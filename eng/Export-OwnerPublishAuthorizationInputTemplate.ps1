@@ -91,7 +91,7 @@ $template = [pscustomobject]@{
   authorizedRoutes = @()
   publishTargetChannels = @(
     "nuget-small-bridge-core",
-    "github-packages-full-runtime"
+    "github-packages-bridge"
   )
   ownerAuthorizationId = "<owner-fill-owner-authorization-id>"
   ownerAuthorizationScope = "manual-owner-run-only"

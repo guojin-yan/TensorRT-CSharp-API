@@ -1,5 +1,47 @@
 # TensorRtSharp4.0 完成情况审查
 
+## 2026-07-30 NVIDIA 运行库外置与 Bridge-Only 发布收口
+
+本阶段按最新 Owner 决策废止 CUDA、cuDNN、TensorRT、NVRTC 与 builder-resource 的打包/发布路线。正式发布物收敛为
+托管 C# 接口包、按 TensorRT/CUDA 版本编译的项目自有 bridge 包，以及 Git 跟踪文件源码归档。用户负责安装匹配的
+NVIDIA 依赖。
+
+### 实现
+
+- 新增 `pack/external-vendor-runtime-policy.json` 与 `eng/Test-ExternalVendorRuntimePackagePolicy.ps1`；门禁同时检查
+  静态项目/workflow 合同和实际 `.nupkg` entry，拒绝 `nvinfer*`、`nvonnxparser*`、`nvparsers*`、`cudart*`、
+  `cublas*`、`cudnn*`、`nvrtc*` 原厂二进制。
+- `pack/runtime` 全部设为 `IsPackable=false`；`pack/runtime-split` 默认不可打包，只有六个 Windows `.Bridge`
+  项目显式 opt-in，Linux 动态 bridge 项目也显式 opt-in。
+- `Invoke-LocalRuntimePackage.ps1` 与 `Collect-RuntimeAssets.ps1` fail closed；split 收集和打包入口只接受
+  `bridge`，拒绝 full/vendor/meta/collection/RTC role 与版本 pin。
+- Windows/Linux runtime workflow 的 full-runtime 收集、pack、consumer、Release 与 GitHub Packages job 固定
+  `if: false`；active job 只构建并二次检查 bridge。managed、source、release-bundle 和 release-quality-gate
+  全部接入同一门禁。
+- 新增 `package-source.yml` 与 `New-SourceArchive.ps1`，只从 Git 跟踪文件生成源码 zip；新增
+  `Export-RetiredVendorPackageCleanupPlan.ps1`，生成历史包候选但不查询、不删除远程资产。
+- `grape-yan` 固定为 validation-only：新增只读 `ci-validation.yml`，正式 release-bundle 与所有 publish/upload
+  路径只允许 `guojin-yan`。
+
+### 验证
+
+- 策略/双路线/workflow 定向测试 `13/13`；完整 `TensorRtSharp.sln` Debug build `0 warning / 0 error`。
+- 9 份 workflow YAML 全部可解析；静态策略门禁 `0` finding；`git diff --check` 通过。
+- 实际 managed nupkg 识别为 `managed`，native entries `0`；实际 TRT11/CUDA12.9 bridge nupkg 只有
+  `runtimes/win-x64/native/jyppxtrtbridge.dll`，策略门禁通过。
+- 旧 full-runtime csproj 直接 `dotnet pack` 产出 `0` 个 nupkg；旧 full 脚本和 `cuda-cudnn` split role 均返回非零。
+- 源码归档 `3720` entries、vendor runtime binary `0`；历史远程清理计划列出 `33` 个候选，
+  `performsRemoteQuery=false`、`performsDelete=false`。
+
+### 边界
+
+- 本批没有 push、workflow dispatch、NuGet/GitHub Packages publish、Release upload/delete 或远程包删除。
+- `runtime-packages.manifest.json` 中的 vendor 文件列表仅保留为本机 build/dependency probe 矩阵，不是发布资产。
+- 33 个候选只表示按历史 manifest 推导的清理对象；正式账号授权后仍需读取真实远程版本、资产名与 hash，并经
+  Owner 确认后删除。managed、`.Bridge` 和 GitHub 自动源码归档必须保留。
+- 本机无 `pwsh`，因此依赖 PowerShell 7 的既有全量 exporter 测试未声明通过；本批新脚本均已在 Windows
+  PowerShell 5.1 下验证。
+
 ## 2026-07-28 CUDA RTC Full-Runtime Packaging Preflight
 
 本阶段没有直接物化或发布 `cuda-rtc` 包，而是把 runtime/split manifest 中的 planned role 升级为可执行、可复算的严格

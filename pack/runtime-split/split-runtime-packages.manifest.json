@@ -1,5 +1,22 @@
 {
   "schemaVersion": 2,
+  "publicationPolicy": {
+    "state": "bridge-only",
+    "policy": "pack/external-vendor-runtime-policy.json",
+    "allowedRoles": [
+      "bridge"
+    ],
+    "retiredRoles": [
+      "cuda-cudnn",
+      "tensorrt",
+      "cuda-rtc",
+      "collection",
+      "meta",
+      "builder-resource"
+    ],
+    "legacyEntriesAreNotPackable": true,
+    "notes": "Non-bridge entries remain only as historical package identities for remote cleanup and must not be built or published."
+  },
   "cudaRtcSplitRole": {
     "role": "cuda-rtc",
     "prototypeState": "planned-not-materialized",

@@ -9,7 +9,7 @@ param(
   [switch]$RunWindowsRuntimePackaging,
   [string[]]$WindowsRuntimeKeys = @(),
   [string[]]$WindowsSplitPackageRoles = @(),
-  [ValidateSet("full", "split")]
+  [ValidateSet("split")]
   [string]$WindowsRuntimeDeliveryMode = "split",
   [string]$WindowsMetaPackageVersion,
   [string]$WindowsBridgePackageVersion,
@@ -29,7 +29,7 @@ param(
   [ValidateSet("hosted", "hosted-container", "self-hosted")]
   [string]$LinuxRunnerMode = "hosted",
   [string[]]$LinuxSplitPackageRoles = @(),
-  [ValidateSet("full", "split")]
+  [ValidateSet("split")]
   [string]$LinuxRuntimeDeliveryMode = "split",
   [string]$LinuxMetaPackageVersion,
   [string]$LinuxBridgePackageVersion,
@@ -197,6 +197,33 @@ $windowsRoles = @(Expand-TokenList -Values $WindowsSplitPackageRoles)
 $linuxKeys = @(Expand-TokenList -Values $LinuxRuntimeKeys)
 $linuxRoles = @(Expand-TokenList -Values $LinuxSplitPackageRoles)
 $linuxUbuntu20Keys = @(Expand-TokenList -Values $LinuxUbuntu20RuntimeKeys)
+
+if ($windowsRoles.Count -eq 0) { $windowsRoles = @("bridge") }
+if ($linuxRoles.Count -eq 0) { $linuxRoles = @("bridge") }
+$retiredRoles = @($windowsRoles + $linuxRoles | Where-Object { $_.ToLowerInvariant() -ne "bridge" })
+$retiredInputs = @(
+  $WindowsMetaPackageVersion,
+  $WindowsCudaCudnnPackageVersion,
+  $WindowsCudaCudnnPackageVersionMap,
+  $WindowsCudaCudnnPackageReleaseTag,
+  $WindowsCudaCudnnPackageReleaseTagMap,
+  $WindowsTensorRtPackageVersion,
+  $WindowsTensorRtPackageVersionMap,
+  $WindowsTensorRtPackageReleaseTag,
+  $WindowsTensorRtPackageReleaseTagMap,
+  $LinuxMetaPackageVersion,
+  $LinuxCudaCudnnPackageVersion,
+  $LinuxCudaCudnnPackageVersionMap,
+  $LinuxCudaCudnnPackageReleaseTag,
+  $LinuxCudaCudnnPackageReleaseTagMap,
+  $LinuxTensorRtPackageVersion,
+  $LinuxTensorRtPackageVersionMap,
+  $LinuxTensorRtPackageReleaseTag,
+  $LinuxTensorRtPackageReleaseTagMap
+) | Where-Object { -not [string]::IsNullOrWhiteSpace([string]$_) }
+if ($retiredRoles.Count -gt 0 -or $retiredInputs.Count -gt 0 -or $WindowsIncludeMetaPackage.IsPresent -or $LinuxIncludeMetaPackage.IsPresent) {
+  throw "Remote release accepts bridge packages only. CUDA/cuDNN, TensorRT, full-runtime, and collection/meta package inputs are retired."
+}
 $runDocsReleaseValue = ConvertFrom-BooleanInput -Value $RunDocsRelease -DefaultValue $true
 $runWindowsSmokeValue = ConvertFrom-BooleanInput -Value $RunWindowsSmoke -DefaultValue $true
 $runLinuxSmokeValue = ConvertFrom-BooleanInput -Value $RunLinuxSmoke -DefaultValue $false

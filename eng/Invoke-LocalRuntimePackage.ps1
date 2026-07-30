@@ -29,6 +29,8 @@ $utf8 = [System.Text.UTF8Encoding]::new($false)
 $OutputEncoding = $utf8
 $powerShellCommand = if ($PSVersionTable.PSEdition -eq "Core") { "pwsh" } else { "powershell" }
 
+throw "Full-runtime packaging is retired. Use eng/Invoke-LocalSplitRuntimePackage.ps1 -SplitPackageRole bridge. Consumers must install matching CUDA, cuDNN, TensorRT, and optional NVRTC libraries."
+
 function Expand-KeyList {
   param(
     [string[]]$Values

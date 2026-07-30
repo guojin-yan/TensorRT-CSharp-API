@@ -1,5 +1,7 @@
 # TensorRtSharp NuGet 包结构：Managed 包与 Native Runtime 包如何协作
 
+> 策略更新（2026-07-30）：Native Runtime vendor 包已退休。现在 managed 包提供 C# API，`.Bridge` 包只提供项目自行编译的一份 bridge DLL/`.so`；CUDA、cuDNN、TensorRT 与可选 NVRTC 由用户自行安装。本文后续把 vendor assets 放入 runtime package 的内容仅作旧方案说明，不再是可执行发布指引。
+
 ## 适用读者
 
 这篇文章适合准备安装 TensorRtSharp 4.0 的 .NET 用户、维护 NuGet 发布流程的 owner、以及需要理解 managed/native 包拆分策略的部署工程师。

@@ -8,7 +8,7 @@ namespace JYPPX.ProjectQuality.Tests;
 public sealed class DualPackagePublishPreflightMatrixTests
 {
     [Fact]
-    public void DualPackagePreflightMatrixSeparatesNuGetSmallPackageAndGitHubFullRuntimeWithoutPublishingClaims()
+    public void DualPackagePreflightMatrixSeparatesManagedAndBridgePackagesWithoutPublishingClaims()
     {
         string scriptPath = Path.Combine(RepositoryPaths.Root, "eng", "Export-DualPackagePublishPreflightMatrix.ps1");
         string validatorPath = Path.Combine(RepositoryPaths.Root, "eng", "Test-DualPackagePublishPreflightMatrix.ps1");
@@ -18,7 +18,8 @@ public sealed class DualPackagePublishPreflightMatrixTests
         string script = File.ReadAllText(scriptPath);
         string validator = File.ReadAllText(validatorPath);
         Assert.Contains("nuget-small-bridge-core", script, StringComparison.Ordinal);
-        Assert.Contains("github-packages-full-runtime", script, StringComparison.Ordinal);
+        Assert.Contains("github-packages-bridge", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("github-packages-full-runtime", script, StringComparison.Ordinal);
         Assert.Contains("blocked-dual-package-publish-preflight-owner-proof-required", validator, StringComparison.Ordinal);
         Assert.Contains("performsPublish = $false", script, StringComparison.Ordinal);
         Assert.Contains("usesPublishToken = $false", script, StringComparison.Ordinal);
@@ -60,12 +61,12 @@ public sealed class DualPackagePublishPreflightMatrixTests
 
         JsonElement[] routes = root.GetProperty("routes").EnumerateArray().ToArray();
         JsonElement nugetRoute = Assert.Single(routes, static item => item.GetProperty("id").GetString() == "nuget-small-bridge-core");
-        JsonElement githubRoute = Assert.Single(routes, static item => item.GetProperty("id").GetString() == "github-packages-full-runtime");
+        JsonElement githubRoute = Assert.Single(routes, static item => item.GetProperty("id").GetString() == "github-packages-bridge");
 
         Assert.Equal("nuget.org", nugetRoute.GetProperty("distributionChannel").GetString());
         Assert.Equal("JYPPX.TensorRT.CSharp.API", nugetRoute.GetProperty("packageId").GetString());
-        Assert.Contains("no bundled NVIDIA full runtime claim", nugetRoute.GetProperty("packageContents").GetString(), StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("consumer installs CUDA", nugetRoute.GetProperty("dependencyStrategy").GetString(), StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("C# public API assemblies", nugetRoute.GetProperty("packageContents").GetString(), StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("matching project-owned bridge", nugetRoute.GetProperty("dependencyStrategy").GetString(), StringComparison.OrdinalIgnoreCase);
         Assert.False(nugetRoute.GetProperty("canPublishPublicly").GetBoolean());
         Assert.False(nugetRoute.GetProperty("canClaimPackageConsumerRuntimeProof").GetBoolean());
         Assert.True(nugetRoute.GetProperty("ownerActionRequired").GetBoolean());
@@ -76,16 +77,18 @@ public sealed class DualPackagePublishPreflightMatrixTests
         Assert.DoesNotContain("full runtime package already published", nugetRoute.GetProperty("proofBoundary").GetString(), StringComparison.OrdinalIgnoreCase);
 
         Assert.Equal("GitHub Packages", githubRoute.GetProperty("distributionChannel").GetString());
-        Assert.StartsWith("JYPPX.TensorRT.CSharp.API.runtime.", githubRoute.GetProperty("packageId").GetString(), StringComparison.Ordinal);
-        Assert.Contains("heavier native assets", githubRoute.GetProperty("packageContents").GetString(), StringComparison.OrdinalIgnoreCase);
+        Assert.StartsWith("JYPPX.TensorRT.CSharp.API.Runtime.", githubRoute.GetProperty("packageId").GetString(), StringComparison.Ordinal);
+        Assert.EndsWith(".Bridge", githubRoute.GetProperty("packageId").GetString(), StringComparison.Ordinal);
+        Assert.Contains("project-owned native bridge", githubRoute.GetProperty("packageContents").GetString(), StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("no NVIDIA vendor runtime libraries", githubRoute.GetProperty("packageContents").GetString(), StringComparison.OrdinalIgnoreCase);
         Assert.Contains("GitHub Packages", githubRoute.GetProperty("dependencyStrategy").GetString(), StringComparison.Ordinal);
         Assert.False(githubRoute.GetProperty("canPublishPublicly").GetBoolean());
         Assert.False(githubRoute.GetProperty("canPublishGitHubPackages").GetBoolean());
         Assert.False(githubRoute.GetProperty("canClaimRuntimeProof").GetBoolean());
         Assert.True(githubRoute.GetProperty("ownerActionRequired").GetBoolean());
-        Assert.Equal("owner-authorize-github-packages-publish-and-import-credentialed-clean-runtime-proof", githubRoute.GetProperty("nextOwnerAction").GetString());
-        Assert.Equal("github-packages-restore-source-runtime-dll-resolution-clean-smoke-missing", githubRoute.GetProperty("externalProofMissingReason").GetString());
-        Assert.Equal("post-publish-github-packages-clean-consumer-proof-missing", githubRoute.GetProperty("postPublishProofMissingReason").GetString());
+        Assert.Equal("owner-authorize-github-bridge-publish-and-import-clean-runtime-proof", githubRoute.GetProperty("nextOwnerAction").GetString());
+        Assert.Equal("github-bridge-restore-external-dependency-resolution-clean-smoke-missing", githubRoute.GetProperty("externalProofMissingReason").GetString());
+        Assert.Equal("post-publish-github-bridge-clean-consumer-proof-missing", githubRoute.GetProperty("postPublishProofMissingReason").GetString());
         Assert.False(githubRoute.GetProperty("acceptsSubstituteProof").GetBoolean());
         Assert.DoesNotContain("NuGet publication succeeded", githubRoute.GetProperty("proofBoundary").GetString(), StringComparison.OrdinalIgnoreCase);
 
@@ -120,7 +123,8 @@ public sealed class DualPackagePublishPreflightMatrixTests
         string markdown = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "artifacts", "final-release", "dual-package-publish-preflight-matrix.md"));
         Assert.Contains("Dual Package Publish Preflight Matrix", markdown, StringComparison.Ordinal);
         Assert.Contains("nuget-small-bridge-core", markdown, StringComparison.Ordinal);
-        Assert.Contains("github-packages-full-runtime", markdown, StringComparison.Ordinal);
+        Assert.Contains("github-packages-bridge", markdown, StringComparison.Ordinal);
+        Assert.DoesNotContain("github-packages-full-runtime", markdown, StringComparison.Ordinal);
         Assert.Contains("owner-authorization-required", markdown, StringComparison.Ordinal);
         Assert.Contains("Next Owner Action", markdown, StringComparison.Ordinal);
         Assert.Contains("External Proof Missing Reason", markdown, StringComparison.Ordinal);
@@ -153,7 +157,7 @@ public sealed class DualPackagePublishPreflightMatrixTests
     private static string RunPowerShell(string scriptPath, params string[] arguments)
     {
         using Process process = new();
-        process.StartInfo.FileName = "pwsh";
+        process.StartInfo.FileName = OperatingSystem.IsWindows() ? "powershell" : "pwsh";
         process.StartInfo.ArgumentList.Add("-NoProfile");
         process.StartInfo.ArgumentList.Add("-ExecutionPolicy");
         process.StartInfo.ArgumentList.Add("Bypass");

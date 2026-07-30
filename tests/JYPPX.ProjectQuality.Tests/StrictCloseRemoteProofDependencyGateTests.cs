@@ -230,7 +230,7 @@ public sealed class StrictCloseRemoteProofDependencyGateTests
     private static readonly string[] RequiredDualPackageLaneIds =
     [
         "dual-package-nuget-small-bridge-core",
-        "dual-package-github-packages-full-runtime",
+        "dual-package-github-packages-bridge",
     ];
 
     private static readonly string[] RequiredRemoteProofSourceArtifacts =

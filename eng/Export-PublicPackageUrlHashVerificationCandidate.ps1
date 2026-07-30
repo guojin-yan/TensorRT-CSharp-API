@@ -21,6 +21,6 @@ $record = Export-OwnerPostPublishLaneCandidateArtifact `
   -CandidateState "blocked-public-package-url-hash-owner-proof-required" `
   -Title "Public Package URL Hash Verification Candidate" `
   -Boundary "Public package URL/hash candidate checks Owner supplied public package URL, package version, downloaded nupkg SHA256, and transcript hash only; it does not download packages, does not publish, is not public package proof, not runtime proof, not post-publish proof, not release close approval, and not package push." `
-  -ExtraProperties ([pscustomobject]@{ expectedChannels = @("nuget-small-bridge-core", "github-packages-full-runtime") })
+  -ExtraProperties ([pscustomobject]@{ expectedChannels = @("nuget-small-bridge-core", "github-packages-bridge") })
 
 Write-Host "PublicPackageUrlHashVerificationCandidateState=$($record.candidateState) ReadyFields=$($record.readyFieldCount)/$($record.requiredFieldCount)"

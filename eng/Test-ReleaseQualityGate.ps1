@@ -173,14 +173,14 @@ else {
   @($splitManifest.packages | Where-Object { [string]$_.sourceRuntimeKey -eq $RuntimePackageKey })
 }
 $targetRoles = @($targetSplitPackages | ForEach-Object { [string]$_.role } | Sort-Object -Unique)
-$requiredComponentRoles = @("bridge", "cuda-cudnn", "tensorrt")
+$requiredComponentRoles = @("bridge")
 $missingComponentRoles = @($requiredComponentRoles | Where-Object { $targetRoles -notcontains $_ })
 $invalidSplitPackages = @($targetSplitPackages | Where-Object {
   [string]::IsNullOrWhiteSpace([string]$_.packageId) -or
   @($_.assets).Count -eq 0
 })
 Add-Check -Id "split-manifest-component-roles" -Passed ($missingComponentRoles.Count -eq 0) -Required $true -Detail ("Missing roles: " + ($missingComponentRoles -join ", "))
-Add-Check -Id "split-manifest-package-contract" -Passed ($targetSplitPackages.Count -ge 3 -and $invalidSplitPackages.Count -eq 0) -Required $true -Detail "Target split packages require package IDs and non-empty asset lists."
+Add-Check -Id "split-manifest-package-contract" -Passed (@($targetSplitPackages | Where-Object { [string]$_.role -eq "bridge" }).Count -eq 1 -and $invalidSplitPackages.Count -eq 0) -Required $true -Detail "Each target requires exactly one active bridge package; legacy vendor entries are cleanup identities only."
 
 $objectArrayFindings = Get-TextFindings -Roots @(
   (Join-Path $RepositoryRoot "docs"),

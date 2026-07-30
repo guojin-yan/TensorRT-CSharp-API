@@ -371,6 +371,25 @@ cmake --build --preset win-x64-trt8-cuda12-release --parallel
 
 ## Runtime Packages
 
+自 2026-07-30 起，不再打包或发布 NVIDIA 原厂运行库。正式发布物只保留 C# 托管接口包、按版本编译的项目自有 `.Bridge` 包，以及由 Git 跟踪文件生成的源码归档。CUDA、cuDNN、TensorRT 和可选 NVRTC 由用户自行安装。
+
+下面的 runtime key 继续作为 bridge 编译兼容矩阵，用于选择用户本机的 header 与 import library，不再表示可复制进包内的 vendor DLL 或 `.so`。
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\eng\Invoke-LocalSplitRuntimePackage.ps1 `
+  -SourceRuntimeKey win-x64-trt11.0-cuda12.9-cudnn9.22 `
+  -Version 4.0.0 `
+  -SplitPackageRole bridge
+
+powershell -ExecutionPolicy Bypass -File .\eng\Test-ExternalVendorRuntimePackagePolicy.ps1 `
+  -PackagePath .\artifacts\runtime-split-nupkg\win-x64-trt11.0-cuda12.9-cudnn9.22
+```
+
+完整策略见 `docs/articles/zh-cn/external-vendor-runtime-package-policy.md` 与 `pack/external-vendor-runtime-policy.json`。
+
+<details>
+<summary>历史 full-runtime 说明（已退休，不得用于发布）</summary>
+
 runtime 包为一个明确 TensorRT / CUDA / cuDNN 组合承载原生部署资产。当前 Windows runtime package keys：
 
 - `win-x64-trt8.6-cuda11.8-cudnn8.9`
@@ -395,7 +414,22 @@ runtime 包为一个明确 TensorRT / CUDA / cuDNN 组合承载原生部署资�
 - `docs/articles/zh-cn/release-candidate-gate.md`
 - `docs/articles/zh-cn/api-reference.md`
 
+</details>
+
 ## 发布自动化
+
+正式发布只允许在 `guojin-yan` 仓库执行。`grape-yan` 仓库仅用于日常 build/test，workflow 权限为只读，不包含 package push 或 Release upload job。
+
+当前发布工作流只处理：
+
+- `package-managed.yml`：`JYPPX.TensorRT.CSharp.API`；
+- `runtime-windows.yml` / `runtime-linux.yml`：`split_package_roles=bridge` 的 `.Bridge` 包；
+- `package-source.yml`：仅含 Git 跟踪文件的源码归档。
+
+所有上传路径都会运行 `eng/Test-ExternalVendorRuntimePackagePolicy.ps1`。`release-bundle.yml` 只编排 managed、bridge 与 source，并拒绝已退休的 full/vendor roles。
+
+<details>
+<summary>历史发布自动化说明（vendor package 参数已退休）</summary>
 
 这个仓库支持两种发布执行方式：
 
@@ -495,6 +529,8 @@ powershell -ExecutionPolicy Bypass -File .\eng\Invoke-LocalReleaseBundle.ps1 `
 `release-bundle.yml` 默认不再触发 runtime 打包。需要 runtime 时显式设置 `run_windows_runtime_packaging=true` 或 `run_linux_runtime_packaging=true`；如果启用 Linux runtime 但 `linux_runtime_keys` 为空，Linux 模块会干净 no-op。
 
 发布到 `nuget.org` 时，仓库 secret `NUGET_API_KEY` 应填写 NuGet 官网生成的纯文本 ASCII API key。这个 key 必须仍然有效，并且必须对 `JYPPX.TensorRT.CSharp.API` 这个 package ID 或其所属账号/组织拥有 push 权限。managed-package workflow 会在发布前校验该 secret；不要把加密后的本机凭据或机器导出的 token 片段填进 `NUGET_API_KEY`。如果推送阶段返回 nuget.org `403`，说明 key 无效、过期或没有该包 ID 的权限，需要用包 owner 账号重新生成有 scope 的 key 后再重跑 managed-only workflow。
+
+</details>
 
 ## 仓库布局
 

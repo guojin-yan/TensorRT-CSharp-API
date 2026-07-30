@@ -125,7 +125,7 @@ $fieldResults = @(Convert-ToArray (Get-PropertyOrDefault -Object $candidate -Nam
 $nonSubstituteConfirmations = @(Convert-ToArray (Get-PropertyOrDefault -Object $candidate -Name "nonSubstituteConfirmations" -DefaultValue @()))
 $findings = New-Object System.Collections.Generic.List[object]
 
-$dualPackageRouteIds = @("nuget-small-bridge-core", "github-packages-full-runtime")
+$dualPackageRouteIds = @("nuget-small-bridge-core", "github-packages-bridge")
 $dualPackageRouteProofResults = @($fieldResults | Where-Object {
     [string](Get-PropertyOrDefault -Object $_ -Name "fieldPath" -DefaultValue "") -like "dualPackageRoutes.*"
   })

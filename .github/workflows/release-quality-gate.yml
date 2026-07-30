@@ -65,6 +65,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Enforce package publication policy
+        shell: pwsh
+        run: pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-ExternalVendorRuntimePackagePolicy.ps1 -StaticOnly
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
@@ -209,15 +213,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Build split all plus meta without publishing
+      - name: Build bridge package without publishing
         shell: pwsh
         run: |
           pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Invoke-LocalSplitRuntimePackage.ps1 `
             -SourceRuntimeKey "${{ inputs.runtime_package_key }}" `
             -Version 4.0.0 `
-            -SplitPackageRole all `
-            -IncludeMetaPackage `
+            -SplitPackageRole bridge `
             -Configuration Release
+
+          pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-ExternalVendorRuntimePackagePolicy.ps1 `
+            -PackagePath (Join-Path '.\artifacts\runtime-split-nupkg' '${{ inputs.runtime_package_key }}')
 
       - name: Validate split package inventory
         shell: pwsh

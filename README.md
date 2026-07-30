@@ -372,6 +372,25 @@ Recent sample maturity updates:
 
 ## Runtime Packages
 
+As of 2026-07-30, NVIDIA runtime redistribution is retired. Published artifacts are limited to the managed C# package, versioned project-owned `.Bridge` packages, and tracked source archives. Consumers install matching CUDA, cuDNN, TensorRT, and optional NVRTC dependencies themselves.
+
+The runtime keys below remain build compatibility keys. They select which locally installed headers and import libraries compile the bridge; they do not authorize copying vendor DLLs or shared libraries into a package.
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\eng\Invoke-LocalSplitRuntimePackage.ps1 `
+  -SourceRuntimeKey win-x64-trt11.0-cuda12.9-cudnn9.22 `
+  -Version 4.0.0 `
+  -SplitPackageRole bridge
+
+powershell -ExecutionPolicy Bypass -File .\eng\Test-ExternalVendorRuntimePackagePolicy.ps1 `
+  -PackagePath .\artifacts\runtime-split-nupkg\win-x64-trt11.0-cuda12.9-cudnn9.22
+```
+
+See `docs/articles/zh-cn/external-vendor-runtime-package-policy.md` and `pack/external-vendor-runtime-policy.json`.
+
+<details>
+<summary>Historical full-runtime notes (retired; do not use for publication)</summary>
+
 Runtime packages carry native deployment assets for one explicit TensorRT / CUDA / cuDNN combination. Current Windows runtime package keys:
 
 - `win-x64-trt8.6-cuda11.8-cudnn8.9`
@@ -396,7 +415,22 @@ See:
 - `docs/articles/en/release-candidate-gate.md`
 - `docs/articles/en/api-reference.md`
 
+</details>
+
 ## Release Automation
+
+Formal releases run only from the `guojin-yan` repository. The `grape-yan` repository is build/test validation-only and has read-only workflow permissions with no package push or Release upload job.
+
+Current release workflows publish only:
+
+- `package-managed.yml`: `JYPPX.TensorRT.CSharp.API`;
+- `runtime-windows.yml` / `runtime-linux.yml`: `.Bridge` packages with `split_package_roles=bridge`;
+- `package-source.yml`: a tracked-files-only source archive.
+
+Every upload path runs `eng/Test-ExternalVendorRuntimePackagePolicy.ps1`. `release-bundle.yml` dispatches the managed, bridge, and source workflows but rejects retired full/vendor roles.
+
+<details>
+<summary>Historical release automation notes (retired vendor-package inputs)</summary>
 
 GitHub Actions does not need a GitHub-hosted machine for every job. In this repository:
 
@@ -581,6 +615,8 @@ When runtime packaging is enabled, `release-bundle.yml` can check the required W
 For `nuget.org` publication, store a plain-text ASCII NuGet API key in the repository secret `NUGET_API_KEY`. The key must be active and must have push permission for the `JYPPX.TensorRT.CSharp.API` package ID or its owning account/organization. The managed-package workflow fails before publication when this secret is missing, so it no longer depends on a self-hosted runner's current-user NuGet configuration or any machine-local credential fallback. Do not store an encrypted local credential blob or other machine-generated token format in `NUGET_API_KEY`.
 
 The managed-package workflow validates that `NUGET_API_KEY` is plain ASCII text before publishing. If the secret contains non-ASCII characters or embedded whitespace, the job fails immediately with a configuration error instead of spending time on a doomed publish attempt. A nuget.org `403` during push means the key is invalid, expired, or lacks permission for the managed package ID; replace the secret with a scoped key from the package owner before rerunning the managed-only workflow.
+
+</details>
 
 ## Repository Layout
 

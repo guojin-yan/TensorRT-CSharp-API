@@ -57,8 +57,8 @@ public sealed class ReleaseQualityGateWorkflowTests
         Assert.Contains("if (-not $WarnOnly.IsPresent)", runnerScript, StringComparison.Ordinal);
         Assert.Contains("runs-on: [self-hosted, windows, x64, release-artifacts]", workflow, StringComparison.Ordinal);
         Assert.Contains("runs-on: [self-hosted, windows, x64]", workflow, StringComparison.Ordinal);
-        Assert.Contains("-SplitPackageRole all", workflow, StringComparison.Ordinal);
-        Assert.Contains("-IncludeMetaPackage", workflow, StringComparison.Ordinal);
+        Assert.Contains("-SplitPackageRole bridge", workflow, StringComparison.Ordinal);
+        Assert.Contains("Test-ExternalVendorRuntimePackagePolicy.ps1", workflow, StringComparison.Ordinal);
         Assert.Contains("Test-ReleaseEvidenceClassificationAudit.ps1 -Strict", workflow, StringComparison.Ordinal);
         Assert.Contains("Test-PublicProofClaimBoundaryAudit.ps1 -Strict", workflow, StringComparison.Ordinal);
         Assert.Contains("Test-ReleaseQualityGate.ps1", workflow, StringComparison.Ordinal);
@@ -94,8 +94,8 @@ public sealed class ReleaseQualityGateWorkflowTests
         Assert.Contains("publish_to_nuget:", packageManagedWorkflow, StringComparison.Ordinal);
         Assert.Contains("publish_to_github_packages:", packageManagedWorkflow, StringComparison.Ordinal);
         Assert.True(CountOccurrences(packageManagedWorkflow, "default: false") >= 4);
-        Assert.Contains("if: ${{ inputs.publish_to_nuget }}", packageManagedWorkflow, StringComparison.Ordinal);
-        Assert.Contains("if: ${{ inputs.publish_to_github_packages }}", packageManagedWorkflow, StringComparison.Ordinal);
+        Assert.Contains("if: ${{ inputs.publish_to_nuget && github.repository_owner == 'guojin-yan' }}", packageManagedWorkflow, StringComparison.Ordinal);
+        Assert.Contains("if: ${{ inputs.publish_to_github_packages && github.repository_owner == 'guojin-yan' }}", packageManagedWorkflow, StringComparison.Ordinal);
 
         Assert.Contains("[object]$PublishManagedToNuGet = $false", remoteBundleScript, StringComparison.Ordinal);
         Assert.Contains("[object]$PublishRuntimeToGitHubPackages = $false", remoteBundleScript, StringComparison.Ordinal);

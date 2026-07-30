@@ -1,5 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <JYPPXPackageKind>bridge</JYPPXPackageKind>
+    <IsPackable>true</IsPackable>
     <PackageId>JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda13.2.cudnn9.22.Bridge</PackageId>
     <Title>JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda13.2.cudnn9.22.Bridge</Title>
     <JYPPXRuntimeKey>win-x64-trt11.0-cuda13.2-cudnn9.22-bridge</JYPPXRuntimeKey>

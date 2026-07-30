@@ -4,14 +4,14 @@
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <IncludeBuildOutput>false</IncludeBuildOutput>
-    <IsPackable>true</IsPackable>
+    <IsPackable>false</IsPackable>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageProjectUrl>$(RepositoryUrl)</PackageProjectUrl>
     <RepositoryUrl>$(RepositoryUrl)</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <Description>Split runtime component package for a specific TensorRT, CUDA, and cuDNN combination.</Description>
-    <!-- Split runtime package IDs intentionally encode the dependency matrix and preserve published package identity. -->
+    <Description>Retired split runtime project. Only projects that explicitly opt in as bridge packages are packable.</Description>
+    <!-- Bridge projects explicitly override IsPackable. Vendor and meta projects remain disabled. -->
     <NoWarn>$(NoWarn);NU5123;NU5128</NoWarn>
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
     <JYPPXRuntimeAssetsDir Condition="'$(JYPPXRuntimeAssetsDir)' == ''">$(MSBuildProjectDirectory)\assets</JYPPXRuntimeAssetsDir>

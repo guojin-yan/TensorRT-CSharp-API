@@ -190,13 +190,13 @@ $splitPackageIds = @($splitPackages | ForEach-Object { [string](Get-PropertyOrDe
 $splitRoles = @($splitPackages | ForEach-Object { [string](Get-PropertyOrDefault -Object $_ -Name "role" -DefaultValue "") } | Sort-Object -Unique)
 $splitTensorRtLines = @($splitPackages | ForEach-Object { [string](Get-PropertyOrDefault -Object $_ -Name "tensorRtLine" -DefaultValue "") } | Sort-Object -Unique)
 $splitCudaLines = @($splitPackages | ForEach-Object { [string](Get-PropertyOrDefault -Object $_ -Name "cudaLine" -DefaultValue "") } | Sort-Object -Unique)
-$missingSplitRoles = @(@("bridge", "cuda-cudnn", "tensorrt") | Where-Object { $splitRoles -notcontains $_ })
+$missingSplitRoles = @(@("bridge") | Where-Object { $splitRoles -notcontains $_ })
 $missingTensorRtLines = @(@("8", "10", "11") | Where-Object { $splitTensorRtLines -notcontains $_ })
 $missingCudaLines = @(@("11", "12", "13") | Where-Object { $splitCudaLines -notcontains $_ })
 $invalidSplitPackageIds = @($splitPackages | Where-Object { -not (Test-TextContains ([string](Get-PropertyOrDefault -Object $_ -Name "packageId" -DefaultValue "")) "JYPPX.TensorRT.CSharp.API.Runtime.") })
 $items.Add((New-AuditItem "runtime-split-package-roles" ($missingSplitRoles.Count -eq 0) "blocker" ("Missing split runtime roles: " + ($missingSplitRoles -join ", ")))) | Out-Null
 $items.Add((New-AuditItem "runtime-split-version-lines" ($missingTensorRtLines.Count -eq 0 -and $missingCudaLines.Count -eq 0) "blocker" ("Missing TensorRT lines: " + ($missingTensorRtLines -join ", ") + "; missing CUDA lines: " + ($missingCudaLines -join ", ")))) | Out-Null
-$items.Add((New-AuditItem "runtime-split-package-ids" ($splitPackages.Count -ge 10 -and $invalidSplitPackageIds.Count -eq 0) "blocker" "Split runtime package manifest must expose concrete JYPPX.TensorRT.CSharp.API.Runtime package ids.")) | Out-Null
+$items.Add((New-AuditItem "runtime-split-package-ids" (@($splitPackages | Where-Object { [string](Get-PropertyOrDefault -Object $_ -Name "role" -DefaultValue "") -eq "bridge" }).Count -ge 6 -and $invalidSplitPackageIds.Count -eq 0) "blocker" "Split runtime manifest must expose concrete bridge package ids; other entries are retired cleanup identities.")) | Out-Null
 
 $scanRoots = @("README.md", "README.zh-CN.md", "docs", "samples", "applications", "src", "pack", ".github")
 $scanExtensions = @(".md", ".yml", ".yaml", ".json", ".props", ".targets", ".csproj", ".cs", ".ps1", ".xml", ".txt")

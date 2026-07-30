@@ -1,0 +1,58 @@
+name: ci-validation
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - TensorRtSharp4.0
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-validation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  managed-and-policy:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
+      - name: Enforce non-publishing package policy
+        shell: pwsh
+        run: pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-ExternalVendorRuntimePackagePolicy.ps1 -StaticOnly
+
+      - name: Restore
+        run: dotnet restore TensorRtSharp.sln
+
+      - name: Validate generated bindings
+        shell: pwsh
+        run: pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-BindingGeneratorOutputs.ps1
+
+      - name: Build
+        run: dotnet build TensorRtSharp.sln -c Debug --no-restore
+
+      - name: Test publication policy contracts
+        run: >-
+          dotnet test .\tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj
+          -c Debug
+          --no-build
+          --filter "FullyQualifiedName~ExternalVendorRuntimePackagePolicyTests"
+
+      - name: Verify no publishing capability
+        shell: pwsh
+        run: |
+          if ('${{ github.repository_owner }}' -eq 'grape-yan') {
+            Write-Host "grape-yan validation repository: build/test only; no package push or Release job is present."
+          }

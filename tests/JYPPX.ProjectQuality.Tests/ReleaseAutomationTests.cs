@@ -109,7 +109,7 @@ public sealed class ReleaseAutomationTests
     }
 
     [Fact]
-    public void RemoteReleaseBundleDryRunCarriesStableDependencyVersionMaps()
+    public void RemoteReleaseBundleDryRunCarriesBridgeOnlyPolicy()
     {
         string script = Path.Combine(RepositoryPaths.Root, "eng", "Invoke-RemoteReleaseBundle.ps1");
         string output = RunPowerShell(
@@ -117,27 +117,20 @@ public sealed class ReleaseAutomationTests
             "-Version", "4.0.7000",
             "-RuntimeVersion", "4.0.7000",
             "-RunWindowsRuntimePackaging",
-            "-WindowsSplitPackageRoles", "bridge,collection",
+            "-WindowsSplitPackageRoles", "bridge",
             "-RunLinuxRuntimePackaging",
             "-LinuxRuntimeKeySet", "hosted-all",
-            "-LinuxSplitPackageRoles", "bridge,collection",
-            "-WindowsCudaCudnnPackageVersionMap", "win-x64-*=4.0.6156",
-            "-WindowsTensorRtPackageVersionMap", "win-x64-*=4.0.6156",
-            "-LinuxCudaCudnnPackageVersionMap", "linux-x64-ubuntu22.04-*=4.0.6167;linux-x64-ubuntu24.04-*=4.0.6169",
-            "-LinuxTensorRtPackageVersionMap", "linux-x64-ubuntu22.04-*=4.0.6167;linux-x64-ubuntu24.04-*=4.0.6169",
-            "-LinuxIncludeMetaPackage",
-            "-WindowsIncludeMetaPackage",
+            "-LinuxSplitPackageRoles", "bridge",
             "-PublishRuntimeToGitHubPackages", "true",
             "-DryRun");
 
         Assert.Contains("gh workflow run release-bundle.yml", output, StringComparison.Ordinal);
         Assert.Contains("release_config_json=", output, StringComparison.Ordinal);
-        Assert.Contains("windows_cuda_cudnn_package_version_map", output, StringComparison.Ordinal);
-        Assert.Contains("windows_tensorrt_package_version_map", output, StringComparison.Ordinal);
-        Assert.Contains("linux_cuda_cudnn_package_version_map", output, StringComparison.Ordinal);
-        Assert.Contains("linux_tensorrt_package_version_map", output, StringComparison.Ordinal);
+        Assert.DoesNotContain("cuda_cudnn_package_version", output, StringComparison.Ordinal);
+        Assert.DoesNotContain("tensorrt_package_version", output, StringComparison.Ordinal);
         Assert.Contains("hosted-all", output, StringComparison.Ordinal);
-        Assert.Contains("bridge,collection", output, StringComparison.Ordinal);
+        Assert.Contains("windows_split_package_roles=bridge", output, StringComparison.Ordinal);
+        Assert.Contains("linux_split_package_roles=bridge", output, StringComparison.Ordinal);
     }
 
     [Theory]

@@ -1,5 +1,7 @@
 # Runtime Distribution Strategy
 
+> Policy update (2026-07-30): the full/vendor runtime distribution route is retired. Active distribution is limited to the managed C# package, one project-owned bridge binary per `.Bridge` package, and tracked source archives. CUDA, cuDNN, TensorRT, NVRTC, parser, plugin, and builder-resource libraries are external consumer-installed dependencies. Older component/meta package material below is retained only as historical context.
+
 ## Current reality
 
 Runtime packages must now be versioned by the exact major/minor deployment combination:

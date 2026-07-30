@@ -1,5 +1,7 @@
 # Runtime 分发策略说明
 
+> 策略更新（2026-07-30）：full/vendor runtime 分发路线已经退休。当前只分发 C# 托管接口包、每个 `.Bridge` 包内的一份项目自有 bridge 二进制，以及 Git 跟踪文件源码归档。CUDA、cuDNN、TensorRT、NVRTC、parser、plugin 和 builder-resource 都是用户自行安装的外部依赖；本文后续旧 component/meta 内容只保留为历史背景。
+
 ## 当前规则
 
 runtime 包必须显式绑定 TensorRT / CUDA / cuDNN 的 major.minor 组合：

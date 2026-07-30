@@ -20,6 +20,8 @@ $utf8 = [System.Text.UTF8Encoding]::new($false)
 $OutputEncoding = $utf8
 $isWindowsHost = $env:OS -eq "Windows_NT"
 
+throw "Full-runtime asset collection is retired. NVIDIA runtime binaries are external consumer-installed dependencies; only project-owned bridge assets may be packaged."
+
 $manifestPath = Join-Path $RepositoryRoot "pack\runtime\runtime-packages.manifest.json"
 $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
 

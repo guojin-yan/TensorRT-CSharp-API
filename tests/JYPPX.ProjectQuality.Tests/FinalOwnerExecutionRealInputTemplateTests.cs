@@ -68,7 +68,7 @@ public sealed class FinalOwnerExecutionRealInputTemplateTests
             "direct .nupkg",
             "pre-publish smoke reused as post-publish proof",
             "nuget-small-bridge-core",
-            "github-packages-full-runtime",
+            "github-packages-bridge",
             "owner-dual-package-nuget-owner-authorization-url",
             "owner-dual-package-github-runtime-dll-resolution-report-path",
             "Test-DualPackagePublishPreflightMatrix.ps1",

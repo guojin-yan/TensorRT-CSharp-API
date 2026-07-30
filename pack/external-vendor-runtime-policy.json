@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "policyId": "external-vendor-runtime-not-redistributed",
+  "effectiveDate": "2026-07-30",
+  "summary": "TensorRtSharp packages never redistribute NVIDIA CUDA, cuDNN, TensorRT, or NVRTC runtime binaries. Consumers install matching NVIDIA dependencies on their own systems.",
+  "formalReleaseRepositoryOwner": "guojin-yan",
+  "validationOnlyRepositoryOwner": "grape-yan",
+  "allowedPackageKinds": [
+    "managed",
+    "bridge"
+  ],
+  "managedPackageIds": [
+    "JYPPX.TensorRT.CSharp.API"
+  ],
+  "bridgePackageIdPattern": "^JYPPX\\.TensorRT\\.CSharp\\.API\\.Runtime\\..+\\.Bridge$",
+  "allowedBridgeNativeFileNames": [
+    "jyppxtrtbridge.dll",
+    "libjyppxtrtbridge.so"
+  ],
+  "forbiddenPackageRoles": [
+    "full-runtime",
+    "cuda-cudnn",
+    "tensorrt",
+    "cuda-rtc",
+    "collection",
+    "meta",
+    "builder-resource"
+  ],
+  "forbiddenNativeFileNamePatterns": [
+    "^nvinfer.*\\.(dll|so(?:\\..*)?)$",
+    "^libnvinfer.*\\.so(?:\\..*)?$",
+    "^nvonnxparser.*\\.(dll|so(?:\\..*)?)$",
+    "^libnvonnxparser.*\\.so(?:\\..*)?$",
+    "^nvparsers.*\\.(dll|so(?:\\..*)?)$",
+    "^libnvparsers.*\\.so(?:\\..*)?$",
+    "^cudart.*\\.(dll|so(?:\\..*)?)$",
+    "^libcudart.*\\.so(?:\\..*)?$",
+    "^cublas.*\\.(dll|so(?:\\..*)?)$",
+    "^libcublas.*\\.so(?:\\..*)?$",
+    "^cudnn.*\\.(dll|so(?:\\..*)?)$",
+    "^libcudnn.*\\.so(?:\\..*)?$",
+    "^nvrtc.*\\.(dll|so(?:\\..*)?)$",
+    "^libnvrtc.*\\.so(?:\\..*)?$"
+  ],
+  "sourceArchivePolicy": {
+    "allowed": true,
+    "mustUseGitTrackedFiles": true,
+    "mustExcludeThirdPartyBinaries": true
+  },
+  "retiredSurfaces": [
+    "pack/runtime full-runtime projects",
+    "CUDA/cuDNN split packages",
+    "TensorRT split packages",
+    "runtime collection/meta packages",
+    "TensorRT builder-resource packages",
+    "CUDA RTC vendor bundles"
+  ]
+}

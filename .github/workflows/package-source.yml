@@ -1,0 +1,91 @@
+name: package-source
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Source archive version (must start with 4.0.x)
+        required: false
+        default: 4.0.0
+        type: string
+      artifact_name:
+        description: Uploaded artifact name
+        required: false
+        default: source-package
+        type: string
+      release_tag:
+        description: Optional GitHub Release tag
+        required: false
+        default: ""
+        type: string
+      attach_to_github_release:
+        description: Upload source archive to the GitHub Release
+        required: false
+        default: false
+        type: boolean
+  workflow_call:
+    inputs:
+      version:
+        required: false
+        default: 4.0.0
+        type: string
+      artifact_name:
+        required: false
+        default: source-package
+        type: string
+      release_tag:
+        required: false
+        default: ""
+        type: string
+      attach_to_github_release:
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+jobs:
+  pack:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Enforce package publication policy
+        shell: pwsh
+        run: |
+          pwsh -NoProfile -File ./eng/Test-ExternalVendorRuntimePackagePolicy.ps1 -StaticOnly
+          if ('${{ github.repository_owner }}' -ne 'guojin-yan' -and '${{ inputs.attach_to_github_release }}' -eq 'true') {
+            throw "The grape-yan repository is validation-only and cannot upload Release assets."
+          }
+
+      - name: Create tracked source archive
+        shell: pwsh
+        run: pwsh -NoProfile -File ./eng/New-SourceArchive.ps1 -Version "${{ inputs.version }}"
+
+      - name: Upload source artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ inputs.artifact_name }}
+          path: |
+            artifacts/source/*.zip
+            artifacts/source/*.json
+
+      - name: Attach source archive to GitHub Release
+        if: ${{ inputs.attach_to_github_release && inputs.release_tag != '' && github.repository_owner == 'guojin-yan' }}
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh release view "${{ inputs.release_tag }}" --repo "$env:GH_REPO" *> $null
+          if ($LASTEXITCODE -ne 0) {
+            throw "Release '${{ inputs.release_tag }}' does not exist."
+          }
+          Get-ChildItem -LiteralPath ./artifacts/source -Filter *.zip -File | ForEach-Object {
+            gh release upload "${{ inputs.release_tag }}" $_.FullName --clobber --repo "$env:GH_REPO"
+            if ($LASTEXITCODE -ne 0) { throw "Failed to upload source archive '$($_.Name)'." }
+          }

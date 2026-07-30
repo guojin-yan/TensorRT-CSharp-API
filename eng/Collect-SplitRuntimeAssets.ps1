@@ -185,6 +185,9 @@ else {
 if (-not $splitPackage) {
   throw "Split package key '$SplitPackageKey' was not found."
 }
+if ([string]$splitPackage.role -ne "bridge") {
+  throw "Only bridge assets may be collected. Split role '$($splitPackage.role)' is retired because NVIDIA runtime binaries must be installed by the consumer."
+}
 if (-not $sourcePackage) {
   throw "Source runtime key '$($splitPackage.sourceRuntimeKey)' was not found."
 }

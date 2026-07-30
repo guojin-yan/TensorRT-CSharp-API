@@ -430,6 +430,8 @@
     href: articles/zh-cn/local-actions.md
   - name: Runtime Packages
     href: articles/zh-cn/runtime-packages.md
+  - name: NVIDIA Runtime External Dependency Policy
+    href: articles/zh-cn/external-vendor-runtime-package-policy.md
   - name: Runtime Distribution Strategy
     href: articles/zh-cn/runtime-distribution-strategy.md
   - name: Package Consumer Validation

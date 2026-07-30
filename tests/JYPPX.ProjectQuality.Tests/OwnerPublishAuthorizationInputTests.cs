@@ -176,8 +176,8 @@ public sealed class OwnerPublishAuthorizationInputTests
             values["ownerName"] = "Release Owner";
             values["ownerDecisionTimestampUtc"] = DateTimeOffset.UtcNow.ToString("O");
             values["authorizationDecision"] = "approved-for-owner-run";
-            values["authorizedRoutes"] = new[] { "nuget-small-bridge-core", "github-packages-full-runtime" };
-            values["publishTargetChannels"] = new[] { "nuget-small-bridge-core", "github-packages-full-runtime" };
+            values["authorizedRoutes"] = new[] { "nuget-small-bridge-core", "github-packages-bridge" };
+            values["publishTargetChannels"] = new[] { "nuget-small-bridge-core", "github-packages-bridge" };
             values["ownerAuthorizationId"] = "owner-auth-20260712-001";
             values["ownerAuthorizationScope"] = "manual-owner-run-only";
             values["managedPackageVersion"] = "4.0.0";

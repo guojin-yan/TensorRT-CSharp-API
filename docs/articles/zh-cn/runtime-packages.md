@@ -8,6 +8,8 @@ runtime 包用于承载某一个明确 TensorRT / CUDA / cuDNN 组合的原生�
 - 匹配的 cuDNN 动态库
 - TensorRT 8 parser/plugin 等场景需要的 cuBLAS 等可选部署依赖
 
+> 策略更新（2026-07-30）：NVIDIA 原厂运行库包已退休。TensorRtSharp 只发布 C# 托管接口包、项目自有 `.Bridge` 包和 Git 跟踪文件源码归档；CUDA、cuDNN、TensorRT 与可选 NVRTC 由用户自行安装。本文中的兼容 key 以后只选择 bridge 编译输入，后续出现的旧 vendor-bundle 命令仅作历史记录，不得用于发布。完整规则见 `pack/external-vendor-runtime-policy.json`。
+
 ## 命名规则
 
 runtime package key 和 NuGet package ID 必须包含依赖的 `major.minor` 版本：

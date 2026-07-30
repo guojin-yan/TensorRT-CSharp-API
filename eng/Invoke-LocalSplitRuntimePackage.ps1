@@ -2,7 +2,7 @@
 param(
   [string]$SourceRuntimeKey,
   [string]$Version = "4.0.0",
-  [string[]]$SplitPackageRole = @("all"),
+  [string[]]$SplitPackageRole = @("bridge"),
   [string]$MetaPackageVersion,
   [string]$BridgePackageVersion,
   [string]$CudaCudnnPackageVersion,
@@ -495,6 +495,8 @@ function Ensure-SplitPackageProject {
     <PackageId>$($SplitPackage.packageId)</PackageId>
     <Title>$($SplitPackage.packageId)</Title>
     <Description>$description</Description>
+    <JYPPXPackageKind>bridge</JYPPXPackageKind>
+    <IsPackable>true</IsPackable>
     <JYPPXRuntimeKey>$($SplitPackage.key)</JYPPXRuntimeKey>
     <PackageTags>$packageTags</PackageTags>
   </PropertyGroup>
@@ -582,7 +584,20 @@ $resolvedBridgePackageVersion = [string]$splitPackagePins.bridgePackageVersion
 $smokeRuntimeKeys = @(Expand-KeyList -Values $SmokeRuntimePackageKey)
 $requestedSplitRoles = @(Expand-KeyList -Values $SplitPackageRole | ForEach-Object { $_.ToLowerInvariant() })
 if ($requestedSplitRoles.Count -eq 0) {
-  $requestedSplitRoles = @("all")
+  $requestedSplitRoles = @("bridge")
+}
+
+$retiredRoleRequests = @($requestedSplitRoles | Where-Object { $_ -ne "bridge" })
+if ($retiredRoleRequests.Count -gt 0) {
+  throw "Only the 'bridge' split package role is allowed. CUDA, cuDNN, TensorRT, CUDA RTC, collection, meta, and full-runtime packages are retired. Rejected roles: $($retiredRoleRequests -join ', ')."
+}
+if ($IncludeMetaPackage.IsPresent -or
+    -not [string]::IsNullOrWhiteSpace($MetaPackageVersion) -or
+    -not [string]::IsNullOrWhiteSpace($CudaCudnnPackageVersion) -or
+    -not [string]::IsNullOrWhiteSpace($CudaCudnnPackageVersionMap) -or
+    -not [string]::IsNullOrWhiteSpace($TensorRtPackageVersion) -or
+    -not [string]::IsNullOrWhiteSpace($TensorRtPackageVersionMap)) {
+  throw "Vendor dependency and collection/meta package inputs are retired. Build the bridge package only and require consumers to install matching NVIDIA dependencies."
 }
 if ($requestedSplitRoles -contains "cuda-rtc") {
   Invoke-CheckedCommand -FilePath $powerShellCommand -ArgumentList @(

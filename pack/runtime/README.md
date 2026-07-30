@@ -1,45 +1,25 @@
-# Runtime Packages
+# Runtime compatibility matrix
 
-This directory contains runtime-specific NuGet package projects for explicit TensorRT / CUDA / cuDNN combinations.
+The projects under this directory are retired full-runtime package projects and are deliberately non-packable.
 
-Runtime package identities use dependency `major.minor` fragments, for example:
+`runtime-packages.manifest.json` remains the canonical TensorRT/CUDA/cuDNN compatibility and build-input matrix. Its vendor file lists describe locally installed dependencies used for build and diagnostic probes. They are not package assets and must never be copied to NuGet packages or GitHub Release assets.
 
-- Key: `win-x64-trt10.11-cuda11.8-cudnn8.9`
-- Package ID: `JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda11.8.cudnn8.9`
+Consumers install matching NVIDIA dependencies themselves:
 
-Before packing a Windows runtime package, validate the explicit local roots and collect assets:
+- TensorRT
+- CUDA Toolkit/runtime
+- cuDNN when required by the selected TensorRT line
+- NVRTC and matching builtins when runtime compilation is used
 
-```powershell
-powershell -ExecutionPolicy Bypass -File .\eng\Validate-WindowsRuntimeInputs.ps1 `
-  -RuntimePackageKey win-x64-trt10.11-cuda11.8-cudnn8.9 `
-  -TensorRtRoot "<TensorRT root>" `
-  -CudaRoot "<CUDA root>" `
-  -CudnnRoot "<cuDNN root>"
-powershell -ExecutionPolicy Bypass -File .\eng\Collect-RuntimeAssets.ps1 -RuntimePackageKey win-x64-trt10.11-cuda11.8-cudnn8.9
-```
+Use `runtime-packages.local.example.json` as the starting point for machine-specific roots. The real `runtime-packages.local.json` remains ignored by Git.
 
-Then pack the managed package and matching runtime package:
+Build a package through the bridge-only entry point:
 
 ```powershell
-dotnet pack .\pack\JYPPX.TensorRT.CSharp.API\JYPPX.TensorRT.CSharp.API.csproj -c Release -o .\artifacts\managed
-dotnet pack .\pack\runtime\win-x64-trt10.11-cuda11.8-cudnn8.9\JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda11.8.cudnn8.9.csproj -c Release -o .\artifacts\runtime-nupkg
+powershell -ExecutionPolicy Bypass -File .\eng\Invoke-LocalSplitRuntimePackage.ps1 `
+  -SourceRuntimeKey win-x64-trt11.0-cuda12.9-cudnn9.22 `
+  -Version 4.0.0 `
+  -SplitPackageRole bridge
 ```
 
-Validate a consumer project from the local packages:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\eng\Test-PackageConsumer.ps1 -RuntimePackageKey win-x64-trt10.11-cuda11.8-cudnn8.9 -RunSmoke -SmokeRuntimePackageKey win-x64-trt10.11-cuda11.8-cudnn8.9
-```
-
-Latest local evidence:
-
-- `win-x64-trt10.11-cuda11.8-cudnn8.9`: 2026-06-12 restored, built, copied `16/16` native assets, and passed smoke with TensorRT `10.11.0`, CUDA `11.8`, and one CUDA device.
-- `win-x64-trt10.11-cuda12.9-cudnn9.22`: 2026-06-12 restored, built, copied `19/19` native asset patterns, and passed smoke with TensorRT `10.11.0`, CUDA `12.9`, and one CUDA device.
-- `win-x64-trt11.0-cuda12.9-cudnn9.22`: 2026-06-12 restored, built, copied `19/19` native asset patterns, and passed smoke with TensorRT `11.0.0`, CUDA `12.9`, and one CUDA device.
-- `win-x64-trt11.0-cuda13.2-cudnn9.22`: 2026-06-14 full split package set and collection package packed locally; package consumer restore/build/native-copy validation passed with `19/19` native asset patterns. Smoke remains pending because the current driver reports CUDA `12.9`, not a CUDA 13-capable runtime stack.
-
-Machine-specific roots belong in `runtime-packages.local.json`, which is ignored by Git. Public package metadata belongs in `runtime-packages.manifest.json`.
-
-Start from `runtime-packages.local.example.json` for Windows or Linux runners. CUDA, cuDNN, and TensorRT binaries must be downloaded from official NVIDIA distributions and installed or unpacked on the self-hosted runner; the workflows resolve those roots and do not commit or fetch vendor binaries from Git.
-
-CUDA RTC is an optional dynamic dependency and is not part of bridge-only packages. Before any full-runtime RTC package is materialized, run `eng/Test-CudaRtcFullRuntimePackagingPreflight.ps1`. It cross-checks the public runtime manifest, split-role contract, capability matrix, local CUDA roots, NVRTC/builtins sizes and hashes, and license-text files. The default command writes a blocked-state report without copying or packing assets; `-RequireMaterializationReady` exits nonzero until platform asset proof, redistribution approval, and the split role are all complete.
+`eng/Invoke-LocalRuntimePackage.ps1` and `eng/Collect-RuntimeAssets.ps1` now fail closed. The enforced policy is `pack/external-vendor-runtime-policy.json`.

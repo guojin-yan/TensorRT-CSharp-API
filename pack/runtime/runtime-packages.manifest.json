@@ -1,5 +1,13 @@
 {
   "schemaVersion": 3,
+  "publicationPolicy": {
+    "state": "retired-full-runtime-packaging",
+    "policy": "pack/external-vendor-runtime-policy.json",
+    "isPackable": false,
+    "vendorLibrariesAreExternalDependencies": true,
+    "allowedPublishedNativeAsset": "project-owned bridge only",
+    "notes": "The entries below remain a build and dependency compatibility matrix. Vendor file lists are dependency probes only and must never be copied into a package or release asset."
+  },
   "cudaRtcPackaging": {
     "dependencyMode": "optional-dynamic",
     "bridgeOnlyBundlesNvrtc": false,

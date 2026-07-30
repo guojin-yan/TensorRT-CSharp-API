@@ -92,6 +92,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Enforce package publication policy
+        shell: pwsh
+        run: |
+          pwsh -NoProfile -File .\eng\Test-ExternalVendorRuntimePackagePolicy.ps1 -StaticOnly
+          if ('${{ github.repository_owner }}' -ne 'guojin-yan' -and
+              ('${{ inputs.publish_to_nuget }}' -eq 'true' -or '${{ inputs.publish_to_github_packages }}' -eq 'true' -or '${{ inputs.attach_to_github_release }}' -eq 'true')) {
+            throw "The grape-yan repository is validation-only and cannot publish packages or Release assets."
+          }
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
@@ -138,7 +147,9 @@ jobs:
         run: dotnet pack .\pack\JYPPX.TensorRT.CSharp.API\JYPPX.TensorRT.CSharp.API.csproj -c "${{ inputs.configuration }}" -o .\artifacts\managed -p:JYPPXPackageVersion=${{ steps.version.outputs.package_version }}
 
       - name: Validate managed package content
-        run: pwsh -NoProfile -File .\eng\Test-ManagedPackageContent.ps1
+        run: |
+          pwsh -NoProfile -File .\eng\Test-ManagedPackageContent.ps1
+          pwsh -NoProfile -File .\eng\Test-ExternalVendorRuntimePackagePolicy.ps1 -PackagePath .\artifacts\managed
 
       - name: Upload managed artifacts
         uses: actions/upload-artifact@v7
@@ -175,7 +186,7 @@ jobs:
           }
 
   publish-github-packages:
-    if: ${{ inputs.publish_to_github_packages }}
+    if: ${{ inputs.publish_to_github_packages && github.repository_owner == 'guojin-yan' }}
     needs: pack
     runs-on: windows-latest
     steps:
@@ -187,6 +198,10 @@ jobs:
         with:
           name: ${{ inputs.artifact_name }}
           path: artifacts/managed
+
+      - name: Revalidate GitHub Packages payload
+        shell: pwsh
+        run: pwsh -NoProfile -File .\eng\Test-ExternalVendorRuntimePackagePolicy.ps1 -PackagePath .\artifacts\managed
 
       - name: Publish managed package to GitHub Packages
         shell: pwsh
@@ -202,7 +217,7 @@ jobs:
             -RetryDelaySeconds 15
 
   publish-nuget:
-    if: ${{ inputs.publish_to_nuget }}
+    if: ${{ inputs.publish_to_nuget && github.repository_owner == 'guojin-yan' }}
     needs: pack
     runs-on: windows-latest
     steps:
@@ -228,6 +243,10 @@ jobs:
         with:
           name: ${{ inputs.artifact_name }}
           path: artifacts/managed
+
+      - name: Revalidate nuget.org payload
+        shell: pwsh
+        run: pwsh -NoProfile -File .\eng\Test-ExternalVendorRuntimePackagePolicy.ps1 -PackagePath .\artifacts\managed
 
       - name: Publish managed package to nuget.org
         shell: pwsh

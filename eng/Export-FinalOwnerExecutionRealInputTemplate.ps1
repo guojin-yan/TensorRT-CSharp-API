@@ -223,7 +223,7 @@ $template = [pscustomobject]@{
       cleanRuntimeSmokeLogSha256 = "<owner-dual-package-github-clean-runtime-smoke-log-sha256>"
       confirmsNoSubstituteProof = $false
     }
-    routeIds = @("nuget-small-bridge-core", "github-packages-full-runtime")
+    routeIds = @("nuget-small-bridge-core", "github-packages-bridge")
     sourceValidators = @(
       "eng/Test-DualPackagePublishPreflightMatrix.ps1 -Strict",
       "eng/Test-FinalCloseGateConvergence.ps1 -Strict"

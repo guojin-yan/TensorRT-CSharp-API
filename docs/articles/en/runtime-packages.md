@@ -1,5 +1,7 @@
 # Runtime Packages
 
+> Policy update (2026-07-30): NVIDIA runtime packages are retired. TensorRtSharp publishes only the managed C# package, project-owned `.Bridge` packages, and tracked source archives. Consumers install CUDA, cuDNN, TensorRT, and optional NVRTC themselves. The compatibility keys in this article now select bridge build inputs only; any older vendor-bundle command below is historical and must not be used for publication. See `pack/external-vendor-runtime-policy.json`.
+
 Runtime packages carry the native deployment assets for one explicit TensorRT / CUDA / cuDNN combination:
 
 - the JYPPX native bridge library

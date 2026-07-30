@@ -35,7 +35,7 @@ public sealed class FinalOwnerExecutionRealInputStrictPreflightTests
 
         string[] routeIds = preflight.GetProperty("dualPackageRouteIds").EnumerateArray().Select(static item => item.GetString()!).ToArray();
         Assert.Contains("nuget-small-bridge-core", routeIds);
-        Assert.Contains("github-packages-full-runtime", routeIds);
+        Assert.Contains("github-packages-bridge", routeIds);
 
         string[] routeFieldPaths = preflight.GetProperty("dualPackageRouteProofFieldPaths").EnumerateArray().Select(static item => item.GetString()!).ToArray();
         Assert.Contains("dualPackageRoutes.nugetSmallBridgeCore.ownerAuthorizationUrl", routeFieldPaths);
@@ -47,7 +47,7 @@ public sealed class FinalOwnerExecutionRealInputStrictPreflightTests
             "dualPackageRoutes.nugetSmallBridgeCore.ownerAuthorizationUrl",
             "dualPackageRoutes.githubPackagesFullRuntime.runtimeDllResolutionReportPath",
             "nuget-small-bridge-core",
-            "github-packages-full-runtime",
+            "github-packages-bridge",
             "placeholder",
             "SHA256 invalid",
             "path missing",

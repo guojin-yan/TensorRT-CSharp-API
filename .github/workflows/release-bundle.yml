@@ -34,17 +34,17 @@ on:
         default: "win-x64-trt8.6-cuda11.8-cudnn8.9,win-x64-trt8.6-cuda12.1-cudnn8.9,win-x64-trt10.11-cuda11.8-cudnn8.9,win-x64-trt10.11-cuda12.9-cudnn9.22,win-x64-trt11.0-cuda12.9-cudnn9.22,win-x64-trt11.0-cuda13.2-cudnn9.22"
         type: string
       windows_split_package_roles:
-        description: Split Windows runtime roles or keys to build
+        description: Must be bridge; NVIDIA runtime package roles are retired
         required: false
-        default: "bridge,collection"
+        default: "bridge"
         type: string
       windows_cuda_cudnn_package_version:
-        description: Optional version for already-published Windows CUDA/cuDNN split packages
+        description: Retired; must stay empty
         required: false
         default: ""
         type: string
       windows_tensorrt_package_version:
-        description: Optional version for already-published Windows TensorRT split packages
+        description: Retired; must stay empty
         required: false
         default: ""
         type: string
@@ -69,17 +69,17 @@ on:
         default: hosted
         type: string
       linux_split_package_roles:
-        description: Split Linux runtime roles or keys to build
+        description: Must be bridge; NVIDIA runtime package roles are retired
         required: false
-        default: all
+        default: bridge
         type: string
       linux_cuda_cudnn_package_version:
-        description: Optional version for already-published Linux CUDA/cuDNN split packages
+        description: Retired; must stay empty
         required: false
         default: ""
         type: string
       linux_tensorrt_package_version:
-        description: Optional version for already-published Linux TensorRT split packages
+        description: Retired; must stay empty
         required: false
         default: ""
         type: string
@@ -114,7 +114,7 @@ on:
         default: true
         type: boolean
       publish_runtime_to_github_packages:
-        description: Publish runtime packages to GitHub Packages
+        description: Publish project-owned bridge packages to GitHub Packages
         required: false
         default: false
         type: boolean
@@ -174,6 +174,31 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+
+      - name: Enforce package publication policy
+        shell: pwsh
+        run: |
+          pwsh -NoProfile -File .\eng\Test-ExternalVendorRuntimePackagePolicy.ps1 -StaticOnly
+          if ('${{ github.repository_owner }}' -ne 'guojin-yan') {
+            throw "release-bundle may run only in the formal guojin-yan repository. The grape-yan repository is validation-only."
+          }
+          if ('${{ inputs.windows_split_package_roles }}'.Trim().ToLowerInvariant() -ne 'bridge' -or
+              '${{ inputs.linux_split_package_roles }}'.Trim().ToLowerInvariant() -ne 'bridge') {
+            throw "Windows and Linux split_package_roles must be 'bridge'. NVIDIA runtime package roles are retired."
+          }
+          $retiredInputs = @(
+            '${{ inputs.windows_cuda_cudnn_package_version }}',
+            '${{ inputs.windows_tensorrt_package_version }}',
+            '${{ inputs.linux_cuda_cudnn_package_version }}',
+            '${{ inputs.linux_tensorrt_package_version }}'
+          ) | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+          $releaseConfig = '${{ inputs.release_config_json }}' | ConvertFrom-Json
+          $retiredConfigKeys = @($releaseConfig.PSObject.Properties.Name | Where-Object {
+            $_ -match '(cuda_cudnn|tensorrt_package|meta_package|include_meta)'
+          })
+          if ($retiredInputs.Count -gt 0 -or $retiredConfigKeys.Count -gt 0) {
+            throw "Vendor, meta, and full-runtime release inputs are retired. Remove: $($retiredConfigKeys -join ', ')"
+          }
 
       - name: Validate release publish prerequisites
         shell: bash
@@ -398,6 +423,11 @@ jobs:
             -f "release_tag=$RELEASE_TAG" \
             -f "attach_to_github_release=$ATTACH_RUNTIME_TO_GITHUB_RELEASE"
 
+          dispatch_workflow "package-source" \
+            -f "version=$RELEASE_VERSION" \
+            -f "release_tag=$RELEASE_TAG" \
+            -f "attach_to_github_release=$ATTACH_RUNTIME_TO_GITHUB_RELEASE"
+
           if [ "$RUN_WINDOWS_RUNTIME_PACKAGING" = "true" ]; then
             dispatch_workflow "runtime-windows" \
               -f "version=$runtime_version" \
@@ -577,6 +607,11 @@ jobs:
                 ;;
             esac
           done
+
+      - name: Validate downloaded release packages
+        if: ${{ inputs.attach_runtime_to_github_release }}
+        shell: pwsh
+        run: pwsh -NoProfile -File .\eng\Test-ExternalVendorRuntimePackagePolicy.ps1 -PackagePath (Join-Path $env:RUNNER_TEMP 'release-bundle-downloads')
 
       - name: Create or update GitHub Release
         if: ${{ inputs.attach_runtime_to_github_release }}
