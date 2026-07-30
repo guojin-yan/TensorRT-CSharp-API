@@ -9,6 +9,9 @@
 
 `debug-listener-borrowed-tensor-safety-gate` 把 DebugListener 最容易误用的 borrowed tensor 边界拆出来单独审计：TensorRT 在 `IDebugListener::processDebugTensor` 中传入的 debug tensor 与 data buffer 都是借用生命周期，C# public API 不能返回 raw `IntPtr` / `nint` / native owner pointer / debug tensor pointer / data pointer，也不能让 borrowed pointer 逃逸到用户代码。
 
+托管 evaluator 位于 `TensorRtDebugListenerBorrowedTensorSafetyGate.cs`，pointer-free result model 位于
+`TensorRtDebugListenerBorrowedTensorSafetyGateResult.cs`。readiness 与源码测试必须组合读取这两个文件。
+
 公开 API：
 
 - `TensorRtDebugListenerBorrowedTensorSafetyGate`

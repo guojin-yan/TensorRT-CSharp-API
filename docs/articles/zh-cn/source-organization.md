@@ -226,6 +226,12 @@ DebugListener native no-throw vtable scaffold gate 与 no-throw destructor 的 r
 `b51277e392df8069e7c9f47e2eede14e5819449b`，并固定 vtable scaffold/exception/status/in-flight prerequisite、
 native owner non-copyable/no-throw destructor、pointer non-exposure、deferred-row 与 runtime-proof blocker 语义。
 
+DebugListener native owner non-copyable storage 与 borrowed tensor safety gate 的 result 也已归入同名文件。原
+318 行 storage 分为 130 行 evaluator 与 193 行 result；原 317 行 borrowed tensor safety 分为 132 行 evaluator 与
+190 行 result。布局门禁可重组拆分前 Git blob `0f395ae7dcb4b04c1189e8d1bc19b6eb1791eb7b` 与
+`34bd7d9638321ef955730bc4126da254fc45935f`，并固定 owner copy/move blocking、stable identity、borrowed metadata
+copy、lifetime/pointer escape blocking、deferred-row 与 runtime-proof blocker 语义。
+
 OutputAllocator diagnostics 继续按 public design owner 与 internal managed runtime gate 分层。原 637 行
 `Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeGate.cs` 降为 38 行 state/constructor core；entries、snapshots、
 lifecycle、shared invocation、trampoline/state 与 formatting 进入 6 份 partial，request/result 类型各自成文件。原 503 行

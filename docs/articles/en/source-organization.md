@@ -256,6 +256,13 @@ Git blobs `c8f31605e413c172dbf8cc1bb6eb6c21e60c5954` and `b51277e392df8069e7c9f4
 vtable scaffold/exception/status/in-flight prerequisites, native-owner non-copyability, no-throw destruction, pointer
 non-exposure, deferred rows, and runtime-proof blockers.
 
+The DebugListener native owner non-copyable storage and borrowed tensor safety gate results now also have dedicated namesake
+files. The former 318-line storage gate is split into a 130-line evaluator and a 193-line result; the former 317-line
+borrowed tensor safety gate is split into a 132-line evaluator and a 190-line result. The layout gate recomposes the
+pre-split Git blobs `0f395ae7dcb4b04c1189e8d1bc19b6eb1791eb7b` and `34bd7d9638321ef955730bc4126da254fc45935f`, preserving
+owner copy/move blocking, stable identity, borrowed metadata copying, lifetime/pointer-escape blocking, deferred rows,
+and runtime-proof blockers.
+
 OutputAllocator diagnostics are split across the public design owner and its internal managed runtime gate. The former
 637-line `Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeGate.cs` is reduced to a 38-line state/constructor core;
 entries, snapshots, lifecycle, shared invocation, trampoline/state, and formatting live in six partials, with request/result

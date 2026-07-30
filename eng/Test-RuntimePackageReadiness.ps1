@@ -3656,6 +3656,7 @@ function New-DebugListenerAttachDetachDesignGateEvidence {
 
 function New-DebugListenerBorrowedTensorSafetyGateEvidence {
   $borrowedTensorSafetyGateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerBorrowedTensorSafetyGate.cs"
+  $borrowedTensorSafetyGateResultSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerBorrowedTensorSafetyGateResult.cs"
   $precheckSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerRuntimeProofPrecheck.cs"
   $attachDetachGateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerAttachDetachDesignGate.cs"
   $ownerSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerCallbackOwner.cs"
@@ -3673,6 +3674,7 @@ function New-DebugListenerBorrowedTensorSafetyGateEvidence {
   $packageConsumerRelativePath = "eng\Test-PackageConsumer.ps1"
   $comparisonRelativePath = "artifacts\interface-coverage\tensorrt-interface-comparison.csv"
   $borrowedTensorSafetyGateSourcePath = Join-Path $RepositoryRoot $borrowedTensorSafetyGateSourceRelativePath
+  $borrowedTensorSafetyGateResultSourcePath = Join-Path $RepositoryRoot $borrowedTensorSafetyGateResultSourceRelativePath
   $precheckSourcePath = Join-Path $RepositoryRoot $precheckSourceRelativePath
   $attachDetachGateSourcePath = Join-Path $RepositoryRoot $attachDetachGateSourceRelativePath
   $ownerSourcePath = Join-Path $RepositoryRoot $ownerSourceRelativePath
@@ -3723,7 +3725,7 @@ function New-DebugListenerBorrowedTensorSafetyGateEvidence {
     '"IGpuAsyncAllocator","deallocateAsync","IGpuAsyncAllocator::deallocateAsync","other","deferred-only"'
   )
 
-  $evidencePaths = @($borrowedTensorSafetyGateSourcePath, $precheckSourcePath, $attachDetachGateSourcePath, $ownerSourcePath, $smokePath, $borrowedTensorSafetyGateDocPath, $precheckDocPath, $attachDetachGateDocPath, $callbackDesignDocPath, $callbackGatePath, $schemaPath, $latestPath, $runtimeSplitReadmePath, $smokeReadmePath, $bridgeConsumerPath, $packageConsumerPath, $comparisonPath)
+  $evidencePaths = @($borrowedTensorSafetyGateSourcePath, $borrowedTensorSafetyGateResultSourcePath, $precheckSourcePath, $attachDetachGateSourcePath, $ownerSourcePath, $smokePath, $borrowedTensorSafetyGateDocPath, $precheckDocPath, $attachDetachGateDocPath, $callbackDesignDocPath, $callbackGatePath, $schemaPath, $latestPath, $runtimeSplitReadmePath, $smokeReadmePath, $bridgeConsumerPath, $packageConsumerPath, $comparisonPath)
   $missingFiles = @($evidencePaths | Where-Object { -not (Test-Path -LiteralPath $_ -PathType Leaf) })
   if ($missingFiles.Count -gt 0) {
     return [pscustomobject]@{
@@ -5822,6 +5824,7 @@ function New-DebugListenerNativeOwnerStableIdentityEvidence {
 
 function New-DebugListenerNativeOwnerNonCopyableStorageEvidence {
   $storageSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeOwnerNonCopyableStorage.cs"
+  $storageResultSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeOwnerNonCopyableStorageResult.cs"
   $stableIdentitySourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeOwnerStableIdentity.cs"
   $precheckSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerRuntimeProofPrecheck.cs"
   $nativeStorageScaffoldRelativePath = "native\src\tensorrt\common\debug_listener_native_owner_noncopyable_storage.inc"
@@ -5844,6 +5847,7 @@ function New-DebugListenerNativeOwnerNonCopyableStorageEvidence {
   $comparisonRelativePath = "artifacts\interface-coverage\tensorrt-interface-comparison.csv"
 
   $storageSourcePath = Join-Path $RepositoryRoot $storageSourceRelativePath
+  $storageResultSourcePath = Join-Path $RepositoryRoot $storageResultSourceRelativePath
   $stableIdentitySourcePath = Join-Path $RepositoryRoot $stableIdentitySourceRelativePath
   $precheckSourcePath = Join-Path $RepositoryRoot $precheckSourceRelativePath
   $nativeStorageScaffoldPath = Join-Path $RepositoryRoot $nativeStorageScaffoldRelativePath
@@ -5914,7 +5918,7 @@ function New-DebugListenerNativeOwnerNonCopyableStorageEvidence {
     '"IGpuAsyncAllocator","deallocateAsync","IGpuAsyncAllocator::deallocateAsync","other","deferred-only"'
   )
 
-  $evidencePaths = @($storageSourcePath, $stableIdentitySourcePath, $precheckSourcePath, $nativeStorageScaffoldPath, $nativeTrt8Path, $nativeTrt10Path, $nativeTrt11Path, $smokePath, $storageDocPath, $stableIdentityDocPath, $precheckDocPath, $callbackGatePath, $schemaPath, $latestPath, $indexPath, $tocPath, $runtimeSplitReadmePath, $smokeReadmePath, $bridgeConsumerPath, $packageConsumerPath, $comparisonPath)
+  $evidencePaths = @($storageSourcePath, $storageResultSourcePath, $stableIdentitySourcePath, $precheckSourcePath, $nativeStorageScaffoldPath, $nativeTrt8Path, $nativeTrt10Path, $nativeTrt11Path, $smokePath, $storageDocPath, $stableIdentityDocPath, $precheckDocPath, $callbackGatePath, $schemaPath, $latestPath, $indexPath, $tocPath, $runtimeSplitReadmePath, $smokeReadmePath, $bridgeConsumerPath, $packageConsumerPath, $comparisonPath)
   $missingFiles = @($evidencePaths | Where-Object { -not (Test-Path -LiteralPath $_ -PathType Leaf) })
   if ($missingFiles.Count -gt 0) {
     return [pscustomobject]@{

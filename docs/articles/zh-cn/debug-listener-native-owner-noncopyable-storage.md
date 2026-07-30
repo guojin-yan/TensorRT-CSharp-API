@@ -9,6 +9,9 @@
 
 `debug-listener-native-owner-noncopyable-storage` 位于 [DebugListener Native Owner Stable Identity](debug-listener-native-owner-stable-identity.md) 和 [DebugListener Native No-Throw Destructor](debug-listener-native-nothrow-destructor.md) 之间。它只证明 native 侧已经有一个不可复制、不可移动、默认 `noexcept` 析构的 storage scaffold，并把这条证据以 pointer-free 的 C# public diagnostics 暴露给后续 destructor gate 与 precheck。
 
+托管 evaluator 位于 `TensorRtDebugListenerNativeOwnerNonCopyableStorage.cs`，pointer-free result model 位于
+`TensorRtDebugListenerNativeOwnerNonCopyableStorageResult.cs`。readiness 与源码测试必须组合读取这两个文件。
+
 公开 API：
 
 - `TensorRtDebugListenerNativeOwnerNonCopyableStorage`
