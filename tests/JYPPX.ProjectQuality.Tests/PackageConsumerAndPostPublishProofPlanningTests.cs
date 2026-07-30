@@ -23,8 +23,8 @@ public sealed class PackageConsumerAndPostPublishProofPlanningTests
         Assert.False(root.GetProperty("canPromoteRuntimeProof").GetBoolean());
 
         JsonElement[] routes = root.GetProperty("routes").EnumerateArray().ToArray();
-        Assert.Contains(routes, static route => route.GetProperty("routeId").GetString() == "github-full-dependency-package");
-        Assert.Contains(routes, static route => route.GetProperty("routeId").GetString() == "nuget-core-api-plus-bridge-package");
+        Assert.Contains(routes, static route => route.GetProperty("routeId").GetString() == "github-release-managed-plus-bridge-assets");
+        Assert.Contains(routes, static route => route.GetProperty("routeId").GetString() == "nuget-managed-plus-bridge-packages");
 
         foreach (JsonElement route in routes)
         {
@@ -37,8 +37,20 @@ public sealed class PackageConsumerAndPostPublishProofPlanningTests
             Assert.True(route.GetProperty("requiredHashes").GetArrayLength() >= 4);
             Assert.True(route.GetProperty("requiredEnvironmentMetadata").GetArrayLength() >= 6);
             Assert.Contains("public", route.GetProperty("publicSourceRequirement").GetString(), StringComparison.OrdinalIgnoreCase);
-            Assert.Contains("Test-PackageConsumerRuntimeProofRecord.ps1", route.GetProperty("validatorCommand").GetString(), StringComparison.Ordinal);
+            Assert.Contains("Test-PackageConsumerRuntimeProofRecord.ps1", route.GetProperty("promotionRecordValidatorCommand").GetString(), StringComparison.Ordinal);
         }
+
+        JsonElement githubRoute = routes.Single(static route => route.GetProperty("routeId").GetString() == "github-release-managed-plus-bridge-assets");
+        Assert.Contains("Test-PublicReleaseBridgePackageConsumer.ps1", githubRoute.GetProperty("validatorCommand").GetString(), StringComparison.Ordinal);
+        Assert.Contains("-RequireReferencedFiles", githubRoute.GetProperty("validatorCommand").GetString(), StringComparison.Ordinal);
+        Assert.Contains("-FailOnNotEvidence", githubRoute.GetProperty("validatorCommand").GetString(), StringComparison.Ordinal);
+        string raw = root.GetRawText();
+        Assert.Contains("Invoke-PublicReleaseBridgePackageConsumer.ps1", raw, StringComparison.Ordinal);
+        Assert.Contains("machine-installed", raw, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("same source commit", raw, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("bridge-only", root.GetProperty("requiredDecision").GetString(), StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("github-full-dependency-package", raw, StringComparison.Ordinal);
+        Assert.DoesNotContain("runtime dependency bundle", raw, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
@@ -151,8 +163,8 @@ public sealed class PackageConsumerAndPostPublishProofPlanningTests
 
         Assert.Equal("artifacts/final-release/package-consumer-dual-route-proof-plan.json", packageAction.GetProperty("planningArtifact").GetString());
         Assert.Equal("artifacts/final-release/clean-external-consumer-execution-kit.json", packageAction.GetProperty("executionKit").GetString());
-        Assert.Contains("github-full-dependency-package", packageAction.GetProperty("routeIds").EnumerateArray().Select(static item => item.GetString()!));
-        Assert.Contains("nuget-core-api-plus-bridge-package", packageAction.GetProperty("routeIds").EnumerateArray().Select(static item => item.GetString()!));
+        Assert.Contains("github-release-managed-plus-bridge-assets", packageAction.GetProperty("routeIds").EnumerateArray().Select(static item => item.GetString()!));
+        Assert.Contains("nuget-managed-plus-bridge-packages", packageAction.GetProperty("routeIds").EnumerateArray().Select(static item => item.GetString()!));
         Assert.Contains("public package source", packageAction.GetProperty("publicSourceRequirement").GetString(), StringComparison.OrdinalIgnoreCase);
 
         Assert.Equal("artifacts/final-release/post-publish-verification-intake-map.json", postPublishAction.GetProperty("intakeMapArtifact").GetString());

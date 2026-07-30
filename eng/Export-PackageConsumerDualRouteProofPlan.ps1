@@ -40,25 +40,30 @@ $forbiddenSubstitutes = @(
 
 $routes = @(
   [pscustomobject]@{
-    routeId = "github-full-dependency-package"
+    routeId = "github-release-managed-plus-bridge-assets"
     routeState = "blocked-owner-public-package-runtime-evidence-required"
-    packageSource = "GitHub Release asset that carries managed package, native bridge, and TensorRT/CUDA/cuDNN runtime dependency bundle."
-    intendedUse = "Full dependency route for owners who want a single downloadable package set with large runtime assets."
+    packageSource = "Public GitHub Release assets for the managed API package and the matching project-owned bridge package; NVIDIA TensorRT/CUDA/cuDNN/NVRTC libraries remain machine-installed prerequisites."
+    intendedUse = "Release-asset route for consumers who want immutable GitHub URLs and SHA256 digests without redistributing NVIDIA vendor runtime libraries."
     requiredArtifacts = @(
       "public GitHub Release URL",
-      "release asset download transcript",
-      "full dependency package file",
-      "extraction or install transcript",
+      "managed package Release asset URL and GitHub digest",
+      "bridge package Release asset URL and GitHub digest",
+      "matching managed and bridge nuspec repository commit",
+      "verified public asset download transcript",
       "clean external consumer project",
-      "runtime asset copy log",
+      "bridge native asset copy log",
+      "machine-installed NVIDIA dependency metadata",
       "consumer restore/build/run transcript",
-      "smoke output JSON/log"
+      "smoke output JSON/log",
+      "independent public Release bridge consumer validation report"
     )
     requiredHashes = @(
-      "GitHub release asset SHA256",
-      "managed package SHA256",
-      "native bridge SHA256",
-      "runtime dependency bundle SHA256",
+      "managed Release asset GitHub SHA256",
+      "downloaded managed package SHA256",
+      "bridge Release asset GitHub SHA256",
+      "downloaded bridge package SHA256",
+      "runtime consumer report SHA256",
+      "runtime stdout and stderr SHA256",
       "smoke output log SHA256"
     )
     requiredEnvironmentMetadata = @(
@@ -70,10 +75,12 @@ $routes = @(
       "cuDNN version",
       ".NET SDK version"
     )
-    cleanConsumerCommand = "pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\New-PackageConsumerExternalSmokeScaffold.ps1; dotnet restore --source <public-github-package-source>; dotnet build -c Release; dotnet run -c Release -- --runtime-package-key win-x64-trt11.0-cuda13.2-cudnn9.22"
-    validatorCommand = "pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-PackageConsumerRuntimeProofRecord.ps1 -Strict -RequireExistingLog -FailOnNotProof"
-    firstOwnerCommand = "Download the public GitHub Release asset into a clean directory outside the repository and record URL, SHA256, install log, and smoke log."
-    publicSourceRequirement = "Must reference a public GitHub Release channel and immutable asset URL."
+    cleanConsumerCommand = "pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Invoke-PublicReleaseBridgePackageConsumer.ps1 -ManagedReleaseTag <managed-tag> -BridgeReleaseTag <bridge-tag> -SourceRuntimeKey win-x64-trt11.0-cuda13.2-cudnn9.22"
+    validatorCommand = "pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-PublicReleaseBridgePackageConsumer.ps1 -InputPath <public-release-consumer-report> -RequireReferencedFiles -Strict -FailOnNotEvidence"
+    promotionRecordValidatorCommand = "pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-PackageConsumerRuntimeProofRecord.ps1 -Strict -RequireExistingLog -FailOnNotProof"
+    firstOwnerCommand = "Run the public Release bridge consumer outside the repository, verify both GitHub digests and package identities, then record machine-installed dependency metadata and the runtime smoke logs."
+    publicSourceRequirement = "Must reference public immutable GitHub Release asset URLs for both managed and bridge packages; both nuspec files must name the formal repository and the same source commit; verified download staging must contain no locally built nupkg."
+    downloadedAssetStagingPolicy = "A downloaded public Release nupkg may be placed in isolated NuGet restore staging only after URL, GitHub digest, package id, package version, and bridge-only content validation. PackageReference remains mandatory; direct file references remain forbidden."
     forbiddenSubstitutes = @($forbiddenSubstitutes)
     ownerInputArtifact = "artifacts/final-release/package-consumer-runtime-proof-owner-input.template.json"
     requiredRecord = "artifacts/final-release/package-consumer-runtime-proof-record.json"
@@ -84,15 +91,16 @@ $routes = @(
     canCloseReleaseIssue = $false
   },
   [pscustomobject]@{
-    routeId = "nuget-core-api-plus-bridge-package"
+    routeId = "nuget-managed-plus-bridge-packages"
     routeState = "blocked-owner-public-package-runtime-evidence-required"
-    packageSource = "Public NuGet package for the C# API and C++ bridge; TensorRT/CUDA/cuDNN remain machine-installed prerequisites."
-    intendedUse = "Small NuGet route for normal package consumers who install NVIDIA dependencies separately."
+    packageSource = "Public NuGet-compatible source for the managed C# API package and matching project-owned bridge package; TensorRT/CUDA/cuDNN/NVRTC remain machine-installed prerequisites."
+    intendedUse = "Normal PackageReference route for consumers who install NVIDIA dependencies separately."
     requiredArtifacts = @(
       "public NuGet package URL",
       "NuGet restore transcript",
       "managed package metadata",
       "native bridge asset list",
+      "matching managed and bridge nuspec repository commit",
       "clean external consumer project",
       "external NVIDIA runtime metadata",
       "consumer restore/build/run transcript",
@@ -114,8 +122,9 @@ $routes = @(
       ".NET SDK version",
       "PATH/library probing summary"
     )
-    cleanConsumerCommand = "dotnet new console -n TensorRtSharpPublicConsumer; dotnet add package JYPPX.TensorRT.CSharp.API --version <published-version> --source <public-nuget-source>; dotnet restore; dotnet build -c Release; dotnet run -c Release -- --runtime-package-key win-x64-trt11.0-cuda13.2-cudnn9.22"
+    cleanConsumerCommand = "dotnet new console -n TensorRtSharpPublicConsumer; dotnet add package JYPPX.TensorRT.CSharp.API --version <managed-version> --source <public-nuget-source>; dotnet add package <bridge-package-id> --version <bridge-version> --source <public-nuget-source>; dotnet restore; dotnet build -c Release; dotnet run -c Release -- --runtime-package-key win-x64-trt11.0-cuda13.2-cudnn9.22"
     validatorCommand = "pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-PackageConsumerRuntimeProofRecord.ps1 -Strict -RequireExistingLog -FailOnNotProof"
+    promotionRecordValidatorCommand = "pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-PackageConsumerRuntimeProofRecord.ps1 -Strict -RequireExistingLog -FailOnNotProof"
     firstOwnerCommand = "Create a clean consumer outside the repository, restore only from the public NuGet source, then record package metadata, environment metadata, exit code, and smoke log."
     publicSourceRequirement = "Must reference a public NuGet source and a published version."
     forbiddenSubstitutes = @($forbiddenSubstitutes)
@@ -138,13 +147,13 @@ $plan = [pscustomobject]@{
   sharedOwnerInputArtifact = "artifacts/final-release/package-consumer-runtime-proof-owner-input.template.json"
   sharedValidator = "eng/Test-PackageConsumerRuntimeProofRecord.ps1 -Strict -RequireExistingLog -FailOnNotProof"
   forbiddenSubstitutes = @($forbiddenSubstitutes)
-  requiredDecision = "Owner must choose one public package consumption route and provide real external consumer logs, hashes, host metadata, package source, and reviewer decision."
+  requiredDecision = "Owner must choose one bridge-only public package consumption route and provide real external consumer logs, hashes, host metadata, package source, and reviewer decision. NVIDIA vendor runtime packages are not a supported route."
   performsPublish = $false
   canPublishPublicly = $false
   canCloseReleaseIssue = $false
   canPromotePackageConsumerRuntime = $false
   canPromoteRuntimeProof = $false
-  boundary = "This plan is an owner action map only. It does not publish packages, does not run a consumer, and does not promote package consumer runtime evidence."
+  boundary = "This plan is an owner action map for managed plus bridge-only delivery. It does not publish packages, redistribute NVIDIA runtime libraries, run a consumer, or promote package consumer runtime evidence."
 }
 
 $jsonPath = Join-Path $OutputRoot "package-consumer-dual-route-proof-plan.json"

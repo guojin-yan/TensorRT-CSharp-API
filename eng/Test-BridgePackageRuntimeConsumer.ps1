@@ -11,6 +11,7 @@ param(
   [string]$CudaRoot,
   [string]$CudnnRoot,
   [switch]$SkipBaselineValidation,
+  [switch]$SkipInstalledVendorAssetHashing,
   [switch]$KeepConsumerOutput,
   [switch]$AllowRuntimeSmokeFailure,
   [string]$RepositoryRoot
@@ -246,29 +247,32 @@ function Get-RuntimeSearchDirectories {
 function Get-NativeAssetEvidence {
   param(
     [Parameter(Mandatory = $true)][string]$BridgeOutputPath,
-    [Parameter(Mandatory = $true)][object]$Roots
+    [Parameter(Mandatory = $true)][object]$Roots,
+    [switch]$SkipVendorHashing
   )
 
   $assets = New-Object System.Collections.Generic.List[object]
   $candidates = New-Object System.Collections.Generic.List[string]
   $candidates.Add($BridgeOutputPath)
 
-  foreach ($directoryAndPattern in @(
-      [pscustomobject]@{ Directory = (Join-Path $Roots.TensorRtRoot "bin"); Pattern = "nvinfer*.dll" },
-      [pscustomobject]@{ Directory = (Join-Path $Roots.TensorRtRoot "bin"); Pattern = "nvonnxparser*.dll" },
-      [pscustomobject]@{ Directory = (Join-Path $Roots.TensorRtRoot "lib"); Pattern = "nvinfer*.dll" },
-      [pscustomobject]@{ Directory = (Join-Path $Roots.TensorRtRoot "lib"); Pattern = "nvonnxparser*.dll" },
-      [pscustomobject]@{ Directory = (Join-Path $Roots.CudaRoot "bin\x64"); Pattern = "cudart64*.dll" },
-      [pscustomobject]@{ Directory = (Join-Path $Roots.CudaRoot "bin"); Pattern = "cudart64*.dll" },
-      [pscustomobject]@{ Directory = (Join-Path $Roots.CudnnRoot "bin"); Pattern = "cudnn*64_9.dll" }
-    )) {
-    if ([string]::IsNullOrWhiteSpace($directoryAndPattern.Directory) -or
-        -not (Test-Path -LiteralPath $directoryAndPattern.Directory -PathType Container)) {
-      continue
-    }
+  if (-not $SkipVendorHashing.IsPresent) {
+    foreach ($directoryAndPattern in @(
+        [pscustomobject]@{ Directory = (Join-Path $Roots.TensorRtRoot "bin"); Pattern = "nvinfer*.dll" },
+        [pscustomobject]@{ Directory = (Join-Path $Roots.TensorRtRoot "bin"); Pattern = "nvonnxparser*.dll" },
+        [pscustomobject]@{ Directory = (Join-Path $Roots.TensorRtRoot "lib"); Pattern = "nvinfer*.dll" },
+        [pscustomobject]@{ Directory = (Join-Path $Roots.TensorRtRoot "lib"); Pattern = "nvonnxparser*.dll" },
+        [pscustomobject]@{ Directory = (Join-Path $Roots.CudaRoot "bin\x64"); Pattern = "cudart64*.dll" },
+        [pscustomobject]@{ Directory = (Join-Path $Roots.CudaRoot "bin"); Pattern = "cudart64*.dll" },
+        [pscustomobject]@{ Directory = (Join-Path $Roots.CudnnRoot "bin"); Pattern = "cudnn*64_9.dll" }
+      )) {
+      if ([string]::IsNullOrWhiteSpace($directoryAndPattern.Directory) -or
+          -not (Test-Path -LiteralPath $directoryAndPattern.Directory -PathType Container)) {
+        continue
+      }
 
-    foreach ($file in Get-ChildItem -LiteralPath $directoryAndPattern.Directory -Filter $directoryAndPattern.Pattern -File) {
-      $candidates.Add($file.FullName)
+      foreach ($file in Get-ChildItem -LiteralPath $directoryAndPattern.Directory -Filter $directoryAndPattern.Pattern -File) {
+        $candidates.Add($file.FullName)
+      }
     }
   }
 
@@ -279,12 +283,21 @@ function Get-NativeAssetEvidence {
 
     $file = Get-Item -LiteralPath $path
     $version = $file.VersionInfo.FileVersion
+    $isBridgeAsset = [string]::Equals($file.FullName, [System.IO.Path]::GetFullPath($BridgeOutputPath), [System.StringComparison]::OrdinalIgnoreCase)
+    $sha256 = if ($isBridgeAsset -or -not $SkipVendorHashing.IsPresent) {
+      (Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash
+    }
+    else {
+      ""
+    }
     $assets.Add([pscustomobject]@{
         name = $file.Name
         path = $file.FullName
         length = $file.Length
         fileVersion = if ($null -eq $version) { "" } else { [string]$version }
-        sha256 = (Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash
+        sha256 = $sha256
+        sha256Captured = -not [string]::IsNullOrWhiteSpace($sha256)
+        hashSkipReason = if ([string]::IsNullOrWhiteSpace($sha256)) { "diagnostic mode skipped installed vendor asset hashing" } else { "" }
       })
   }
 
@@ -400,7 +413,7 @@ function Write-Reports {
   New-Item -ItemType Directory -Path $Directory -Force | Out-Null
   $jsonPath = Join-Path $Directory "bridge-package-runtime-consumer-proof.json"
   $markdownPath = Join-Path $Directory "bridge-package-runtime-consumer-proof.md"
-  $Result | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $jsonPath -Encoding utf8
+  $Result | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $jsonPath -Encoding utf8
 
   $lines = New-Object System.Collections.Generic.List[string]
   $lines.Add("# Bridge Package Runtime Consumer Proof")
@@ -862,8 +875,16 @@ $enqueueCompleted = (($stdoutLines -join "`n") -match "EnqueueCompleted=True")
 $serializedBytesText = Get-FirstMarkerValue -Lines $stdoutLines -Prefix "EngineSerializedBytes="
 $engineSerializedBytes = 0L
 [void][long]::TryParse($serializedBytesText, [ref]$engineSerializedBytes)
+Write-Host "PostRuntimeCollection=host-metadata"
 $nvidia = Get-NvidiaHostMetadata
-$nativeAssets = @(Get-NativeAssetEvidence -BridgeOutputPath $bridgeOutputPath -Roots $runtimeRoots)
+Write-Host "PostRuntimeCollection=native-assets"
+$nativeAssets = if ($SkipInstalledVendorAssetHashing.IsPresent) {
+  @()
+}
+else {
+  @(Get-NativeAssetEvidence -BridgeOutputPath $bridgeOutputPath -Roots $runtimeRoots)
+}
+Write-Host "PostRuntimeCollection=package-sources"
 $managedPackageSourceEvidence = Get-PackageSourceEvidence -Package $managedPackage -SourceDirectory $ManagedPackageDirectory -SourceName "jyppx-managed-local"
 $bridgePackageSourceEvidence = Get-PackageSourceEvidence -Package $bridgePackage -SourceDirectory $BridgePackageDirectory -SourceName "jyppx-bridge-local"
 $additionalPackageSources = @(
@@ -906,7 +927,7 @@ $result = [ordered]@{
   generatedAtUtc = [DateTime]::UtcNow.ToString("O")
   sourceRuntimeKey = $SourceRuntimeKey
   bridgePackageKey = [string]$bridgeDefinition.key
-  proofClassification = if ($runtimeSmokePassed) { "compatible-host-bridge-package-runtime" } else { "compatible-host-bridge-package-runtime-failed" }
+  proofClassification = if ($SkipInstalledVendorAssetHashing.IsPresent) { "compatible-host-bridge-package-runtime-diagnostic" } elseif ($runtimeSmokePassed) { "compatible-host-bridge-package-runtime" } else { "compatible-host-bridge-package-runtime-failed" }
   smokeStatus = if ($runtimeSmokePassed) { "passed" } else { "failed" }
   exitCode = $exitCode
   engineSerializedBytes = $engineSerializedBytes
@@ -914,13 +935,16 @@ $result = [ordered]@{
   identityOutputMatch = $identityOutputMatch
   isRuntimeExecutionProof = $runtimeSmokePassed
   isPackageConsumerRuntimeProof = $false
-  canPromoteCompatibleHostRuntimeProof = $runtimeSmokePassed
+  canPromoteCompatibleHostRuntimeProof = $runtimeSmokePassed -and -not $SkipInstalledVendorAssetHashing.IsPresent
   canPromoteRuntimeProof = $false
   canPublishPublicly = $false
   canCloseReleaseIssue = $false
+  installedVendorAssetHashingSkipped = $SkipInstalledVendorAssetHashing.IsPresent
+  installedVendorAssetInventorySkipped = $SkipInstalledVendorAssetHashing.IsPresent
+  nativeAssetHashesComplete = -not $SkipInstalledVendorAssetHashing.IsPresent
   cudaPreflight = $cudaPreflight
   runtimeCreateDiagnostic = $runtimeCreateDiagnostic
-  runtimeProofBoundary = "This record proves local managed plus bridge packages can build, serialize, deserialize, enqueue, and verify an identity network with system-installed vendor dependencies on this compatible host. Local package feeds are not public clean package-consumer proof, and this result does not clear other runtime lines."
+  runtimeProofBoundary = if ($SkipInstalledVendorAssetHashing.IsPresent) { "Diagnostic execution may record runtime behavior but skips installed vendor asset SHA256 values and cannot promote compatible-host runtime proof. Local package feeds are not public clean package-consumer proof." } else { "This record proves local managed plus bridge packages can build, serialize, deserialize, enqueue, and verify an identity network with system-installed vendor dependencies on this compatible host. Local package feeds are not public clean package-consumer proof, and this result does not clear other runtime lines." }
   packages = [ordered]@{
     managed = [ordered]@{
       id = $managedPackage.Id
@@ -988,7 +1012,9 @@ $result = [ordered]@{
   nativeAssets = @($nativeAssets)
 }
 
+Write-Host "PostRuntimeCollection=serialize-report"
 Write-Reports -Result ([pscustomobject]$result) -Directory $ReportDirectory
+Write-Host "PostRuntimeCollection=report-written"
 
 if (-not $KeepConsumerOutput.IsPresent) {
   Remove-ConsumerDirectory -Path $consumerRoot -AllowedRoot $OutputRoot
