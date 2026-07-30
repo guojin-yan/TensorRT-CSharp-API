@@ -895,7 +895,7 @@ MNIST real-model 边界和 YoloVision 关系，明确转换链路的证据价值
   package-consumer-runtime proof。
 - 连接 `samples/YoloVision`、`yolovision-article-case-pack.json` 和
   `yolovision-family-task-real-asset-roadmap.json`，要求公开材料使用 YOLO 系列和
-  det/cls/seg/OBB/pose/semantic segmentation 的广义口径，不退回 `samples/YoloDet`。
+  det/cls/seg/OBB/pose/semantic segmentation 的广义口径，不退回已退役的 detection-only 独立样例路径。
 - 为 `PublishingPublicArticleTests` 增加
   `OnnxToEnginePublicArticleCoversSharedParserReportsYoloVisionAndProofBoundary`
   专项门禁。

@@ -137,11 +137,12 @@ Add-Check -Id "workflow-opt-in-large-jobs" -Passed (
   $workflow.Contains("run_release_artifact_audit", [StringComparison]::Ordinal) -and
   ([regex]::Matches($workflow, "default:\s+false")).Count -ge 2
 ) -Required $true -Detail "Large split-package and release-artifact jobs must default to false."
-Add-Check -Id "workflow-split-all-contract" -Passed (
+Add-Check -Id "workflow-bridge-package-contract" -Passed (
   $workflow.Contains("Invoke-LocalSplitRuntimePackage.ps1", [StringComparison]::Ordinal) -and
-  $workflow.Contains("-SplitPackageRole all", [StringComparison]::Ordinal) -and
-  $workflow.Contains("-IncludeMetaPackage", [StringComparison]::Ordinal)
-) -Required $true -Detail "Opt-in split job must build all component roles plus meta."
+  $workflow.Contains("-SplitPackageRole bridge", [StringComparison]::Ordinal) -and
+  -not $workflow.Contains("-SplitPackageRole all", [StringComparison]::Ordinal) -and
+  -not $workflow.Contains("-IncludeMetaPackage", [StringComparison]::Ordinal)
+) -Required $true -Detail "Opt-in runtime package validation must build the project-owned bridge package only."
 Add-Check -Id "workflow-strict-release-audits" -Passed (
   $workflow.Contains("Test-ReleaseEvidenceClassificationAudit.ps1 -Strict", [StringComparison]::Ordinal) -and
   $workflow.Contains("Test-PublicProofClaimBoundaryAudit.ps1 -Strict", [StringComparison]::Ordinal)

@@ -41,7 +41,7 @@ on:
         default: false
         type: boolean
       run_split_package_build:
-        description: Build split all plus meta and run the clean consumer contract
+        description: Build the bridge package and run the clean consumer contract
         required: false
         default: false
         type: boolean
@@ -166,8 +166,7 @@ jobs:
     if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_package_managed_dry_run }}
     uses: ./.github/workflows/package-managed.yml
     permissions:
-      contents: write
-      packages: write
+      contents: read
     with:
       version: 4.0.0
       configuration: Release
@@ -206,7 +205,7 @@ jobs:
             artifacts/final-release/release-evidence-classification-audit.*
             artifacts/final-release/release-candidate-package-inventory.*
 
-  split-package-all:
+  bridge-package:
     if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_split_package_build }}
     runs-on: [self-hosted, windows, x64]
     steps:
@@ -225,7 +224,7 @@ jobs:
           pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-ExternalVendorRuntimePackagePolicy.ps1 `
             -PackagePath (Join-Path '.\artifacts\runtime-split-nupkg' '${{ inputs.runtime_package_key }}')
 
-      - name: Validate split package inventory
+      - name: Validate bridge package inventory
         shell: pwsh
         run: |
           pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Export-ReleaseCandidatePackageInventory.ps1 `

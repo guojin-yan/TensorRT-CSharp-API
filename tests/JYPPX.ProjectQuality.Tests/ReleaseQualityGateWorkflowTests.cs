@@ -22,6 +22,8 @@ public sealed class ReleaseQualityGateWorkflowTests
         Assert.True(CountOccurrences(workflow, "default: false") >= 3);
         Assert.Contains("package-managed-dry-run:", workflow, StringComparison.Ordinal);
         Assert.Contains("uses: ./.github/workflows/package-managed.yml", workflow, StringComparison.Ordinal);
+        Assert.DoesNotContain("packages: write", workflow, StringComparison.Ordinal);
+        Assert.DoesNotContain("contents: write", workflow, StringComparison.Ordinal);
         Assert.Contains("publish_to_nuget: false", workflow, StringComparison.Ordinal);
         Assert.Contains("publish_to_github_packages: false", workflow, StringComparison.Ordinal);
         Assert.Contains("artifact_name: package-managed-dry-run", workflow, StringComparison.Ordinal);
@@ -58,11 +60,14 @@ public sealed class ReleaseQualityGateWorkflowTests
         Assert.Contains("runs-on: [self-hosted, windows, x64, release-artifacts]", workflow, StringComparison.Ordinal);
         Assert.Contains("runs-on: [self-hosted, windows, x64]", workflow, StringComparison.Ordinal);
         Assert.Contains("-SplitPackageRole bridge", workflow, StringComparison.Ordinal);
+        Assert.DoesNotContain("-SplitPackageRole all", workflow, StringComparison.Ordinal);
+        Assert.DoesNotContain("-IncludeMetaPackage", workflow, StringComparison.Ordinal);
         Assert.Contains("Test-ExternalVendorRuntimePackagePolicy.ps1", workflow, StringComparison.Ordinal);
         Assert.Contains("Test-ReleaseEvidenceClassificationAudit.ps1 -Strict", workflow, StringComparison.Ordinal);
         Assert.Contains("Test-PublicProofClaimBoundaryAudit.ps1 -Strict", workflow, StringComparison.Ordinal);
         Assert.Contains("Test-ReleaseQualityGate.ps1", workflow, StringComparison.Ordinal);
         Assert.Contains("release-quality-gate-summary.json", ReadSource("eng", "Test-ReleaseQualityGate.ps1"), StringComparison.Ordinal);
+        Assert.Contains("workflow-bridge-package-contract", ReadSource("eng", "Test-ReleaseQualityGate.ps1"), StringComparison.Ordinal);
 
         Assert.DoesNotContain("dotnet nuget push", workflow, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("Push-NuGetPackages", workflow, StringComparison.Ordinal);
