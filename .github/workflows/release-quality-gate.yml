@@ -163,10 +163,11 @@ jobs:
             artifacts/final-release/github-actions-package-validation-audit.*
 
   package-managed-dry-run:
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_package_managed_dry_run }}
+    if: ${{ github.repository_owner == 'guojin-yan' && github.event_name == 'workflow_dispatch' && inputs.run_package_managed_dry_run }}
     uses: ./.github/workflows/package-managed.yml
     permissions:
-      contents: read
+      contents: write
+      packages: write
     with:
       version: 4.0.0
       configuration: Release

@@ -22,8 +22,7 @@ public sealed class ReleaseQualityGateWorkflowTests
         Assert.True(CountOccurrences(workflow, "default: false") >= 3);
         Assert.Contains("package-managed-dry-run:", workflow, StringComparison.Ordinal);
         Assert.Contains("uses: ./.github/workflows/package-managed.yml", workflow, StringComparison.Ordinal);
-        Assert.DoesNotContain("packages: write", workflow, StringComparison.Ordinal);
-        Assert.DoesNotContain("contents: write", workflow, StringComparison.Ordinal);
+        Assert.Contains("github.repository_owner == 'guojin-yan'", workflow, StringComparison.Ordinal);
         Assert.Contains("publish_to_nuget: false", workflow, StringComparison.Ordinal);
         Assert.Contains("publish_to_github_packages: false", workflow, StringComparison.Ordinal);
         Assert.Contains("artifact_name: package-managed-dry-run", workflow, StringComparison.Ordinal);
@@ -88,7 +87,7 @@ public sealed class ReleaseQualityGateWorkflowTests
         Assert.Contains("run_package_managed_dry_run:", workflow, StringComparison.Ordinal);
         Assert.Contains("default: false", workflow, StringComparison.Ordinal);
         Assert.Contains("package-managed-dry-run:", workflow, StringComparison.Ordinal);
-        Assert.Contains("if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_package_managed_dry_run }}", workflow, StringComparison.Ordinal);
+        Assert.Contains("if: ${{ github.repository_owner == 'guojin-yan' && github.event_name == 'workflow_dispatch' && inputs.run_package_managed_dry_run }}", workflow, StringComparison.Ordinal);
         Assert.DoesNotContain("package-managed-dry-run:\n    if: ${{ github.event_name == 'push'", workflow, StringComparison.Ordinal);
         Assert.Contains("publish_to_nuget: false", workflow, StringComparison.Ordinal);
         Assert.Contains("publish_to_github_packages: false", workflow, StringComparison.Ordinal);
