@@ -112,3 +112,12 @@ smoke 输出必须保留：
 - `IGpuAsyncAllocator::deallocateAsync`
 
 只有 full package consumer smoke 输出完整 `real-callback-runtime` 字段，并且 readiness 将 `realCallbackRuntimeEvidence.isRealCallbackRuntimeProof=true`，才能说明真实 TensorRT callback runtime 已触发。
+
+## 文件归属
+
+evaluator 与 result 已按职责拆开：
+
+- `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerAttachDetachDesignGate.cs` 只负责 `Evaluate` 与 blocker 构造。
+- `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerAttachDetachDesignGateResult.cs` 只负责 pointer-free result 构造、属性、diagnostic 与 `ToString`。
+
+两文件按原始 Git blob 顺序重组，attach/detach 状态、API surface 与 deferred 分类不变。

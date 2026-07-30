@@ -389,6 +389,8 @@ ONNX stripped-plan refit 生命周期与持久化 plan 重载 snapshot 统一放
 
 Callbacks/Debugging 中的 DebugListener gate 也按 evaluator/result 职责归类。`TensorRtDebugListenerNativeAttachNoThrowPreflight.cs` 与 `TensorRtDebugListenerNativeOwnerStableIdentity.cs` 只保留评估入口和 blocker 聚合；对应的 `TensorRtDebugListenerNativeAttachNoThrowPreflightResult.cs`、`TensorRtDebugListenerNativeOwnerStableIdentityResult.cs` 只保留 pointer-free 结果构造、属性和诊断。
 
+`TensorRtDebugListenerAttachDetachDesignGate.cs` 与 `TensorRtDebugListenerExceptionStatusMappingGate.cs` 也只保留 evaluator/helper；对应的 `*Result.cs` 文件拥有 internal constructor、公开属性、diagnostic 与 `ToString`。
+
 ## 规则
 
 - 模块化时不得改名 C ABI 导出入口。

@@ -770,3 +770,5 @@ docs/articles/zh-cn/real-callback-runtime-evidence-schema.md
 下一批 callback 实现不应一次横跨五个 family。优先选择一个已有 owner/lifecycle 组件最多、vendor contract 清晰、能构造确定性 runtime case 的 family，完成 native vtable、attach/detach、failure injection、compatible-host smoke 和 package proof的完整闭环；其余 family 继续保留 deferred。当前 closure matrix 会直接显示下一列缺口，避免继续只增加 managed-only gate 字段。
 
 DebugListener native attach/no-throw preflight 与 native owner stable identity 也遵循同一文件职责边界：evaluator 文件只保留评估和 blocker 聚合，*Result.cs 文件保留 pointer-free 结果属性与诊断。该 source split 只改善可维护性，不改变 ABI、生命周期顺序、evidence classification 或任何 deferred row。
+
+同样，attach/detach design gate 与 exception/status mapping gate 的 evaluator/result 也已分别归入同名文件。该归类不启用 non-null attach，不提升 exception mapping 为 runtime proof。

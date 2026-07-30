@@ -3533,6 +3533,7 @@ function New-DebugListenerCallbackOwnerDesignEvidence {
 
 function New-DebugListenerAttachDetachDesignGateEvidence {
   $gateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerAttachDetachDesignGate.cs"
+  $gateResultSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerAttachDetachDesignGateResult.cs"
   $ownerSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerCallbackOwner.cs"
   $contextSourceRelativePath = "src\JYPPX.TensorRtSharp\Execution\TensorRtExecutionContext.Trt11RuntimeDiagnostics.cs"
   $smokeRelativePath = "smoke\CallbackAllocatorSafeControlsSmokeRunner\Program.cs"
@@ -3545,6 +3546,7 @@ function New-DebugListenerAttachDetachDesignGateEvidence {
   $smokeReadmeRelativePath = "smoke\README.md"
   $comparisonRelativePath = "artifacts\interface-coverage\tensorrt-interface-comparison.csv"
   $gateSourcePath = Join-Path $RepositoryRoot $gateSourceRelativePath
+  $gateResultSourcePath = Join-Path $RepositoryRoot $gateResultSourceRelativePath
   $ownerSourcePath = Join-Path $RepositoryRoot $ownerSourceRelativePath
   $contextSourcePath = Join-Path $RepositoryRoot $contextSourceRelativePath
   $smokePath = Join-Path $RepositoryRoot $smokeRelativePath
@@ -3590,7 +3592,7 @@ function New-DebugListenerAttachDetachDesignGateEvidence {
     '"IGpuAsyncAllocator","deallocateAsync","IGpuAsyncAllocator::deallocateAsync","other","deferred-only"'
   )
 
-  $evidencePaths = @($gateSourcePath, $ownerSourcePath, $contextSourcePath, $smokePath, $designDocPath, $callbackDesignPath, $callbackGatePath, $schemaPath, $latestPath, $runtimeSplitReadmePath, $smokeReadmePath, $comparisonPath)
+  $evidencePaths = @($gateSourcePath, $gateResultSourcePath, $ownerSourcePath, $contextSourcePath, $smokePath, $designDocPath, $callbackDesignPath, $callbackGatePath, $schemaPath, $latestPath, $runtimeSplitReadmePath, $smokeReadmePath, $comparisonPath)
   $missingFiles = @($evidencePaths | Where-Object { -not (Test-Path -LiteralPath $_ -PathType Leaf) })
   if ($missingFiles.Count -gt 0) {
     return [pscustomobject]@{
@@ -6717,6 +6719,7 @@ function New-DebugListenerExceptionStatusMappingGateEvidence {
     -Source "source-smoke-docs-native-scaffold" `
     -EvidenceRelativePaths @(
       "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerExceptionStatusMappingGate.cs",
+      "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerExceptionStatusMappingGateResult.cs",
       "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeAttachBridgeShapeGate.cs",
       "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerRuntimeProofPrecheck.cs",
       "native\src\tensorrt\common\debug_listener_exception_status_mapping_gate.inc",

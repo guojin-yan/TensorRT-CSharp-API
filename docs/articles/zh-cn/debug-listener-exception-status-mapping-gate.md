@@ -58,3 +58,12 @@ smoke/readiness marker 必须包含：
 ## 不能证明什么
 
 该 gate 是 exception/status mapping scaffold evidence，not proof。它不能证明真实 native vtable 已安装，不能证明 TensorRT 已调用 callback，不能解除 `IDebugListener::processDebugTensor` deferred row。
+
+## 文件归属
+
+evaluator 与 result 已按职责拆开：
+
+- `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerExceptionStatusMappingGate.cs` 只负责 `Evaluate` 与 blocker 聚合。
+- `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerExceptionStatusMappingGateResult.cs` 只负责 pointer-free result 构造、属性、diagnostic 与 `ToString`。
+
+两文件按原始 Git blob 顺序重组，exception/status 字段、API surface 与 deferred 分类不变。

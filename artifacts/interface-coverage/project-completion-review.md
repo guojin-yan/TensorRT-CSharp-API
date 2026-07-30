@@ -7534,3 +7534,39 @@ non-exposure、deferred rows 与 runtime-proof blocker 语义保持不变。
 - source/type relocation 与 attach-preflight/stable-identity gate 不构成新的 real callback runtime、
   TensorRT/CUDA runtime、real model、Linux、package consumer、public package、post-publish、Owner acceptance 或 release proof。
 - 8 份 publishing 用户变更未触碰、未暂存；未 push、未触发 GitHub Actions、未执行远程发布操作。
+
+## 2026-07-30 DebugListener Attach Detach And Exception Status Result Split
+
+本阶段继续整理 `JYPPX.TensorRtSharp/Callbacks/Debugging`，将 attach/detach design gate 与 exception/status
+mapping gate 的 result model 从 evaluator 分离。line support、attach/detach control、exception capture/status mapping、
+pointer non-exposure、deferred rows 与 runtime-proof blocker 语义保持不变。
+
+### 实现与门禁
+
+- 原 269 行 `TensorRtDebugListenerAttachDetachDesignGate.cs` 分为 125 行 evaluator 与 150 行 result；
+  evaluator 只保留一个 `Evaluate`。
+- 原 264 行 `TensorRtDebugListenerExceptionStatusMappingGate.cs` 分为 106 行 evaluator 与 164 行 result；
+  evaluator 只保留两个 Evaluate overload 与 `AddBlockerIfFalse`/`AddBlocker` helper。
+- `ManagedDebugListenerAttachDetachExceptionStatusSourceLayoutTests` 固定四个文件的精确 top-level type、constructor、
+  method、public property、pointer-free surface、readiness/test source-set、消费测试和文档 marker，并重组原源码。
+- 拆分前 Git blob 为 `436984a2fe1d8850bf0866112905aed9d26a75e8` 与
+  `f43b68ed5d2b3732c182bc33901fca093cfddf06`；normalized SHA-256 保持
+  `0f62bbd560d75374ab67a8189e5e1cc76e20aba43b038251dc78f59a19d8e1f8` 与
+  `d5ab2a07e578fc1a781357f6eb66e594398c693c3ac328b3f1e699e692a23632`。
+- readiness 与 test reader 显式展开两套 source-set；attach/detach 直接测试改读统一 reader，exception/status
+  batch 测试继续读取组合；两份专题文档、callback safety roadmap 与双语 source-organization 同步真实 result owner。
+
+### 验证与边界
+
+- 新布局门禁 `13/13`；两个消费集合 `6/6`，联合定向集合 `19/19`；全部 DebugListener 聚焦集合
+  `285/285`；`SourceLayoutTests` `256/256`；统一 Managed 前缀集合 `655/655`。
+- `JYPPX.TensorRtSharp` 全目标框架与完整 `TensorRtSharp.sln` Debug build 均为
+  `0 warning / 0 error`；RuntimePackageReadiness UTF-8 ParseInput 为 `0 error`，对应质量测试 `2/2`。
+- ignored deferred candidate evidence 保持 `260` 条引用、`147` 个唯一路径、`0` 缺失；其中引用的
+  `22` 份 JSON 全部可解析，ignored 文件未强制提交。
+- Generated/native/manifest/ABI 改动为 0；`git diff --check` 通过。
+- 进程审计快照未发现引用本工作区的其他进程；6 个已知 YoloVision/YOLOX Temp 目录继续保留，未删除或绕过工具策略。
+- source/type relocation 与 attach/detach/exception-status gate 不构成新的 real callback runtime、TensorRT/CUDA runtime、
+  real model、Linux、package consumer、public package、post-publish、Owner acceptance 或 release proof。
+- 本机无仓库认可的 `pwsh`，未运行 exporter/B-tier 聚合；8 份 publishing 用户变更未触碰、未暂存；
+  未 push、未触发 GitHub Actions、未执行远程发布操作。

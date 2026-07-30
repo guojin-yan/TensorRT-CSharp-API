@@ -430,6 +430,8 @@ ONNX stripped-plan refit lifecycle and persisted-plan reload snapshots live in `
 
 DebugListener gates under `Callbacks/Debugging` follow the same evaluator/result ownership. `TensorRtDebugListenerNativeAttachNoThrowPreflight.cs` and `TensorRtDebugListenerNativeOwnerStableIdentity.cs` contain evaluation and blocker aggregation only; their corresponding `*Result.cs` files contain pointer-free result construction, properties, and diagnostics.
 
+`TensorRtDebugListenerAttachDetachDesignGate.cs` and `TensorRtDebugListenerExceptionStatusMappingGate.cs` now follow that boundary as well: evaluator/helper logic stays in the gate file, while the namesake `*Result.cs` file owns construction, public properties, diagnostics, and `ToString`.
+
 ## Rules
 
 - Do not rename exported C ABI entrypoints during modularization.

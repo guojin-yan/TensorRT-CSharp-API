@@ -113,10 +113,20 @@ internal static class RepositorySourceReader
                 "TensorRtDebugListenerBorrowedTensorSafetyGate.cs",
                 "TensorRtDebugListenerBorrowedTensorSafetyGateResult.cs"
             ],
+            ["TensorRtDebugListenerAttachDetachDesignGate.cs"] =
+            [
+                "TensorRtDebugListenerAttachDetachDesignGate.cs",
+                "TensorRtDebugListenerAttachDetachDesignGateResult.cs"
+            ],
             ["TensorRtDebugListenerNativeAttachBridgeShapeGate.cs"] =
             [
                 "TensorRtDebugListenerNativeAttachBridgeShapeGate.cs",
                 "TensorRtDebugListenerNativeAttachBridgeShapeGateResult.cs"
+            ],
+            ["TensorRtDebugListenerExceptionStatusMappingGate.cs"] =
+            [
+                "TensorRtDebugListenerExceptionStatusMappingGate.cs",
+                "TensorRtDebugListenerExceptionStatusMappingGateResult.cs"
             ],
             ["TensorRtDebugListenerInFlightAccountingGate.cs"] =
             [
