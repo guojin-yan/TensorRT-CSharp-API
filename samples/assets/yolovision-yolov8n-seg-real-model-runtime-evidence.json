@@ -1,0 +1,162 @@
+{
+  "schemaVersion": 1,
+  "recordKind": "sample-run-evidence-record",
+  "recordName": "yolovision-yolov8n-seg-ultralytics-v8.3.0-trt10.11",
+  "generatedAtUtc": "2026-07-30T19:50:05.7358975+00:00",
+  "templateOnly": false,
+  "sampleName": "YoloVision",
+  "manifestPath": "samples/assets/yolovision-yolov8n-seg-official-assets.json",
+  "proofClassification": "real-model-runtime",
+  "modelPath": "E:\\GitSpace\\TensorRT-CSharp-API-4.0\\downloads\\yolov8n-seg-ultralytics-v8.3.0\\source\\yolov8n-seg.onnx",
+  "modelSha256": "08b5c61368d4ddec5e647522fc55a93c42a9e0c581770aae48b87bba65a9b21d",
+  "modelLicense": "AGPL-3.0-only; Ultralytics v8.3.0 source commit 6e43d1e1e5db72afbf686dee6745669bcb124b0a reviewed for this local runtime case; public redistribution remains unapproved",
+  "labelsPath": "E:\\GitSpace\\TensorRT-CSharp-API-4.0\\downloads\\yolox-apache\\derived\\coco.names",
+  "labelsSha256": "4d4aaea7bee6be2f675d9b53a9195ca36dfe6429f7479f29155da522a6c85930",
+  "labelsLicense": "Apache-2.0; derived from the pinned YOLOX COCO labels asset",
+  "inputAssetPath": "E:\\GitSpace\\TensorRT-CSharp-API-4.0\\downloads\\yolox-apache\\derived\\dog.ppm",
+  "inputAssetSha256": "6cb94c9cd0781412598fe179246b09041af4303d388a5ba3c55f760dff11ec2c",
+  "inputAssetLicense": "Apache-2.0; derived from the pinned YOLOX dog image asset",
+  "preprocessedInputTensorPath": "E:\\GitSpace\\TensorRT-CSharp-API-4.0\\downloads\\yolov8n-seg-ultralytics-v8.3.0\\runtime\\dog-1x3x640x640-rgb-letterbox.fp32.bin",
+  "preprocessedInputTensorSha256": "3a37e91ca77118ae168b367583faea65f61613ba71a38413f6adf794d88d0488",
+  "preprocessedInputTensorElementCount": "1228800",
+  "evidenceSidecarPath": "E:\\GitSpace\\TensorRT-CSharp-API-4.0\\downloads\\yolov8n-seg-ultralytics-v8.3.0\\tensorrtexec\\tensorrtexec-load-engine-report.json",
+  "buildReportPath": "E:\\GitSpace\\TensorRT-CSharp-API-4.0\\downloads\\yolov8n-seg-ultralytics-v8.3.0\\tensorrtexec\\tensorrtexec-report.json",
+  "sampleRunCommand": "dotnet .\\samples\\YoloVision\\bin\\Release\\net8.0\\YoloVision.dll --model E:\\GitSpace\\TensorRT-CSharp-API-4.0\\downloads\\yolov8n-seg-ultralytics-v8.3.0\\source\\yolov8n-seg.onnx --labels E:\\GitSpace\\TensorRT-CSharp-API-4.0\\downloads\\yolox-apache\\derived\\coco.names --image E:\\GitSpace\\TensorRT-CSharp-API-4.0\\downloads\\yolox-apache\\derived\\dog.ppm --preprocessed-output E:\\GitSpace\\TensorRT-CSharp-API-4.0\\downloads\\yolov8n-seg-ultralytics-v8.3.0\\runtime\\dog-1x3x640x640-rgb-letterbox.fp32.bin --input-shape 1x3x640x640 --tensor-rt-line 10 --family v8 --task seg --output-role-map output0:det,output1:mask-prototypes --mask-coefficient-count 32 --confidence 0.25 --iou-threshold 0.45 --mask-threshold 0.5 --mask-spatial-transform --mask-coordinate-space model-input --mask-crop-to-box true --reference-outputs output0:E:\\GitSpace\\TensorRT-CSharp-API-4.0\\downloads\\yolov8n-seg-ultralytics-v8.3.0\\reference\\output0.reference.json,output1:E:\\GitSpace\\TensorRT-CSharp-API-4.0\\downloads\\yolov8n-seg-ultralytics-v8.3.0\\reference\\output1.reference.json --reference-abs-tolerance 0.02 --reference-rel-tolerance 0.03 --output-json E:\\GitSpace\\TensorRT-CSharp-API-4.0\\downloads\\yolov8n-seg-ultralytics-v8.3.0\\runtime\\yolovision-yolov8n-seg-output.json --segmentation-mask-output-directory E:\\GitSpace\\TensorRT-CSharp-API-4.0\\downloads\\yolov8n-seg-ultralytics-v8.3.0\\runtime\\segmentation-masks --visualization E:\\GitSpace\\TensorRT-CSharp-API-4.0\\downloads\\yolov8n-seg-ultralytics-v8.3.0\\runtime\\yolovision-yolov8n-seg-output.svg",
+  "sampleRunLogPath": "E:\\GitSpace\\TensorRT-CSharp-API-4.0\\downloads\\yolov8n-seg-ultralytics-v8.3.0\\runtime\\yolovision-yolov8n-seg-runtime.log",
+  "sampleRunLogSha256": "11e84c14fb6dd4aac98822dd4e6c605498a82625e80780e1b5567e247951f692",
+  "stdoutSummary": "YoloVision loaded the official YOLOv8n-seg ONNX export with TensorRT 10.11, bound images/output0/output1, validated 974400 detection-row values and 819200 prototype values against independent ONNX Runtime CPU references, decoded dog/bicycle/truck/car, wrote four source-image mask artifact sets, and ended with YoloVision Passed=True.",
+  "stderrSummary": "",
+  "expectedEvidenceLines": [
+    "YoloVision TensorRtLine=10",
+    "Profile Family=YoloV8 Task=Segmentation",
+    "InputSource=external InputFile=",
+    "ImagePreprocessConfig Mode=letterbox Layout=NCHW Color=RGB Target=640x640 Resized=640x480 Pad=0,80",
+    "BindingMetadata Index=1 Name=output0 Mode=Output DataType=Float Shape=[1, 116, 8400]",
+    "BindingMetadata Index=2 Name=output1 Mode=Output DataType=Float Shape=[1, 32, 160, 160]",
+    "ReferenceOutputValidation Requested=True Completed=True Passed=True Tensors=2",
+    "Postprocess Task=Segmentation;Detections=4;Classifications=0;Segmentations=4",
+    "SegmentationMaskArtifacts=",
+    "OutputValidated=True",
+    "YoloVision Passed=True"
+  ],
+  "isSmokePassed": true,
+  "canPromoteRealModelRuntime": true,
+  "validatorState": "real-model-runtime",
+  "failureReasons": [],
+  "runtimeEnvironment": {
+    "os": "Windows",
+    "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+    "driverVersion": "576.02",
+    "cudaToolkitVersion": "12.9",
+    "tensorRtVersion": "10.11.0.33",
+    "precision": "fp32",
+    "nativeBridgeSha256": "37aeae086e8f4800d2a000540eb352ff3d0f53073e159bd029b50d07278c6077"
+  },
+  "modelContract": {
+    "input": {
+      "name": "images",
+      "shape": [1, 3, 640, 640],
+      "dataType": "float32"
+    },
+    "outputs": [
+      {
+        "name": "output0",
+        "shape": [1, 116, 8400],
+        "role": "detection-rows-with-32-mask-coefficients"
+      },
+      {
+        "name": "output1",
+        "shape": [1, 32, 160, 160],
+        "role": "mask-prototypes"
+      }
+    ]
+  },
+  "runtimeReferenceValidation": {
+    "sourceClassification": "independent-onnxruntime-cpu-execution-provider",
+    "absoluteTolerance": 0.02,
+    "relativeTolerance": 0.03,
+    "passed": true,
+    "tensors": [
+      {
+        "name": "output0",
+        "referenceSha256": "a607dd1d80dbb85a1a77f5354c7669e357c2caf8d0a9cd93328397d1858bde5f",
+        "comparedValueCount": 974400,
+        "mismatchCount": 0,
+        "maximumAbsoluteError": 2.2696075
+      },
+      {
+        "name": "output1",
+        "referenceSha256": "3cc8387483187bc5d86ef8e82943e215caadefbbf41a8523d9ffc4c6b040f8d5",
+        "comparedValueCount": 819200,
+        "mismatchCount": 0,
+        "maximumAbsoluteError": 0.010600209
+      }
+    ]
+  },
+  "segmentationPostprocessValidation": {
+    "referenceFramework": "Ultralytics/PyTorch CPU",
+    "referenceSha256": "48d1a79ac76e2dcfba5d2ebf685d23026493b4d90cc02a192ef4e02b77cd940d",
+    "comparisonSha256": "befbbd450af2384f2256487784c64f618d40070e3b96fb960b08fc5acca97c36",
+    "maskArtifactManifestSha256": "75237b8f28d5659dbd79b0fdc6259d267c1b5482bb1bab1201efe68ae61e58c5",
+    "predictionCount": 4,
+    "thresholds": {
+      "maximumBoxCoordinateAbsoluteError": 1.0,
+      "maximumScoreAbsoluteError": 0.01,
+      "minimumBoxIoU": 0.995,
+      "minimumMaskIoU": 0.99
+    },
+    "predictions": [
+      { "className": "dog", "boxIoU": 0.999665536113295, "maskIoU": 0.9958422174840085, "passed": true },
+      { "className": "bicycle", "boxIoU": 0.9993447550532055, "maskIoU": 0.9957464154688691, "passed": true },
+      { "className": "truck", "boxIoU": 0.9984715664463002, "maskIoU": 0.9966688874083944, "passed": true },
+      { "className": "car", "boxIoU": 0.9986956835633377, "maskIoU": 0.991140642303433, "passed": true }
+    ],
+    "passed": true
+  },
+  "controlledNegativeValidation": {
+    "kind": "single-reference-value-mutation",
+    "referenceSha256": "aad3f0b8fead4465249c5304c78082c63eb9d8479514e5c1d0a0aaa8a0128931",
+    "reportSha256": "4d0b3dde784b68a5b55fd99801ae2102d912157d5c651fc8df4ad1962db1b5de",
+    "logSha256": "9a98c3810e9453d5b0c85ff75f04ddf1f66d9004c87ea6085d53f38e2e86ca7e",
+    "exitCode": 2,
+    "state": "load-engine-reference-validation-failed",
+    "completed": true,
+    "passed": false,
+    "tensorName": "output0",
+    "comparedValueCount": 974400,
+    "mismatchCount": 1,
+    "firstMismatchIndex": 0,
+    "maximumAbsoluteError": 9999.999
+  },
+  "controlledArtifactIntegrityValidation": {
+    "kind": "source-thresholded-mask-byte-mutation-with-unchanged-manifest-sha256",
+    "exitCode": 1,
+    "passed": false,
+    "diagnostic": "Thresholded mask SHA256 does not match the manifest.",
+    "logSha256": "660a8fcf17ac654923d1698f35c2dc5a745856d78c0fb8e4adc9cc57a8528840",
+    "failClosed": true
+  },
+  "outputArtifacts": {
+    "outputJsonSha256": "dafc4c75cad39e08c692b036ce9ef9f1dbe362da1d682d8275a540455ba7b59c",
+    "visualizationSha256": "716a5be74bb81bdacffb9900af165a809aed4358764bb1a369fb375c2a8655fe",
+    "engineSha256": "5173601e56a872e74490e32eea0c82069b0d39759d1abb992300106c18931bfa",
+    "tensorRtExecLoadEngineReportSha256": "d21cd19b788656ef4fa52390ff076d3e6c7651683308d59c81bf5042c7ae078d",
+    "tensorRtExecLoadEngineLogSha256": "4b6ca6b2fd8dc5ffe7492cdbaf348cfb2170ab686f02bdb749609cc8fb44021a"
+  },
+  "proofBoundary": {
+    "sourceTreeRealModelRuntime": true,
+    "publicRedistributionApproved": false,
+    "packageConsumerRuntimeProof": false,
+    "publicPackageProof": false,
+    "postPublishProof": false,
+    "ownerReleaseAcceptance": false,
+    "releaseProof": false,
+    "performsPublish": false,
+    "uploadsAssets": false
+  },
+  "notes": [
+    "The repository commits this small record only; model, engine, reference tensors, masks, logs, SVG, and runtime binaries remain outside Git.",
+    "The upstream model license is recorded for local source-tree validation, but public redistribution approval remains false.",
+    "Source-tree real-model-runtime does not replace clean package-consumer, public-package, post-publish, or Owner release evidence."
+  ]
+}

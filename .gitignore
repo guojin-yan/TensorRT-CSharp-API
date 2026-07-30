@@ -25,6 +25,8 @@ Testing/
 *.opendb
 *.VC.db
 *.sqlite
+__pycache__/
+*.py[cod]
 docs/_site/
 docs/api/
 -Strict/

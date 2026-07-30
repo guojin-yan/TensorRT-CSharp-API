@@ -187,6 +187,21 @@ public static class YoloVisionCommand
                 Console.WriteLine($"OutputJson={Path.GetFullPath(outputJsonPath)}");
             }
 
+            string segmentationMaskOutputDirectory = SampleCommandLine.GetStringArgument(
+                args,
+                "--segmentation-mask-output-directory",
+                string.Empty);
+            if (!string.IsNullOrWhiteSpace(segmentationMaskOutputDirectory))
+            {
+                string manifestPath = YoloSegmentationMaskArtifactWriter.Write(
+                    segmentationMaskOutputDirectory,
+                    visionResult,
+                    labels,
+                    imagePreprocess,
+                    segmentationSpatialTransform);
+                Console.WriteLine($"SegmentationMaskArtifacts={manifestPath}");
+            }
+
             string visualizationPath = SampleCommandLine.GetStringArgument(
                 args,
                 "--visualization",
@@ -594,6 +609,7 @@ public static class YoloVisionCommand
         Console.WriteLine("  --mask-spatial-transform        Opt in to explicit prototype-to-source-image mask mapping; requires --image.");
         Console.WriteLine("  --mask-coordinate-space model-input|normalized  Required with --mask-spatial-transform.");
         Console.WriteLine("  --mask-crop-to-box true|false   Crop the transformed mask to its detection box. Default: true.");
+        Console.WriteLine("  --segmentation-mask-output-directory <path>  Write hashed prototype/source probability masks, thresholded u8 masks, and a manifest.");
         Console.WriteLine("  --pose-keypoints-output <name>   Pose keypoint tensor name.");
         Console.WriteLine("  --keypoint-count <count>         Pose keypoint count; --keypoint-stride defaults to 3.");
         Console.WriteLine("  --obb-angle-output <name>        OBB angle tensor name; --angle-degrees or --angle-radians controls units.");

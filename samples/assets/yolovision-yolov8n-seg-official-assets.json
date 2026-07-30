@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "recordKind": "yolovision-yolov8n-seg-official-asset-acquisition-manifest",
+  "assetSetId": "ultralytics-yolov8n-seg-v8.3.0-agpl-3.0",
+  "sampleName": "YoloVision",
+  "upstreamAssetsRepository": "https://github.com/ultralytics/assets",
+  "upstreamReleaseTag": "v8.3.0",
+  "upstreamReleaseId": 177482232,
+  "upstreamReleasePublishedUtc": "2024-09-29T17:59:56Z",
+  "upstreamSourceRepository": "https://github.com/ultralytics/ultralytics",
+  "upstreamSourceTag": "v8.3.0",
+  "upstreamSourceTagObject": "a46b49a27a97d44c642882a405c8b57979e6d368",
+  "upstreamSourceCommit": "6e43d1e1e5db72afbf686dee6745669bcb124b0a",
+  "license": {
+    "name": "GNU Affero General Public License v3.0",
+    "spdxId": "AGPL-3.0-only",
+    "sourceAssetId": "ultralytics-license-v8.3.0",
+    "provenanceState": "source-tag-commit-and-license-hash-pinned",
+    "publicRedistributionOwnerApproval": false
+  },
+  "modelContract": {
+    "family": "yolov8",
+    "task": "seg",
+    "input": {
+      "name": "images",
+      "shape": [1, 3, 640, 640],
+      "dataType": "float32",
+      "layout": "NCHW",
+      "colorOrder": "RGB",
+      "resize": "center-letterbox",
+      "normalizeScale": 0.00392156862745098
+    },
+    "outputs": [
+      {
+        "name": "output0",
+        "role": "detection-rows-with-mask-coefficients",
+        "shape": [1, 116, 8400],
+        "boxChannelCount": 4,
+        "classCount": 80,
+        "maskCoefficientCount": 32,
+        "hasObjectness": false,
+        "layout": "channels-first"
+      },
+      {
+        "name": "output1",
+        "role": "mask-prototypes",
+        "shape": [1, 32, 160, 160],
+        "prototypeCount": 32,
+        "layout": "NCHW"
+      }
+    ]
+  },
+  "assets": [
+    {
+      "id": "yolov8n-seg-pt",
+      "role": "model-weights",
+      "fileName": "yolov8n-seg.pt",
+      "url": "https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8n-seg.pt",
+      "githubReleaseAssetId": 195720083,
+      "expectedLength": 7071756,
+      "expectedSha256": "a7cd8f929e1903d78a12a48efecab430209f18dc46cb96c3599a5980c63c423c",
+      "hashProvenance": "repository-pinned-after-first-download-from-the-exact-official-release-asset-id; upstream-release-api-digest-was-empty"
+    },
+    {
+      "id": "ultralytics-license-v8.3.0",
+      "role": "license",
+      "fileName": "LICENSE.ultralytics-6e43d1e1.txt",
+      "url": "https://raw.githubusercontent.com/ultralytics/ultralytics/6e43d1e1e5db72afbf686dee6745669bcb124b0a/LICENSE",
+      "expectedLength": 34523,
+      "expectedSha256": "0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0",
+      "hashProvenance": "source-commit-content-hash-pinned"
+    }
+  ],
+  "exportContract": {
+    "format": "onnx",
+    "imageSize": 640,
+    "batch": 1,
+    "opset": 17,
+    "dynamic": false,
+    "simplify": true,
+    "half": false,
+    "requiredEvidence": [
+      "exporter version",
+      "export log SHA256",
+      "ONNX SHA256",
+      "ONNX checker success",
+      "actual input/output names and shapes"
+    ],
+    "boundary": "The exported ONNX is a local derived artifact. Its hash is not an upstream model checksum and can change with exporter versions."
+  },
+  "compatibleRuntimeInputs": {
+    "source": "yolovision-yolox-official-assets.json",
+    "labels": {
+      "pathHint": "downloads/yolox-apache/derived/coco.names",
+      "classCount": 80,
+      "expectedSha256": "4d4aaea7bee6be2f675d9b53a9195ca36dfe6429f7479f29155da522a6c85930"
+    },
+    "image": {
+      "pathHint": "downloads/yolox-apache/derived/dog.ppm",
+      "format": "P6 RGB PPM",
+      "expectedSha256": "6cb94c9cd0781412598fe179246b09041af4303d388a5ba3c55f760dff11ec2c"
+    },
+    "preprocessedTensor": {
+      "shape": [1, 3, 640, 640],
+      "expectedElementCount": 1228800,
+      "expectedSha256": "3a37e91ca77118ae168b367583faea65f61613ba71a38413f6adf794d88d0488"
+    }
+  },
+  "proofBoundary": {
+    "canProceedToSourceTreeRuntime": true,
+    "canPromotePackageConsumerRuntime": false,
+    "canPublishPublicly": false,
+    "performsPublish": false,
+    "notes": [
+      "Official release identity, length, and repository-pinned SHA256 support repeatable local acquisition but do not claim an upstream-published digest.",
+      "AGPL-3.0-only licensing requires Owner review before any public redistribution decision.",
+      "Weights, ONNX, engines, input tensors, references, and mask binaries remain in the E-drive download workspace and are not repository assets.",
+      "Raw TensorRT output comparison and independent postprocess/mask comparison are both required for this source-tree runtime candidate.",
+      "No source-tree run can substitute for package-consumer, public-package, post-publish, Owner authorization, or release proof."
+    ]
+  }
+}

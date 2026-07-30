@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jyppx.github.io/TensorRtSharp/schemas/yolovision-segmentation-mask-artifacts.schema.json",
+  "title": "YoloVision segmentation mask artifacts",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "task",
+    "predictionCount",
+    "spatialTransformApplied",
+    "probabilityDataType",
+    "thresholdedDataType",
+    "predictions",
+    "boundary"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "yolovision-segmentation-mask-artifacts.v1" },
+    "task": { "const": "seg" },
+    "predictionCount": { "type": "integer", "minimum": 0 },
+    "spatialTransformApplied": { "type": "boolean" },
+    "probabilityDataType": { "const": "float32-little-endian" },
+    "thresholdedDataType": { "const": "uint8-0-or-1" },
+    "predictions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "index",
+          "classId",
+          "className",
+          "score",
+          "sourceIndex",
+          "modelInputBox",
+          "prototypeProbability"
+        ],
+        "properties": {
+          "index": { "type": "integer", "minimum": 0 },
+          "classId": { "type": "integer", "minimum": 0 },
+          "className": { "type": "string", "minLength": 1 },
+          "score": { "type": "number", "minimum": 0 },
+          "sourceIndex": { "type": "integer", "minimum": 0 },
+          "modelInputBox": { "$ref": "#/$defs/box" },
+          "sourceBox": { "$ref": "#/$defs/box" },
+          "prototypeProbability": { "$ref": "#/$defs/artifact" },
+          "sourceProbability": { "$ref": "#/$defs/artifact" },
+          "sourceThresholded": { "$ref": "#/$defs/artifact" },
+          "spatialTransform": {
+            "type": "object",
+            "required": ["coordinateSpace", "cropToDetection", "interpolation", "scope", "boundary"]
+          }
+        }
+      }
+    },
+    "boundary": {
+      "type": "object",
+      "required": ["isRuntimeProof", "isPackageConsumerProof", "isPostPublishProof", "evidenceKind"],
+      "properties": {
+        "isRuntimeProof": { "const": false },
+        "isPackageConsumerProof": { "const": false },
+        "isPostPublishProof": { "const": false },
+        "evidenceKind": { "type": "string", "minLength": 1 }
+      }
+    }
+  },
+  "$defs": {
+    "box": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["x", "y", "width", "height"],
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "width": { "type": "number", "minimum": 0 },
+        "height": { "type": "number", "minimum": 0 }
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "role",
+        "fileName",
+        "path",
+        "shape",
+        "elementCount",
+        "byteLength",
+        "sha256",
+        "dataType",
+        "threshold",
+        "activePixelCount"
+      ],
+      "properties": {
+        "role": {
+          "enum": [
+            "prototype-grid-probability",
+            "source-image-probability",
+            "source-image-thresholded"
+          ]
+        },
+        "fileName": { "type": "string", "minLength": 1 },
+        "path": { "type": "string", "minLength": 1 },
+        "shape": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": { "type": "integer", "minimum": 1 }
+        },
+        "elementCount": { "type": "integer", "minimum": 1 },
+        "byteLength": { "type": "integer", "minimum": 1 },
+        "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "dataType": { "enum": ["float32-little-endian", "uint8-0-or-1"] },
+        "threshold": { "type": "number", "minimum": 0, "maximum": 1 },
+        "activePixelCount": { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}

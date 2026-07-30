@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Security.Cryptography;
 using System.Text.Json;
 using System.IO;
 using JYPPX.TensorRtSharp;
@@ -1463,6 +1464,84 @@ public sealed class YoloVisionManagedPipelineTests
         Assert.All(result.Mask.Values, value => Assert.Equal(1.0f, value, precision: 5));
         Assert.Equal(1.0f, result.Detection.CenterY);
         Assert.Equal(2.0f, result.Detection.Height);
+    }
+
+    [Fact]
+    public void SegmentationMaskArtifactWriterEmitsHashedPrototypeAndSourceMasks()
+    {
+        string directory = Path.Combine(Path.GetTempPath(), "jyppx-yolovision-segmentation-mask-artifacts", Guid.NewGuid().ToString("N"));
+        try
+        {
+            YoloSegmentationPrediction prediction = new YoloSegmentationPrediction(
+                new YoloDetection(1, 0.9f, 2.0f, 2.0f, 2.0f, 2.0f, sourceIndex: 7),
+                new YoloSegmentationMask(
+                    2,
+                    2,
+                    new[] { 0.1f, 0.75f, 0.8f, 0.2f },
+                    YoloSegmentationMaskValueKind.Probability,
+                    0.5f));
+            YoloVisionResult result = YoloVisionResult.FromSegmentations(
+                new[] { prediction },
+                "mask-artifact-contract");
+            YoloImagePreprocessResult preprocess = CreatePreprocess(
+                sourceWidth: 4,
+                sourceHeight: 2,
+                targetWidth: 4,
+                targetHeight: 4,
+                resizedWidth: 4,
+                resizedHeight: 2,
+                padX: 0,
+                padY: 1,
+                scaleX: 1.0f,
+                scaleY: 1.0f);
+
+            string manifestPath = YoloSegmentationMaskArtifactWriter.Write(
+                directory,
+                result,
+                new[] { "zero", "target" },
+                preprocess,
+                new YoloSegmentationSpatialTransformOptions(
+                    YoloSegmentationCoordinateSpace.ModelInputPixels,
+                    cropToDetection: true));
+
+            using JsonDocument document = JsonDocument.Parse(File.ReadAllText(manifestPath));
+            JsonElement root = document.RootElement;
+            Assert.Equal(YoloSegmentationMaskArtifactWriter.SchemaVersion, root.GetProperty("schemaVersion").GetString());
+            Assert.Equal(1, root.GetProperty("predictionCount").GetInt32());
+            Assert.True(root.GetProperty("spatialTransformApplied").GetBoolean());
+            Assert.False(root.GetProperty("boundary").GetProperty("isRuntimeProof").GetBoolean());
+            JsonElement item = root.GetProperty("predictions")[0];
+            Assert.Equal("target", item.GetProperty("className").GetString());
+            Assert.Equal(7, item.GetProperty("sourceIndex").GetInt32());
+            AssertArtifact(item.GetProperty("prototypeProbability"), expectedElements: 4, expectedBytes: 16);
+            AssertArtifact(item.GetProperty("sourceProbability"), expectedElements: 8, expectedBytes: 32);
+            AssertArtifact(item.GetProperty("sourceThresholded"), expectedElements: 8, expectedBytes: 8);
+
+            string thresholdedPath = item.GetProperty("sourceThresholded").GetProperty("path").GetString()!;
+            byte[] thresholded = File.ReadAllBytes(thresholdedPath);
+            Assert.All(thresholded, value => Assert.True(value is 0 or 1));
+            Assert.Equal(
+                thresholded.Count(static value => value == 1),
+                item.GetProperty("sourceThresholded").GetProperty("activePixelCount").GetInt32());
+        }
+        finally
+        {
+            if (Directory.Exists(directory))
+            {
+                Directory.Delete(directory, recursive: true);
+            }
+        }
+    }
+
+    private static void AssertArtifact(JsonElement artifact, int expectedElements, int expectedBytes)
+    {
+        string path = artifact.GetProperty("path").GetString()!;
+        Assert.True(File.Exists(path), path);
+        Assert.Equal(expectedElements, artifact.GetProperty("elementCount").GetInt32());
+        Assert.Equal(expectedBytes, artifact.GetProperty("byteLength").GetInt64());
+        Assert.Equal(expectedBytes, new FileInfo(path).Length);
+        string expectedSha256 = Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(path))).ToLowerInvariant();
+        Assert.Equal(expectedSha256, artifact.GetProperty("sha256").GetString());
     }
 
     [Fact]

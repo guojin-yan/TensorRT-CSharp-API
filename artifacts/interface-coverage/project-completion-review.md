@@ -8195,3 +8195,70 @@ TensorRtExec/OnnxToEngine generic runtime 采用一致的名称绑定、全输�
   PowerShell 7，因此该 validator 留给 Actions，不改编码或降级脚本。没有 native/manifest/generated/ABI 修改。
 - 真实 smoke 输出保留在 ignored `artifacts/temp`，不提交 engine/model/input 等重资产；8 份 publishing 用户变更
   未触碰、未暂存。
+
+## 2026-07-31 YOLOv8n Segmentation Real Multi-Output Runtime
+
+本阶段使用官方 Ultralytics `v8.3.0` `yolov8n-seg.pt` 闭合 YoloVision 的真实实例分割多输出路径。模型、导出 ONNX、
+engine、structured references、mask 二进制和运行日志留在 E 盘；仓库只提交来源/许可证/hash manifest、轻量 evidence、
+artifact schema、独立参考脚本、文档和测试。
+
+### 实现与资产合同
+
+- `yolov8n-seg.pt` 固定 Release `177482232` / asset `195720083`、SHA256
+  `a7cd8f929e1903d78a12a48efecab430209f18dc46cb96c3599a5980c63c423c`；Ultralytics tag commit 固定为
+  `6e43d1e1e5db72afbf686dee6745669bcb124b0a`，license 为 `AGPL-3.0-only`。旧 Release API 未提供 digest，
+  manifest 明确使用官方 asset ID 加首次下载后仓库 pin，不伪称上游 checksum。
+- Apache-2.0 YOLOX `dog.ppm` / COCO labels SHA256 分别为
+  `6cb94c9cd0781412598fe179246b09041af4303d388a5ba3c55f760dff11ec2c` 与
+  `4d4aaea7bee6be2f675d9b53a9195ca36dfe6429f7479f29155da522a6c85930`；预处理 tensor 保持
+  `3a37e91ca77118ae168b367583faea65f61613ba71a38413f6adf794d88d0488`。
+- ONNX SHA256 为 `08b5c61368d4ddec5e647522fc55a93c42a9e0c581770aae48b87bba65a9b21d`；真实合同为
+  `images:[1,3,640,640]`、`output0:[1,116,8400]`（4 box + 80 class + 32 coefficients）和
+  `output1:[1,32,160,160]`（mask prototypes）。
+- 新增 `--segmentation-mask-output-directory` 和 `YoloSegmentationMaskArtifactWriter`，为每个 prediction 输出带
+  SHA256/shape/count 的 prototype probability、source-image probability、source thresholded `0/1` mask 与 manifest；
+  schema 固定 `isRuntimeProof/isPackageConsumerProof/isPostPublishProof=false`。
+- 新增独立 Python 参考：OpenCV 读取同一 PPM，Ultralytics/PyTorch CPU 使用 `rect=False`、`retina_masks=True`，
+  严格比较 class、box 坐标、score、box IoU 和 source-image mask IoU，失败退出 `2`。
+
+### 真实运行与失败门
+
+- TensorRT 10.11/CUDA 12.9 FP32 engine SHA256 为
+  `5173601e56a872e74490e32eea0c82069b0d39759d1abb992300106c18931bfa`，包含 3 bindings、255 layers、
+  1 profile。项目自有 bridge SHA256 为 `37aeae086e8f4800d2a000540eb352ff3d0f53073e159bd029b50d07278c6077`；
+  native build 成功但保留既有编译 warning，不宣称 zero-warning。
+- 最终 YoloVision 运行对独立 ONNX Runtime CPU references 比较 `974400 + 819200` 个值，`abs=0.02 / rel=0.03`，
+  两个 tensor mismatch 均为 0；输出 dog、bicycle、truck、car 四个实例，写出 JSON、SVG、mask manifest，并以
+  `OutputValidated=True`、`YoloVision Passed=True` 结束。
+- 独立后处理比较全部通过：box IoU `0.998472-0.999666`，mask IoU `0.991141-0.996669`；门槛为 box coordinate
+  error `<=1.0`、score error `<=0.01`、box IoU `>=0.995`、mask IoU `>=0.99`。
+- 受控负例只修改 `output0` reference 索引 0，加载同一 engine 后得到 `Completed=True`、`Passed=False`、
+  `Compared=974400`、`Mismatches=1`、`FirstMismatch=0`、`MaxAbs=9999.999`，TensorRtExec 退出码为 `2`。
+  该证据是数值 mismatch，不是 JSON 解析失败或依赖缺失。
+- 独立比较在读取 mask 时先复核 role、shape、element/byte count、SHA256、`0/1` 值域和 active pixel count；只修改
+  一个 source thresholded mask 字节且保持 manifest hash 不变后，以 `Thresholded mask SHA256 does not match the
+  manifest.` 非零退出，没有进入 IoU 比较或产生 false pass。
+
+### 验证结果
+
+- mask writer、artifact/schema/independent reference、官方资产 manifest、真实 evidence 四个新增合同测试 `4/4`；
+  YoloVision managed/output/acquisition 相关集合排除一个已知环境项后 `53/53`。
+- 完整相关集合实际运行 `54` 项：`53` 通过，唯一失败是既有
+  `AcquisitionScriptVerifiesAndCopiesFilesWithoutPromotingUnreviewedLicenses` 硬编码启动本机不存在的 `pwsh`；
+  失败发生在进程创建前，不是脚本断言、资产 hash 或源码失败，留给 PowerShell 7 Actions。
+- 完整 `TensorRtSharp.sln` Debug build 为 `0 warning / 0 error`；YoloVision 及相关测试程序集成功编译。
+- 官方资产 acquisition 以 `-Offline` 复核 2 个 pinned assets 和 2 个兼容输入，`performsExport=false`、
+  `performsRuntime=false`、`performsPublish=false`；mask manifest 通过 Draft 2020-12 schema，三份新增 JSON 可解析，
+  Python `py_compile` 通过。
+- 通用 `Test-SampleRunEvidenceRecord.ps1` 在本机 Windows PowerShell 5.1 因既有
+  `String.Contains(string, StringComparison)` 重载不可用而停止；没有降级脚本或伪称 validator passed，严格
+  `-RequireExistingLog -FailOnNotProof` 留给 `grape` PowerShell 7 Actions。
+
+### 证据边界
+
+- `samples/assets/yolovision-yolov8n-seg-real-model-runtime-evidence.json` 可将本次运行归类为 source-tree
+  `real-model-runtime`；模型公开再分发批准、package-consumer runtime、public package、post-publish、Owner release
+  acceptance 和 release proof 继续全部为 false。
+- 本批不提交或发布模型、ONNX、engine、reference JSON/bin、mask bin、SVG、日志、SDK 或 nupkg；CUDA、cuDNN、
+  TensorRT、NVRTC 仍由用户安装。managed、项目自有 `.Bridge` 和源码是唯一允许发布的产物类别。
+- 8 份 publishing 用户修改继续不覆盖、不暂存；本阶段不依赖这些文件制造文章或发布完成度。

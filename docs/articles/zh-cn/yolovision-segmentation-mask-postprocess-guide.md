@@ -22,6 +22,11 @@
 
 本篇把一条可发布的 segmentation walkthrough 拆成资产准备、ONNX 导出、TensorRtExec build-only、YoloVision 运行、mask 输出解释和 proof boundary。它是一篇文章和真实资产模板说明，不是 runtime proof。
 
+仓库同时保留一份已经完成的 source-tree 真实案例记录：
+`samples/assets/yolovision-yolov8n-seg-real-model-runtime-evidence.json`。该记录证明官方 YOLOv8n-seg 在
+TensorRT 10.11/CUDA 12.9 上完成双输出 enqueue、raw tensor reference 和独立 mask IoU 比较；它不会把本文、
+mask 文件或截图单独晋级为 proof，也不构成 package consumer 或发布证明。
+
 ## 适用场景
 
 YOLOv8n-seg 适合验证 YoloVision 的多输出 metadata 能力：检测框输出负责 class、score 和 box，prototype 输出负责 mask basis，保留下来的检测框再用 coefficient 组合成实例 mask。
@@ -103,21 +108,29 @@ dotnet run --project .\samples\YoloVision -- --model .\models\yolov8n-seg.onnx -
 dotnet run --project .\samples\YoloVision -- `
   --model .\models\yolov8n-seg.onnx `
   --labels .\models\coco.names `
-  --input-data .\models\yolov8n-seg-fp32.bin `
+  --image .\models\dog.ppm `
+  --preprocessed-output .\models\yolov8n-seg-fp32.bin `
   --input-shape 1x3x640x640 `
   --family v8 `
   --task seg `
-  --output-role-map boxes:det,proto:mask-prototypes `
-  --mask-coefficient-count 32
+  --output-role-map output0:det,output1:mask-prototypes `
+  --mask-coefficient-count 32 `
+  --mask-threshold 0.5 `
+  --mask-spatial-transform `
+  --mask-coordinate-space model-input `
+  --mask-crop-to-box true `
+  --segmentation-mask-output-directory .\models\segmentation-masks
 ```
 
 真实日志至少应包含：
 
-- `Profile Family=v8 Task=seg`
+- `Profile Family=YoloV8 Task=Segmentation`
 - `InputSource=external`
 - `Segmentations=...`
-- `Postprocess Task=seg`
-- owner 提供的 YoloVision 成功标记日志行
+- `Postprocess Task=Segmentation;Detections=...;Segmentations=...`
+- `SegmentationMaskArtifacts=...`
+- `OutputValidated=True`
+- `YoloVision Passed=True`
 
 如果只有 synthetic tensor，结果只能作为 managed pipeline evidence，不能作为真实图像 segmentation proof。
 
@@ -137,16 +150,24 @@ dotnet run --project .\samples\YoloVision -- `
 - `className`
 - `score`
 
-完整的模型特定后处理目标顺序为：decode boxes -> score filtering -> NMS -> coefficient 与 prototype 组合 -> sigmoid -> crop -> resize -> threshold。当前通用 managed path 已实现到稳定 sigmoid、prototype-grid threshold/statistics 和有界 SVG 预览；crop 与原图 resize-back 仍由 owner-approved adapter 实现并记录，不能由通用预览冒充。
+完整的模型特定后处理顺序为：decode boxes -> score filtering -> NMS -> coefficient 与 prototype 组合 -> sigmoid ->
+按 exporter coordinate contract crop -> 移除 letterbox padding -> bilinear resize-back -> source box crop -> threshold。
+当前 managed path 已实现稳定 sigmoid、prototype-grid statistics、显式 `model-input|normalized` coordinate space、使用同一
+preprocess metadata 的 source-image bilinear resize-back、half-open box crop 和有界 SVG 预览。它不会从外部 tensor 猜测
+source image 元数据；不同 exporter 的坐标约定仍必须用独立 reference 验证。
 
 ## 代码与文件入口
 
 - `samples/YoloVision/YoloSampleRunner.cs`：多输出 runtime 路由、box/coefficient source-index 对齐与 prototype shape。
 - `samples/YoloVision/YoloMaskComposer.cs`：线性组合和稳定 sigmoid probability compose。
 - `samples/YoloVision/YoloSegmentationMask.cs`：value kind、threshold 与 active pixel statistics。
+- `samples/YoloVision/YoloSegmentationSpatialTransform.cs`：显式 coordinate space、letterbox 逆变换、bilinear resize 和 box crop。
+- `samples/YoloVision/YoloSegmentationMaskArtifactWriter.cs`：写出带 SHA256 的 prototype/source probability 和 thresholded mask。
+- `samples/YoloVision/yolovision-segmentation-mask-artifacts.schema.json`：mask artifact manifest 契约。
 - `samples/YoloVision/YoloSampleRunner.cs`：在 detection decode/NMS 后继续按 source index 关联 coefficients。
 - `samples/YoloVision/yolovision-task-output-contract.json`：segmentation 输出角色契约。
 - `samples/YoloVision/Program.cs`：`--task seg`、`--output-role-map` 和 mask 参数入口。
+- `eng/Invoke-YoloVisionSegmentationReference.py`：独立 Ultralytics/PyTorch CPU box/mask 比较和失败退出码。
 - `eng/Test-YoloVisionRealAssetCandidate.ps1`：模型、图片、labels、日志和 SHA256 校验。
 
 ## 可复用资产目录与完整验证
@@ -173,7 +194,7 @@ Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-seg\tensors\
 预处理和运行命令应保留显式 layout、颜色顺序和 role map：
 
 dotnet run --project .\samples\YoloVision -- --preprocess-only --image E:\TensorRtSharpAssets\cases\yolov8n-seg\images\dog.ppm --preprocessed-output E:\TensorRtSharpAssets\cases\yolov8n-seg\tensors\dog-fp32.bin --input-shape 1x3x640x640 --tensor-layout NCHW --color-order RGB --resize letterbox
-dotnet run --project .\samples\YoloVision -- --model E:\TensorRtSharpAssets\cases\yolov8n-seg\models\yolov8n-seg.onnx --labels E:\TensorRtSharpAssets\cases\yolov8n-seg\labels\coco.names --input-data E:\TensorRtSharpAssets\cases\yolov8n-seg\tensors\dog-fp32.bin --input-shape 1x3x640x640 --family v8 --task seg --output-role-map boxes:det,proto:mask-prototypes --mask-coefficient-count 32 --output-json E:\TensorRtSharpAssets\cases\yolov8n-seg\reports\yolov8n-seg-output.json --visualization-svg E:\TensorRtSharpAssets\cases\yolov8n-seg\reports\yolov8n-seg-output.svg
+dotnet run --project .\samples\YoloVision -- --model E:\TensorRtSharpAssets\cases\yolov8n-seg\models\yolov8n-seg.onnx --labels E:\TensorRtSharpAssets\cases\yolov8n-seg\labels\coco.names --image E:\TensorRtSharpAssets\cases\yolov8n-seg\images\dog.ppm --preprocessed-output E:\TensorRtSharpAssets\cases\yolov8n-seg\tensors\dog-fp32.bin --input-shape 1x3x640x640 --family v8 --task seg --output-role-map output0:det,output1:mask-prototypes --mask-coefficient-count 32 --mask-spatial-transform --mask-coordinate-space model-input --mask-crop-to-box true --segmentation-mask-output-directory E:\TensorRtSharpAssets\cases\yolov8n-seg\reports\segmentation-masks --output-json E:\TensorRtSharpAssets\cases\yolov8n-seg\reports\yolov8n-seg-output.json --visualization-svg E:\TensorRtSharpAssets\cases\yolov8n-seg\reports\yolov8n-seg-output.svg
 
 通用输出 JSON 直接保留 detection output shape、prototype shape、maskThreshold、maskPixelCount、maskTotalPixelCount、maskValueKind、`maskPixelCountScope=prototype-grid-before-crop-resize`、className、score、modelSha256、imageSha256 和 preprocessedTensorSha256。owner 最终 overlay 记录还应补 letterboxScale、letterboxPadX、letterboxPadY、boxBeforeCrop、boxAfterResize 和 adapter hash。SVG 是派生证据，必须能追溯到同一份 JSON、输入图和 run log。
 
@@ -181,9 +202,13 @@ dotnet run --project .\samples\YoloVision -- --model E:\TensorRtSharpAssets\case
 
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-YoloVisionOutputReport.ps1 -Strict
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-YoloVisionRealAssetCandidate.ps1
-pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-SampleRunEvidenceRecord.ps1
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-SampleRunEvidenceRecord.ps1 -InputPath .\samples\assets\yolovision-yolov8n-seg-real-model-runtime-evidence.json -RequireExistingLog -FailOnNotProof
 
 只有当 owner 回填真实 prototype/output roles、model/labels/input hashes、YoloVision Passed=True、stdout/stderr summary 和 owner review，并且 validator 通过后，才可以形成 real-model-runtime 候选。preflight、build-only、mask overlay、截图、local feed 和 direct nupkg 仍不是 package-consumer-runtime proof。
+
+本仓库记录的官方 `v8.3.0` 案例已经满足上述 source-tree `real-model-runtime` 条件：4 个实例的 box IoU 为
+`0.998472-0.999666`，mask IoU 为 `0.991141-0.996669`。模型公开再分发、clean package consumer、公开包和
+post-publish 字段仍全部为 false。
 
 ## 图示建议
 
