@@ -907,9 +907,9 @@ internal static class Program
             },
             SampleSupportMismatchRun = new
             {
-                sampleSupportMismatch.ReferenceValidation.Completed,
-                sampleSupportMismatch.ReferenceValidation.Passed,
-                mismatchComparison.Completed,
+                ReferenceValidationCompleted = sampleSupportMismatch.ReferenceValidation.Completed,
+                ReferenceValidationPassed = sampleSupportMismatch.ReferenceValidation.Passed,
+                ComparisonCompleted = mismatchComparison.Completed,
                 mismatchComparison.MismatchCount,
                 mismatchComparison.FirstMismatchIndex,
                 mismatchComparison.MaximumAbsoluteError,
