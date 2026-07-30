@@ -300,6 +300,16 @@ internal static class RepositorySourceReader
                 "TensorRtLoggerFinderMetadataDesignGate.cs",
                 "TensorRtLoggerFinderMetadataDesignGateResult.cs"
             ],
+            ["TensorRtRuntimeDeserializationBoundaryPrecheck.cs"] =
+            [
+                "TensorRtRuntimeDeserializationBoundaryPrecheck.cs",
+                "TensorRtRuntimeDeserializationBoundaryPrecheckResult.cs"
+            ],
+            ["TensorRtRuntimeDeserializationDependencyDiagnostics.cs"] =
+            [
+                "TensorRtRuntimeDeserializationDependencyDiagnostics.cs",
+                "TensorRtRuntimeDeserializationDependencyDiagnosticsResult.cs"
+            ],
             ["TensorRtStreamIoInterfaceInfoDesignGate.cs"] =
             [
                 "TensorRtStreamIoInterfaceInfoDesignGate.cs",

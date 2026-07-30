@@ -261,6 +261,12 @@ MemoryAllocation 的 callback/allocator readiness evaluator 与 snapshot 现在�
 `133d913042fa2cd7aa0d13e0628b4bc1a485d1ae`，并固定 gate 聚合顺序、blocked prerequisite 复制、公开属性顺序、
 summary、pointer non-exposure 与 managed-readiness/non-proof 语义。
 
+Runtime deserialization boundary precheck 与 dependency diagnostics result 现在也各自归入同名文件。原 388 行
+boundary precheck 分为 176 行 evaluator 与 218 行 result；原 393 行 dependency diagnostics 分为 122 行 evaluator
+与 277 行 result。布局门禁可重组拆分前 Git blob `9ab81dadc09b84d03ad39d094acf16c97f25100a` 与
+`85c565c4094b240fc76b5c0d1f4d66b308de6374`，并固定 scoped-buffer/engine ownership、dependency/driver 分类、
+公开属性顺序、pointer non-exposure、deferred-row 与 runtime-proof blocker 语义。
+
 OutputAllocator diagnostics 继续按 public design owner 与 internal managed runtime gate 分层。原 637 行
 `Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeGate.cs` 降为 38 行 state/constructor core；entries、snapshots、
 lifecycle、shared invocation、trampoline/state 与 formatting 进入 6 份 partial，request/result 类型各自成文件。原 503 行

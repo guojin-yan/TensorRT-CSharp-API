@@ -2,6 +2,10 @@
 
 `runtime-deserialization-boundary-precheck` 用来收口 `IRuntime::deserializeCudaEngine`、`IRuntime::deserializeCudaEngineV2` 和 `IRuntime::loadRuntime` 周围的安全边界。它不是 runtime execution proof；它记录当前 C# 高层 `TensorRtRuntime.Deserialize(...)` 的安全形态，并区分已经由 scoped-buffer native bridge 覆盖的 `deserializeCudaEngine` 与仍需 callback/ownership 设计的 V2、`loadRuntime` 行。
 
+源码职责分为 `TensorRtRuntimeDeserializationBoundaryPrecheck.cs` 与
+`TensorRtRuntimeDeserializationBoundaryPrecheckResult.cs`：前者只拥有两组 evaluation 入口，后者拥有 result
+构造、公开属性、阻塞项、诊断和 `ToString`。该归类不改变 runtime-precheck/non-proof 边界。
+
 ## 当前可用边界
 
 - `TensorRtRuntime.Deserialize(byte[])` 通过托管 `byte[]` 调用 native `jyppx_trt*_runtime_deserialize_engine`。

@@ -2,6 +2,10 @@
 
 `runtime-deserialization-dependency-diagnostics` 是 `runtime-deserialization-boundary-precheck` 之后的一层发布诊断。它把 managed `TensorRtRuntime.Deserialize(...)` 的安全边界、full package consumer report、dependency-probe-only 状态和 `blocked-by-cuda-driver` 分类放在同一个结构里，但它不是 runtime execution proof。
 
+源码职责分为 `TensorRtRuntimeDeserializationDependencyDiagnostics.cs` 与
+`TensorRtRuntimeDeserializationDependencyDiagnosticsResult.cs`：前者只拥有 evaluation 与 blocker helper，后者
+拥有 result 构造、公开属性、分类逻辑、诊断和 `ToString`。该归类不改变 dependency-diagnostics/non-proof 边界。
+
 ## 输出字段
 
 典型字段包括：

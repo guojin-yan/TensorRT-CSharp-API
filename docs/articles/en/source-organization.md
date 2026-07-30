@@ -297,6 +297,13 @@ layout gate recomposes the pre-split Git blob `133d913042fa2cd7aa0d13e0628b4bc1a
 order, blocked-prerequisite copying, public property order, summary, pointer non-exposure, and managed-readiness/non-proof
 semantics.
 
+The Runtime deserialization boundary precheck and dependency diagnostics results now also have dedicated namesake files.
+The former 388-line boundary precheck is split into a 176-line evaluator and a 218-line result; the former 393-line
+dependency diagnostics is split into a 122-line evaluator and a 277-line result. The layout gate recomposes the pre-split
+Git blobs `9ab81dadc09b84d03ad39d094acf16c97f25100a` and `85c565c4094b240fc76b5c0d1f4d66b308de6374`, preserving
+scoped-buffer/engine ownership, dependency/driver classification, public property order, pointer non-exposure, deferred
+rows, and runtime-proof blockers.
+
 OutputAllocator diagnostics are split across the public design owner and its internal managed runtime gate. The former
 637-line `Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeGate.cs` is reduced to a 38-line state/constructor core;
 entries, snapshots, lifecycle, shared invocation, trampoline/state, and formatting live in six partials, with request/result

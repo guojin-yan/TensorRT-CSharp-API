@@ -1932,6 +1932,7 @@ function New-RuntimeDeserializationBoundaryPrecheckEvidence {
     -RuntimeEvidenceKind "runtime-precheck" `
     -EvidenceRelativePaths @(
       "src\JYPPX.TensorRtSharp\Runtime\TensorRtRuntimeDeserializationBoundaryPrecheck.cs",
+      "src\JYPPX.TensorRtSharp\Runtime\TensorRtRuntimeDeserializationBoundaryPrecheckResult.cs",
       "src\JYPPX.TensorRtSharp\Runtime\TensorRtRuntime.cs",
       "src\JYPPX.TensorRtSharp\Internal\Interop\NativeBridgeApi.cs",
       "smoke\CallbackAllocatorSafeControlsSmokeRunner\Program.cs",
@@ -2075,7 +2076,9 @@ function New-RuntimeDeserializationDependencyDiagnosticsEvidence {
     -RuntimeEvidenceKind "dependency-diagnostics" `
     -EvidenceRelativePaths @(
       "src\JYPPX.TensorRtSharp\Runtime\TensorRtRuntimeDeserializationDependencyDiagnostics.cs",
+      "src\JYPPX.TensorRtSharp\Runtime\TensorRtRuntimeDeserializationDependencyDiagnosticsResult.cs",
       "src\JYPPX.TensorRtSharp\Runtime\TensorRtRuntimeDeserializationBoundaryPrecheck.cs",
+      "src\JYPPX.TensorRtSharp\Runtime\TensorRtRuntimeDeserializationBoundaryPrecheckResult.cs",
       "smoke\CallbackAllocatorSafeControlsSmokeRunner\Program.cs",
       "docs\articles\zh-cn\runtime-deserialization-dependency-diagnostics.md",
       "docs\articles\zh-cn\runtime-deserialization-boundary-precheck.md",

@@ -7710,3 +7710,39 @@ managed-readiness/non-proof 语义保持不变。
   real model、Linux、package consumer、public package、post-publish、Owner acceptance 或 release proof。
 - 本机无仓库认可的 `pwsh`，未运行 exporter/B-tier 聚合；8 份 publishing 用户变更未触碰、未暂存；
   未 push、未触发 GitHub Actions、未执行远程发布操作。
+
+## 2026-07-30 Runtime Deserialization Diagnostics Result Split
+
+本阶段继续整理 `JYPPX.TensorRtSharp/Runtime`，将 deserialization boundary precheck 与 dependency diagnostics
+的 result model 从 evaluator 分离。scoped-buffer/engine ownership、dependency/driver 分类、公开属性顺序、pointer
+non-exposure、deferred rows 与 runtime-proof blocker 语义保持不变。
+
+### 实现与门禁
+
+- 原 388 行 `TensorRtRuntimeDeserializationBoundaryPrecheck.cs` 分为 176 行 evaluator 与 218 行 result；
+  evaluator 只保留 `EvaluateKnownSurface` 与 `Evaluate`。
+- 原 393 行 `TensorRtRuntimeDeserializationDependencyDiagnostics.cs` 分为 122 行 evaluator 与 277 行 result；
+  evaluator 只保留两组 evaluation 入口与两个 blocker helper。
+- `ManagedRuntimeDeserializationDiagnosticsSourceLayoutTests` 固定四个文件的精确 top-level type、constructor、method、
+  public property、pointer-free surface、readiness/test source-set、直接消费测试和文档 marker，并重组原源码。
+- 拆分前 Git blob 为 `9ab81dadc09b84d03ad39d094acf16c97f25100a` 与
+  `85c565c4094b240fc76b5c0d1f4d66b308de6374`；normalized SHA-256 保持
+  `6591ff58bbfb5cb6e1f01cb9a52caa7f310c27029548854f3632ed2f0275f0ec` 与
+  `2fd282093b86550e509b45658dd8738c837efd8b15993c27877e36409426f290`。
+- readiness 与 test reader 显式展开两套 source-set；既有直接消费测试改读统一 reader；两份专题文档与双语
+  source-organization 同步真实 result owner。
+
+### 验证与边界
+
+- 新布局门禁 `13/13`；直接消费类 `5/5`，联合定向集合 `18/18`；`SourceLayoutTests` `317/317`；
+  统一 Managed 前缀集合 `716/716`。
+- `JYPPX.TensorRtSharp` 全目标框架与完整 `TensorRtSharp.sln` Debug build 均为
+  `0 warning / 0 error`；RuntimePackageReadiness UTF-8 ParseInput 为 `0 error`，对应质量测试 `2/2`。
+- ignored deferred candidate evidence 保持 `262` 条引用、`149` 个唯一路径、`0` 缺失；其中引用的
+  `22` 份 JSON 全部可解析，ignored 文件未强制提交。
+- Generated/native/manifest/project/ABI 改动为 0；`git diff --check` 通过。进程审计未发现引用本工作区的其他进程，
+  Downloads 近三小时没有本批重资产命中；6 个已知 YoloVision/YOLOX Temp 目录继续保留。
+- source/type relocation 与 runtime deserialization diagnostics result split 不构成新的 TensorRT/CUDA runtime、
+  real model、Linux、package consumer、public package、post-publish、Owner acceptance 或 release proof。
+- 本机无仓库认可的 `pwsh`，未运行 exporter/B-tier 聚合；8 份 publishing 用户变更未触碰、未暂存；
+  未 push、未触发 GitHub Actions、未执行远程发布操作。
