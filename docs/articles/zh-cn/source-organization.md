@@ -387,6 +387,8 @@ TensorRT 复制型 versioned-interface metadata 与 owner-scoped metadata query 
 
 ONNX stripped-plan refit 生命周期与持久化 plan 重载 snapshot 统一放入 `JYPPX.TensorRtSharp.Tools/Refit`。`Build` 模块继续负责 build options、service、diagnostics 与 result，并消费这些复制型证据模型。
 
+Callbacks/Debugging 中的 DebugListener gate 也按 evaluator/result 职责归类。`TensorRtDebugListenerNativeAttachNoThrowPreflight.cs` 与 `TensorRtDebugListenerNativeOwnerStableIdentity.cs` 只保留评估入口和 blocker 聚合；对应的 `TensorRtDebugListenerNativeAttachNoThrowPreflightResult.cs`、`TensorRtDebugListenerNativeOwnerStableIdentityResult.cs` 只保留 pointer-free 结果构造、属性和诊断。
+
 ## 规则
 
 - 模块化时不得改名 C ABI 导出入口。

@@ -428,6 +428,8 @@ Copied TensorRT versioned-interface metadata and owner-scoped metadata queries l
 
 ONNX stripped-plan refit lifecycle and persisted-plan reload snapshots live in `JYPPX.TensorRtSharp.Tools/Refit`. The `Build` module consumes these copied evidence models while retaining responsibility for build options, services, diagnostics, and results.
 
+DebugListener gates under `Callbacks/Debugging` follow the same evaluator/result ownership. `TensorRtDebugListenerNativeAttachNoThrowPreflight.cs` and `TensorRtDebugListenerNativeOwnerStableIdentity.cs` contain evaluation and blocker aggregation only; their corresponding `*Result.cs` files contain pointer-free result construction, properties, and diagnostics.
+
 ## Rules
 
 - Do not rename exported C ABI entrypoints during modularization.

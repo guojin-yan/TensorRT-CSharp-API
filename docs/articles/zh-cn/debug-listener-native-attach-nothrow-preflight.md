@@ -97,3 +97,12 @@ smoke 输出必须保留：
 - `IGpuAsyncAllocator::deallocateAsync`
 
 只有 native owner 生命周期、no-throw vtable、exception-to-status mapping、borrowed tensor/data lifetime、真实 TensorRT callback smoke 和 full package consumer `real-callback-runtime` 证据全部具备，readiness 才能将 DebugListener callback runtime 视为 proof。
+
+## 文件归属
+
+evaluator 与 result 已按职责拆开：
+
+- `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerNativeAttachNoThrowPreflight.cs` 只负责 `Evaluate` 与 blocker 聚合。
+- `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerNativeAttachNoThrowPreflightResult.cs` 只负责 pointer-free result 构造、属性、diagnostic 与 `ToString`。
+
+两文件按原始 Git blob 顺序重组，保持 API、证据字段与 deferred 分类不变。

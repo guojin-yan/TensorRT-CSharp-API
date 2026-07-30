@@ -82,3 +82,12 @@ smoke 输出必须包含：
 - `IGpuAsyncAllocator::deallocateAsync`
 
 下一阶段进入 [DebugListener Native Owner NonCopyable Storage](debug-listener-native-owner-noncopyable-storage.md)，只提升 source-visible no-copy/no-move storage scaffold；即使该阶段让 precheck 中的 `NativeOwnerNonCopyableReady=True`，也仍不能直接启用真实 callback runtime。
+
+## 文件归属
+
+evaluator 与 result 已按职责拆开：
+
+- `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerNativeOwnerStableIdentity.cs` 只负责 `Evaluate` 与 blocker 聚合。
+- `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerNativeOwnerStableIdentityResult.cs` 只负责 pointer-free result 构造、属性、diagnostic 与 `ToString`。
+
+两文件按原始 Git blob 顺序重组，保持 owner identity 字段、API surface 与 deferred 分类不变。

@@ -7495,3 +7495,42 @@ release-after-drain、unpin-after-drain、deferred rows 与 runtime-proof blocke
 - source/type relocation 与 attach-bridge/in-flight accounting gate 不构成新的 real callback runtime、TensorRT/CUDA
   runtime、real model、Linux、package consumer、public package、post-publish、Owner acceptance 或 release proof。
 - 8 份 publishing 用户变更未触碰、未暂存；未 push、未触发 GitHub Actions、未执行远程发布操作。
+
+## 2026-07-30 DebugListener Native Attach Preflight And Stable Identity Result Split
+
+本阶段继续整理 `JYPPX.TensorRtSharp/Callbacks/Debugging`，将 native attach/no-throw preflight 与 native owner
+stable identity 的 result model 从 evaluator 分离。attach/vtable prerequisite、owner identity diagnostics、pointer
+non-exposure、deferred rows 与 runtime-proof blocker 语义保持不变。
+
+### 实现与门禁
+
+- 原 313 行 `TensorRtDebugListenerNativeAttachNoThrowPreflight.cs` 分为 137 行 evaluator 与 182 行 result；
+  evaluator 只保留两个 Evaluate overload 与 `AddBlockerIfFalse`/`AddBlocker` helper。
+- 原 290 行 `TensorRtDebugListenerNativeOwnerStableIdentity.cs` 分为 119 行 evaluator 与 177 行 result；
+  evaluator 只保留两个 Evaluate overload 与 `AddBlockerIfFalse`/`AddBlocker` helper。
+- `ManagedDebugListenerAttachPreflightStableIdentitySourceLayoutTests` 固定四个文件的精确 top-level type、constructor、
+  method、public property、pointer-free surface、readiness/test source-set、两个消费测试和文档 marker，并重组原源码。
+- 拆分前 Git blob 为 `a65d5ff6bb2b89849f86dd5c229d33b57eee6480` 与
+  `f6be64343ae77c96ab926554ad9dc6f22aa2966e`；normalized SHA-256 保持
+  `aa752d93a7ca0a607fe67530c7499e0a912faa6f40523999fcc33f03adc7a549` 与
+  `a8225511214e996bce81afd31d7dcaa9e44898afd7ba67be809bfa252b2f75a9`。
+- readiness 与 test reader 显式展开两套 source-set；两个既有直接消费测试继续通过统一 reader 读取组合；两份
+  专题文档、callback safety roadmap 与双语 source-organization 同步真实 result owner。
+
+### 验证与边界
+
+- 新 type/constructor/method/property/pointer/source-set/doc/重组门禁：`13/13`；两个直接消费类：`8/8`；
+  全部 DebugListener 聚焦集合：`272/272`；`SourceLayoutTests`：`243/243`；统一 Managed 前缀集合：`642/642`。
+- 探索性的宽 `Managed` 过滤为 `776/778`，两项失败均因本机不存在 `pwsh`；探索性的
+  `Managed|Layout` 过滤为 `786/791`，另包含同一环境下的三项 `pwsh` 缺失与两项既有
+  `SampleLayoutTests` 断言。未把两个宽集合宣称为通过，也未修改其无关基线。
+- `JYPPX.TensorRtSharp` 全目标框架与完整 `TensorRtSharp.sln` Debug build 最终串行复核均为
+  `0 warning / 0 error`；RuntimePackageReadiness UTF-8 ParseInput 为 `0 error`，对应质量测试 `2/2`。
+- ignored deferred candidate evidence 保持 `260` 条引用、`147` 个唯一路径、`0` 缺失；其中引用的
+  `22` 份 JSON 全部可解析，ignored 文件未强制提交。
+- Generated/native/manifest/ABI 改动为 0；`git diff --check` 通过。
+- 进程审计快照未发现引用本工作区的其他进程；Downloads 近三小时没有本批重资产命中。上一批宽过滤测试留下的
+  6 个 `jyppx-yolovision-*`/`jyppx-yolox-*` Temp 目录仍保留，未删除或绕过工具策略。
+- source/type relocation 与 attach-preflight/stable-identity gate 不构成新的 real callback runtime、
+  TensorRT/CUDA runtime、real model、Linux、package consumer、public package、post-publish、Owner acceptance 或 release proof。
+- 8 份 publishing 用户变更未触碰、未暂存；未 push、未触发 GitHub Actions、未执行远程发布操作。
