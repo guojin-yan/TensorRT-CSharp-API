@@ -185,6 +185,16 @@ internal static class RepositorySourceReader
                 "TensorRtOutputAllocatorRuntimeProofPrecheck.cs",
                 "TensorRtOutputAllocatorRuntimeProofPrecheckResult.cs"
             ],
+            ["TensorRtOutputBufferOwnershipSafetyGate.cs"] =
+            [
+                "TensorRtOutputBufferOwnershipSafetyGate.cs",
+                "TensorRtOutputBufferOwnershipSafetyGateResult.cs"
+            ],
+            ["TensorRtOutputAllocatorAttachDetachDesignGate.cs"] =
+            [
+                "TensorRtOutputAllocatorAttachDetachDesignGate.cs",
+                "TensorRtOutputAllocatorAttachDetachDesignGateResult.cs"
+            ],
             ["TensorRtDebugListenerCallbackOwner.cs"] =
             [
                 "TensorRtDebugListenerCallbackOwner.cs",

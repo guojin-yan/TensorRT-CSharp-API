@@ -15,6 +15,10 @@
 - `TensorRtOutputBufferOwnershipSafetyGateResult`
 - `Evaluate`
 
+源码按职责拆分为两份：`TensorRtOutputBufferOwnershipSafetyGate.cs` 只拥有两组 `Evaluate` overload，
+`TensorRtOutputBufferOwnershipSafetyGateResult.cs` 拥有 result constructor、公开属性、诊断和 `ToString`。
+这只是源码归类，不改变 public surface、pointer-free 边界或 design-gate/non-proof 分类。
+
 该 gate 只消费 copied `TensorRtOutputAllocatorCallbackOwnerSnapshot` 和可选的 `TensorRtOutputAllocatorAttachDetachDesignGateResult`。它不分配 device memory，不消费或返回 `currentMemory` 指针值，不返回 `IntPtr` / `nint` / native owner pointer / output buffer pointer / device pointer。
 
 ## 当前能证明什么

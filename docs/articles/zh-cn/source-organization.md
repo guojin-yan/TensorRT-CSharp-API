@@ -244,6 +244,12 @@ MemoryAllocation 的 allocator ledger safety gate 与 output allocator runtime p
 `cd8385ec902b765cfcd4ce987e2f6b1ec855e57c`，并固定 ledger snapshot/result mapping、三组 output precheck overload、
 公开属性顺序、pointer non-exposure、deferred-row 与 runtime-proof blocker 语义。源码归类不提升任何 runtime proof。
 
+OutputAllocator 的 output buffer ownership safety gate 与 attach/detach design gate result 现在也各自归入同名文件。
+原 353 行 ownership gate 分为 157 行 evaluator 与 202 行 result；原 259 行 attach/detach gate 分为 118 行
+evaluator 与 147 行 result。布局门禁可重组拆分前 Git blob `ee3ae72d0750db446d8f44c7ca8f3e6aacd5e006` 与
+`d8dcb0613a11b3b9570ae708063846576261eb11`，并固定 ownership metadata/rule mapping、attach/detach lifecycle、
+公开属性顺序、pointer non-exposure、deferred-row 与 runtime-proof blocker 语义。源码归类不提升任何 runtime proof。
+
 OutputAllocator diagnostics 继续按 public design owner 与 internal managed runtime gate 分层。原 637 行
 `Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeGate.cs` 降为 38 行 state/constructor core；entries、snapshots、
 lifecycle、shared invocation、trampoline/state 与 formatting 进入 6 份 partial，request/result 类型各自成文件。原 503 行

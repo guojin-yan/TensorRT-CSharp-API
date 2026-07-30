@@ -277,6 +277,13 @@ pre-split Git blobs `3920e6c4a520ddde03ca1907f2fdcca3ed580476` and `cd8385ec902b
 ledger snapshot/result mapping, all three output precheck overloads, public property order, pointer non-exposure,
 deferred rows, and runtime-proof blockers. Source organization does not promote any runtime proof.
 
+The OutputAllocator output buffer ownership safety gate and attach/detach design gate results now also have dedicated
+namesake files. The former 353-line ownership gate is split into a 157-line evaluator and a 202-line result; the former
+259-line attach/detach gate is split into a 118-line evaluator and a 147-line result. The layout gate recomposes the
+pre-split Git blobs `ee3ae72d0750db446d8f44c7ca8f3e6aacd5e006` and `d8dcb0613a11b3b9570ae708063846576261eb11`, preserving
+ownership metadata/rule mapping, attach/detach lifecycle, public property order, pointer non-exposure, deferred rows,
+and runtime-proof blockers. Source organization does not promote any runtime proof.
+
 OutputAllocator diagnostics are split across the public design owner and its internal managed runtime gate. The former
 637-line `Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeGate.cs` is reduced to a 38-line state/constructor core;
 entries, snapshots, lifecycle, shared invocation, trampoline/state, and formatting live in six partials, with request/result

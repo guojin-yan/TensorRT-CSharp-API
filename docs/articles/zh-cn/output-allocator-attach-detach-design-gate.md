@@ -15,6 +15,10 @@
 - `TensorRtOutputAllocatorAttachDetachDesignGateResult`
 - `Evaluate`
 
+源码按职责拆分为两份：`TensorRtOutputAllocatorAttachDetachDesignGate.cs` 只拥有 `Evaluate`，
+`TensorRtOutputAllocatorAttachDetachDesignGateResult.cs` 拥有 result constructor、公开属性、诊断和 `ToString`。
+这只是源码归类，不改变 public surface、pointer-free 边界或 design-gate/non-proof 分类。
+
 该 gate 不调用 TensorRT `setOutputAllocator` 的 non-null attach，不返回 raw `IntPtr` / `nint`、native allocator pointer、output buffer pointer、device pointer 或 CUDA stream handle。
 
 ## 当前能证明什么

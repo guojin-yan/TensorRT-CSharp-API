@@ -139,6 +139,10 @@ public nint DebugTensor { get; }
   `Lifecycle`、`Invocation`、`Trampoline`、`Formatting` partial 及 internal request/result model。
 - `src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeProofPrecheck.cs` 与
   `TensorRtOutputAllocatorRuntimeProofPrecheckResult.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtOutputAllocatorAttachDetachDesignGate.cs` 与
+  `TensorRtOutputAllocatorAttachDetachDesignGateResult.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtOutputBufferOwnershipSafetyGate.cs` 与
+  `TensorRtOutputBufferOwnershipSafetyGateResult.cs`
 - `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerCallbackOwner.cs`：只保留 owner state、constructor 与 properties。
 - `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerCallbackOwner.DesignDiagnostic.cs`
 - `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerCallbackOwner.Snapshots.cs`

@@ -7606,3 +7606,39 @@ pointer non-exposure、deferred rows 与 runtime-proof blocker 语义保持不�
   real model、Linux、package consumer、public package、post-publish、Owner acceptance 或 release proof。
 - 本机无仓库认可的 `pwsh`，未运行 exporter/B-tier 聚合；8 份 publishing 用户变更未触碰、未暂存；
   未 push、未触发 GitHub Actions、未执行远程发布操作。
+
+## 2026-07-30 Output Allocator Ownership And Attach Detach Result Split
+
+本阶段继续整理 `JYPPX.TensorRtSharp/Callbacks/MemoryAllocation`，将 output buffer ownership safety gate 与
+OutputAllocator attach/detach design gate 的 result model 从 evaluator 分离。ownership metadata/rule mapping、
+attach/detach lifecycle、pointer non-exposure、deferred rows 与 runtime-proof blocker 语义保持不变。
+
+### 实现与门禁
+
+- 原 353 行 `TensorRtOutputBufferOwnershipSafetyGate.cs` 分为 157 行 evaluator 与 202 行 result；evaluator
+  只保留两组 `Evaluate` overload。
+- 原 259 行 `TensorRtOutputAllocatorAttachDetachDesignGate.cs` 分为 118 行 evaluator 与 147 行 result；
+  evaluator 只保留 `Evaluate`。
+- `ManagedOutputAllocatorOwnershipAttachDetachSourceLayoutTests` 固定四个文件的精确 top-level type、constructor、
+  method、public property、pointer-free surface、readiness/test source-set、两个直接消费测试和文档 marker，并重组原源码。
+- 拆分前 Git blob 为 `ee3ae72d0750db446d8f44c7ca8f3e6aacd5e006` 与
+  `d8dcb0613a11b3b9570ae708063846576261eb11`；normalized SHA-256 保持
+  `49fcba6b4eabb700db2958b629491f0ad1d494628a658a30a7c528b8b6ba00bd` 与
+  `982877db36e2cecf031311449c6be889097e468870b614d6af5ff85ed92056ce`。
+- readiness 与 test reader 显式展开两套 source-set；两个既有直接消费测试统一读取组合；两份专题文档、callback
+  safety roadmap 与双语 source-organization 同步真实 result owner。
+
+### 验证与边界
+
+- 新布局门禁 `13/13`；三个直接消费类 `10/10`，联合定向集合 `23/23`；Allocator/closure/readiness 聚焦集合
+  `135/135`；`SourceLayoutTests` `282/282`；统一 Managed 前缀集合 `681/681`。
+- `JYPPX.TensorRtSharp` 全目标框架与完整 `TensorRtSharp.sln` Debug build 均为
+  `0 warning / 0 error`；RuntimePackageReadiness UTF-8 ParseInput 为 `0 error`，对应质量测试 `2/2`。
+- ignored deferred candidate evidence 保持 `260` 条引用、`147` 个唯一路径、`0` 缺失；其中引用的
+  `22` 份 JSON 全部可解析，ignored 文件未强制提交。
+- Generated/native/manifest/project/ABI 改动为 0；`git diff --check` 通过。进程审计未发现引用本工作区的其他进程，
+  Downloads 近三小时没有本批重资产命中；6 个已知 YoloVision/YOLOX Temp 目录继续保留。
+- source/type relocation 与 ownership/attach-detach result split 不构成新的 real callback runtime、TensorRT/CUDA
+  runtime、real model、Linux、package consumer、public package、post-publish、Owner acceptance 或 release proof。
+- 本机无仓库认可的 `pwsh`，未运行 exporter/B-tier 聚合；8 份 publishing 用户变更未触碰、未暂存；
+  未 push、未触发 GitHub Actions、未执行远程发布操作。
