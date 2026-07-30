@@ -309,6 +309,14 @@ RuntimeConfig 与 SerializationConfig summary 也已进入独立同名文件。�
 `19c0362741927f9a3ad6f5fbf100da487e23d707` 与 `6d06225295c20fcfe6c2642ef749b8a241680faf`，并固定
 handle ownership、readback mapping、公开属性顺序、pointer non-exposure 与 non-proof 语义。
 
+ONNX config 与 model-support record 也在 `Parsing` 中落实一份公开类型一个文件。原 364 行
+`TensorRtOnnxConfig.cs` 分为 175 行 owner、`TensorRtOnnxConfigSnapshot.cs` 与
+`TensorRtOnnxConfigSummary.cs`；原 235 行 model-support 文件分为 106 行
+`TensorRtOnnxModelSupportReport.cs`、`TensorRtOnnxModelSupportSummary.cs` 与
+`TensorRtOnnxSubgraphSupportInfo.cs`。布局门禁保持原声明顺序、构造函数、复制值映射、pointer non-exposure 与
+non-proof classification，并可重组 Git blob `98d53f7b30535840e919f97c76b852c90b61a7ff` 与
+`f3ab3a0aa7b1f5e00089cb373293250addb2649a`。
+
 OutputAllocator diagnostics 继续按 public design owner 与 internal managed runtime gate 分层。原 637 行
 `Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeGate.cs` 降为 38 行 state/constructor core；entries、snapshots、
 lifecycle、shared invocation、trampoline/state 与 formatting 进入 6 份 partial，request/result 类型各自成文件。原 503 行

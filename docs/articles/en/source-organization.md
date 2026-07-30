@@ -349,6 +349,14 @@ and a 37-line summary. The layout gate recomposes Git blobs `19c0362741927f9a3ad
 `6d06225295c20fcfe6c2642ef749b8a241680faf`, preserving handle ownership, readback mapping, public property order,
 pointer non-exposure, and non-proof semantics.
 
+ONNX config and model-support records now follow one public type per file in `Parsing`. The former 364-line
+`TensorRtOnnxConfig.cs` is split into the 175-line owner, `TensorRtOnnxConfigSnapshot.cs`, and
+`TensorRtOnnxConfigSummary.cs`; the former 235-line model-support file is split into the 106-line
+`TensorRtOnnxModelSupportReport.cs`, `TensorRtOnnxModelSupportSummary.cs`, and
+`TensorRtOnnxSubgraphSupportInfo.cs`. The layout gate preserves their original declaration order, constructors, copied-value
+mapping, pointer non-exposure, and non-proof classification while recomposing Git blobs
+`98d53f7b30535840e919f97c76b852c90b61a7ff` and `f3ab3a0aa7b1f5e00089cb373293250addb2649a`.
+
 OutputAllocator diagnostics are split across the public design owner and its internal managed runtime gate. The former
 637-line `Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeGate.cs` is reduced to a 38-line state/constructor core;
 entries, snapshots, lifecycle, shared invocation, trampoline/state, and formatting live in six partials, with request/result

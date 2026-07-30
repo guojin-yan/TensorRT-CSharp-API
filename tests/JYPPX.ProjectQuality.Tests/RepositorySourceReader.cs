@@ -370,6 +370,18 @@ internal static class RepositorySourceReader
                 "TensorRtOnnxParserRefitterDiagnosticSnapshot.cs",
                 "TensorRtOnnxParserRefitterDiagnosticSummary.cs"
             ],
+            ["TensorRtOnnxConfig.cs"] =
+            [
+                "TensorRtOnnxConfig.cs",
+                "TensorRtOnnxConfigSnapshot.cs",
+                "TensorRtOnnxConfigSummary.cs"
+            ],
+            ["TensorRtOnnxModelSupportReport.cs"] =
+            [
+                "TensorRtOnnxModelSupportReport.cs",
+                "TensorRtOnnxModelSupportSummary.cs",
+                "TensorRtOnnxSubgraphSupportInfo.cs"
+            ],
             ["TensorRtRuntimeConfig.cs"] =
             [
                 "TensorRtRuntimeConfig.cs",

@@ -154,6 +154,12 @@ snapshot/summary 分别由 `TensorRtOnnxParserDiagnosticSnapshot.cs` 与 `Tensor
 ParserRefitter 对应使用 `TensorRtOnnxParserRefitterDiagnosticSnapshot.cs` 与
 `TensorRtOnnxParserRefitterDiagnosticSummary.cs`。
 
+ONNX config 的 native owner、复制快照与紧凑摘要分别由 `TensorRtOnnxConfig.cs`、
+`TensorRtOnnxConfigSnapshot.cs`、`TensorRtOnnxConfigSummary.cs` 拥有。模型支持诊断也按职责拆开：
+`TensorRtOnnxModelSupportReport.cs` 负责报告与汇总入口，`TensorRtOnnxModelSupportSummary.cs` 负责复制型摘要，
+`TensorRtOnnxSubgraphSupportInfo.cs` 负责单条子图记录。这些类型仍只表达 copied managed values；源码拆分与摘要本身
+不构成 runtime 或 release proof，也不会替代真实模型执行、独立输出核验或 package-consumer 证据。
+
 常见分层：
 
 - unsupported operator/opset：先核对 TensorRT parser 能力。

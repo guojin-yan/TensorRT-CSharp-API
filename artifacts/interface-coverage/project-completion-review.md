@@ -8000,3 +8000,41 @@ readback、公开属性顺序、pointer non-exposure 与 non-proof 语义保持�
   consumer、public package、post-publish、Owner acceptance 或 release proof。
 - 本机无仓库认可的 `pwsh`，未运行 exporter/B-tier 聚合；8 份 publishing 用户变更未触碰、未暂存；
   未 push、未触发 GitHub Actions、未执行远程发布操作。
+
+## 2026-07-30 ONNX Config And Model Support Type Split
+
+本阶段继续整理 `JYPPX.TensorRtSharp/Parsing`，完整拆分 ONNX config 与 model-support report 两份三顶层类型文件。
+native config handle ownership、Dispose 顺序、snapshot/summary 映射、subgraph metadata、公开 constructor/property/method
+顺序、pointer non-exposure 与 non-proof classification 保持不变。
+
+### 实现与门禁
+
+- 原 364 行 `TensorRtOnnxConfig.cs` 分为 175 行 owner、97 行 `TensorRtOnnxConfigSnapshot.cs` 与 98 行
+  `TensorRtOnnxConfigSummary.cs`；owner 保留 handle、scalar controls、`ToSnapshot` 与 `Dispose`。
+- 原 235 行 `TensorRtOnnxModelSupportReport.cs` 分为 106 行 report、82 行
+  `TensorRtOnnxModelSupportSummary.cs` 与 52 行 `TensorRtOnnxSubgraphSupportInfo.cs`；report 保留汇总入口和自身
+  `ToString`，summary 的 proof flags 继续全部保持非提升语义。
+- `ManagedOnnxConfigModelSupportSourceLayoutTests` 固定六个文件的精确 top-level type、constructor、method、public
+  property、pointer-free/non-proof surface、三文件 source-set、五个直接消费者与文档 marker，并重组原源码。
+- 拆分前 Git blob 为 `98d53f7b30535840e919f97c76b852c90b61a7ff` 与
+  `f3ab3a0aa7b1f5e00089cb373293250addb2649a`；normalized SHA-256 保持
+  `3f0ad5e0f709596c5bc2587211e913e8c5e2f4054e9e929b657da17fe416681b` 与
+  `520cec9d6e6bc4ac58bf37eea8b93abb981b89e075b7b6945541a1dbfa14996d`。
+- test reader 按原声明顺序显式展开两套三文件 source-set；三个 ONNX config 直接消费测试改读组合，model-support
+  两个既有消费者继续沿用统一 reader；ONNX roundtrip 文章与双语 source-organization 同步真实 owner。
+
+### 验证与边界
+
+- 新布局门禁与五个直接消费集合联合定向 `48/48`；`SourceLayoutTests` `434/434`；统一 Managed 类名前缀集合
+  `833/833`。
+- `JYPPX.TensorRtSharp` 全目标框架与完整 `TensorRtSharp.sln` Debug build 均为
+  `0 warning / 0 error`；RuntimePackageReadiness UTF-8 ParseInput 为 `0 error`，对应质量测试 `2/2`。
+- 本批没有 readiness/candidate 对两份原源码的直接路径引用，因此 ignored deferred candidate evidence 保持
+  `270` 条引用、`156` 个唯一路径、`0` 缺失；引用的 `22` 份 JSON 全部可解析。
+- `JYPPX.TensorRtSharp` 多顶层公开类型文件由 `24` 降为 `22`；枚举和值类型集合继续保持内聚。
+- Generated/native/manifest/project/ABI 改动为 0；`git diff --check` 通过。构建后进程已退出，复查未发现引用
+  本工作区的其他进程；Downloads 近三小时没有本批重资产命中；6 个已知 YoloVision/YOLOX Temp 目录继续保留。
+- source/type relocation 与 ONNX config/model-support split 不构成新的 TensorRT/CUDA runtime、real model、Linux、
+  package consumer、public package、post-publish、Owner acceptance 或 release proof。
+- 本机无仓库认可的 `pwsh`，未运行 exporter/B-tier 聚合；8 份 publishing 用户变更未触碰、未暂存；
+  未 push、未触发 GitHub Actions、未执行远程发布操作。
