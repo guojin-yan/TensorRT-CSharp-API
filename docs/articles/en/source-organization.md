@@ -263,6 +263,13 @@ pre-split Git blobs `0f395ae7dcb4b04c1189e8d1bc19b6eb1791eb7b` and `34bd7d963832
 owner copy/move blocking, stable identity, borrowed metadata copying, lifetime/pointer-escape blocking, deferred rows,
 and runtime-proof blockers.
 
+The DebugListener native attach bridge shape and in-flight accounting gate results now also have dedicated namesake files.
+The former 320-line attach bridge gate is split into a 134-line evaluator and a 191-line result; the former 312-line
+accounting gate is split into a 119-line evaluator and a 198-line result. The layout gate recomposes the pre-split Git
+blobs `9f94f504f8807ac99f2c3dff926b0f92597f2c07` and `ce52bde9e23c9348818be104417db71857a93936`, preserving attach
+parameter/version/no-throw shape, the pointer-free helper, callback enter/leave, release-after-drain, unpin-after-drain,
+deferred rows, and runtime-proof blockers.
+
 OutputAllocator diagnostics are split across the public design owner and its internal managed runtime gate. The former
 637-line `Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeGate.cs` is reduced to a 38-line state/constructor core;
 entries, snapshots, lifecycle, shared invocation, trampoline/state, and formatting live in six partials, with request/result

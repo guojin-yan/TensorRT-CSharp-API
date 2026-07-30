@@ -6642,6 +6642,7 @@ function New-DebugListenerNativeAttachBridgeShapeGateEvidence {
     -Source "source-smoke-docs-native-scaffold" `
     -EvidenceRelativePaths @(
       "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeAttachBridgeShapeGate.cs",
+      "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeAttachBridgeShapeGateResult.cs",
       "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeOwnerLifecycleGate.cs",
       "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerRuntimeProofPrecheck.cs",
       "native\src\tensorrt\common\debug_listener_native_attach_bridge_shape_gate.inc",
@@ -6782,6 +6783,7 @@ function New-DebugListenerInFlightAccountingGateEvidence {
     -Source "source-smoke-docs-native-scaffold" `
     -EvidenceRelativePaths @(
       "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerInFlightAccountingGate.cs",
+      "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerInFlightAccountingGateResult.cs",
       "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerExceptionStatusMappingGate.cs",
       "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerRuntimeProofPrecheck.cs",
       "native\src\tensorrt\common\debug_listener_inflight_accounting_gate.inc",

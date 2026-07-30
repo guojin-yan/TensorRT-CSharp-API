@@ -9,6 +9,9 @@
 
 `debug-listener-native-attach-bridge-shape-gate` 位于 `debug-listener-native-owner-lifecycle-gate` 之后。它只证明 attach bridge 的 source-visible 形状已经可以被托管 precheck 消费，不创建 native listener owner，不返回 borrowed pointer，不调用 `setDebugListener(non-null)`，也不实现 `IDebugListener::processDebugTensor`。
 
+托管 evaluator 位于 `TensorRtDebugListenerNativeAttachBridgeShapeGate.cs`，pointer-free result model 位于
+`TensorRtDebugListenerNativeAttachBridgeShapeGateResult.cs`。readiness 与源码测试必须组合读取这两个文件。
+
 公开 API：
 
 - `TensorRtDebugListenerNativeAttachBridgeShapeGate`

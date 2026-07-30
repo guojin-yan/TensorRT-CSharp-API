@@ -7458,3 +7458,40 @@ pointer escape blocking、deferred rows 与 runtime-proof blocker 语义保持�
 - source/type relocation 与 storage/borrowed safety gate 不构成新的 real callback runtime、TensorRT/CUDA runtime、
   real model、Linux、package consumer、public package、post-publish、Owner acceptance 或 release proof。
 - 8 份 publishing 用户变更未触碰、未暂存；未 push、未触发 GitHub Actions、未执行远程发布操作。
+
+## 2026-07-30 DebugListener Native Attach Bridge And In-Flight Accounting Result Split
+
+本阶段继续整理 `JYPPX.TensorRtSharp/Callbacks/Debugging`，将 native attach bridge shape 与 in-flight accounting gate
+的 result model 从 evaluator 分离。attach parameter/version/no-throw shape、pointer-free helper、callback enter/leave、
+release-after-drain、unpin-after-drain、deferred rows 与 runtime-proof blocker 语义保持不变。
+
+### 实现与门禁
+
+- 原 320 行 `TensorRtDebugListenerNativeAttachBridgeShapeGate.cs` 分为 134 行 evaluator 与 191 行 result；evaluator
+  只保留两个 Evaluate overload、`BecausePointerFree` 与两个 blocker helper。
+- 原 312 行 `TensorRtDebugListenerInFlightAccountingGate.cs` 分为 119 行 evaluator 与 198 行 result；evaluator
+  只保留两个 Evaluate overload 与两个 blocker helper。
+- `ManagedDebugListenerAttachBridgeInFlightSourceLayoutTests` 固定四个文件的精确 top-level type、constructor、method、
+  public property、pointer-free surface、readiness/test source-set、直接消费测试和文档 marker，并重组原源码。
+- 拆分前 Git blob 为 `9f94f504f8807ac99f2c3dff926b0f92597f2c07` 与
+  `ce52bde9e23c9348818be104417db71857a93936`；normalized SHA-256 保持
+  `fc93627c2f93908e91ed05df15b2e39e166175826c4e3a71b7aad4c9be23265f` 与
+  `4391e6ffe21b711338c4a110ea25fcfcfdaf140cc3e562adde545e63918275ae`。
+- readiness 与 test reader 显式展开两套 source-set；既有 attach/vtable batch 测试继续通过统一 reader 读取组合；
+  两份专题文档、callback safety roadmap 与双语 source-organization 同步真实 result owner。
+
+### 验证与边界
+
+- 新 type/constructor/method/property/pointer/source-set/doc/重组门禁：`13/13`；直接消费测试：`3/3`；
+  全部 DebugListener 聚焦集合：`259/259`；统一 `Managed + Layout` 口径：`611/611`。
+- `JYPPX.TensorRtSharp` 全目标框架与完整 `TensorRtSharp.sln` Debug build 均为 `0 warning / 0 error`；
+  RuntimePackageReadiness UTF-8 ParseInput 为 `0 error`，两套新增 source-set 为 `0` 缺失。
+- 本机无仓库认可的 `pwsh`，未运行 exporter/B-tier 聚合，也未生成或刷新 publishing/exporter evidence。
+- ignored deferred candidate evidence 保持 `260` 条引用、`147` 个唯一路径、`0` 缺失；其中引用的 `22` 份 JSON
+  全部可解析，ignored 文件未强制提交。
+- Generated/native/manifest/ABI 改动为 0；`git diff --check` 通过。
+- 进程审计快照未发现引用本工作区的其他进程；Downloads 近三小时没有本批 TensorRT/JYPPX/CUDA/NVRTC/ONNX/
+  engine/nupkg 重资产匹配项。上一批宽过滤测试留下的 6 个 `jyppx-yolovision-*` Temp 目录仍保留，未绕过工具策略清理。
+- source/type relocation 与 attach-bridge/in-flight accounting gate 不构成新的 real callback runtime、TensorRT/CUDA
+  runtime、real model、Linux、package consumer、public package、post-publish、Owner acceptance 或 release proof。
+- 8 份 publishing 用户变更未触碰、未暂存；未 push、未触发 GitHub Actions、未执行远程发布操作。

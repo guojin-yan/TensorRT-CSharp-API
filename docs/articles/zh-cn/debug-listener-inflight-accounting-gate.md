@@ -9,6 +9,9 @@
 
 `debug-listener-inflight-accounting-gate` 消费 `debug-listener-exception-status-mapping-gate`。它只证明 copied diagnostics 中的 in-flight counter、release hook 和 pin/unpin 状态可被 precheck 审计；它不创建 native owner，不调用 `setDebugListener(non-null)`，也不证明真实 TensorRT callback 已发生。
 
+托管 evaluator 位于 `TensorRtDebugListenerInFlightAccountingGate.cs`，pointer-free result model 位于
+`TensorRtDebugListenerInFlightAccountingGateResult.cs`。readiness 与源码测试必须组合读取这两个文件。
+
 公开 API：
 
 - `TensorRtDebugListenerInFlightAccountingGate`

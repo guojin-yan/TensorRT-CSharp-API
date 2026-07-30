@@ -232,6 +232,12 @@ DebugListener native owner non-copyable storage 与 borrowed tensor safety gate 
 `34bd7d9638321ef955730bc4126da254fc45935f`，并固定 owner copy/move blocking、stable identity、borrowed metadata
 copy、lifetime/pointer escape blocking、deferred-row 与 runtime-proof blocker 语义。
 
+DebugListener native attach bridge shape 与 in-flight accounting gate 的 result 也已归入同名文件。原 320 行
+attach bridge gate 分为 134 行 evaluator 与 191 行 result；原 312 行 accounting gate 分为 119 行 evaluator 与
+198 行 result。布局门禁可重组拆分前 Git blob `9f94f504f8807ac99f2c3dff926b0f92597f2c07` 与
+`ce52bde9e23c9348818be104417db71857a93936`，并固定 attach parameter/version/no-throw shape、pointer-free helper、
+callback enter/leave、release-after-drain、unpin-after-drain、deferred-row 与 runtime-proof blocker 语义。
+
 OutputAllocator diagnostics 继续按 public design owner 与 internal managed runtime gate 分层。原 637 行
 `Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeGate.cs` 降为 38 行 state/constructor core；entries、snapshots、
 lifecycle、shared invocation、trampoline/state 与 formatting 进入 6 份 partial，request/result 类型各自成文件。原 503 行
