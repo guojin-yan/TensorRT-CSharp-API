@@ -5988,6 +5988,7 @@ function New-DebugListenerNativeOwnerNonCopyableStorageEvidence {
 
 function New-DebugListenerNativeNoThrowDestructorEvidence {
   $destructorSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeNoThrowDestructor.cs"
+  $destructorResultSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeNoThrowDestructorResult.cs"
   $storageSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeOwnerNonCopyableStorage.cs"
   $precheckSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerRuntimeProofPrecheck.cs"
   $nativeDestructorScaffoldRelativePath = "native\src\tensorrt\common\debug_listener_native_nothrow_destructor.inc"
@@ -6011,6 +6012,7 @@ function New-DebugListenerNativeNoThrowDestructorEvidence {
   $comparisonRelativePath = "artifacts\interface-coverage\tensorrt-interface-comparison.csv"
 
   $destructorSourcePath = Join-Path $RepositoryRoot $destructorSourceRelativePath
+  $destructorResultSourcePath = Join-Path $RepositoryRoot $destructorResultSourceRelativePath
   $storageSourcePath = Join-Path $RepositoryRoot $storageSourceRelativePath
   $precheckSourcePath = Join-Path $RepositoryRoot $precheckSourceRelativePath
   $nativeDestructorScaffoldPath = Join-Path $RepositoryRoot $nativeDestructorScaffoldRelativePath
@@ -6085,7 +6087,7 @@ function New-DebugListenerNativeNoThrowDestructorEvidence {
     '"IGpuAsyncAllocator","deallocateAsync","IGpuAsyncAllocator::deallocateAsync","other","deferred-only"'
   )
 
-  $evidencePaths = @($destructorSourcePath, $storageSourcePath, $precheckSourcePath, $nativeDestructorScaffoldPath, $nativeStorageScaffoldPath, $nativeTrt8Path, $nativeTrt10Path, $nativeTrt11Path, $smokePath, $destructorDocPath, $storageDocPath, $precheckDocPath, $callbackGatePath, $schemaPath, $latestPath, $indexPath, $tocPath, $runtimeSplitReadmePath, $smokeReadmePath, $bridgeConsumerPath, $packageConsumerPath, $comparisonPath)
+  $evidencePaths = @($destructorSourcePath, $destructorResultSourcePath, $storageSourcePath, $precheckSourcePath, $nativeDestructorScaffoldPath, $nativeStorageScaffoldPath, $nativeTrt8Path, $nativeTrt10Path, $nativeTrt11Path, $smokePath, $destructorDocPath, $storageDocPath, $precheckDocPath, $callbackGatePath, $schemaPath, $latestPath, $indexPath, $tocPath, $runtimeSplitReadmePath, $smokeReadmePath, $bridgeConsumerPath, $packageConsumerPath, $comparisonPath)
   $missingFiles = @($evidencePaths | Where-Object { -not (Test-Path -LiteralPath $_ -PathType Leaf) })
   if ($missingFiles.Count -gt 0) {
     return [pscustomobject]@{
@@ -6854,6 +6856,7 @@ function New-DebugListenerNativeNoThrowVTableScaffoldGateEvidence {
     -Source "source-smoke-docs-native-scaffold" `
     -EvidenceRelativePaths @(
       "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeNoThrowVTableScaffoldGate.cs",
+      "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeNoThrowVTableScaffoldGateResult.cs",
       "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerNativeAttachBridgeShapeGate.cs",
       "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerExceptionStatusMappingGate.cs",
       "src\JYPPX.TensorRtSharp\Callbacks\Debugging\TensorRtDebugListenerInFlightAccountingGate.cs",

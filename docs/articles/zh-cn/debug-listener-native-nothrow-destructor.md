@@ -9,6 +9,9 @@
 
 `debug-listener-native-nothrow-destructor` 位于 [DebugListener Native Owner NonCopyable Storage](debug-listener-native-owner-noncopyable-storage.md) 和 [DebugListener Runtime Proof Precheck](debug-listener-runtime-proof-precheck.md) 之间。它只证明 native 侧已有一个不可复制、不可移动、`noexcept` 析构的 source-visible scaffold，并把这条证据以 pointer-free 的 C# public diagnostics 暴露给 precheck。
 
+托管 evaluator 位于 `TensorRtDebugListenerNativeNoThrowDestructor.cs`，pointer-free result model 位于
+`TensorRtDebugListenerNativeNoThrowDestructorResult.cs`。readiness 与源码测试必须组合读取这两个文件。
+
 公开 API：
 
 - `TensorRtDebugListenerNativeNoThrowDestructor`

@@ -9,6 +9,9 @@
 
 `debug-listener-native-nothrow-vtable-scaffold-gate` 消费 `debug-listener-native-attach-bridge-shape-gate`、`debug-listener-exception-status-mapping-gate` 和 `debug-listener-inflight-accounting-gate`。它只证明 native vtable scaffold 的析构、callback stub、异常封锁和 accounting 结构已 source-visible；它不安装 native `IDebugListener`，不调用 `setDebugListener(non-null)`，也不触发真实 `IDebugListener::processDebugTensor`。
 
+托管 evaluator 位于 `TensorRtDebugListenerNativeNoThrowVTableScaffoldGate.cs`，pointer-free result model 位于
+`TensorRtDebugListenerNativeNoThrowVTableScaffoldGateResult.cs`。readiness 与源码测试必须组合读取这两个文件。
+
 公开 API：
 
 - `TensorRtDebugListenerNativeNoThrowVTableScaffoldGate`
