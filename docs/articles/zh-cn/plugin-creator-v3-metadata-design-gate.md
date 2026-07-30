@@ -37,6 +37,7 @@
 - interop：`src/JYPPX.TensorRtSharp/Internal/Interop/NativeBridgeApi.PluginRegistryInventory.cs`
 - high-level wrapper：`src/JYPPX.TensorRtSharp/Plugins/TensorRtPluginRegistryInventory.cs`
 - design gate：`src/JYPPX.TensorRtSharp/Plugins/TensorRtPluginCreatorV3MetadataDesignGate.cs`
+- design gate result：`src/JYPPX.TensorRtSharp/Plugins/TensorRtPluginCreatorV3MetadataDesignGateResult.cs`
 - smoke：`smoke/PluginRegistryInventorySmokeRunner/Program.cs`
 - quality：`tests/JYPPX.ProjectQuality.Tests/PluginCreatorV3MetadataDesignGateTests.cs`
 

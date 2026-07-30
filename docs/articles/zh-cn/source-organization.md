@@ -281,6 +281,11 @@ summary。布局门禁可重组 Git blob `46eea3f13e19f01f9b927738c2c9dbad76172f
 `6c4a5c3234857443ea45e84e4b8e61f1fe5a786c`，并固定 summary 映射、callback-status 诊断、engine metadata count、
 pointer non-exposure 与 non-proof 语义。
 
+Dimension-expression snapshot 与 PluginCreatorV3 metadata 两个 design gate 也已将 `*DesignGateResult` 移入独立同名
+文件。原 312 行 dimension gate 分为 108 行 evaluator 与 210 行 result；原 300 行 plugin gate 分为 113 行
+evaluator 与 193 行 result。readiness 与 test source-set 保持 known-surface evaluation、candidate metadata、blocker
+顺序、pointer non-exposure、deferred row 与 design-gate-only proof 分类。
+
 OutputAllocator diagnostics 继续按 public design owner 与 internal managed runtime gate 分层。原 637 行
 `Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeGate.cs` 降为 38 行 state/constructor core；entries、snapshots、
 lifecycle、shared invocation、trampoline/state 与 formatting 进入 6 份 partial，request/result 类型各自成文件。原 503 行

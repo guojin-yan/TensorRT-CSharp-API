@@ -1789,6 +1789,7 @@ function New-DimensionExpressionSnapshotDesignGateEvidence {
     -ReadyStatus "design-gate-ready" `
     -EvidenceRelativePaths @(
       "src\JYPPX.TensorRtSharp\Network\TensorRtDimensionExpressionSnapshotDesignGate.cs",
+      "src\JYPPX.TensorRtSharp\Network\TensorRtDimensionExpressionSnapshotDesignGateResult.cs",
       "smoke\CallbackAllocatorSafeControlsSmokeRunner\Program.cs",
       "docs\articles\zh-cn\dimension-expression-snapshot-design-gate.md",
       "docs\articles\zh-cn\deferred-manual-design-groups.md",

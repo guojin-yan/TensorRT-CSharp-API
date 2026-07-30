@@ -4,7 +4,8 @@
 
 ## 已完成
 
-- 新增 public `TensorRtDimensionExpressionSnapshotDesignGate` 与 `TensorRtDimensionExpressionSnapshotDesignGateResult`。
+- 新增 public `TensorRtDimensionExpressionSnapshotDesignGate` 与 `TensorRtDimensionExpressionSnapshotDesignGateResult`；
+  两个顶层类型分别由同名 `.cs` 文件拥有，readiness 同时读取 gate 与 result source-set。
 - dependency-probe smoke 输出 `DimensionExpressionSnapshotDesignGate=dimension-expression-snapshot-design-gate;...`。
 - readiness / release evidence 能识别该 marker，并保持 `RuntimeEvidenceKind=design-gate`。
 - public surface 固定为无裸指针：`ExpressionPointerExposed=False`、`ExpressionPointerProduced=False`、`BorrowedExpressionPointerEscaped=False`。

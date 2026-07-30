@@ -7816,3 +7816,39 @@ diagnostic summary 与 engine deployment summary 从对应 snapshot 文件分离
   real model、Linux、package consumer、public package、post-publish、Owner acceptance 或 release proof。
 - 本机无仓库认可的 `pwsh`，未运行 exporter/B-tier 聚合；8 份 publishing 用户变更未触碰、未暂存；
   未 push、未触发 GitHub Actions、未执行远程发布操作。
+
+## 2026-07-30 Dimension And Plugin Design Gate Result Split
+
+本阶段继续整理 `JYPPX.TensorRtSharp/Network` 与 `JYPPX.TensorRtSharp/Plugins`，将 dimension-expression snapshot
+与 PluginCreatorV3 metadata 的 design-gate result 从 evaluator 分离。known-surface mapping、candidate metadata、
+blocked prerequisite 顺序、pointer non-exposure、deferred rows 与 design-gate-only proof 分类保持不变。
+
+### 实现与门禁
+
+- 原 312 行 `TensorRtDimensionExpressionSnapshotDesignGate.cs` 分为 108 行 evaluator 与 210 行
+  `TensorRtDimensionExpressionSnapshotDesignGateResult.cs`；evaluator 只保留 `EvaluateKnownSurface` 与 `Evaluate`。
+- 原 300 行 `TensorRtPluginCreatorV3MetadataDesignGate.cs` 分为 113 行 evaluator 与 193 行
+  `TensorRtPluginCreatorV3MetadataDesignGateResult.cs`；evaluator 同样只保留两组 evaluation 入口。
+- `ManagedDimensionPluginDesignGateResultSourceLayoutTests` 固定四个文件的精确 top-level type、constructor、method、
+  public property、pointer-free/non-proof surface、candidate/readiness/test source-set、专题文档 marker，并重组原源码。
+- 拆分前 Git blob 为 `76a42811715e1ce1cc656b63614706357aabe698` 与
+  `7f661c29acea8c659375bf0a25d34ae261ba0051`；normalized SHA-256 保持
+  `0b998614fc741b7a016dd273a3ab061fe849eb574b06375b6c78268db8069f80` 与
+  `23f0571f784ffd698cedf3ee3613753e59c82570dd5ab65ebe2140785dd5ce59`。
+- test reader 显式展开两套 source-set；dimension 直接消费测试改读组合；RuntimePackageReadiness evidence source-set
+  同步 Result 路径；两份专题文档与双语 source-organization 同步真实 result owner。
+
+### 验证与边界
+
+- 新布局门禁、直接消费、deferred candidate/uplift 与 readiness 联合定向集合 `27/27`；
+  `SourceLayoutTests` `356/356`；统一 Managed 前缀集合 `755/755`。
+- `JYPPX.TensorRtSharp` 全目标框架与完整 `TensorRtSharp.sln` Debug build 均为
+  `0 warning / 0 error`；RuntimePackageReadiness UTF-8 ParseInput 为 `0 error`，对应质量测试 `2/2`。
+- ignored deferred candidate evidence 更新为 `267` 条引用、`154` 个唯一路径、`0` 缺失；其中引用的
+  `22` 份 JSON 全部可解析，ignored 文件未强制提交。
+- Generated/native/manifest/project/ABI 改动为 0；`git diff --check` 通过。进程审计未发现引用本工作区的其他进程，
+  Downloads 近三小时没有本批重资产命中；6 个已知 YoloVision/YOLOX Temp 目录继续保留。
+- source/type relocation 与 dimension/plugin design-gate result split 不构成新的 TensorRT/CUDA runtime、real model、
+  Linux、package consumer、public package、post-publish、Owner acceptance 或 release proof。
+- 本机无仓库认可的 `pwsh`，未运行 exporter/B-tier 聚合；8 份 publishing 用户变更未触碰、未暂存；
+  未 push、未触发 GitHub Actions、未执行远程发布操作。

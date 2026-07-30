@@ -319,6 +319,12 @@ snapshot and a 133-line summary. The layout gate recomposes Git blobs `46eea3f13
 and `6c4a5c3234857443ea45e84e4b8e61f1fe5a786c`, preserving summary mapping, callback-status diagnostics,
 engine metadata counts, pointer non-exposure, and non-proof semantics.
 
+Dimension-expression snapshot and PluginCreatorV3 metadata design gates now keep their `*DesignGateResult` types in
+dedicated same-name files. The former 312-line dimension gate is split into a 108-line evaluator and a 210-line result;
+the former 300-line plugin gate is split into a 113-line evaluator and a 193-line result. Readiness and test source sets
+preserve known-surface evaluation, candidate metadata, blocker ordering, pointer non-exposure, deferred rows, and
+design-gate-only proof classification.
+
 OutputAllocator diagnostics are split across the public design owner and its internal managed runtime gate. The former
 637-line `Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeGate.cs` is reduced to a 38-line state/constructor core;
 entries, snapshots, lifecycle, shared invocation, trampoline/state, and formatting live in six partials, with request/result
