@@ -37,8 +37,8 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Export-FinalPackageReviewBun
 | 证据 | 用途 | 边界 |
 | --- | --- | --- |
 | `artifacts/release-candidate/runtime-package-matrix.json` | 运行时包矩阵、TRT/CUDA/cuDNN 组合 | 矩阵存在不等于已发布 |
-| `pack/runtime/runtime-packages.manifest.json` | full runtime package manifest | manifest 不是 public package proof |
-| `pack/runtime-split/split-runtime-packages.manifest.json` | split runtime package manifest | split layout 仍需 owner/channel 审批 |
+| `pack/runtime/runtime-packages.manifest.json` | runtime key 与用户机器依赖/编译输入目录 | manifest 不是 vendor package 发布清单，也不是 public package proof |
+| `pack/runtime-split/split-runtime-packages.manifest.json` | bridge-only package identity 与资产布局 | 只有 `role=bridge` 可 pack，仍需 Owner/channel 审批 |
 | `artifacts/package-consumer/package-consumer-validation-summary.json` | package consumer、native-copy、smoke 分类 | driver-blocked 不是 smoke passed |
 | `artifacts/local-feed-consumer/local-nuget-feed-consumer-summary.json` | 本地 feed restore/build/native-copy/dependency probe | 本地 feed 不是 nuget.org/GitHub Packages |
 | `artifacts/runtime/<key>/artifact-manifest.json` | native asset collection | asset collection 不是 runtime execution proof |

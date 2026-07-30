@@ -29,7 +29,7 @@ on:
         default: bridge
         type: string
       meta_package_version:
-        description: Optional split meta package version override
+        description: Retired compatibility input; must stay empty
         required: false
         default: ""
         type: string
@@ -44,7 +44,7 @@ on:
         default: ""
         type: string
       cuda_cudnn_package_version_map:
-        description: Optional runtime-key map for already-published CUDA/cuDNN split package versions
+        description: Retired compatibility input; must stay empty
         required: false
         default: ""
         type: string
@@ -54,7 +54,7 @@ on:
         default: ""
         type: string
       cuda_cudnn_package_release_tag_map:
-        description: Optional runtime-key map for CUDA/cuDNN split package release tags
+        description: Retired compatibility input; must stay empty
         required: false
         default: ""
         type: string
@@ -64,7 +64,7 @@ on:
         default: ""
         type: string
       tensorrt_package_version_map:
-        description: Optional runtime-key map for already-published TensorRT split package versions
+        description: Retired compatibility input; must stay empty
         required: false
         default: ""
         type: string
@@ -74,12 +74,12 @@ on:
         default: ""
         type: string
       tensorrt_package_release_tag_map:
-        description: Optional runtime-key map for TensorRT split package release tags
+        description: Retired compatibility input; must stay empty
         required: false
         default: ""
         type: string
       include_meta_package:
-        description: Build the split meta package even when only a subset of roles is selected
+        description: Retired compatibility input; must remain false
         required: false
         default: false
         type: boolean
@@ -146,7 +146,7 @@ on:
         default: bridge
         type: string
       meta_package_version:
-        description: Optional split meta package version override
+        description: Retired compatibility input; must stay empty
         required: false
         default: ""
         type: string
@@ -161,7 +161,7 @@ on:
         default: ""
         type: string
       cuda_cudnn_package_version_map:
-        description: Optional runtime-key map for already-published CUDA/cuDNN split package versions
+        description: Retired compatibility input; must stay empty
         required: false
         default: ""
         type: string
@@ -171,7 +171,7 @@ on:
         default: ""
         type: string
       cuda_cudnn_package_release_tag_map:
-        description: Optional runtime-key map for CUDA/cuDNN split package release tags
+        description: Retired compatibility input; must stay empty
         required: false
         default: ""
         type: string
@@ -181,7 +181,7 @@ on:
         default: ""
         type: string
       tensorrt_package_version_map:
-        description: Optional runtime-key map for already-published TensorRT split package versions
+        description: Retired compatibility input; must stay empty
         required: false
         default: ""
         type: string
@@ -191,12 +191,12 @@ on:
         default: ""
         type: string
       tensorrt_package_release_tag_map:
-        description: Optional runtime-key map for TensorRT split package release tags
+        description: Retired compatibility input; must stay empty
         required: false
         default: ""
         type: string
       include_meta_package:
-        description: Build the split meta package even when only a subset of roles is selected
+        description: Retired compatibility input; must remain false
         required: false
         default: false
         type: boolean

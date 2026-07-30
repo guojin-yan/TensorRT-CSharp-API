@@ -322,7 +322,7 @@ public sealed class RuntimePackageReadinessTests
         Assert.Contains("callbackRuntimeMatchedLines", script);
         Assert.Contains("callbackRuntimeDiagnostic", script);
         Assert.Contains("full-package-consumer-report", script);
-        Assert.Contains("full package consumer callback runtime report", script);
+        Assert.Contains("historical consumer callback runtime report", script);
         Assert.Contains("missingSmokeMarkers", script);
         Assert.Contains("incomplete-real-callback-runtime", script);
         Assert.Contains("debugListenerCallbackProofGapReport", script);
@@ -373,7 +373,7 @@ public sealed class RuntimePackageReadinessTests
         Assert.Contains("packageConsumerEvidenceKind", script);
         Assert.Contains("runtimeSmokeClassification", script);
         Assert.Contains("isDependencyProbeOnly", script);
-        Assert.Contains("full package consumer evidence scope:", script);
+        Assert.Contains("historical consumer evidence scope:", script);
         Assert.Contains("Runtime execution scope | Consumer status | Smoke requested | Smoke result | Classification", script);
         Assert.Contains("runtime-smoke-driver-blocked", script);
         Assert.Contains("dependency-probe-only", script);
@@ -471,16 +471,15 @@ public sealed class RuntimePackageReadinessTests
         Assert.Contains("hasCudaMemoryRange", script);
         Assert.Contains("Resolve-RuntimeRoots.ps1", script);
         Assert.Contains("split-package", script);
-        Assert.Contains("Vendor inputs are blocked, so the split package cannot be built from complete runtime staging yet", script);
-        Assert.Contains("Resolve vendor input blockers first; this split component is collected from the full runtime staging assets", script);
-        Assert.Contains("Resolve vendor input blockers first; the split collection cannot reference a complete component set", script);
-        Assert.Contains("split-collection-package", script);
-        Assert.Contains("split-collection-consumer", script);
-        Assert.Contains("vendor-inputs", script);
-        Assert.Contains("full-runtime-package", script);
-        Assert.Contains("full-package-consumer", script);
-        Assert.Contains("Invoke-LocalRuntimePackage.ps1 -RuntimePackageKey", script);
-        Assert.Contains("Test-PackageConsumer.ps1 -RuntimePackageKey", script);
+        Assert.Contains("$_.sourceRuntimeKey -eq $key -and $_.role -eq \"bridge\"", script);
+        Assert.Contains("$fullRuntimeStatus = \"retired-not-required\"", script);
+        Assert.Contains("host-vendor-inputs", script);
+        Assert.Contains("do not copy them into a package", script);
+        Assert.Contains("Test-BridgePackageRuntimeConsumer.ps1", script);
+        Assert.DoesNotContain("New-ReadinessBlocker -Category \"full-runtime-package\"", script);
+        Assert.DoesNotContain("New-ReadinessBlocker -Category \"full-package-consumer\"", script);
+        Assert.DoesNotContain("New-ReadinessBlocker -Category \"split-collection-package\"", script);
+        Assert.DoesNotContain("New-ReadinessBlocker -Category \"split-collection-consumer\"", script);
         Assert.DoesNotContain("& (Join-Path $RepositoryRoot \"eng\\Invoke-LocalRuntimePackage.ps1\")", script);
         Assert.DoesNotContain("& (Join-Path $RepositoryRoot \"eng\\Test-PackageConsumer.ps1\")", script);
     }
@@ -490,7 +489,7 @@ public sealed class RuntimePackageReadinessTests
     {
         string script = ReadSource("eng", "Test-RuntimePackageReadiness.ps1");
 
-        Assert.Contains("| Runtime key | Managed | Bridge package | Bridge consumer | Split components | Split collection | Split collection consumer | Full vendor inputs | Full runtime package | Full consumer | Overall | Runtime proof |", script);
+        Assert.Contains("| Runtime key | Managed | Bridge package | Bridge consumer | Packable roles | Legacy collection | Legacy collection consumer | Host NVIDIA inputs | Retired package | Historical consumer | Overall | Runtime proof |", script);
         Assert.Contains("bridge package consumer report was not found", script);
         Assert.Contains("bridge consumer native dependency", script);
         Assert.Contains("bridge consumer probe diagnostic", script);
@@ -583,11 +582,13 @@ public sealed class RuntimePackageReadinessTests
         Assert.Contains("split collection package consumer report does not contain", script);
         Assert.Contains("full runtime package consumer report was not found", script);
         Assert.Contains("full runtime package consumer report does not contain", script);
-        Assert.Contains("full package consumer evidence scope", script);
-        Assert.Contains("full package consumer callback runtime report:", script);
+        Assert.Contains("historical consumer evidence scope", script);
+        Assert.Contains("historical consumer callback runtime report:", script);
+        Assert.Contains("retired vendor package", script);
+        Assert.Contains("publication-allowed=False", script);
         Assert.Contains("runtime execution smoke", script);
         Assert.Contains("| Runtime execution scope | Consumer status | Smoke requested | Smoke result | Classification | Exit code | Evidence kind | Runtime execution | Dependency probe only | Real callback proof | Diagnostic | Report |", script);
-        Assert.Contains("runtime-execution=$($result.splitCollectionConsumer.isRuntimeExecutionEvidence)", script);
+        Assert.Contains("legacy split collection consumer", script);
         Assert.Contains("| Split role | Package | Status | Version |", script);
         Assert.Contains("readiness blockers", script);
         Assert.Contains("| Blocker category | Status | Detail | Next action | Suggested command | External input | Evidence path |", script);

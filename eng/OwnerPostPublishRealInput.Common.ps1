@@ -48,14 +48,14 @@ function New-OwnerPostPublishLaneSpec {
 function Get-OwnerPostPublishLaneSpecs {
   @(
     New-OwnerPostPublishLaneSpec -Id "public-package-urls-and-hashes" -Title "Public package URLs and hashes" -Fields @(
-      New-OwnerPostPublishFieldSpec "nugetManagedPackageId" "string" "NuGet small bridge/core package id."
-      New-OwnerPostPublishFieldSpec "nugetManagedPackageVersion" "version" "NuGet small bridge/core package version."
+      New-OwnerPostPublishFieldSpec "nugetManagedPackageId" "string" "NuGet managed C# API package id."
+      New-OwnerPostPublishFieldSpec "nugetManagedPackageVersion" "version" "NuGet managed C# API package version."
       New-OwnerPostPublishFieldSpec "nugetManagedPackageUrl" "url" "Public NuGet package URL."
       New-OwnerPostPublishFieldSpec "nugetManagedPackageSha256" "sha256" "Downloaded NuGet package SHA256."
-      New-OwnerPostPublishFieldSpec "githubRuntimePackageId" "string" "GitHub Packages full runtime package id."
-      New-OwnerPostPublishFieldSpec "githubRuntimePackageVersion" "version" "GitHub Packages full runtime package version."
-      New-OwnerPostPublishFieldSpec "githubRuntimePackageUrl" "url" "GitHub Packages runtime package URL."
-      New-OwnerPostPublishFieldSpec "githubRuntimePackageSha256" "sha256" "Downloaded GitHub runtime package SHA256."
+      New-OwnerPostPublishFieldSpec "githubRuntimePackageId" "string" "Legacy-named field for the GitHub Packages bridge-only package id; vendor runtime package ids are forbidden."
+      New-OwnerPostPublishFieldSpec "githubRuntimePackageVersion" "version" "Legacy-named field for the GitHub Packages bridge-only package version."
+      New-OwnerPostPublishFieldSpec "githubRuntimePackageUrl" "url" "GitHub Packages bridge-only package URL."
+      New-OwnerPostPublishFieldSpec "githubRuntimePackageSha256" "sha256" "Downloaded GitHub bridge-only package SHA256."
       New-OwnerPostPublishFieldSpec "downloadedAtUtc" "utc" "Owner download timestamp in UTC."
       New-OwnerPostPublishFieldSpec "downloadTranscriptSha256" "sha256" "Transcript hash for public package download."
     )

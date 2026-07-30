@@ -26,11 +26,14 @@ $record = [ordered]@{
   dualPackageRouteReadyFieldCount = 0
   dualPackageRouteBlockedFieldCount = $dualPackageRouteFields.Count
   dualPackageRouteIds = @("nuget-small-bridge-core", "github-packages-bridge")
+  currentDualPackageRouteIds = @("nuget-managed-plus-bridge-packages", "github-release-managed-plus-bridge-assets")
+  legacyDualPackageFieldNamesPreserved = $true
+  vendorRuntimePackagesForbidden = $true
   requiredGroups = @($fieldGroups)
   requiredFields = @($requiredFields)
   requiredOwnerEvidenceAreas = @(
-    "NuGet small bridge/core route owner authorization, public NuGet URL, downloaded nupkg hash, clean external consumer log, and post-publish clean consumer proof hash",
-    "GitHub Packages full runtime route owner authorization, restore source URL, runtime package identity/hash, DLL resolution report, and clean runtime smoke hash",
+    "NuGet managed plus bridge-only route owner authorization, public NuGet URL, downloaded nupkg hashes, clean external consumer log, and post-publish clean consumer proof hash",
+    "GitHub Packages bridge-only route owner authorization, restore source URL, bridge package identity/hash, DLL resolution report, system-installed NVIDIA dependency report, and clean runtime smoke hash",
     "managed/runtime package id/version/public source/url/sha256",
     "GitHub release asset url/sha256 or explicit not-uploaded reason",
     "NuGet push transcript/stdout/stderr/hash, publish command plan hash, managed/runtime publish command hash",

@@ -7,7 +7,7 @@
 - 你需要调试 `native/` 下 TensorRT 或 CUDA C ABI bridge。
 - 你希望重新生成 C# interop bindings，并确认 generated files 与 manifests 一致。
 - 你选择 NuGet 小包路线：NuGet 只安装 C# core API 和 C++ bridge，CUDA/TensorRT/cuDNN 由本机自行安装。
-- 你准备为 GitHub full runtime 包做本地构建验证，但尚未进行公开发布。
+- 你准备为 GitHub Release 或 NuGet-compatible source 的 managed + bridge-only 资产做本地构建验证，但尚未进行公开发布。
 
 ## 推荐环境
 
@@ -19,7 +19,7 @@
 | CMake | 3.27+ | 以 repo preset 为准 |
 | CUDA | 与目标 runtime key 匹配 | 例如 CUDA 12/13 lane |
 | TensorRT | 与目标 TRT8/TRT10/TRT11 lane 匹配 | 不同 TensorRT line 不能混用头文件和 DLL |
-| cuDNN | 目标 sample/runtime 需要时安装 | GitHub full runtime 包可携带，NuGet 小包路线要求用户自装 |
+| cuDNN | 目标 sample/runtime 需要时安装 | 所有公开通道都要求用户自装，任何 nupkg 都不得携带 |
 
 ## 环境变量
 

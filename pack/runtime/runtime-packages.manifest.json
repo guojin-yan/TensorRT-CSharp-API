@@ -11,7 +11,8 @@
   "cudaRtcPackaging": {
     "dependencyMode": "optional-dynamic",
     "bridgeOnlyBundlesNvrtc": false,
-    "fullRuntimeBundleState": "planned-pending-license-and-linux-proof",
+    "vendorPackagingRetired": true,
+    "fullRuntimeBundleState": "retired-not-packable",
     "windowsAssetsByCudaVersion": {
       "11.8": [
         "bin\\nvrtc64_112_0.dll",
@@ -37,16 +38,15 @@
       "lib64/libnvrtc-builtins.so*"
     ],
     "linuxEvidenceState": "unverified-local-assets-not-found",
-    "redistributionApprovalState": "pending-owner-and-license-review",
-    "packageHostSizeReviewState": "pending-owner-channel-review",
+    "redistributionApprovalState": "not-applicable-vendor-packaging-retired",
+    "packageHostSizeReviewState": "not-applicable-vendor-packaging-retired",
     "capabilityMatrix": "artifacts/cuda-runtime-compilation/capability-matrix.json",
     "packagingPreflightScript": "eng/Test-CudaRtcFullRuntimePackagingPreflight.ps1",
     "packagingPreflightEvidence": "artifacts/cuda-runtime-compilation/full-runtime-packaging-preflight.json",
     "assetIntegritySource": "capability-matrix-size-and-sha256",
     "licenseTextPresenceIsRedistributionApproval": false,
-    "materializationRequiresRedistributionApproval": true,
-    "materializationRequiresPackageHostSizeReview": true,
-    "materializationRequiresPlatformAssetProof": true
+    "materializationAllowed": false,
+    "assetListsAreHostDependencyDiagnosticsOnly": true
   },
   "packages": [
     {

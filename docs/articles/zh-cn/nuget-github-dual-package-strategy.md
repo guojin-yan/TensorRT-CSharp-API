@@ -1,19 +1,19 @@
-# NuGet 与 GitHub 双包发布策略
+# NuGet 与 GitHub 双通道 Bridge-only 策略
 
-TensorRtSharp4.0 采用两条发布路线，目的是兼顾易用性、包大小限制和 CUDA/TensorRT/cuDNN 的再分发边界。
+TensorRtSharp4.0 保留两种公开获取通道，但两种通道交付相同的包边界：managed C# API 与项目自有 C++ bridge。CUDA、TensorRT、cuDNN、NVRTC 及其 builtins 由用户自行安装，不进入 NuGet 包、GitHub Packages 或 GitHub Release 资产。
 
-## 两条路线
+## 两种通道
 
-| 路线 | 内容 | 适合用户 | 边界 |
+| 通道 | 内容 | 适合用户 | 证据边界 |
 | --- | --- | --- | --- |
-| GitHub full runtime 包 | C# API、C++ bridge、CUDA/TensorRT/cuDNN 运行时依赖、runtime assets | 想开箱即用、能接受大包下载的用户 | 需要 GitHub Release asset 真实证据 |
-| NuGet small bridge/core 包 | C# core API 与中间 C++ bridge 小包 | 已在机器上安装 CUDA/TensorRT/cuDNN 的用户 | 需要用户自装 NVIDIA runtime |
+| GitHub Release assets | managed `.nupkg`、匹配的 `.Bridge` `.nupkg`、源码归档、不可变 URL 与 GitHub SHA256 digest | 需要按 Release tag 下载固定资产的用户 | 下载资产先验证 URL、digest、包身份、nuspec 仓库提交和 bridge-only 内容，再进入隔离 restore staging |
+| NuGet-compatible source | managed 包与匹配的 `.Bridge` 包 | 希望使用标准 `PackageReference` 的用户 | 记录公开 source、解析版本、下载 hash 与 restore 日志；restore/build 不是 runtime proof |
 
-这两条路线可以同时存在。GitHub full runtime 包解决大依赖分发问题；NuGet 小包降低安装门槛，便于项目宣传和普通 .NET 用户引用。
+通道不同不代表包内容不同。历史 `CudaCudnn`、`TensorRt`、`CudaRtc`、collection、meta 和 full-runtime identity 只用于清理与审计，不能重新 pack、push 或上传到 Release。
 
-## NuGet 小包使用模型
+## 用户安装模型
 
-用户安装 NuGet 包后，需要在本机安装 CUDA、TensorRT、cuDNN，并通过标准路径或环境变量让 probing 找到 native runtime：
+consumer 同时引用 managed 与匹配的 bridge 包，并让 probing 找到机器上的 NVIDIA runtime：
 
 ```powershell
 $env:JYPPX_ENABLE_DEVELOPMENT_PROBING = "1"
@@ -21,47 +21,30 @@ $env:JYPPX_TENSORRT_ROOT = "C:\nvidia\TensorRT-10.x"
 $env:JYPPX_CUDA_ROOT = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.x"
 ```
 
-这种模式下，NuGet 包不应该声明已经包含所有 NVIDIA runtime。文档必须明确用户负责安装和版本匹配。
+文档和包 metadata 必须明确用户负责 NVIDIA 依赖的安装、许可与版本匹配。bridge 包只能包含 `jyppxtrtbridge.dll` 或 `libjyppxtrtbridge.so`。
 
-## GitHub Full Runtime 使用模型
+## GitHub Release 资产验证
 
-GitHub release 可以承载大体积 runtime 包，适合包含：
+GitHub Release 不是 NuGet feed。仓库执行器会下载公开 managed/bridge 资产，验证 GitHub digest 与 nupkg SHA256，把验证后的文件放入隔离目录，并仍通过 `PackageReference` restore：
 
-- Windows x64 native bridge。
-- CUDA runtime assets。
-- TensorRT runtime assets。
-- cuDNN runtime assets。
-- 版本矩阵说明。
-- SHA256 和 asset metadata。
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Invoke-PublicReleaseBridgePackageConsumer.ps1 `
+  -ManagedReleaseTag <managed-tag> `
+  -BridgeReleaseTag <bridge-tag> `
+  -SourceRuntimeKey win-x64-trt10.11-cuda12.9-cudnn9.22
+```
 
-但 GitHub asset 上传必须由 Owner 执行或明确授权，本项目脚本不能自动上传。生成 release bundle、package review、candidate record 都不是 GitHub 发布 proof，也不能替代真实发布 proof。只有 Owner 提供的公开渠道、下载元数据、hash、外部消费者日志和最终授权能进入发布闭环。
+managed 与 bridge 的 nuspec `repository commit` 必须一致。`-AllowCrossCommitPair` 仅用于诊断历史资产，并且永远不能晋级 public asset consumer evidence、package-consumer-runtime proof 或 post-publish proof。
 
 ## 证明边界
 
-| 材料 | 是否可作为公开发布 proof |
+| 材料 | 是否可作为公开消费 proof |
 | --- | --- |
-| local feed consumer | 否 |
-| ProjectReference consumer | 否 |
-| direct `.nupkg` install | 否 |
-| build-only 或 dependency-probe-only | 否 |
-| pre-publish smoke | 否 |
-| failedBlockerCount=0 | 否 |
-| 公开包 URL + SHA256 + downloaded metadata + CleanConsumer restore/build/smoke | 是，仍需 validator |
-| Owner push transcript 或 GitHub-only lane reason | 是，仍需与包证据交叉校验 |
+| local feed 或 ProjectReference consumer | 否 |
+| direct `.nupkg` / DLL 引用 | 否 |
+| build-only、dependency-probe-only 或 pre-publish smoke | 否 |
+| 单独的 URL、dashboard、截图或 `failedBlockerCount=0` | 否 |
+| 公开 managed/bridge URL + digest + 下载 hash + 同提交 provenance + clean consumer runtime 日志 | 候选，仍需独立 validator 与 Owner 审核 |
+| post-publish clean consumer、真实 host metadata、日志 hash 与 Owner 决策 | 可进入最终发布闭环 |
 
-## 发布前必须回填
-
-- 公开包 URL。
-- 包 SHA256。
-- 下载来源和下载元数据。
-- CleanConsumer restore/build/smoke 日志与 SHA256。
-- PostPublish restore/build/smoke 日志与 SHA256。
-- host runtime metadata。
-- package identity 和 dependency graph。
-- rollback review。
-- final close decision。
-- final release close approval。
-
-## 文档口径
-
-对外文章可以说“项目提供两条包路线”，但不能说“已经公开发布完成”，除非最终 release gates 已被真实 Owner evidence 关闭。宣传文章要把安装路径讲清楚，也要把 proof 边界讲清楚。
+对外可以说明项目提供 GitHub Release 与 NuGet-compatible source 两种 managed + bridge-only 通道；在真实公开包、clean consumer、post-publish 与 Owner validator 全部通过前，不能声称发布闭环已经完成。

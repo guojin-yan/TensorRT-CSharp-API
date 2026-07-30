@@ -1,160 +1,106 @@
-# Runtime Distribution Strategy
+# Bridge Package Distribution Strategy
 
-> Policy update (2026-07-30): the full/vendor runtime distribution route is retired. Active distribution is limited to the managed C# package, one project-owned bridge binary per `.Bridge` package, and tracked source archives. CUDA, cuDNN, TensorRT, NVRTC, parser, plugin, and builder-resource libraries are external consumer-installed dependencies. Older component/meta package material below is retained only as historical context.
+TensorRtSharp publishes only the managed C# package, project-owned `.Bridge` packages, and tracked source archives. CUDA, cuDNN, TensorRT, NVRTC, parser, plugin, and builder-resource libraries are consumer-installed prerequisites and never package or Release assets.
 
-## Current reality
+## Compatibility keys
 
-Runtime packages must now be versioned by the exact major/minor deployment combination:
+Every bridge build is identified by the exact deployment combination:
 
-- TensorRT major/minor, for example `trt10.11`
-- CUDA major/minor, for example `cuda11.8`
-- cuDNN major/minor, for example `cudnn8.9`
+- TensorRT major/minor, for example `trt10.11`;
+- CUDA major/minor, for example `cuda12.9`;
+- cuDNN major/minor, for example `cudnn9.22`;
+- RID and, on Linux, the target distribution version.
 
-Example package key:
+Example key and package ID:
 
-- `win-x64-trt10.11-cuda11.8-cudnn8.9`
+```text
+win-x64-trt10.11-cuda12.9-cudnn9.22
+JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge
+```
 
-Example package id:
+The key selects bridge compilation headers and import libraries and documents the machine-installed runtime expected by smoke tests. It does not authorize bundling those NVIDIA libraries.
 
-- `JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda11.8.cudnn8.9`
+## Windows matrix
 
-Do not use ambiguous names such as `win-x64-trt10-cuda11` for runtime packages. CMake preset names may still use line-based labels such as `win-x64-trt10-cuda11-release` because they describe a build line rather than a NuGet runtime identity.
+Current Windows x64 bridge targets:
 
-## Windows runtime matrix
+- `win-x64-trt8.6-cuda11.8-cudnn8.9`;
+- `win-x64-trt8.6-cuda12.1-cudnn8.9`;
+- `win-x64-trt10.11-cuda11.8-cudnn8.9`;
+- `win-x64-trt10.11-cuda12.9-cudnn9.22`;
+- `win-x64-trt11.0-cuda12.9-cudnn9.22`;
+- `win-x64-trt11.0-cuda13.2-cudnn9.22`.
 
-Current Windows runtime package targets:
+A successful compile is build evidence only. Runtime proof for each row requires a compatible driver, the matching machine-installed TensorRT/CUDA/cuDNN libraries, a repository-external consumer, enqueue/readback, logs, and hashes. A CUDA 12.9 host cannot close the CUDA 13.2 runtime row.
 
-- `win-x64-trt8.6-cuda11.8-cudnn8.9`
-- `win-x64-trt8.6-cuda12.1-cudnn8.9`
-- `win-x64-trt10.11-cuda11.8-cudnn8.9`
-- `win-x64-trt10.11-cuda12.9-cudnn9.22`
-- `win-x64-trt11.0-cuda12.9-cudnn9.22`
-- `win-x64-trt11.0-cuda13.2-cudnn9.22`
+## Linux matrix
 
-CUDA `12.9` is installed on the current Windows development machine. Runtime packages targeting `cuda12.9` must now build and validate against CUDA `12.9`; the earlier CUDA `12.3` fallback is retired and must not be used for locally validated packages.
+Linux keys include distribution and architecture. Modeled x64 lines cover Ubuntu 20.04, 22.04, and 24.04 where matching NVIDIA repositories exist. ARM64/SBSA, Jetson/L4T, and non-Ubuntu distributions require separate bridge identities, runners or containers, dependency sources, and runtime evidence.
 
-Current Windows package-consumer readiness:
+`pack/runtime/linux-runtime-targets.manifest.json` remains the target catalog. `runtime_key_set` aliases may select a matrix for build validation, but every published `.Bridge` package still has its own exact key and proof row.
 
-- `win-x64-trt10.11-cuda11.8-cudnn8.9`: package consumer smoke passed.
-- `win-x64-trt10.11-cuda12.9-cudnn9.22`: package consumer smoke passed.
-- `win-x64-trt11.0-cuda12.9-cudnn9.22`: package consumer smoke passed.
-- `win-x64-trt11.0-cuda13.2-cudnn9.22`: 2026-06-14 full split package set and collection package packed locally, restore/build/native-copy passed with `19/19` native asset patterns, but readiness remains blocked until CUDA 13 runtime/builder smoke is available.
+## Package contents
 
-## Linux runtime matrix
+The sole packable native role is `Bridge`:
 
-Linux package keys must include the distribution version and architecture. The default hosted Linux release line is Ubuntu 22.04 x64:
+- Windows: `runtimes/win-x64/native/jyppxtrtbridge.dll`;
+- Linux: `runtimes/<linux-rid>/native/libjyppxtrtbridge.so`.
 
-- `linux-x64-ubuntu22.04-trt8.6-cuda11.8-cudnn8.9`
-- `linux-x64-ubuntu22.04-trt8.6-cuda12.1-cudnn8.9`
-- `linux-x64-ubuntu22.04-trt10.11-cuda11.8-cudnn8.9`
-- `linux-x64-ubuntu22.04-trt10.11-cuda12.9-cudnn9.22`
-- `linux-x64-ubuntu22.04-trt11.0-cuda12.9-cudnn9.22`
-- `linux-x64-ubuntu22.04-trt11.0-cuda13.2-cudnn9.22`
+Historical `CudaCudnn`, `TensorRt`, `CudaRtc`, collection, meta, and full-vendor identities remain in selected manifests only for cleanup and compatibility audit. Their projects are non-packable. `eng/Test-ExternalVendorRuntimePackagePolicy.ps1` rejects those identities and NVIDIA binaries on every current pack or upload path.
 
-Ubuntu 24.04 x64 is modeled only for the modern combinations that exist in NVIDIA's Ubuntu 24.04 repo. Ubuntu 20.04 x64 is a separate hosted-container line that runs on a GitHub-hosted runner with an `ubuntu:20.04` job container. arm64/SBSA, Jetson/L4T, and non-Ubuntu distributions must be added as separate package lines after the matching NVIDIA repository and runner strategy are modeled.
+## Public channels
 
-The `runtime-linux` workflow can resolve package lines through `runtime_key_set`:
+The same managed plus bridge-only boundary is available through two channels:
 
-- `ubuntu22-hosted`: the default hosted publication line with all six Ubuntu 22.04 x64 combinations.
-- `hosted-all`: every hosted Linux line, currently the six Ubuntu 22.04 x64 combinations plus the three modern Ubuntu 24.04 x64 combinations.
-- `ubuntu24-hosted`: only the modern Ubuntu 24.04 x64 combinations.
-- `hosted-container-ubuntu20`: the modeled Ubuntu 20.04 x64 combinations; dispatch with `runner_mode=hosted-container`.
-- `custom`: requires explicit `runtime_keys`.
+1. A NuGet-compatible source using normal `PackageReference` restore.
+2. GitHub Release `.nupkg` assets with immutable download URLs and GitHub SHA256 digests.
 
-Explicit `runtime_keys` always win. When `runtime_keys` is empty, `runtime_key_set` selects the package line. This keeps the normal release path on Ubuntu 22.04 hosted while still making hosted-all and Ubuntu 20.04 hosted-container publication explicit and repeatable.
+GitHub Release is not a NuGet feed. `eng/Invoke-PublicReleaseBridgePackageConsumer.ps1` downloads the managed and bridge assets, verifies the remote digests, package identities, nuspec repository URL/commit, and bridge-only contents, then places the verified files in isolated restore staging. A direct `.nupkg` or DLL reference is not accepted.
 
-The `release-bundle` workflow now has two Linux orchestration lanes:
+Managed and bridge nuspec files must identify the formal repository and the same source commit. `-AllowCrossCommitPair` is diagnostic-only and cannot promote public asset consumer evidence, package-consumer-runtime proof, or post-publish proof.
 
-- `run_linux_runtime_packaging`: hosted Linux publication, defaulting to `hosted-all` so Ubuntu 22.04 x64 and the modeled Ubuntu 24.04 x64 lines are dispatched together.
-- `run_linux_ubuntu20_runtime_packaging`: Ubuntu 20.04 x64 hosted-container publication, defaulting to `hosted-container-ubuntu20` and always dispatching `runner_mode=hosted-container`.
+## Build workflow
 
-Use separate release-bundle inputs for Linux split roles and stable dependency versions. Routine bridge or managed changes can publish Linux `bridge,collection` while pinning already-published `CudaCudnn` and `TensorRt` versions; NVIDIA dependency refreshes should use `cuda-cudnn`, `tensorrt`, or `all`. When one dispatch spans multiple dependency publication versions, such as `hosted-all`, pin the dependencies with runtime-key maps instead of one global version. The current hosted Linux bridge/collection refresh maps `linux-x64-ubuntu22.04-*` to `4.0.6167` and `linux-x64-ubuntu24.04-*` to `4.0.6169`; Ubuntu 20.04 hosted-container bridge refreshes map `linux-x64-ubuntu20.04-*` to `4.0.6171`. The default release tag is `v<resolved package version>` unless a release-tag map is supplied. Less common overrides, such as delivery mode, release tags for stable dependency assets, bridge/meta package versions, and skip-validation toggles, are passed through `release_config_json` to keep the manual GitHub Actions form under the `workflow_dispatch` input limit.
+Resolve and validate machine-local inputs, then pack only the bridge role:
 
-Do not reduce the published release model to the current latest tag. The Windows line still has six modeled combinations, Ubuntu 20.04 x64 has three modeled combinations, Ubuntu 22.04 x64 has six modeled combinations, and Ubuntu 24.04 x64 has three modeled combinations. Use the runtime publication index artifact as the readable map when a release tag only contains a subset of the runtime lines.
+```powershell
+$roots = powershell -ExecutionPolicy Bypass -File .\eng\Resolve-RuntimeRoots.ps1 `
+  -RuntimePackageKey win-x64-trt10.11-cuda12.9-cudnn9.22 | ConvertFrom-Json
 
-Prefer `eng/Invoke-RemoteReleaseBundle.ps1` when dispatching releases from a workstation. The script keeps supported top-level workflow inputs as `-f key=value` flags and serializes advanced release settings into `release_config_json`, which avoids accidental dispatch failures from undeclared workflow inputs.
+powershell -ExecutionPolicy Bypass -File .\eng\Validate-WindowsRuntimeInputs.ps1 `
+  -RuntimePackageKey win-x64-trt10.11-cuda12.9-cudnn9.22 `
+  -TensorRtRoot $roots.tensorRtRoot `
+  -CudaRoot $roots.cudaRoot `
+  -CudnnRoot $roots.cudnnRoot
 
-Hosted Ubuntu 20.04, Ubuntu 22.04, and Ubuntu 24.04 Linux packages now have remote publication evidence. Future ARM/Jetson/non-Ubuntu lines still require matching package identities, runners or containers, dependency sources, and package-consumer evidence before publication.
+powershell -ExecutionPolicy Bypass -File .\eng\Invoke-LocalSplitRuntimePackage.ps1 `
+  -RuntimePackageKey win-x64-trt10.11-cuda12.9-cudnn9.22 `
+  -SplitPackageRole bridge
+```
 
-## Current publication map
+`eng/Invoke-LocalRuntimePackage.ps1` is retired and fails closed. Non-bridge split roles also fail closed.
 
-Runtime packages are intentionally distributed across runtime release tags instead of being copied into every managed release:
+Formal releases run only from `guojin-yan/TensorRT-CSharp-API`. The `grape-yan` repository is validation-only and has no package push or Release upload lane. Current release workflows may publish:
 
-- `v4.0.6156`: Windows x64 runtime matrix for all six modeled Windows dependency combinations.
-- `v4.0.6167`: Linux x64 Ubuntu 22.04 runtime matrix for all six hosted Ubuntu 22.04 combinations.
-- `v4.0.6169`: Linux x64 Ubuntu 24.04 runtime matrix for the three modern hosted Ubuntu 24.04 combinations.
-- `v4.0.6170`: managed package only.
-- `v4.0.6171`: Linux x64 Ubuntu 20.04 runtime matrix for the three hosted-container Ubuntu 20.04 combinations.
+- `JYPPX.TensorRT.CSharp.API`;
+- matching `.Bridge` packages;
+- tracked-files-only source archives.
 
-Run `release-publication-audit.yml` or `eng/Export-RuntimePublicationIndex.ps1` to generate `artifacts/publication-index/runtime-publication-index.md`, which is the canonical readable map from runtime combination to release tag and GitHub Packages entry.
+## Historical cleanup
 
-## Distribution lanes
+Vendor-bearing GitHub Package versions and matching Release assets published in June 2026 were removed on 2026-07-30 after exact fingerprint review. Historical release tags and manifest identities may still appear in audits, but they are not a source of current packages and must not be republished.
 
-Current lane guidance:
+## Evidence boundary
 
-- `TRT8` Windows packages are public-preview candidates only after NVIDIA redistribution terms and package size limits are reviewed.
-- `TRT10` Windows packages are private-feed or split-delivery candidates because builder resources, plugins, and parser assets can be large. Both Windows TRT10 package-consumer smoke paths have 2026-06-12 local evidence.
-- `TRT11` Windows CUDA `12.9` is a private-feed candidate with package-consumer smoke evidence. Windows CUDA `13.2` remains blocked until driver/runtime-compatible smoke is available.
-- Hosted Ubuntu 20.04, Ubuntu 22.04, and Ubuntu 24.04 Linux packages have remote publication evidence; ARM/Jetson/non-Ubuntu lines remain future separate package lines.
+Public release closure requires all of the following for the intended rows:
 
-## nuget.org size boundary
+- owner-authorized managed, bridge, and source publication;
+- public URL, package identity, version, size, and SHA256;
+- same-commit managed/bridge provenance;
+- repository-external restore/build/runtime smoke;
+- host driver, GPU, TensorRT, CUDA, cuDNN, and optional NVRTC metadata;
+- runtime stdout/stderr and structured report hashes;
+- post-publish clean consumer verification;
+- strict validators and final Owner decision.
 
-nuget.org has an approximately `250 MB` per-package size limit. Windows split runtime packages should be audited per release because CUDA/cuDNN and TensorRT packages can still exceed that size. Therefore:
-
-- After owner approval and package-consumer/post-publish gates pass, the `JYPPX.TensorRT.CSharp.API` managed package is suitable for nuget.org.
-- After owner approval and package-consumer/post-publish gates pass, small `Bridge` and collection packages are suitable for nuget.org or GitHub Packages when needed.
-- Most CUDA/cuDNN and TensorRT dependency component packages are not suitable for nuget.org and should normally stay on GitHub Packages when a NuGet feed is required, or as GitHub Release assets when direct `.nupkg` download is acceptable.
-- GitHub Release assets are not queried by NuGet restore. If stable dependency packages stay only on a Release, validation and consumers must download the matching `.nupkg` files into a local package source first.
-- If only the local C ABI bridge or C# wrapper changes later, republish the `Bridge`, collection, and managed packages. Do not republish `CudaCudnn` or `TensorRt` packages unless the corresponding NVIDIA dependency set changes.
-- Use `cuda_cudnn_package_version_map` and `tensorrt_package_version_map` when a collection package references stable dependency packages that were published under different versions for different runtime keys.
-
-## Engineering rules
-
-Each runtime package entry in `pack/runtime/runtime-packages.manifest.json` records:
-
-- `tensorRtVersion`
-- `cudaVersion`
-- `cudnnVersion`
-- `cudnnMajor`
-- `distributionTier`
-- `validationState`
-- `distributionNotes`
-
-Validation rules:
-
-- Package key and package id must include TensorRT, CUDA, and cuDNN major/minor fragments.
-- Full vendor patch versions stay in manifest metadata and documentation, not in package identity.
-- CUDA `12.9` target packages can only be marked `local-validated` when the exact CUDA `12.9` toolkit and matching TensorRT/cuDNN assets were used.
-- Private-feed and split-delivery readiness require `local-validated`; `pending-local-validation` and `dry-run-only` must stay blocked.
-- NVIDIA binary dependencies must not be committed to Git.
-
-Supporting scripts:
-
-- `eng/Validate-RuntimeManifest.ps1`
-- `eng/Validate-WindowsRuntimeInputs.ps1`
-- `eng/Collect-RuntimeAssets.ps1`
-- `eng/Export-RuntimeDistributionReport.ps1`
-- `eng/Export-RuntimeDeliveryStrategy.ps1`
-- `eng/Test-RuntimePublishReadiness.ps1`
-- `eng/Export-ReleaseCandidateChecklist.ps1`
-
-## Split Runtime Components
-
-The split runtime model applies to Windows runtime combinations that are too large or too stable to republish with every managed-code release:
-
-- `Bridge`: local C ABI bridge, republished when native wrapper code changes.
-- `CudaCudnn`: CUDA runtime, cuDNN, and related shared assets, republished only when the CUDA/cuDNN dependency set changes.
-- `TensorRt`: TensorRT runtime, parser, plugin, and builder-resource assets, republished only when the TensorRT dependency set changes.
-- collection package: the original runtime package ID, republished when a new tested component-version combination should be advertised.
-
-The managed package can release independently from these runtime component packages. Routine C# or bridge changes should publish only the managed package, `Bridge`, and collection package while pinning the existing `CudaCudnn` and `TensorRt` package versions.
-
-## Release boundary
-
-Formal public distribution is blocked until these issues are resolved:
-
-- NVIDIA CUDA / cuDNN / TensorRT redistribution terms are reviewed.
-- NuGet.org package-size practicality is reviewed.
-- Runtime package keys, package IDs, component package versions, and manifest metadata are aligned.
-- Package consumer validation covers the intended release packages.
-- TensorRT 11 packages pass real adapter-backed runtime/package smoke on the intended CUDA driver/runtime stack.
+Local pack, local feed, ProjectReference, direct `.nupkg`, dependency probe, build-only output, historical vendor-package evidence, or a green dashboard cannot substitute for these records.

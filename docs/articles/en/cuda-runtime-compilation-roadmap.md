@@ -105,9 +105,9 @@ Compile-only output, artifact hashes, synthetic kernels, and a local Toolkit are
 ### F. Packaging and Cross-Platform Proof
 
 - The bridge-only NuGet package does not bundle NVRTC; callers install a matching CUDA Toolkit and receive focused dependency diagnostics.
-- Full GitHub runtime packages add `nvrtc` and the matching `nvrtc-builtins`, with Windows/Linux manifests, split-package roles, hashes, size checks, and redistribution review.
-- The local packaging preflight verifies Windows assets `4/4` and Linux assets `0/4`. It treats license-text presence as review input, never as redistribution approval. An explicit `cuda-rtc` split-pack request fails while any blocker remains.
-- Validate Windows x64, Linux x64, and CUDA 11.8/12.1/12.9/13.2. Runtime-key declarations must match actual native dependencies and package assets.
+- `.Bridge` packages never carry `nvrtc` or `nvrtc-builtins`. Consumers install a matching CUDA Toolkit, and the Windows/Linux diagnostics record machine paths, versions, sizes, and hashes.
+- The historical packaging preflight is retained only as a host-dependency identity audit. The `cuda-rtc` package role is `retired-not-packable`, and every explicit non-bridge pack request fails before asset collection.
+- Validate Windows x64, Linux x64, and CUDA 11.8/12.1/12.9/13.2. Runtime-key declarations must match actual host dependencies; vendor files are never package assets.
 - The Windows CUDA 12.9 local-feed clean consumer now compiles and launches without `ProjectReference` or development probing. Repeat the same smoke against a public source after publishing; the current result must remain a local candidate.
 
 ## Evidence Ladder

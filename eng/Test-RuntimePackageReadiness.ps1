@@ -1533,19 +1533,18 @@ function New-RuntimeProofBlockerOwnerAction {
   }
 
   $summary = switch ($RuntimeProofStatus) {
-    "ready" { "runtime proof is ready from package consumer smoke." ; break }
-    "blocked-by-cuda-driver" { "package consumer smoke reached the packaged runtime but CUDA driver/runtime compatibility blocked execution; this is owner-action-required and is not smoke passed." ; break }
+    "ready" { "runtime proof is ready from bridge-only package consumer smoke with host-installed NVIDIA dependencies." ; break }
+    "blocked-by-cuda-driver" { "bridge package consumer smoke reached the host runtime but CUDA driver/runtime compatibility blocked execution; this is owner-action-required and is not smoke passed." ; break }
     "blocked-by-application-control" { "package consumer smoke was blocked by Windows application control policy; this is owner-action-required and is not smoke passed." ; break }
-    "not-requested" { "full package consumer runtime smoke has not been requested; build/native-copy evidence is not runtime proof." ; break }
-    default { "runtime proof is incomplete; inspect package consumer smoke and runtime readiness evidence." ; break }
+    "not-requested" { "bridge package consumer runtime smoke has not been requested; build/native-copy evidence is not runtime proof." ; break }
+    default { "runtime proof is incomplete; inspect bridge package consumer smoke and runtime readiness evidence." ; break }
   }
 
   $externalInputRequired = [string]$RuntimeProofStatus -ne "ready"
   $suggestedCommands = @(
     "pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Resolve-RuntimeRoots.ps1 -RuntimePackageKey $Key",
-    "pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Materialize-WindowsVendorRuntimeAssets.ps1 -RuntimePackageKey $Key -DryRun",
-    "pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Invoke-LocalRuntimePackage.ps1 -RuntimePackageKey $Key",
-    "pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-PackageConsumer.ps1 -RuntimePackageKey $Key -RunSmoke -AllowSmokeFailure",
+    "pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Invoke-LocalSplitRuntimePackage.ps1 -SourceRuntimeKey $Key -SplitPackageRole bridge",
+    "pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-BridgePackageRuntimeConsumer.ps1 -SourceRuntimeKey $Key -AllowRuntimeSmokeFailure",
     "pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Export-ExternalRuntimeProofRecordTemplate.ps1 -RuntimePackageKey $Key",
     "pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-ExternalRuntimeProofRecord.ps1",
     "pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Export-ReleaseEvidenceBundle.ps1"
@@ -1553,14 +1552,14 @@ function New-RuntimeProofBlockerOwnerAction {
 
   $externalInputs = @(
     "compatible NVIDIA driver for the selected CUDA runtime",
-    "CUDA runtime assets matching the runtime package key",
-    "TensorRT runtime assets matching the runtime package key",
-    "cuDNN runtime assets when the package line requires cuDNN",
+    "machine-installed CUDA runtime matching the runtime package key",
+    "machine-installed TensorRT runtime matching the runtime package key",
+    "machine-installed cuDNN runtime when the package line requires cuDNN",
     "GPU host allowed to execute package-consumer runtime smoke"
   )
 
   $evidencePaths = @(
-    "artifacts/package-consumer/package-consumer-validation-summary.json",
+    "artifacts/package-consumer/bridge-runtime/$Key/bridge-package-runtime-consumer-proof.json",
     "artifacts/package-readiness/runtime-package-readiness-summary.json",
     "artifacts/final-release/external-runtime-proof-record-template.json",
     "artifacts/final-release/external-runtime-proof-validation.json",
@@ -2046,7 +2045,7 @@ function New-RuntimeDeserializationDependencyDiagnosticsEvidence {
     "runtime-deserialization-precheck-incomplete"
   }
   elseif (-not $fullPackageConsumerReportPresent) {
-    "full-package-consumer-report-missing"
+    "bridge-package-consumer-report-missing"
   }
   elseif (-not $fullPackageConsumerSmokeRequested) {
     "runtime-smoke-not-requested"
@@ -2062,10 +2061,10 @@ function New-RuntimeDeserializationDependencyDiagnosticsEvidence {
   }
 
   $nextOwnerAction = switch ($runtimeProofBlockerCategory) {
-    "cuda-driver-runtime-compatibility" { "Run full package consumer smoke on a host with a compatible NVIDIA driver, then attach a promotable package-consumer-runtime external proof record."; break }
-    "runtime-smoke-not-requested" { "Run Test-PackageConsumer.ps1 with -RunSmoke for the selected runtime package key and refresh runtime readiness evidence."; break }
-    "full-package-consumer-report-missing" { "Generate the full package consumer report before evaluating runtime proof."; break }
-    "dependency-probe-only" { "Replace dependency-probe-only evidence with successful full package consumer runtime smoke evidence."; break }
+    "cuda-driver-runtime-compatibility" { "Run bridge package consumer smoke on a host with a compatible NVIDIA driver, then attach a promotable package-consumer-runtime external proof record."; break }
+    "runtime-smoke-not-requested" { "Run Test-BridgePackageRuntimeConsumer.ps1 for the selected runtime package key and refresh runtime readiness evidence."; break }
+    "bridge-package-consumer-report-missing" { "Generate the bridge package runtime consumer report before evaluating runtime proof."; break }
+    "dependency-probe-only" { "Replace dependency-probe-only evidence with successful bridge package consumer runtime smoke evidence."; break }
     "plugin-library-dependency-diagnostics-incomplete" { "Complete plugin library dependency diagnostics before attempting runtime proof promotion."; break }
     default { "Inspect blocked prerequisites, refresh package consumer evidence, and provide a promotable package-consumer-runtime proof record."; break }
   }
@@ -8354,7 +8353,7 @@ function Write-ReadinessReports {
   $lines = New-Object System.Collections.Generic.List[string]
   $lines.Add("# Runtime Package Readiness Summary")
   $lines.Add("")
-  $lines.Add("| Runtime key | Managed | Bridge package | Bridge consumer | Split components | Split collection | Split collection consumer | Full vendor inputs | Full runtime package | Full consumer | Overall | Runtime proof |")
+  $lines.Add("| Runtime key | Managed | Bridge package | Bridge consumer | Packable roles | Legacy collection | Legacy collection consumer | Host NVIDIA inputs | Retired package | Historical consumer | Overall | Runtime proof |")
   $lines.Add("| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |")
   foreach ($result in $Results) {
     $splitComponentSummary = "$($result.splitPackages.status) $($result.splitPackages.foundCount)/$($result.splitPackages.expectedCount)"
@@ -8476,17 +8475,17 @@ function Write-ReadinessReports {
     $lines.Add("- real callback trampoline diagnostic: $($result.realCallbackTrampolineGate.diagnostic)")
     $lines.Add("- real callback runtime evidence schema: $($result.realCallbackRuntimeEvidenceSchema.status); marker=``$($result.realCallbackRuntimeEvidenceSchema.marker)``; evidence-kind=$($result.realCallbackRuntimeEvidenceSchema.evidenceKind); runtime-evidence=$($result.realCallbackRuntimeEvidenceSchema.runtimeEvidenceKind)")
     $lines.Add("- real callback runtime evidence: $($result.realCallbackRuntimeEvidence.status); marker=``$($result.realCallbackRuntimeEvidence.marker)``; evidence-kind=$($result.realCallbackRuntimeEvidence.evidenceKind); proof=$($result.realCallbackRuntimeEvidence.isRealCallbackRuntimeProof); source=$($result.realCallbackRuntimeEvidence.source)")
-    $lines.Add("- split components: $($result.splitPackages.status) $($result.splitPackages.foundCount)/$($result.splitPackages.expectedCount)")
-    $lines.Add("- split collection package: $($result.splitCollectionPackage.status) ``$($result.splitCollectionPackage.version)``")
-    $lines.Add("- split collection consumer: $($result.splitCollectionConsumer.status) $($result.splitCollectionConsumer.smokeResult); runtime-execution=$($result.splitCollectionConsumer.isRuntimeExecutionEvidence)")
-    $lines.Add("- full runtime package: $($result.fullRuntimePackage.status) ``$($result.fullRuntimePackage.version)``")
-    $lines.Add("- full package consumer: $($result.fullPackageConsumer.status) $($result.fullPackageConsumer.smokeResult)")
-    $lines.Add("- full package consumer evidence scope: $($result.fullPackageConsumer.evidenceKind); classification=$($result.fullPackageConsumer.runtimeSmokeClassification); full-runtime=$($result.fullPackageConsumer.isFullRuntimeEvidence); runtime-execution=$($result.fullPackageConsumer.isRuntimeExecutionEvidence); dependency-probe-only=$($result.fullPackageConsumer.isDependencyProbeOnly); real-callback-proof=$($result.fullPackageConsumer.isRealCallbackRuntimeProof)")
-    $lines.Add("- full package consumer callback runtime report: status=$($result.fullPackageConsumer.callbackRuntimeEvidenceStatus); evidence-kind=$($result.fullPackageConsumer.callbackRuntimeEvidenceKind); proof=$($result.fullPackageConsumer.callbackRuntimeIsProof); diagnostic=$($result.fullPackageConsumer.callbackRuntimeDiagnostic)")
+    $lines.Add("- packable split roles: $($result.splitPackages.status) $($result.splitPackages.foundCount)/$($result.splitPackages.expectedCount); policy=bridge-only")
+    $lines.Add("- legacy split collection package: $($result.splitCollectionPackage.status) ``$($result.splitCollectionPackage.version)``; publication-allowed=False")
+    $lines.Add("- legacy split collection consumer: $($result.splitCollectionConsumer.status) $($result.splitCollectionConsumer.smokeResult); historical-only=True")
+    $lines.Add("- retired vendor package: $($result.fullRuntimePackage.status); publication-allowed=False; historical version=``$($result.fullRuntimePackage.version)``")
+    $lines.Add("- historical vendor-package consumer: $($result.fullPackageConsumer.status) $($result.fullPackageConsumer.smokeResult); not-current-package-proof=True")
+    $lines.Add("- historical consumer evidence scope: $($result.fullPackageConsumer.evidenceKind); classification=$($result.fullPackageConsumer.runtimeSmokeClassification); runtime-execution=$($result.fullPackageConsumer.isRuntimeExecutionEvidence); dependency-probe-only=$($result.fullPackageConsumer.isDependencyProbeOnly); real-callback-proof=$($result.fullPackageConsumer.isRealCallbackRuntimeProof)")
+    $lines.Add("- historical consumer callback runtime report: status=$($result.fullPackageConsumer.callbackRuntimeEvidenceStatus); evidence-kind=$($result.fullPackageConsumer.callbackRuntimeEvidenceKind); proof=$($result.fullPackageConsumer.callbackRuntimeIsProof); diagnostic=$($result.fullPackageConsumer.callbackRuntimeDiagnostic)")
     $lines.Add("- runtime execution smoke: $($result.runtimeExecution.status); $($result.runtimeExecution.diagnostic)")
     $lines.Add("- runtime proof status: $($result.runtimeProofStatus); release-required=$($result.runtimeProofRequiredForRelease); $($result.runtimeProofDiagnostic)")
     $lines.Add("- runtime proof blocker owner action: $($result.runtimeProofBlockerOwnerAction.status); category=$($result.runtimeProofBlockerOwnerAction.blockerCategory); external-input=$($result.runtimeProofBlockerOwnerAction.externalInputRequired); why-not-smoke-passed=$($result.runtimeProofBlockerOwnerAction.whyNotSmokePassed)")
-    $lines.Add("- vendor roots: TensorRT=``$($result.fullVendorInputs.tensorRtRoot)`` CUDA=``$($result.fullVendorInputs.cudaRoot)`` cuDNN=``$($result.fullVendorInputs.cudnnRoot)``")
+    $lines.Add("- host NVIDIA roots (never package assets): TensorRT=``$($result.fullVendorInputs.tensorRtRoot)`` CUDA=``$($result.fullVendorInputs.cudaRoot)`` cuDNN=``$($result.fullVendorInputs.cudnnRoot)``")
     $lines.Add("- readiness blockers: $(@($result.readinessBlockers).Count)")
 
     if ($result.runtimeProofBlockerOwnerAction) {
@@ -9019,7 +9018,7 @@ foreach ($key in $keys) {
   $managedEvidence = New-PackageEvidence -Directory $ManagedPackageDirectory -PackageId "JYPPX.TensorRT.CSharp.API"
   $fullRuntimeEvidence = New-PackageEvidence -Directory $RuntimePackageDirectory -PackageId ([string]$package.packageId)
 
-  $splitPackages = @($splitManifest.packages | Where-Object { $_.sourceRuntimeKey -eq $key })
+  $splitPackages = @($splitManifest.packages | Where-Object { $_.sourceRuntimeKey -eq $key -and $_.role -eq "bridge" })
   $splitPackageDirectory = Join-Path $SplitPackageRoot $key
   $splitCollectionPackageEvidence = New-PackageEvidence -Directory $splitPackageDirectory -PackageId ([string]$package.packageId)
   $splitPackageEvidence = @(
@@ -9134,15 +9133,7 @@ foreach ($key in $keys) {
   $realCallbackRuntimeEvidenceSchema = New-RealCallbackRuntimeEvidenceSchema
   $realCallbackRuntimeEvidence = New-RealCallbackRuntimeEvidence -FullPackageConsumer $fullPackageConsumerEvidence -Schema $realCallbackRuntimeEvidenceSchema
 
-  $fullRuntimeStatus = if ($fullRuntimeEvidence.status -eq "ready" -and $vendorStatus -eq "ready" -and $fullPackageConsumerEvidence.status -eq "ready") {
-    "ready"
-  }
-  elseif ($vendorStatus -eq "skipped") {
-    "skipped"
-  }
-  else {
-    "blocked"
-  }
+  $fullRuntimeStatus = "retired-not-required"
 
   $splitPackageEvidenceRows = @($splitPackageEvidence)
   $assetCheckRows = @($assetChecks.ToArray())
@@ -9154,7 +9145,7 @@ foreach ($key in $keys) {
   $nonReadySplitPackageEvidenceRows = @($splitPackageEvidenceRows | Where-Object { $_.status -ne "ready" })
   $splitReadinessStatus = if ($splitPackageEvidenceRows.Count -gt 0 -and $nonReadySplitPackageEvidenceRows.Count -eq 0) { "ready" } else { "incomplete" }
 
-  $overallStatus = if ($managedEvidence.status -eq "ready" -and $bridgePackageEvidence.status -eq "ready" -and $bridgeConsumerEvidence.status -eq "ready" -and $splitReadinessStatus -eq "ready" -and $splitCollectionPackageEvidence.status -eq "ready" -and $splitCollectionConsumerEvidence.status -eq "ready" -and $fullRuntimeStatus -eq "ready") {
+  $overallStatus = if ($managedEvidence.status -eq "ready" -and $bridgePackageEvidence.status -eq "ready" -and $bridgeConsumerEvidence.status -eq "ready" -and $splitReadinessStatus -eq "ready") {
     "ready"
   }
   else {
@@ -9164,13 +9155,13 @@ foreach ($key in $keys) {
   $managedPackageCommand = "dotnet pack .\pack\JYPPX.TensorRT.CSharp.API\JYPPX.TensorRT.CSharp.API.csproj -c Debug -o .\artifacts\managed -p:JYPPXPackageVersion=4.0.0 /p:UseSharedCompilation=false"
   $bridgePackageCommand = "pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Invoke-LocalSplitRuntimePackage.ps1 -SourceRuntimeKey $key -SplitPackageRole bridge"
   $bridgeConsumerCommand = "pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-BridgePackageConsumer.ps1 -SourceRuntimeKey $key -BridgePackageDirectory .\artifacts\runtime-split-nupkg\$key -SkipProbe"
-  $splitAllCommand = "pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Invoke-LocalSplitRuntimePackage.ps1 -SourceRuntimeKey $key -SplitPackageRole all"
-  $splitCollectionCommand = "pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Invoke-LocalSplitRuntimePackage.ps1 -SourceRuntimeKey $key -SplitPackageRole collection"
+  $splitAllCommand = "retired: only -SplitPackageRole bridge is allowed"
+  $splitCollectionCommand = "retired: collection packages are not publishable"
   $splitCollectionConsumerCommand = "pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-PackageConsumer.ps1 -RuntimePackageKey $key -RuntimePackageDirectory .\artifacts\runtime-split-nupkg\$key -ReportDirectory .\artifacts\package-consumer\split-collection"
   $vendorRootsCommand = "pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Resolve-RuntimeRoots.ps1 -RuntimePackageKey $key"
-  $vendorMaterializeCommand = "pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Materialize-WindowsVendorRuntimeAssets.ps1 -RuntimePackageKey $key -DryRun"
-  $fullRuntimeCommand = "pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Invoke-LocalRuntimePackage.ps1 -RuntimePackageKey $key"
-  $fullPackageConsumerCommand = "pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-PackageConsumer.ps1 -RuntimePackageKey $key"
+  $vendorMaterializeCommand = "Install matching NVIDIA dependencies on the consumer host, then rerun Resolve-RuntimeRoots.ps1."
+  $fullRuntimeCommand = "retired: full-runtime packaging is fail-closed"
+  $fullPackageConsumerCommand = "retired: use Test-BridgePackageRuntimeConsumer.ps1 with host-installed NVIDIA dependencies"
 
   $readinessBlockers = New-Object System.Collections.Generic.List[object]
   if ([string]$managedEvidence.status -ne "ready") {
@@ -9206,34 +9197,10 @@ foreach ($key in $keys) {
     }
   }
 
-  if ([string]$splitCollectionPackageEvidence.status -ne "ready") {
-    $splitCollectionAction = if ($nonReadySplitPackageEvidenceRows.Count -gt 0) { "Complete split component packages first, then build the lightweight split collection package." } else { "Build the lightweight split collection package that references the ready split components." }
-    $splitCollectionSuggestedCommand = if ($nonReadySplitPackageEvidenceRows.Count -gt 0) { $splitAllCommand } else { $splitCollectionCommand }
-    $splitCollectionExternalInputRequired = $false
-    if ([string]$vendorStatus -eq "blocked" -and $nonReadySplitPackageEvidenceRows.Count -gt 0) {
-      $splitCollectionAction = "Resolve vendor input blockers first; the split collection cannot reference a complete component set until non-bridge split packages exist."
-      $splitCollectionSuggestedCommand = $vendorMaterializeCommand
-      $splitCollectionExternalInputRequired = $true
-    }
-    $readinessBlockers.Add((New-ReadinessBlocker -Category "split-collection-package" -Status ([string]$splitCollectionPackageEvidence.status) -Detail "split collection package '$($splitCollectionPackageEvidence.packageId)' was not found." -NextAction $splitCollectionAction -SuggestedCommand $splitCollectionSuggestedCommand -IsExternalInputRequired $splitCollectionExternalInputRequired -EvidencePath ([string]$splitCollectionPackageEvidence.directory)))
-  }
-
-  if ([string]$splitCollectionConsumerEvidence.status -ne "ready") {
-    $readinessBlockers.Add((New-ReadinessBlocker -Category "split-collection-consumer" -Status ([string]$splitCollectionConsumerEvidence.status) -Detail ([string]$splitCollectionConsumerEvidence.diagnostic) -NextAction "Run package consumer validation against the split collection package source." -SuggestedCommand $splitCollectionConsumerCommand -EvidencePath ([string]$splitCollectionConsumerEvidence.reportPath)))
-  }
-
   if ([string]$vendorStatus -ne "ready") {
     foreach ($blocker in @($vendorBlockerRows)) {
-      $readinessBlockers.Add((New-ReadinessBlocker -Category "vendor-inputs" -Status ([string]$vendorStatus) -Detail ([string]$blocker) -NextAction "Populate the TensorRT/CUDA/cuDNN vendor roots reported by Resolve-RuntimeRoots, then rerun packaging/readiness. Use Materialize-WindowsVendorRuntimeAssets.ps1 when local NVIDIA archives are available." -SuggestedCommand $vendorMaterializeCommand -IsExternalInputRequired $true -EvidencePath $runtimeManifestPath))
+      $readinessBlockers.Add((New-ReadinessBlocker -Category "host-vendor-inputs" -Status ([string]$vendorStatus) -Detail ([string]$blocker) -NextAction "Install the matching TensorRT/CUDA/cuDNN dependencies on the consumer host and rerun readiness; do not copy them into a package." -SuggestedCommand $vendorRootsCommand -IsExternalInputRequired $true -EvidencePath $runtimeManifestPath))
     }
-  }
-
-  if ([string]$fullRuntimeEvidence.status -ne "ready") {
-    $readinessBlockers.Add((New-ReadinessBlocker -Category "full-runtime-package" -Status ([string]$fullRuntimeEvidence.status) -Detail "full runtime package '$($fullRuntimeEvidence.packageId)' was not found." -NextAction "Build the full runtime package after vendor inputs are complete." -SuggestedCommand $fullRuntimeCommand -IsExternalInputRequired ([string]$vendorStatus -ne "ready") -EvidencePath ([string]$fullRuntimeEvidence.directory)))
-  }
-
-  if ([string]$fullPackageConsumerEvidence.status -ne "ready") {
-    $readinessBlockers.Add((New-ReadinessBlocker -Category "full-package-consumer" -Status ([string]$fullPackageConsumerEvidence.status) -Detail ([string]$fullPackageConsumerEvidence.diagnostic) -NextAction "Run full runtime package consumer validation and refresh the consumer report." -SuggestedCommand $fullPackageConsumerCommand -IsExternalInputRequired ([string]$fullRuntimeStatus -ne "ready") -EvidencePath ([string]$fullPackageConsumerEvidence.reportPath)))
   }
 
   if ([string]$callbackOwnerClosureMatrixEvidence.status -ne "closure-matrix-ready" -or [bool]$callbackOwnerClosureMatrixEvidence.isRealCallbackRuntimeProof) {
@@ -9284,11 +9251,13 @@ foreach ($key in $keys) {
       blockers = @($vendorBlockerRows)
     }
     fullRuntimePackage = [pscustomobject]@{
-      status = if ($fullRuntimeEvidence.status -eq "ready") { "ready" } else { "missing" }
+      status = "retired-not-required"
       packageId = [string]$fullRuntimeEvidence.packageId
       version = [string]$fullRuntimeEvidence.version
       path = [string]$fullRuntimeEvidence.path
       directory = [string]$fullRuntimeEvidence.directory
+      publicationAllowed = $false
+      historicalEvidenceOnly = $true
     }
     fullPackageConsumer = $fullPackageConsumerEvidence
     packageConsumerEvidenceKind = [string]$fullPackageConsumerEvidence.packageConsumerEvidenceKind

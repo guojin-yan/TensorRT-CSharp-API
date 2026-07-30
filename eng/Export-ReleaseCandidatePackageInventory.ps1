@@ -242,8 +242,8 @@ $allPackages = @($managedPackages + $runtimePackages + $splitRuntimePackages + $
   Sort-Object role, packageId, version, fileName
 
 $managedPackageReady = @($allPackages | Where-Object { $_.role -eq "managed" -and $_.packageId -eq "JYPPX.TensorRT.CSharp.API" -and $_.version -eq "4.0.0" }).Count -gt 0
-$fullRuntimeReady = @($allPackages | Where-Object { $_.role -eq "full-runtime" -and $_.packageId -like "*trt11.0.cuda13.2.cudnn9.22*" -and $_.version -eq "4.0.0" }).Count -gt 0
-$requiredSplitRoles = @("split-bridge", "split-cuda-cudnn", "split-tensorrt", "split-meta")
+$fullRuntimeReady = $false
+$requiredSplitRoles = @("split-bridge")
 $presentRoles = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
 foreach ($package in $allPackages) {
   [void]$presentRoles.Add([string]$package.role)
@@ -251,8 +251,10 @@ foreach ($package in $allPackages) {
 $missingSplitRoles = @($requiredSplitRoles | Where-Object { -not $presentRoles.Contains($_) })
 $splitBridgePackageReady = $presentRoles.Contains("split-bridge")
 $splitRuntimePackagesReady = $missingSplitRoles.Count -eq 0
-$sha256Ready = @($allPackages | Where-Object { -not $_.sha256Ready }).Count -eq 0 -and $allPackages.Count -gt 0
-$packageSetReady = $managedPackageReady -and $fullRuntimeReady -and $splitRuntimePackagesReady -and $sha256Ready
+$allowedPackages = @($allPackages | Where-Object { $_.role -in @("managed", "split-bridge") })
+$retiredPackageCandidates = @($allPackages | Where-Object { $_.role -notin @("managed", "split-bridge") })
+$sha256Ready = @($allowedPackages | Where-Object { -not $_.sha256Ready }).Count -eq 0 -and $allowedPackages.Count -gt 0
+$packageSetReady = $managedPackageReady -and $splitBridgePackageReady -and $splitRuntimePackagesReady -and $sha256Ready -and $retiredPackageCandidates.Count -eq 0
 
 $record = [pscustomobject]@{
   generatedAtUtc = [DateTimeOffset]::UtcNow.ToString("O")
@@ -265,6 +267,8 @@ $record = [pscustomobject]@{
   packageCount = $allPackages.Count
   managedPackageCount = $managedPackages.Count
   fullRuntimePackageCount = $runtimePackages.Count
+  allowedPackageCount = $allowedPackages.Count
+  retiredPackageCandidateCount = $retiredPackageCandidates.Count
   splitRuntimePackageCount = $splitRuntimePackages.Count
   compatibleBridgePackageCount = $compatibleBridgePackages.Count
   compatibleBridgeRuntimeKeys = $compatibleBridgeRuntimeKeys
@@ -272,6 +276,9 @@ $record = [pscustomobject]@{
   compatibleBridgeRuntimeProofs = $compatibleBridgeRuntimeProofs
   managedPackageReady = $managedPackageReady
   fullRuntimePackageReady = $fullRuntimeReady
+  fullRuntimePackageRequired = $false
+  vendorRuntimePackagesForbidden = $true
+  publicationPolicy = "bridge-only"
   requiredSplitRoles = $requiredSplitRoles
   missingSplitRoles = $missingSplitRoles
   splitBridgePackageReady = $splitBridgePackageReady
@@ -279,7 +286,7 @@ $record = [pscustomobject]@{
   sha256Ready = $sha256Ready
   packageSetReady = $packageSetReady
   packages = @($allPackages)
-  proofBoundary = "Local package inventory records package identity, size, SHA256, and paths only; it is not public channel proof, runtime execution proof, post-publish proof, or owner authorization."
+  proofBoundary = "Local package inventory accepts only managed and bridge candidates. Any full/vendor, collection, or meta candidate blocks packageSetReady. The inventory is not public channel proof, runtime execution proof, post-publish proof, or owner authorization."
   guardrails = @(
     "This inventory does not publish packages.",
     "Local feed and dependency-probe-only evidence are not post-publish proof.",
@@ -302,7 +309,8 @@ $lines.Add("- can publish publicly: ``$($record.canPublishPublicly)``")
 $lines.Add("- can use as public package proof: ``$($record.canUseAsPublicPackageProof)``")
 $lines.Add("- can close release issue: ``$($record.canCloseReleaseIssue)``")
 $lines.Add("- managed package ready: ``$managedPackageReady``")
-$lines.Add("- full runtime package ready: ``$fullRuntimeReady``")
+$lines.Add("- full/vendor runtime packages required: ``False``")
+$lines.Add("- retired package candidates found: ``$($retiredPackageCandidates.Count)``")
 $lines.Add("- split bridge package ready: ``$splitBridgePackageReady``")
   $lines.Add("- split runtime packages ready: ``$splitRuntimePackagesReady``")
   $lines.Add("- compatible bridge packages: ``$($compatibleBridgePackages.Count)``")

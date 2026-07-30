@@ -429,7 +429,7 @@ runtime 包为一个明确 TensorRT / CUDA / cuDNN 组合承载原生部署资�
 所有上传路径都会运行 `eng/Test-ExternalVendorRuntimePackagePolicy.ps1`。`release-bundle.yml` 只编排 managed、bridge 与 source，并拒绝已退休的 full/vendor roles。
 
 <details>
-<summary>历史发布自动化说明（vendor package 参数已退休）</summary>
+<summary>Bridge-only 发布自动化说明</summary>
 
 这个仓库支持两种发布执行方式：
 
@@ -438,18 +438,18 @@ runtime 包为一个明确 TensorRT / CUDA / cuDNN 组合承载原生部署资�
 
 也可以用 `act` 在本机做 workflow dry-run，例如解析 `release-bundle.yml` 或 `runtime-linux.yml` 的调度图。`act` 适合做轻量检查，但不能替代正式发布证据：Windows hosted job 不能被 Linux 容器可靠复刻，self-hosted runtime job 仍依赖真实本机/runner 上的 CUDA、cuDNN、TensorRT 和签名环境。详见 `docs/articles/zh-cn/local-actions.md`。
 
-runtime 包现在和 managed 包独立版本。日常维护优先只发布 `JYPPX.TensorRT.CSharp.API` 到 nuget.org 和 GitHub Packages；CUDA/cuDNN/TensorRT 这类大组件保持在 GitHub Packages 或 GitHub Releases。每个 NVIDIA 依赖版本只发布一次 vendor 组件包；后续本地 C ABI bridge 变化时，只重发 `bridge,collection`。
+managed 与 bridge 可以独立版本，但必须绑定同一个源码提交。CUDA、cuDNN、TensorRT 和 NVRTC 由 consumer 自行安装，不再上传到 GitHub Packages 或 GitHub Releases。日常 Actions 先在 `grape-yan` 验证；正式发布只在 `guojin-yan` 执行。
 
-截至 2026-06-17 的远端发布映射：
+历史远端 vendor 包清理结果：
 
-| Release tag | 内容 |
+| 项目 | 结果 |
 | --- | --- |
-| `v4.0.6170` | 只有 managed 包：`JYPPX.TensorRT.CSharp.API.4.0.6170.nupkg`。 |
-| `v4.0.6156` | Windows x64 runtime 矩阵：6 个 Windows TensorRT/CUDA/cuDNN 组合。 |
-| `v4.0.6167` | Linux x64 Ubuntu 22.04 runtime 矩阵：6 个 hosted Ubuntu 22.04 组合。 |
-| `v4.0.6169` | Linux x64 Ubuntu 24.04 runtime 矩阵：3 个 hosted Ubuntu 24.04 现代组合。 |
+| Owner 确认指纹 | `sha256:bbd87a8e018ca4b3dc62d1382a7c710e4f7548ec958c9e6f2aaee45f7ec05b97` |
+| 已删除 | 65 个 GitHub Package versions + 65 个 Release assets |
+| 删除后候选 | 0 |
+| 保留 | managed、`.Bridge` 和 GitHub 自动源码归档 |
 
-最新 managed release 不应该被理解为“包含全部 runtime asset”。需要核对完整 runtime 到 release tag 的对应关系时，看 `release-publication-audit.yml` 上传的 `artifacts/publication-index/runtime-publication-index.md`。
+历史 package identity 只保留给清理与证据解释，不能重新 pack、push 或上传。
 
 远端 managed-only 发布示例：
 
@@ -458,11 +458,10 @@ gh workflow run release-bundle.yml `
   --ref TensorRtSharp4.0 `
   -f version=4.0.1 `
   -f publish_managed_to_nuget=true `
-  -f publish_managed_to_github_packages=true `
-  -f attach_runtime_to_github_release=true
+  -f publish_managed_to_github_packages=true
 ```
 
-远端首次发布或升级 CUDA/cuDNN/TensorRT 时刷新 vendor 组件示例：
+远端构建/发布 Windows bridge 示例：
 
 Windows 远端示例默认使用完整 6 组合矩阵，不传 `windows_runtime_keys`，使用默认 Windows 6 组合矩阵。只有调试或修复单一依赖线时才单独传 key。
 
@@ -473,12 +472,12 @@ gh workflow run release-bundle.yml `
   -f runtime_version=4.0.0 `
   -f run_windows_runtime_packaging=true `
   -f windows_runtime_delivery_mode=split `
-  -f windows_split_package_roles=cuda-cudnn,tensorrt `
+  -f windows_split_package_roles=bridge `
   -f publish_runtime_to_github_packages=true `
   -f attach_runtime_to_github_release=true
 ```
 
-远端本地封装代码变化后刷新 bridge 和 collection 示例：
+单个 key 的 bridge 诊断示例：
 
 ```powershell
 gh workflow run release-bundle.yml `
@@ -487,14 +486,10 @@ gh workflow run release-bundle.yml `
   -f runtime_version=4.0.1 `
   -f run_windows_runtime_packaging=true `
   -f windows_runtime_delivery_mode=split `
-  -f windows_split_package_roles=bridge,collection `
-  -f windows_cuda_cudnn_package_version=4.0.6156 `
-  -f windows_cuda_cudnn_package_release_tag=v4.0.6156 `
-  -f windows_tensorrt_package_version=4.0.6156 `
-  -f windows_tensorrt_package_release_tag=v4.0.6156 `
-  -f publish_managed_to_github_packages=true `
+  -f windows_runtime_keys=<runtime-key> `
+  -f windows_split_package_roles=bridge `
   -f publish_runtime_to_github_packages=false `
-  -f attach_runtime_to_github_release=true
+  -f attach_runtime_to_github_release=false
 ```
 
 本地 managed-only 示例：
@@ -505,25 +500,18 @@ powershell -ExecutionPolicy Bypass -File .\eng\Invoke-LocalReleaseBundle.ps1 `
   -SkipWindowsRuntime
 ```
 
-本地刷新 bridge 和 collection 示例：
+本地构建 bridge 示例：
 
 下面的示例用单个 `<runtime-key>` 做快速迭代；正式发布时应省略 `windows_runtime_keys`，或一次性传入 6 个 key。
 
 ```powershell
-gh release download v4.0.6156 `
-  --pattern "JYPPX.TensorRT.CSharp.API.Runtime.<runtime-package-id>.*.4.0.6156.nupkg" `
-  --dir .\artifacts\stable-runtime-package-source\<runtime-key> `
-  --repo guojin-yan/TensorRT-CSharp-API
-
-powershell -ExecutionPolicy Bypass -File .\eng\Invoke-LocalReleaseBundle.ps1 `
+powershell -ExecutionPolicy Bypass -File .\eng\Invoke-LocalSplitRuntimePackage.ps1 `
+  -SourceRuntimeKey <runtime-key> `
   -Version 4.0.1 `
-  -RuntimeVersion 4.0.1 `
-  -WindowsRuntimeKeys <runtime-key> `
-  -WindowsRuntimeDeliveryMode split `
-  -WindowsSplitPackageRoles bridge,collection `
-  -WindowsCudaCudnnPackageVersion 4.0.6156 `
-  -WindowsTensorRtPackageVersion 4.0.6156 `
-  -WindowsAdditionalPackageSource .\artifacts\stable-runtime-package-source\<runtime-key>
+  -SplitPackageRole bridge
+
+powershell -ExecutionPolicy Bypass -File .\eng\Test-ExternalVendorRuntimePackagePolicy.ps1 `
+  -PackagePath .\artifacts\runtime-split-nupkg\<runtime-key>
 ```
 
 `release-bundle.yml` 默认不再触发 runtime 打包。需要 runtime 时显式设置 `run_windows_runtime_packaging=true` 或 `run_linux_runtime_packaging=true`；如果启用 Linux runtime 但 `linux_runtime_keys` 为空，Linux 模块会干净 no-op。
@@ -579,13 +567,13 @@ cmake --build --preset win-x64-trt11-cuda13-release --parallel
 
 Windows 本地 root 不写入公开 runtime manifest。请使用 `pack/runtime/runtime-packages.local.json` 保存机器本地覆盖配置；可从 `pack/runtime/runtime-packages.local.example.json` 复制后修改。
 
-物化任何 full-runtime CUDA RTC 组件前先运行：
+审计本机 NVRTC/builtins 身份时可以运行：
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-CudaRtcFullRuntimePackagingPreflight.ps1
 ```
 
-preflight 会按 capability matrix 的 size/SHA256 核对四版 Windows NVRTC/builtins pair，并记录 Toolkit license text 是否存在；license 文本存在不等于 redistribution 已批准，测得字节数也不等于 package host 已评审。当前 Windows 资产 `4/4` 就绪、Linux `0/4`、再分发与 package-host size review 均 pending，且 `cuda-rtc` role 未物化，因此显式 `-SplitPackageRole cuda-rtc` 仍会被阻断。
+该脚本只做 host dependency identity audit，不复制、不打包、不发布。`cuda-rtc` role 已固定为 `retired-not-packable`；`.Bridge` 包永远不携带 NVRTC 或 matching builtins。
 
 托管 runtime loading 面向生产部署：
 

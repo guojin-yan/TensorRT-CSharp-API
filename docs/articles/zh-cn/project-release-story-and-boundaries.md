@@ -292,34 +292,19 @@ smoke runners 覆盖 builder/runtime/network layers、plugin inventory、parser/
 
 smoke 的 evidence kind 必须按真实范围解释；synthetic identity、compile surface 或 skipped run 不能自动成为 real-model/package proof。
 
-## 双路线 Package 策略
+## 双通道 Bridge-only 策略
 
-TensorRT、CUDA、cuDNN 体积大、版本组合多，因此项目采用两条路线。
+TensorRT、CUDA、cuDNN 体积大且有独立安装与许可边界，因此项目不再分发 NVIDIA 原厂 runtime。GitHub Release 与 NuGet-compatible source 是两种获取通道，不是两种包内容。
 
-仓库对这两条路线使用固定名称：`GitHub full runtime package` 与 `NuGet small core/bridge package`。它们共享托管 API，但依赖交付、主机前置条件和发布后验证方式不同。
-
-### GitHub Full Runtime Packages
-
-完整 runtime package 可以携带对应版本的 native/vendor 资产，适合“一次下载后运行”的渠道。
-
-这条路线需要：
-
-- NVIDIA redistribution decision；
-- package identity/SHA256；
-- 大文件托管与 Release 资产；
-- post-publish 下载验证。
-
-### NuGet Small Managed/Core + Bridge
-
-小包只发布：
+两种通道都只发布：
 
 - managed core API；
-- C++ bridge；
+- 与 runtime key 匹配的项目自有 C++ bridge；
 - targets/buildTransitive/native copy metadata。
 
-用户自行安装匹配的 TensorRT、CUDA、cuDNN。
+用户自行安装匹配的 TensorRT、CUDA、cuDNN 与可选 NVRTC。GitHub Release 通道额外记录不可变 URL、GitHub digest 与同提交 provenance；NuGet 通道记录公开 source 与实际解析版本。两者都需要仓库外 clean consumer 和 post-publish 验证。
 
-这条路线更适合 NuGet 生态，但必须提供版本选择、PATH/native search 和 DLL/SO 排障文档。
+历史 vendor-bearing package identity 只保留用于清理与审计，不能重新 pack 或发布。
 
 ## Runtime Package Matrix
 
@@ -553,7 +538,7 @@ native bridge 需要根据 TensorRT/CUDA 版本选择 CMake preset，并配置 v
 
 ### 可以只安装小 NuGet 包吗
 
-双路线设计允许小 managed/core + bridge 包，但用户必须自行安装匹配 vendor runtime，并处理 native search path。
+可以。用户同时引用 managed 与匹配的 `.Bridge` 包，自行安装 NVIDIA runtime，并处理 native search path。
 
 ### 为什么现在不发布
 
@@ -565,7 +550,7 @@ native bridge 需要根据 TensorRT/CUDA 版本选择 CMake preset，并配置 v
 2. TRT8/10/11 interface coverage 表。
 3. TensorRtExec CLI 与 WinForms 同一 normalized command 截图。
 4. YoloVision 六任务输出拼图。
-5. GitHub full runtime / NuGet small bridge 双路线图。
+5. GitHub Release / NuGet managed + bridge-only 双通道图。
 6. 五级 proof ladder 与 release blocker dashboard。
 7. source build、test、validator 的终端截图。
 

@@ -28,12 +28,12 @@
 
 ## 背景与场景
 
-TensorRtSharp4.0 有两类交付路线：
+TensorRtSharp4.0 有两类公开获取通道：
 
-- GitHub full runtime package：可以携带对应版本的 native/vendor 资产。
-- NuGet small core/bridge package：只交付 managed API 和 C++ bridge，用户自行安装 TensorRT、CUDA、cuDNN。
+- GitHub Release managed + bridge assets：通过不可变 URL 和 GitHub digest 获取 managed/bridge `.nupkg`。
+- NuGet managed + bridge packages：通过 NuGet-compatible source 与标准 `PackageReference` 获取相同边界的包。
 
-两类路线都需要 clean consumer，但它们的 native asset 预期不同。full runtime route 要核对 package 内的 vendor 资产；small core/bridge route 要核对 bridge 与主机 SDK 搜索路径。不能用一份报告模糊两个路线。
+两种通道的 native asset 预期相同：包内只能有项目自有 bridge，NVIDIA TensorRT、CUDA、cuDNN 与可选 NVRTC 必须来自用户机器。GitHub Release 路线额外核对 URL、digest 与同提交 provenance；NuGet 路线额外核对公开 source 和解析版本。两者都要记录主机 SDK 搜索路径，不能用本地构建包替代公开资产。
 
 ## Proof 定义
 

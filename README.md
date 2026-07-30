@@ -429,192 +429,24 @@ Current release workflows publish only:
 
 Every upload path runs `eng/Test-ExternalVendorRuntimePackagePolicy.ps1`. `release-bundle.yml` dispatches the managed, bridge, and source workflows but rejects retired full/vendor roles.
 
+For nuget.org publication, `NUGET_API_KEY` must be an active plain-text key with push permission for the `JYPPX.TensorRT.CSharp.API` package ID. A nuget.org `403` is non-retryable until the package owner supplies a valid package-scoped key.
+
 <details>
-<summary>Historical release automation notes (retired vendor-package inputs)</summary>
+<summary>Historical vendor-package migration note</summary>
 
-GitHub Actions does not need a GitHub-hosted machine for every job. In this repository:
+Before 2026-07-30, this repository modeled package roles that could carry CUDA, cuDNN, TensorRT, NVRTC, parser, plugin, builder-resource, collection, and meta assets. Those publication paths are retired and must not be replayed.
 
-- `docs-release.yml` and the hosted part of `package-managed.yml` run on GitHub-hosted runners.
-- `runtime-windows.yml` runs on the local self-hosted Windows runner when dispatched from GitHub.
-- `release-bundle.yml` always drives the managed package and can optionally dispatch Windows or Linux runtime modules.
+The historical package identities remain in selected manifests only for cleanup, compatibility audits, and interpretation of old evidence. Their projects are non-packable. `eng/Invoke-LocalRuntimePackage.ps1` fails closed, and `eng/Invoke-LocalSplitRuntimePackage.ps1` accepts only `bridge`.
 
-That means there are two supported execution modes:
+After explicit Owner fingerprint review, 65 retired GitHub Package versions and 65 matching Release assets were deleted from `guojin-yan/TensorRT-CSharp-API`. The post-delete inventory contained zero remaining deletion candidates. Managed and `.Bridge` package identities were preserved.
 
-1. Dispatch the workflow through GitHub with `gh`, then let the self-hosted runner on this machine execute the Windows runtime job.
-2. Run the local scripts directly when you want a true workstation-only validation loop without creating a GitHub Actions run record.
+Current formal release rules:
 
-You can also use `act` for local workflow dry-runs, such as parsing `release-bundle.yml` or the `runtime-linux.yml` `prepare` job. Treat this as a lightweight workflow check only, not as release evidence. See `docs/articles/en/local-actions.md`.
-
-Runtime packages are versioned independently from the managed package. The normal maintenance path is to publish `JYPPX.TensorRT.CSharp.API` to nuget.org and GitHub Packages, while keeping large CUDA/cuDNN/TensorRT component packages on GitHub Packages or GitHub Releases. Publish `CudaCudnn` and `TensorRt` component packages once per dependency version, then publish only `bridge,collection` when the local C ABI bridge changes.
-
-Current remote publication map as of 2026-06-17:
-
-| Release tag | Contents |
-| --- | --- |
-| `v4.0.6170` | Managed package only: `JYPPX.TensorRT.CSharp.API.4.0.6170.nupkg`. |
-| `v4.0.6156` | Windows x64 runtime matrix: all six Windows TensorRT/CUDA/cuDNN combinations. |
-| `v4.0.6167` | Linux x64 Ubuntu 22.04 runtime matrix: all six hosted Ubuntu 22.04 combinations. |
-| `v4.0.6169` | Linux x64 Ubuntu 24.04 runtime matrix: the three modern hosted Ubuntu 24.04 combinations. |
-| `v4.0.6171` | Linux x64 Ubuntu 20.04 runtime matrix: the three hosted-container Ubuntu 20.04 combinations. |
-
-The latest managed release is not expected to contain every runtime asset. Use `artifacts/publication-index/runtime-publication-index.md` from `release-publication-audit.yml` when you need the full runtime-to-release-tag map.
-
-GitHub Release assets are useful for large public `.nupkg` files, but they are not a NuGet feed. If stable dependency packages live only on a Release, the remote Windows workflow downloads those Release assets into a temporary local package source for validation. Publish `bridge,collection` to GitHub Packages only when the referenced `CudaCudnn` and `TensorRt` component packages are also available from a NuGet feed; otherwise attach the whole `.nupkg` set to a GitHub Release and consume it as a downloaded local package source.
-
-Before dispatching a remote release, audit the current repository secrets and self-hosted runners:
-
-```powershell
-pwsh -NoProfile -File .\eng\Test-RemoteReleasePrerequisites.ps1 -WarnOnly
-```
-
-Use `-WarnOnly` while preparing infrastructure. Remove it for a hard release gate.
-
-Managed-only remote release:
-
-```powershell
-pwsh -NoProfile -File .\eng\Invoke-RemoteReleaseBundle.ps1 `
-  -Version 4.0.1 `
-  -PublishManagedToNuGet:$true `
-  -PublishManagedToGitHubPackages:$true `
-  -AttachRuntimeToGitHubRelease:$true
-```
-
-Windows stable dependency component refresh for the first publish or a CUDA/cuDNN/TensorRT upgrade:
-
-The Windows remote examples intentionally omit `-WindowsRuntimeKeys` to use the full six-combination Windows matrix; pass explicit keys only for a diagnostic or one-off repair run.
-
-```powershell
-pwsh -NoProfile -File .\eng\Invoke-RemoteReleaseBundle.ps1 `
-  -Version 4.0.0 `
-  -RuntimeVersion 4.0.0 `
-  -RunWindowsRuntimePackaging `
-  -WindowsRuntimeDeliveryMode split `
-  -WindowsSplitPackageRoles cuda-cudnn,tensorrt `
-  -PublishRuntimeToGitHubPackages:$true `
-  -AttachRuntimeToGitHubRelease:$true
-```
-
-Windows bridge and collection refresh after local native-wrapper changes:
-
-```powershell
-pwsh -NoProfile -File .\eng\Invoke-RemoteReleaseBundle.ps1 `
-  -Version 4.0.1 `
-  -RuntimeVersion 4.0.1 `
-  -RunWindowsRuntimePackaging `
-  -WindowsRuntimeDeliveryMode split `
-  -WindowsSplitPackageRoles bridge,collection `
-  -WindowsCudaCudnnPackageVersion 4.0.6156 `
-  -WindowsCudaCudnnPackageReleaseTag v4.0.6156 `
-  -WindowsTensorRtPackageVersion 4.0.6156 `
-  -WindowsTensorRtPackageReleaseTag v4.0.6156 `
-  -PublishManagedToGitHubPackages:$true `
-  -PublishRuntimeToGitHubPackages:$false `
-  -AttachRuntimeToGitHubRelease:$true
-```
-
-Hosted Linux stable dependency refresh for Ubuntu 22.04 x64 plus the modeled Ubuntu 24.04 x64 line:
-
-```powershell
-pwsh -NoProfile -File .\eng\Invoke-RemoteReleaseBundle.ps1 `
-  -Version 4.0.0 `
-  -RuntimeVersion 4.0.0 `
-  -RunLinuxRuntimePackaging `
-  -LinuxRuntimeKeySet hosted-all `
-  -LinuxRuntimeDeliveryMode split `
-  -LinuxSplitPackageRoles cuda-cudnn,tensorrt `
-  -PublishRuntimeToGitHubPackages:$true `
-  -AttachRuntimeToGitHubRelease:$true
-```
-
-Hosted Linux bridge and collection refresh after local native-wrapper changes:
-
-```powershell
-pwsh -NoProfile -File .\eng\Invoke-RemoteReleaseBundle.ps1 `
-  -Version 4.0.1 `
-  -RuntimeVersion 4.0.1 `
-  -RunLinuxRuntimePackaging `
-  -LinuxRuntimeKeySet hosted-all `
-  -LinuxRuntimeDeliveryMode split `
-  -LinuxSplitPackageRoles bridge,collection `
-  -LinuxCudaCudnnPackageVersionMap 'linux-x64-ubuntu22.04-*=4.0.6167;linux-x64-ubuntu24.04-*=4.0.6169' `
-  -LinuxTensorRtPackageVersionMap 'linux-x64-ubuntu22.04-*=4.0.6167;linux-x64-ubuntu24.04-*=4.0.6169' `
-  -PublishManagedToGitHubPackages:$true `
-  -PublishRuntimeToGitHubPackages:$false `
-  -AttachRuntimeToGitHubRelease:$true
-```
-
-Use version maps when one workflow dispatch spans multiple stable dependency releases. The current hosted Linux line uses Ubuntu 22.04 dependency packages from `v4.0.6167` and Ubuntu 24.04 dependency packages from `v4.0.6169`; Ubuntu 20.04 uses the separate hosted-container dependency packages from `v4.0.6171`. The release tag defaults to `v<resolved package version>` for each matched key. If a dependency package is attached to a non-default Release tag, pass the matching `-LinuxCudaCudnnPackageReleaseTagMap` and `-LinuxTensorRtPackageReleaseTagMap` values as well.
-
-Ubuntu 20.04 packaging uses a separate hosted-container lane:
-
-```powershell
-pwsh -NoProfile -File .\eng\Invoke-RemoteReleaseBundle.ps1 `
-  -Version 4.0.0 `
-  -RuntimeVersion 4.0.0 `
-  -RunLinuxUbuntu20RuntimePackaging `
-  -LinuxUbuntu20RuntimeKeySet hosted-container-ubuntu20 `
-  -LinuxRuntimeDeliveryMode split `
-  -LinuxSplitPackageRoles all `
-  -PublishRuntimeToGitHubPackages:$true `
-  -AttachRuntimeToGitHubRelease:$true
-```
-
-Ubuntu 20.04 bridge and collection refreshes should keep the stable dependency packages pinned to `4.0.6171` and publish only the changed `bridge,collection` packages:
-
-```powershell
-pwsh -NoProfile -File .\eng\Invoke-RemoteReleaseBundle.ps1 `
-  -Version 4.0.1 `
-  -RuntimeVersion 4.0.1 `
-  -RunLinuxUbuntu20RuntimePackaging `
-  -LinuxUbuntu20RuntimeKeySet hosted-container-ubuntu20 `
-  -LinuxRuntimeDeliveryMode split `
-  -LinuxSplitPackageRoles bridge,collection `
-  -LinuxCudaCudnnPackageVersionMap 'linux-x64-ubuntu20.04-*=4.0.6171' `
-  -LinuxTensorRtPackageVersionMap 'linux-x64-ubuntu20.04-*=4.0.6171' `
-  -PublishRuntimeToGitHubPackages:$false `
-  -AttachRuntimeToGitHubRelease:$true
-```
-
-The old `self-hosted-ubuntu20` key set is no longer a release path. Use `hosted-container-ubuntu20` with `runner_mode=hosted-container`.
-
-Managed-only local example:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\eng\Invoke-LocalReleaseBundle.ps1 `
-  -Version 4.0.1 `
-  -SkipWindowsRuntime
-```
-
-Local bridge and collection runtime example:
-
-The local example below uses a single `<runtime-key>` so you can iterate quickly on one installed dependency set. For release packaging, omit `-WindowsRuntimeKeys` or pass all six keys.
-
-```powershell
-gh release download v4.0.6156 `
-  --pattern "JYPPX.TensorRT.CSharp.API.Runtime.<runtime-package-id>.*.4.0.6156.nupkg" `
-  --dir .\artifacts\stable-runtime-package-source\<runtime-key> `
-  --repo guojin-yan/TensorRT-CSharp-API
-
-powershell -ExecutionPolicy Bypass -File .\eng\Invoke-LocalReleaseBundle.ps1 `
-  -Version 4.0.1 `
-  -RuntimeVersion 4.0.1 `
-  -WindowsRuntimeKeys <runtime-key> `
-  -WindowsRuntimeDeliveryMode split `
-  -WindowsSplitPackageRoles bridge,collection `
-  -WindowsCudaCudnnPackageVersion 4.0.6156 `
-  -WindowsTensorRtPackageVersion 4.0.6156 `
-  -WindowsAdditionalPackageSource .\artifacts\stable-runtime-package-source\<runtime-key>
-```
-
-On WDAC / application-control machines, the local and self-hosted Windows runtime validation path can sign the generated consumer output before smoke. This helps when `PackageConsumerSmoke.exe` would otherwise be blocked even though package restore, native asset copy, and build succeeded.
-
-`release-bundle.yml` treats runtime packaging as opt-in. Set `run_windows_runtime_packaging=true` or `run_linux_runtime_packaging=true` only for runtime releases. If Linux runtime packaging is enabled with an empty `linux_runtime_keys` input, the Linux module cleanly no-ops.
-
-When runtime packaging is enabled, `release-bundle.yml` can check the required Windows self-hosted runner labels before it creates a GitHub Release. Set repository secret `RUNNER_AUDIT_TOKEN` to a token that can read repository self-hosted runners to enable the check. GitHub documents the repository runner list API as requiring a fine-grained token with `Administration` repository permission set to `read`: <https://docs.github.com/rest/actions/self-hosted-runners>. Windows runtime packaging routes to `self-hosted,windows,x64`; Ubuntu 20.04 Linux runtime packaging runs through the hosted-container lane and does not require a repository self-hosted Linux runner.
-
-For `nuget.org` publication, store a plain-text ASCII NuGet API key in the repository secret `NUGET_API_KEY`. The key must be active and must have push permission for the `JYPPX.TensorRT.CSharp.API` package ID or its owning account/organization. The managed-package workflow fails before publication when this secret is missing, so it no longer depends on a self-hosted runner's current-user NuGet configuration or any machine-local credential fallback. Do not store an encrypted local credential blob or other machine-generated token format in `NUGET_API_KEY`.
-
-The managed-package workflow validates that `NUGET_API_KEY` is plain ASCII text before publishing. If the secret contains non-ASCII characters or embedded whitespace, the job fails immediately with a configuration error instead of spending time on a doomed publish attempt. A nuget.org `403` during push means the key is invalid, expired, or lacks permission for the managed package ID; replace the secret with a scoped key from the package owner before rerunning the managed-only workflow.
+- publish only `JYPPX.TensorRT.CSharp.API`, matching `.Bridge` packages, and tracked-files-only source archives;
+- keep NVIDIA libraries as consumer-installed machine prerequisites;
+- run `eng/Test-ExternalVendorRuntimePackagePolicy.ps1` on every pack/upload path;
+- run formal publication only from `guojin-yan`; use `grape-yan` for build/test validation only;
+- require same-commit managed/bridge provenance, clean external consumer evidence, post-publish verification, and Owner approval before release closure.
 
 </details>
 
@@ -665,13 +497,13 @@ Use one of the scripts below to inspect local TensorRT/CUDA/cuDNN roots:
 
 Windows local roots are intentionally not stored in the public runtime manifest. Use `pack/runtime/runtime-packages.local.json` for machine-specific root overrides; start from `pack/runtime/runtime-packages.local.example.json`.
 
-Before materializing any full-runtime CUDA RTC component, run:
+To audit locally installed NVRTC/builtins identity, run:
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-CudaRtcFullRuntimePackagingPreflight.ps1
 ```
 
-The preflight checks the four modeled Windows NVRTC/builtins pairs against the capability-matrix size and SHA256 values and records available Toolkit license text. License-text presence is not redistribution approval, and measured bytes are not package-host approval. The current report has Windows assets ready `4/4`, Linux assets ready `0/4`, redistribution and package-host size review pending, and no materialized `cuda-rtc` role, so explicit `-SplitPackageRole cuda-rtc` packing remains blocked.
+This script is a host-dependency identity audit only: it does not copy, package, or publish vendor files. The `cuda-rtc` role is permanently `retired-not-packable`; `.Bridge` packages never carry NVRTC or matching builtins.
 
 Managed runtime loading is production-first:
 

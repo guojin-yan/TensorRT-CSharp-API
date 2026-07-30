@@ -37,17 +37,19 @@ public sealed class ReleaseAutomationTests
     }
 
     [Fact]
-    public void RootReadmeRemoteRuntimeExamplesDoNotNarrowWindowsToOneCombination()
+    public void RootReadmesDescribeBridgeOnlyRuntimePublication()
     {
         string english = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "README.md"));
         string chinese = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "README.zh-CN.md"));
         string samples = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "README.md"));
 
-        Assert.DoesNotContain("-WindowsRuntimeKeys win-x64-trt11.0-cuda12.9-cudnn9.22", english, StringComparison.Ordinal);
-        Assert.DoesNotContain("-f windows_runtime_keys=win-x64-trt11.0-cuda12.9-cudnn9.22", chinese, StringComparison.Ordinal);
-        Assert.DoesNotContain("-WindowsRuntimeKeys win-x64-trt11.0-cuda12.9-cudnn9.22", samples, StringComparison.Ordinal);
-        Assert.Contains("omit `-WindowsRuntimeKeys` to use the full six-combination Windows matrix", english, StringComparison.Ordinal);
+        Assert.Contains("NVIDIA runtime redistribution is retired", english, StringComparison.Ordinal);
+        Assert.Contains("`.Bridge` packages with `split_package_roles=bridge`", english, StringComparison.Ordinal);
+        Assert.Contains("windows_split_package_roles=bridge", chinese, StringComparison.Ordinal);
         Assert.Contains("不传 `windows_runtime_keys`，使用默认 Windows 6 组合矩阵", chinese, StringComparison.Ordinal);
+        Assert.DoesNotContain("windows_split_package_roles=bridge,collection", chinese, StringComparison.Ordinal);
+        Assert.DoesNotContain("windows_cuda_cudnn_package_version", chinese, StringComparison.Ordinal);
+        Assert.DoesNotContain("windows_tensorrt_package_version", chinese, StringComparison.Ordinal);
         Assert.Contains("-WindowsRuntimeKeys <runtime-key>", samples, StringComparison.Ordinal);
     }
 

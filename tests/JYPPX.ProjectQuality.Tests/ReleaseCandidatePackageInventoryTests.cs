@@ -31,7 +31,10 @@ public sealed class ReleaseCandidatePackageInventoryTests
         Assert.Contains("packageSetReady", script, StringComparison.Ordinal);
         Assert.Contains("canPublishPublicly = $false", script, StringComparison.Ordinal);
         Assert.Contains("canUseAsPublicPackageProof = $false", script, StringComparison.Ordinal);
-        Assert.Contains("Local package inventory records package identity", script, StringComparison.Ordinal);
+        Assert.Contains("Local package inventory accepts only managed and bridge candidates", script, StringComparison.Ordinal);
+        Assert.Contains("retiredPackageCandidateCount", script, StringComparison.Ordinal);
+        Assert.Contains("fullRuntimePackageRequired = $false", script, StringComparison.Ordinal);
+        Assert.Contains("vendorRuntimePackagesForbidden = $true", script, StringComparison.Ordinal);
         Assert.Contains("B-tier safe alternative proof is not runtime proof", script, StringComparison.Ordinal);
         Assert.Contains("CompatibleBridgeRuntimePackageKey", script, StringComparison.Ordinal);
         Assert.Contains("compatibleBridgeRuntimeProofReady", script, StringComparison.Ordinal);
@@ -48,7 +51,7 @@ public sealed class ReleaseCandidatePackageInventoryTests
     }
 
     [Fact]
-    public void ExportedInventoryCoversManagedFullAndSplitPackages()
+    public void ExportedInventoryAcceptsManagedAndBridgeAndFlagsRetiredCandidates()
     {
         RunPowerShell(Path.Combine(RepositoryPaths.Root, "eng", "Export-ReleaseCandidatePackageInventory.ps1"));
 
@@ -65,11 +68,14 @@ public sealed class ReleaseCandidatePackageInventoryTests
         Assert.False(root.GetProperty("canUseAsPublicPackageProof").GetBoolean());
         Assert.False(root.GetProperty("canCloseReleaseIssue").GetBoolean());
         Assert.True(root.GetProperty("managedPackageReady").GetBoolean());
-        Assert.True(root.GetProperty("fullRuntimePackageReady").GetBoolean());
+        Assert.False(root.GetProperty("fullRuntimePackageReady").GetBoolean());
+        Assert.False(root.GetProperty("fullRuntimePackageRequired").GetBoolean());
+        Assert.True(root.GetProperty("vendorRuntimePackagesForbidden").GetBoolean());
         Assert.True(root.GetProperty("splitBridgePackageReady").GetBoolean());
         Assert.True(root.GetProperty("splitRuntimePackagesReady").GetBoolean());
         Assert.True(root.GetProperty("sha256Ready").GetBoolean());
-        Assert.True(root.GetProperty("packageSetReady").GetBoolean());
+        int retiredCandidateCount = root.GetProperty("retiredPackageCandidateCount").GetInt32();
+        Assert.Equal(retiredCandidateCount == 0, root.GetProperty("packageSetReady").GetBoolean());
         Assert.True(root.GetProperty("compatibleBridgeRuntimeProofReady").GetBoolean());
         Assert.True(root.GetProperty("compatibleBridgePackageCount").GetInt32() >= 1);
         Assert.Empty(root.GetProperty("missingSplitRoles").EnumerateArray());
@@ -80,15 +86,9 @@ public sealed class ReleaseCandidatePackageInventoryTests
             package.GetProperty("role").GetString() == "managed" &&
             package.GetProperty("packageId").GetString() == "JYPPX.TensorRT.CSharp.API" &&
             package.GetProperty("version").GetString() == "4.0.0");
-        Assert.Contains(packages.EnumerateArray(), static package =>
-            package.GetProperty("role").GetString() == "full-runtime" &&
-            package.GetProperty("packageId").GetString()!.Contains("trt11.0.cuda13.2.cudnn9.22", StringComparison.Ordinal) &&
-            package.GetProperty("version").GetString() == "4.0.0");
-
         Assert.Contains(packages.EnumerateArray(), static package => package.GetProperty("role").GetString() == "split-bridge");
-        Assert.Contains(packages.EnumerateArray(), static package => package.GetProperty("role").GetString() == "split-cuda-cudnn");
-        Assert.Contains(packages.EnumerateArray(), static package => package.GetProperty("role").GetString() == "split-tensorrt");
-        Assert.Contains(packages.EnumerateArray(), static package => package.GetProperty("role").GetString() == "split-meta");
+        Assert.Equal(retiredCandidateCount, packages.EnumerateArray().Count(static package =>
+            package.GetProperty("role").GetString() is not ("managed" or "split-bridge")));
         Assert.Contains(packages.EnumerateArray(), static package =>
             package.GetProperty("role").GetString() == "split-bridge" &&
             package.GetProperty("runtimePackageKey").GetString() == "win-x64-trt10.11-cuda12.9-cudnn9.22");
@@ -106,7 +106,8 @@ public sealed class ReleaseCandidatePackageInventoryTests
 
         string markdown = File.ReadAllText(markdownPath);
         Assert.Contains("Release Candidate Package Inventory", markdown, StringComparison.Ordinal);
-        Assert.Contains("Local package inventory records package identity", markdown, StringComparison.Ordinal);
+        Assert.Contains("full/vendor runtime packages required: `False`", markdown, StringComparison.Ordinal);
+        Assert.Contains("retired package candidates found", markdown, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -124,16 +125,19 @@ public sealed class ReleaseCandidatePackageInventoryTests
         JsonElement proofRoot = proof.RootElement;
         Assert.Equal("release-candidate-package-inventory", proofRoot.GetProperty("packageInventoryState").GetString());
         Assert.True(proofRoot.GetProperty("packageInventorySplitBridgePackageReady").GetBoolean());
-        Assert.True(proofRoot.GetProperty("packageInventoryReady").GetBoolean());
+        Assert.Equal(
+            proofRoot.GetProperty("packageInventoryRetiredPackageCandidateCount").GetInt32() == 0,
+            proofRoot.GetProperty("packageInventoryReady").GetBoolean());
         Assert.True(proofRoot.GetProperty("packageInventorySha256Ready").GetBoolean());
         Assert.False(proofRoot.GetProperty("canUseAsPublicPackageProof").GetBoolean());
         Assert.False(proofRoot.GetProperty("canPromoteRuntimeProof").GetBoolean());
-        Assert.Contains(proofRoot.GetProperty("evidenceItems").EnumerateArray(), static item =>
+        bool inventoryReady = proofRoot.GetProperty("packageInventoryRetiredPackageCandidateCount").GetInt32() == 0;
+        Assert.Contains(proofRoot.GetProperty("evidenceItems").EnumerateArray(), item =>
             item.GetProperty("id").GetString() == "release-candidate-package-inventory" &&
-            item.GetProperty("passed").GetBoolean() &&
+            item.GetProperty("passed").GetBoolean() == inventoryReady &&
             item.GetProperty("state").GetString()!.Contains("bridgeReady=True", StringComparison.Ordinal) &&
-            item.GetProperty("state").GetString()!.Contains("splitReady=True", StringComparison.Ordinal) &&
-            item.GetProperty("boundary").GetString()!.Contains("complete split package set", StringComparison.OrdinalIgnoreCase));
+            item.GetProperty("state").GetString()!.Contains("bridgeOnlySetReady=True", StringComparison.Ordinal) &&
+            item.GetProperty("boundary").GetString()!.Contains("only managed and bridge candidates", StringComparison.OrdinalIgnoreCase));
 
         using JsonDocument finalReview = JsonDocument.Parse(File.ReadAllText(Path.Combine(
             RepositoryPaths.Root,
@@ -144,6 +148,7 @@ public sealed class ReleaseCandidatePackageInventoryTests
         Assert.Equal("release-candidate-package-inventory", finalRoot.GetProperty("packageInventoryState").GetString());
         Assert.True(finalRoot.GetProperty("packageInventorySplitBridgePackageReady").GetBoolean());
         Assert.True(finalRoot.GetProperty("packageInventorySplitRuntimePackagesReady").GetBoolean());
+        Assert.False(finalRoot.GetProperty("packageInventoryFullRuntimePackageRequired").GetBoolean());
         Assert.True(finalRoot.GetProperty("packageInventorySha256Ready").GetBoolean());
         Assert.True(finalRoot.GetProperty("compatibleBridgeRuntimeProofReady").GetBoolean());
         Assert.True(finalRoot.GetProperty("compatibleBridgePackageCount").GetInt32() >= 1);

@@ -243,7 +243,7 @@ $markdown = @"
 
 ## 用途
 
-该矩阵将 TensorRtSharp4.0 的发布路线拆成 NuGet small bridge/core 与 GitHub Packages full runtime 两条路线。它只做发布前证据差距预检，不执行 `dotnet nuget push`，不使用 publish token，不上传 NuGet，不上传 GitHub Packages，也不能把 dry-run artifact、local feed、ProjectReference、direct `.nupkg`、template 或 dashboard 当作 package-consumer runtime proof。
+该矩阵将 TensorRtSharp4.0 的发布路线拆成 NuGet managed package 与 GitHub Packages bridge-only package 两条路线。两条路线都禁止 NVIDIA vendor runtime 资产。它只做发布前证据差距预检，不执行 `dotnet nuget push`，不使用 publish token，不上传 NuGet，不上传 GitHub Packages，也不能把 dry-run artifact、local feed、ProjectReference、direct `.nupkg`、template 或 dashboard 当作 package-consumer runtime proof。
 
 | 项目 | 当前值 |
 |---|---|

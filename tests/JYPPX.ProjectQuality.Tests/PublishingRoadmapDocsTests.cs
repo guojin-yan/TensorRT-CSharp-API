@@ -72,10 +72,11 @@ public sealed class PublishingRoadmapDocsTests
         Assert.Contains("高层 wrapper", presets, StringComparison.Ordinal);
         Assert.Contains("不删除 deferred", presets, StringComparison.Ordinal);
 
-        Assert.Contains("GitHub full runtime 包", packages, StringComparison.Ordinal);
-        Assert.Contains("NuGet small bridge/core 包", packages, StringComparison.Ordinal);
-        Assert.Contains("CUDA/TensorRT/cuDNN", packages, StringComparison.Ordinal);
-        Assert.Contains("不能替代真实发布 proof", packages, StringComparison.Ordinal);
+        Assert.Contains("GitHub Release assets", packages, StringComparison.Ordinal);
+        Assert.Contains("NuGet-compatible source", packages, StringComparison.Ordinal);
+        Assert.Contains("managed + bridge-only", packages, StringComparison.Ordinal);
+        Assert.Contains("CUDA、TensorRT、cuDNN、NVRTC", packages, StringComparison.Ordinal);
+        Assert.Contains("不能重新 pack、push 或上传", packages, StringComparison.Ordinal);
     }
 
     [Fact]

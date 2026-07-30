@@ -81,6 +81,118 @@ if (-not (Test-TextContains -Path $fullRuntimeScript -Text "Full-runtime packagi
   Add-Failure "Invoke-LocalRuntimePackage.ps1 must fail closed after full-runtime retirement."
 }
 
+$publicReleaseConsumerScript = Join-Path $RepositoryRoot "eng\Invoke-PublicReleaseBridgePackageConsumer.ps1"
+foreach ($requiredMarker in @(
+    "publicReleaseAssetProvenanceVerified = `$true",
+    "remoteDigestVerified = `$true",
+    "stagingIsLocallyBuiltPackageFeed = `$false",
+    "directNupkgReferenceUsed = `$false",
+    "vendorRuntimeBundled = `$false",
+    "packageSourceCommitAligned",
+    "currentHeadBindingVerified = `$false",
+    "isPackageConsumerRuntimeProof = `$false",
+    "isPostPublishProof = `$false"
+  )) {
+  if (-not (Test-TextContains -Path $publicReleaseConsumerScript -Text $requiredMarker)) {
+    Add-Failure "Public Release bridge consumer is missing required evidence boundary marker: $requiredMarker"
+  }
+}
+
+$publicReleaseConsumerValidator = Join-Path $RepositoryRoot "eng\Test-PublicReleaseBridgePackageConsumer.ps1"
+foreach ($requiredMarker in @(
+    "runtimeReportSha256Verified",
+    "invocationLogHashesVerified",
+    "sourceCommitsAligned",
+    "verified-cross-commit-diagnostic-only",
+    "canPromotePublicReleaseAssetConsumerEvidence",
+    "isPackageConsumerRuntimeProof = `$false",
+    "isPostPublishProof = `$false",
+    "currentHeadBindingVerified = `$false"
+  )) {
+  if (-not (Test-TextContains -Path $publicReleaseConsumerValidator -Text $requiredMarker)) {
+    Add-Failure "Public Release bridge consumer validator is missing required integrity or proof-boundary marker: $requiredMarker"
+  }
+}
+if (-not (Test-TextContains -Path $publicReleaseConsumerScript -Text "Test-PublicReleaseBridgePackageConsumer.ps1") -or
+    -not (Test-TextContains -Path $publicReleaseConsumerScript -Text "-RequireReferencedFiles") -or
+    -not (Test-TextContains -Path $publicReleaseConsumerScript -Text "runtimeReportSha256 = `$runtimeProofSha256")) {
+  Add-Failure "Public Release bridge consumer must invoke the independent validator and pin the runtime report SHA256."
+}
+
+$dualRoutePlanScript = Join-Path $RepositoryRoot "eng\Export-PackageConsumerDualRouteProofPlan.ps1"
+if (-not (Test-TextContains -Path $dualRoutePlanScript -Text "github-release-managed-plus-bridge-assets") -or
+    -not (Test-TextContains -Path $dualRoutePlanScript -Text "nuget-managed-plus-bridge-packages")) {
+  Add-Failure "Public package routes must describe managed plus bridge-only delivery for GitHub Release and NuGet-compatible sources."
+}
+$dualRoutePlanText = Get-Content -LiteralPath $dualRoutePlanScript -Raw -Encoding utf8
+foreach ($retiredMarker in @("github-full-dependency-package", "runtime dependency bundle")) {
+  if ($dualRoutePlanText.IndexOf($retiredMarker, [StringComparison]::OrdinalIgnoreCase) -ge 0) {
+    Add-Failure "Public package route plan still advertises retired vendor runtime delivery: $retiredMarker"
+  }
+}
+
+$runtimeReleasePlanScript = Join-Path $RepositoryRoot "eng\Export-RuntimeReleasePlan.ps1"
+foreach ($requiredMarker in @(
+    'publicationPolicy = "bridge-only"',
+    'vendorRuntimePackagesForbidden = $true',
+    "retiredStableDependencyPinMaps",
+    "split_package_roles=bridge",
+    "publish_to_github_packages=false",
+    "attach_to_github_release=false"
+  )) {
+  if (-not (Test-TextContains -Path $runtimeReleasePlanScript -Text $requiredMarker)) {
+    Add-Failure "Runtime release plan is missing bridge-only dry-run marker: $requiredMarker"
+  }
+}
+
+$runtimeReadinessScript = Join-Path $RepositoryRoot "eng\Test-RuntimePackageReadiness.ps1"
+foreach ($requiredMarker in @(
+    '$_.sourceRuntimeKey -eq $key -and $_.role -eq "bridge"',
+    '$fullRuntimeStatus = "retired-not-required"',
+    'host-vendor-inputs',
+    'do not copy them into a package'
+  )) {
+  if (-not (Test-TextContains -Path $runtimeReadinessScript -Text $requiredMarker)) {
+    Add-Failure "Runtime readiness is missing bridge-only policy marker: $requiredMarker"
+  }
+}
+$runtimeReadinessText = Get-Content -LiteralPath $runtimeReadinessScript -Raw -Encoding utf8
+foreach ($retiredBlocker in @(
+    'New-ReadinessBlocker -Category "full-runtime-package"',
+    'New-ReadinessBlocker -Category "full-package-consumer"',
+    'New-ReadinessBlocker -Category "split-collection-package"',
+    'New-ReadinessBlocker -Category "split-collection-consumer"'
+  )) {
+  if ($runtimeReadinessText.IndexOf($retiredBlocker, [StringComparison]::Ordinal) -ge 0) {
+    Add-Failure "Runtime readiness still blocks on a retired package role: $retiredBlocker"
+  }
+}
+
+foreach ($surface in @(
+    "README.md",
+    "docs\articles\en\runtime-packages.md",
+    "docs\articles\en\runtime-distribution-strategy.md",
+    "docs\articles\zh-cn\runtime-distribution-strategy.md",
+    "docs\articles\zh-cn\nuget-github-dual-package-strategy.md",
+    "docs\articles\zh-cn\publishing\package-strategy-public-article.md",
+    "docs\articles\zh-cn\publishing\project-overview-public-article.md",
+    "docs\articles\zh-cn\publishing\native-bridge-build-public-article.md"
+  )) {
+  $surfacePath = Join-Path $RepositoryRoot $surface
+  $surfaceText = Get-Content -LiteralPath $surfacePath -Raw -Encoding utf8
+  foreach ($retiredClaim in @(
+      "GitHub full runtime package",
+      "GitHub Packages full runtime",
+      "full dependency package route",
+      "publish CudaCudnn",
+      "republish CudaCudnn"
+    )) {
+    if ($surfaceText.IndexOf($retiredClaim, [StringComparison]::OrdinalIgnoreCase) -ge 0) {
+      Add-Failure "Current public policy surface '$surface' still advertises retired vendor package delivery: $retiredClaim"
+    }
+  }
+}
+
 foreach ($workflowName in @("package-managed.yml", "package-source.yml", "runtime-windows.yml", "runtime-linux.yml", "release-bundle.yml", "release-quality-gate.yml")) {
   $workflowPath = Join-Path $RepositoryRoot ".github\workflows\$workflowName"
   if (-not (Test-TextContains -Path $workflowPath -Text "Test-ExternalVendorRuntimePackagePolicy.ps1")) {

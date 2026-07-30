@@ -80,8 +80,8 @@ if ($candidatePresent) {
   Add-CandidateValidationItem $items "managed-package-sha256" (Test-OwnerSha256Format -Value (Get-SummaryValue "managedPackageSha256")) "action-required" "Managed package SHA256 must be present."
   Add-CandidateValidationItem $items "runtime-package-sha256" (Test-OwnerSha256Format -Value (Get-SummaryValue "runtimePackageSha256")) "action-required" "Runtime package SHA256 must be present."
 
-  Add-CandidateValidationItem $items "github-release-url" (Test-OwnerGitHubUrl -Value (Get-SummaryValue "githubReleaseUrl")) "action-required" "GitHub release URL must be present for the full-dependency package route."
-  Add-CandidateValidationItem $items "github-release-asset-url" (Test-OwnerGitHubUrl -Value (Get-SummaryValue "githubReleaseAssetUrl")) "action-required" "GitHub release asset URL must be present for the full-dependency package route."
+  Add-CandidateValidationItem $items "github-release-url" (Test-OwnerGitHubUrl -Value (Get-SummaryValue "githubReleaseUrl")) "action-required" "GitHub release URL must be present for the managed plus bridge-only asset route."
+  Add-CandidateValidationItem $items "github-release-asset-url" (Test-OwnerGitHubUrl -Value (Get-SummaryValue "githubReleaseAssetUrl")) "action-required" "GitHub release asset URL must identify a managed or bridge-only package asset."
   Add-CandidateValidationItem $items "github-release-asset-sha256" (Test-OwnerSha256Format -Value (Get-SummaryValue "githubReleaseAssetSha256")) "action-required" "GitHub release asset SHA256 must be present."
   Add-CandidateValidationItem $items "package-managed-source-channel-public" ((Get-SummaryValue "packageManagedPackageSourceChannel") -match '(?i)nuget\.org|public\s+nuget') "action-required" "Managed package source channel must identify public NuGet."
   Add-CandidateValidationItem $items "package-source-channel-public" ((Get-SummaryValue "packageSourceChannel") -match '(?i)nuget\.org|github') "action-required" "Package source channel must identify public NuGet/GitHub package routes."

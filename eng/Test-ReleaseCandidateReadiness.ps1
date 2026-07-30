@@ -139,10 +139,10 @@ $externalRuntimeProofValidation = Read-JsonOrNull "artifacts\final-release\exter
 $checks = New-Object System.Collections.Generic.List[object]
 
 if ($runtimeReadiness -and $runtimeReadiness.managedPackage.status -eq "ready") { $managedPackageStatus = "ready" } else { $managedPackageStatus = "missing" }
-if ($runtimeReadiness -and $runtimeReadiness.fullRuntimePackage.status -eq "ready") { $fullRuntimePackageStatus = "ready" } else { $fullRuntimePackageStatus = "missing" }
+$fullRuntimePackageStatus = "retired-not-required"
 if ($runtimeReadiness -and $runtimeReadiness.bridgePackage.status -eq "ready") { $bridgePackageStatus = "ready" } else { $bridgePackageStatus = "missing" }
 if ($bridgeConsumer -and $bridgeConsumer.NativeDependencyStatus -eq "ready") { $bridgeConsumerStatus = "ready" } else { $bridgeConsumerStatus = "missing-or-not-ready" }
-if ($packageConsumer -and $packageConsumer.NativeAssetsFound -eq $packageConsumer.NativeAssetsExpected) { $packageConsumerStatus = "ready" } else { $packageConsumerStatus = "missing-or-not-ready" }
+if ($packageConsumer -and $packageConsumer.NativeAssetsFound -eq $packageConsumer.NativeAssetsExpected) { $packageConsumerStatus = "historical-record-present" } else { $packageConsumerStatus = "historical-record-missing" }
 $compatibleBridgeRuntimeProofReady = $compatibleBridgeRuntimeProof -and
   [string]$compatibleBridgeRuntimeProof.proofClassification -eq "compatible-host-bridge-package-runtime" -and
   [string]$compatibleBridgeRuntimeProof.smokeStatus -eq "passed" -and
@@ -155,21 +155,21 @@ $compatibleBridgeRuntimeProofReady = $compatibleBridgeRuntimeProof -and
 $compatibleBridgeRuntimeProofStatus = if ($compatibleBridgeRuntimeProofReady) { "ready" } elseif ($compatibleBridgeRuntimeProof) { "not-ready" } else { "missing" }
 
 $checks.Add((New-Check -Category "managed-package" -Name "Managed package exists" -Status $managedPackageStatus -Severity "blocker" -Detail "managed package status from runtime readiness." -EvidencePath "artifacts/package-readiness/runtime-package-readiness-summary.json")) | Out-Null
-$checks.Add((New-Check -Category "runtime-package" -Name "Full runtime package exists" -Status $fullRuntimePackageStatus -Severity "blocker" -Detail "full runtime package status from runtime readiness." -EvidencePath "artifacts/package-readiness/runtime-package-readiness-summary.json")) | Out-Null
+$checks.Add((New-Check -Category "package-policy" -Name "Vendor package route retired" -Status "ready" -Severity "blocker" -Detail "Only managed and bridge packages are publishable; full/vendor package absence is required and not a readiness blocker." -EvidencePath "pack/external-vendor-runtime-policy.json")) | Out-Null
 $checks.Add((New-Check -Category "runtime-package" -Name "Bridge package exists" -Status $bridgePackageStatus -Severity "blocker" -Detail "bridge split package status from runtime readiness." -EvidencePath "artifacts/package-readiness/runtime-package-readiness-summary.json")) | Out-Null
 $checks.Add((New-Check -Category "consumer" -Name "Bridge package consumer" -Status $bridgeConsumerStatus -Severity "blocker" -Detail "bridge consumer validates wrapper surface and native dependency probe without claiming full runtime callback proof." -EvidencePath "artifacts/package-consumer/bridge-package-consumer-validation-summary.json")) | Out-Null
 $checks.Add((New-Check -Category "runtime-proof" -Name "TRT10 compatible bridge package runtime proof" -Status $compatibleBridgeRuntimeProofStatus -Severity "warning" -Detail "External PackageReference consumer executes identity build/serialize/deserialize/enqueue/output-compare with system TensorRT/CUDA dependencies. This is compatible-host runtime execution evidence only; it remains isPackageConsumerRuntimeProof=false and does not clear the TRT11 public release blocker." -EvidencePath $compatibleBridgeRuntimeProofPath.Replace('\', '/'))) | Out-Null
-$checks.Add((New-Check -Category "consumer" -Name "Full package consumer" -Status $packageConsumerStatus -Severity "blocker" -Detail "full package consumer restore/build/native asset validation." -EvidencePath "artifacts/package-consumer/package-consumer-validation-summary.json")) | Out-Null
+$checks.Add((New-Check -Category "consumer" -Name "Historical vendor-package consumer" -Status $packageConsumerStatus -Severity "warning" -Detail "Historical vendor-package consumer records remain diagnostic inputs only and are not required by bridge-only publication." -EvidencePath "artifacts/package-consumer/package-consumer-validation-summary.json")) | Out-Null
 
 if ($packageConsumer) { $smokeStatus = [string]$packageConsumer.SmokeResult } else { $smokeStatus = "missing" }
 $fallbackPackageConsumerEvidenceKind = switch ($smokeStatus) {
-  "passed" { "full-runtime-package-consumer-smoke"; break }
+  "passed" { "historical-vendor-package-consumer-smoke"; break }
   "not-requested" { "package-consumer-native-copy"; break }
-  "blocked-by-application-control" { "full-runtime-package-consumer-smoke-application-control-blocked"; break }
-  "blocked-by-cuda-driver" { "full-runtime-package-consumer-smoke-driver-blocked"; break }
-  "failed" { "full-runtime-package-consumer-smoke-failed"; break }
+  "blocked-by-application-control" { "historical-vendor-package-consumer-smoke-application-control-blocked"; break }
+  "blocked-by-cuda-driver" { "historical-vendor-package-consumer-smoke-driver-blocked"; break }
+  "failed" { "historical-vendor-package-consumer-smoke-failed"; break }
   "missing" { "missing"; break }
-  default { "full-runtime-package-consumer-diagnostic"; break }
+  default { "historical-vendor-package-consumer-diagnostic"; break }
 }
 $fallbackRuntimeSmokeClassification = switch ($smokeStatus) {
   "passed" { "runtime-smoke-passed"; break }
@@ -235,13 +235,13 @@ $compatibleHostRuntimeProofCollectionBundleRunPackageConsumerSmokeCommand = [str
 $compatibleHostRuntimeProofCollectionBundleValidateFilledRecordCommandFallback = [string](Get-PropertyOrDefault -Object $compatibleHostRuntimeProofCollectionBundle -Name "compatibleHostRuntimeProofCollectionBundleValidateFilledRecordCommand" -DefaultValue "pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-ExternalRuntimeProofRecord.ps1 -InputPath artifacts/final-release/external-runtime-proof-record.json -RequireExistingLog -FailOnNotProof")
 $compatibleHostRuntimeProofCollectionBundleValidateFilledRecordCommandFallback = [string](Get-PropertyOrDefault -Object $compatibleHostRuntimeProofCollectionBundle -Name "validateFilledRecordCommand" -DefaultValue $compatibleHostRuntimeProofCollectionBundleValidateFilledRecordCommandFallback)
 $compatibleHostRuntimeProofCollectionBundleValidateFilledRecordCommand = [string](Get-PropertyOrDefault -Object $compatibleHostRuntimeProofCollectionBundleCommands -Name "validateFilledRecord" -DefaultValue $compatibleHostRuntimeProofCollectionBundleValidateFilledRecordCommandFallback)
-if ($smokeStatus -eq "passed" -or $smokeStatus -eq "blocked-by-cuda-driver" -or ($AllowRuntimeSmokeBlocked.IsPresent -and $smokeStatus -eq "blocked-by-cuda-driver")) { $smokeSeverity = "warning" } else { $smokeSeverity = "blocker" }
+$smokeSeverity = "warning"
 $runtimeProofSeverity = if ($runtimeProofRequiredForRelease -and -not $isRuntimeExecutionEvidence) { "blocker" } else { "warning" }
 if ($packageConsumer) { $smokeDetail = [string]$packageConsumer.SmokeDiagnostic } else { $smokeDetail = "package consumer smoke report was not found." }
 $smokeDetail = "$smokeDetail EvidenceKind=$packageConsumerEvidenceKind; RuntimeSmokeClassification=$runtimeSmokeClassification; IsRuntimeExecutionEvidence=$isRuntimeExecutionEvidence; IsDependencyProbeOnly=$isDependencyProbeOnly; IsRealCallbackRuntimeProof=$isPackageConsumerRealCallbackRuntimeProof; RuntimeProofStatus=$runtimeProofStatus; RuntimeProofRequiredForRelease=$runtimeProofRequiredForRelease."
-$checks.Add((New-Check -Category "runtime-smoke" -Name "Full package consumer smoke" -Status $smokeStatus -Severity $smokeSeverity -Detail $smokeDetail -EvidencePath "artifacts/package-consumer/package-consumer-validation-summary.json")) | Out-Null
+$checks.Add((New-Check -Category "runtime-smoke" -Name "Historical vendor-package consumer smoke" -Status $smokeStatus -Severity $smokeSeverity -Detail "$smokeDetail Historical vendor-package smoke cannot satisfy current package-consumer or post-publish proof." -EvidencePath "artifacts/package-consumer/package-consumer-validation-summary.json")) | Out-Null
 $runtimeProofDetail = "runtime proof status is separate from package/readiness overall status; release-required=$runtimeProofRequiredForRelease; runtime-execution-evidence=$isRuntimeExecutionEvidence; externalRuntimeProofConsumerProjectIdentityReady=$externalRuntimeProofConsumerProjectIdentityReady; externalRuntimeProofSmokeCommandRuntimeKeyReady=$externalRuntimeProofSmokeCommandRuntimeKeyReady; externalRuntimeProofHostReady=$externalRuntimeProofHostReady; externalRuntimeProofCommandsReady=$externalRuntimeProofCommandsReady; $runtimeProofDiagnostic Missing real external-runtime-proof-record.json remains a release blocker when runtimeProofRequiredForRelease=True; blocked-by-cuda-driver is not smoke passed; compatible-host-runtime-proof-collection-bundle is guidance only."
-$checks.Add((New-Check -Category "runtime-proof" -Name "Full package runtime proof" -Status $runtimeProofStatus -Severity $runtimeProofSeverity -Detail $runtimeProofDetail -EvidencePath "artifacts/package-readiness/runtime-package-readiness-summary.json; artifacts/final-release/external-runtime-proof-record.json")) | Out-Null
+$checks.Add((New-Check -Category "runtime-proof" -Name "External bridge runtime proof" -Status $runtimeProofStatus -Severity $runtimeProofSeverity -Detail "$runtimeProofDetail Current proof must use managed plus bridge-only packages with host-installed NVIDIA dependencies." -EvidencePath "artifacts/package-readiness/runtime-package-readiness-summary.json; artifacts/final-release/external-runtime-proof-record.json")) | Out-Null
 $compatibleHostRuntimeProofCollectionBundleReady = $compatibleHostRuntimeProofCollectionBundle -and
   -not $compatibleHostRuntimeProofCollectionBundlePerformsPublish -and
   -not $compatibleHostRuntimeProofCollectionBundleApprovesPublicRelease -and

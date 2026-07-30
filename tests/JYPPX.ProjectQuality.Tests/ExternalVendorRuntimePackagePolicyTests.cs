@@ -157,6 +157,62 @@ public sealed class ExternalVendorRuntimePackagePolicyTests
     }
 
     [Fact]
+    public void PublicReleaseConsumerUsesVerifiedManagedAndBridgeAssetsOnly()
+    {
+        string consumer = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "eng",
+            "Invoke-PublicReleaseBridgePackageConsumer.ps1"));
+        string routePlan = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "eng",
+            "Export-PackageConsumerDualRouteProofPlan.ps1"));
+
+        foreach (string marker in new[]
+        {
+            "browser_download_url",
+            "^sha256:[0-9a-fA-F]{64}$",
+            "Get-FileHash",
+            "Assert-PackageIdentity",
+            "repositoryCommit",
+            "packageSourceCommitAligned",
+            "-AllowCrossCommitPair is diagnostic-only",
+            "Test-ExternalVendorRuntimePackagePolicy.ps1",
+            "Test-BridgePackageRuntimeConsumer.ps1",
+            "restoreUsesDownloadedAssetStaging = $true",
+            "stagingIsLocallyBuiltPackageFeed = $false",
+            "directNupkgReferenceUsed = $false",
+            "vendorRuntimeBundled = $false",
+            "currentHeadBindingVerified = $false",
+            "isPackageConsumerRuntimeProof = $false",
+            "isPostPublishProof = $false",
+            "runtime-consumer-invocation.stdout.log",
+            "runtime-consumer-invocation.stderr.log",
+            "-SkipInstalledVendorAssetHashing",
+        })
+        {
+            Assert.Contains(marker, consumer, StringComparison.Ordinal);
+        }
+
+        Assert.Contains("github-release-managed-plus-bridge-assets", routePlan, StringComparison.Ordinal);
+        Assert.Contains("nuget-managed-plus-bridge-packages", routePlan, StringComparison.Ordinal);
+        Assert.Contains("NVIDIA vendor runtime packages are not a supported route", routePlan, StringComparison.Ordinal);
+        Assert.Contains("same source commit", routePlan, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("github-full-dependency-package", routePlan, StringComparison.Ordinal);
+        Assert.DoesNotContain("runtime dependency bundle", routePlan, StringComparison.OrdinalIgnoreCase);
+
+        string runtimeConsumer = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "eng",
+            "Test-BridgePackageRuntimeConsumer.ps1"));
+        Assert.Contains("[switch]$SkipInstalledVendorAssetHashing", runtimeConsumer, StringComparison.Ordinal);
+        Assert.Contains("installedVendorAssetHashingSkipped", runtimeConsumer, StringComparison.Ordinal);
+        Assert.Contains("installedVendorAssetInventorySkipped", runtimeConsumer, StringComparison.Ordinal);
+        Assert.Contains("nativeAssetHashesComplete", runtimeConsumer, StringComparison.Ordinal);
+        Assert.Contains("canPromoteCompatibleHostRuntimeProof = $runtimeSmokePassed -and -not $SkipInstalledVendorAssetHashing.IsPresent", runtimeConsumer, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void RemoteCleanupInventoryIsReadOnlyAndRequiresOwnerReview()
     {
         string script = File.ReadAllText(Path.Combine(

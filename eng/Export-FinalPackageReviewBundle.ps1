@@ -285,6 +285,8 @@ $packageInventoryState = [string](Get-PropertyOrDefault -Object $releaseCandidat
 $packageInventoryPackageCount = [int](Get-PropertyOrDefault -Object $releaseCandidatePackageInventory -Name "packageCount" -DefaultValue 0)
 $packageInventoryManagedPackageReady = [bool](Get-PropertyOrDefault -Object $releaseCandidatePackageInventory -Name "managedPackageReady" -DefaultValue $false)
 $packageInventoryFullRuntimePackageReady = [bool](Get-PropertyOrDefault -Object $releaseCandidatePackageInventory -Name "fullRuntimePackageReady" -DefaultValue $false)
+$packageInventoryFullRuntimePackageRequired = [bool](Get-PropertyOrDefault -Object $releaseCandidatePackageInventory -Name "fullRuntimePackageRequired" -DefaultValue $false)
+$packageInventoryRetiredPackageCandidateCount = [int](Get-PropertyOrDefault -Object $releaseCandidatePackageInventory -Name "retiredPackageCandidateCount" -DefaultValue 0)
 $packageInventorySplitBridgePackageReady = [bool](Get-PropertyOrDefault -Object $releaseCandidatePackageInventory -Name "splitBridgePackageReady" -DefaultValue $false)
 $packageInventorySplitRuntimePackagesReady = [bool](Get-PropertyOrDefault -Object $releaseCandidatePackageInventory -Name "splitRuntimePackagesReady" -DefaultValue $false)
 $packageInventorySha256Ready = [bool](Get-PropertyOrDefault -Object $releaseCandidatePackageInventory -Name "sha256Ready" -DefaultValue $false)
@@ -337,6 +339,8 @@ $record = [pscustomobject]@{
   packageInventoryPackageCount = $packageInventoryPackageCount
   packageInventoryManagedPackageReady = $packageInventoryManagedPackageReady
   packageInventoryFullRuntimePackageReady = $packageInventoryFullRuntimePackageReady
+  packageInventoryFullRuntimePackageRequired = $packageInventoryFullRuntimePackageRequired
+  packageInventoryRetiredPackageCandidateCount = $packageInventoryRetiredPackageCandidateCount
   packageInventorySplitBridgePackageReady = $packageInventorySplitBridgePackageReady
   packageInventorySplitRuntimePackagesReady = $packageInventorySplitRuntimePackagesReady
   packageInventorySha256Ready = $packageInventorySha256Ready
@@ -379,7 +383,8 @@ $lines.Add("- native asset count: ``$nativeAssetCount``")
 $lines.Add("- package inventory state: ``$packageInventoryState``")
 $lines.Add("- package inventory package count: ``$packageInventoryPackageCount``")
 $lines.Add("- package inventory managed package ready: ``$packageInventoryManagedPackageReady``")
-$lines.Add("- package inventory full runtime package ready: ``$packageInventoryFullRuntimePackageReady``")
+$lines.Add("- package inventory full/vendor runtime package required: ``$packageInventoryFullRuntimePackageRequired``")
+$lines.Add("- package inventory retired package candidate count: ``$packageInventoryRetiredPackageCandidateCount``")
 $lines.Add("- package inventory split bridge package ready: ``$packageInventorySplitBridgePackageReady``")
 $lines.Add("- package inventory split runtime packages ready: ``$packageInventorySplitRuntimePackagesReady``")
   $lines.Add("- package inventory SHA256 ready: ``$packageInventorySha256Ready``")

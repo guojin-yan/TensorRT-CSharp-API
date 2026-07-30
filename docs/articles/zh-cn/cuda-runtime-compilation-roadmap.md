@@ -109,9 +109,9 @@ compile-only smoke、artifact hash、synthetic kernel 和 local Toolkit 都不�
 ### 阶段 F：Packaging 与跨平台证明
 
 - Bridge-only NuGet 不捆绑 NVRTC；consumer 自行安装匹配 CUDA Toolkit，并获得明确 dependency diagnostics。
-- GitHub full runtime 包按 runtime key 增加 `nvrtc` 与匹配的 `nvrtc-builtins`，同步 Windows/Linux manifests、split package roles、hash/size checks 和 redistribution review。
-- 本地 packaging preflight 当前验证 Windows `4/4`、Linux `0/4`；license text 只作为复核输入，绝不等于再分发批准。任何 blocker 未关闭时，显式 `cuda-rtc` split pack 请求必须失败。
-- 验证 Windows x64、Linux x64、CUDA 11.8/12.1/12.9/13.2；每个 runtime key 的声明必须与实际 native dependencies 和 package assets 一致。
+- `.Bridge` 包不得携带 `nvrtc` 或 `nvrtc-builtins`。用户安装与 runtime key 匹配的 CUDA Toolkit，consumer 记录 NVRTC/builtins 的机器路径、版本和 hash；Windows/Linux 运行验证分别闭合。
+- 历史 packaging preflight 只保留为 host dependency identity audit；`cuda-rtc` package role 固定为 `retired-not-packable`，任何非 bridge pack 请求都在资产收集前失败。
+- 验证 Windows x64、Linux x64、CUDA 11.8/12.1/12.9/13.2；每个 runtime key 的声明必须与实际 host dependencies 一致，vendor 文件永远不是 package assets。
 - Windows CUDA 12.9 local-feed clean consumer 已在无 `ProjectReference`、无开发 probing 下完成 compile-to-launch；公开发布后仍必须从公开 source 重跑同一 smoke，当前结果只能保留为本地 candidate。
 
 ## 验证矩阵与证据等级

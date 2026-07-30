@@ -122,12 +122,13 @@ NuGet.org、GitHub Packages 或 owner 指定的 NuGet v3 feed 可以作为 resto
 
 GitHub Release URL 能提供真实下载文件，但 Release asset 本身不是 NuGet source。不能仅把 `.nupkg` 下载到本地目录，再把这个目录称为公开 source。
 
-如果项目选择 GitHub full runtime package 路线，owner 需要明确：
+如果项目选择 GitHub Release managed + bridge assets 路线，owner 需要明确：
 
-- 用户如何从 Release asset 恢复 package source；
-- 下载 URL 与 release/tag/asset identity；
+- managed 与 `.Bridge` 资产各自的下载 URL、release/tag/asset identity 和 GitHub digest；
+- 两个 nuspec 的 repository commit 是否一致；
 - validator 如何区分真实渠道下载与本地候选包；
-- clean consumer 如何在不使用仓库 artifacts 的前提下消费它。
+- clean consumer 如何只把已验证的公开下载文件放入隔离 restore staging；
+- 主机上的 TensorRT/CUDA/cuDNN/NVRTC 如何独立发现，且没有进入包资产。
 
 当前 strict record 要求 `noLocalPackageSource=true`。无法满足时应保持 blocker，不要把临时本地 feed 写成 post-publish proof。
 
@@ -350,10 +351,7 @@ Get-ChildItem (Join-Path $consumerRoot "bin\Release") -File -Recurse |
   } | Set-Content -LiteralPath $nativeListing -Encoding utf8
 ```
 
-native listing 要与渠道 route 对齐：
-
-- full runtime package：检查 bridge + vendor runtime assets；
-- small core/bridge：检查 bridge，并单独记录主机 TensorRT/CUDA/cuDNN discovery。
+两种公开通道的 native listing 规则相同：包内只检查项目自有 bridge，并单独记录主机 TensorRT/CUDA/cuDNN/NVRTC discovery。任何 NVIDIA 原厂 binary 出现在 nupkg listing 中都应让验证 fail closed。
 
 ## 阶段七：Dependency Probe
 

@@ -1,13 +1,13 @@
 # CUDA / TensorRT DLL 加载问题排查
 
-在 Windows 上使用 TensorRT C# binding，最常见的问题不是 C# 语法，而是 native 依赖加载：CUDA driver、CUDA runtime、TensorRT DLL、cuDNN、Visual C++ runtime、PATH、当前工作目录、进程位数、RID 和 runtime package 都必须匹配。本文给出面向用户的排查路径，帮助把“DLL 找不到”变成可定位、可复现、可反馈的问题。
+在 Windows 上使用 TensorRT C# binding，最常见的问题不是 C# 语法，而是 native 依赖加载：CUDA driver、用户安装的 CUDA runtime、TensorRT DLL、cuDNN、Visual C++ runtime、PATH、当前工作目录、进程位数、RID 和 `.Bridge` package 都必须匹配。本文给出面向用户的排查路径，帮助把“DLL 找不到”变成可定位、可复现、可反馈的问题。
 
 这篇文章是 troubleshooting guide，不是 package-consumer-runtime proof。它可以帮助用户缩小问题范围，但不能授权发布、不能关闭 release issue，也不能替代 clean external consumer 的 runtime smoke 和 strict validator。
 
 ## 适合谁阅读
 
 - 遇到 `DllNotFoundException`、`BadImageFormatException`、CUDA error 35 或 TensorRT native load 失败的新用户。
-- 需要维护 runtime package、native assets copied 和 dependency probe 的发布负责人。
+- 需要维护 bridge package、host dependency listing 和 dependency probe 的发布负责人。
 - 正在排查 `jyppxtrtbridge.dll`、`nvinfer_10.dll`、`nvonnxparser_10.dll`、`cudart64_12.dll`、`cudnn64_9.dll` 等依赖链的工程师。
 - 准备采集 clean external consumer proof，但还没有真实 owner log/hash/host metadata 的 owner。
 
@@ -26,12 +26,12 @@ TensorRT line/version
 cuDNN major/version
 目标 RID，例如 win-x64 或 linux-x64
 managed package id/version
-runtime package id/version/runtime key
+bridge package id/version/runtime key
 native asset listing
 stdout/stderr log SHA256
 ```
 
-这些字段后续也会进入 owner proof 输入，不能只靠截图或口头描述。若 driver 支持的 CUDA runtime 低于 runtime package 需求，常见表现是 CUDA error 35、CUDA driver/runtime mismatch 或 native initialization failed；这只能形成 blocked-by-cuda-driver 诊断，不能写成 runtime proof。
+这些字段后续也会进入 owner proof 输入，不能只靠截图或口头描述。若 driver 支持的 CUDA runtime 低于所选 runtime key 对应的主机依赖需求，常见表现是 CUDA error 35、CUDA driver/runtime mismatch 或 native initialization failed；这只能形成 blocked-by-cuda-driver 诊断，不能写成 runtime proof。
 
 ## 代码与文档入口
 
@@ -68,16 +68,16 @@ dotnet --info
 
 如果进程不是 x64，先修正项目平台和 RID。TensorRT/CUDA Windows runtime 基本按 x64 交付，x86 进程会导致 `BadImageFormatException` 或无法加载 native dependency。
 
-第二步：确认 driver 与 CUDA。
+第二步：确认 driver 与用户安装的 CUDA。
 
 ```powershell
 nvidia-smi
 Get-Command nvcc -ErrorAction SilentlyContinue
 ```
 
-`nvcc` 是否存在不是 runtime package proof；很多用户只装 driver 不装 Toolkit。真正要确认的是 driver 是否支持 runtime package 需要的 CUDA runtime。CUDA error 35 代表 driver/runtime 组合不兼容时，应该换兼容 host 或 runtime key，而不是修改测试或删除 blocker。
+`nvcc` 是否存在不是 runtime proof；很多用户只装 driver 不装 Toolkit。真正要确认的是 driver 是否支持所选 runtime key 对应的 CUDA runtime。CUDA error 35 代表 driver/runtime 组合不兼容时，应该换兼容 host 或调整主机安装，而不是修改测试或删除 blocker。
 
-第三步：确认 NuGet runtime package。
+第三步：确认 managed + Bridge PackageReference。
 
 ```powershell
 dotnet list package
@@ -102,9 +102,9 @@ tensorRtFiles
 cudaFiles
 cudnnFiles
 role = bridge
-role = cuda-cudnn
-role = tensorrt
 ```
+
+`tensorRtFiles`、`cudaFiles` 和 `cudnnFiles` 现在是主机依赖诊断 pattern，不是 nupkg 内容清单。split manifest 中只有 `role = bridge` 可发布，其余历史 role 不可 pack。
 
 第四步：确认输出目录。
 
@@ -113,13 +113,18 @@ Get-ChildItem .\bin\Release\net8.0 -Filter *.dll | Sort-Object Name
 Get-ChildItem .\bin\Debug\net8.0 -Filter *.dll | Sort-Object Name
 ```
 
-常见文件包括：
+managed 和 bridge package 应复制：
 
 ```text
 JYPPX.TensorRtSharp.dll
 JYPPX.CudaSharp.dll
 JYPPX.TensorRtSharp.Tools.dll
 jyppxtrtbridge.dll
+```
+
+下面这些文件必须来自用户自己的 NVIDIA 安装，而不是 NuGet 包：
+
+```text
 nvinfer.dll / nvinfer_10.dll
 nvinfer_plugin.dll / nvinfer_plugin_10.dll
 nvonnxparser.dll / nvonnxparser_10.dll
@@ -127,7 +132,7 @@ cudart64_110.dll / cudart64_12.dll
 cudnn64_8.dll / cudnn64_9.dll
 ```
 
-缺少 bridge 时先看 Bridge package；缺少 TensorRT DLL 时看 TensorRt package；缺少 CUDA/cuDNN DLL 时看 CudaCudnn package。不要把系统目录复制到输出目录来掩盖包内容问题，除非只是临时诊断且记录清楚。
+缺少 bridge 时先看 `.Bridge` package；缺少 TensorRT、CUDA 或 cuDNN DLL 时检查用户安装、loader path 和 runtime key。不要从历史 vendor package 或另一台机器复制 DLL 来掩盖安装问题；临时诊断复制必须明确记录。
 
 第五步：确认搜索路径。
 
@@ -154,7 +159,7 @@ Get-Command jyppxtrtbridge.dll -ErrorAction SilentlyContinue
 dumpbin /dependents .\\bin\\Release\\net8.0\\jyppxtrtbridge.dll
 ```
 
-`where` 和 `Get-Command` 只能说明 PATH 上能看到什么；`dumpbin /dependents` 只能说明 bridge import table 需要什么。真正的加载结果还取决于应用输出目录、runtime package `runtimes/<rid>/native`、当前进程 PATH、Visual C++ runtime 和 Windows loader 缓存。因此 issue 中建议同时记录：
+`where` 和 `Get-Command` 只能说明 PATH 上能看到什么；`dumpbin /dependents` 只能说明 bridge import table 需要什么。真正的加载结果还取决于应用输出目录中的 bridge、主机 NVIDIA 安装、当前进程 PATH、Visual C++ runtime 和 Windows loader 缓存。因此 issue 中建议同时记录：
 
 ```text
 NativeBridgePathResolver candidate paths
@@ -171,9 +176,9 @@ VC++ runtime installed
 `NativeBridgePathResolver` 和 `NativeBridgeLibraryLoader` 的日志应该区分两种失败：
 
 - bridge DLL 自身找不到：通常是 Bridge package/RID/output copy 问题。
-- bridge DLL 找到了但 vendor dependency 找不到：通常是 TensorRT/CUDA/cuDNN runtime package、PATH 或 driver/toolkit 组合问题。
+- bridge DLL 找到了但 vendor dependency 找不到：通常是用户安装的 TensorRT/CUDA/cuDNN、PATH 或 driver/toolkit 组合问题。
 
-如果只是为了临时确认缺哪一个 DLL，可以把 vendor DLL 放进应用输出目录复测；但这种动作必须标记为 `temporary-local-diagnostic-copy`。它不能作为 package content proof，也不能写成 clean external consumer proof。发布前仍要回到 package restore 后的 native asset copy 结果。
+如果只是为了临时确认缺哪一个 DLL，可以把 vendor DLL 放进应用输出目录复测；但这种动作必须标记为 `temporary-local-diagnostic-copy`。它不能作为 package content proof，也不能写成 clean external consumer proof。发布前仍要回到 managed/bridge restore 与 host-installed dependency listing 的真实结果。
 
 ## PATH 污染与版本漂移
 
@@ -182,7 +187,7 @@ VC++ runtime installed
 ```text
 PATH 里同时有 TensorRT-8、TensorRT-10、TensorRT-11
 CUDA_PATH 指向 12.9，但 PATH 先命中 CUDA 11.8 bin
-输出目录里是 trt10 runtime package，但 PATH 里先加载 trt11 DLL
+bridge 按 TRT10 编译，但 PATH 里先加载 TRT11 DLL
 cuDNN 8 和 cuDNN 9 DLL 混在同一目录
 Visual C++ runtime 缺失或版本过旧
 ```
@@ -197,15 +202,15 @@ Visual C++ runtime 缺失或版本过旧
 
 ### 找不到 `jyppxtrtbridge.dll`
 
-通常是 runtime package 没安装、RID 不匹配、输出目录缺少 Bridge assets，或项目使用了 ProjectReference/local build 但没有复制 native bridge。先看 `dotnet list package` 和输出目录，再看 `NativeBridgePathResolver` 的候选路径。
+通常是 `.Bridge` package 没安装、RID 不匹配、输出目录缺少 bridge asset，或项目使用了 ProjectReference/local build 但没有复制 native bridge。先看 `dotnet list package` 和输出目录，再看 `NativeBridgePathResolver` 的候选路径。
 
 ### 找不到 `nvinfer_10.dll` / `nvonnxparser_10.dll`
 
-通常是 TensorRT runtime assets 没复制、TensorRt split package 未引用、整包 runtime key 选错，或 PATH 中先加载了不兼容的 TensorRT 主版本。TRT8、TRT10、TRT11 的 ABI 和 DLL 命名不同，不要混在同一输出目录。
+通常是用户没有安装匹配的 TensorRT runtime、loader path 未配置、runtime key 选错，或 PATH 中先加载了不兼容的 TensorRT 主版本。TRT8、TRT10、TRT11 的 ABI 和 DLL 命名不同，不要混在同一 loader path。
 
 ### 找不到 `cudart64_12.dll` / `cudnn64_9.dll`
 
-通常是 CUDA/cuDNN runtime assets 缺失、CudaCudnn split package 未引用，或 cuDNN 8/9 选错。CUDA Toolkit 安装目录不能替代 runtime package；它只能帮助本机开发和诊断。
+通常是用户安装的 CUDA/cuDNN runtime 缺失、loader path 未配置，或 cuDNN 8/9 选错。应按 NVIDIA 官方方式修复主机安装；TensorRtSharp 不提供这些 vendor binary。
 
 ### `BadImageFormatException`
 
@@ -233,7 +238,7 @@ dependency probe log
 runtime smoke log
 stdout/stderr SHA256
 runtime package key
-managed/runtime package SHA256
+managed/bridge package SHA256
 OS / architecture / GPU / driver / CUDA / TensorRT / cuDNN metadata
 ```
 
@@ -253,7 +258,8 @@ PackageReferenceOnly = true/false
 UsesLocalFeed = true/false
 UsesProjectReference = true/false
 UsesDirectNupkg = true/false
-NativeAssetsCopied = true/false
+BridgeAssetCopied = true/false
+VendorDependenciesSource = host-installed/unknown
 DependencyProbeOnly = true/false
 RuntimeSmokeAttempted = true/false
 RuntimeSmokePassed = true/false
@@ -262,7 +268,7 @@ PathContaminationSuspected = true/false
 TemporaryLocalDiagnosticCopyUsed = true/false
 ```
 
-这些字段能让 maintainer 快速判断：这是安装问题、PATH 问题、runtime package 内容问题，还是 owner proof 仍缺真实 clean consumer smoke。
+这些字段能让 maintainer 快速判断：这是 bridge package 问题、主机安装问题、PATH 问题，还是 owner proof 仍缺真实 clean consumer smoke。
 
 ## 不能作为 proof 的材料
 
@@ -300,4 +306,4 @@ TemporaryLocalDiagnosticCopyUsed = true/false
 
 ## 下一步
 
-后续应把每个 runtime package key 的依赖 DLL 列成机器可读清单，并让 clean consumer validator 检查 native assets copied、dependency probe status 和 smoke status。若目标是发布，owner 还需要补齐 package-consumer-runtime、Linux runner proof、real-model-runtime、owner authorization 和 post-publish verification；在这些 proof 通过前，排查文章不能授权发布，也不能关闭 release issue。
+后续应把每个 runtime key 的主机依赖 DLL 列成机器可读清单，并让 clean consumer validator 检查 bridge asset、host dependency listing、dependency probe status 和 smoke status。若目标是发布，owner 还需要补齐 package-consumer-runtime、Linux runner proof、real-model-runtime、owner authorization 和 post-publish verification；在这些 proof 通过前，排查文章不能授权发布，也不能关闭 release issue。

@@ -217,7 +217,7 @@ dotnet test .\tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj
 
 ## 与两条 package 路线的关系
 
-Native bridge 是二次矫正里“NuGet 小包路线”的核心之一。完整依赖包可以继续走 GitHub full runtime package；NuGet 小包路线则应发布：
+Native bridge 是两种公开获取通道共同的 native 交付物。GitHub Release 与 NuGet-compatible source 都只应发布：
 
 ```text
 JYPPX.TensorRT.CSharp.API
@@ -227,7 +227,7 @@ JYPPX.CudaSharp / JYPPX.TensorRtSharp managed assemblies
 
 用户自行安装 TensorRT、CUDA 和 cuDNN，并让 `NativeBridgePathResolver` 找到本机 runtime DLL。这个路线适合宣传和轻量安装，但它仍需要 clean external consumer restore/build/smoke 和 owner input validator 才能成为 package-consumer-runtime proof。
 
-split runtime 包里 Bridge 组件成功，只能说明 bridge package 可被消费；CudaCudnn/TensorRt 组件、full runtime package、public package source、downloaded nupkg SHA256、native asset copy、host metadata 和 runtime smoke 仍要各自有证据。Bridge 包通过不能替代 TensorRT runtime 真实执行，也不能替代 YoloVision、OnnxToEngine 或 TensorRtExec 的真实模型 proof。
+Bridge 组件成功只能说明项目自有 bridge package 可被消费；public package source、downloaded nupkg SHA256、同提交 provenance、native asset copy、主机 NVIDIA 依赖 metadata 和 runtime smoke 仍要各自有证据。Bridge 包通过不能替代 TensorRT runtime 真实执行，也不能替代 YoloVision、OnnxToEngine 或 TensorRtExec 的真实模型 proof。
 
 ## proof 边界
 

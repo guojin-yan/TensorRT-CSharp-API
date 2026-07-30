@@ -263,7 +263,9 @@ $workflowContracts = @(
       New-Requirement -Needle "Runtime Release Plan" -Description "runtime release plan report title"
       New-Requirement -Needle "runtime-release-plan" -Description "runtime release plan artifact output"
       New-Requirement -Needle "dispatchableNextTargets" -Description "dispatchable next-target reporting"
-      New-Requirement -Needle "stableDependencyPinMaps" -Description "stable dependency pin maps for bridge/collection refreshes"
+      New-Requirement -Needle "retiredStableDependencyPinMaps" -Description "retired vendor dependency pin maps remain empty"
+      New-Requirement -Needle "vendorRuntimePackagesForbidden" -Description "bridge-only vendor package boundary"
+      New-Requirement -Needle "split_package_roles=bridge" -Description "bridge-only workflow command"
       New-Requirement -Needle "ubuntu20-hosted-container" -Description "Ubuntu 20.04 hosted-container command"
       New-Requirement -Needle "future separate package lines" -Description "future ARM/Jetson/non-Ubuntu release planning"
     )

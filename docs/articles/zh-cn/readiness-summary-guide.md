@@ -1,142 +1,78 @@
 # Package Readiness Summary 怎么读
 
-`artifacts/package-readiness/runtime-package-readiness-summary.md` 是判断 runtime package 当前状态的主证据之一。它不是简单的“通过/失败”表，而是把 managed package、bridge package、split components、full runtime package、consumer report、vendor root 和 runtime smoke 分开表达。
+`artifacts/package-readiness/runtime-package-readiness-summary.md` 汇总 managed、bridge、consumer、主机依赖和 runtime smoke。2026-07-30 之后，历史 full/vendor package 字段只用于解释旧证据，不再是可打包或可发布条件。
 
-读这份报告时，最重要的是区分 package completeness、consumer build evidence 和 runtime execution evidence。
+## 当前优先字段
 
-## 总览表
+阅读每个 runtime key 时，按以下顺序判断：
 
-报告顶部类似：
+1. managed package 是否存在且不含 `runtimes/*/native`。
+2. `.Bridge` package 是否存在且只含一个项目自有 bridge binary。
+3. managed 与 bridge 是否来自同一 repository commit。
+4. consumer root 是否在仓库外，是否只用 `PackageReference`。
+5. 包来源是否为公开 URL/source，下载 hash 是否与渠道 digest 一致。
+6. TensorRT/CUDA/cuDNN/NVRTC 是否明确标记为机器安装依赖。
+7. restore/build/enqueue/readback 是否实际执行且 exit code 为 0。
+8. runtime JSON、stdout、stderr 和 nupkg SHA256 是否可复算。
+9. 是否存在 post-publish clean consumer 与 Owner 审核。
 
-```text
-| Runtime key | Managed | Bridge package | Bridge consumer | Split components | Split collection | Split collection consumer | Full vendor inputs | Full runtime package | Full consumer | Overall |
-| win-x64-trt11.0-cuda13.2-cudnn9.22 | ready | ready | ready | ready 3/3 | ready | ready | ready | ready | ready | ready |
-```
+## 三层状态
 
-这说明当前 runtime key 的包完整性、消费端报告和 vendor input 检查都达到了 readiness 要求。`Overall=ready` 是 package/readiness 层面的 ready，不是所有 runtime API 都已经真实执行通过。
+### Package completeness
 
-## Split 与 full package
+只说明 managed 与 bridge 包的 identity、内容、版本和 hash 完整。它不证明主机依赖可加载，也不证明 TensorRT enqueue 成功。
 
-`split components: ready 3/3` 表示以下组件均存在：
+### Consumer build
 
-- `Bridge`
-- `CudaCudnn`
-- `TensorRt`
+说明仓库外项目可以 restore/build，并把 bridge 复制到输出目录。它仍可能只是 build-only 或 dependency-probe-only evidence。
 
-`split collection package: ready` 表示轻量 collection 包也存在，可以固定这组组件版本。
+### Runtime execution
 
-`full runtime package: ready` 表示完整 runtime nupkg 存在，适合 full package consumer validation。
+需要真实 TensorRT/CUDA 初始化、engine build/deserialize、enqueue、output readback 和结果验证。driver/runtime incompatibility、异常或 skipped output 都不能写成通过。
 
-## Consumer 状态
+## GitHub Release 路线
 
-consumer 分为三类：
+GitHub Release 不是 NuGet feed。下载 managed 与 bridge `.nupkg` 后，先验证：
 
-- bridge consumer：验证 bridge split package 和 high-level wrapper surface。
-- split collection consumer：验证 split collection 包能被消费端 restore/build/native-copy。
-- full package consumer：验证 full runtime package 的消费端路径。
+- immutable asset URL；
+- GitHub `sha256:` digest；
+- 实际文件 size/SHA256；
+- package id/version；
+- nuspec repository URL/commit；
+- bridge-only native entries。
 
-当前 full package consumer 为：
+验证后的资产可以进入隔离 restore staging，但这不是 locally built package feed，也不能改成 direct `.nupkg` 或 DLL 引用。
 
-```text
-full package consumer: ready blocked-by-cuda-driver
-full package consumer evidence scope: full-runtime-package-consumer-smoke-driver-blocked
-full package consumer evidence classification: runtime-smoke-driver-blocked
-full package consumer runtime-execution: False
-full package consumer dependency-probe-only: True
-full package consumer real-callback-proof: False
-```
+managed 与 bridge commit 不一致时，严格模式必须拒绝。`-AllowCrossCommitPair` 只产生 diagnostic-only 记录，即使发生了部分 runtime 调用也不能晋级 proof。
 
-这表示 full package consumer 本身可用，smoke 已经请求，但执行被 CUDA driver/runtime compatibility 阻塞。
+## 主机依赖
 
-## Package consumer evidence schema
-
-readiness summary 会把 package consumer evidence 拆成五个字段，避免把同一个 `ready blocked-by-cuda-driver` 误读为不同层次的 proof：
-
-| 字段 | 当前值 | 读法 |
-| --- | --- | --- |
-| `packageConsumerEvidenceKind` | `full-runtime-package-consumer-smoke-driver-blocked` | full runtime package consumer 已经进入 smoke 路径，但最终是 driver-blocked evidence。 |
-| `runtimeSmokeClassification` | `runtime-smoke-driver-blocked` | runtime smoke 被归类为 driver/runtime compatibility 阻塞。 |
-| `isRuntimeExecutionEvidence` | `False` | 当前不是可晋级的 runtime execution proof。 |
-| `isDependencyProbeOnly` | `True` | 当前只能作为 dependency probe/native-load/环境阻塞诊断。 |
-| `isRealCallbackRuntimeProof` | `False` | 当前不是 TensorRT callback runtime proof。 |
-
-因此，`Overall=ready` 可以和 `isRuntimeExecutionEvidence=False` 同时成立：前者是 package/readiness 层 ready，后者说明当前 smoke evidence 仍不能证明真实 runtime 执行完成。
-
-## Runtime execution smoke
-
-`runtime execution smoke` 是 runtime 执行层证据。当前状态：
+主机 dependency report 应记录：
 
 ```text
-runtime execution smoke: blocked-by-cuda-driver
+GPU / driver
+TensorRT root and runtime version
+CUDA root and runtime/driver version
+cuDNN root and version
+NVRTC path/version when used
 ```
 
-含义是 package consumer 程序已经实际启动 packaged runtime，并走到 CUDA runtime 边界，但 `cudaRuntimeGetVersion` 返回 CUDA error 35。它不是 API 缺失，也不是 package layout failure。
+这些文件可以参与主机诊断和 hash inventory，但永远不能出现在 nupkg asset listing 中。
 
-如果未来在兼容驱动上通过普通 smoke，也仍然不能自动证明 callback runtime。普通 smoke 通过只说明消费端程序运行成功；callback proof 需要单独的 `real-callback-runtime` markers。
+## 历史字段
 
-## Callback evidence
+旧 summary 可能包含 split collection、full consumer、full vendor inputs 或 vendor blockers。这些字段只说明旧版打包链当时观察到什么，不能驱动当前 pack/push，也不能替代 bridge-only policy gate。看到旧字段为 `ready` 时，不得推导当前公开包已发布或 runtime proof 已完成。
 
-当前报告中最需要谨慎阅读的是：
+## 常见误读
 
-```text
-real callback runtime evidence schema: schema-ready
-real callback runtime evidence: blocked-by-cuda-driver; evidence-kind=not-present; proof=False
-```
+以下结论都不成立：
 
-`schema-ready` 表示 proof 格式和审计规则已经写清楚。`proof=False` 表示真实 TensorRT callback runtime proof 没有完成。
+- `overall=ready` 等于所有 runtime 行都可发布；
+- package restore/build 等于 TensorRT runtime proof；
+- dependency probe 找到 DLL 等于 enqueue/readback；
+- 本地 feed 等于公开包消费；
+- 跨提交 managed/bridge pair 等于同一发布候选；
+- 一条 Windows 记录覆盖 Linux 或另一 CUDA/TRT 行；
+- 绿色 dashboard、文章或截图可以替代原始日志/hash。
 
-以下都不是 proof：
-
-- bridge-only dependency probe。
-- compile-only package consumer。
-- wrapper surface compiled。
-- dry-run。
-- copied-state。
-- internal-runtime-prototype。
-- safety-gate。
-- design-gate。
-- precheck。
-- `blocked-by-cuda-driver`。
-
-## Vendor blockers
-
-报告底部会列出 vendor root：
-
-```text
-TensorRT=True
-CUDA=True
-cuDNN=True
-Missing expected assets=0
-vendor blockers: none
-```
-
-这说明本地 TensorRT/CUDA/cuDNN 文件根目录中的预期 DLL/LIB 都存在。它不保证当前 GPU driver 能运行某个 CUDA runtime 版本。
-
-## readiness blockers
-
-`readiness blockers: 0` 表示当前 readiness 脚本没有发现 package、consumer report 或 vendor input 层面的阻塞项。
-
-不要把它解读成：
-
-- 所有 deferred API 都已经提升为真实实现。
-- 所有 samples 都在当前机器可运行。
-- callback runtime proof 已完成。
-- NVIDIA 二进制再分发许可已复核。
-
-它只证明当前 runtime key 的 package readiness 条件满足。
-
-## 推荐排查顺序
-
-如果 readiness 不为 ready，按这个顺序看：
-
-1. managed package 是否存在。
-2. bridge package 是否存在。
-3. bridge consumer report 是否存在并 ready。
-4. split components 是否完整。
-5. split collection package/consumer 是否 ready。
-6. vendor roots 是否缺 DLL/LIB。
-7. full runtime package 是否存在。
-8. full package consumer 是否存在并 ready。
-9. runtime smoke 是 `passed`、`not-requested`、`blocked-by-cuda-driver` 还是其它状态。
-
-这样可以避免把 package 缺失、驱动不兼容、应用控制策略和真实 API 缺口混在一起。
+当前发布闭环以 `eng/Test-ExternalVendorRuntimePackagePolicy.ps1`、公开资产独立验证、clean consumer、post-publish validator 和 Owner 决策为准。

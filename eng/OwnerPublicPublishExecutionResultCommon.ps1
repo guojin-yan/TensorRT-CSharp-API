@@ -144,10 +144,20 @@ function New-OwnerValidationItem {
 function New-OwnerPublicPublishRequiredField {
   param([string]$Group, [string]$Name, [string[]]$ForbiddenSubstitutes = @())
 
+  $currentRouteId = switch ($Group) {
+    "nugetSmallBridgeCoreRoute" { "nuget-managed-plus-bridge-packages" }
+    "githubPackagesFullRuntimeRoute" { "github-release-managed-plus-bridge-assets" }
+    default { "" }
+  }
+  $legacyCompatibilityName = $Group -eq "nugetSmallBridgeCoreRoute" -or $Group -eq "githubPackagesFullRuntimeRoute"
+
   [pscustomobject]@{
     group = $Group
     name = $Name
-    description = "Owner supplied real public publish evidence field: $Name."
+    description = if ($legacyCompatibilityName) { "Owner supplied real managed plus bridge-only publish evidence field retained under a legacy compatibility name: $Name." } else { "Owner supplied real public publish evidence field: $Name." }
+    currentRouteId = $currentRouteId
+    legacyCompatibilityName = $legacyCompatibilityName
+    vendorRuntimePackagesForbidden = $true
     required = $true
     valueState = "owner-input-required"
     ready = $false

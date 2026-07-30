@@ -146,7 +146,9 @@ public sealed class ReleaseCandidateReadinessTests
         Assert.Contains("runtimeProofStatus", readiness, StringComparison.Ordinal);
         Assert.Contains("runtimeProofDiagnostic", readiness, StringComparison.Ordinal);
         Assert.Contains("runtimeProofRequiredForRelease", readiness, StringComparison.Ordinal);
-        Assert.Contains("Full package runtime proof", readiness, StringComparison.Ordinal);
+        Assert.Contains("External bridge runtime proof", readiness, StringComparison.Ordinal);
+        Assert.Contains("Vendor package route retired", readiness, StringComparison.Ordinal);
+        Assert.DoesNotContain("Full runtime package exists", readiness, StringComparison.Ordinal);
         Assert.Contains("runtimeProofSeverity", readiness, StringComparison.Ordinal);
         Assert.Contains("runtime-execution-evidence", readiness, StringComparison.Ordinal);
         Assert.Contains("isRuntimeExecutionEvidence", readiness, StringComparison.Ordinal);
@@ -190,7 +192,7 @@ public sealed class ReleaseCandidateReadinessTests
         Assert.Contains("External runtime proof record", finalRelease, StringComparison.Ordinal);
         Assert.Contains("releaseReadinessKnownRuntimeProofBlocker", finalRelease, StringComparison.Ordinal);
         Assert.Contains("blocked-by-cuda-driver-owner-action", finalRelease, StringComparison.Ordinal);
-        Assert.Contains("Full package runtime proof", finalRelease, StringComparison.Ordinal);
+        Assert.Contains("External bridge runtime proof", finalRelease, StringComparison.Ordinal);
         Assert.Contains("isRuntimeExecutionEvidence", finalRelease, StringComparison.Ordinal);
         Assert.Contains("isDependencyProbeOnly", finalRelease, StringComparison.Ordinal);
         Assert.Contains("IsDependencyProbeOnly", finalRelease, StringComparison.Ordinal);
@@ -1681,7 +1683,7 @@ public sealed class ReleaseCandidateReadinessTests
         Assert.Contains(gates, static gate => gate.GetProperty("name").GetString() == "Public API bilingual documentation backlog");
         Assert.Contains(gates, static gate => gate.GetProperty("name").GetString() == "Full package runtime smoke");
         Assert.Contains(gates, static gate =>
-            gate.GetProperty("name").GetString() == "Full package runtime proof" &&
+            gate.GetProperty("name").GetString() == "External bridge runtime proof" &&
             (gate.GetProperty("status").GetString() == "not-requested" ||
              gate.GetProperty("status").GetString() == "blocked-by-cuda-driver") &&
             gate.GetProperty("severity").GetString() == "manual-approval");

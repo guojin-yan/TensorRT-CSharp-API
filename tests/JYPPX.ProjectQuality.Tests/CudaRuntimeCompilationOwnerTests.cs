@@ -163,31 +163,32 @@ public sealed class CudaRuntimeCompilationOwnerTests
     }
 
     [Fact]
-    public void PackageManifestsKeepBridgeOnlyAndFullRuntimeRtcRolesSeparate()
+    public void PackageManifestsKeepRtcAsHostDependencyAndRetireVendorPackaging()
     {
         using JsonDocument runtime = JsonDocument.Parse(ReadSource("pack", "runtime", "runtime-packages.manifest.json"));
         JsonElement policy = runtime.RootElement.GetProperty("cudaRtcPackaging");
         Assert.False(policy.GetProperty("bridgeOnlyBundlesNvrtc").GetBoolean());
+        Assert.True(policy.GetProperty("vendorPackagingRetired").GetBoolean());
+        Assert.Equal("retired-not-packable", policy.GetProperty("fullRuntimeBundleState").GetString());
         Assert.Equal(2, policy.GetProperty("windowsAssetsByCudaVersion").GetProperty("11.8").GetArrayLength());
         Assert.Equal(2, policy.GetProperty("windowsAssetsByCudaVersion").GetProperty("13.2").GetArrayLength());
         Assert.Equal("unverified-local-assets-not-found", policy.GetProperty("linuxEvidenceState").GetString());
-        Assert.Equal("pending-owner-and-license-review", policy.GetProperty("redistributionApprovalState").GetString());
+        Assert.Equal("not-applicable-vendor-packaging-retired", policy.GetProperty("redistributionApprovalState").GetString());
+        Assert.False(policy.GetProperty("materializationAllowed").GetBoolean());
+        Assert.True(policy.GetProperty("assetListsAreHostDependencyDiagnosticsOnly").GetBoolean());
 
         using JsonDocument split = JsonDocument.Parse(ReadSource("pack", "runtime-split", "split-runtime-packages.manifest.json"));
         JsonElement role = split.RootElement.GetProperty("cudaRtcSplitRole");
         Assert.Equal("cuda-rtc", role.GetProperty("role").GetString());
         Assert.False(role.GetProperty("bridgePackagesReferenceRole").GetBoolean());
-        Assert.True(role.GetProperty("fullRuntimeCollectionsMayReferenceRole").GetBoolean());
-        Assert.Equal("planned-not-materialized", role.GetProperty("prototypeState").GetString());
-        Assert.Equal("eng/Test-CudaRtcFullRuntimePackagingPreflight.ps1", role.GetProperty("packagingPreflightScript").GetString());
-        Assert.True(role.GetProperty("explicitPackRequestRequiresMaterializationReady").GetBoolean());
+        Assert.False(role.GetProperty("fullRuntimeCollectionsMayReferenceRole").GetBoolean());
+        Assert.Equal("retired-not-packable", role.GetProperty("prototypeState").GetString());
+        Assert.Equal("eng/Test-CudaRtcFullRuntimePackagingPreflight.ps1", role.GetProperty("hostDependencyAuditScript").GetString());
+        Assert.False(role.GetProperty("explicitPackRequestAllowed").GetBoolean());
         Assert.Equal(
             "artifacts/cuda-runtime-compilation/full-runtime-packaging-preflight.json",
-            policy.GetProperty("packagingPreflightEvidence").GetString());
+            role.GetProperty("hostDependencyAuditEvidence").GetString());
         Assert.False(policy.GetProperty("licenseTextPresenceIsRedistributionApproval").GetBoolean());
-        Assert.True(policy.GetProperty("materializationRequiresRedistributionApproval").GetBoolean());
-        Assert.True(policy.GetProperty("materializationRequiresPackageHostSizeReview").GetBoolean());
-        Assert.True(policy.GetProperty("materializationRequiresPlatformAssetProof").GetBoolean());
     }
 
     [Fact]
@@ -202,10 +203,10 @@ public sealed class CudaRuntimeCompilationOwnerTests
         Assert.Contains("performsPublish = $false", preflight, StringComparison.Ordinal);
 
         string splitPack = ReadSource("eng", "Invoke-LocalSplitRuntimePackage.ps1");
-        Assert.Contains("$requestedSplitRoles -contains \"cuda-rtc\"", splitPack, StringComparison.Ordinal);
-        Assert.Contains("Test-CudaRtcFullRuntimePackagingPreflight.ps1", splitPack, StringComparison.Ordinal);
-        Assert.Contains("-RequireMaterializationReady", splitPack, StringComparison.Ordinal);
-        Assert.Contains("excludes the planned cuda-rtc role", splitPack, StringComparison.Ordinal);
+        Assert.Contains("$retiredRoleRequests", splitPack, StringComparison.Ordinal);
+        Assert.Contains("Only the 'bridge' split package role is allowed", splitPack, StringComparison.Ordinal);
+        Assert.Contains("CUDA RTC, collection, meta, and full-runtime packages are retired", splitPack, StringComparison.Ordinal);
+        Assert.DoesNotContain("-RequireMaterializationReady", splitPack, StringComparison.Ordinal);
 
         using JsonDocument evidence = JsonDocument.Parse(ReadSource(
             "artifacts", "cuda-runtime-compilation", "full-runtime-packaging-preflight.json"));

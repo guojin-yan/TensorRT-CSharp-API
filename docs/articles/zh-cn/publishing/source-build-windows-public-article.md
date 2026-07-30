@@ -38,7 +38,7 @@ flowchart LR
 | TensorRT | 检查 `include\NvInfer.h`、`lib\nvinfer*.lib` | TensorRT 8/10/11 line 不能混用头文件和库。 |
 | cuDNN | 检查 include/lib/bin | CUDA 11.8 常见 cuDNN 8.x；CUDA 12.9/13.2 常见 cuDNN 9.x。 |
 
-推荐把大型 SDK 和构建产物放在 E 盘或其他数据盘，避免把 TensorRT、CUDA、cuDNN、ONNX、engine 或 nupkg 下载到 C 盘用户目录。NuGet 小包路线下用户本机必须自行安装这些 NVIDIA runtime；GitHub full runtime 包路线则可以携带匹配依赖，但仍需要许可和公开包 proof。
+推荐把大型 SDK 和构建产物放在 E 盘或其他数据盘，避免把 TensorRT、CUDA、cuDNN、ONNX、engine 或 nupkg 下载到 C 盘用户目录。GitHub Release 与 NuGet-compatible source 都只交付 managed + bridge-only 包，用户机器必须自行安装这些 NVIDIA runtime。
 
 ## 推荐目录
 
@@ -225,7 +225,7 @@ dotnet run --project .\smoke\CallbackAllocatorSafeControlsSmokeRunner\CallbackAl
 ```powershell
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-ManagedPackageContent.ps1
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-RuntimePackageReadiness.ps1
-pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Validate-SplitRuntimePackages.ps1
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-ExternalVendorRuntimePackagePolicy.ps1 -StaticOnly
 ```
 
 这些命令仍然属于本地候选检查。它们可以证明 package nuspec/content/runtimes layout 和 split manifest 更接近
@@ -294,20 +294,20 @@ cudnn*.dll
 
 如果 `dumpbin /dependents` 只能看到 import dependency，仍需结合实际进程 PATH、应用输出目录和 runtime package
 copy log 判断最终加载来源。把 DLL 临时复制到 `C:\Windows\System32` 或全局 CUDA bin 目录，会污染后续 proof；
-推荐使用应用本地输出目录、明确 PATH 片段或 package runtime assets。
+推荐使用应用本地 bridge 输出目录和明确的主机 NVIDIA PATH 片段；不要把 vendor DLL 复制进 package assets。
 
 ### CUDA error 35
 
 CUDA error 35 通常是 driver/runtime 不兼容。先看 `nvidia-smi` 的 driver，再看 `nvcc --version` 和实际加载的 runtime package key。CUDA 13 smoke 需要足够新的 NVIDIA driver；driver 不满足时只能记录 dependency/runtime blocker，不能声明通过。
 
-## GitHub full runtime 包与 NuGet 小包
+## GitHub Release 与 NuGet 的 Bridge-only 通道
 
-源码构建教程要服务两条发布路线：
+源码构建教程要服务两个公开获取通道；它们的包内容边界相同：
 
 | 路线 | 包含内容 | 用户要求 | 优点 | 边界 |
 | --- | --- | --- | --- | --- |
-| GitHub full runtime 包 | managed API、C++ bridge、TensorRT/CUDA/cuDNN runtime assets | 选择匹配 runtime key | 开箱更近，适合完整示例 | 包体大，授权和 post-publish proof 更重 |
-| NuGet 小包 | C# core API 与 C++ bridge 小包 | 用户自装 CUDA/TensorRT/cuDNN | 公开 .NET 生态更友好 | DLL 搜索路径和版本匹配由用户环境承担 |
+| GitHub Release assets | managed `.nupkg`、匹配 `.Bridge` `.nupkg`、源码归档、不可变 URL/digest | 用户自装 CUDA/TensorRT/cuDNN/NVRTC | 资产可按 tag 固定 | Release 不是 NuGet feed，需验证后进入隔离 restore staging |
+| NuGet-compatible source | managed 与匹配 `.Bridge` 包 | 用户自装 CUDA/TensorRT/cuDNN/NVRTC | 标准 `PackageReference` | DLL/SO 搜索路径和版本匹配由用户环境承担 |
 
 无论哪条路线，源码构建成功都只是 build-only 路径健康。它不能证明用户能从公开包安装，也不能证明 post-publish 包可用，更不能替代 package-consumer-runtime proof。
 
@@ -352,7 +352,7 @@ release issue close record。
 - 一张 Windows 终端截图，展示 CMake preset、`dotnet build` 和生成绑定连续通过。
 - 一张目录截图，标出 `native/generated`、`artifacts/interface-coverage` 和 `artifacts/final-release` 的关系。
 - 一张 evidence ladder 图，把 build-only 放在 proof 之前的低层级。
-- 一张 GitHub full runtime 包与 NuGet 小包的依赖对照图。
+- 一张 GitHub Release 与 NuGet managed + bridge-only 通道的依赖对照图。
 
 ## 下一步
 

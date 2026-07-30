@@ -19,20 +19,20 @@
   },
   "cudaRtcSplitRole": {
     "role": "cuda-rtc",
-    "prototypeState": "planned-not-materialized",
+    "prototypeState": "retired-not-packable",
     "bridgePackagesReferenceRole": false,
-    "fullRuntimeCollectionsMayReferenceRole": true,
+    "fullRuntimeCollectionsMayReferenceRole": false,
     "requiredAssetPair": [
       "nvrtc",
       "matching-nvrtc-builtins"
     ],
     "windowsAssetSource": "pack/runtime/runtime-packages.manifest.json#cudaRtcPackaging.windowsAssetsByCudaVersion",
     "linuxEvidenceState": "unverified-local-assets-not-found",
-    "redistributionApprovalState": "pending-owner-and-license-review",
-    "packagingPreflightScript": "eng/Test-CudaRtcFullRuntimePackagingPreflight.ps1",
-    "packagingPreflightEvidence": "artifacts/cuda-runtime-compilation/full-runtime-packaging-preflight.json",
-    "explicitPackRequestRequiresMaterializationReady": true,
-    "proofBoundary": "A modeled split role is not a materialized package, clean consumer, public package, or post-publish proof."
+    "redistributionApprovalState": "not-applicable-vendor-packaging-retired",
+    "hostDependencyAuditScript": "eng/Test-CudaRtcFullRuntimePackagingPreflight.ps1",
+    "hostDependencyAuditEvidence": "artifacts/cuda-runtime-compilation/full-runtime-packaging-preflight.json",
+    "explicitPackRequestAllowed": false,
+    "proofBoundary": "The retired identity remains only for host dependency diagnostics and remote cleanup. It cannot be materialized, packed, published, or promoted to public/post-publish proof."
   },
   "packages": [
     {
@@ -70,7 +70,7 @@
         "cudnn_ops_train64_8.dll",
         "cudnn64_8.dll"
       ],
-      "notes": "CUDA runtime and cuDNN runtime libraries for win-x64-trt10.11-cuda11.8-cudnn8.9. Publish only when the CUDA/cuDNN dependency set changes."
+      "notes": "Retired CUDA/cuDNN package identity retained only for remote cleanup and host dependency diagnostics. Never pack or publish."
     },
     {
       "key": "win-x64-trt10.11-cuda11.8-cudnn8.9-tensorrt",
@@ -91,7 +91,7 @@
         "nvinfer_vc_plugin_10.dll",
         "nvonnxparser_10.dll"
       ],
-      "notes": "TensorRT runtime, parser, plugin, and builder-resource libraries for win-x64-trt10.11-cuda11.8-cudnn8.9. Publish only when the TensorRT dependency set changes."
+      "notes": "Retired TensorRT package identity retained only for remote cleanup and host dependency diagnostics. Never pack or publish."
     },
     {
       "key": "win-x64-trt10.11-cuda12.9-cudnn9.22-bridge",
@@ -131,7 +131,7 @@
         "cudnn_ops64_9.dll",
         "cudnn64_9.dll"
       ],
-      "notes": "CUDA runtime and cuDNN runtime libraries for win-x64-trt10.11-cuda12.9-cudnn9.22. Publish only when the CUDA/cuDNN dependency set changes."
+      "notes": "Retired CUDA/cuDNN package identity retained only for remote cleanup and host dependency diagnostics. Never pack or publish."
     },
     {
       "key": "win-x64-trt10.11-cuda12.9-cudnn9.22-tensorrt",
@@ -152,7 +152,7 @@
         "nvinfer_vc_plugin_10.dll",
         "nvonnxparser_10.dll"
       ],
-      "notes": "TensorRT runtime, parser, plugin, and builder-resource libraries for win-x64-trt10.11-cuda12.9-cudnn9.22. Publish only when the TensorRT dependency set changes."
+      "notes": "Retired TensorRT package identity retained only for remote cleanup and host dependency diagnostics. Never pack or publish."
     },
     {
       "key": "win-x64-trt11.0-cuda12.9-cudnn9.22-bridge",
@@ -192,7 +192,7 @@
         "cudnn_ops64_9.dll",
         "cudnn64_9.dll"
       ],
-      "notes": "CUDA runtime and cuDNN runtime libraries for win-x64-trt11.0-cuda12.9-cudnn9.22. Publish only when the CUDA/cuDNN dependency set changes."
+      "notes": "Retired CUDA/cuDNN package identity retained only for remote cleanup and host dependency diagnostics. Never pack or publish."
     },
     {
       "key": "win-x64-trt11.0-cuda12.9-cudnn9.22-tensorrt-runtime",
@@ -212,7 +212,7 @@
         "nvinfer_vc_plugin_11.dll",
         "nvonnxparser_11.dll"
       ],
-      "notes": "TensorRT runtime, parser, plugin, and lean/dispatch libraries for win-x64-trt11.0-cuda12.9-cudnn9.22. Publish only when the TensorRT dependency set changes."
+      "notes": "Retired TensorRT package identity retained only for remote cleanup and host dependency diagnostics. Never pack or publish."
     },
     {
       "key": "win-x64-trt11.0-cuda12.9-cudnn9.22-tensorrt-builder-sm75-sm86",
@@ -302,7 +302,7 @@
         "cudnn_ops64_9.dll",
         "cudnn64_9.dll"
       ],
-      "notes": "CUDA runtime and cuDNN runtime libraries for win-x64-trt11.0-cuda13.2-cudnn9.22. Publish only when the CUDA/cuDNN dependency set changes."
+      "notes": "Retired CUDA/cuDNN package identity retained only for remote cleanup and host dependency diagnostics. Never pack or publish."
     },
     {
       "key": "win-x64-trt11.0-cuda13.2-cudnn9.22-tensorrt",
@@ -330,7 +330,7 @@
         "nvinfer_vc_plugin_11.dll",
         "nvonnxparser_11.dll"
       ],
-      "notes": "TensorRT runtime, parser, plugin, and builder-resource libraries for win-x64-trt11.0-cuda13.2-cudnn9.22. Publish only when the TensorRT dependency set changes."
+      "notes": "Retired TensorRT package identity retained only for remote cleanup and host dependency diagnostics. Never pack or publish."
     },
     {
       "key": "win-x64-trt8.6-cuda11.8-cudnn8.9-bridge",
@@ -369,7 +369,7 @@
         "cudnn_ops_train64_8.dll",
         "cudnn64_8.dll"
       ],
-      "notes": "CUDA runtime and cuDNN runtime libraries for win-x64-trt8.6-cuda11.8-cudnn8.9. Publish only when the CUDA/cuDNN dependency set changes."
+      "notes": "Retired CUDA/cuDNN package identity retained only for remote cleanup and host dependency diagnostics. Never pack or publish."
     },
     {
       "key": "win-x64-trt8.6-cuda11.8-cudnn8.9-tensorrt",
@@ -391,7 +391,7 @@
         "nvonnxparser.dll",
         "nvparsers.dll"
       ],
-      "notes": "TensorRT runtime, parser, plugin, and builder-resource libraries for win-x64-trt8.6-cuda11.8-cudnn8.9. Publish only when the TensorRT dependency set changes."
+      "notes": "Retired TensorRT package identity retained only for remote cleanup and host dependency diagnostics. Never pack or publish."
     },
     {
       "key": "win-x64-trt8.6-cuda12.1-cudnn8.9-bridge",
@@ -430,7 +430,7 @@
         "cudnn_ops_train64_8.dll",
         "cudnn64_8.dll"
       ],
-      "notes": "CUDA runtime and cuDNN runtime libraries for win-x64-trt8.6-cuda12.1-cudnn8.9. Publish only when the CUDA/cuDNN dependency set changes."
+      "notes": "Retired CUDA/cuDNN package identity retained only for remote cleanup and host dependency diagnostics. Never pack or publish."
     },
     {
       "key": "win-x64-trt8.6-cuda12.1-cudnn8.9-tensorrt",
@@ -452,7 +452,7 @@
         "nvonnxparser.dll",
         "nvparsers.dll"
       ],
-      "notes": "TensorRT runtime, parser, plugin, and builder-resource libraries for win-x64-trt8.6-cuda12.1-cudnn8.9. Publish only when the TensorRT dependency set changes."
+      "notes": "Retired TensorRT package identity retained only for remote cleanup and host dependency diagnostics. Never pack or publish."
     }
   ]
 }

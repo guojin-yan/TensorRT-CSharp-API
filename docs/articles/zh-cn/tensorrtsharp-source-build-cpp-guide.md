@@ -4,7 +4,7 @@
 
 > 证据边界：本文是源码编译教程，不是 release proof、post-publish proof 或 package-consumer-runtime proof。local build、local feed、ProjectReference、direct `.nupkg`、dependency probe、build-only report 和截图都不能替代真实 Owner proof。
 
-如果你只是想在业务项目里使用 TensorRtSharp，可以直接看 NuGet 小包或 GitHub full runtime 包的安装教程。只有在以下场景里，才建议从源码编译 C++ bridge：
+如果你只是想在业务项目里使用 TensorRtSharp，可以直接看 NuGet-compatible source 或 GitHub Release managed + bridge assets 的安装教程。只有在以下场景里，才建议从源码编译 C++ bridge：
 
 - 你要确认某个 TensorRT/CUDA/cuDNN 版本组合能被本机 toolchain 编译。
 - 你要修改 `native/manifests`、`native/src`、binding generator 或 ABI entrypoint。
@@ -42,7 +42,7 @@ TensorRtSharp4.0 的运行时由三层组成：
 | --- | --- | --- |
 | C# managed API | `JYPPX.TensorRtSharp.dll`、`JYPPX.CudaSharp.dll`、`JYPPX.Shared.dll` | 面向 .NET 用户的高层 wrapper |
 | C++ bridge | `jyppxtrtbridge.dll` 或对应平台共享库 | no-throw C ABI，隔离 TensorRT/CUDA C++ ABI 与托管 P/Invoke |
-| NVIDIA runtime | TensorRT、CUDA、cuDNN DLL/shared objects | 由用户本机安装，或由 GitHub full runtime 包承载 |
+| NVIDIA runtime | TensorRT、CUDA、cuDNN DLL/shared objects | 始终由用户机器安装，不进入 managed/bridge nupkg |
 
 源码编译主要验证第二层：C++ bridge 是否能按目标 TensorRT/CUDA/cuDNN 组合构建，并和托管绑定保持一致。
 
@@ -118,8 +118,8 @@ Get-Content .\CMakePresets.json
 | --- | --- | --- |
 | 只验证 C# wrapper 编译 | managed build | `dotnet build`、ProjectQuality tests |
 | 修改 manifest 或 native source | source build | binding generator、CMake preset、ABI tests |
-| 给已装 NVIDIA runtime 的用户使用 | NuGet small core/bridge 包 | bridge 包 + 本机 TensorRT/CUDA/cuDNN |
-| 给不想装大依赖的用户使用 | GitHub full runtime 包 | full runtime assets、license、hash、owner proof |
+| 从 NuGet-compatible source 使用 | managed + `.Bridge` 包 | 公开 source、解析版本、包 hash + 本机 TensorRT/CUDA/cuDNN |
+| 从 GitHub Release 使用 | managed + `.Bridge` 资产 | immutable URL、digest、同提交 provenance + 本机 TensorRT/CUDA/cuDNN |
 | 准备正式发布 | owner release proof | clean consumer、runtime smoke、post-publish verification |
 
 ## 生成绑定
@@ -264,38 +264,39 @@ BlockedReason
 
 只要 `UsesProjectReference=true`、`UsesLocalFeed=true` 或 `UsesDirectNupkg=true`，这条记录就不能写成 clean public package runtime proof。
 
-## 两条发布路线如何衔接
+## 两个公开通道如何衔接
 
-源码编译完成后，发布路线分两类：
+源码编译完成后，可以通过两个通道交付相同的 managed + bridge-only 内容：
 
 | 路线 | 包含内容 | 适合用户 | 边界 |
 | --- | --- | --- | --- |
-| GitHub full runtime 包 | C# API、C++ bridge、CUDA/TensorRT/cuDNN 大依赖、runtime assets | 希望下载完整组合包的用户 | GitHub Release asset 不是 NuGet feed；仍需 hash、license 和 owner proof |
-| NuGet small core/bridge 包 | C# core API、小体积 C++ bridge 包 | 已自行安装 TensorRT/CUDA/cuDNN 的用户 | 用户负责 NVIDIA runtime 安装与版本匹配 |
+| GitHub Release assets | managed `.nupkg`、匹配 `.Bridge` `.nupkg`、源码归档 | 希望按 tag 固定下载资产的用户 | Release 不是 NuGet feed；需验证 URL/digest/nuspec commit 后进入隔离 restore staging |
+| NuGet-compatible source | managed 与匹配 `.Bridge` 包 | 希望使用标准 `PackageReference` 的用户 | 需记录公开 source、解析版本与下载 hash |
 
 具体策略见 `docs/articles/zh-cn/nuget-github-dual-package-strategy.md` 和 `docs/articles/zh-cn/tensorrtsharp-nuget-runtime-package-guide.md`。
 
-### NuGet 小包路线
+### NuGet-compatible source
 
-NuGet small core/bridge 包适合推广和常规 .NET 消费：
+NuGet managed + bridge-only 包适合常规 .NET 消费：
 
 ```xml
 <PackageReference Include="JYPPX.TensorRT.CSharp.API" Version="4.0.0" />
-<PackageReference Include="JYPPX.TensorRT.CSharp.API.NativeBridge" Version="4.0.0" />
+<PackageReference Include="JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge" Version="4.0.0" />
 ```
 
 用户自己安装 TensorRT、CUDA 和 cuDNN，并通过 PATH、应用目录或 `NativeBridgePathResolver` 可发现路径提供 NVIDIA runtime。这个路线包体小，适合 NuGet.org；缺点是用户必须自己处理 NVIDIA SDK 版本。
 
-### GitHub full runtime 包路线
+### GitHub Release assets
 
-GitHub full runtime 包适合完整依赖分发：
+GitHub Release 可以固定 managed、bridge 与源码资产：
 
 ```text
-JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Full
-JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda13.2.cudnn9.22.Full
+JYPPX.TensorRT.CSharp.API.4.0.x.nupkg
+JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge.4.0.x.nupkg
+TensorRT-CSharp-API-4.0.x-source.zip
 ```
 
-这条路线可以包含 bridge、TensorRT、CUDA、cuDNN runtime assets 和 manifest，但必须额外审查 NVIDIA 再分发许可、包体积、hash、下载 URL、rollback plan 和 post-publish verification。不能因为 GitHub Release 里有完整包，就跳过 clean consumer proof。
+这条路线不得包含 TensorRT、CUDA、cuDNN 或 NVRTC runtime assets。managed 与 bridge nuspec 必须来自同一源码提交，还要记录 hash、下载 URL、rollback plan 和 post-publish verification。不能因为 Release 中存在资产，就跳过 clean consumer proof。
 
 ## 常见错误
 
@@ -365,7 +366,7 @@ TensorRT / cuDNN version
 5. `docs/articles/zh-cn/tensorrtsharp-nuget-runtime-package-guide.md`
 6. `docs/articles/zh-cn/runtime-package-installation-deep-dive.md`
 
-这条路径适合写成一组连续技术文章：先让用户理解为什么需要 C++ bridge，再让用户按 preset 编译，最后解释如何在 NuGet 小包和 GitHub full runtime 包之间选择。
+这条路径适合写成一组连续技术文章：先让用户理解为什么需要 C++ bridge，再让用户按 preset 编译，最后解释 GitHub Release 与 NuGet-compatible source 的获取差异。
 
 ## 配图建议
 
@@ -380,7 +381,7 @@ TensorRT / cuDNN version
 
 ## 下一步
 
-如果你是普通用户，下一步是选择 NuGet small core/bridge 包或 GitHub full runtime 包路线，并准备一个最小 `OnnxToEngine` 或 `YoloVision --preflight` 命令。
+如果你是普通用户，下一步是选择 NuGet-compatible source 或 GitHub Release managed + bridge assets，并准备一个最小 `OnnxToEngine` 或 `YoloVision --preflight` 命令。
 
 如果你是维护者，下一步是把本地 C++ bridge 构建日志、binding generator 日志和 focused tests 写入阶段 diary；若修改了 ABI 或 deferred uplift，还要同步 native manifest、C# wrapper、smoke、ProjectQuality tests 和 proof boundary 文档。
 

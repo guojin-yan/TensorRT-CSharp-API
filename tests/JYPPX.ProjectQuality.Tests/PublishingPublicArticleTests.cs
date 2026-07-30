@@ -43,7 +43,7 @@ public sealed class PublishingPublicArticleTests
     }
 
     [Fact]
-    public void NuGetInstallRuntimePackagePublicArticleCoversRuntimeKeysSplitPackagesCleanConsumerAndProofBoundary()
+    public void NuGetInstallRuntimePackagePublicArticleCoversManagedBridgeHostDependenciesAndProofBoundary()
     {
         string content = File.ReadAllText(Path.Combine(
             RepositoryPaths.Root,
@@ -71,11 +71,16 @@ public sealed class PublishingPublicArticleTests
             "win-x64-trt11.0-cuda13.2-cudnn9.22",
             "linux-x64-trt10.11-cuda12.9-cudnn9.22",
             "role = bridge",
-            "role = cuda-cudnn",
-            "role = tensorrt",
             "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge",
-            "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.CudaCudnn",
-            "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.TensorRt",
+            "managed + bridge-only",
+            "GitHub Release verified staging",
+            "NuGet-compatible source",
+            "host-installed",
+            "NVRTC builtins",
+            "Invoke-PublicReleaseBridgePackageConsumer.ps1",
+            "Test-PublicReleaseBridgePackageConsumer.ps1",
+            "-AllowCrossCommitPair",
+            "diagnostic-only",
             "key",
             "packageId",
             "rid",
@@ -97,16 +102,16 @@ public sealed class PublishingPublicArticleTests
             "dotnet restore --force-evaluate",
             "dotnet build -c Release",
             "jyppxtrtbridge.dll",
-            "nvinfer_10.dll",
-            "nvonnxparser_10.dll",
-            "cudart64_12.dll",
-            "cudnn64_9.dll",
+            "where.exe nvinfer_10.dll",
+            "where.exe nvonnxparser_10.dll",
+            "where.exe cudart64_12.dll",
+            "where.exe cudnn64_9.dll",
             "public package source URL",
             "managed package id/version",
-            "runtime package id/version/runtime key",
+            "bridge package id/version/runtime key",
             "managed nupkg SHA256",
-            "runtime nupkg SHA256",
-            "native asset listing",
+            "bridge nupkg SHA256",
+            "installed vendor asset listing",
             "dependency probe log",
             "runtime smoke log",
             "exitCode = 0",
@@ -122,7 +127,6 @@ public sealed class PublishingPublicArticleTests
             "ProjectReference consumer",
             "direct `.nupkg` install",
             "GitHub Actions dry-run",
-            "GitHub full runtime collection package",
             "owner execution package",
             "package id/version template",
             "release issue close record template",
@@ -144,10 +148,13 @@ public sealed class PublishingPublicArticleTests
         Assert.Contains("不能关闭 release issue", content, StringComparison.Ordinal);
         Assert.Contains("不要把 runtime deserialization ownership", content, StringComparison.Ordinal);
         Assert.Contains("伪装成低风险安装问题", content, StringComparison.Ordinal);
+        Assert.DoesNotContain(".CudaCudnn", content, StringComparison.Ordinal);
+        Assert.DoesNotContain(".TensorRt\"", content, StringComparison.Ordinal);
+        Assert.DoesNotContain("GitHub full runtime", content, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
-    public void NuGetInstallRuntimePackagePublicArticleCoversPackageSourcesCacheBoundariesPackageReferenceOnlyAndNativeAssetManifest()
+    public void NuGetInstallRuntimePackagePublicArticleCoversSourcesCachePackageReferencesAndHostDependencyManifest()
     {
         string content = File.ReadAllText(Path.Combine(
             RepositoryPaths.Root,
@@ -163,28 +170,21 @@ public sealed class PublishingPublicArticleTests
             "dotnet nuget list source",
             "dotnet nuget add source <public-or-owner-approved-source> --name TensorRtSharpPublic",
             "dotnet nuget locals all --list",
-            "NuGet.org",
-            "GitHub Packages",
-            "GitHub Release asset",
+            "GitHub Release asset 不是 NuGet feed",
+            "NuGet-compatible source",
             "public package source",
-            "%UserProfile%\\\\.nuget\\\\packages",
             "$env:NUGET_PACKAGES = \"E:\\\\NuGetPackages\"",
-            "E:\\\\TensorRtSharpAssets",
             "PackageReference-only consumer",
             "<RuntimeIdentifier>win-x64</RuntimeIdentifier>",
             "<PlatformTarget>x64</PlatformTarget>",
             "PackageReference Include=\"JYPPX.TensorRT.CSharp.API\"",
             "PackageReference Include=\"JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge\"",
-            "PackageReference Include=\"JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.CudaCudnn\"",
-            "PackageReference Include=\"JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.TensorRt\"",
-            "full runtime collection package",
-            "split components",
-            "NativeAssetsCopied=true/false",
+            "ManagedPackagePresent=true/false",
+            "BridgePackagePresent=true/false",
             "BridgeAssetPresent=true/false",
-            "CudaCudnnAssetsPresent=true/false",
-            "TensorRtAssetsPresent=true/false",
+            "VendorDependenciesSource=host-installed",
+            "InstalledVendorAssetListing=<path>",
             "RuntimePackageKey=win-x64-trt10.11-cuda12.9-cudnn9.22",
-            "RestoreSourceMode=public-package-source",
             "PackageReferenceOnly=true",
             "UsesProjectReference=false",
             "UsesLocalFeed=false",
@@ -192,11 +192,9 @@ public sealed class PublishingPublicArticleTests
             "DependencyProbeOnly=false",
             "RuntimeSmokeAttempted=false",
             "PackageConsumerRuntimeProof=false",
-            "NuGet global packages cache 命中",
-            "NUGET_PACKAGES` 改到 E 盘",
             "PackageReference-only 但没有 runtime smoke",
-            "NativeAssetsCopied=true 但 dependency probe 失败",
-            "dependency probe passed 但没有 enqueue/output validation"
+            "dependency probe 通过",
+            "TensorRT enqueue/output validation"
         })
         {
             Assert.Contains(marker, content, StringComparison.Ordinal);
@@ -204,7 +202,9 @@ public sealed class PublishingPublicArticleTests
 
         Assert.Contains("不能出现在 clean consumer proof 的 package source 字段里", content, StringComparison.Ordinal);
         Assert.Contains("只是缓存位置调整，不改变 proof 语义", content, StringComparison.Ordinal);
-        Assert.Contains("不能替代每个组件的 nupkg SHA256", content, StringComparison.Ordinal);
+        Assert.Contains("不能把本地构建目录冒充公开包源", content, StringComparison.Ordinal);
+        Assert.DoesNotContain(".CudaCudnn", content, StringComparison.Ordinal);
+        Assert.DoesNotContain("full runtime collection package", content, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
@@ -270,13 +270,13 @@ public sealed class PublishingPublicArticleTests
             "cudaFiles",
             "cudnnFiles",
             "role = bridge",
-            "role = cuda-cudnn",
-            "role = tensorrt",
+            "只有 `role = bridge` 可发布",
+            "主机依赖诊断 pattern",
             "native asset listing",
             "dependency probe log",
             "runtime smoke log",
             "stdout/stderr SHA256",
-            "managed/runtime package SHA256",
+            "managed/bridge package SHA256",
             "OS / architecture / GPU / driver / CUDA / TensorRT / cuDNN metadata",
             "eng/Test-ExternalRuntimeProofRecord.ps1",
             "eng/Test-PackageConsumerRuntimeProofRecord.ps1",
@@ -302,6 +302,8 @@ public sealed class PublishingPublicArticleTests
         Assert.Contains("不能关闭 release issue", content, StringComparison.Ordinal);
         Assert.Contains("不要把 runtime deserialization ownership", content, StringComparison.Ordinal);
         Assert.Contains("伪装成 DLL 加载问题", content, StringComparison.Ordinal);
+        Assert.DoesNotContain("CudaCudnn package", content, StringComparison.Ordinal);
+        Assert.DoesNotContain("TensorRt package", content, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -344,7 +346,8 @@ public sealed class PublishingPublicArticleTests
             "UsesLocalFeed",
             "UsesProjectReference",
             "UsesDirectNupkg",
-            "NativeAssetsCopied",
+            "BridgeAssetCopied",
+            "VendorDependenciesSource",
             "DependencyProbeOnly",
             "RuntimeSmokeAttempted",
             "RuntimeSmokePassed",
@@ -627,8 +630,8 @@ public sealed class PublishingPublicArticleTests
             "YOLO26",
             "YOLOX",
             "det、cls、seg、obb、pose、sem",
-            "GitHub full runtime packages",
-            "NuGet small managed/core + bridge package route",
+            "GitHub Release managed + bridge assets",
+            "NuGet managed + bridge package route",
             "pack/runtime/runtime-packages.manifest.json",
             "pack/runtime-split/split-runtime-packages.manifest.json",
             "docs/articles/zh-cn/publishing/package-strategy-public-article.md",
@@ -1133,8 +1136,9 @@ public sealed class PublishingPublicArticleTests
             "PublicApiHandleExposureAuditTests",
             "dumpbin /dependents",
             "CUDA error 35",
-            "GitHub full runtime 包",
-            "NuGet 小包",
+            "GitHub Release",
+            "NuGet-compatible source",
+            "managed + bridge-only",
             "docs/articles/zh-cn/source-build-cmake-windows-guide.md",
             "docs/articles/zh-cn/tensorrtsharp-source-build-cpp-guide.md",
             "package-consumer-runtime proof"
@@ -1188,7 +1192,7 @@ public sealed class PublishingPublicArticleTests
             "runtime deserialization ownership",
             "Test-ManagedPackageContent.ps1",
             "Test-RuntimePackageReadiness.ps1",
-            "Validate-SplitRuntimePackages.ps1",
+            "Test-ExternalVendorRuntimePackagePolicy.ps1",
             "cmake configure log",
             "cmake build log",
             "binding generator validation log",
@@ -1241,16 +1245,22 @@ public sealed class PublishingPublicArticleTests
 
         foreach (string marker in new[]
         {
-            "GitHub full runtime 包",
-            "NuGet small bridge/core 包",
+            "GitHub Release managed + bridge assets",
+            "NuGet managed + bridge packages",
             "managed API",
             "C++ bridge DLL",
             "Bridge",
-            "CudaCudnn",
-            "TensorRt",
+            "bridge-only",
+            "NVIDIA 原厂运行库",
             "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge",
             "win-x64-trt11.0-cuda13.2-cudnn9.22",
             "Export-DualPackagePublishPreflightMatrix.ps1",
+            "Invoke-PublicReleaseBridgePackageConsumer.ps1",
+            "Test-PublicReleaseBridgePackageConsumer.ps1",
+            "-AllowCrossCommitPair",
+            "diagnostic-only",
+            "runtime JSON",
+            "Test-ExternalVendorRuntimePackagePolicy.ps1",
             "Export-FinalOwnerExecutionChecklist.ps1",
             "release-docs-and-nuget-metadata-audit.json",
             "release-candidate-package-inventory.md",
@@ -1272,6 +1282,8 @@ public sealed class PublishingPublicArticleTests
         Assert.Contains("不能作为 package-consumer-runtime proof", content, StringComparison.Ordinal);
         Assert.Contains("不能说“公开发布已经完成”", content, StringComparison.Ordinal);
         Assert.Contains("“runtime proof 已完成”", content, StringComparison.Ordinal);
+        Assert.DoesNotContain("GitHub full runtime 包", content, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("runtime dependency bundle", content, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
@@ -1298,14 +1310,13 @@ public sealed class PublishingPublicArticleTests
             "pack/runtime-split/Directory.Build.props",
             "pack/runtime-split/README.md",
             "pack/runtime-split/split-runtime-packages.manifest.json",
-            "TensorRtRuntime",
-            "TensorRtBuilder.Sm75Sm86",
-            "TensorRtBuilder.Sm89Sm90",
-            "TensorRtBuilder.Sm100Sm120Ptx",
+            "publicationPolicy.state=bridge-only",
+            "role=bridge",
+            "IsPackable=false",
             "Invoke-LocalRuntimePackage.ps1",
             "Invoke-LocalSplitRuntimePackage.ps1",
-            "Resolve-SplitPackagePins.ps1",
-            "Validate-SplitRuntimePackages.ps1",
+            "Test-ExternalVendorRuntimePackagePolicy.ps1",
+            "Test-PublicReleaseBridgePackageConsumer.ps1",
             "Test-RuntimePackageReadiness.ps1",
             "Export-ReleaseCandidatePackageInventory.ps1",
             "Export-PreReleasePackageProofReadinessMatrix.ps1",
@@ -1340,7 +1351,7 @@ public sealed class PublishingPublicArticleTests
 
         Assert.Contains("不能写入公开文章作为下载来源", content, StringComparison.Ordinal);
         Assert.Contains("模板本身不是执行日志", content, StringComparison.Ordinal);
-        Assert.Contains("不能只记录 meta package 名称", content, StringComparison.Ordinal);
+        Assert.Contains("不能重新进入 pack、push 或 Release upload", content, StringComparison.Ordinal);
         Assert.Contains("不等于 clean consumer proof", content, StringComparison.Ordinal);
         Assert.Contains("不能被文章", content, StringComparison.Ordinal);
     }

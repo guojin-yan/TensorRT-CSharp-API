@@ -1,6 +1,6 @@
-# 包策略：GitHub Full Runtime 与 NuGet 小包双路线
+# 包策略：GitHub Release 与 NuGet 的 Bridge-only 双路线
 
-TensorRtSharp4.0 的包策略不是“一个 NuGet 包装下所有东西”，而是把公开消费拆成两条路线：GitHub full runtime 包负责大体积 native runtime 的整包分发，NuGet small bridge/core 包负责托管 API 和小型 bridge 的常规 .NET 引用体验。这样做可以同时照顾开箱即用、包大小、NVIDIA runtime 再分发边界和发布证据可审计性。
+TensorRtSharp4.0 不再打包或发布 CUDA、cuDNN、TensorRT、NVRTC 及其 builtins 等 NVIDIA 原厂运行库。公开消费仍保留两条路线，但两条路线都只交付项目源码编译得到的 managed API 与 C++ bridge DLL/.so：GitHub Release 提供带不可变 URL 和 SHA256 digest 的 `.nupkg` 资产，NuGet-compatible source 提供常规 `PackageReference` 体验。用户必须自行安装与 runtime key 匹配的 NVIDIA 依赖。
 
 ## 适合
 
@@ -13,10 +13,33 @@ TensorRtSharp4.0 的包策略不是“一个 NuGet 包装下所有东西”，�
 
 | 路线 | 交付内容 | 适合用户 | 证据边界 |
 | --- | --- | --- | --- |
-| GitHub full runtime 包 | managed API、C++ bridge DLL、CUDA/TensorRT/cuDNN runtime assets、版本矩阵、SHA256 和 release asset metadata | 想开箱即用、能接受大包下载的用户 | 必须有公开 GitHub asset、下载元数据、hash、clean external consumer 日志和 owner 授权 |
-| NuGet small bridge/core 包 | `JYPPX.TensorRT.CSharp.API` 托管 API，以及按平台和 SDK 组合拆分的小型 runtime 包 | 已在机器上安装或能自行管理 NVIDIA runtime 的 .NET 用户 | 必须说明用户负责 CUDA/TensorRT/cuDNN 安装与版本匹配；NuGet restore/build 本身不是 runtime proof |
+| GitHub Release managed + bridge assets | `JYPPX.TensorRT.CSharp.API` 与匹配的 `.Bridge` 包、Release URL、GitHub digest 和源码归档 | 需要从 GitHub Release 获取不可变资产的用户 | 下载后必须核对 URL、digest、package id/version 和 bridge-only 内容；隔离 restore staging 不能混入本地构建包 |
+| NuGet managed + bridge packages | `JYPPX.TensorRT.CSharp.API` 与按 RID/TRT/CUDA 组合编译的 `.Bridge` 包 | 已自行安装 NVIDIA runtime、希望使用标准 `PackageReference` 的用户 | 必须记录公开 NuGet source、解析版本和下载 hash；restore/build 本身不是 runtime proof |
 
-这两条路线可以同时存在。GitHub full runtime 包解决大依赖分发问题；NuGet 小包降低引用门槛，便于普通业务项目先建立 managed API 依赖，再按环境选择 runtime package key。
+这两条路线可以同时存在，区别只在公开获取通道，不在打包范围。两者都不得携带 NVIDIA 原厂运行库，也不能用旧的 full-runtime、`CudaCudnn`、`TensorRt`、`CudaRtc`、collection 或 meta 包作为正式发布资产。
+
+GitHub Release 资产路线使用仓库提供的执行器验证远端 URL、GitHub digest、package id/version、包内容和仓库外 runtime smoke：
+
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Invoke-PublicReleaseBridgePackageConsumer.ps1 `
+  -ManagedReleaseTag <managed-tag> `
+  -BridgeReleaseTag <bridge-tag> `
+  -SourceRuntimeKey win-x64-trt10.11-cuda12.9-cudnn9.22
+```
+
+执行器把公开下载资产放入隔离 NuGet restore staging，但项目仍只使用 `PackageReference`，不会直接引用 `.nupkg` 或 DLL。只有远端 URL、GitHub SHA256、下载 SHA256、包身份、nuspec `repository commit` 和 bridge-only 内容全部一致时才继续；managed 与 bridge 必须来自同一源码提交，staging 中也不能混入本地构建包。
+
+执行器会在清理临时下载之前自动调用独立验证器，重新计算两个 `.nupkg`、runtime JSON、stdout 和 stderr 的 SHA256，并重新读取 nuspec 与 bridge native entries。保存证据后也可以显式复核：
+
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-PublicReleaseBridgePackageConsumer.ps1 `
+  -InputPath artifacts\public-release-consumer\<runtime-key>\public-release-bridge-package-consumer.json `
+  -RequireReferencedFiles `
+  -Strict `
+  -FailOnNotEvidence
+```
+
+`-AllowCrossCommitPair` 只用于调查历史资产不齐的情况。它会强制进入 diagnostic-only 路径并关闭已安装 vendor asset 的 hash 晋级条件；即使进程完成了 CUDA/TensorRT 调用，也必须保持 `isPublicReleaseAssetConsumerEvidence=false`、`isPackageConsumerRuntimeProof=false` 和 `isPostPublishProof=false`。同提交但误加该参数同样会 fail closed。
 
 ## 包结构
 
@@ -28,29 +51,19 @@ JYPPX.CudaSharp
 JYPPX.TensorRtSharp
 ```
 
-runtime 侧按平台、TensorRT、CUDA、cuDNN 和角色拆分。当前公开文档和 metadata audit 使用的核心角色是：
+native 侧按平台、TensorRT ABI 和 CUDA toolchain 组合编译 bridge。唯一允许公开发布的 native 包角色是：
 
 ```text
 Bridge
-CudaCudnn
-TensorRt
 ```
 
 典型 split runtime package id 形如：
 
 ```text
 JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge
-JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.CudaCudnn
-JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.TensorRt
 ```
 
-full runtime 包则更接近单个大包，例如 release candidate inventory 中的本地候选：
-
-```text
-JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda13.2.cudnn9.22
-```
-
-这些本地候选可以记录 size、SHA256 和路径，但在公开渠道下载、外部 consumer 运行、owner 回填和 strict validator 通过前，仍然只是 candidate inventory，不是 post-publish proof。
+历史 manifest 中仍可能保留 `CudaCudnn`、`TensorRt`、full-runtime、collection 和 meta identity，用于远端清理、兼容审计和历史证据解释。它们的项目必须保持 `IsPackable=false`，不能重新进入 pack、push 或 Release upload。
 
 ## Runtime Package Key
 
@@ -112,39 +125,29 @@ pack/runtime-split/README.md
 pack/runtime-split/split-runtime-packages.manifest.json
 ```
 
-`pack/JYPPX.TensorRT.CSharp.API/JYPPX.TensorRT.CSharp.API.csproj` 是 managed/core 小包的打包入口，
+`pack/JYPPX.TensorRT.CSharp.API/JYPPX.TensorRT.CSharp.API.csproj` 是 managed API 包的打包入口，
 它收拢 `JYPPX.Shared`、`JYPPX.TensorRtSharp` 和 `JYPPX.CudaSharp` 的托管产物；README 则说明
-consumer 需要引用的托管 API。`pack/runtime/runtime-packages.manifest.json` 描述 full runtime 候选，
-它按 RID、TensorRT、CUDA、cuDNN、bridge 和 native asset 组合组织。`pack/runtime-split/split-runtime-packages.manifest.json`
-描述 split runtime 组件包，负责把 Bridge、CudaCudnn、TensorRt 以及 TRT11 builder/runtime 分片拆开，
-让包大小和复用关系更可控。
+consumer 需要引用的托管 API。`pack/runtime/runtime-packages.manifest.json` 只用于描述 runtime key、用户安装路径和编译输入，
+不是 full-runtime 发布清单。`pack/runtime-split/split-runtime-packages.manifest.json` 的 `publicationPolicy.state=bridge-only`，
+只有 `role=bridge` 的条目可打包；其余条目保留为历史 identity 且不可 pack。
 
 `runtime-packages.local.example.json` 是 owner 本地路径模板；真正机器上的
 `runtime-packages.local.json` 只说明“这台机器如何找到 NVIDIA 资产”，不能写入公开文章作为下载来源，
 也不能当成 public package source。`runtime-package-smoke-command-template.json` 是 smoke 命令模板，
 它能帮助 owner 统一 restore/build/probe/smoke 命令形状，但模板本身不是执行日志。
 
-## Full Runtime 与 Split Runtime 的取舍
+## Bridge-only 与用户自装依赖
 
-full runtime 包把一个 runtime key 下的 bridge、CUDA、cuDNN 和 TensorRT 资产合进单个包。它适合
-GitHub Release asset 或 GitHub Packages 中的“整包下载”路线，优点是 consumer 只需要选中一个 runtime
-key；缺点是包体大、更新粒度粗，并且每条 TRT/CUDA/cuDNN 组合都要重新产生完整证据。
-
-split runtime 包把同一 runtime key 拆成组件：
+每个 runtime key 只发布一个项目自有 bridge 包：
 
 ```text
 JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.Bridge
-JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.CudaCudnn
-JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.TensorRtRuntime
-JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.TensorRtBuilder.Sm75Sm86
-JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.TensorRtBuilder.Sm89Sm90
-JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.TensorRtBuilder.Sm100Sm120Ptx
 ```
 
-split meta package 通过 `PackageReference` pin 住同一 runtime key 下的组件版本。这样做的意义是：
-Bridge 包可以跟 managed API 一起快速验证，TensorRT builder kernel 按 SM 分片，runtime-only consumer
-不用下载不需要的 builder 资产。缺点是 release owner 必须记录每个组件 nupkg 的 SHA256、source URL、
-package id、version 和 meta package pin，不能只记录 meta package 名称。
+bridge 包只包含 `jyppxtrtbridge.dll` 或 `libjyppxtrtbridge.so`。CUDA、cuDNN、TensorRT、parser、plugin、
+builder resource、NVRTC 和 NVRTC builtins 必须来自用户机器上的 NVIDIA 安装。release owner 仍需记录
+managed/bridge nupkg 的 SHA256、source URL、package id 和 version，同时 clean consumer 需要记录实际加载的
+外部依赖路径与版本，不能把 dependency probe 当作 runtime execution proof。
 
 TRT8、TRT10 和 TRT11 的包策略不要混写。TRT8 常见于 CUDA 11.8/12.1 和 cuDNN 8.9；TRT10/11
 常见于 CUDA 12.9/13.2 和 cuDNN 9.22。文章可以解释兼容矩阵，但不能暗示一个 runtime key 能覆盖所有
@@ -155,10 +158,8 @@ driver、GPU 架构或 TensorRT ABI。
 维护者可以用这些脚本生成包策略相关的候选证据：
 
 ```powershell
-pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Invoke-LocalRuntimePackage.ps1
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Invoke-LocalSplitRuntimePackage.ps1
-pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Resolve-SplitPackagePins.ps1
-pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Validate-SplitRuntimePackages.ps1
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-ExternalVendorRuntimePackagePolicy.ps1 -StaticOnly
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-RuntimePackageReadiness.ps1
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Export-ReleaseCandidatePackageInventory.ps1
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Export-PreReleasePackageProofReadinessMatrix.ps1
@@ -167,13 +168,12 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Export-PackageConsumerDualRo
 
 这些脚本解决的问题不同：
 
-- `Invoke-LocalRuntimePackage.ps1` 和 `Invoke-LocalSplitRuntimePackage.ps1` 生成本地候选包。
-- `Resolve-SplitPackagePins.ps1` 检查 split meta package 的组件 pin。
-- `Validate-SplitRuntimePackages.ps1` 检查 split package manifest、项目和资产布局是否一致。
+- `Invoke-LocalRuntimePackage.ps1` 已 fail closed；`Invoke-LocalSplitRuntimePackage.ps1` 只允许 `bridge`。
+- `Test-ExternalVendorRuntimePackagePolicy.ps1` 拒绝 vendor runtime binary 和非 managed/bridge package id。
 - `Test-RuntimePackageReadiness.ps1` 检查 runtime package readiness，不等于 clean consumer proof。
 - `Export-ReleaseCandidatePackageInventory.ps1` 记录候选 `.nupkg` 的路径、大小和 hash。
 - `Export-PreReleasePackageProofReadinessMatrix.ps1` 和 `Export-PackageConsumerDualRouteProofPlan.ps1`
-  把 full runtime、split runtime、managed package、clean consumer、post-publish verification 和 blocker
+  把 managed/bridge、GitHub Release/NuGet 获取通道、clean consumer、post-publish verification 和 blocker
   状态放进同一张 release owner 视图。
 
 候选审计输出通常落在 `artifacts/final-release`，例如：
@@ -311,12 +311,12 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-RealProofRecordCandidat
 - `failedBlockerCount=0`、package inventory ready 或 metadata audit ready。
 - blocked-by-cuda-driver 结论。
 
-公开文章可以说“项目提供 GitHub full runtime 包和 NuGet small bridge/core 包两条路线”，但不能说“公开发布已经完成”或“runtime proof 已完成”，除非 owner proof、clean external consumer、post-publish verification 和 strict validator 已经全部通过。
+公开文章可以说“项目提供 GitHub Release 与 NuGet-compatible source 两种 managed + bridge-only 获取通道”，但不能说“公开发布已经完成”或“runtime proof 已完成”，除非 owner proof、clean external consumer、post-publish verification 和 strict validator 已经全部通过。
 
 ## 配图建议
 
-- 一张 managed API、Bridge、CudaCudnn、TensorRt split package 与 full runtime 包的关系图。
-- 一张 GitHub full runtime 包和 NuGet small bridge/core 包的双路线流程图。
+- 一张 managed API、Bridge 与用户自装 CUDA/TensorRT/cuDNN 的依赖关系图。
+- 一张 GitHub Release assets 和 NuGet managed + bridge packages 的双路线流程图。
 - 一张 owner result input JSON 截图，突出 `resultInputs[]`、SHA256 和 `nonSubstituteConfirmations` 字段。
 - 一张 release evidence ladder，标出 local build、candidate inventory、public package download、clean external consumer、strict validator 和 release close 的分层。
 

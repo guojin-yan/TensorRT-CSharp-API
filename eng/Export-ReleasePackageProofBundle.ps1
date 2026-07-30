@@ -275,14 +275,19 @@ $packageInventoryState = [string](Get-PropertyOrDefault -Object $releaseCandidat
 $packageInventoryPackageCount = [int](Get-PropertyOrDefault -Object $releaseCandidatePackageInventory -Name "packageCount" -DefaultValue 0)
 $packageInventoryManagedPackageReady = [bool](Get-PropertyOrDefault -Object $releaseCandidatePackageInventory -Name "managedPackageReady" -DefaultValue $false)
 $packageInventoryFullRuntimePackageReady = [bool](Get-PropertyOrDefault -Object $releaseCandidatePackageInventory -Name "fullRuntimePackageReady" -DefaultValue $false)
+$packageInventoryFullRuntimePackageRequired = [bool](Get-PropertyOrDefault -Object $releaseCandidatePackageInventory -Name "fullRuntimePackageRequired" -DefaultValue $true)
+$packageInventoryRetiredPackageCandidateCount = [int](Get-PropertyOrDefault -Object $releaseCandidatePackageInventory -Name "retiredPackageCandidateCount" -DefaultValue 0)
 $packageInventorySplitBridgePackageReady = [bool](Get-PropertyOrDefault -Object $releaseCandidatePackageInventory -Name "splitBridgePackageReady" -DefaultValue $false)
 $packageInventorySplitRuntimePackagesReady = [bool](Get-PropertyOrDefault -Object $releaseCandidatePackageInventory -Name "splitRuntimePackagesReady" -DefaultValue $false)
 $packageInventorySha256Ready = [bool](Get-PropertyOrDefault -Object $releaseCandidatePackageInventory -Name "sha256Ready" -DefaultValue $false)
 $packageInventoryReady = [string]::Equals($packageInventoryState, "release-candidate-package-inventory", [System.StringComparison]::OrdinalIgnoreCase) -and
+  [bool](Get-PropertyOrDefault -Object $releaseCandidatePackageInventory -Name "packageSetReady" -DefaultValue $false) -and
   $packageInventoryManagedPackageReady -and
-  $packageInventoryFullRuntimePackageReady -and
+  $packageInventorySplitBridgePackageReady -and
   $packageInventorySplitRuntimePackagesReady -and
-  $packageInventorySha256Ready
+  $packageInventorySha256Ready -and
+  -not $packageInventoryFullRuntimePackageRequired -and
+  $packageInventoryRetiredPackageCandidateCount -eq 0
 
 $canUseAsPublicPackageProof = $false
 $canPromoteRuntimeProof = $false
@@ -293,7 +298,7 @@ $evidenceItems = @(
   New-EvidenceItem -Id "runtime-package-matrix" -Title "Runtime package matrix" -Artifact "artifacts/release-candidate/runtime-package-matrix.json" -State ("entries=" + $matrixEntries.Count + "; currentExists=" + ($null -ne $currentMatrixEntry)) -Passed ($null -ne $currentMatrixEntry) -Boundary "Matrix presence is package targeting evidence, not publication or runtime execution proof."
   New-EvidenceItem -Id "runtime-package-manifest" -Title "Runtime package manifest" -Artifact "pack/runtime/runtime-packages.manifest.json" -State ("packages=" + $manifestPackages.Count + "; currentExists=" + ($null -ne $currentManifestPackage)) -Passed ($null -ne $currentManifestPackage) -Boundary "Manifest presence is not proof that a public package was published."
   New-EvidenceItem -Id "split-runtime-manifest" -Title "Split runtime package manifest" -Artifact "pack/runtime-split/split-runtime-packages.manifest.json" -State ("packagesForRuntime=" + $currentSplitManifestPackages.Count) -Passed ($currentSplitManifestPackages.Count -gt 0) -Boundary "Split package layout evidence still needs owner channel approval and runtime proof."
-  New-EvidenceItem -Id "release-candidate-package-inventory" -Title "Release candidate package inventory" -Artifact "artifacts/final-release/release-candidate-package-inventory.json" -State ("state=" + $packageInventoryState + "; packageCount=" + $packageInventoryPackageCount + "; managedReady=" + $packageInventoryManagedPackageReady + "; fullRuntimeReady=" + $packageInventoryFullRuntimePackageReady + "; bridgeReady=" + $packageInventorySplitBridgePackageReady + "; splitReady=" + $packageInventorySplitRuntimePackagesReady + "; sha256Ready=" + $packageInventorySha256Ready) -Passed $packageInventoryReady -Boundary "Local package inventory records package identity/hash only; bridge-ready does not mean the complete split package set is ready and is not public channel, runtime, post-publish, or owner authorization proof."
+  New-EvidenceItem -Id "release-candidate-package-inventory" -Title "Release candidate package inventory" -Artifact "artifacts/final-release/release-candidate-package-inventory.json" -State ("state=" + $packageInventoryState + "; packageCount=" + $packageInventoryPackageCount + "; managedReady=" + $packageInventoryManagedPackageReady + "; bridgeReady=" + $packageInventorySplitBridgePackageReady + "; bridgeOnlySetReady=" + $packageInventorySplitRuntimePackagesReady + "; retiredCandidates=" + $packageInventoryRetiredPackageCandidateCount + "; sha256Ready=" + $packageInventorySha256Ready) -Passed $packageInventoryReady -Boundary "Local package inventory accepts only managed and bridge candidates. It is not public channel, runtime, post-publish, or Owner authorization proof."
   New-EvidenceItem -Id "runtime-nupkg-files" -Title "Runtime nupkg files" -Artifact "artifacts/runtime-nupkg; artifacts/runtime-split-nupkg; artifacts/managed" -State ("runtime=" + $runtimePackageFiles.Count + "; split=" + $splitPackageFiles.Count + "; managed=" + $managedPackageFiles.Count) -Passed (($runtimePackageFiles.Count + $splitPackageFiles.Count) -gt 0 -and $managedPackageFiles.Count -gt 0) -Boundary "Local nupkg files are not public package proof."
   New-EvidenceItem -Id "native-asset-manifest" -Title "Native asset manifest" -Artifact "artifacts/runtime/$RuntimePackageKey/artifact-manifest.json" -State ("nativeAssetCount=" + $nativeAssetCount) -Passed ($nativeAssetCount -gt 0) -Boundary "Native asset collection is layout evidence, not runtime execution proof."
   New-EvidenceItem -Id "package-consumer" -Title "Package consumer validation" -Artifact "artifacts/package-consumer/package-consumer-validation-summary.json" -State ("SmokeResult=" + $packageConsumerSmokeResult + "; EvidenceKind=" + $packageConsumerEvidenceKind + "; IsDependencyProbeOnly=" + $isDependencyProbeOnly) -Passed $nativeAssetCopyReady -Boundary "Driver-blocked or dependency-probe-only output is not runtime execution proof."
@@ -373,6 +378,8 @@ $record = [pscustomobject]@{
   packageInventoryPackageCount = $packageInventoryPackageCount
   packageInventoryManagedPackageReady = $packageInventoryManagedPackageReady
   packageInventoryFullRuntimePackageReady = $packageInventoryFullRuntimePackageReady
+  packageInventoryFullRuntimePackageRequired = $packageInventoryFullRuntimePackageRequired
+  packageInventoryRetiredPackageCandidateCount = $packageInventoryRetiredPackageCandidateCount
   packageInventorySplitBridgePackageReady = $packageInventorySplitBridgePackageReady
   packageInventorySplitRuntimePackagesReady = $packageInventorySplitRuntimePackagesReady
   packageInventorySha256Ready = $packageInventorySha256Ready

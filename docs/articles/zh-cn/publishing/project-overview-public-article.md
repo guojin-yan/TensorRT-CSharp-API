@@ -109,11 +109,11 @@ artifacts/interface-coverage/project-completion-review.md
 项目保留两条分发路线：
 
 ```text
-GitHub full runtime packages
-NuGet small managed/core + bridge package route
+GitHub Release managed + bridge assets
+NuGet managed + bridge package route
 ```
 
-大体积 TensorRT/CUDA/cuDNN runtime assets 更适合 GitHub full runtime 或私有分发；C# 核心 API、工具库和中间 C++ bridge 小包更适合 NuGet。相关 manifest 和文章包括：
+两条路线都只交付 C# 核心 API、工具库和项目自有 C++ bridge，不打包 NVIDIA 原厂 runtime。GitHub Release 提供不可变 URL 与 digest，NuGet-compatible source 提供标准 `PackageReference`；用户自行安装 TensorRT、CUDA、cuDNN 和可选 NVRTC。相关 manifest 和文章包括：
 
 ```text
 pack/runtime/runtime-packages.manifest.json
@@ -311,7 +311,7 @@ artifacts/final-release/technical-article-campaign-matrix.md
 
 - 项目架构图：C# wrapper -> generated interop -> native bridge -> CUDA/TensorRT/cuDNN。
 - 证据梯度图：tutorial -> build report -> sample run -> real-model-runtime -> package-consumer-runtime -> post-publish verification。
-- Runtime package 双路线图：GitHub full runtime packages 与 NuGet small managed/core + bridge package route。
+- Runtime package 双路线图：GitHub Release managed + bridge assets 与 NuGet managed + bridge package route。
 - 应用截图：TensorRtExec CLI 输出、WinForms 界面、YoloVision det/seg/pose/obb/cls/sem 结果。
 - Deferred uplift 风险图：readonly/query/deployment API 与 callback/allocator/plugin/borrowed pointer 高风险 API。
 

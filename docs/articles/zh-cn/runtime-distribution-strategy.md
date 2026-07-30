@@ -1,152 +1,106 @@
-# Runtime 分发策略说明
+# Bridge 包分发策略
 
-> 策略更新（2026-07-30）：full/vendor runtime 分发路线已经退休。当前只分发 C# 托管接口包、每个 `.Bridge` 包内的一份项目自有 bridge 二进制，以及 Git 跟踪文件源码归档。CUDA、cuDNN、TensorRT、NVRTC、parser、plugin 和 builder-resource 都是用户自行安装的外部依赖；本文后续旧 component/meta 内容只保留为历史背景。
+TensorRtSharp 只发布 managed C# 包、项目自有 `.Bridge` 包和 tracked-files-only 源码归档。CUDA、cuDNN、TensorRT、NVRTC、parser、plugin 与 builder resource 都是用户自行安装的依赖，不得进入 NuGet 包或 GitHub Release 资产。
 
-## 当前规则
+## 兼容键
 
-runtime 包必须显式绑定 TensorRT / CUDA / cuDNN 的 major.minor 组合：
+每个 bridge 构建使用明确的部署组合：
 
-- TensorRT：例如 `trt10.11`
-- CUDA：例如 `cuda12.9`
-- cuDNN：例如 `cudnn9.22`
+- TensorRT major/minor，例如 `trt10.11`；
+- CUDA major/minor，例如 `cuda12.9`；
+- cuDNN major/minor，例如 `cudnn9.22`；
+- RID；Linux 还要包含发行版版本。
 
-发布前 PublicDocs proof boundary freeze 要求本文持续区分 runtime package 发布策略、`local feed` 验证和真实 proof：runtime package 的本地打包、restore/build、native-copy、dependency-probe 或 local feed smoke 只能证明分发结构可检查，不能替代 package-consumer runtime proof、post-publish proof、publish approval 或 release close approval。真实 proof 仍必须来自仓库外 clean consumer、公开或 Owner 批准的 package source、runtime smoke 日志、SHA256、host metadata 和 strict validator。
+示例：
 
-示例 runtime key：
+```text
+win-x64-trt10.11-cuda12.9-cudnn9.22
+JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge
+```
 
-- `win-x64-trt10.11-cuda12.9-cudnn9.22`
+兼容键选择 bridge 编译使用的 header/import library，并声明 smoke 所需的机器依赖。它不授权把 NVIDIA 原厂库装入包内。
 
-示例 package id：
+## Windows 矩阵
 
-- `JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22`
+当前 Windows x64 bridge 目标：
 
-完整 vendor patch/build 版本保留在 manifest 与文档中，不进入 NuGet 包名。
+- `win-x64-trt8.6-cuda11.8-cudnn8.9`；
+- `win-x64-trt8.6-cuda12.1-cudnn8.9`；
+- `win-x64-trt10.11-cuda11.8-cudnn8.9`；
+- `win-x64-trt10.11-cuda12.9-cudnn9.22`；
+- `win-x64-trt11.0-cuda12.9-cudnn9.22`；
+- `win-x64-trt11.0-cuda13.2-cudnn9.22`。
 
-## Windows runtime 矩阵
+编译成功只算 build evidence。每一行的 runtime proof 仍需要兼容 driver、机器安装的 TensorRT/CUDA/cuDNN、仓库外 consumer、enqueue/readback、日志和 hash。CUDA 12.9 主机不能关闭 CUDA 13.2 runtime 行。
 
-当前 Windows runtime 包目标：
+## Linux 矩阵
 
-- `win-x64-trt8.6-cuda11.8-cudnn8.9`
-- `win-x64-trt8.6-cuda12.1-cudnn8.9`
-- `win-x64-trt10.11-cuda11.8-cudnn8.9`
-- `win-x64-trt10.11-cuda12.9-cudnn9.22`
-- `win-x64-trt11.0-cuda12.9-cudnn9.22`
-- `win-x64-trt11.0-cuda13.2-cudnn9.22`
+Linux key 包含发行版和架构。当前 x64 模型覆盖 NVIDIA 仓库实际支持的 Ubuntu 20.04、22.04 与 24.04 组合。ARM64/SBSA、Jetson/L4T 和非 Ubuntu 发行版需要独立 bridge identity、runner/container、依赖来源和 runtime 证据。
 
-CUDA `12.9` 当前已安装。所有目标为 `cuda12.9` 的 runtime 包现在必须使用 CUDA `12.9` 构建和验证；之前的 CUDA `12.3` 临时 fallback 已废弃，不能再用于 `local-validated` 结论。
+`pack/runtime/linux-runtime-targets.manifest.json` 仍是目标目录。`runtime_key_set` 可以选择一组构建验证行，但每个公开 `.Bridge` 包仍有独立精确 key 和 proof row。
 
-当前 Windows package-consumer readiness：
+## 包内容
 
-- `win-x64-trt10.11-cuda11.8-cudnn8.9`：package consumer smoke 通过。
-- `win-x64-trt10.11-cuda12.9-cudnn9.22`：package consumer smoke 通过。
-- `win-x64-trt11.0-cuda12.9-cudnn9.22`：package consumer smoke 通过。
-- `win-x64-trt11.0-cuda13.2-cudnn9.22`：2026-06-14 已完成完整 split 组件包与 collection 包本地打包，restore/build/native-copy 通过，native asset patterns 为 `19/19`；但 CUDA 13 runtime/builder smoke 可用前 readiness 保持 blocked。
+唯一可 pack 的 native role 是 `Bridge`：
 
-## Linux runtime 矩阵
+- Windows：`runtimes/win-x64/native/jyppxtrtbridge.dll`；
+- Linux：`runtimes/<linux-rid>/native/libjyppxtrtbridge.so`。
 
-Linux package key 必须包含发行版版本和架构。默认 hosted Linux 发布线为 Ubuntu 22.04 x64：
+历史 `CudaCudnn`、`TensorRt`、`CudaRtc`、collection、meta 和 vendor-bundling identity 只保留用于清理与兼容审计，对应项目保持不可打包。`eng/Test-ExternalVendorRuntimePackagePolicy.ps1` 会在当前 pack/upload 路径拒绝这些 identity 和 NVIDIA binary。
 
-- `linux-x64-ubuntu22.04-trt8.6-cuda11.8-cudnn8.9`
-- `linux-x64-ubuntu22.04-trt8.6-cuda12.1-cudnn8.9`
-- `linux-x64-ubuntu22.04-trt10.11-cuda11.8-cudnn8.9`
-- `linux-x64-ubuntu22.04-trt10.11-cuda12.9-cudnn9.22`
-- `linux-x64-ubuntu22.04-trt11.0-cuda12.9-cudnn9.22`
-- `linux-x64-ubuntu22.04-trt11.0-cuda13.2-cudnn9.22`
+## 公开通道
 
-Ubuntu 24.04 x64 只建模 NVIDIA Ubuntu 24.04 仓库中存在的现代组合。Ubuntu 20.04 x64 是单独的 hosted-container 发布线，在 GitHub-hosted runner 上使用 `ubuntu:20.04` job container。arm64/SBSA、Jetson/L4T、非 Ubuntu 发行版都必须作为独立包线加入，不能混用 x64 Ubuntu 包名。
+相同的 managed + bridge-only 边界通过两个通道提供：
 
-`runtime-linux` workflow 支持用 `runtime_key_set` 选择发行线：
+1. NuGet-compatible source，使用标准 `PackageReference` restore。
+2. GitHub Release `.nupkg` 资产，使用不可变 URL 和 GitHub SHA256 digest。
 
-- `ubuntu22-hosted`：默认 hosted 发布线，包含 Ubuntu 22.04 x64 的 6 个组合。
-- `hosted-all`：所有 hosted Linux 线，当前为 Ubuntu 22.04 x64 的 6 个组合加 Ubuntu 24.04 x64 的 3 个现代组合。
-- `ubuntu24-hosted`：只发布 Ubuntu 24.04 x64 的现代组合。
-- `hosted-container-ubuntu20`：发布 Ubuntu 20.04 x64 的 hosted-container 组合，必须配合 `runner_mode=hosted-container`。
-- `custom`：必须显式填写 `runtime_keys`。
+GitHub Release 不是 NuGet feed。`eng/Invoke-PublicReleaseBridgePackageConsumer.ps1` 会下载 managed/bridge 资产，验证远端 digest、包身份、nuspec repository URL/commit 和 bridge-only 内容，再把验证后的文件放入隔离 restore staging。direct `.nupkg` 或 DLL 引用不被接受。
 
-如果 `runtime_keys` 非空，则以显式 key 为准；如果为空，则使用 `runtime_key_set`。这样日常发布可以保持 Ubuntu 22.04 hosted 主线，完整 hosted 发布可以切到 `hosted-all`，Ubuntu 20.04 则单独走 hosted-container。
+managed 与 bridge 的 nuspec 必须指向正式仓库的同一源码提交。`-AllowCrossCommitPair` 只能产生 diagnostic-only 记录，不能晋级 public asset consumer evidence、package-consumer-runtime proof 或 post-publish proof。
 
-`release-bundle` workflow 现在有两条 Linux 编排线：
+## 构建流程
 
-- `run_linux_runtime_packaging`：hosted Linux 发布线，默认使用 `hosted-all`，会一起触发 Ubuntu 22.04 x64 与已经建模的 Ubuntu 24.04 x64 组合。
-- `run_linux_ubuntu20_runtime_packaging`：Ubuntu 20.04 x64 hosted-container 发布线，默认使用 `hosted-container-ubuntu20`，并固定以 `runner_mode=hosted-container` 触发。
+先解析并验证本机输入，再只打 bridge role：
 
-Linux split 包角色、稳定依赖版本也有单独输入。日常只改 bridge 或 managed 代码时，owner 授权且 package-consumer/post-publish gate 通过后，可刷新 Linux `bridge,collection` 并固定已发布的 `CudaCudnn` 与 `TensorRt` 版本；只有 NVIDIA 依赖集合变化时才使用 `cuda-cudnn`、`tensorrt` 或 `all` 重发稳定依赖。如果一次 dispatch 覆盖多个稳定依赖发布版本，例如 `hosted-all`，不要用一个全局版本覆盖所有 runtime key，而应使用 runtime-key 版本映射。当前 hosted Linux bridge/collection 刷新应把 `linux-x64-ubuntu22.04-*` 映射到 `4.0.6167`，把 `linux-x64-ubuntu24.04-*` 映射到 `4.0.6169`；Ubuntu 20.04 hosted-container bridge 刷新应把 `linux-x64-ubuntu20.04-*` 映射到 `4.0.6171`。默认 release tag 会按解析出的版本使用 `v<version>`，除非另外提供 release-tag map。较少使用的 delivery mode、稳定依赖 release tag、bridge/meta 包版本、跳过验证开关等通过 `release_config_json` 传入，避免超过 GitHub Actions `workflow_dispatch` 顶层输入数量限制。
+```powershell
+$roots = powershell -ExecutionPolicy Bypass -File .\eng\Resolve-RuntimeRoots.ps1 `
+  -RuntimePackageKey win-x64-trt10.11-cuda12.9-cudnn9.22 | ConvertFrom-Json
 
-不要把当前发布状态误读成“只有最新 tag”。Windows 线仍然有 6 个建模组合，Ubuntu 20.04 x64 有 3 个建模组合，Ubuntu 22.04 x64 也有 6 个建模组合，Ubuntu 24.04 x64 有 3 个建模组合。需要直观查看时，请以 runtime publication index artifact 为准，而不要只看最新 release tag。
+powershell -ExecutionPolicy Bypass -File .\eng\Validate-WindowsRuntimeInputs.ps1 `
+  -RuntimePackageKey win-x64-trt10.11-cuda12.9-cudnn9.22 `
+  -TensorRtRoot $roots.tensorRtRoot `
+  -CudaRoot $roots.cudaRoot `
+  -CudnnRoot $roots.cudnnRoot
 
-建议优先使用 `eng/Invoke-RemoteReleaseBundle.ps1` 从工作站触发远程发布。这个脚本会把支持的顶层参数继续作为 `-f key=value` 传给 workflow，同时把高级参数自动序列化进 `release_config_json`，避免误传未声明的 workflow input。
+powershell -ExecutionPolicy Bypass -File .\eng\Invoke-LocalSplitRuntimePackage.ps1 `
+  -RuntimePackageKey win-x64-trt10.11-cuda12.9-cudnn9.22 `
+  -SplitPackageRole bridge
+```
 
-Ubuntu 20.04、Ubuntu 22.04 和 Ubuntu 24.04 hosted Linux 包都已经有远程发布证据。未来 ARM/Jetson/非 Ubuntu 线仍需要匹配 package identity、runner 或 container、官方依赖源和 package-consumer 证据后才能发布。
+`eng/Invoke-LocalRuntimePackage.ps1` 已退役并 fail closed，非 bridge split role 同样 fail closed。
 
-## 当前发布映射
+正式发布只从 `guojin-yan/TensorRT-CSharp-API` 执行。`grape-yan` 仓库仅用于 Actions 编译验证，不含 package push 或 Release upload lane。当前 release workflow 只可发布：
 
-runtime 包会按 runtime release tag 分散发布，不会复制到每一个 managed release：
+- `JYPPX.TensorRT.CSharp.API`；
+- 匹配的 `.Bridge` 包；
+- tracked-files-only 源码归档。
 
-- `v4.0.6156`：Windows x64 runtime 矩阵，覆盖 6 个已建模 Windows 依赖组合。
-- `v4.0.6167`：Linux x64 Ubuntu 22.04 runtime 矩阵，覆盖 6 个 hosted Ubuntu 22.04 组合。
-- `v4.0.6169`：Linux x64 Ubuntu 24.04 runtime 矩阵，覆盖 3 个 hosted Ubuntu 24.04 现代组合。
-- `v4.0.6170`：只有 managed 包。
-- `v4.0.6171`：Linux x64 Ubuntu 20.04 runtime 矩阵，覆盖 3 个 hosted-container Ubuntu 20.04 组合。
+## 历史清理
 
-运行 `release-publication-audit.yml` 或 `eng/Export-RuntimePublicationIndex.ps1` 会生成 `artifacts/publication-index/runtime-publication-index.md`，这是最直观的 runtime 组合、release tag 和 GitHub Packages 对应表。
+2026 年 6 月发布的 vendor-bearing GitHub Package 版本与对应 Release 资产，已在 2026-07-30 经过精确指纹确认后删除。历史 release tag 与 manifest identity 可能继续出现在审计记录中，但它们不是当前包来源，也不能重新发布。
 
-## 分发策略
+## 证据边界
 
-当前建议：
+公开发布闭环需要目标矩阵行具备：
 
-- `TRT8` Windows 包可作为公开预览候选，但正式公开前仍需复核 NVIDIA 再分发许可和 NuGet.org 包体积限制。
-- `TRT10` Windows 包更适合私有源或 split-delivery，因为 builder resource、plugin、parser 等资产体积较大。两条 Windows TRT10 package-consumer smoke 路径均已有 2026-06-12 本地证据。
-- `TRT11` Windows CUDA `12.9` 当前作为私有源候选，已有 package-consumer smoke 证据；Windows CUDA `13.2` 在 driver/runtime-compatible smoke 可用前保持 blocked。
-- Ubuntu 20.04、Ubuntu 22.04 和 Ubuntu 24.04 hosted Linux 包已有远程发布证据；ARM/Jetson/非 Ubuntu 仍是未来独立包线。
+- Owner 授权的 managed、bridge 和源码发布；
+- 公开 URL、package identity、version、size 与 SHA256；
+- managed/bridge 同提交 provenance；
+- 仓库外 restore/build/runtime smoke；
+- driver、GPU、TensorRT、CUDA、cuDNN 与可选 NVRTC 主机 metadata；
+- runtime stdout/stderr 与结构化报告 hash；
+- post-publish clean consumer；
+- strict validator 与最终 Owner 决策。
 
-## nuget.org 大小边界
-
-nuget.org 单个包大小限制约为 `250 MB`。Windows split runtime 包需要每次发布前重新审计大小，因为 CUDA/cuDNN 和 TensorRT 组件包仍可能超过该限制。因此：
-
-- owner 授权且 package-consumer/post-publish gate 通过后，`JYPPX.TensorRT.CSharp.API` managed 包适合投递到 nuget.org。
-- owner 授权且 package-consumer/post-publish gate 通过后，体积较小的 `Bridge` 和 collection 包适合投递到 nuget.org 或 GitHub Packages。
-- CUDA/cuDNN 和 TensorRT 稳定依赖组件包多数不适合 nuget.org；如果需要 NuGet feed 自动 restore，应优先放 GitHub Packages；如果可以直接下载 `.nupkg` 文件，则可以保留为 GitHub Release assets。
-- GitHub Release assets 不会被 NuGet restore 自动查询。稳定依赖包只放 Release 时，验证和用户消费前都需要先把匹配 `.nupkg` 下载到本地 package source。
-- 后续如果只修改本地 C ABI bridge 或 C# wrapper，重发 `Bridge`、collection 和 managed 包即可，不需要重发 `CudaCudnn` 或 `TensorRt` 包，除非对应 NVIDIA 依赖集合变化。
-- 当 collection 包要引用不同 runtime key 下不同版本的稳定依赖包时，使用 `cuda_cudnn_package_version_map` 和 `tensorrt_package_version_map`，不要使用单个全局版本。
-
-## 工程规则
-
-`pack/runtime/runtime-packages.manifest.json` 中每个 runtime 包必须记录：
-
-- `tensorRtVersion`
-- `cudaVersion`
-- `cudnnVersion`
-- `cudnnMajor`
-- `distributionTier`
-- `validationState`
-- `distributionNotes`
-
-校验规则：
-
-- runtime key 和 package id 必须包含 TensorRT / CUDA / cuDNN 的 major.minor 片段。
-- 完整 vendor patch 版本只写入 manifest 和文档，不进入 package id。
-- CUDA `12.9` 目标包只有在确实使用 CUDA `12.9` 工具链和匹配 TensorRT/cuDNN 资产验证后，才允许标记为 `local-validated`。
-- private-feed 和 split-delivery readiness 必须要求 `local-validated`；`pending-local-validation` 和 `dry-run-only` 必须保持 blocked。
-- NVIDIA 二进制依赖不能提交到 Git。
-
-相关脚本：
-
-- `eng/Validate-RuntimeManifest.ps1`
-- `eng/Validate-WindowsRuntimeInputs.ps1`
-- `eng/Collect-RuntimeAssets.ps1`
-- `eng/Export-RuntimeDistributionReport.ps1`
-- `eng/Export-RuntimeDeliveryStrategy.ps1`
-- `eng/Test-RuntimePublishReadiness.ps1`
-- `eng/Export-ReleaseCandidateChecklist.ps1`
-
-## Runtime 组件拆分
-
-split runtime 模型适用于体积较大、或者不应跟随 managed 代码频繁重发的 Windows runtime 组合：
-
-- `Bridge`：本地 C ABI bridge。只有 native wrapper 代码变化时重发。
-- `CudaCudnn`：CUDA runtime、cuDNN 和相关共享资产。只有 CUDA/cuDNN 依赖集合变化时重发。
-- `TensorRt`：TensorRT runtime、parser、plugin 和 builder-resource 资产。只有 TensorRT 依赖集合变化时重发。
-- collection 包：保留原始 runtime package ID，用来声明一组已验证的组件版本组合。
-
-managed 包可以和这些 runtime 组件包独立发版。日常 C# 或 bridge 改动只需要发布 managed 包、`Bridge` 和 collection 包，并固定已有 `CudaCudnn` 和 `TensorRt` 包版本。
+local pack、local feed、ProjectReference、direct `.nupkg`、dependency probe、build-only 输出、历史 vendor 包证据或绿色 dashboard 都不能替代这些记录。
