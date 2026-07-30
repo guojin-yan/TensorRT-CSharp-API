@@ -7852,3 +7852,40 @@ blocked prerequisite 顺序、pointer non-exposure、deferred rows 与 design-ga
   Linux、package consumer、public package、post-publish、Owner acceptance 或 release proof。
 - 本机无仓库认可的 `pwsh`，未运行 exporter/B-tier 聚合；8 份 publishing 用户变更未触碰、未暂存；
   未 push、未触发 GitHub Actions、未执行远程发布操作。
+
+## 2026-07-30 Runtime And Refitter Diagnostic Summary Split
+
+本阶段继续整理 `JYPPX.TensorRtSharp/Runtime` 与 `JYPPX.TensorRtSharp/Refit`，将 runtime/refitter diagnostic
+summary 从对应 snapshot 文件分离。snapshot-to-summary 映射、error-recorder 与 named-weight/dynamic-range inventory
+计数、公开属性顺序、pointer non-exposure 与 non-proof 语义保持不变。
+
+### 实现与门禁
+
+- 原 308 行 `TensorRtRuntimeDiagnosticSnapshot.cs` 分为 141 行 snapshot 与 172 行
+  `TensorRtRuntimeDiagnosticSummary.cs`；snapshot 保留构造、复制属性、`ToSummary` 与自身 `ToString`。
+- 原 300 行 `TensorRtRefitterDiagnosticSnapshot.cs` 分为 159 行 snapshot 与 146 行
+  `TensorRtRefitterDiagnosticSummary.cs`；summary 独立拥有构造、公开属性与自身 `ToString`。
+- `ManagedRuntimeRefitterDiagnosticSummarySourceLayoutTests` 固定四个文件的精确 top-level type、constructor、method、
+  public property、pointer-free surface、candidate/test source-set、四个直接消费测试和三份文档 marker，并重组原源码。
+- 拆分前 Git blob 为 `6003269ee021488f519fe6944a1a6827cd9232c7` 与
+  `504a003346f84915b7bf3af4924feeaeaeb0bcbf`；normalized SHA-256 保持
+  `436e702ad3182c377999a01358d18e5eb6a6b2b57b3497e3d332344fa3eb65dc` 与
+  `615ad27b6336d49c6313ff3bb9e60ade2f9445efc2362cfce7145cb32ca429bd`。
+- test reader 显式展开两套 source-set；Refitter 直接消费测试改读统一 reader；ignored candidate evidence 中两处
+  Runtime snapshot source-set 同步 Summary 路径；双语 source-organization 与 Windows API 完成说明同步真实 owner。
+
+### 验证与边界
+
+- 新布局门禁、四个直接消费集合与 readiness 联合定向集合 `44/44`；`SourceLayoutTests` `369/369`；
+  统一 Managed 前缀集合 `768/768`。
+- `JYPPX.TensorRtSharp` 全目标框架与完整 `TensorRtSharp.sln` Debug build 均为
+  `0 warning / 0 error`；RuntimePackageReadiness UTF-8 ParseInput 为 `0 error`，对应质量测试 `2/2`。
+- ignored deferred candidate evidence 更新为 `269` 条引用、`155` 个唯一路径、`0` 缺失；其中引用的
+  `22` 份 JSON 全部可解析，ignored 文件未强制提交。
+- `JYPPX.TensorRtSharp` 多顶层公开类型文件由 `32` 降为 `30`；枚举和值类型集合继续保持内聚。
+- Generated/native/manifest/project/ABI 改动为 0；`git diff --check` 通过。构建后短暂进程已自然退出，复查未发现
+  引用本工作区的其他进程；Downloads 近三小时没有本批重资产命中；6 个已知 YoloVision/YOLOX Temp 目录继续保留。
+- source/type relocation 与 runtime/refitter diagnostic summary split 不构成新的 TensorRT/CUDA runtime、real model、
+  Linux、package consumer、public package、post-publish、Owner acceptance 或 release proof。
+- 本机无仓库认可的 `pwsh`，未运行 exporter/B-tier 聚合；8 份 publishing 用户变更未触碰、未暂存；
+  未 push、未触发 GitHub Actions、未执行远程发布操作。

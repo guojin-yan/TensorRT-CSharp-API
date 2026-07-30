@@ -325,6 +325,12 @@ the former 300-line plugin gate is split into a 113-line evaluator and a 193-lin
 preserve known-surface evaluation, candidate metadata, blocker ordering, pointer non-exposure, deferred rows, and
 design-gate-only proof classification.
 
+`TensorRtRuntimeDiagnosticSummary.cs` and `TensorRtRefitterDiagnosticSummary.cs` now own the runtime and refitter
+diagnostic summary models. The former 308-line runtime snapshot is split into a 141-line snapshot and a 172-line summary;
+the former 300-line refitter snapshot is split into a 159-line snapshot and a 146-line summary. The layout gate recomposes
+Git blobs `6003269ee021488f519fe6944a1a6827cd9232c7` and `504a003346f84915b7bf3af4924feeaeaeb0bcbf`,
+preserving copied diagnostics, error/inventory counts, public property order, pointer non-exposure, and non-proof semantics.
+
 OutputAllocator diagnostics are split across the public design owner and its internal managed runtime gate. The former
 637-line `Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeGate.cs` is reduced to a 38-line state/constructor core;
 entries, snapshots, lifecycle, shared invocation, trampoline/state, and formatting live in six partials, with request/result

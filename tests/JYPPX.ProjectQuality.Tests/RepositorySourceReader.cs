@@ -340,6 +340,16 @@ internal static class RepositorySourceReader
                 "TensorRtPluginCreatorV3MetadataDesignGate.cs",
                 "TensorRtPluginCreatorV3MetadataDesignGateResult.cs"
             ],
+            ["TensorRtRuntimeDiagnosticSnapshot.cs"] =
+            [
+                "TensorRtRuntimeDiagnosticSnapshot.cs",
+                "TensorRtRuntimeDiagnosticSummary.cs"
+            ],
+            ["TensorRtRefitterDiagnosticSnapshot.cs"] =
+            [
+                "TensorRtRefitterDiagnosticSnapshot.cs",
+                "TensorRtRefitterDiagnosticSummary.cs"
+            ],
             ["TensorRtStreamIoInterfaceInfoDesignGate.cs"] =
             [
                 "TensorRtStreamIoInterfaceInfoDesignGate.cs",

@@ -286,6 +286,12 @@ Dimension-expression snapshot 与 PluginCreatorV3 metadata 两个 design gate �
 evaluator 与 193 行 result。readiness 与 test source-set 保持 known-surface evaluation、candidate metadata、blocker
 顺序、pointer non-exposure、deferred row 与 design-gate-only proof 分类。
 
+`TensorRtRuntimeDiagnosticSummary.cs` 与 `TensorRtRefitterDiagnosticSummary.cs` 现在分别拥有 runtime/refitter
+diagnostic summary。原 308 行 runtime snapshot 分为 141 行 snapshot 与 172 行 summary；原 300 行 refitter
+snapshot 分为 159 行 snapshot 与 146 行 summary。布局门禁可重组 Git blob
+`6003269ee021488f519fe6944a1a6827cd9232c7` 与 `504a003346f84915b7bf3af4924feeaeaeb0bcbf`，并固定
+copied diagnostics、error/inventory count、公开属性顺序、pointer non-exposure 与 non-proof 语义。
+
 OutputAllocator diagnostics 继续按 public design owner 与 internal managed runtime gate 分层。原 637 行
 `Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeGate.cs` 降为 38 行 state/constructor core；entries、snapshots、
 lifecycle、shared invocation、trampoline/state 与 formatting 进入 6 份 partial，request/result 类型各自成文件。原 503 行
