@@ -21,8 +21,8 @@ That split keeps:
 | `InferenceBindings` | TensorRtInferenceBindings host/device workflow example | runnable |
 | `OnnxToEngine` | user-facing ONNX to engine walkthrough with trtexec-like option parsing | runnable |
 | `RefittedPlan.PackageConsumer` | PackageReference-only persisted refitted-plan reload, enqueue, raw output hash, and owner cleanup example | runnable through the local-package proof script |
-| `Classification` | External ONNX classifier inference and Top-K output walkthrough | runnable with user-provided ONNX assets |
-| `YoloVision` | External YOLO-family ONNX vision sample with family/task profiles, raw/preprocessed tensor input, detection/classification/segmentation/pose/OBB/semantic helpers, layout decoding, score filtering, and NMS walkthrough | runnable with user-provided ONNX assets |
+| `Classification` | External ONNX classifier inference with legacy single-input and strict named multi-input binding, raw/task reference validation, and Top-K output | runnable with user-provided ONNX assets |
+| `YoloVision` | External YOLO-family ONNX vision sample with strict named multi-input binding, all-output reference validation, family/task profiles, preprocessing, and det/cls/seg/pose/OBB/semantic helpers | runnable with user-provided ONNX assets |
 
 `YoloVision` also exposes an offline capability matrix for documentation, smoke, and asset-planning workflows:
 

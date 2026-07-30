@@ -219,6 +219,24 @@
         }
       }
     },
+    "inputTensors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["tensorName", "shape", "elementCount", "byteLength", "sha256", "sourceClassification", "sourcePath", "preview"],
+        "properties": {
+          "tensorName": { "type": "string", "minLength": 1 },
+          "shape": { "type": "array", "minItems": 1, "items": { "type": "integer", "minimum": 1 } },
+          "elementCount": { "type": "integer", "minimum": 1 },
+          "byteLength": { "type": "integer", "minimum": 4 },
+          "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "sourceClassification": { "type": "string", "enum": ["float-data-file", "raw-byte-file", "deterministic-pattern"] },
+          "sourcePath": { "type": "string" },
+          "preview": { "type": "array", "maxItems": 8, "items": { "oneOf": [{ "type": "number" }, { "type": "string", "enum": ["NaN", "Infinity", "-Infinity"] }] } }
+        }
+      }
+    },
     "engine": {
       "type": "object",
       "additionalProperties": false,
@@ -349,6 +367,48 @@
             }
           }
         }
+      }
+    },
+    "referenceValidation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["requested", "completed", "passed", "absoluteTolerance", "relativeTolerance", "nanPolicy", "infinityPolicy", "tensorComparisons", "diagnostics", "proofBoundary"],
+      "properties": {
+        "requested": { "type": "boolean" },
+        "completed": { "type": "boolean" },
+        "passed": { "type": "boolean" },
+        "absoluteTolerance": { "type": "number", "minimum": 0 },
+        "relativeTolerance": { "type": "number", "minimum": 0 },
+        "nanPolicy": { "type": "string", "enum": ["reject", "equal"] },
+        "infinityPolicy": { "type": "string", "enum": ["exact", "reject"] },
+        "tensorComparisons": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["tensorName", "referencePath", "referenceSha256", "sourceClassification", "actualShape", "referenceShape", "actualElementCount", "referenceElementCount", "comparedElementCount", "mismatchCount", "firstMismatchIndex", "maximumAbsoluteError", "maximumRelativeError", "completed", "passed", "diagnostic"],
+            "properties": {
+              "tensorName": { "type": "string", "minLength": 1 },
+              "referencePath": { "type": "string", "minLength": 1 },
+              "referenceSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              "sourceClassification": { "type": "string", "minLength": 1 },
+              "actualShape": { "type": "array", "minItems": 1, "items": { "type": "integer", "minimum": 1 } },
+              "referenceShape": { "type": "array", "minItems": 1, "items": { "type": "integer", "minimum": 1 } },
+              "actualElementCount": { "type": "integer", "minimum": 1 },
+              "referenceElementCount": { "type": "integer", "minimum": 0 },
+              "comparedElementCount": { "type": "integer", "minimum": 0 },
+              "mismatchCount": { "type": "integer", "minimum": 0 },
+              "firstMismatchIndex": { "type": "integer", "minimum": -1 },
+              "maximumAbsoluteError": { "oneOf": [{ "type": "number" }, { "type": "string", "enum": ["NaN", "Infinity", "-Infinity"] }] },
+              "maximumRelativeError": { "oneOf": [{ "type": "number" }, { "type": "string", "enum": ["NaN", "Infinity", "-Infinity"] }] },
+              "completed": { "type": "boolean" },
+              "passed": { "type": "boolean" },
+              "diagnostic": { "type": "string" }
+            }
+          }
+        },
+        "diagnostics": { "type": "array", "items": { "type": "string" } },
+        "proofBoundary": { "type": "string", "minLength": 1 }
       }
     },
     "bindingMetadata": {

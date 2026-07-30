@@ -8,6 +8,12 @@
     <Compile Include="$(MSBuildThisFileDirectory)JYPPX.SampleSupport\TensorRtOnnxSample.cs"
              Link="JYPPX.SampleSupport\TensorRtOnnxSample.cs"
              Condition="'$(JYPPXIncludeTensorRtOnnxSampleSupport)' == 'true'" />
+    <Compile Include="$(MSBuildThisFileDirectory)JYPPX.SampleSupport\TensorRtOnnxSample.Inputs.cs"
+             Link="JYPPX.SampleSupport\TensorRtOnnxSample.Inputs.cs"
+             Condition="'$(JYPPXIncludeTensorRtOnnxSampleSupport)' == 'true'" />
+    <Compile Include="$(MSBuildThisFileDirectory)JYPPX.SampleSupport\TensorRtOnnxSample.References.cs"
+             Link="JYPPX.SampleSupport\TensorRtOnnxSample.References.cs"
+             Condition="'$(JYPPXIncludeTensorRtOnnxSampleSupport)' == 'true'" />
     <Compile Include="$(MSBuildThisFileDirectory)JYPPX.SampleSupport\SampleRgbImage.cs"
              Link="JYPPX.SampleSupport\SampleRgbImage.cs"
              Condition="'$(JYPPXIncludeTensorRtOnnxSampleSupport)' == 'true'" />

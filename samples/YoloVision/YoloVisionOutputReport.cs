@@ -119,6 +119,16 @@ public sealed class YoloVisionOutputReportContext
 
     /// <summary>Gets the explicit segmentation spatial-transform options, when requested. 获取显式 segmentation 空间变换选项。</summary>
     public YoloSegmentationSpatialTransformOptions? SegmentationSpatialTransform { get; }
+
+    internal IReadOnlyList<OnnxSampleInputTensor> RuntimeInputTensors { get; private set; } = Array.Empty<OnnxSampleInputTensor>();
+
+    internal OnnxSampleReferenceValidationResult? RuntimeReferenceValidation { get; private set; }
+
+    internal void AttachRuntimeEvidence(OnnxSampleMultiOutputResult run)
+    {
+        RuntimeInputTensors = run?.Inputs ?? throw new ArgumentNullException(nameof(run));
+        RuntimeReferenceValidation = run.ReferenceValidation;
+    }
 }
 
 /// <summary>
@@ -230,9 +240,7 @@ public static class YoloVisionOutputReport
             throw new ArgumentNullException(nameof(run));
         }
 
-        Write(
-            outputPath,
-            new YoloVisionOutputReportContext(
+        YoloVisionOutputReportContext context = new YoloVisionOutputReportContext(
                 options.ModelPath,
                 options.InputPath,
                 options.InputDataPath,
@@ -244,7 +252,11 @@ public static class YoloVisionOutputReport
                 run.ElapsedMilliseconds,
                 labelsPath,
                 imagePreprocess,
-                segmentationSpatialTransform),
+                segmentationSpatialTransform);
+        context.AttachRuntimeEvidence(run);
+        Write(
+            outputPath,
+            context,
             outputs,
             profile,
             result,
@@ -267,9 +279,11 @@ public static class YoloVisionOutputReport
         writer.WriteString("modelFamily", ToFamilyAlias(profile.Family));
         WriteLabels(writer, context, labels);
         WriteInput(writer, context);
+        WriteInputTensors(writer, context.RuntimeInputTensors);
         WriteEngine(writer, context);
         WriteRuntime(writer, context);
         WriteOutputs(writer, outputs);
+        WriteReferenceValidation(writer, context.RuntimeReferenceValidation);
         if (bindingReport != null)
         {
             WriteBindingMetadata(writer, bindingReport, outputs);
@@ -313,6 +327,76 @@ public static class YoloVisionOutputReport
             WriteImagePreprocess(writer, context.ImagePreprocess);
         }
 
+        writer.WriteEndObject();
+    }
+
+    private static void WriteInputTensors(Utf8JsonWriter writer, IReadOnlyList<OnnxSampleInputTensor> inputs)
+    {
+        writer.WritePropertyName("inputTensors");
+        writer.WriteStartArray();
+        foreach (OnnxSampleInputTensor input in inputs)
+        {
+            writer.WriteStartObject();
+            writer.WriteString("tensorName", input.Name);
+            writer.WritePropertyName("shape");
+            WriteIntArray(writer, input.Shape.Values);
+            writer.WriteNumber("elementCount", input.ElementCount);
+            writer.WriteNumber("byteLength", input.ByteLength);
+            writer.WriteString("sha256", input.Sha256);
+            writer.WriteString("sourceClassification", input.SourceClassification);
+            writer.WriteString("sourcePath", input.SourcePath);
+            writer.WritePropertyName("preview");
+            WriteFloatPreview(writer, input.Preview.ToArray());
+            writer.WriteEndObject();
+        }
+        writer.WriteEndArray();
+    }
+
+    private static void WriteReferenceValidation(Utf8JsonWriter writer, OnnxSampleReferenceValidationResult? validation)
+    {
+        writer.WritePropertyName("referenceValidation");
+        writer.WriteStartObject();
+        writer.WriteBoolean("requested", validation?.Requested ?? false);
+        writer.WriteBoolean("completed", validation?.Completed ?? false);
+        writer.WriteBoolean("passed", validation?.Passed ?? false);
+        writer.WriteNumber("absoluteTolerance", validation?.AbsoluteTolerance ?? 0.0f);
+        writer.WriteNumber("relativeTolerance", validation?.RelativeTolerance ?? 0.0f);
+        writer.WriteString("nanPolicy", validation?.NaNPolicy ?? "reject");
+        writer.WriteString("infinityPolicy", validation?.InfinityPolicy ?? "exact");
+        writer.WritePropertyName("tensorComparisons");
+        writer.WriteStartArray();
+        foreach (OnnxSampleReferenceTensorComparison comparison in validation?.TensorComparisons ?? Array.Empty<OnnxSampleReferenceTensorComparison>())
+        {
+            writer.WriteStartObject();
+            writer.WriteString("tensorName", comparison.TensorName);
+            writer.WriteString("referencePath", comparison.ReferencePath);
+            writer.WriteString("referenceSha256", comparison.ReferenceSha256);
+            writer.WriteString("sourceClassification", comparison.SourceClassification);
+            writer.WritePropertyName("actualShape");
+            WriteIntArray(writer, comparison.ActualShape.ToArray());
+            writer.WritePropertyName("referenceShape");
+            WriteIntArray(writer, comparison.ReferenceShape.ToArray());
+            writer.WriteNumber("actualElementCount", comparison.ActualElementCount);
+            writer.WriteNumber("referenceElementCount", comparison.ReferenceElementCount);
+            writer.WriteNumber("comparedElementCount", comparison.ComparedElementCount);
+            writer.WriteNumber("mismatchCount", comparison.MismatchCount);
+            writer.WriteNumber("firstMismatchIndex", comparison.FirstMismatchIndex);
+            WriteFloatProperty(writer, "maximumAbsoluteError", comparison.MaximumAbsoluteError);
+            WriteFloatProperty(writer, "maximumRelativeError", comparison.MaximumRelativeError);
+            writer.WriteBoolean("completed", comparison.Completed);
+            writer.WriteBoolean("passed", comparison.Passed);
+            writer.WriteString("diagnostic", comparison.Diagnostic);
+            writer.WriteEndObject();
+        }
+        writer.WriteEndArray();
+        writer.WritePropertyName("diagnostics");
+        writer.WriteStartArray();
+        foreach (string diagnostic in validation?.Diagnostics ?? Array.Empty<string>())
+        {
+            writer.WriteStringValue(diagnostic);
+        }
+        writer.WriteEndArray();
+        writer.WriteString("proofBoundary", "Structured reference comparison proves only the recorded tensor values under the declared policy; synthetic references and hashes do not promote real-model or package-consumer proof.");
         writer.WriteEndObject();
     }
 
@@ -766,6 +850,17 @@ public static class YoloVisionOutputReport
         }
 
         writer.WriteEndArray();
+    }
+
+    private static void WriteFloatProperty(Utf8JsonWriter writer, string name, float value)
+    {
+        if (float.IsFinite(value))
+        {
+            writer.WriteNumber(name, value);
+            return;
+        }
+
+        writer.WriteString(name, float.IsNaN(value) ? "NaN" : value > 0.0f ? "Infinity" : "-Infinity");
     }
 
     private static string LabelOrIndex(IReadOnlyList<string> labels, int index)

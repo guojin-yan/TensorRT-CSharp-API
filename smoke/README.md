@@ -28,6 +28,7 @@ These projects are intentionally different from the user-facing examples under `
 - `TensorRtSmokeRunner`
 - `LifecycleSmokeRunner`
 - `InferenceBindingsSmokeRunner`
+- `LegacyParserDiagnosticsSmokeRunner`
 - `OnnxToEngineSmokeRunner`
 - `RefitWeightsSmokeRunner`
 - `NetworkBuilderSmokeRunner`

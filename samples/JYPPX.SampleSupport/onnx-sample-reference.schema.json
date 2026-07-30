@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jyppx.github.io/TensorRtSharp/schemas/onnx-sample-reference.schema.json",
+  "title": "JYPPX shared ONNX sample output reference",
+  "description": "A traceable float output tensor reference for Classification/YoloVision raw runtime comparison. The document and its SHA256 are comparison inputs, not Owner acceptance or release proof.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "tensorName", "shape", "values", "sourceClassification"],
+  "properties": {
+    "schemaVersion": { "type": "integer", "const": 1 },
+    "tensorName": { "type": "string", "minLength": 1 },
+    "shape": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "integer", "minimum": 1 }
+    },
+    "values": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "oneOf": [
+          { "type": "number" },
+          { "type": "string", "enum": ["NaN", "Infinity", "-Infinity"] }
+        ]
+      }
+    },
+    "sourceClassification": { "type": "string", "minLength": 1 }
+  }
+}

@@ -8155,3 +8155,43 @@ owner lease、方法/属性顺序、pointer non-exposure、deferred history 与 
   package consumer、public package、post-publish、Owner acceptance 或 release proof。
 - 本机无仓库认可的 `pwsh`，未运行 exporter/B-tier 聚合；8 份 publishing 用户变更未触碰、未暂存；
   截至本地验证结束未执行 push、GitHub Actions 或远程发布操作。
+
+## 2026-07-31 Shared Sample Multi-Input Reference Runtime
+
+本阶段闭合 `samples/JYPPX.SampleSupport/TensorRtOnnxSample` 的单输入限制，使 Classification/YoloVision 与既有
+TensorRtExec/OnnxToEngine generic runtime 采用一致的名称绑定、全输出 capture 和结构化 reference 比较边界。
+
+### 实现与合同
+
+- 保留旧 `--input-name/--input-shape/--input-data` 单输入参数；新增 `--input-shapes`、三份 profile map、
+  `--load-inputs`、`--load-byte-inputs` 和 `--input-patterns`。复数模式要求 engine input name 全覆盖、每个 input
+  只有一个来源，缺失、重复、未知名称、rank/static dimension/profile 范围错误全部 fail closed。
+- runtime 按 engine 顺序复制全部 network input metadata，统一创建 optimization profile，逐 input
+  `SetInputShape/CopyInputFromHost`，并输出 name、shape、element/byte count、最多 8 个 preview values、SHA256、
+  source classification/path；旧结果的 `InputName/InputShape` 继续映射第一个 engine input。
+- 新增 `--reference-outputs` 与绝对/相对 tolerance、NaN/Infinity policy。mapping 必须覆盖全部 captured outputs；
+  每个 tensor 记录 reference path/SHA256/source、actual/reference shape/count、Completed、mismatch count、first
+  mismatch、最大绝对/相对误差和 diagnostic。metadata 不可比较时 `Completed=false`；数值 mismatch 为
+  `Completed=true, Passed=false`。
+- 新增共享 `onnx-sample-reference.schema.json`；YoloVision v1 report 兼容增加 `inputTensors/referenceValidation`，
+  Classification v1 report 增加 `inputTensors/runtimeReferenceValidation`，并保持任务级 reference 与 raw runtime
+  reference 分离，两者同时请求时必须全部通过。
+- `TensorRtOnnxSample.Inputs.cs` 与 `TensorRtOnnxSample.References.cs` 将输入合同和 reference policy 从运行核心分离；
+  `CudaRuntimeCompilation` 同步改为标准 `Program.Main`，smoke README 补齐既有 LegacyParser runner 清单。
+
+### 验证与证据边界
+
+- 新合同、SampleLayout、YoloVision、Classification、TensorRtExec、CUDA RTC 定向集合 `77/77`；完整
+  `TensorRtSharp.sln` Debug build 为 `0 warning / 0 error`；三份新增/修改 schema 均可解析，`git diff --check`
+  通过。
+- RTX 3060 / TensorRT 10.11 / CUDA 12.9 真实动态 Add/Sub smoke：2 inputs、2 outputs、2 references 全通过；
+  受控修改 `difference[7] += 0.25` 后为 `Completed=true`、`Passed=false`、`MismatchCount=1`、
+  `FirstMismatchIndex=7`、`MaximumAbsoluteError=0.25`。该运行是 synthetic runtime，不是 real-model 或 package proof。
+- 官方 YOLOv10n v1.1 单输入回归继续得到 4 个 detection；新 ordered input snapshot 为 `images:[1,3,640,640]`、
+  `1228800` elements、`4915200` bytes，SHA256 保持
+  `3a37e91ca77118ae168b367583faea65f61613ba71a38413f6adf794d88d0488`。该回归沿用既有 source-tree
+  real-model 边界，不新增公开包、post-publish 或 Owner redistribution approval。
+- 本机只有 Windows PowerShell 5.1；`Test-YoloVisionOutputReport.ps1` 的既有 `ConvertFrom-Json -Depth` 需要
+  PowerShell 7，因此该 validator 留给 Actions，不改编码或降级脚本。没有 native/manifest/generated/ABI 修改。
+- 真实 smoke 输出保留在 ignored `artifacts/temp`，不提交 engine/model/input 等重资产；8 份 publishing 用户变更
+  未触碰、未暂存。

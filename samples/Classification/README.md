@@ -1,6 +1,7 @@
 # Classification
 
-This sample runs a user-provided single-input float ONNX classifier through TensorRT and prints Top-K scores.
+This sample runs a user-provided float ONNX classifier through TensorRT and prints Top-K scores. The ordinary image path remains
+single-input, while custom classifiers may bind multiple float inputs explicitly by name.
 
 The repository does not bundle model, label, or image assets because those files have separate licensing and size constraints. The sample uses a synthetic input tensor by default, so it validates the deployment pipeline only.
 
@@ -45,6 +46,20 @@ dotnet run --project .\samples\Classification -- `
   --min-shape 1x3x224x224 `
   --opt-shape 4x3x224x224 `
   --max-shape 8x3x224x224
+```
+
+For a custom multi-input classifier, replace all singular input/profile options with complete named maps. Every input must have
+exactly one source; missing, duplicate, and unknown names fail before engine execution.
+
+```powershell
+dotnet run --project .\samples\Classification -- `
+  --model .\models\image-and-metadata.onnx `
+  --input-shapes "images:1x3x224x224,metadata:1x8" `
+  --min-shapes "images:1x3x224x224,metadata:1x8" `
+  --opt-shapes "images:1x3x224x224,metadata:1x8" `
+  --max-shapes "images:4x3x224x224,metadata:4x8" `
+  --load-inputs "images:.\models\image.fp32.bin,metadata:.\models\metadata.txt" `
+  --output-name logits
 ```
 
 ## Required Assets For A Full Demo
@@ -109,7 +124,7 @@ that gate.
 
 ## Output And Reference JSON
 
-Use `--output-json <path>` to write a `classification-output.v1` report containing the input/preprocessing fingerprints, raw and transformed output values, stable Top-K predictions, runtime summary, optional reference comparison, and explicit non-proof boundary. Its schema is `samples/Classification/classification-output.schema.json`.
+Use `--output-json <path>` to write a `classification-output.v1` report containing ordered `inputTensors`, input/preprocessing fingerprints, raw and transformed output values, stable Top-K predictions, runtime summary, optional task-specific and raw-runtime reference comparisons, and an explicit non-proof boundary. Its schema is `samples/Classification/classification-output.schema.json`.
 
 Use `--reference-output <path>` with `--reference-abs`, `--reference-rel`, `--reference-nan-policy reject|equal`, and `--reference-infinity-policy exact|reject` to compare the selected raw-logit or softmax output. The reference format is described by `samples/Classification/classification-reference.schema.json` and requires all six lowercase SHA256 fingerprints:
 
@@ -123,6 +138,12 @@ Use `--reference-output <path>` with `--reference-abs`, `--reference-rel`, `--re
 For `--image`, the preprocessing contract hash is generated from resize/crop, layout, color order, scale, mean/std, and interpolation settings. For `--input` or `--input-data`, a reference comparison also requires the caller to supply the exact `--preprocess-contract-sha256`; the runner does not infer preprocessing semantics from tensor bytes.
 
 Metadata mismatches stop comparison with `Completed=false`. Value mismatches complete comparison with `Completed=true, Passed=false`, and the process returns exit code 1. A passing comparison remains a task-specific candidate: `boundary.ownerReviewedGolden`, `isPackageConsumerRuntimeProof`, `isPublicPackageProof`, `isPostPublishProof`, `canPublishPublicly`, and `canCloseReleaseIssue` all remain `false` until their separate Owner and public-package evidence exists.
+
+`--reference-outputs "tensor:path,..."` adds raw runtime validation for every captured output. It uses
+`--reference-abs-tolerance`, `--reference-rel-tolerance`, and the same NaN/Infinity policies. This generic tensor check is separate
+from `--reference-output`, which validates Classification preprocessing, labels, score transform, and task semantics. When both
+are requested, both must pass. Its JSON schema is `samples/JYPPX.SampleSupport/onnx-sample-reference.schema.json`. A raw tensor
+reference by itself cannot replace the richer Classification provenance contract.
 
 ## Evidence Lines
 

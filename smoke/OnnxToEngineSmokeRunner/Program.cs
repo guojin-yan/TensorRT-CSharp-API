@@ -828,6 +828,39 @@ internal static class Program
             throw new InvalidOperationException("Mismatch output artifact incorrectly promoted reference validation.");
         }
 
+        JYPPX.SampleSupport.OnnxSampleMultiOutputResult sampleSupportSuccess = RunSampleSupportMultiInput(
+            lineText,
+            modelPath,
+            shapeProfile,
+            inputMappings,
+            referenceMappings);
+        if (sampleSupportSuccess.Inputs.Count != 2 ||
+            sampleSupportSuccess.Outputs.Count != 2 ||
+            !sampleSupportSuccess.ReferenceValidation.Requested ||
+            !sampleSupportSuccess.ReferenceValidation.Completed ||
+            !sampleSupportSuccess.ReferenceValidation.Passed ||
+            sampleSupportSuccess.ReferenceValidation.TensorComparisons.Count != 2)
+        {
+            throw new InvalidOperationException("Shared sample support did not preserve the validated 2-input/2-output reference contract.");
+        }
+
+        JYPPX.SampleSupport.OnnxSampleMultiOutputResult sampleSupportMismatch = RunSampleSupportMultiInput(
+            lineText,
+            modelPath,
+            shapeProfile,
+            inputMappings,
+            mismatchMappings);
+        JYPPX.SampleSupport.OnnxSampleReferenceTensorComparison mismatchComparison = sampleSupportMismatch.ReferenceValidation.TensorComparisons
+            .Single(static comparison => string.Equals(comparison.TensorName, "difference", StringComparison.Ordinal));
+        if (sampleSupportMismatch.ReferenceValidation.Passed ||
+            !mismatchComparison.Completed ||
+            mismatchComparison.Passed ||
+            mismatchComparison.MismatchCount != 1 ||
+            mismatchComparison.FirstMismatchIndex != elementCount - 1)
+        {
+            throw new InvalidOperationException("Shared sample support did not preserve mismatch count and first mismatch index.");
+        }
+
         string summaryPath = Path.Combine(root, "multi-input-reference-smoke.json");
         File.WriteAllText(summaryPath, JsonSerializer.Serialize(new
         {
@@ -861,10 +894,56 @@ internal static class Program
                 OutputSha256 = Sha256(failedOutputPath),
                 ReportSha256 = Sha256(failedReportPath)
             },
+            SampleSupportRun = new
+            {
+                InputTensorCount = sampleSupportSuccess.Inputs.Count,
+                OutputTensorCount = sampleSupportSuccess.Outputs.Count,
+                sampleSupportSuccess.ReferenceValidation.Requested,
+                sampleSupportSuccess.ReferenceValidation.Completed,
+                sampleSupportSuccess.ReferenceValidation.Passed,
+                ComparisonCount = sampleSupportSuccess.ReferenceValidation.TensorComparisons.Count,
+                InputTensorNames = sampleSupportSuccess.Inputs.Select(static input => input.Name).ToArray(),
+                OutputTensorNames = sampleSupportSuccess.Outputs.Select(static output => output.Name).ToArray()
+            },
+            SampleSupportMismatchRun = new
+            {
+                sampleSupportMismatch.ReferenceValidation.Completed,
+                sampleSupportMismatch.ReferenceValidation.Passed,
+                mismatchComparison.Completed,
+                mismatchComparison.MismatchCount,
+                mismatchComparison.FirstMismatchIndex,
+                mismatchComparison.MaximumAbsoluteError,
+                mismatchComparison.MaximumRelativeError
+            },
             ReferenceSourceClassification = "synthetic-generated",
             ProofBoundary = "real TensorRT build/enqueue/readback and all-output reference comparison on a generated model; synthetic runtime evidence only, not real-model, package-consumer, public-package, post-publish, or release proof"
         }, new JsonSerializerOptions { WriteIndented = true }));
         Console.WriteLine($"MultiInputReferenceSmoke Passed=True Root={root} Summary={summaryPath} ValidatedState={success.State} MismatchState={mismatch.State}");
+    }
+
+    private static JYPPX.SampleSupport.OnnxSampleMultiOutputResult RunSampleSupportMultiInput(
+        string lineText,
+        string modelPath,
+        string shapeProfile,
+        string inputMappings,
+        string referenceMappings)
+    {
+        JYPPX.SampleSupport.OnnxSampleOptions options = JYPPX.SampleSupport.OnnxSampleOptions.FromArgs(new[]
+        {
+            "--tensor-rt-line", lineText,
+            "--model", modelPath,
+            "--input-shapes", shapeProfile,
+            "--min-shapes", shapeProfile,
+            "--opt-shapes", shapeProfile,
+            "--max-shapes", shapeProfile,
+            "--load-inputs", inputMappings,
+            "--reference-outputs", referenceMappings,
+            "--reference-abs-tolerance", "0",
+            "--reference-rel-tolerance", "0",
+            "--reference-nan-policy", "reject",
+            "--reference-infinity-policy", "exact"
+        }, "1x4");
+        return JYPPX.SampleSupport.TensorRtOnnxSample.RunSingleFloatInputOutputs(options);
     }
 
     private static void WriteFloats(string path, float[] values)

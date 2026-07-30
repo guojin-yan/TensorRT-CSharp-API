@@ -144,10 +144,15 @@ public static class YoloVisionCommand
                 PrintImagePreprocess(imagePreprocess);
             }
 
-            Console.WriteLine($"Input={result.InputName}:{result.InputShape} Output={primaryOutput.Name}:{primaryOutput.Shape} Outputs={result.Outputs.Count}");
+            Console.WriteLine($"Input={result.InputName}:{result.InputShape} Inputs={result.Inputs.Count} Output={primaryOutput.Name}:{primaryOutput.Shape} Outputs={result.Outputs.Count}");
+            foreach (OnnxSampleInputTensor input in result.Inputs)
+            {
+                Console.WriteLine($"RuntimeInput Tensor={input.Name} Shape={input.Shape} Elements={input.ElementCount} Bytes={input.ByteLength} Source={input.SourceClassification} SourcePath={input.SourcePath} Sha256={input.Sha256}");
+            }
             Console.WriteLine($"ProfileIndex={result.ProfileIndex} EngineDeviceMemory={result.EngineDeviceMemoryBytes}");
             PrintBindingReport(result.Report);
             Console.WriteLine($"Execution {result.ExecutionSummary} ElapsedMs={result.ElapsedMilliseconds:0.###}");
+            PrintReferenceValidation(result.ReferenceValidation);
 
             YoloRuntimeOutputSet runtimeOutputs = new YoloRuntimeOutputSet(result.Outputs.Select(output =>
                 new YoloRuntimeOutputTensor(
@@ -199,8 +204,11 @@ public static class YoloVisionCommand
                 Console.WriteLine($"Visualization={Path.GetFullPath(visualizationPath)}");
             }
 
-            Console.WriteLine("YoloVision Passed=True");
-            return 0;
+            bool success = !result.ReferenceValidation.Requested ||
+                (result.ReferenceValidation.Completed && result.ReferenceValidation.Passed);
+            Console.WriteLine("OutputValidated=" + (result.ReferenceValidation.Requested && result.ReferenceValidation.Completed && result.ReferenceValidation.Passed));
+            Console.WriteLine("YoloVision Passed=" + success);
+            return success ? 0 : 1;
         }
         catch (SampleSkippedException exception)
         {
@@ -228,6 +236,25 @@ public static class YoloVisionCommand
         {
             Console.WriteLine($"YoloVision=UnsupportedOutput Reason={exception.Message}");
             return 2;
+        }
+        catch (Exception exception) when (exception is InvalidDataException || exception is JsonException)
+        {
+            Console.WriteLine($"YoloVision=InvalidArguments Reason={exception.Message}");
+            return 2;
+        }
+    }
+
+    private static void PrintReferenceValidation(OnnxSampleReferenceValidationResult validation)
+    {
+        if (!validation.Requested)
+        {
+            return;
+        }
+
+        Console.WriteLine($"ReferenceOutputValidation Requested=True Completed={validation.Completed} Passed={validation.Passed} Tensors={validation.TensorComparisons.Count} AbsTolerance={validation.AbsoluteTolerance:R} RelTolerance={validation.RelativeTolerance:R} NaNPolicy={validation.NaNPolicy} InfinityPolicy={validation.InfinityPolicy}");
+        foreach (OnnxSampleReferenceTensorComparison comparison in validation.TensorComparisons)
+        {
+            Console.WriteLine($"ReferenceOutputTensor Tensor={comparison.TensorName} Passed={comparison.Passed} Compared={comparison.ComparedElementCount} Mismatches={comparison.MismatchCount} FirstMismatch={comparison.FirstMismatchIndex} MaxAbs={comparison.MaximumAbsoluteError:R} MaxRel={comparison.MaximumRelativeError:R} ReferenceSha256={comparison.ReferenceSha256} Source={comparison.SourceClassification} Diagnostic={comparison.Diagnostic}");
         }
     }
 
@@ -579,6 +606,14 @@ public static class YoloVisionCommand
         Console.WriteLine("  --input-pattern <pattern> zeros, ones, or ramp. Default: ramp.");
         Console.WriteLine("  --input <path>           Raw byte tensor normalized to [0,1]; byte count must match input element count.");
         Console.WriteLine("  --input-data <path>      Float tensor data from .bin/.raw float32 or comma/space/newline text.");
+        Console.WriteLine("  --input-shapes <map>     Named multi-input shapes, for example left:1x4,right:1x4.");
+        Console.WriteLine("  --min-shapes/--opt-shapes/--max-shapes <map>  Complete named dynamic profile; all three maps are required together.");
+        Console.WriteLine("  --load-inputs <map>      Named float32/text input files; every model input needs exactly one source.");
+        Console.WriteLine("  --load-byte-inputs <map> Named raw-byte input files normalized to [0,1].");
+        Console.WriteLine("  --input-patterns <map>   Named synthetic sources using zeros, ones, or ramp.");
+        Console.WriteLine("  --reference-outputs <map>  Structured schemaVersion=1 output references using tensor:path mappings.");
+        Console.WriteLine("  --reference-abs-tolerance/--reference-rel-tolerance <n>  Finite non-negative comparison tolerances.");
+        Console.WriteLine("  --reference-nan-policy <reject|equal> --reference-infinity-policy <exact|reject>");
         Console.WriteLine("  --image <path>           Decode .bmp/.ppm image, preprocess to fp32, and feed it as --input-data.");
         Console.WriteLine("  --input-image <path>     Alias for --image.");
         Console.WriteLine("  --preprocessed-output <path>  Optional fp32 tensor path written by --image preprocessing.");

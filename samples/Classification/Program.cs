@@ -84,7 +84,11 @@ internal static class Program
                 validation);
 
             Console.WriteLine($"Classification TensorRtLine={(int)result.Line} Model={options.ModelPath}");
-            Console.WriteLine($"Input={result.InputName}:{result.InputShape} Output={result.OutputName}:{result.OutputShape}");
+            Console.WriteLine($"Input={result.InputName}:{result.InputShape} Inputs={result.Inputs.Count} Output={result.OutputName}:{result.OutputShape}");
+            foreach (OnnxSampleInputTensor input in result.Inputs)
+            {
+                Console.WriteLine($"RuntimeInput Tensor={input.Name} Shape={input.Shape} Elements={input.ElementCount} Bytes={input.ByteLength} Source={input.SourceClassification} SourcePath={input.SourcePath} Sha256={input.Sha256}");
+            }
             Console.WriteLine($"ProfileIndex={result.ProfileIndex} EngineDeviceMemory={result.EngineDeviceMemoryBytes}");
             Console.WriteLine($"Execution {result.ExecutionSummary} ElapsedMs={result.ElapsedMilliseconds:0.###}");
             Console.WriteLine($"InputSource={(preprocess != null ? "image" : options.UsesExternalInput ? "external-tensor" : "synthetic")} TensorSha256={inputTensorSha256} PreprocessContractSha256={preprocessContractSha256}");
@@ -101,13 +105,20 @@ internal static class Program
             {
                 Console.WriteLine($"ClassificationReference Requested=True Completed={validation.Completed} Passed={validation.Passed} Compared={validation.ComparedElementCount} Mismatches={validation.MismatchCount} FirstMismatch={validation.FirstMismatchIndex} Diagnostic={validation.Diagnostic}");
             }
-            Console.WriteLine("OutputValidated=" + (validation.Requested && validation.Completed && validation.Passed));
+            if (result.ReferenceValidation.Requested)
+            {
+                Console.WriteLine($"ReferenceOutputValidation Requested=True Completed={result.ReferenceValidation.Completed} Passed={result.ReferenceValidation.Passed} Tensors={result.ReferenceValidation.TensorComparisons.Count} AbsTolerance={result.ReferenceValidation.AbsoluteTolerance:R} RelTolerance={result.ReferenceValidation.RelativeTolerance:R} NaNPolicy={result.ReferenceValidation.NaNPolicy} InfinityPolicy={result.ReferenceValidation.InfinityPolicy}");
+            }
+            bool validationRequested = validation.Requested || result.ReferenceValidation.Requested;
+            bool validationPassed = (!validation.Requested || validation.Passed) &&
+                (!result.ReferenceValidation.Requested || (result.ReferenceValidation.Completed && result.ReferenceValidation.Passed));
+            Console.WriteLine("OutputValidated=" + (validationRequested && validationPassed));
             if (!string.IsNullOrWhiteSpace(outputJsonPath))
             {
                 Console.WriteLine("OutputJson=" + Path.GetFullPath(outputJsonPath));
             }
 
-            bool success = !validation.Requested || validation.Passed;
+            bool success = validationPassed;
             Console.WriteLine("Classification Passed=" + success);
             return success ? 0 : 1;
         }
@@ -315,10 +326,13 @@ internal static class Program
         Console.WriteLine("  --input-data <path>       Preprocessed float32 .bin/.raw or text tensor.");
         Console.WriteLine("Runtime/output options:");
         Console.WriteLine("  --input-name/--output-name <name> --min-shape/--opt-shape/--max-shape <dims>");
+        Console.WriteLine("  --input-shapes <map> with --load-inputs/--load-byte-inputs/--input-patterns <map> enables strict named multi-input binding.");
+        Console.WriteLine("  --min-shapes/--opt-shapes/--max-shapes <map> provide the complete named dynamic profile.");
         Console.WriteLine("  --score-transform <raw|softmax> --top-k <n> --output-json <path>");
         Console.WriteLine("Reference options:");
         Console.WriteLine("  --reference-output <json> --reference-abs <n> --reference-rel <n>");
         Console.WriteLine("  --reference-nan-policy <reject|equal> --reference-infinity-policy <exact|reject>");
+        Console.WriteLine("  --reference-outputs <tensor:path,...> validates every raw runtime output; use --reference-abs-tolerance/--reference-rel-tolerance.");
         Console.WriteLine("  --preprocess-contract-sha256 <hash> is required for reference validation of externally preprocessed tensors.");
     }
 }

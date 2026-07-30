@@ -22,7 +22,9 @@ internal sealed class OnnxSampleOptions
         bool hasProfileOverride,
         string inputPattern,
         string inputPath,
-        string inputDataPath)
+        string inputDataPath,
+        IReadOnlyList<OnnxSampleInputOptions> inputs,
+        OnnxSampleReferenceOptions referenceOutputs)
     {
         Line = line;
         ModelPath = modelPath;
@@ -36,6 +38,8 @@ internal sealed class OnnxSampleOptions
         InputPattern = inputPattern;
         InputPath = inputPath;
         InputDataPath = inputDataPath;
+        Inputs = inputs ?? throw new ArgumentNullException(nameof(inputs));
+        ReferenceOutputs = referenceOutputs ?? throw new ArgumentNullException(nameof(referenceOutputs));
     }
 
     public TensorRtApiLine Line { get; }
@@ -62,7 +66,13 @@ internal sealed class OnnxSampleOptions
 
     public string InputDataPath { get; }
 
-    public bool UsesExternalInput => !string.IsNullOrWhiteSpace(InputPath) || !string.IsNullOrWhiteSpace(InputDataPath);
+    public IReadOnlyList<OnnxSampleInputOptions> Inputs { get; }
+
+    public OnnxSampleReferenceOptions ReferenceOutputs { get; }
+
+    public bool UsesExternalInput => Inputs.Any(static input => input.UsesExternalInput);
+
+    public bool UsesNamedInputContract => Inputs.Count > 1 || (Inputs.Count == 1 && !string.IsNullOrWhiteSpace(Inputs[0].Name) && !string.Equals(Inputs[0].Name, InputName, StringComparison.Ordinal));
 
     public static OnnxSampleOptions FromArgs(string[] args, string defaultInputShape)
     {
@@ -91,19 +101,37 @@ internal sealed class OnnxSampleOptions
         TensorRtDims optShape = string.IsNullOrWhiteSpace(optShapeText) ? inputShape : TensorRtOnnxSample.ParseShape(optShapeText, "--opt-shape");
         TensorRtDims maxShape = string.IsNullOrWhiteSpace(maxShapeText) ? inputShape : TensorRtOnnxSample.ParseShape(maxShapeText, "--max-shape");
 
+        string inputName = SampleCommandLine.GetStringArgument(args, "--input-name", string.Empty);
+        string inputPattern = SampleCommandLine.GetStringArgument(args, "--input-pattern", "ramp");
+        string inputPath = ResolveOptionalInputFile(args, "--input");
+        string inputDataPath = ResolveOptionalInputFile(args, "--input-data");
+        IReadOnlyList<OnnxSampleInputOptions> inputs = OnnxSampleInputOptions.FromArgs(
+            args,
+            inputName,
+            inputShape,
+            minShape,
+            optShape,
+            maxShape,
+            hasProfileOverride,
+            inputPattern,
+            inputPath,
+            inputDataPath);
+
         return new OnnxSampleOptions(
             line,
             fullModelPath,
-            SampleCommandLine.GetStringArgument(args, "--input-name", string.Empty),
+            inputName,
             SampleCommandLine.GetStringArgument(args, "--output-name", string.Empty),
             inputShape,
             minShape,
             optShape,
             maxShape,
             hasProfileOverride,
-            SampleCommandLine.GetStringArgument(args, "--input-pattern", "ramp"),
-            ResolveOptionalInputFile(args, "--input"),
-            ResolveOptionalInputFile(args, "--input-data"));
+            inputPattern,
+            inputPath,
+            inputDataPath,
+            inputs,
+            OnnxSampleReferenceOptions.FromArgs(args));
     }
 
     private static string ResolveOptionalInputFile(string[] args, string name)
@@ -137,7 +165,9 @@ internal sealed class OnnxSampleResult
         TensorRtInferenceExecutionSummary executionSummary,
         float elapsedMilliseconds,
         int profileIndex,
-        ulong engineDeviceMemoryBytes)
+        ulong engineDeviceMemoryBytes,
+        IReadOnlyList<OnnxSampleInputTensor> inputs,
+        OnnxSampleReferenceValidationResult referenceValidation)
     {
         Line = line;
         InputName = inputName;
@@ -150,6 +180,8 @@ internal sealed class OnnxSampleResult
         ElapsedMilliseconds = elapsedMilliseconds;
         ProfileIndex = profileIndex;
         EngineDeviceMemoryBytes = engineDeviceMemoryBytes;
+        Inputs = inputs ?? Array.Empty<OnnxSampleInputTensor>();
+        ReferenceValidation = referenceValidation ?? throw new ArgumentNullException(nameof(referenceValidation));
     }
 
     public TensorRtApiLine Line { get; }
@@ -173,6 +205,10 @@ internal sealed class OnnxSampleResult
     public int ProfileIndex { get; }
 
     public ulong EngineDeviceMemoryBytes { get; }
+
+    public IReadOnlyList<OnnxSampleInputTensor> Inputs { get; }
+
+    public OnnxSampleReferenceValidationResult ReferenceValidation { get; }
 }
 
 internal sealed class OnnxSampleOutputTensor
@@ -210,7 +246,9 @@ internal sealed class OnnxSampleMultiOutputResult
         TensorRtInferenceExecutionSummary executionSummary,
         float elapsedMilliseconds,
         int profileIndex,
-        ulong engineDeviceMemoryBytes)
+        ulong engineDeviceMemoryBytes,
+        IReadOnlyList<OnnxSampleInputTensor> inputs,
+        OnnxSampleReferenceValidationResult referenceValidation)
     {
         Line = line;
         InputName = inputName ?? string.Empty;
@@ -222,6 +260,8 @@ internal sealed class OnnxSampleMultiOutputResult
         ElapsedMilliseconds = elapsedMilliseconds;
         ProfileIndex = profileIndex;
         EngineDeviceMemoryBytes = engineDeviceMemoryBytes;
+        Inputs = inputs ?? Array.Empty<OnnxSampleInputTensor>();
+        ReferenceValidation = referenceValidation ?? throw new ArgumentNullException(nameof(referenceValidation));
     }
 
     public TensorRtApiLine Line { get; }
@@ -243,6 +283,10 @@ internal sealed class OnnxSampleMultiOutputResult
     public int ProfileIndex { get; }
 
     public ulong EngineDeviceMemoryBytes { get; }
+
+    public IReadOnlyList<OnnxSampleInputTensor> Inputs { get; }
+
+    public OnnxSampleReferenceValidationResult ReferenceValidation { get; }
 
     public OnnxSampleOutputTensor PrimaryOutput => GetOutput(PrimaryOutputName);
 
@@ -268,7 +312,7 @@ internal sealed class SampleSkippedException : Exception
     }
 }
 
-internal static class TensorRtOnnxSample
+internal static partial class TensorRtOnnxSample
 {
     public static TensorRtDims ParseShape(string value, string argumentName)
     {
@@ -312,7 +356,9 @@ internal static class TensorRtOnnxSample
             result.ExecutionSummary,
             result.ElapsedMilliseconds,
             result.ProfileIndex,
-            result.EngineDeviceMemoryBytes);
+            result.EngineDeviceMemoryBytes,
+            result.Inputs,
+            result.ReferenceValidation);
     }
 
     public static OnnxSampleMultiOutputResult RunSingleFloatInputOutputs(OnnxSampleOptions options)
@@ -342,23 +388,19 @@ internal static class TensorRtOnnxSample
             throw new InvalidOperationException(parser.GetErrorSummary());
         }
 
-        if (network.InputCount != 1)
-        {
-            throw new NotSupportedException($"This sample supports one float input tensor. Model input count: {network.InputCount}.");
-        }
-
-        using TensorRtTensor inputTensor = ResolveNetworkInput(network, options.InputName);
-        if (inputTensor.DataType != TensorRtDataType.Float)
-        {
-            throw new NotSupportedException($"This sample supports float input tensors only. Input '{inputTensor.Name}' is {inputTensor.DataType}.");
-        }
-
-        bool dynamicInput = HasDynamicDimension(inputTensor.Shape);
+        List<OnnxSampleNetworkInput> networkInputs = ResolveNetworkInputs(network, options);
+        bool dynamicInput = networkInputs.Any(static input => HasDynamicDimension(input.NetworkShape));
         int profileIndex = 0;
-        if (dynamicInput || options.HasProfileOverride)
+        if (dynamicInput || networkInputs.Any(static input => input.Options.HasProfileOverride))
         {
             using TensorRtOptimizationProfile profile = builder.CreateOptimizationProfile();
-            profile.SetShape(inputTensor.Name, options.MinShape, options.OptShape, options.MaxShape);
+            foreach (OnnxSampleNetworkInput input in networkInputs)
+            {
+                if (HasDynamicDimension(input.NetworkShape) || input.Options.HasProfileOverride)
+                {
+                    profile.SetShape(input.Name, input.Options.MinShape, input.Options.OptShape, input.Options.MaxShape);
+                }
+            }
             profileIndex = config.AddOptimizationProfile(profile);
         }
 
@@ -373,7 +415,10 @@ internal static class TensorRtOnnxSample
         using TensorRtInferenceBindings bindings = new TensorRtInferenceBindings(engine, context, profileIndex);
 
         string primaryOutputName = ResolveOutputName(bindings.Report, options.OutputName);
-        List<string> outputNames = ResolveOutputNames(bindings.Report, primaryOutputName, captureAllOutputs);
+        List<string> outputNames = ResolveOutputNames(
+            bindings.Report,
+            primaryOutputName,
+            captureAllOutputs || options.ReferenceOutputs.Requested);
         foreach (string outputName in outputNames)
         {
             TensorRtEngineTensorBinding outputBinding = bindings.Report.GetTensor(outputName);
@@ -383,13 +428,23 @@ internal static class TensorRtOnnxSample
             }
         }
 
-        if (dynamicInput || options.HasProfileOverride)
+        List<OnnxSampleInputTensor> inputArtifacts = new List<OnnxSampleInputTensor>(networkInputs.Count);
+        foreach (OnnxSampleNetworkInput input in networkInputs)
         {
-            bindings.SetInputShape(inputTensor.Name, options.InputShape);
-        }
+            if (HasDynamicDimension(input.NetworkShape) || input.Options.HasProfileOverride || !ShapesEqual(input.NetworkShape, input.Options.Shape))
+            {
+                bindings.SetInputShape(input.Name, input.Options.Shape);
+            }
 
-        float[] inputValues = CreateInputValues(CountElements(options.InputShape), options);
-        bindings.CopyInputFromHost(inputTensor.Name, inputValues, options.InputShape);
+            float[] inputValues = CreateInputValues(CountElements(input.Options.Shape), input.Options);
+            bindings.CopyInputFromHost(input.Name, inputValues, input.Options.Shape);
+            inputArtifacts.Add(new OnnxSampleInputTensor(
+                input.Name,
+                input.Options.Shape,
+                inputValues,
+                input.Options.SourceClassification,
+                input.Options.SourcePath));
+        }
         _ = bindings.GetReadiness(runShapeInference: true);
 
         Dictionary<string, TensorRtInferenceBuffer> outputBuffers = new Dictionary<string, TensorRtInferenceBuffer>(StringComparer.Ordinal);
@@ -413,17 +468,22 @@ internal static class TensorRtOnnxSample
             outputs.Add(new OnnxSampleOutputTensor(outputName, outputBuffer.RuntimeShape!, outputValues));
         }
 
+        OnnxSampleReferenceValidationResult referenceValidation = ValidateReferenceOutputs(outputs, options.ReferenceOutputs);
+        OnnxSampleInputTensor primaryInput = inputArtifacts[0];
+
         return new OnnxSampleMultiOutputResult(
             options.Line,
-            inputTensor.Name,
+            primaryInput.Name,
             primaryOutputName,
-            options.InputShape,
+            primaryInput.Shape,
             outputs,
             bindings.Report,
             executionSummary,
             elapsedMilliseconds,
             profileIndex,
-            engine.DeviceMemorySizeInBytes);
+            engine.DeviceMemorySizeInBytes,
+            inputArtifacts,
+            referenceValidation);
     }
 
     public static int CountElements(TensorRtDims shape)
@@ -470,15 +530,103 @@ internal static class TensorRtOnnxSample
             : index.ToString();
     }
 
-    private static TensorRtTensor ResolveNetworkInput(TensorRtNetworkDefinition network, string requestedName)
+    private static List<OnnxSampleNetworkInput> ResolveNetworkInputs(TensorRtNetworkDefinition network, OnnxSampleOptions options)
     {
-        using TensorRtTensor firstInput = network.GetInput(0);
-        if (string.IsNullOrWhiteSpace(requestedName) || string.Equals(firstInput.Name, requestedName, StringComparison.Ordinal))
+        if (network.InputCount == 0)
         {
-            return network.GetInput(0);
+            throw new NotSupportedException("This sample requires at least one model input tensor.");
         }
 
-        throw new ArgumentException($"Input tensor '{requestedName}' was not found. This sample model exposes '{firstInput.Name}'.");
+        List<string> names = new List<string>(network.InputCount);
+        List<TensorRtDataType> dataTypes = new List<TensorRtDataType>(network.InputCount);
+        List<TensorRtDims> networkShapes = new List<TensorRtDims>(network.InputCount);
+        for (int index = 0; index < network.InputCount; index++)
+        {
+            using TensorRtTensor tensor = network.GetInput(index);
+            names.Add(tensor.Name);
+            dataTypes.Add(tensor.DataType);
+            networkShapes.Add(tensor.Shape);
+        }
+
+        Dictionary<string, OnnxSampleInputOptions> configured = new Dictionary<string, OnnxSampleInputOptions>(StringComparer.Ordinal);
+        if (options.UsesNamedInputContract)
+        {
+            foreach (OnnxSampleInputOptions input in options.Inputs)
+            {
+                if (!configured.TryAdd(input.Name, input))
+                {
+                    throw new ArgumentException($"Input contract contains a duplicate tensor '{input.Name}'.");
+                }
+            }
+
+            HashSet<string> engineNames = new HashSet<string>(names, StringComparer.Ordinal);
+            string[] missing = engineNames.Except(configured.Keys).OrderBy(static name => name, StringComparer.Ordinal).ToArray();
+            string[] extra = configured.Keys.Except(engineNames).OrderBy(static name => name, StringComparer.Ordinal).ToArray();
+            if (missing.Length != 0 || extra.Length != 0)
+            {
+                throw new ArgumentException($"Named input contract must match model inputs exactly. Missing=[{string.Join(",", missing)}] Extra=[{string.Join(",", extra)}].");
+            }
+        }
+        else
+        {
+            if (network.InputCount != 1)
+            {
+                throw new NotSupportedException($"Models with {network.InputCount} inputs require named --input-shapes and per-input source mappings.");
+            }
+
+            OnnxSampleInputOptions input = options.Inputs[0];
+            if (!string.IsNullOrWhiteSpace(input.Name) && !string.Equals(input.Name, names[0], StringComparison.Ordinal))
+            {
+                throw new ArgumentException($"Input tensor '{input.Name}' was not found. This sample model exposes '{names[0]}'.");
+            }
+
+            configured[names[0]] = input;
+        }
+
+        List<OnnxSampleNetworkInput> result = new List<OnnxSampleNetworkInput>(network.InputCount);
+        for (int index = 0; index < names.Count; index++)
+        {
+            if (dataTypes[index] != TensorRtDataType.Float)
+            {
+                throw new NotSupportedException($"This sample supports float input tensors only. Input '{names[index]}' is {dataTypes[index]}.");
+            }
+
+            OnnxSampleInputOptions input = configured[names[index]];
+            ValidateInputShapes(names[index], networkShapes[index], input);
+            result.Add(new OnnxSampleNetworkInput(names[index], dataTypes[index], networkShapes[index], input));
+        }
+
+        return result;
+    }
+
+    private static void ValidateInputShapes(string name, TensorRtDims networkShape, OnnxSampleInputOptions input)
+    {
+        int[] network = networkShape.Values;
+        int[] runtime = input.Shape.Values;
+        int[] minimum = input.MinShape.Values;
+        int[] optimum = input.OptShape.Values;
+        int[] maximum = input.MaxShape.Values;
+        if (runtime.Length != network.Length || minimum.Length != network.Length || optimum.Length != network.Length || maximum.Length != network.Length)
+        {
+            throw new ArgumentException($"Input '{name}' runtime/profile shapes must all have rank {network.Length}.");
+        }
+
+        for (int index = 0; index < network.Length; index++)
+        {
+            if (minimum[index] > optimum[index] || optimum[index] > maximum[index])
+            {
+                throw new ArgumentException($"Input '{name}' profile dimension {index} must satisfy min <= opt <= max.");
+            }
+            if (runtime[index] < minimum[index] || runtime[index] > maximum[index])
+            {
+                throw new ArgumentException($"Input '{name}' runtime dimension {index} must be inside the profile range.");
+            }
+            if (network[index] > 0 &&
+                (runtime[index] != network[index] || minimum[index] != network[index] || optimum[index] != network[index] || maximum[index] != network[index]))
+            {
+                throw new ArgumentException($"Input '{name}' dimension {index} is static ({network[index]}) and cannot be overridden.");
+            }
+        }
     }
 
     private static string ResolveOutputName(TensorRtEngineBindingReport report, string requestedName)
@@ -535,6 +683,11 @@ internal static class TensorRtOnnxSample
         return false;
     }
 
+    private static bool ShapesEqual(TensorRtDims left, TensorRtDims right)
+    {
+        return left.Values.SequenceEqual(right.Values);
+    }
+
     public static float[] CreateInputValuesForTesting(int count, string inputPattern, string inputPath = "", string inputDataPath = "")
     {
         return CreateInputValues(
@@ -543,6 +696,16 @@ internal static class TensorRtOnnxSample
     }
 
     private static float[] CreateInputValues(int count, OnnxSampleOptions options)
+    {
+        if (options == null)
+        {
+            throw new ArgumentNullException(nameof(options));
+        }
+
+        return CreateInputValues(count, new ExternalInputRequest(options.InputPattern, options.InputPath, options.InputDataPath));
+    }
+
+    private static float[] CreateInputValues(int count, OnnxSampleInputOptions options)
     {
         if (options == null)
         {

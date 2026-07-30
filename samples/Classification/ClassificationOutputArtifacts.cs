@@ -503,14 +503,17 @@ internal static class ClassificationOutputReportWriter
         string proofClassification = preprocess != null
             ? "real-input-reference-candidate-runtime"
             : options.UsesExternalInput ? "external-tensor-runtime" : "synthetic-input-runtime";
+        bool validationRequested = validation.Requested || result.ReferenceValidation.Requested;
+        bool validationPassed = (!validation.Requested || validation.Passed) &&
+            (!result.ReferenceValidation.Requested || (result.ReferenceValidation.Completed && result.ReferenceValidation.Passed));
         var document = new
         {
             schemaVersion = SchemaVersion,
             task = "classification",
-            success = !validation.Requested || validation.Passed,
+            success = validationPassed,
             inferenceRan = true,
             outputCaptured = true,
-            outputValidated = validation.Requested && validation.Completed && validation.Passed,
+            outputValidated = validationRequested && validationPassed,
             proofClassification,
             model = new
             {
@@ -552,6 +555,17 @@ internal static class ClassificationOutputReportWriter
                     standardDeviation = preprocess.Options.StandardDeviation
                 }
             },
+            inputTensors = result.Inputs.Select(static input => new
+            {
+                tensorName = input.Name,
+                shape = input.Shape.Values,
+                input.ElementCount,
+                input.ByteLength,
+                input.Preview,
+                input.Sha256,
+                input.SourceClassification,
+                input.SourcePath
+            }),
             output = new
             {
                 tensorName = result.OutputName,
@@ -575,6 +589,7 @@ internal static class ClassificationOutputReportWriter
                 executionSummary = result.ExecutionSummary.ToString()
             },
             referenceValidation = validation,
+            runtimeReferenceValidation = result.ReferenceValidation,
             boundary = new
             {
                 isIndependentFrameworkGolden = false,

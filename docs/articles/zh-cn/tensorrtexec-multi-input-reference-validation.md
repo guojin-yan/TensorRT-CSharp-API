@@ -22,9 +22,31 @@ TensorRtExec `
 `InputTensors` 为每个输入保存 name、shape、element/byte count、最多 8 个 preview values、SHA256、
 `SourceClassification` 与 `SourcePath`。这些字段都是 managed copy，不包含 device pointer 或 borrowed handle。
 
+## Classification / YoloVision 共享样例合同
+
+`samples/JYPPX.SampleSupport` 现在使用同样的严格名称绑定，不再把 Classification/YoloVision 限制为一个 ONNX
+input。样例命令采用 kebab-case 参数：
+
+- `--input-shapes name:dims,...`：必须覆盖全部 model inputs；
+- `--min-shapes`、`--opt-shapes`、`--max-shapes`：任意一个出现时，三份 map 必须同时完整；
+- `--load-inputs`、`--load-byte-inputs`、`--input-patterns`：每个 input 必须且只能命中一种来源；
+- `--reference-outputs name:path,...`：必须覆盖全部 captured outputs；
+- `--reference-abs-tolerance`、`--reference-rel-tolerance` 与显式 NaN/Infinity policy。
+
+旧的 `--input-name`、`--input-shape`、`--input-data` 等单输入参数继续兼容，但不能与复数 map 混用。运行结果按
+engine 顺序保存 `Inputs`/`Outputs`，YoloVision JSON 写入 `inputTensors` 和 `referenceValidation`，Classification JSON
+同时区分任务级 `referenceValidation` 与 raw runtime `runtimeReferenceValidation`。两种 Classification 校验同时请求时
+必须全部通过。
+
+同一条 TRT10/CUDA12.9 Add/Sub smoke 现在也执行共享样例层：成功分支为 2 inputs、2 outputs、2 comparisons 全通过；
+负向分支固定得到 `MismatchCount=1`、`FirstMismatchIndex=7`、`MaximumAbsoluteError=0.25`。这证明实际 build、enqueue、
+readback 与 fail-closed 行为，不改变 synthetic runtime 的证据分类。
+
 ## Reference JSON
 
 每个 output 使用独立、可追溯的 JSON：
+
+共享样例对应 schema 为 `samples/JYPPX.SampleSupport/onnx-sample-reference.schema.json`。
 
 ```json
 {

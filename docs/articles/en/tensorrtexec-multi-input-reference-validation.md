@@ -23,9 +23,30 @@ TensorRtExec `
 Each `InputTensors` entry records the name, shape, element and byte counts, an eight-value bounded preview, SHA256, source
 classification, and source path. These are managed copies and never expose device pointers or borrowed handles.
 
+## Shared Classification / YoloVision Contract
+
+`samples/JYPPX.SampleSupport` now applies the same strict name binding instead of limiting Classification and YoloVision to one
+ONNX input. The sample commands use kebab-case options:
+
+- `--input-shapes name:dims,...` must cover every model input;
+- `--min-shapes`, `--opt-shapes`, and `--max-shapes` must all be complete when any profile map is present;
+- each input must occur exactly once across `--load-inputs`, `--load-byte-inputs`, and `--input-patterns`;
+- `--reference-outputs name:path,...` must cover every captured output;
+- absolute/relative tolerances and NaN/Infinity policies remain explicit.
+
+Legacy singular input options remain compatible but cannot be mixed with named maps. Results preserve engine order. YoloVision JSON
+adds `inputTensors` and `referenceValidation`; Classification keeps its task-aware `referenceValidation` separate from raw runtime
+`runtimeReferenceValidation`, and both must pass when both are requested.
+
+The TRT10/CUDA12.9 Add/Sub smoke now runs the shared sample layer as well. Its passing branch records two inputs, two outputs, and
+two successful comparisons. Its controlled mismatch records one mismatch at index 7 with maximum absolute error 0.25. This proves
+real build/enqueue/readback and fail-closed behavior while remaining synthetic runtime evidence.
+
 ## Reference JSON
 
 Each output maps to one traceable structured document:
+
+The shared sample schema is `samples/JYPPX.SampleSupport/onnx-sample-reference.schema.json`.
 
 ```json
 {

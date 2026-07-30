@@ -1,6 +1,6 @@
 # YoloVision
 
-This sample runs a user-provided single-input float YOLO-family ONNX model through TensorRT, then decodes common output layouts and task profiles. The managed postprocess base now has a unified `YoloVisionResult` path for detection, classification, segmentation, OBB, pose, and semantic segmentation. Detection-style tasks share box decode, score filtering, and class-aware/class-agnostic NMS; classification and semantic segmentation have single-output decoders; segmentation, OBB, and pose also have pure managed multi-output helpers for model-specific auxiliary tensors.
+This sample runs a user-provided float YOLO-family ONNX model through TensorRT, including strict named multi-input models, then decodes common output layouts and task profiles. The managed postprocess base now has a unified `YoloVisionResult` path for detection, classification, segmentation, OBB, pose, and semantic segmentation. Detection-style tasks share box decode, score filtering, and class-aware/class-agnostic NMS; classification and semantic segmentation have primary-output decoders; segmentation, OBB, and pose also have pure managed multi-output helpers for model-specific auxiliary tensors.
 
 - `[1, 84, 8400]` style channel-first output
 - `[1, 8400, 84]` style box-first output
@@ -173,7 +173,7 @@ When an owner is ready to backfill real evidence, run `eng/Export-YoloVisionReal
 
 ## Managed Multi-Output Metadata
 
-The command-line runner still executes a single-output TensorRT sample path. For models whose exported graph returns separate auxiliary tensors, use the managed helpers from tests or a host application:
+The command-line runner captures every float output in engine order. For models whose exported graph returns separate auxiliary tensors, use the managed helpers from tests or a host application:
 
 - `YoloSampleRunner.DecodeSegmentationOutputs(...)`: detection rows plus mask coefficients and `[P,H,W]` or `[1,P,H,W]` prototype tensor.
 - `YoloSampleRunner.DecodePoseOutputs(...)`: detection rows plus `[1,N,K*stride]` or `[1,K*stride,N]` keypoint tensor.
@@ -183,6 +183,34 @@ The command-line runner still executes a single-output TensorRT sample path. For
 These helpers keep model-specific ownership outside TensorRT and are covered by managed tests. A real asset manifest must still record the exact output tensor names, shapes, layout, crop/scale rules, and evidence log before the sample is treated as a real demo pass.
 
 The shared ONNX sample support now also has a multi-output snapshot path. `YoloVision` captures all float outputs, wraps them as `YoloRuntimeOutputTensor` values with explicit roles, then routes them through `YoloSampleRunner.DecodeRuntimeOutputs`. The command-line path remains compatible with single-output models by assigning the primary output role from the selected task and falling back to the single-output diagnostic decoder when no auxiliary metadata is supplied.
+
+## Named Multi-Input And Runtime References
+
+Custom YOLO exports with multiple float inputs use a strict name-bound contract. `--input-shapes` must cover every model input,
+and each name must have exactly one source in `--load-inputs`, `--load-byte-inputs`, or `--input-patterns`. If any dynamic profile
+map is supplied, `--min-shapes`, `--opt-shapes`, and `--max-shapes` must all cover the same names. Legacy singular arguments remain
+available for ordinary one-input models and cannot be mixed with the named contract.
+
+```powershell
+dotnet run --project .\samples\YoloVision -- `
+  --model .\models\fusion-yolo.onnx `
+  --family custom --task det `
+  --input-shapes "images:1x3x640x640,scale:1" `
+  --min-shapes "images:1x3x640x640,scale:1" `
+  --opt-shapes "images:1x3x640x640,scale:1" `
+  --max-shapes "images:4x3x640x640,scale:1" `
+  --load-inputs "images:.\models\image.fp32.bin,scale:.\models\scale.txt" `
+  --reference-outputs "boxes:.\references\boxes.json,scores:.\references\scores.json" `
+  --reference-abs-tolerance 1e-5 `
+  --reference-rel-tolerance 1e-4 `
+  --output-json .\artifacts\yolovision\fusion-output.json
+```
+
+Every reference document follows `samples/JYPPX.SampleSupport/onnx-sample-reference.schema.json` and uses `schemaVersion=1`, `tensorName`, `shape`, `values`, and `sourceClassification`. Reference mappings
+must cover every captured output. The report records ordered `inputTensors`, reference file SHA256, per-tensor shape/count,
+mismatch count, first mismatch, maximum errors, and special-value policy. A mismatch returns exit code 1 and
+`OutputValidated=False`. A synthetic or same-runtime reference remains regression evidence only; its hash does not make it an
+owner-reviewed golden, real-model, package-consumer, public-package, or post-publish proof.
 
 Use `--output <path>` or `--output-json <path>` to write a machine-readable `yolovision-output.v1` JSON report. The report includes copied output tensor shapes, per-output `valueSha256` and preview values, task/family metadata, postprocess thresholds, prediction summaries, labels path/class count/SHA256, model/input SHA256 values when files are available, and a strict boundary block that keeps the file out of runtime-proof promotion. When `--image` is used, the report also records the source image path/SHA256/size, the generated preprocessed tensor path/SHA256/element count, layout, color order, normalization scale, and letterbox/stretch metadata. It is intended for owner review, golden-output comparison, and sample-run evidence backfill; it still needs real logs, hashes, host metadata, and owner approval before any real-model-runtime decision.
 
