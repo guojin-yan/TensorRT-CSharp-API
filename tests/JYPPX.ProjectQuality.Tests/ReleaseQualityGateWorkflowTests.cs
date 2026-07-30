@@ -81,6 +81,7 @@ public sealed class ReleaseQualityGateWorkflowTests
     {
         string workflow = Normalize(ReadSource(".github", "workflows", "release-quality-gate.yml"));
         string packageManagedWorkflow = Normalize(ReadSource(".github", "workflows", "package-managed.yml"));
+        string actionsAudit = ReadSource("eng", "Export-GitHubActionsPackageValidationAudit.ps1");
         string remoteBundleScript = ReadSource("eng", "Invoke-RemoteReleaseBundle.ps1");
 
         Assert.Contains("workflow_dispatch:", workflow, StringComparison.Ordinal);
@@ -100,6 +101,9 @@ public sealed class ReleaseQualityGateWorkflowTests
         Assert.True(CountOccurrences(packageManagedWorkflow, "default: false") >= 4);
         Assert.Contains("if: ${{ inputs.publish_to_nuget && github.repository_owner == 'guojin-yan' }}", packageManagedWorkflow, StringComparison.Ordinal);
         Assert.Contains("if: ${{ inputs.publish_to_github_packages && github.repository_owner == 'guojin-yan' }}", packageManagedWorkflow, StringComparison.Ordinal);
+        Assert.Contains("inputs.publish_to_nuget && github.repository_owner", actionsAudit, StringComparison.Ordinal);
+        Assert.Contains("inputs.publish_to_github_packages && github.repository_owner", actionsAudit, StringComparison.Ordinal);
+        Assert.Contains("grape-yan repository is validation-only", actionsAudit, StringComparison.Ordinal);
 
         Assert.Contains("[object]$PublishManagedToNuGet = $false", remoteBundleScript, StringComparison.Ordinal);
         Assert.Contains("[object]$PublishRuntimeToGitHubPackages = $false", remoteBundleScript, StringComparison.Ordinal);

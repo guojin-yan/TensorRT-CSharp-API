@@ -132,11 +132,12 @@ $packageManagedDryRunReady = Test-ContainsAll -Text $packageWorkflow -Needles @(
 )
 
 $packageManagedPublishGuarded = Test-ContainsAll -Text $packageWorkflow -Needles @(
-  'if: ${{ inputs.publish_to_nuget }}',
+  'if: ${{ inputs.publish_to_nuget && github.repository_owner == ''guojin-yan'' }}',
   "NUGET_API_KEY",
   "Test-PublishPrerequisites.ps1",
   "Push-NuGetPackages.ps1",
-  'if: ${{ inputs.publish_to_github_packages }}'
+  'if: ${{ inputs.publish_to_github_packages && github.repository_owner == ''guojin-yan'' }}',
+  "grape-yan repository is validation-only"
 )
 
 $releaseQualityHasSourceGate = Test-ContainsAll -Text $releaseQualityWorkflow -Needles @(
@@ -209,7 +210,7 @@ $checks = @(
   New-Check -Id "git-worktree-clean" -Passed $isWorktreeClean -Severity "blocker" -Detail "dirtyTracked=$dirtyTrackedCount; untracked=$untrackedCount"
   New-Check -Id "git-head-pushed-to-upstream" -Passed $headPushedToUpstream -Severity "blocker" -Detail "HEAD=$($headSha.stdout); upstream=$upstreamShaText"
   New-Check -Id "workflow-package-managed-dry-run-contract" -Passed $packageManagedDryRunReady -Severity "blocker" -Detail "package-managed.yml must test, pack, validate package content, upload artifacts, and default publish toggles to false."
-  New-Check -Id "workflow-package-managed-publish-guard" -Passed $packageManagedPublishGuarded -Severity "blocker" -Detail "package-managed.yml must guard nuget.org/GitHub Packages publication behind explicit inputs and prerequisites."
+  New-Check -Id "workflow-package-managed-publish-guard" -Passed $packageManagedPublishGuarded -Severity "blocker" -Detail "package-managed.yml must guard nuget.org/GitHub Packages publication behind explicit inputs, guojin-yan ownership, and prerequisites."
   New-Check -Id "workflow-release-quality-source-gate" -Passed $releaseQualityHasSourceGate -Severity "blocker" -Detail "release-quality-gate.yml must run source quality, bindings, coverage, build, and tests."
   New-Check -Id "workflow-release-quality-source-only-filter" -Passed $releaseQualitySourceOnlyFilterClean -Severity "blocker" -Detail "release-quality-gate.yml source-quality must not depend on final-release artifact-only test classes."
   New-Check -Id "workflow-release-quality-package-dry-run-audit" -Passed $releaseQualityHasPackageDryRunAudit -Severity "blocker" -Detail "release-quality-gate.yml must expose an opt-in package-managed dry run and archive this audit."
