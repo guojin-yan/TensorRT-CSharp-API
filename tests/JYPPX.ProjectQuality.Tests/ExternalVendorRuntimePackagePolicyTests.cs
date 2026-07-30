@@ -156,6 +156,28 @@ public sealed class ExternalVendorRuntimePackagePolicyTests
         Assert.DoesNotContain("gh release", validation, StringComparison.OrdinalIgnoreCase);
     }
 
+    [Fact]
+    public void RemoteCleanupInventoryIsReadOnlyAndRequiresOwnerReview()
+    {
+        string script = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "eng",
+            "Export-RetiredVendorPackageRemoteInventory.ps1"));
+
+        Assert.Contains("users/$Owner/packages?package_type=nuget", script, StringComparison.Ordinal);
+        Assert.Contains("/versions?per_page=100", script, StringComparison.Ordinal);
+        Assert.Contains("repos/$formalRepository/releases?per_page=100", script, StringComparison.Ordinal);
+        Assert.Contains("remoteInventoryComplete = $true", script, StringComparison.Ordinal);
+        Assert.Contains("ownerReviewRequired = $true", script, StringComparison.Ordinal);
+        Assert.Contains("reviewFingerprint = $reviewFingerprint", script, StringComparison.Ordinal);
+        Assert.Contains("reviewItemCount = $reviewLines.Count", script, StringComparison.Ordinal);
+        Assert.Contains("performsRemoteQuery = $true", script, StringComparison.Ordinal);
+        Assert.Contains("performsDelete = $false", script, StringComparison.Ordinal);
+        Assert.Contains("deleteExecuted = $false", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("--method DELETE", script, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("Remove-Item", script, StringComparison.OrdinalIgnoreCase);
+    }
+
     private static void CreatePackage(string path, string packageId, params string[] nativeEntries)
     {
         using ZipArchive archive = ZipFile.Open(path, ZipArchiveMode.Create);

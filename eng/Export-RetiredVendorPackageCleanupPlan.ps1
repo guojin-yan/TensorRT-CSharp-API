@@ -60,7 +60,8 @@ $plan = [pscustomobject]@{
   deleteExecuted = $false
   performsRemoteQuery = $false
   performsDelete = $false
-  nextAction = "After formal-account authorization, inventory GitHub Packages versions and Release assets, match exact hashes and versions, then request Owner confirmation before deletion."
+  remoteInventoryScript = "eng/Export-RetiredVendorPackageRemoteInventory.ps1"
+  nextAction = "Run eng/Export-RetiredVendorPackageRemoteInventory.ps1 as the formal owner, review its exact version/asset IDs and fingerprint, then request Owner confirmation before deletion."
 }
 
 New-Item -ItemType Directory -Path $OutputDirectory -Force | Out-Null
@@ -80,7 +81,7 @@ This is a local candidate inventory. It did not query or modify GitHub.
 |---|---|---|---|---|
 $($rows -join "`r`n")
 
-Preserve the managed package, every `.Bridge` package, and GitHub-generated source archives. Before deletion, authenticate the formal account, inventory exact package versions and Release assets, verify the candidate mapping, and obtain Owner confirmation.
+Preserve the managed package, every `.Bridge` package, and GitHub-generated source archives. Run `eng/Export-RetiredVendorPackageRemoteInventory.ps1` as the formal owner, verify the exact version/asset IDs and review fingerprint, and obtain Owner confirmation before deletion.
 "@
 $markdown | Set-Content -LiteralPath $markdownPath -Encoding utf8
 $plan | ConvertTo-Json -Depth 8
