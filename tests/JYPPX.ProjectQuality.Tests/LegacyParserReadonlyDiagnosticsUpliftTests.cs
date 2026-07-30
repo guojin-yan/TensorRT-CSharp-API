@@ -136,6 +136,6 @@ public sealed class LegacyParserReadonlyDiagnosticsUpliftTests
 
     private static string ReadSource(params string[] pathParts)
     {
-        return File.ReadAllText(Path.Combine(new[] { RepositoryPaths.Root }.Concat(pathParts).ToArray()));
+        return RepositorySourceReader.Read(Path.Combine(new[] { RepositoryPaths.Root }.Concat(pathParts).ToArray()));
     }
 }

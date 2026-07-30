@@ -196,5 +196,5 @@ public sealed class PluginV2LayerCapabilityReadonlyUpliftTests
     }
 
     private static string ReadSource(params string[] pathParts) =>
-        File.ReadAllText(Path.Combine(new[] { RepositoryPaths.Root }.Concat(pathParts).ToArray()));
+        RepositorySourceReader.Read(Path.Combine(new[] { RepositoryPaths.Root }.Concat(pathParts).ToArray()));
 }

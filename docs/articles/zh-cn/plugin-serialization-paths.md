@@ -255,6 +255,14 @@ runtime/package asset 清单，并在部署阶段投影为应用目录可解析�
 - 保存 hash、签名和 package identity，避免 DLL search order hijacking。
 - plugin DLL 加载应由独立 loader/registry contract 管理，不在 path setter 中偷偷执行。
 
+## PluginV2 Layer 只读元数据源码归属
+
+复制型 PluginV2 identity、版本、serialization size 与 capability model 由 `TensorRtPluginV2LayerMetadata.cs` 拥有；
+需要 network owner lease 的 layer 查询由 `TensorRtLayer.PluginV2Metadata.cs` partial 拥有。Layer partial 在每条查询前
+调用 `EnsurePluginV2OwnerLease`，bridge 只在 lease 有效时读取 borrowed plugin 并复制返回值，不让 `IPluginV2*`
+穿过 native ABI。该源码拆分与 copied metadata 不构成 runtime 或 release proof，也不替代真实 plugin load、build、
+serialize/deserialize、enqueue 或 package-consumer 验证。
+
 ## Path API 与 Plugin Callback 的 Deferred 边界
 
 以下 manifest row 仍与本文能力不同：

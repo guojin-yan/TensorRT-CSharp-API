@@ -16,6 +16,9 @@ TensorRtCaffeBinaryProtoSnapshot mean =
     TensorRtLegacyParserDiagnostics.ReadCaffeBinaryProto("mnist_mean.binaryproto");
 ```
 
+两个公开模型分别由 `TensorRtLegacyUffRequiredVersionSnapshot.cs` 与 `TensorRtCaffeBinaryProtoSnapshot.cs` 拥有；
+不再共置于 plural snapshot 文件。文件拆分只整理源码职责，不改变下述复制和生命周期契约。
+
 第一个接口在单次 native 调用内创建 UFF parser、读取三个版本标量并删除 parser。第二个接口创建 Caffe
 parser 和 binaryproto blob，在 owner 有效期间复制 shape、data type 和所有数据字节，然后删除两个 native
 对象。公开 API 不包含 `IntPtr`、`nint`、`UIntPtr`、`SafeHandle` 或 parser/blob/data pointer。

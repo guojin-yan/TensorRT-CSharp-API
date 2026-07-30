@@ -324,6 +324,13 @@ version/stage/report 顺序。由于两份原 Report 文件名实际对应第三
 布局门禁可重组 Git blob `bafe37487e85385883d315c3f1b91a879e944a25` 与
 `3cb8df75eea08200938d55170359572abc315d90`；这次源码归类不构成 runtime 或 release proof。
 
+TRT8 legacy parser snapshot 现分别由 `TensorRtLegacyUffRequiredVersionSnapshot.cs` 与
+`TensorRtCaffeBinaryProtoSnapshot.cs` 拥有；原 plural snapshot 文件删除，同时通过 test reader key 兼容历史源码消费者。
+Plugin V2 复制型 metadata 保留在 `TensorRtPluginV2LayerMetadata.cs`，network-owned layer 查询 partial 移入
+`TensorRtLayer.PluginV2Metadata.cs`。布局门禁可重组 Git blob `4930556a64895570a168168179f1316496def931` 与
+`41c7fb535a6effe3ecf47833bb371480b7f8acb9`，并保持 copied data、owner lease 检查、方法顺序、pointer
+non-exposure 与 non-proof 语义。
+
 OutputAllocator diagnostics 继续按 public design owner 与 internal managed runtime gate 分层。原 637 行
 `Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeGate.cs` 降为 38 行 state/constructor core；entries、snapshots、
 lifecycle、shared invocation、trampoline/state 与 formatting 进入 6 份 partial，request/result 类型各自成文件。原 503 行

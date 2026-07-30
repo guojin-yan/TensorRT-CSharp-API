@@ -364,6 +364,13 @@ version/stage/report order. Because both original report filenames represented t
 records the historical order explicitly. The layout gate recomposes Git blobs `bafe37487e85385883d315c3f1b91a879e944a25` and
 `3cb8df75eea08200938d55170359572abc315d90`; this source organization does not constitute runtime or release proof.
 
+TRT8 legacy parser snapshots now live in `TensorRtLegacyUffRequiredVersionSnapshot.cs` and
+`TensorRtCaffeBinaryProtoSnapshot.cs`; the former plural snapshot file is removed while its test-reader key keeps historical
+source consumers compatible. Plugin V2 copied metadata remains in `TensorRtPluginV2LayerMetadata.cs`, while the network-owned
+layer query partial lives in `TensorRtLayer.PluginV2Metadata.cs`. Layout gates recompose Git blobs
+`4930556a64895570a168168179f1316496def931` and `41c7fb535a6effe3ecf47833bb371480b7f8acb9`, preserving copied data,
+owner-lease checks, method order, pointer non-exposure, and non-proof semantics.
+
 OutputAllocator diagnostics are split across the public design owner and its internal managed runtime gate. The former
 637-line `Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeGate.cs` is reduced to a 38-line state/constructor core;
 entries, snapshots, lifecycle, shared invocation, trampoline/state, and formatting live in six partials, with request/result

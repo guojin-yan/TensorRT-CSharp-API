@@ -8075,3 +8075,41 @@ runtime staged probe 两份三顶层类型文件。dependency source/info/report
   package consumer、public package、post-publish、Owner acceptance 或 release proof。
 - 本机无仓库认可的 `pwsh`，未运行 exporter/B-tier 聚合；8 份 publishing 用户变更未触碰、未暂存；
   未 push、未触发 GitHub Actions、未执行远程发布操作。
+
+## 2026-07-30 Legacy Parser And Plugin V2 Source Split
+
+本阶段继续整理 `JYPPX.TensorRtSharp/Parsing` 与 `JYPPX.TensorRtSharp/Plugins`，将 UFF/Caffe legacy parser
+snapshot 分文件，并将 Plugin V2 copied metadata model 与 network-owned `TensorRtLayer` 查询 partial 分离。复制值、
+owner lease、方法/属性顺序、pointer non-exposure、deferred history 与 non-proof classification 保持不变。
+
+### 实现与门禁
+
+- 原 102 行 `TensorRtLegacyParserDiagnosticSnapshots.cs` 分为 46 行
+  `TensorRtLegacyUffRequiredVersionSnapshot.cs` 与 60 行 `TensorRtCaffeBinaryProtoSnapshot.cs`；原 plural 文件删除，
+  test reader key 按 UFF/Caffe 历史顺序兼容直接源码消费者。
+- 原 242 行 `TensorRtPluginV2LayerMetadata.cs` 分为 104 行 metadata model 与 144 行
+  `TensorRtLayer.PluginV2Metadata.cs`；Layer partial 保留八个公开查询、exception classifier 与 owner-lease helper。
+- `ManagedLegacyParserPluginV2SourceLayoutTests` 固定四个文件的精确 top-level type、internal constructor、method、
+  public property、pointer-free/owner-bound surface、reader/consumer source-set、文档 marker 与旧源码重组。
+- 拆分前 Git blob 为 `4930556a64895570a168168179f1316496def931` 与
+  `41c7fb535a6effe3ecf47833bb371480b7f8acb9`；normalized SHA-256 保持
+  `654f82ed466b129ee1c749e488703689a4f95c31e42268e09df87c41350667af` 与
+  `815f5eb5b1f22efa6d8e8ce9b7d827849403d27f674877742294eef809c597e1`。
+- Legacy 与两个 Plugin V2 直接消费测试改用统一 reader；TRT8 legacy parser、plugin serialization 专题文档与
+  双语 source-organization 同步真实 owner，publishing 用户文章未触碰。
+
+### 验证与边界
+
+- 新布局门禁与三个直接消费集合联合定向 `33/33`；`SourceLayoutTests` `473/473`；统一 Managed
+  类名前缀集合 `872/872`。
+- `JYPPX.TensorRtSharp` 全目标框架与完整 `TensorRtSharp.sln` Debug build 均为
+  `0 warning / 0 error`；RuntimePackageReadiness UTF-8 ParseInput 为 `0 error`，对应质量测试 `2/2`。
+- 本批没有 candidate/readiness 对两份原文件的直接 evidence 路径，因此 ignored deferred candidate evidence 保持
+  `272` 条引用、`158` 个唯一路径、`0` 缺失；引用的 `22` 份 JSON 全部可解析。
+- `JYPPX.TensorRtSharp` 多顶层公开类型文件由 `20` 降为 `18`；枚举和值类型集合继续保持内聚。
+- Generated/native/manifest/project/ABI 改动为 0；`git diff --check` 通过。构建后进程已退出，复查未发现引用
+  本工作区的其他进程；Downloads 近三小时没有本批重资产命中；6 个已知 YoloVision/YOLOX Temp 目录继续保留。
+- source/type relocation 与 legacy parser/Plugin V2 split 不构成新的 TensorRT/CUDA runtime、real model、Linux、
+  package consumer、public package、post-publish、Owner acceptance 或 release proof。
+- 本机无仓库认可的 `pwsh`，未运行 exporter/B-tier 聚合；8 份 publishing 用户变更未触碰、未暂存；
+  截至本地验证结束未执行 push、GitHub Actions 或远程发布操作。
