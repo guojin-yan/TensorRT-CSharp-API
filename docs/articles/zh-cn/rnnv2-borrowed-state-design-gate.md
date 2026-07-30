@@ -2,6 +2,9 @@
 
 本批次处理 `IRNNv2Layer` 的 12 条 C-tier triage 行。目标不是机械删除 deferred，而是把安全 scalar、owner-bound borrowed tensor 和 copied weights 三类边界分开：
 
+源码按顶层职责分为 `TensorRtRnnV2BorrowedStateDesignGate.cs` 与
+`TensorRtRnnV2BorrowedStateDesignGateResult.cs`，不改变 triage 计数或 proof 分类。
+
 - 2 条 `getDataLength` 记录已通过真实 manifest、native entrypoint、C# interop 和 `TensorRtLayer.GetRnnV2DataLength()` 提升。
 - 10 条 borrowed tensor/weights 记录已通过 owner-bound wrapper 或 caller-buffer copy-out 提升。
 - 旧 deferred manifest 记录继续保留为审计历史，不用于制造完成度。

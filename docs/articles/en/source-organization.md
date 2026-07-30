@@ -331,6 +331,12 @@ the former 300-line refitter snapshot is split into a 159-line snapshot and a 14
 Git blobs `6003269ee021488f519fe6944a1a6827cd9232c7` and `504a003346f84915b7bf3af4924feeaeaeb0bcbf`,
 preserving copied diagnostics, error/inventory counts, public property order, pointer non-exposure, and non-proof semantics.
 
+Calibrator metadata and RNNv2 borrowed-state design gates now keep their Result models in dedicated same-name files.
+The former 268-line calibrator gate is split into a 105-line evaluator and a 169-line result; the former 199-line RNNv2
+gate is split into a 53-line evaluator and a 151-line result. The layout gate recomposes Git blobs
+`db5eb26e158d64f94dd678351a260f8bd41c7138` and `d1a7c4a34dde13ffa3fce824f5a95e0f0c528f30`,
+preserving known-surface evaluation, triage/candidate counts, blocker ordering, pointer non-exposure, and proof classification.
+
 OutputAllocator diagnostics are split across the public design owner and its internal managed runtime gate. The former
 637-line `Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeGate.cs` is reduced to a 38-line state/constructor core;
 entries, snapshots, lifecycle, shared invocation, trampoline/state, and formatting live in six partials, with request/result

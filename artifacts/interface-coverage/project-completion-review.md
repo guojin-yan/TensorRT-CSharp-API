@@ -7889,3 +7889,40 @@ summary 从对应 snapshot 文件分离。snapshot-to-summary 映射、error-rec
   Linux、package consumer、public package、post-publish、Owner acceptance 或 release proof。
 - 本机无仓库认可的 `pwsh`，未运行 exporter/B-tier 聚合；8 份 publishing 用户变更未触碰、未暂存；
   未 push、未触发 GitHub Actions、未执行远程发布操作。
+
+## 2026-07-30 Calibrator And RNN Design Gate Result Split
+
+本阶段继续整理 `JYPPX.TensorRtSharp/Builder` 与 `JYPPX.TensorRtSharp/Layers`，将 calibrator metadata 与 RNNv2
+borrowed-state design-gate result 从 evaluator 分离。known-surface evaluation、triage/candidate count、blocked
+prerequisite 顺序、pointer non-exposure、deferred rows 与 proof classification 保持不变。
+
+### 实现与门禁
+
+- 原 268 行 `TensorRtCalibratorMetadataDesignGate.cs` 分为 105 行 evaluator 与 169 行
+  `TensorRtCalibratorMetadataDesignGateResult.cs`；evaluator 只保留 `EvaluateKnownSurface` 与 `Evaluate`。
+- 原 199 行 `TensorRtRnnV2BorrowedStateDesignGate.cs` 分为 53 行 evaluator 与 151 行
+  `TensorRtRnnV2BorrowedStateDesignGateResult.cs`；Result 继续只提供属性诊断，不新增 `ToString`。
+- `ManagedCalibratorRnnDesignGateResultSourceLayoutTests` 固定四个文件的精确 top-level type、constructor、method、
+  public property、pointer-free/non-proof surface、candidate/readiness/test source-set 与专题文档 marker，并重组原源码。
+- 拆分前 Git blob 为 `db5eb26e158d64f94dd678351a260f8bd41c7138` 与
+  `d1a7c4a34dde13ffa3fce824f5a95e0f0c528f30`；normalized SHA-256 保持
+  `d9f624227e9d1486ad4a2b6bf42ec979a517637652fa418ae8cec2a94b1af5f4` 与
+  `25b435da28b6a6476302556065f0bf253dcd68e5b0f6b967fa71696fed7e0e0c`。
+- test reader 显式展开两套 source-set；两个直接消费测试改读组合；RuntimePackageReadiness calibrator evidence
+  source-set 与 ignored candidate 本机证据同步 Result 路径；两份专题文档与双语 source-organization 同步真实 owner。
+
+### 验证与边界
+
+- 新布局门禁、两个直接消费集合、next-candidate 与 readiness 联合定向集合 `25/25`；
+  `SourceLayoutTests` `382/382`；统一 Managed 前缀集合 `781/781`。
+- `JYPPX.TensorRtSharp` 全目标框架与完整 `TensorRtSharp.sln` Debug build 均为
+  `0 warning / 0 error`；RuntimePackageReadiness UTF-8 ParseInput 为 `0 error`，对应质量测试 `2/2`。
+- ignored deferred candidate evidence 更新为 `270` 条引用、`156` 个唯一路径、`0` 缺失；其中引用的
+  `22` 份 JSON 全部可解析，ignored 文件未强制提交。
+- `JYPPX.TensorRtSharp` 多顶层公开类型文件由 `30` 降为 `28`；枚举和值类型集合继续保持内聚。
+- Generated/native/manifest/project/ABI 改动为 0；`git diff --check` 通过。构建后短暂进程已自然退出，复查未发现
+  引用本工作区的其他进程；Downloads 近三小时没有本批重资产命中；6 个已知 YoloVision/YOLOX Temp 目录继续保留。
+- source/type relocation 与 calibrator/RNN design-gate result split 不构成新的 TensorRT/CUDA runtime、real model、
+  Linux、package consumer、public package、post-publish、Owner acceptance 或 release proof。
+- 本机无仓库认可的 `pwsh`，未运行 exporter/B-tier 聚合；8 份 publishing 用户变更未触碰、未暂存；
+  未 push、未触发 GitHub Actions、未执行远程发布操作。

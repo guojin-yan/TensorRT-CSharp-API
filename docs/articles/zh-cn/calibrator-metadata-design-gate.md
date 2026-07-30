@@ -2,6 +2,9 @@
 
 `calibrator-metadata-design-gate` 用来收口 `IInt8Calibrator` / `IInt8EntropyCalibrator` / `IInt8EntropyCalibrator2` / `IInt8LegacyCalibrator` / `IInt8MinMaxCalibrator` 这组中风险 deferred 候选。它只允许 presence 与 copied metadata 规划，不会调用 calibration callback，不会读取或写入 calibration cache，也不是 runtime execution proof。
 
+源码按顶层职责分为 `TensorRtCalibratorMetadataDesignGate.cs` 与
+`TensorRtCalibratorMetadataDesignGateResult.cs`；readiness 同时读取 evaluator/result source-set。
+
 ## 当前结论
 
 - `RuntimeEvidenceKind=design-gate`。

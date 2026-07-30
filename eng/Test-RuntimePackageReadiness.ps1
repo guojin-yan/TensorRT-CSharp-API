@@ -1858,6 +1858,7 @@ function New-CalibratorMetadataDesignGateEvidence {
     -ReadyStatus "design-gate-ready" `
     -EvidenceRelativePaths @(
       "src\JYPPX.TensorRtSharp\Builder\TensorRtCalibratorMetadataDesignGate.cs",
+      "src\JYPPX.TensorRtSharp\Builder\TensorRtCalibratorMetadataDesignGateResult.cs",
       "src\JYPPX.TensorRtSharp\Builder\TensorRtBuilderConfig.cs",
       "smoke\CallbackAllocatorSafeControlsSmokeRunner\Program.cs",
       "docs\articles\zh-cn\calibrator-metadata-design-gate.md",

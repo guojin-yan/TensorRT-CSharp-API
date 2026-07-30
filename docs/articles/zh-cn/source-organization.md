@@ -292,6 +292,12 @@ snapshot 分为 159 行 snapshot 与 146 行 summary。布局门禁可重组 Git
 `6003269ee021488f519fe6944a1a6827cd9232c7` 与 `504a003346f84915b7bf3af4924feeaeaeb0bcbf`，并固定
 copied diagnostics、error/inventory count、公开属性顺序、pointer non-exposure 与 non-proof 语义。
 
+Calibrator metadata 与 RNNv2 borrowed-state 两个 design gate 的 Result 也已进入独立同名文件。原 268 行
+calibrator gate 分为 105 行 evaluator 与 169 行 result；原 199 行 RNNv2 gate 分为 53 行 evaluator 与 151 行
+result。布局门禁可重组 Git blob `db5eb26e158d64f94dd678351a260f8bd41c7138` 与
+`d1a7c4a34dde13ffa3fce824f5a95e0f0c528f30`，并固定 known-surface evaluation、triage/candidate count、blocker
+顺序、pointer non-exposure 与 proof classification。
+
 OutputAllocator diagnostics 继续按 public design owner 与 internal managed runtime gate 分层。原 637 行
 `Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeGate.cs` 降为 38 行 state/constructor core；entries、snapshots、
 lifecycle、shared invocation、trampoline/state 与 formatting 进入 6 份 partial，request/result 类型各自成文件。原 503 行
