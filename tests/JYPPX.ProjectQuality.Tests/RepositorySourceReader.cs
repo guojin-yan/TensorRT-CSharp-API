@@ -382,6 +382,18 @@ internal static class RepositorySourceReader
                 "TensorRtOnnxModelSupportSummary.cs",
                 "TensorRtOnnxSubgraphSupportInfo.cs"
             ],
+            ["TensorRtDependencyProbeReport.cs"] =
+            [
+                "TensorRtNativeDependencySource.cs",
+                "TensorRtNativeDependencyInfo.cs",
+                "TensorRtDependencyProbeReport.cs"
+            ],
+            ["TensorRtRuntimeProbeReport.cs"] =
+            [
+                "TensorRtGlobalRuntimeVersion.cs",
+                "TensorRtRuntimeProbeStage.cs",
+                "TensorRtRuntimeProbeReport.cs"
+            ],
             ["TensorRtRuntimeConfig.cs"] =
             [
                 "TensorRtRuntimeConfig.cs",

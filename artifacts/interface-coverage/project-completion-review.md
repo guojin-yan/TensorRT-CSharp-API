@@ -8038,3 +8038,40 @@ native config handle ownership、Dispose 顺序、snapshot/summary 映射、subg
   package consumer、public package、post-publish、Owner acceptance 或 release proof。
 - 本机无仓库认可的 `pwsh`，未运行 exporter/B-tier 聚合；8 份 publishing 用户变更未触碰、未暂存；
   未 push、未触发 GitHub Actions、未执行远程发布操作。
+
+## 2026-07-30 Dependency And Runtime Probe Type Split
+
+本阶段继续整理 `JYPPX.TensorRtSharp/Diagnostics` 与 `JYPPX.TensorRtSharp/Runtime`，完整拆分 dependency probe 与
+runtime staged probe 两份三顶层类型文件。dependency source/info/report、runtime version/stage/report 的历史声明顺序、
+复制值映射、公开 constructor/property、诊断文本、pointer non-exposure 与 non-proof classification 保持不变。
+
+### 实现与门禁
+
+- 原 195 行 `TensorRtDependencyProbeReport.cs` 分为 30 行 `TensorRtNativeDependencySource.cs`、78 行
+  `TensorRtNativeDependencyInfo.cs` 与 93 行 report；来源枚举、单条 DLL 信息和聚合报告分别拥有独立文件。
+- 原 192 行 `TensorRtRuntimeProbeReport.cs` 分为 87 行 `TensorRtGlobalRuntimeVersion.cs`、39 行
+  `TensorRtRuntimeProbeStage.cs` 与 73 行 report；全局版本、单阶段诊断和 staged report 分别拥有独立文件。
+- `ManagedDependencyRuntimeProbeSourceLayoutTests` 固定六个文件的精确 top-level type、internal constructor、method、
+  public property、pointer-free surface、producer/consumer/candidate source-set、文档 marker 与原声明组合顺序。
+- 拆分前 Git blob 为 `bafe37487e85385883d315c3f1b91a879e944a25` 与
+  `3cb8df75eea08200938d55170359572abc315d90`；normalized SHA-256 保持
+  `213076b3d11b6e80e467e0f731f25a5d653dbe92355c4d7cc6dfcb6ccdd73a4b` 与
+  `37cc1851f0700b5ac2048c84bc03d6d40bf272f1be83a2aff8abb63fd07d34c8`。
+- 两份原文件名都对应第三个声明，因此 test reader 显式按 source/info/report 与 version/stage/report 顺序组合；
+  readonly candidate 消费测试继续使用统一 reader，ignored candidate 本机 evidence 同步两份 dependency 类型路径。
+
+### 验证与边界
+
+- 新布局门禁与 readonly candidate 消费集合联合定向 `26/26`；`SourceLayoutTests` `457/457`；统一 Managed
+  类名前缀集合 `856/856`。
+- `JYPPX.TensorRtSharp` 全目标框架与完整 `TensorRtSharp.sln` Debug build 均为
+  `0 warning / 0 error`；RuntimePackageReadiness UTF-8 ParseInput 为 `0 error`，对应质量测试 `2/2`。
+- ignored deferred candidate evidence 更新为 `272` 条引用、`158` 个唯一路径、`0` 缺失；引用的 `22` 份 JSON
+  全部可解析，ignored 文件未强制提交。
+- `JYPPX.TensorRtSharp` 多顶层公开类型文件由 `22` 降为 `20`；枚举和值类型集合继续保持内聚。
+- Generated/native/manifest/project/ABI 改动为 0；`git diff --check` 通过。构建后进程已退出，复查未发现引用
+  本工作区的其他进程；Downloads 近三小时没有本批重资产命中；6 个已知 YoloVision/YOLOX Temp 目录继续保留。
+- source/type relocation 与 dependency/runtime probe split 不构成新的 TensorRT/CUDA runtime、real model、Linux、
+  package consumer、public package、post-publish、Owner acceptance 或 release proof。
+- 本机无仓库认可的 `pwsh`，未运行 exporter/B-tier 聚合；8 份 publishing 用户变更未触碰、未暂存；
+  未 push、未触发 GitHub Actions、未执行远程发布操作。

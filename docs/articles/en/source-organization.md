@@ -357,6 +357,13 @@ ONNX config and model-support records now follow one public type per file in `Pa
 mapping, pointer non-exposure, and non-proof classification while recomposing Git blobs
 `98d53f7b30535840e919f97c76b852c90b61a7ff` and `f3ab3a0aa7b1f5e00089cb373293250addb2649a`.
 
+Dependency and runtime probe records also use one public type per file. `TensorRtNativeDependencySource.cs`,
+`TensorRtNativeDependencyInfo.cs`, and `TensorRtDependencyProbeReport.cs` preserve the dependency source/info/report order;
+`TensorRtGlobalRuntimeVersion.cs`, `TensorRtRuntimeProbeStage.cs`, and `TensorRtRuntimeProbeReport.cs` preserve the runtime
+version/stage/report order. Because both original report filenames represented the third declaration, the source-set reader
+records the historical order explicitly. The layout gate recomposes Git blobs `bafe37487e85385883d315c3f1b91a879e944a25` and
+`3cb8df75eea08200938d55170359572abc315d90`; this source organization does not constitute runtime or release proof.
+
 OutputAllocator diagnostics are split across the public design owner and its internal managed runtime gate. The former
 637-line `Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeGate.cs` is reduced to a 38-line state/constructor core;
 entries, snapshots, lifecycle, shared invocation, trampoline/state, and formatting live in six partials, with request/result

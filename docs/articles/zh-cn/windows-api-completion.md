@@ -22,6 +22,12 @@ C# 高层新增 `TensorRtDims64` 与 `TensorRtOptimizationProfileShapeRange64`�
 
 其中 ExecutionContext 与 BuilderConfig 的 snapshot/summary 已按顶层类型分文件：snapshot 文件拥有复制值、
 `ToSummary` 和自身 `ToString`，同名 `*DeploymentSummary.cs` 文件拥有 summary 构造、公开属性和诊断文本。
+
+依赖与 runtime 分阶段探针也按公开类型分文件。dependency 侧由 `TensorRtNativeDependencySource.cs`、
+`TensorRtNativeDependencyInfo.cs`、`TensorRtDependencyProbeReport.cs` 分别拥有来源枚举、复制型 DLL 信息与报告；
+runtime 侧由 `TensorRtGlobalRuntimeVersion.cs`、`TensorRtRuntimeProbeStage.cs`、`TensorRtRuntimeProbeReport.cs` 分别拥有
+只读版本、阶段诊断与报告。它们继续只返回复制值、布尔状态和诊断文本，不公开 native pointer；这次源码拆分本身
+不构成 runtime 或 release proof，也不替代真实 runtime creation、模型执行或 package-consumer 验证。
 该归类不改变 readback 映射，也不把 readonly summary 提升为 runtime proof。
 
 ExecutionContext runtime diagnostic 与 Engine deployment 的 snapshot/summary 也已按顶层类型分文件：

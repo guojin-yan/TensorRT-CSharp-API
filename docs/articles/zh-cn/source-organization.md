@@ -317,6 +317,13 @@ ONNX config 与 model-support record 也在 `Parsing` 中落实一份公开类�
 non-proof classification，并可重组 Git blob `98d53f7b30535840e919f97c76b852c90b61a7ff` 与
 `f3ab3a0aa7b1f5e00089cb373293250addb2649a`。
 
+dependency 与 runtime probe record 也落实一份公开类型一个文件。`TensorRtNativeDependencySource.cs`、
+`TensorRtNativeDependencyInfo.cs`、`TensorRtDependencyProbeReport.cs` 保持 dependency source/info/report 顺序；
+`TensorRtGlobalRuntimeVersion.cs`、`TensorRtRuntimeProbeStage.cs`、`TensorRtRuntimeProbeReport.cs` 保持 runtime
+version/stage/report 顺序。由于两份原 Report 文件名实际对应第三个声明，source-set reader 显式固定历史顺序。
+布局门禁可重组 Git blob `bafe37487e85385883d315c3f1b91a879e944a25` 与
+`3cb8df75eea08200938d55170359572abc315d90`；这次源码归类不构成 runtime 或 release proof。
+
 OutputAllocator diagnostics 继续按 public design owner 与 internal managed runtime gate 分层。原 637 行
 `Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeGate.cs` 降为 38 行 state/constructor core；entries、snapshots、
 lifecycle、shared invocation、trampoline/state 与 formatting 进入 6 份 partial，request/result 类型各自成文件。原 503 行
