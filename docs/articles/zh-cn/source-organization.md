@@ -238,6 +238,12 @@ attach bridge gate 分为 134 行 evaluator 与 191 行 result；原 312 行 acc
 `ce52bde9e23c9348818be104417db71857a93936`，并固定 attach parameter/version/no-throw shape、pointer-free helper、
 callback enter/leave、release-after-drain、unpin-after-drain、deferred-row 与 runtime-proof blocker 语义。
 
+MemoryAllocation 的 allocator ledger safety gate 与 output allocator runtime proof precheck result 现在也各自归入同名文件。
+原 405 行 ledger gate 分为 102 行 evaluator 与 309 行 result；原 384 行 output precheck 分为 175 行 evaluator 与
+215 行 result。布局门禁可重组拆分前 Git blob `3920e6c4a520ddde03ca1907f2fdcca3ed580476` 与
+`cd8385ec902b765cfcd4ce987e2f6b1ec855e57c`，并固定 ledger snapshot/result mapping、三组 output precheck overload、
+公开属性顺序、pointer non-exposure、deferred-row 与 runtime-proof blocker 语义。源码归类不提升任何 runtime proof。
+
 OutputAllocator diagnostics 继续按 public design owner 与 internal managed runtime gate 分层。原 637 行
 `Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeGate.cs` 降为 38 行 state/constructor core；entries、snapshots、
 lifecycle、shared invocation、trampoline/state 与 formatting 进入 6 份 partial，request/result 类型各自成文件。原 503 行

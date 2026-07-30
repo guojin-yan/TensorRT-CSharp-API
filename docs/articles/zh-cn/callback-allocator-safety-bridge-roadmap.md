@@ -127,7 +127,8 @@ public nint DebugTensor { get; }
 - `src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtAllocatorCallbackOwner.InternalPrototype.cs`
 - `src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtAllocatorCallbackOwner.ResultMapping.cs`
 - `src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtAllocatorDryRunRequest.cs` 与同目录的 result/snapshot/delegate model 文件。
-- `src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtAllocatorLedgerSafetyGate.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtAllocatorLedgerSafetyGate.cs` 与
+  `TensorRtAllocatorLedgerSafetyGateResult.cs`
 - `src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtOutputAllocatorCallbackOwner.cs`：只保留 owner state、constructor 与 properties。
 - `src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtOutputAllocatorCallbackOwner.DesignDiagnostic.cs`
 - `src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtOutputAllocatorCallbackOwner.Snapshots.cs`
@@ -136,7 +137,8 @@ public nint DebugTensor { get; }
   `TensorRtOutputAllocatorCallbackOwnerSnapshot.cs`
 - `src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeGate.cs` 与其 `Entries`、`Snapshots`、
   `Lifecycle`、`Invocation`、`Trampoline`、`Formatting` partial 及 internal request/result model。
-- `src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeProofPrecheck.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeProofPrecheck.cs` 与
+  `TensorRtOutputAllocatorRuntimeProofPrecheckResult.cs`
 - `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerCallbackOwner.cs`：只保留 owner state、constructor 与 properties。
 - `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerCallbackOwner.DesignDiagnostic.cs`
 - `src/JYPPX.TensorRtSharp/Callbacks/Debugging/TensorRtDebugListenerCallbackOwner.Snapshots.cs`

@@ -15,6 +15,10 @@
 - `TensorRtOutputAllocatorRuntimeProofPrecheckResult`
 - `Evaluate`
 
+源码按职责拆分为两份：`TensorRtOutputAllocatorRuntimeProofPrecheck.cs` 只拥有三组 `Evaluate` overload，
+`TensorRtOutputAllocatorRuntimeProofPrecheckResult.cs` 拥有 result constructor、公开属性、诊断和 `ToString`。
+这只是源码归类，不改变 public surface、pointer-free 边界或 runtime-gate-precheck/non-proof 分类。
+
 该 precheck 不调用 TensorRT `setOutputAllocator`，不 attach 到 execution context，不经过 build/enqueue，不返回 output buffer/device pointer，也不证明真实 `IOutputAllocator::notifyShape` 或 `IOutputAllocator::reallocateOutput` 已被 TensorRT 调用。它只报告 copied diagnostics 和阻塞项。
 
 ## 当前能证明什么

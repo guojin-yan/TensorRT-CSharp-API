@@ -270,6 +270,13 @@ blobs `9f94f504f8807ac99f2c3dff926b0f92597f2c07` and `ce52bde9e23c9348818be10441
 parameter/version/no-throw shape, the pointer-free helper, callback enter/leave, release-after-drain, unpin-after-drain,
 deferred rows, and runtime-proof blockers.
 
+The MemoryAllocation allocator ledger safety gate and output allocator runtime proof precheck results now also have
+dedicated namesake files. The former 405-line ledger gate is split into a 102-line evaluator and a 309-line result; the
+former 384-line output precheck is split into a 175-line evaluator and a 215-line result. The layout gate recomposes the
+pre-split Git blobs `3920e6c4a520ddde03ca1907f2fdcca3ed580476` and `cd8385ec902b765cfcd4ce987e2f6b1ec855e57c`, preserving
+ledger snapshot/result mapping, all three output precheck overloads, public property order, pointer non-exposure,
+deferred rows, and runtime-proof blockers. Source organization does not promote any runtime proof.
+
 OutputAllocator diagnostics are split across the public design owner and its internal managed runtime gate. The former
 637-line `Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeGate.cs` is reduced to a 38-line state/constructor core;
 entries, snapshots, lifecycle, shared invocation, trampoline/state, and formatting live in six partials, with request/result

@@ -25,6 +25,10 @@
 - `TensorRtAllocatorLedgerSafetyGate.Evaluate`
 - `TensorRtAllocatorLedgerSafetyGate.GetSnapshot`
 
+源码按职责拆分为两份：`TensorRtAllocatorLedgerSafetyGate.cs` 只拥有 `Evaluate` / `GetSnapshot`，
+`TensorRtAllocatorLedgerSafetyGateResult.cs` 拥有 result constructor、公开属性、阻塞项构造、诊断和 `ToString`。
+这只是源码归类，不改变 public surface、pointer-free 边界或 non-proof 分类。
+
 `Evaluate` 会触发 internal sync allocator prototype 诊断，并尝试运行 native state ledger dry-run。native bridge 或 vendor runtime 不可用时，错误会复制到 `NativeLedgerDiagnostic`，不会升级为 real callback proof。
 
 `GetSnapshot` 只复制当前托管 owner 生命周期状态，适合在 `Dispose` 后验证 release hook。它不会运行 native ledger。

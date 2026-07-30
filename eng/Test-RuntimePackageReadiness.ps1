@@ -2608,6 +2608,7 @@ function New-AllocatorOwnerInternalRuntimePrototypeEvidence {
 
 function New-AllocatorOwnerLedgerSafetyGateEvidence {
   $gateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\MemoryAllocation\TensorRtAllocatorLedgerSafetyGate.cs"
+  $gateResultSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\MemoryAllocation\TensorRtAllocatorLedgerSafetyGateResult.cs"
   $ownerSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\MemoryAllocation\TensorRtAllocatorCallbackOwner.cs"
   $smokeRelativePath = "smoke\CallbackAllocatorSafeControlsSmokeRunner\Program.cs"
   $gateDocRelativePath = "docs\articles\zh-cn\allocator-owner-ledger-safety-gate.md"
@@ -2621,6 +2622,7 @@ function New-AllocatorOwnerLedgerSafetyGateEvidence {
   $packageConsumerRelativePath = "eng\Test-PackageConsumer.ps1"
   $comparisonRelativePath = "artifacts\interface-coverage\tensorrt-interface-comparison.csv"
   $gateSourcePath = Join-Path $RepositoryRoot $gateSourceRelativePath
+  $gateResultSourcePath = Join-Path $RepositoryRoot $gateResultSourceRelativePath
   $ownerSourcePath = Join-Path $RepositoryRoot $ownerSourceRelativePath
   $smokePath = Join-Path $RepositoryRoot $smokeRelativePath
   $gateDocPath = Join-Path $RepositoryRoot $gateDocRelativePath
@@ -2676,7 +2678,7 @@ function New-AllocatorOwnerLedgerSafetyGateEvidence {
     '"IDebugListener","processDebugTensor","IDebugListener::processDebugTensor","other","deferred-only"'
   )
 
-  $evidencePaths = @($gateSourcePath, $ownerSourcePath, $smokePath, $gateDocPath, $callbackDesignPath, $callbackGatePath, $schemaPath, $latestPath, $runtimeSplitReadmePath, $smokeReadmePath, $bridgeConsumerPath, $packageConsumerPath, $comparisonPath)
+  $evidencePaths = @($gateSourcePath, $gateResultSourcePath, $ownerSourcePath, $smokePath, $gateDocPath, $callbackDesignPath, $callbackGatePath, $schemaPath, $latestPath, $runtimeSplitReadmePath, $smokeReadmePath, $bridgeConsumerPath, $packageConsumerPath, $comparisonPath)
   $missingFiles = @($evidencePaths | Where-Object { -not (Test-Path -LiteralPath $_ -PathType Leaf) })
   if ($missingFiles.Count -gt 0) {
     return [pscustomobject]@{
@@ -3258,6 +3260,7 @@ function New-OutputBufferOwnershipSafetyGateEvidence {
 
 function New-OutputAllocatorRuntimeProofPrecheckEvidence {
   $precheckSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\MemoryAllocation\TensorRtOutputAllocatorRuntimeProofPrecheck.cs"
+  $precheckResultSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\MemoryAllocation\TensorRtOutputAllocatorRuntimeProofPrecheckResult.cs"
   $attachDetachGateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\MemoryAllocation\TensorRtOutputAllocatorAttachDetachDesignGate.cs"
   $ownershipGateSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\MemoryAllocation\TensorRtOutputBufferOwnershipSafetyGate.cs"
   $ownerSourceRelativePath = "src\JYPPX.TensorRtSharp\Callbacks\MemoryAllocation\TensorRtOutputAllocatorCallbackOwner.cs"
@@ -3276,6 +3279,7 @@ function New-OutputAllocatorRuntimeProofPrecheckEvidence {
   $packageConsumerRelativePath = "eng\Test-PackageConsumer.ps1"
   $comparisonRelativePath = "artifacts\interface-coverage\tensorrt-interface-comparison.csv"
   $precheckSourcePath = Join-Path $RepositoryRoot $precheckSourceRelativePath
+  $precheckResultSourcePath = Join-Path $RepositoryRoot $precheckResultSourceRelativePath
   $attachDetachGateSourcePath = Join-Path $RepositoryRoot $attachDetachGateSourceRelativePath
   $ownershipGateSourcePath = Join-Path $RepositoryRoot $ownershipGateSourceRelativePath
   $ownerSourcePath = Join-Path $RepositoryRoot $ownerSourceRelativePath
@@ -3345,7 +3349,7 @@ function New-OutputAllocatorRuntimeProofPrecheckEvidence {
     '"IGpuAsyncAllocator","deallocateAsync","IGpuAsyncAllocator::deallocateAsync","other","deferred-only"'
   )
 
-  $evidencePaths = @($precheckSourcePath, $attachDetachGateSourcePath, $ownershipGateSourcePath, $ownerSourcePath, $gateSourcePath, $smokePath, $precheckDocPath, $attachDetachGateDocPath, $ownershipGateDocPath, $designDocPath, $callbackGatePath, $schemaPath, $latestPath, $runtimeSplitReadmePath, $smokeReadmePath, $bridgeConsumerPath, $packageConsumerPath, $comparisonPath)
+  $evidencePaths = @($precheckSourcePath, $precheckResultSourcePath, $attachDetachGateSourcePath, $ownershipGateSourcePath, $ownerSourcePath, $gateSourcePath, $smokePath, $precheckDocPath, $attachDetachGateDocPath, $ownershipGateDocPath, $designDocPath, $callbackGatePath, $schemaPath, $latestPath, $runtimeSplitReadmePath, $smokeReadmePath, $bridgeConsumerPath, $packageConsumerPath, $comparisonPath)
   $missingFiles = @($evidencePaths | Where-Object { -not (Test-Path -LiteralPath $_ -PathType Leaf) })
   if ($missingFiles.Count -gt 0) {
     return [pscustomobject]@{
