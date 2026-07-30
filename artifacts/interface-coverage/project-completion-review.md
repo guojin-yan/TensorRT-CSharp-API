@@ -7781,3 +7781,38 @@ pointer-free summary 与 non-proof 语义保持不变。
   package consumer、public package、post-publish、Owner acceptance 或 release proof。
 - 本机无仓库认可的 `pwsh`，未运行 exporter/B-tier 聚合；8 份 publishing 用户变更未触碰、未暂存；
   未 push、未触发 GitHub Actions、未执行远程发布操作。
+
+## 2026-07-30 Runtime Diagnostic And Engine Deployment Summary Split
+
+本阶段继续整理 `JYPPX.TensorRtSharp/Execution` 与 `JYPPX.TensorRtSharp/Engine`，将 execution-context runtime
+diagnostic summary 与 engine deployment summary 从对应 snapshot 文件分离。callback status、allocator/debug-listener
+复制状态、engine metadata count、公开属性顺序、pointer non-exposure 与 non-proof 语义保持不变。
+
+### 实现与门禁
+
+- 原 411 行 `TensorRtExecutionContextRuntimeDiagnosticSnapshot.cs` 分为 198 行 snapshot 与 217 行
+  `TensorRtExecutionContextRuntimeDiagnosticSummary.cs`；snapshot 保留构造、复制属性、`ToSummary` 与自身 `ToString`。
+- 原 380 行 `TensorRtEngineDeploymentSnapshot.cs` 分为 251 行 snapshot 与 133 行
+  `TensorRtEngineDeploymentSummary.cs`；summary 独立拥有构造、公开属性、派生状态与自身 `ToString`。
+- `ManagedRuntimeDiagnosticEngineSummarySourceLayoutTests` 固定四个文件的精确 top-level type、constructor、method、
+  public property、pointer-free surface、candidate/source-set、三个直接消费测试和三份文档 marker，并重组原源码。
+- 拆分前 Git blob 为 `46eea3f13e19f01f9b927738c2c9dbad76172feb` 与
+  `6c4a5c3234857443ea45e84e4b8e61f1fe5a786c`；normalized SHA-256 保持
+  `744329112e0680d03a61b400c9de073d675d555882191f25dd9a3ba3186b25f5` 与
+  `2803fd2737d166351134e43094c986aa0c6cb6484f2fe36b166d8dc95bbc004d`。
+- test reader 显式展开两套 source-set；三个既有直接消费测试统一读取组合；Windows API 完成说明与双语
+  source-organization 同步真实 summary owner。
+
+### 验证与边界
+
+- 新布局门禁与直接消费联合定向集合 `25/25`；`SourceLayoutTests` `343/343`；统一 Managed 前缀集合 `742/742`。
+- `JYPPX.TensorRtSharp` 全目标框架与完整 `TensorRtSharp.sln` Debug build 均为
+  `0 warning / 0 error`；RuntimePackageReadiness UTF-8 JSON parse 为 `0 error`，对应质量测试 `2/2`。
+- ignored deferred candidate evidence 更新为 `265` 条引用、`152` 个唯一路径、`0` 缺失；其中引用的
+  `22` 份 JSON 全部可解析，ignored 文件未强制提交。
+- Generated/native/manifest/project/ABI 改动为 0；`git diff --check` 通过。进程审计未发现引用本工作区的其他进程，
+  Downloads 近三小时没有本批重资产命中；6 个已知 YoloVision/YOLOX Temp 目录继续保留。
+- source/type relocation 与 runtime-diagnostic/engine-deployment summary split 不构成新的 TensorRT/CUDA runtime、
+  real model、Linux、package consumer、public package、post-publish、Owner acceptance 或 release proof。
+- 本机无仓库认可的 `pwsh`，未运行 exporter/B-tier 聚合；8 份 publishing 用户变更未触碰、未暂存；
+  未 push、未触发 GitHub Actions、未执行远程发布操作。

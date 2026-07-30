@@ -24,6 +24,11 @@ C# 高层新增 `TensorRtDims64` 与 `TensorRtOptimizationProfileShapeRange64`�
 `ToSummary` 和自身 `ToString`，同名 `*DeploymentSummary.cs` 文件拥有 summary 构造、公开属性和诊断文本。
 该归类不改变 readback 映射，也不把 readonly summary 提升为 runtime proof。
 
+ExecutionContext runtime diagnostic 与 Engine deployment 的 snapshot/summary 也已按顶层类型分文件：
+`TensorRtExecutionContextRuntimeDiagnosticSummary` 与 `TensorRtEngineDeploymentSummary` 分别进入同名源码文件。
+runtime-diagnostic summary 保留 callback status 与 allocator/debug-listener 复制状态，engine summary 保留 tensor、
+profile tensor value 与 memory/weight metadata 计数；两者仍是 pointer-free diagnostics，不替代真实 enqueue/readback proof。
+
 已验证 `TensorRtSmokeRunner` 的 TensorRT 11 + CUDA 12.9 路径，输出包含 `ConfigSnapshot`、`EngineSnapshot`、`ContextSnapshot`、`EngineProfileTensorValuesV2`、`InspectorErrorRecorder=False->False`，且 `HighLevelChain11=True`。`CudaSmokeRunner`、TRT11 package consumer smoke、TRT11/TRT10/TRT8 lifecycle、DocFX 0 warning、workflow contract 和 generator deterministic gate 均通过。`buildSerializedNetwork(..., kernelText)` 仍是本机 vendor/API 边界：native/managed 已接线，但 TensorRT 11.0 + CUDA 12.9 返回空 TensorRT object，不伪造成成功。
 
 ## TRT11 第十四批状态

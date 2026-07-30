@@ -312,6 +312,13 @@ gate recomposes the pre-split Git blobs `e0413b02864fae42c4d0c6872b96f2cee3f53e7
 `d7501f3ba89e00f9bb373d8892b0804f5cb91637`, preserving snapshot-to-summary mapping, public property order,
 diagnostic counts, pointer-free summaries, and non-proof semantics.
 
+`TensorRtExecutionContextRuntimeDiagnosticSummary.cs` and `TensorRtEngineDeploymentSummary.cs` now own the remaining
+execution runtime-diagnostic and engine deployment summaries. The former 411-line runtime-diagnostic snapshot is split
+into a 198-line snapshot and a 217-line summary; the former 380-line engine deployment snapshot is split into a 251-line
+snapshot and a 133-line summary. The layout gate recomposes Git blobs `46eea3f13e19f01f9b927738c2c9dbad76172feb`
+and `6c4a5c3234857443ea45e84e4b8e61f1fe5a786c`, preserving summary mapping, callback-status diagnostics,
+engine metadata counts, pointer non-exposure, and non-proof semantics.
+
 OutputAllocator diagnostics are split across the public design owner and its internal managed runtime gate. The former
 637-line `Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeGate.cs` is reduced to a 38-line state/constructor core;
 entries, snapshots, lifecycle, shared invocation, trampoline/state, and formatting live in six partials, with request/result
