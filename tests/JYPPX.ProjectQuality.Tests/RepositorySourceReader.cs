@@ -370,6 +370,16 @@ internal static class RepositorySourceReader
                 "TensorRtOnnxParserRefitterDiagnosticSnapshot.cs",
                 "TensorRtOnnxParserRefitterDiagnosticSummary.cs"
             ],
+            ["TensorRtRuntimeConfig.cs"] =
+            [
+                "TensorRtRuntimeConfig.cs",
+                "TensorRtRuntimeConfigSummary.cs"
+            ],
+            ["TensorRtSerializationConfig.cs"] =
+            [
+                "TensorRtSerializationConfig.cs",
+                "TensorRtSerializationConfigSummary.cs"
+            ],
             ["TensorRtStreamIoInterfaceInfoDesignGate.cs"] =
             [
                 "TensorRtStreamIoInterfaceInfoDesignGate.cs",

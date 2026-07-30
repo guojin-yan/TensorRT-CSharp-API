@@ -28,6 +28,11 @@
 | `tensorrt-execution-context-deployment-summary` | `TensorRtExecutionContextDeploymentSummary` | deployment diagnostics | `ExecutionContextDeploymentSummary=` | 非 runtime proof |
 | `tensorrt-serialization-config-summary` | `TensorRtSerializationConfigSummary` | readonly config | `SerializationConfigSummary=` | 非 runtime proof |
 | `tensorrt-runtime-config-summary` | `TensorRtRuntimeConfigSummary` | readonly config | `RuntimeConfigSummary=` | 非 runtime proof |
+
+Runtime 与 Serialization config 的 owner/summary 已按顶层类型分文件：
+`TensorRtRuntimeConfig.cs`/`TensorRtRuntimeConfigSummary.cs` 与
+`TensorRtSerializationConfig.cs`/`TensorRtSerializationConfigSummary.cs`。该归类不改变 handle owner、flag/allocation
+strategy readback 或 proof classification。
 | `tensorrt-onnx-parser-diagnostic-summary` | `TensorRtOnnxParserDiagnosticSummary` | parser diagnostics | `ParserDiagnosticSummary=` | 非 runtime proof |
 | `tensorrt-onnx-model-support-summary` | `TensorRtOnnxModelSupportSummary` | parser support diagnostics | `ParserModelSupport` | 非 runtime proof |
 | `tensorrt-error-recorder-summary` | `TensorRtErrorRecorderSummary` | callback boundary diagnostics | `ErrorRecorderSummary=` | 非 runtime proof |

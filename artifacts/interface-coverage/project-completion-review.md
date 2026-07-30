@@ -7963,3 +7963,40 @@ non-exposure 与 copied-summary proof classification 保持不变。
   Linux、package consumer、public package、post-publish、Owner acceptance 或 release proof。
 - 本机无仓库认可的 `pwsh`，未运行 exporter/B-tier 聚合；8 份 publishing 用户变更未触碰、未暂存；
   未 push、未触发 GitHub Actions、未执行远程发布操作。
+
+## 2026-07-30 Runtime And Serialization Config Summary Split
+
+本阶段继续整理 `JYPPX.TensorRtSharp/Runtime` 与 `JYPPX.TensorRtSharp/Serialization`，将 RuntimeConfig 与
+SerializationConfig summary 从 owner 文件分离。native handle ownership、Dispose 顺序、flag/allocation strategy
+readback、公开属性顺序、pointer non-exposure 与 non-proof 语义保持不变。
+
+### 实现与门禁
+
+- 原 97 行 `TensorRtRuntimeConfig.cs` 分为 66 行 owner 与 37 行 `TensorRtRuntimeConfigSummary.cs`；owner 保留
+  handle、`ToSummary` 与 `Dispose`。
+- 原 130 行 `TensorRtSerializationConfig.cs` 分为 99 行 owner 与 37 行
+  `TensorRtSerializationConfigSummary.cs`；owner 保留 set/clear/get flag、`ToSummary` 与 `Dispose`。
+- `ManagedRuntimeSerializationConfigSummarySourceLayoutTests` 固定四个文件的精确 top-level type、constructor、method、
+  public property、pointer-free/non-proof surface、test source-set 与文档 marker，并重组原源码。
+- 拆分前 Git blob 为 `19c0362741927f9a3ad6f5fbf100da487e23d707` 与
+  `6d06225295c20fcfe6c2642ef749b8a241680faf`；normalized SHA-256 保持
+  `da5c8921ce02c2fcd66c1aa3d2214c941b15e31c1edc7cb4c24c167a4932658d` 与
+  `91a5979d9a8f23239b24da43094572d978ec2aea1aa16ec9f3c8bb411351766a`。
+- test reader 显式展开两套 source-set；既有 RuntimeSerialization consumer 已使用统一 reader；readonly summary
+  evidence matrix 与双语 source-organization 同步真实 Summary owner。
+
+### 验证与边界
+
+- 新布局门禁与直接消费集合联合定向 `18/18`；`SourceLayoutTests` `408/408`；
+  统一 Managed 前缀集合 `807/807`。
+- `JYPPX.TensorRtSharp` 全目标框架与完整 `TensorRtSharp.sln` Debug build 均为
+  `0 warning / 0 error`；RuntimePackageReadiness UTF-8 ParseInput 为 `0 error`，对应质量测试 `2/2`。
+- 本批没有 readiness/candidate 对这两份源码的直接路径引用，因此 ignored deferred candidate evidence 保持
+  `270` 条引用、`156` 个唯一路径、`0` 缺失；引用的 `22` 份 JSON 全部可解析。
+- `JYPPX.TensorRtSharp` 多顶层公开类型文件由 `26` 降为 `24`；枚举和值类型集合继续保持内聚。
+- Generated/native/manifest/project/ABI 改动为 0；`git diff --check` 通过。构建后短暂进程已自然退出，复查未发现
+  引用本工作区的其他进程；Downloads 近三小时没有本批重资产命中；6 个已知 YoloVision/YOLOX Temp 目录继续保留。
+- source/type relocation 与 config summary split 不构成新的 TensorRT/CUDA runtime、real model、Linux、package
+  consumer、public package、post-publish、Owner acceptance 或 release proof。
+- 本机无仓库认可的 `pwsh`，未运行 exporter/B-tier 聚合；8 份 publishing 用户变更未触碰、未暂存；
+  未 push、未触发 GitHub Actions、未执行远程发布操作。

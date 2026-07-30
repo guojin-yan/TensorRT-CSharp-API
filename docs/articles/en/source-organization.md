@@ -343,6 +343,12 @@ into an 85-line snapshot and a 108-line summary. The layout gate recomposes Git 
 `7a2fde67837713343938bc73130707d696b699d6` and `725939901e71733723097025d1ee3e48a344ca2b`, preserving copied
 diagnostics, public constructor/property order, pointer non-exposure, and copied-summary proof classification.
 
+RuntimeConfig and SerializationConfig summaries now live in dedicated same-name files. The former 97-line runtime config
+is split into a 66-line owner and a 37-line summary; the former 130-line serialization config is split into a 99-line owner
+and a 37-line summary. The layout gate recomposes Git blobs `19c0362741927f9a3ad6f5fbf100da487e23d707` and
+`6d06225295c20fcfe6c2642ef749b8a241680faf`, preserving handle ownership, readback mapping, public property order,
+pointer non-exposure, and non-proof semantics.
+
 OutputAllocator diagnostics are split across the public design owner and its internal managed runtime gate. The former
 637-line `Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeGate.cs` is reduced to a 38-line state/constructor core;
 entries, snapshots, lifecycle, shared invocation, trampoline/state, and formatting live in six partials, with request/result

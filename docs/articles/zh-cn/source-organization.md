@@ -304,6 +304,11 @@ ONNX parser 与 ParserRefitter diagnostic summary 也已进入独立同名文件
 `725939901e71733723097025d1ee3e48a344ca2b`，并固定 copied diagnostics、public constructor/property 顺序、
 pointer non-exposure 与 copied-summary proof classification。
 
+RuntimeConfig 与 SerializationConfig summary 也已进入独立同名文件。原 97 行 runtime config 分为 66 行 owner 与
+37 行 summary；原 130 行 serialization config 分为 99 行 owner 与 37 行 summary。布局门禁可重组 Git blob
+`19c0362741927f9a3ad6f5fbf100da487e23d707` 与 `6d06225295c20fcfe6c2642ef749b8a241680faf`，并固定
+handle ownership、readback mapping、公开属性顺序、pointer non-exposure 与 non-proof 语义。
+
 OutputAllocator diagnostics 继续按 public design owner 与 internal managed runtime gate 分层。原 637 行
 `Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeGate.cs` 降为 38 行 state/constructor core；entries、snapshots、
 lifecycle、shared invocation、trampoline/state 与 formatting 进入 6 份 partial，request/result 类型各自成文件。原 503 行
