@@ -105,6 +105,7 @@ Chinese articles:
 - [TensorRtExec INT8 Calibration Owner Field Guide](articles/zh-cn/tensorrtexec-int8-calibration-owner-field-guide.md)
 - [YoloVision YOLOv8 Detection Real Asset Tutorial](articles/zh-cn/yolovision-yolov8-det-real-asset-tutorial.md)
 - [YoloVision YOLOv8 Segmentation Real Asset Tutorial](articles/zh-cn/yolovision-yolov8-seg-real-asset-tutorial.md)
+- [YoloVision YOLOv8 Segmentation Local Package Consumer Tutorial](articles/zh-cn/yolovision-yolov8-seg-local-package-consumer-tutorial.md)
 - [YoloVision YOLOv8n Semantic Segmentation Map Guide](articles/zh-cn/yolovision-semantic-segmentation-map-guide.md)
 - [Sample Asset Manifest Guide](articles/zh-cn/sample-asset-manifest-guide.md)
 - [Sample Asset Acquisition Plan](articles/zh-cn/sample-asset-acquisition-plan.md)

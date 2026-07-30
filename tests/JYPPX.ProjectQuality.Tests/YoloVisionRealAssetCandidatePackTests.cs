@@ -167,7 +167,7 @@ public sealed class YoloVisionRealAssetCandidatePackTests
     }
 
     [Fact]
-    public void YoloVisionYoloV8TutorialsAreLinkedAndKeepOwnerActionRequiredBoundary()
+    public void YoloVisionYoloV8TutorialsAreLinkedAndKeepTheirCurrentEvidenceBoundaries()
     {
         string docsIndex = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "index.md"));
         string docsToc = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "toc.yml"));
@@ -175,7 +175,8 @@ public sealed class YoloVisionRealAssetCandidatePackTests
         foreach (string articleFile in new[]
         {
             "yolovision-yolov8-det-real-asset-tutorial.md",
-            "yolovision-yolov8-seg-real-asset-tutorial.md"
+            "yolovision-yolov8-seg-real-asset-tutorial.md",
+            "yolovision-yolov8-seg-local-package-consumer-tutorial.md"
         })
         {
             string href = "articles/zh-cn/" + articleFile;
@@ -185,13 +186,26 @@ public sealed class YoloVisionRealAssetCandidatePackTests
             Assert.True(File.Exists(path));
             Assert.Contains(href, docsIndex, StringComparison.Ordinal);
             Assert.Contains(href, docsToc, StringComparison.Ordinal);
-            Assert.Contains("owner-action-required", article, StringComparison.Ordinal);
-            Assert.Contains("不是 runtime proof", article, StringComparison.Ordinal);
             Assert.Contains("package-consumer-runtime", article, StringComparison.Ordinal);
-            Assert.Contains("YoloVision Passed=True", article, StringComparison.Ordinal);
             Assert.Contains("SHA256", article, StringComparison.Ordinal);
-            Assert.Contains("TensorRtExec", article, StringComparison.Ordinal);
         }
+
+        string detection = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "articles", "zh-cn", "yolovision-yolov8-det-real-asset-tutorial.md"));
+        Assert.Contains("owner-action-required", detection, StringComparison.Ordinal);
+        Assert.Contains("不是 runtime proof", detection, StringComparison.Ordinal);
+        Assert.Contains("TensorRtExec", detection, StringComparison.Ordinal);
+
+        string segmentation = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "articles", "zh-cn", "yolovision-yolov8-seg-real-asset-tutorial.md"));
+        Assert.Contains("real-model-runtime", segmentation, StringComparison.Ordinal);
+        Assert.Contains("YoloVision Passed=True", segmentation, StringComparison.Ordinal);
+        Assert.Contains("TensorRtExec", segmentation, StringComparison.Ordinal);
+        Assert.Contains("仍不是公开 feed 或 post-publish 证明", segmentation, StringComparison.Ordinal);
+
+        string packageConsumer = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "articles", "zh-cn", "yolovision-yolov8-seg-local-package-consumer-tutorial.md"));
+        Assert.Contains("local-package-consumer-runtime", packageConsumer, StringComparison.Ordinal);
+        Assert.Contains("1,793,600", packageConsumer, StringComparison.Ordinal);
+        Assert.Contains("publicPackageProof", packageConsumer, StringComparison.Ordinal);
+        Assert.Contains("ownerReleaseAcceptance", packageConsumer, StringComparison.Ordinal);
     }
 
     [Fact]

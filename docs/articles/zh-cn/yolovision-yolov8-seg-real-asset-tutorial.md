@@ -2,7 +2,7 @@
 
 本文记录 `samples/YoloVision` 已执行的 YOLOv8n segmentation 真实案例。它覆盖官方资产获取、ONNX 导出、
 TensorRT 多输出构建与加载、ONNX Runtime tensor reference、Ultralytics/PyTorch 独立后处理比较、source-image mask
-工件和受控失败验证。该结果可归类为 source-tree `real-model-runtime`，但不是 package-consumer、公开包、
+工件和受控失败验证。该结果可归类为 source-tree `real-model-runtime`，但本记录本身不是 `package-consumer-runtime`、公开包、
 post-publish、Owner 发布验收或模型再分发许可。
 
 ## 固定资产
@@ -209,9 +209,10 @@ dotnet test .\tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj
 当前仍不可声明：
 
 - 模型或派生 ONNX 已获公开再分发批准；
-- `.Bridge`/managed NuGet clean consumer 已重复该案例；
 - 公开包 URL/hash 或 post-publish 验证已完成；
 - Owner 已接受该案例作为正式 release proof。
 
-下一步应在仓库外 clean bridge-only package consumer 中重复相同输入、tensor reference 与 mask IoU 门禁；公开发布仍只允许
-managed、项目自有 `.Bridge` 和源码，CUDA、cuDNN、TensorRT、NVRTC 继续由用户自行安装。
+仓库外 clean bridge-only package consumer 已经用三个本地 `.nupkg` 重复相同输入、双 tensor reference、source-image mask、独立
+mask IoU 和两个受控负例。独立记录与命令见
+`docs/articles/zh-cn/yolovision-yolov8-seg-local-package-consumer-tutorial.md`；它仍不是公开 feed 或 post-publish 证明。
+公开发布仍只允许 managed、项目自有 `.Bridge` 和源码，CUDA、cuDNN、TensorRT、NVRTC 继续由用户自行安装。

@@ -168,6 +168,7 @@ def generate_reference(args: argparse.Namespace) -> tuple[dict[str, Any], Path]:
         "schemaVersion": 1,
         "recordKind": "yolovision-independent-segmentation-postprocess-reference",
         "sourceClassification": "independent-ultralytics-pytorch-cpu-reference",
+        "evidenceClassification": args.evidence_classification,
         "model": {
             "path": str(model_path),
             "sha256": sha256_file(model_path),
@@ -332,6 +333,7 @@ def compare_actual(
     comparison = {
         "schemaVersion": 1,
         "recordKind": "yolovision-segmentation-independent-reference-comparison",
+        "evidenceClassification": args.evidence_classification,
         "referencePath": str(reference_path),
         "referenceSha256": sha256_file(reference_path),
         "actualManifestPath": str(manifest_path),
@@ -349,7 +351,7 @@ def compare_actual(
         "completed": True,
         "passed": passed,
         "boundary": (
-            "Independent postprocess comparison for source-tree runtime evidence; not Owner acceptance, "
+            f"Independent postprocess comparison for {args.evidence_classification}; not Owner acceptance, "
             "package-consumer proof, post-publish proof, redistribution approval, or release proof."
         ),
     }
@@ -374,6 +376,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--maximum-score-error", type=float, default=0.01)
     parser.add_argument("--minimum-box-iou", type=float, default=0.995)
     parser.add_argument("--minimum-mask-iou", type=float, default=0.99)
+    parser.add_argument(
+        "--evidence-classification",
+        choices=("source-tree-runtime", "local-package-consumer-runtime"),
+        default="source-tree-runtime",
+    )
     args = parser.parse_args()
     for name in ("confidence", "iou_threshold", "mask_threshold", "minimum_box_iou", "minimum_mask_iou"):
         value = float(getattr(args, name))

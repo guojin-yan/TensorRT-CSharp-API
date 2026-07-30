@@ -9,9 +9,14 @@ param(
   [string]$RuntimePackageKey = "win-x64-trt10.11-cuda12.9-cudnn9.22",
   [string]$BridgePackageId,
   [ValidateSet("8", "10", "11")][string]$TensorRtLine,
+  [ValidateSet("yolox-detection", "yolov8-segmentation")][string]$Scenario = "yolox-detection",
   [string]$ModelPath,
+  [string]$ModelWeightsPath,
   [string]$LabelsPath,
   [string]$ImagePath,
+  [string]$ReferenceOutput0Path,
+  [string]$ReferenceOutput1Path,
+  [string]$PythonPath,
   [string]$TensorRtRoot,
   [string]$TensorRtRuntimeRoot,
   [string]$CudaRoot,
@@ -74,6 +79,52 @@ function Assert-NonCDrivePath {
   if ([IO.Path]::GetPathRoot($fullPath).TrimEnd('\') -ieq "C:") {
     throw "$Description must not use the C drive: $fullPath"
   }
+}
+
+function Remove-DirectoryTree {
+  param(
+    [Parameter(Mandatory = $true)][string]$Path,
+    [int]$Attempts = 6
+  )
+
+  if (-not (Test-Path -LiteralPath $Path)) {
+    return
+  }
+
+  $fullPath = [IO.Path]::GetFullPath($Path)
+  $extendedPath = if ($fullPath.StartsWith("\\", [StringComparison]::Ordinal)) {
+    "\\?\UNC\" + $fullPath.Substring(2)
+  }
+  else {
+    "\\?\" + $fullPath
+  }
+  $lastError = $null
+  for ($attempt = 1; $attempt -le $Attempts; $attempt++) {
+    try {
+      Remove-Item -LiteralPath $fullPath -Recurse -Force -ErrorAction Stop
+      return
+    }
+    catch {
+      $lastError = $_
+    }
+
+    try {
+      [GC]::Collect()
+      [GC]::WaitForPendingFinalizers()
+      [IO.Directory]::Delete($extendedPath, $true)
+      return
+    }
+    catch {
+      $lastError = $_
+      Start-Sleep -Milliseconds (250 * $attempt)
+    }
+
+    if (-not (Test-Path -LiteralPath $fullPath)) {
+      return
+    }
+  }
+
+  throw "Failed to remove directory '$fullPath': $($lastError.Exception.Message)"
 }
 
 function ConvertTo-XmlAttributeValue {
@@ -165,13 +216,74 @@ function Test-PackageEntry {
   }
 }
 
+function Get-PackageEntryNames {
+  param([Parameter(Mandatory = $true)][string]$PackagePath)
+
+  $zip = [IO.Compression.ZipFile]::OpenRead($PackagePath)
+  try {
+    return @($zip.Entries | ForEach-Object { $_.FullName.Replace('\', '/') })
+  }
+  finally {
+    $zip.Dispose()
+  }
+}
+
+function Assert-FileSha256 {
+  param(
+    [Parameter(Mandatory = $true)][string]$Path,
+    [Parameter(Mandatory = $true)][string]$ExpectedSha256,
+    [Parameter(Mandatory = $true)][string]$Description
+  )
+
+  $actualSha256 = (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToLowerInvariant()
+  if (-not [string]::Equals($actualSha256, $ExpectedSha256, [StringComparison]::Ordinal)) {
+    throw "$Description SHA256 mismatch. Expected='$ExpectedSha256' Actual='$actualSha256' Path='$Path'."
+  }
+}
+
 function Invoke-CapturedProcess {
   param(
     [Parameter(Mandatory = $true)][string]$FileName,
     [Parameter(Mandatory = $true)][string[]]$Arguments,
     [Parameter(Mandatory = $true)][string]$WorkingDirectory,
-    [hashtable]$Environment = @{}
+    [hashtable]$Environment = @{},
+    [string[]]$EnvironmentVariablesToRemove = @()
   )
+
+  function ConvertTo-NativeProcessArgument {
+    param([Parameter(Mandatory = $true)][AllowEmptyString()][string]$Value)
+
+    if ($Value.Length -gt 0 -and $Value -notmatch '[\s"]') {
+      return $Value
+    }
+
+    $builder = [Text.StringBuilder]::new()
+    [void]$builder.Append('"')
+    $backslashCount = 0
+    foreach ($character in $Value.ToCharArray()) {
+      if ($character -eq '\') {
+        $backslashCount++
+        continue
+      }
+
+      if ($character -eq '"') {
+        [void]$builder.Append(('\' * (($backslashCount * 2) + 1)))
+        [void]$builder.Append('"')
+      }
+      else {
+        if ($backslashCount -gt 0) {
+          [void]$builder.Append(('\' * $backslashCount))
+        }
+        [void]$builder.Append($character)
+      }
+      $backslashCount = 0
+    }
+    if ($backslashCount -gt 0) {
+      [void]$builder.Append(('\' * ($backslashCount * 2)))
+    }
+    [void]$builder.Append('"')
+    return $builder.ToString()
+  }
 
   $startInfo = [Diagnostics.ProcessStartInfo]::new()
   $startInfo.FileName = $FileName
@@ -180,11 +292,12 @@ function Invoke-CapturedProcess {
   $startInfo.RedirectStandardOutput = $true
   $startInfo.RedirectStandardError = $true
   $startInfo.CreateNoWindow = $true
-  foreach ($argument in $Arguments) {
-    $startInfo.ArgumentList.Add($argument)
+  $startInfo.Arguments = (($Arguments | ForEach-Object { ConvertTo-NativeProcessArgument -Value $_ }) -join ' ')
+  foreach ($name in $EnvironmentVariablesToRemove) {
+    [void]$startInfo.EnvironmentVariables.Remove($name)
   }
   foreach ($name in $Environment.Keys) {
-    $startInfo.Environment[$name] = [string]$Environment[$name]
+    $startInfo.EnvironmentVariables[$name] = [string]$Environment[$name]
   }
 
   $process = [Diagnostics.Process]::new()
@@ -223,6 +336,28 @@ function Invoke-CheckedDotNet {
   return $result
 }
 
+function Set-NamedArgumentValue {
+  param(
+    [Parameter(Mandatory = $true)][string[]]$Arguments,
+    [Parameter(Mandatory = $true)][string]$Name,
+    [Parameter(Mandatory = $true)][AllowEmptyString()][string]$Value
+  )
+
+  $copy = @($Arguments)
+  $matches = @()
+  for ($index = 0; $index -lt $copy.Count; $index++) {
+    if ([string]::Equals($copy[$index], $Name, [StringComparison]::Ordinal)) {
+      $matches += $index
+    }
+  }
+  if ($matches.Count -ne 1 -or $matches[0] + 1 -ge $copy.Count) {
+    throw "Argument '$Name' must occur exactly once with a value."
+  }
+
+  $copy[$matches[0] + 1] = $Value
+  return $copy
+}
+
 $splitManifestPath = Join-Path $RepositoryRoot "pack\runtime-split\split-runtime-packages.manifest.json"
 $splitManifest = Get-Content -LiteralPath $splitManifestPath -Raw -Encoding utf8 | ConvertFrom-Json
 $bridgeManifestEntries = @($splitManifest.packages | Where-Object {
@@ -249,12 +384,18 @@ if (-not [string]::IsNullOrWhiteSpace($TensorRtLine) -and
 }
 $BridgePackageId = $expectedBridgePackageId
 $TensorRtLine = $expectedTensorRtLine
+$isSegmentationScenario = [string]::Equals($Scenario, "yolov8-segmentation", [StringComparison]::Ordinal)
+$scenarioSlug = if ($isSegmentationScenario) { "yolov8n-seg" } else { "yolox" }
 
 $resolvedRuntimeRoots = $null
 if ([string]::IsNullOrWhiteSpace($TensorRtRoot) -or
     [string]::IsNullOrWhiteSpace($CudaRoot) -or
     [string]::IsNullOrWhiteSpace($CudnnRoot)) {
-  $runtimeRootsJson = (& pwsh -NoProfile -ExecutionPolicy Bypass -File (Join-Path $RepositoryRoot "eng\Resolve-RuntimeRoots.ps1") -RuntimePackageKey $RuntimePackageKey -RepositoryRoot $RepositoryRoot | Out-String).Trim()
+  $runtimeRootShell = Get-Command pwsh -ErrorAction SilentlyContinue
+  if ($null -eq $runtimeRootShell) {
+    $runtimeRootShell = Get-Command powershell.exe -ErrorAction Stop
+  }
+  $runtimeRootsJson = (& $runtimeRootShell.Source -NoProfile -ExecutionPolicy Bypass -File (Join-Path $RepositoryRoot "eng\Resolve-RuntimeRoots.ps1") -RuntimePackageKey $RuntimePackageKey -RepositoryRoot $RepositoryRoot | Out-String).Trim()
   if ($LASTEXITCODE -ne 0) {
     throw "Failed to resolve vendor roots for runtime package key '$RuntimePackageKey'."
   }
@@ -264,14 +405,33 @@ $defaultTensorRtRoot = if ($null -eq $resolvedRuntimeRoots) { "" } else { [strin
 $defaultCudaRoot = if ($null -eq $resolvedRuntimeRoots) { "" } else { [string]$resolvedRuntimeRoots.cudaRoot }
 $defaultCudnnRoot = if ($null -eq $resolvedRuntimeRoots) { "" } else { [string]$resolvedRuntimeRoots.cudnnRoot }
 
-$OutputRoot = Resolve-PathValue -Value $OutputRoot -DefaultValue (Join-Path $outerRoot "consumer-workspaces\yolovision-yolox-local-package-trt$TensorRtLine") -RelativeRoot $outerRoot
-$ReportDirectory = Resolve-PathValue -Value $ReportDirectory -DefaultValue (Join-Path $RepositoryRoot "artifacts\yolovision\yolox-local-package-consumer\$RuntimePackageKey") -RelativeRoot $RepositoryRoot
+$defaultConsumerOutputRoot = if ($isSegmentationScenario) {
+  Join-Path $outerRoot "consumer-workspaces\yolovision-yolov8n-seg-local-package-trt$TensorRtLine"
+}
+else {
+  Join-Path $outerRoot "consumer-workspaces\yolovision-yolox-local-package-trt$TensorRtLine"
+}
+$OutputRoot = Resolve-PathValue -Value $OutputRoot -DefaultValue $defaultConsumerOutputRoot -RelativeRoot $outerRoot
+$ReportDirectory = Resolve-PathValue -Value $ReportDirectory -DefaultValue (Join-Path $RepositoryRoot "artifacts\yolovision\$scenarioSlug-local-package-consumer\$RuntimePackageKey") -RelativeRoot $RepositoryRoot
 $ManagedPackageDirectory = Resolve-PathValue -Value $ManagedPackageDirectory -DefaultValue (Join-Path $RepositoryRoot "artifacts\managed") -RelativeRoot $RepositoryRoot
 $YoloVisionPackageDirectory = Resolve-PathValue -Value $YoloVisionPackageDirectory -DefaultValue (Join-Path $RepositoryRoot "artifacts\yolovision-nupkg") -RelativeRoot $RepositoryRoot
 $BridgePackageDirectory = Resolve-PathValue -Value $BridgePackageDirectory -DefaultValue (Join-Path $RepositoryRoot "artifacts\runtime-split-nupkg\$RuntimePackageKey") -RelativeRoot $RepositoryRoot
-$ModelPath = Resolve-PathValue -Value $ModelPath -DefaultValue (Join-Path $outerRoot "downloads\yolox-apache\source\yolox_s.onnx") -RelativeRoot $outerRoot
+$defaultModelPath = if ($isSegmentationScenario) {
+  Join-Path $outerRoot "downloads\yolov8n-seg-ultralytics-v8.3.0\source\yolov8n-seg.onnx"
+}
+else {
+  Join-Path $outerRoot "downloads\yolox-apache\source\yolox_s.onnx"
+}
+$ModelPath = Resolve-PathValue -Value $ModelPath -DefaultValue $defaultModelPath -RelativeRoot $outerRoot
 $LabelsPath = Resolve-PathValue -Value $LabelsPath -DefaultValue (Join-Path $outerRoot "downloads\yolox-apache\derived\coco.names") -RelativeRoot $outerRoot
 $ImagePath = Resolve-PathValue -Value $ImagePath -DefaultValue (Join-Path $outerRoot "downloads\yolox-apache\derived\dog.ppm") -RelativeRoot $outerRoot
+if ($isSegmentationScenario) {
+  $ModelWeightsPath = Resolve-PathValue -Value $ModelWeightsPath -DefaultValue (Join-Path $outerRoot "downloads\yolov8n-seg-ultralytics-v8.3.0\source\yolov8n-seg.pt") -RelativeRoot $outerRoot
+  $ReferenceOutput0Path = Resolve-PathValue -Value $ReferenceOutput0Path -DefaultValue (Join-Path $outerRoot "downloads\yolov8n-seg-ultralytics-v8.3.0\reference\output0.reference.json") -RelativeRoot $outerRoot
+  $ReferenceOutput1Path = Resolve-PathValue -Value $ReferenceOutput1Path -DefaultValue (Join-Path $outerRoot "downloads\yolov8n-seg-ultralytics-v8.3.0\reference\output1.reference.json") -RelativeRoot $outerRoot
+  $defaultPythonPath = Join-Path $env:USERPROFILE ".conda\envs\ultralytics\python.exe"
+  $PythonPath = Resolve-PathValue -Value $PythonPath -DefaultValue $defaultPythonPath -RelativeRoot $outerRoot
+}
 $TensorRtRoot = Resolve-PathValue -Value $TensorRtRoot -DefaultValue $defaultTensorRtRoot -RelativeRoot $outerRoot
 $TensorRtRuntimeRoot = Resolve-PathValue -Value $TensorRtRuntimeRoot -DefaultValue $TensorRtRoot -RelativeRoot $outerRoot
 $CudaRoot = Resolve-PathValue -Value $CudaRoot -DefaultValue $defaultCudaRoot -RelativeRoot $outerRoot
@@ -292,10 +452,33 @@ foreach ($item in @(
   Assert-NonCDrivePath -Path $item.Path -Description $item.Description
 }
 
-foreach ($requiredPath in @($ModelPath, $LabelsPath, $ImagePath, $TensorRtRoot, $TensorRtRuntimeRoot, $CudaRoot, $CudnnRoot)) {
+if ($isSegmentationScenario) {
+  foreach ($item in @(
+    @{ Path = $ModelWeightsPath; Description = "YOLOv8 segmentation weights" },
+    @{ Path = $ReferenceOutput0Path; Description = "YOLOv8 output0 reference" },
+    @{ Path = $ReferenceOutput1Path; Description = "YOLOv8 output1 reference" }
+  )) {
+    Assert-NonCDrivePath -Path $item.Path -Description $item.Description
+  }
+}
+
+$requiredPaths = @($ModelPath, $LabelsPath, $ImagePath, $TensorRtRoot, $TensorRtRuntimeRoot, $CudaRoot, $CudnnRoot)
+if ($isSegmentationScenario) {
+  $requiredPaths += @($ModelWeightsPath, $ReferenceOutput0Path, $ReferenceOutput1Path, $PythonPath)
+}
+foreach ($requiredPath in $requiredPaths) {
   if (-not (Test-Path -LiteralPath $requiredPath)) {
     throw "Required local dependency does not exist: $requiredPath"
   }
+}
+
+if ($isSegmentationScenario) {
+  Assert-FileSha256 -Path $ModelPath -ExpectedSha256 "08b5c61368d4ddec5e647522fc55a93c42a9e0c581770aae48b87bba65a9b21d" -Description "YOLOv8n-seg ONNX"
+  Assert-FileSha256 -Path $ModelWeightsPath -ExpectedSha256 "a7cd8f929e1903d78a12a48efecab430209f18dc46cb96c3599a5980c63c423c" -Description "YOLOv8n-seg weights"
+  Assert-FileSha256 -Path $ReferenceOutput0Path -ExpectedSha256 "a607dd1d80dbb85a1a77f5354c7669e357c2caf8d0a9cd93328397d1858bde5f" -Description "YOLOv8n-seg output0 reference"
+  Assert-FileSha256 -Path $ReferenceOutput1Path -ExpectedSha256 "3cc8387483187bc5d86ef8e82943e215caadefbbf41a8523d9ffc4c6b040f8d5" -Description "YOLOv8n-seg output1 reference"
+  Assert-FileSha256 -Path $LabelsPath -ExpectedSha256 "4d4aaea7bee6be2f675d9b53a9195ca36dfe6429f7479f29155da522a6c85930" -Description "COCO labels"
+  Assert-FileSha256 -Path $ImagePath -ExpectedSha256 "6cb94c9cd0781412598fe179246b09041af4303d388a5ba3c55f760dff11ec2c" -Description "YOLOX dog image"
 }
 
 $managedPackage = Find-Package -Directory $ManagedPackageDirectory -PackageId "JYPPX.TensorRT.CSharp.API" -ExpectedVersion $PackageVersion
@@ -310,11 +493,31 @@ if (-not (Test-PackageEntry -PackagePath $yoloVisionPackage.Path -ExpectedEntry 
 if (-not (Test-PackageEntry -PackagePath $bridgePackage.Path -ExpectedEntry "runtimes/win-x64/native/jyppxtrtbridge.dll")) {
   throw "Bridge package does not contain the win-x64 native bridge."
 }
+$packageEntries = @(
+  foreach ($package in @($managedPackage, $yoloVisionPackage, $bridgePackage)) {
+    foreach ($entryName in Get-PackageEntryNames -PackagePath $package.Path) {
+      [pscustomobject]@{ packageId = $package.Id; entryName = $entryName }
+    }
+  }
+)
+$vendorRuntimeEntries = @($packageEntries | Where-Object {
+  [IO.Path]::GetFileName([string]$_.entryName) -match '^(?:cudart|cudnn|nvinfer|nvonnxparser|nvrtc|nvJitLink|cublas|cufft|curand|cusolver|cusparse|nvToolsExt|zlibwapi).*(?:\.dll|\.so(?:\.[0-9.]+)?|\.dylib)$'
+})
+if ($vendorRuntimeEntries.Count -ne 0) {
+  throw "Local package set contains forbidden NVIDIA vendor runtime entries: $($vendorRuntimeEntries.entryName -join ', ')."
+}
+$bridgeNativeEntries = @(Get-PackageEntryNames -PackagePath $bridgePackage.Path | Where-Object {
+  $_.StartsWith("runtimes/win-x64/native/", [StringComparison]::OrdinalIgnoreCase) -and -not $_.EndsWith("/", [StringComparison]::Ordinal)
+})
+if ($bridgeNativeEntries.Count -ne 1 -or
+    -not [string]::Equals($bridgeNativeEntries[0], "runtimes/win-x64/native/jyppxtrtbridge.dll", [StringComparison]::OrdinalIgnoreCase)) {
+  throw "Bridge package native surface must contain exactly runtimes/win-x64/native/jyppxtrtbridge.dll."
+}
 
 if (Test-Path -LiteralPath $OutputRoot) {
   $resolvedExistingOutput = (Resolve-Path -LiteralPath $OutputRoot).Path
   Assert-PathUnderRoot -Path $resolvedExistingOutput -Root $outerRoot -Description "Existing consumer workspace"
-  Remove-Item -LiteralPath $resolvedExistingOutput -Recurse -Force
+  Remove-DirectoryTree -Path $resolvedExistingOutput
 }
 New-Item -ItemType Directory -Path $OutputRoot, $ReportDirectory -Force | Out-Null
 
@@ -332,8 +535,12 @@ $projectContent = $projectContent.Replace("__YOLOVISION_PACKAGE_VERSION__", $yol
 $projectContent = $projectContent.Replace("__BRIDGE_PACKAGE_ID__", $bridgePackage.Id)
 $projectContent = $projectContent.Replace("__BRIDGE_PACKAGE_VERSION__", $bridgePackage.Version)
 [IO.File]::WriteAllText($consumerProjectPath, $projectContent, $utf8)
-if ($projectContent.Contains("ProjectReference", [StringComparison]::OrdinalIgnoreCase)) {
+if ($projectContent.IndexOf("ProjectReference", [StringComparison]::OrdinalIgnoreCase) -ge 0) {
   throw "Consumer project must not contain ProjectReference."
+}
+if ($projectContent.IndexOf("<Reference ", [StringComparison]::OrdinalIgnoreCase) -ge 0 -or
+    $projectContent.IndexOf("<HintPath>", [StringComparison]::OrdinalIgnoreCase) -ge 0) {
+  throw "Consumer project must not contain direct assembly references or HintPath entries."
 }
 
 $nugetConfigPath = Join-Path $workspace "NuGet.config"
@@ -369,28 +576,60 @@ if ($nativeBridgePaths.Count -ne 1) {
   throw "Expected one copied native bridge in consumer output, found $($nativeBridgePaths.Count)."
 }
 
-$tensorPath = Join-Path $runOutput "dog-yolox-s.fp32.bin"
+$tensorFileName = if ($isSegmentationScenario) { "dog-yolov8n-seg.fp32.bin" } else { "dog-yolox-s.fp32.bin" }
+$tensorPath = Join-Path $runOutput $tensorFileName
 $outputJsonPath = Join-Path $runOutput "yolovision-output.json"
 $visualizationPath = Join-Path $runOutput "yolovision-output.svg"
-$runArguments = @(
-  $consumerAssemblyPath,
-  "--model", $ModelPath,
-  "--labels", $LabelsPath,
-  "--image", $ImagePath,
-  "--preprocessed-output", $tensorPath,
-  "--output-json", $outputJsonPath,
-  "--visualization", $visualizationPath,
-  "--input-shape", "1x3x640x640",
-  "--tensor-rt-line", $TensorRtLine,
-  "--family", "yolox",
-  "--task", "det",
-  "--layout", "boxes-first",
-  "--has-objectness", "true",
-  "--nms-mode", "class-aware",
-  "--confidence", "0.3",
-  "--iou-threshold", "0.45",
-  "--top-k", "20"
-)
+$segmentationMaskDirectory = Join-Path $runOutput "segmentation-masks"
+if ($isSegmentationScenario) {
+  $runArguments = @(
+    $consumerAssemblyPath,
+    "--model", $ModelPath,
+    "--labels", $LabelsPath,
+    "--image", $ImagePath,
+    "--preprocessed-output", $tensorPath,
+    "--output-json", $outputJsonPath,
+    "--segmentation-mask-output-directory", $segmentationMaskDirectory,
+    "--visualization", $visualizationPath,
+    "--input-shape", "1x3x640x640",
+    "--tensor-rt-line", $TensorRtLine,
+    "--family", "v8",
+    "--task", "seg",
+    "--output-role-map", "output0:det,output1:mask-prototypes",
+    "--mask-coefficient-count", "32",
+    "--confidence", "0.25",
+    "--iou-threshold", "0.45",
+    "--top-k", "10",
+    "--mask-threshold", "0.5",
+    "--mask-spatial-transform",
+    "--mask-coordinate-space", "model-input",
+    "--mask-crop-to-box", "true",
+    "--reference-outputs", "output0:$ReferenceOutput0Path,output1:$ReferenceOutput1Path",
+    "--reference-abs-tolerance", "0.02",
+    "--reference-rel-tolerance", "0.03"
+  )
+}
+else {
+  $runArguments = @(
+    $consumerAssemblyPath,
+    "--model", $ModelPath,
+    "--labels", $LabelsPath,
+    "--image", $ImagePath,
+    "--preprocessed-output", $tensorPath,
+    "--output-json", $outputJsonPath,
+    "--visualization", $visualizationPath,
+    "--input-shape", "1x3x640x640",
+    "--tensor-rt-line", $TensorRtLine,
+    "--family", "yolox",
+    "--task", "det",
+    "--layout", "boxes-first",
+    "--has-objectness", "true",
+    "--nms-mode", "class-aware",
+    "--confidence", "0.3",
+    "--iou-threshold", "0.45",
+    "--top-k", "20"
+  )
+}
 $nativePathEntries = @(
   $consumerOutputDirectory,
   $nativeBridgePaths[0].DirectoryName,
@@ -408,7 +647,7 @@ $runEnvironment = @{
   PATH = ($pathEntries -join ';')
   NUGET_PACKAGES = $packageCache
 }
-$runResult = Invoke-CapturedProcess -FileName "dotnet" -Arguments $runArguments -WorkingDirectory $workspace -Environment $runEnvironment
+$runResult = Invoke-CapturedProcess -FileName "dotnet" -Arguments $runArguments -WorkingDirectory $workspace -Environment $runEnvironment -EnvironmentVariablesToRemove @("JYPPX_NATIVE_BRIDGE_PATH")
 $stdoutPath = Join-Path $ReportDirectory "runtime.stdout.log"
 $stderrPath = Join-Path $ReportDirectory "runtime.stderr.log"
 [IO.File]::WriteAllText($stdoutPath, $runResult.Stdout, $utf8)
@@ -420,8 +659,8 @@ if (-not [string]::IsNullOrWhiteSpace($runResult.Stderr)) {
 if ($runResult.ExitCode -ne 0) {
   throw "YoloVision package consumer exited with code $($runResult.ExitCode)."
 }
-if (-not $runResult.Stdout.Contains("YoloVisionPackageConsumer ProjectReference=False", [StringComparison]::Ordinal) -or
-    -not $runResult.Stdout.Contains("YoloVision Passed=True", [StringComparison]::Ordinal)) {
+if ($runResult.Stdout.IndexOf("YoloVisionPackageConsumer ProjectReference=False", [StringComparison]::Ordinal) -lt 0 -or
+    $runResult.Stdout.IndexOf("YoloVision Passed=True", [StringComparison]::Ordinal) -lt 0) {
   throw "YoloVision package consumer did not emit the required package/runtime success markers."
 }
 
@@ -435,11 +674,14 @@ if ($bridgeTensorRtVersion -notmatch '^(?<major>[0-9]+)' -or
   throw "Bridge TensorRT build version '$bridgeTensorRtVersion' does not match requested TensorRT line '$TensorRtLine'."
 }
 
-$predictionLines = @($runResult.Stdout -split "`r?`n" | Where-Object { $_.StartsWith("Detection Class=", [StringComparison]::Ordinal) })
+$predictionPrefix = if ($isSegmentationScenario) { "Segmentation Class=" } else { "Detection Class=" }
+$predictionKind = if ($isSegmentationScenario) { "segmentation" } else { "detection" }
+$predictionLines = @($runResult.Stdout -split "`r?`n" | Where-Object { $_.StartsWith($predictionPrefix, [StringComparison]::Ordinal) })
 $predictions = @(
   foreach ($line in $predictionLines) {
-    if ($line -match '^Detection Class=(?<class>.+?) Score=(?<score>[0-9.]+) ') {
+    if ($line -match '^(?:Detection|Segmentation) Class=(?<class>.+?) Score=(?<score>[0-9.]+) ') {
       [pscustomobject]@{
+        kind = $predictionKind
         className = $Matches.class
         score = [double]::Parse($Matches.score, [Globalization.CultureInfo]::InvariantCulture)
         line = $line
@@ -448,14 +690,26 @@ $predictions = @(
   }
 )
 if ($predictions.Count -eq 0) {
-  throw "YoloVision package consumer did not produce detections."
+  throw "YoloVision package consumer did not produce $predictionKind predictions."
+}
+if ($isSegmentationScenario) {
+  $expectedClasses = @("dog", "bicycle", "truck", "car")
+  $actualClasses = @($predictions | ForEach-Object { $_.className })
+  if ($predictions.Count -ne 4 -or @(Compare-Object -ReferenceObject $expectedClasses -DifferenceObject $actualClasses).Count -ne 0) {
+    throw "YOLOv8 segmentation package consumer predictions must be dog, bicycle, truck, and car exactly once. Actual='$($actualClasses -join ',')'."
+  }
 }
 $elapsedMilliseconds = 0.0
 if ($runResult.Stdout -match 'Execution .* ElapsedMs=(?<elapsed>[0-9.]+)') {
   $elapsedMilliseconds = [double]::Parse($Matches.elapsed, [Globalization.CultureInfo]::InvariantCulture)
 }
 
-foreach ($file in @($tensorPath, $outputJsonPath, $visualizationPath)) {
+$expectedRuntimeFiles = @($tensorPath, $outputJsonPath, $visualizationPath)
+if ($isSegmentationScenario) {
+  $segmentationMaskManifestPath = Join-Path $segmentationMaskDirectory "segmentation-mask-artifacts.manifest.json"
+  $expectedRuntimeFiles += $segmentationMaskManifestPath
+}
+foreach ($file in $expectedRuntimeFiles) {
   if (-not (Test-Path -LiteralPath $file -PathType Leaf)) {
     throw "Expected runtime output was not created: $file"
   }
@@ -464,10 +718,204 @@ $yoloOutputReport = Get-Content -LiteralPath $outputJsonPath -Raw -Encoding utf8
 if ([int]$yoloOutputReport.runtime.tensorRtLine -ne [int]$TensorRtLine) {
   throw "YoloVision output report TensorRT line '$($yoloOutputReport.runtime.tensorRtLine)' does not match requested line '$TensorRtLine'."
 }
+$referenceComparisons = @()
+if ($isSegmentationScenario) {
+  $expectedOutputShapes = @{
+    output0 = "1x116x8400"
+    output1 = "1x32x160x160"
+  }
+  $actualOutputs = @($yoloOutputReport.outputs)
+  if ($actualOutputs.Count -ne 2) {
+    throw "YOLOv8 segmentation output report must contain exactly two outputs. Found $($actualOutputs.Count)."
+  }
+  foreach ($output in $actualOutputs) {
+    $shapeText = (@($output.shape) -join 'x')
+    if (-not $expectedOutputShapes.ContainsKey([string]$output.name) -or
+        -not [string]::Equals($shapeText, $expectedOutputShapes[[string]$output.name], [StringComparison]::Ordinal)) {
+      throw "Unexpected YOLOv8 segmentation output contract: $($output.name):$shapeText."
+    }
+  }
+
+  if (-not $yoloOutputReport.referenceValidation.requested -or
+      -not $yoloOutputReport.referenceValidation.completed -or
+      -not $yoloOutputReport.referenceValidation.passed) {
+    throw "YOLOv8 segmentation raw tensor reference validation did not pass."
+  }
+  $referenceComparisons = @($yoloOutputReport.referenceValidation.tensorComparisons)
+  if ($referenceComparisons.Count -ne 2 -or
+      ($referenceComparisons | Measure-Object comparedElementCount -Sum).Sum -ne 1793600 -or
+      ($referenceComparisons | Measure-Object mismatchCount -Sum).Sum -ne 0) {
+    throw "YOLOv8 segmentation raw tensor reference validation must compare 1,793,600 values with zero mismatches."
+  }
+}
 $copiedOutputJson = Join-Path $ReportDirectory "yolovision-output.json"
 $copiedVisualization = Join-Path $ReportDirectory "yolovision-output.svg"
 Copy-Item -LiteralPath $outputJsonPath -Destination $copiedOutputJson -Force
 Copy-Item -LiteralPath $visualizationPath -Destination $copiedVisualization -Force
+
+$archivedMaskManifestPath = $null
+$runtimeMaskManifestSha256 = $null
+$archivedMaskManifestSha256 = $null
+$independentReference = $null
+$independentComparison = $null
+$independentReferencePath = $null
+$independentComparisonPath = $null
+$independentRuntimeResult = $null
+$controlledReferenceResult = $null
+$controlledReferenceReport = $null
+$controlledReferenceMutationSha256 = $null
+$controlledMaskResult = $null
+$controlledMaskOriginalSha256 = $null
+$controlledMaskMutatedSha256 = $null
+$controlledMaskExpectedSha256 = $null
+
+if ($isSegmentationScenario) {
+  $runtimeMaskManifestSha256 = (Get-FileHash -LiteralPath $segmentationMaskManifestPath -Algorithm SHA256).Hash.ToLowerInvariant()
+  $archivedMaskDirectory = Join-Path $ReportDirectory "segmentation-masks"
+  if (Test-Path -LiteralPath $archivedMaskDirectory) {
+    Remove-Item -LiteralPath $archivedMaskDirectory -Recurse -Force
+  }
+  Copy-Item -LiteralPath $segmentationMaskDirectory -Destination $archivedMaskDirectory -Recurse -Force
+  $archivedMaskManifestPath = Join-Path $archivedMaskDirectory "segmentation-mask-artifacts.manifest.json"
+  $archivedMaskManifest = Get-Content -LiteralPath $archivedMaskManifestPath -Raw -Encoding utf8 | ConvertFrom-Json
+  foreach ($prediction in @($archivedMaskManifest.predictions)) {
+    foreach ($propertyName in @("prototypeProbability", "sourceProbability", "sourceThresholded")) {
+      $artifact = $prediction.$propertyName
+      if ($null -ne $artifact) {
+        $artifact.path = Join-Path $archivedMaskDirectory ([string]$artifact.fileName)
+      }
+    }
+  }
+  [IO.File]::WriteAllText($archivedMaskManifestPath, ($archivedMaskManifest | ConvertTo-Json -Depth 16), $utf8)
+  $archivedMaskManifestSha256 = (Get-FileHash -LiteralPath $archivedMaskManifestPath -Algorithm SHA256).Hash.ToLowerInvariant()
+
+  $independentDirectory = Join-Path $ReportDirectory "independent-pytorch-reference"
+  if (Test-Path -LiteralPath $independentDirectory) {
+    Remove-Item -LiteralPath $independentDirectory -Recurse -Force
+  }
+  New-Item -ItemType Directory -Path $independentDirectory -Force | Out-Null
+  $independentArguments = @(
+    (Join-Path $RepositoryRoot "eng\Invoke-YoloVisionSegmentationReference.py"),
+    "--model", $ModelWeightsPath,
+    "--image", $ImagePath,
+    "--output-directory", $independentDirectory,
+    "--actual-manifest", $archivedMaskManifestPath,
+    "--image-size", "640",
+    "--confidence", "0.25",
+    "--iou-threshold", "0.45",
+    "--max-detections", "10",
+    "--mask-threshold", "0.5",
+    "--maximum-box-coordinate-error", "1.0",
+    "--maximum-score-error", "0.01",
+    "--minimum-box-iou", "0.995",
+    "--minimum-mask-iou", "0.99",
+    "--evidence-classification", "local-package-consumer-runtime"
+  )
+  $independentRuntimeResult = Invoke-CapturedProcess -FileName $PythonPath -Arguments $independentArguments -WorkingDirectory $RepositoryRoot
+  $independentStdoutPath = Join-Path $ReportDirectory "independent-pytorch.stdout.log"
+  $independentStderrPath = Join-Path $ReportDirectory "independent-pytorch.stderr.log"
+  [IO.File]::WriteAllText($independentStdoutPath, $independentRuntimeResult.Stdout, $utf8)
+  [IO.File]::WriteAllText($independentStderrPath, $independentRuntimeResult.Stderr, $utf8)
+  if ($independentRuntimeResult.ExitCode -ne 0) {
+    throw "Independent Ultralytics/PyTorch comparison failed with exit code $($independentRuntimeResult.ExitCode). See $independentStderrPath"
+  }
+  $independentReferencePath = Join-Path $independentDirectory "ultralytics-pytorch-reference.json"
+  $independentComparisonPath = Join-Path $independentDirectory "yolovision-independent-comparison.json"
+  $independentReference = Get-Content -LiteralPath $independentReferencePath -Raw -Encoding utf8 | ConvertFrom-Json
+  $independentComparison = Get-Content -LiteralPath $independentComparisonPath -Raw -Encoding utf8 | ConvertFrom-Json
+  if (-not $independentComparison.completed -or -not $independentComparison.passed -or
+      [int]$independentComparison.actualPredictionCount -ne 4 -or
+      @($independentComparison.comparisons | Where-Object { -not $_.passed }).Count -ne 0) {
+    throw "Independent Ultralytics/PyTorch mask comparison did not pass all four predictions."
+  }
+
+  $controlledReferenceDirectory = Join-Path $runOutput "controlled-reference-negative"
+  New-Item -ItemType Directory -Path $controlledReferenceDirectory -Force | Out-Null
+  $controlledReferencePath = Join-Path $controlledReferenceDirectory "output0.single-value-mutated.reference.json"
+  $mutationResult = Invoke-CapturedProcess -FileName $PythonPath -Arguments @(
+    (Join-Path $RepositoryRoot "eng\New-YoloVisionReferenceMutation.py"),
+    "--input", $ReferenceOutput0Path,
+    "--output", $controlledReferencePath,
+    "--index", "0",
+    "--delta", "10000"
+  ) -WorkingDirectory $RepositoryRoot
+  $mutationLogPath = Join-Path $ReportDirectory "controlled-reference-mutation.log"
+  [IO.File]::WriteAllText($mutationLogPath, ($mutationResult.Stdout + $mutationResult.Stderr), $utf8)
+  if ($mutationResult.ExitCode -ne 0 -or -not (Test-Path -LiteralPath $controlledReferencePath -PathType Leaf)) {
+    throw "Failed to create the controlled raw-reference mutation. See $mutationLogPath"
+  }
+  $controlledReferenceMutationSha256 = (Get-FileHash -LiteralPath $controlledReferencePath -Algorithm SHA256).Hash.ToLowerInvariant()
+
+  $controlledReferenceArguments = Set-NamedArgumentValue -Arguments $runArguments -Name "--reference-outputs" -Value "output0:$controlledReferencePath,output1:$ReferenceOutput1Path"
+  $controlledReferenceArguments = Set-NamedArgumentValue -Arguments $controlledReferenceArguments -Name "--output-json" -Value (Join-Path $controlledReferenceDirectory "yolovision-output.json")
+  $controlledReferenceArguments = Set-NamedArgumentValue -Arguments $controlledReferenceArguments -Name "--visualization" -Value (Join-Path $controlledReferenceDirectory "yolovision-output.svg")
+  $controlledReferenceArguments = Set-NamedArgumentValue -Arguments $controlledReferenceArguments -Name "--segmentation-mask-output-directory" -Value (Join-Path $controlledReferenceDirectory "segmentation-masks")
+  $controlledReferenceResult = Invoke-CapturedProcess -FileName "dotnet" -Arguments $controlledReferenceArguments -WorkingDirectory $workspace -Environment $runEnvironment -EnvironmentVariablesToRemove @("JYPPX_NATIVE_BRIDGE_PATH")
+  $controlledReferenceStdoutPath = Join-Path $ReportDirectory "controlled-reference.stdout.log"
+  $controlledReferenceStderrPath = Join-Path $ReportDirectory "controlled-reference.stderr.log"
+  [IO.File]::WriteAllText($controlledReferenceStdoutPath, $controlledReferenceResult.Stdout, $utf8)
+  [IO.File]::WriteAllText($controlledReferenceStderrPath, $controlledReferenceResult.Stderr, $utf8)
+  $controlledReferenceOutputPath = Join-Path $controlledReferenceDirectory "yolovision-output.json"
+  if ($controlledReferenceResult.ExitCode -ne 1 -or
+      $controlledReferenceResult.Stdout.IndexOf("YoloVision Passed=False", [StringComparison]::Ordinal) -lt 0 -or
+      -not (Test-Path -LiteralPath $controlledReferenceOutputPath -PathType Leaf)) {
+    throw "Controlled raw-reference mutation must fail closed and still emit its diagnostic report."
+  }
+  $controlledReferenceReport = Get-Content -LiteralPath $controlledReferenceOutputPath -Raw -Encoding utf8 | ConvertFrom-Json
+  $controlledReferenceComparisons = @($controlledReferenceReport.referenceValidation.tensorComparisons)
+  $controlledOutput0 = @($controlledReferenceComparisons | Where-Object { $_.tensorName -eq "output0" })
+  if ($controlledOutput0.Count -ne 1 -or [int]$controlledOutput0[0].mismatchCount -ne 1 -or
+      [long]$controlledOutput0[0].firstMismatchIndex -ne 0 -or $controlledReferenceReport.referenceValidation.passed) {
+    throw "Controlled raw-reference mutation did not produce exactly one output0 mismatch at index zero."
+  }
+  Copy-Item -LiteralPath $controlledReferenceOutputPath -Destination (Join-Path $ReportDirectory "controlled-reference-output.json") -Force
+
+  $controlledMaskDirectory = Join-Path $ReportDirectory "controlled-mask-tamper"
+  if (Test-Path -LiteralPath $controlledMaskDirectory) {
+    Remove-Item -LiteralPath $controlledMaskDirectory -Recurse -Force
+  }
+  Copy-Item -LiteralPath $archivedMaskDirectory -Destination $controlledMaskDirectory -Recurse -Force
+  $controlledMaskManifestPath = Join-Path $controlledMaskDirectory "segmentation-mask-artifacts.manifest.json"
+  $controlledMaskManifest = Get-Content -LiteralPath $controlledMaskManifestPath -Raw -Encoding utf8 | ConvertFrom-Json
+  foreach ($prediction in @($controlledMaskManifest.predictions)) {
+    foreach ($propertyName in @("prototypeProbability", "sourceProbability", "sourceThresholded")) {
+      $artifact = $prediction.$propertyName
+      if ($null -ne $artifact) {
+        $artifact.path = Join-Path $controlledMaskDirectory ([string]$artifact.fileName)
+      }
+    }
+  }
+  [IO.File]::WriteAllText($controlledMaskManifestPath, ($controlledMaskManifest | ConvertTo-Json -Depth 16), $utf8)
+  $controlledMaskArtifact = $controlledMaskManifest.predictions[0].sourceThresholded
+  $controlledMaskPath = [string]$controlledMaskArtifact.path
+  $controlledMaskExpectedSha256 = [string]$controlledMaskArtifact.sha256
+  $controlledMaskOriginalSha256 = (Get-FileHash -LiteralPath $controlledMaskPath -Algorithm SHA256).Hash.ToLowerInvariant()
+  $controlledMaskBytes = [IO.File]::ReadAllBytes($controlledMaskPath)
+  if ($controlledMaskBytes.Length -eq 0) {
+    throw "Controlled thresholded mask is empty."
+  }
+  $controlledMaskBytes[0] = if ($controlledMaskBytes[0] -eq 0) { 1 } else { 0 }
+  [IO.File]::WriteAllBytes($controlledMaskPath, $controlledMaskBytes)
+  $controlledMaskMutatedSha256 = (Get-FileHash -LiteralPath $controlledMaskPath -Algorithm SHA256).Hash.ToLowerInvariant()
+  if (-not [string]::Equals($controlledMaskOriginalSha256, $controlledMaskExpectedSha256, [StringComparison]::Ordinal) -or
+      [string]::Equals($controlledMaskMutatedSha256, $controlledMaskExpectedSha256, [StringComparison]::Ordinal)) {
+    throw "Controlled mask mutation did not preserve the original manifest digest while changing one byte."
+  }
+
+  $controlledMaskReferenceDirectory = Join-Path $runOutput "controlled-mask-reference"
+  $controlledMaskArguments = @($independentArguments)
+  $controlledMaskArguments = Set-NamedArgumentValue -Arguments $controlledMaskArguments -Name "--output-directory" -Value $controlledMaskReferenceDirectory
+  $controlledMaskArguments = Set-NamedArgumentValue -Arguments $controlledMaskArguments -Name "--actual-manifest" -Value $controlledMaskManifestPath
+  $controlledMaskResult = Invoke-CapturedProcess -FileName $PythonPath -Arguments $controlledMaskArguments -WorkingDirectory $RepositoryRoot
+  $controlledMaskStdoutPath = Join-Path $ReportDirectory "controlled-mask.stdout.log"
+  $controlledMaskStderrPath = Join-Path $ReportDirectory "controlled-mask.stderr.log"
+  [IO.File]::WriteAllText($controlledMaskStdoutPath, $controlledMaskResult.Stdout, $utf8)
+  [IO.File]::WriteAllText($controlledMaskStderrPath, $controlledMaskResult.Stderr, $utf8)
+  if ($controlledMaskResult.ExitCode -ne 1 -or
+      $controlledMaskResult.Stderr.IndexOf("Thresholded mask SHA256 does not match the manifest.", [StringComparison]::Ordinal) -lt 0) {
+    throw "Controlled mask mutation did not fail closed on the manifest SHA256 mismatch."
+  }
+}
 
 $gpuName = ""
 $driverVersion = ""
@@ -494,22 +942,130 @@ $workspaceRemoved = $false
 if (-not $KeepWorkspace.IsPresent) {
   $resolvedCleanupTarget = (Resolve-Path -LiteralPath $OutputRoot).Path
   Assert-PathUnderRoot -Path $resolvedCleanupTarget -Root $outerRoot -Description "Consumer cleanup target"
-  Remove-Item -LiteralPath $resolvedCleanupTarget -Recurse -Force
+  Remove-DirectoryTree -Path $resolvedCleanupTarget
   $workspaceRemoved = -not (Test-Path -LiteralPath $resolvedCleanupTarget)
 }
 
+$segmentationEvidence = $null
+if ($isSegmentationScenario) {
+  $rawTensorSummaries = @(
+    foreach ($comparison in $referenceComparisons) {
+      [pscustomobject][ordered]@{
+        tensorName = [string]$comparison.tensorName
+        actualShape = @($comparison.actualShape)
+        referenceShape = @($comparison.referenceShape)
+        comparedElementCount = [long]$comparison.comparedElementCount
+        mismatchCount = [long]$comparison.mismatchCount
+        firstMismatchIndex = [long]$comparison.firstMismatchIndex
+        maximumAbsoluteError = [double]$comparison.maximumAbsoluteError
+        maximumRelativeError = [double]$comparison.maximumRelativeError
+        referenceSha256 = [string]$comparison.referenceSha256
+        sourceClassification = [string]$comparison.sourceClassification
+        passed = [bool]$comparison.passed
+      }
+    }
+  )
+  $independentComparisonSummaries = @(
+    foreach ($comparison in @($independentComparison.comparisons)) {
+      [pscustomobject][ordered]@{
+        classId = [int]$comparison.classId
+        className = [string]$comparison.className
+        maximumBoxCoordinateAbsoluteError = [double]$comparison.maximumBoxCoordinateAbsoluteError
+        scoreAbsoluteError = [double]$comparison.scoreAbsoluteError
+        boxIoU = [double]$comparison.boxIoU
+        maskIoU = [double]$comparison.maskIoU
+        passed = [bool]$comparison.passed
+      }
+    }
+  )
+  $archivedMaskFiles = @(Get-ChildItem -LiteralPath $archivedMaskDirectory -File)
+  $segmentationEvidence = [pscustomobject][ordered]@{
+    modelContract = [pscustomobject][ordered]@{
+      input = [pscustomobject][ordered]@{ name = "images"; shape = @(1, 3, 640, 640); dataType = "float32" }
+      outputs = @(
+        [pscustomobject][ordered]@{ name = "output0"; shape = @(1, 116, 8400); role = "detection-rows-with-32-mask-coefficients" },
+        [pscustomobject][ordered]@{ name = "output1"; shape = @(1, 32, 160, 160); role = "mask-prototypes" }
+      )
+    }
+    rawTensorReferenceValidation = [pscustomobject][ordered]@{
+      sourceClassification = "independent-onnxruntime-cpu-execution-provider"
+      absoluteTolerance = 0.02
+      relativeTolerance = 0.03
+      tensorCount = $rawTensorSummaries.Count
+      comparedElementCount = [long](($rawTensorSummaries | Measure-Object comparedElementCount -Sum).Sum)
+      mismatchCount = [long](($rawTensorSummaries | Measure-Object mismatchCount -Sum).Sum)
+      tensors = $rawTensorSummaries
+      completed = $true
+      passed = $true
+    }
+    maskArtifacts = [pscustomobject][ordered]@{
+      runtimeManifestSha256 = $runtimeMaskManifestSha256
+      archivedManifestSha256 = $archivedMaskManifestSha256
+      archivedFileCount = $archivedMaskFiles.Count
+      archivedBytes = [long](($archivedMaskFiles | Measure-Object Length -Sum).Sum)
+      predictionCount = [int]$archivedMaskManifest.predictionCount
+      spatialTransformApplied = [bool]$archivedMaskManifest.spatialTransformApplied
+      sourceThresholdedMaskCount = @($archivedMaskManifest.predictions | Where-Object { $null -ne $_.sourceThresholded }).Count
+    }
+    independentPostprocessValidation = [pscustomobject][ordered]@{
+      evidenceClassification = [string]$independentComparison.evidenceClassification
+      referenceFramework = [string]$independentReference.runtime.framework
+      pythonVersion = [string]$independentReference.runtime.pythonVersion
+      ultralyticsVersion = [string]$independentReference.runtime.ultralyticsVersion
+      torchVersion = [string]$independentReference.runtime.torchVersion
+      referenceSha256 = (Get-FileHash -LiteralPath $independentReferencePath -Algorithm SHA256).Hash.ToLowerInvariant()
+      comparisonSha256 = (Get-FileHash -LiteralPath $independentComparisonPath -Algorithm SHA256).Hash.ToLowerInvariant()
+      thresholds = $independentComparison.thresholds
+      predictionCount = [int]$independentComparison.actualPredictionCount
+      comparisons = $independentComparisonSummaries
+      completed = [bool]$independentComparison.completed
+      passed = [bool]$independentComparison.passed
+    }
+    controlledRawReferenceValidation = [pscustomobject][ordered]@{
+      kind = "single-reference-value-mutation"
+      mutationIndex = 0
+      mutationDelta = 10000.0
+      mutatedReferenceSha256 = $controlledReferenceMutationSha256
+      exitCode = $controlledReferenceResult.ExitCode
+      tensorName = [string]$controlledOutput0[0].tensorName
+      comparedElementCount = [long]$controlledOutput0[0].comparedElementCount
+      mismatchCount = [long]$controlledOutput0[0].mismatchCount
+      firstMismatchIndex = [long]$controlledOutput0[0].firstMismatchIndex
+      validationPassed = [bool]$controlledReferenceReport.referenceValidation.passed
+      failClosed = $true
+    }
+    controlledMaskIntegrityValidation = [pscustomobject][ordered]@{
+      kind = "source-thresholded-mask-single-byte-mutation-with-unchanged-manifest-sha256"
+      expectedSha256 = $controlledMaskExpectedSha256
+      originalSha256 = $controlledMaskOriginalSha256
+      mutatedSha256 = $controlledMaskMutatedSha256
+      exitCode = $controlledMaskResult.ExitCode
+      diagnostic = "Thresholded mask SHA256 does not match the manifest."
+      failClosed = $true
+    }
+  }
+}
+
+$reportRecordKind = if ($isSegmentationScenario) { "yolovision-yolov8n-seg-local-package-consumer-runtime" } else { "yolovision-yolox-local-package-consumer-runtime" }
+$reportFileName = if ($isSegmentationScenario) { "yolov8n-seg-local-package-consumer-runtime.json" } else { "yolox-local-package-consumer-runtime.json" }
+$reportTitle = if ($isSegmentationScenario) { "YOLOv8n-seg Local Package Consumer Runtime" } else { "YOLOX Local Package Consumer Runtime" }
+$sourceCommit = (& git -C $RepositoryRoot rev-parse HEAD).Trim()
+
 $report = [pscustomobject][ordered]@{
-  schemaVersion = 2
-  recordKind = "yolovision-yolox-local-package-consumer-runtime"
+  schemaVersion = if ($isSegmentationScenario) { 3 } else { 2 }
+  recordKind = $reportRecordKind
   generatedAtUtc = [DateTime]::UtcNow.ToString("O")
   validationState = "passed-local-package-consumer-runtime"
   evidenceClassification = "local-package-consumer-runtime"
+  scenario = $Scenario
+  sourceCommit = $sourceCommit
   runtimePackageKey = $RuntimePackageKey
   tensorRtLine = $TensorRtLine
   consumer = [pscustomobject][ordered]@{
     template = "samples/YoloVision.PackageConsumer"
     targetFramework = "net8.0"
     projectReferenceCount = 0
+    directAssemblyReferenceCount = 0
     restoredProjectLibraryCount = $projectLibraryCount
     packageSourceKind = "local-file-feed-only"
     packageSourceCount = 3
@@ -521,6 +1077,7 @@ $report = [pscustomobject][ordered]@{
     restoreExitCode = $restoreResult.ExitCode
     buildExitCode = $buildResult.ExitCode
     runtimeExitCode = $runResult.ExitCode
+    nativeBridgePathEnvironmentVariableSet = $false
     restoreCommand = "dotnet restore $consumerProjectPath --configfile $nugetConfigPath --packages $packageCache --force --no-cache --verbosity minimal"
     buildCommand = "dotnet build $consumerProjectPath -c Release --no-restore --verbosity minimal"
     runtimeCommand = "dotnet " + ($runArguments -join ' ')
@@ -545,11 +1102,17 @@ $report = [pscustomobject][ordered]@{
     bridgeBuildCudaToolkitVersion = $bridgeCudaToolkitVersion
     bridgeBuildTensorRtLineMatches = $true
     tensorRtCudaAndCudnnAreExternalDependencies = $true
+    packageContainsTensorRtCudaOrCudnn = ($vendorRuntimeEntries.Count -ne 0)
+    vendorRuntimePackageEntryCount = $vendorRuntimeEntries.Count
+    bridgeNativePackageEntryCount = $bridgeNativeEntries.Count
   }
   assets = [pscustomobject][ordered]@{
     modelSha256 = (Get-FileHash -LiteralPath $ModelPath -Algorithm SHA256).Hash.ToLowerInvariant()
     labelsSha256 = (Get-FileHash -LiteralPath $LabelsPath -Algorithm SHA256).Hash.ToLowerInvariant()
     imageSha256 = (Get-FileHash -LiteralPath $ImagePath -Algorithm SHA256).Hash.ToLowerInvariant()
+    modelWeightsSha256 = if ($isSegmentationScenario) { (Get-FileHash -LiteralPath $ModelWeightsPath -Algorithm SHA256).Hash.ToLowerInvariant() } else { $null }
+    referenceOutput0Sha256 = if ($isSegmentationScenario) { (Get-FileHash -LiteralPath $ReferenceOutput0Path -Algorithm SHA256).Hash.ToLowerInvariant() } else { $null }
+    referenceOutput1Sha256 = if ($isSegmentationScenario) { (Get-FileHash -LiteralPath $ReferenceOutput1Path -Algorithm SHA256).Hash.ToLowerInvariant() } else { $null }
     tensorLength = $tensorLength
     tensorSha256 = $tensorSha256
     assetsRemainOnEDrive = $true
@@ -566,6 +1129,7 @@ $report = [pscustomobject][ordered]@{
     outputJsonSha256 = (Get-FileHash -LiteralPath $copiedOutputJson -Algorithm SHA256).Hash.ToLowerInvariant()
     visualizationSha256 = (Get-FileHash -LiteralPath $copiedVisualization -Algorithm SHA256).Hash.ToLowerInvariant()
   }
+  segmentation = $segmentationEvidence
   host = [pscustomobject][ordered]@{
     os = [Runtime.InteropServices.RuntimeInformation]::OSDescription
     processArchitecture = [Runtime.InteropServices.RuntimeInformation]::ProcessArchitecture.ToString()
@@ -577,22 +1141,27 @@ $report = [pscustomobject][ordered]@{
     isRuntimeExecutionEvidence = $true
     isRealModelRuntimeEvidence = $true
     isLocalPackageConsumerRuntimeEvidence = $true
+    isSourceTreeRuntimeProof = $false
     isPackageConsumerRuntimeProof = $false
+    isPublicPackageProof = $false
     packagesDownloadedFromPublicFeed = $false
     publicRedistributionOwnerApproval = $false
     canPromotePackageConsumerRuntime = $false
     canPublishPublicly = $false
     isPostPublishProof = $false
+    ownerReleaseAcceptance = $false
+    releaseProof = $false
     canCloseReleaseIssue = $false
     performsPublish = $false
+    uploadsAssets = $false
   }
 }
 
-$reportPath = Join-Path $ReportDirectory "yolox-local-package-consumer-runtime.json"
+$reportPath = Join-Path $ReportDirectory $reportFileName
 $report | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath $reportPath -Encoding utf8
 $markdownPath = [IO.Path]::ChangeExtension($reportPath, ".md")
 $markdown = @(
-  "# YOLOX Local Package Consumer Runtime",
+  "# $reportTitle",
   "",
   "- state: ``$($report.validationState)``",
   "- classification: ``$($report.evidenceClassification)``",
@@ -607,7 +1176,14 @@ $markdown = @(
   "- package-consumer runtime proof: ``False``",
   "- can publish publicly: ``False``",
   "",
-  "This record proves a clean local-feed PackageReference restore/build/run with the official YOLOX assets. It does not prove public-feed download, redistribution approval, post-publish verification, or release closure."
+  $(if ($isSegmentationScenario) { "- raw tensor values compared: ``$($segmentationEvidence.rawTensorReferenceValidation.comparedElementCount)``" } else { $null }),
+  $(if ($isSegmentationScenario) { "- raw tensor mismatches: ``0``" } else { $null }),
+  $(if ($isSegmentationScenario) { "- independent mask comparison passed: ``True``" } else { $null }),
+  $(if ($isSegmentationScenario) { "- raw-reference negative exit: ``$($controlledReferenceResult.ExitCode)``" } else { $null }),
+  $(if ($isSegmentationScenario) { "- mask-integrity negative exit: ``$($controlledMaskResult.ExitCode)``" } else { $null }),
+  "",
+  $(if ($isSegmentationScenario) { "This record proves a clean local-feed PackageReference restore/build/run with the pinned YOLOv8n-seg assets, two raw tensor references, source-image mask artifacts, an independent PyTorch comparison, and two fail-closed negatives." } else { "This record proves a clean local-feed PackageReference restore/build/run with the official YOLOX assets." }),
+  "It does not prove public-feed download, redistribution approval, post-publish verification, Owner release acceptance, or release closure."
 )
 $markdown | Set-Content -LiteralPath $markdownPath -Encoding utf8
 

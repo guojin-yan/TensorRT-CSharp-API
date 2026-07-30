@@ -23,6 +23,9 @@ public sealed class ExternalVendorRuntimePackagePolicyTests
             static value => Assert.Equal("bridge", value));
         Assert.Equal("guojin-yan", root.GetProperty("formalReleaseRepositoryOwner").GetString());
         Assert.Equal("grape-yan", root.GetProperty("validationOnlyRepositoryOwner").GetString());
+        Assert.Equal(
+            new[] { "JYPPX.TensorRT.CSharp.API", "JYPPX.TensorRT.CSharp.API.YoloVision" },
+            root.GetProperty("managedPackageIds").EnumerateArray().Select(static value => value.GetString()).ToArray());
         Assert.True(root.GetProperty("sourceArchivePolicy").GetProperty("mustUseGitTrackedFiles").GetBoolean());
         Assert.True(root.GetProperty("sourceArchivePolicy").GetProperty("mustExcludeThirdPartyBinaries").GetBoolean());
 
@@ -101,6 +104,21 @@ public sealed class ExternalVendorRuntimePackagePolicyTests
             (int bridgeExitCode, string bridgeOutput) = RunPowerShell(gate, "-PackagePath", bridgePackage);
             Assert.Equal(0, bridgeExitCode);
             Assert.Contains("\"passed\":  true", bridgeOutput, StringComparison.Ordinal);
+
+            string yoloVisionPackage = Path.Combine(tempRoot, "yolovision.nupkg");
+            CreatePackage(yoloVisionPackage, "JYPPX.TensorRT.CSharp.API.YoloVision");
+            (int yoloVisionExitCode, string yoloVisionOutput) = RunPowerShell(gate, "-PackagePath", yoloVisionPackage);
+            Assert.Equal(0, yoloVisionExitCode);
+            Assert.Contains("\"kind\":  \"managed\"", yoloVisionOutput, StringComparison.Ordinal);
+
+            string invalidYoloVisionPackage = Path.Combine(tempRoot, "yolovision-native.nupkg");
+            CreatePackage(
+                invalidYoloVisionPackage,
+                "JYPPX.TensorRT.CSharp.API.YoloVision",
+                "runtimes/win-x64/native/jyppxtrtbridge.dll");
+            (int invalidYoloVisionExitCode, string invalidYoloVisionOutput) = RunPowerShell(gate, "-PackagePath", invalidYoloVisionPackage);
+            Assert.NotEqual(0, invalidYoloVisionExitCode);
+            Assert.Contains("must not contain runtimes/*/native assets", invalidYoloVisionOutput, StringComparison.OrdinalIgnoreCase);
 
             string vendorPackage = Path.Combine(tempRoot, "vendor.nupkg");
             CreatePackage(

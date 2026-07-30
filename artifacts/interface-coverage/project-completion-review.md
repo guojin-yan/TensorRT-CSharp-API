@@ -1,5 +1,44 @@
 # TensorRtSharp4.0 完成情况审查
 
+## 2026-07-31 YOLOv8n-seg Bridge-Only 本地包消费者闭环
+
+本阶段把已完成的 YOLOv8n-seg source-tree 真实案例推进到仓库外 clean consumer。消费者只使用 managed API、
+YoloVision 纯 C# 扩展和 TRT10/CUDA12.9 `.Bridge` 三个本地 `.nupkg`；CUDA、cuDNN、TensorRT 与模型资产继续由宿主机提供。
+
+### 实现
+
+- `Test-YoloVisionLocalPackageConsumer.ps1` 新增严格 `yolov8-segmentation` 场景，同时保持 YOLOX detection 默认语义；
+  兼容 Windows PowerShell 5.1，长 NuGet cache 使用受根目录保护的扩展路径清理。
+- 新增 `Test-YoloVisionSegmentationLocalPackageConsumer.ps1`，固定 `images:[1,3,640,640]`、
+  `output0:[1,116,8400]`、`output1:[1,32,160,160]`、双 raw reference 与 source-image mask 参数。
+- clean project 只有三个 `PackageReference`，禁止 `ProjectReference`、直接 `Reference/HintPath` 与
+  `JYPPX_NATIVE_BRIDGE_PATH`；NuGet sources 清空后只加入三个 E 盘 local file feed。
+- 新增 JSON parser 驱动的单值 reference mutation；mask 单字节篡改保持 manifest SHA256 不变，两条负例均 fail closed。
+- 独立 Ultralytics/PyTorch 脚本新增 `local-package-consumer-runtime` 分类，不把本地包结果写成 public package proof。
+- 新增专用轻量 evidence exporter、合同测试和中文教程；模型、ONNX、reference、mask、engine、SDK、nupkg 与完整日志均不提交。
+- 外部 vendor runtime policy 显式允许无 native entry 的 `JYPPX.TensorRT.CSharp.API.YoloVision` managed extension，
+  同时继续拒绝其携带任何 `runtimes/*/native` 资产。
+
+### 真实验证
+
+- 三包 restore/build/run：package count `3`、ProjectReference `0`、direct assembly reference `0`、restore graph project
+  library `0`、vendor runtime package entry `0`、Bridge native entry `1`。
+- TensorRT 10.11/CUDA 12.9：双 output 共比较 `1,793,600` 个值，mismatch `0`，dog/bicycle/truck/car 四个实例。
+- 独立 PyTorch：最低 box IoU `0.998436`，最低 mask IoU `0.991141`，四项均通过门槛。
+- raw reference 索引 0 加 10000：exit `1`、output0 mismatch `1`、first mismatch `0`、`YoloVision Passed=False`。
+- source thresholded mask 单字节篡改：exit `1`，按 manifest SHA256 在 IoU 前拒绝。
+- 默认 YOLOX clean consumer 回归通过：5 detections、`YoloVision Passed=True`。
+- 相关测试 `80/80`；外部 vendor policy 测试 `7/7`；YoloVision package surface `45` exported types、
+  `424` public members、finding `0`；完整 solution Debug build `0 warning / 0 error`。
+
+### 证据边界
+
+- 当前可声明 `local-package-consumer-runtime` 工程证据；不是公开 feed 下载后的 `package-consumer-runtime` proof。
+- `publicPackageProof=false`、`postPublishProof=false`、`publicRedistributionOwnerApproval=false`、
+  `ownerReleaseAcceptance=false`、`releaseProof=false`、`performsPublish=false`、`uploadsAssets=false`。
+- Ultralytics 权重为 `AGPL-3.0-only`，只用于本地验证；模型及派生 ONNX 的公开再分发仍需 Owner 单独批准。
+- 发布策略继续只允许 managed/C# 扩展、项目自有 `.Bridge` 和 Git 跟踪源码；CUDA、cuDNN、TensorRT、NVRTC 由用户安装。
+
 ## 2026-07-30 NVIDIA 运行库外置与 Bridge-Only 发布收口
 
 本阶段按最新 Owner 决策废止 CUDA、cuDNN、TensorRT、NVRTC 与 builder-resource 的打包/发布路线。正式发布物收敛为

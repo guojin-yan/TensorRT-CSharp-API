@@ -10,7 +10,8 @@
     "bridge"
   ],
   "managedPackageIds": [
-    "JYPPX.TensorRT.CSharp.API"
+    "JYPPX.TensorRT.CSharp.API",
+    "JYPPX.TensorRT.CSharp.API.YoloVision"
   ],
   "bridgePackageIdPattern": "^JYPPX\\.TensorRT\\.CSharp\\.API\\.Runtime\\..+\\.Bridge$",
   "allowedBridgeNativeFileNames": [
