@@ -298,6 +298,12 @@ result。布局门禁可重组 Git blob `db5eb26e158d64f94dd678351a260f8bd41c713
 `d1a7c4a34dde13ffa3fce824f5a95e0f0c528f30`，并固定 known-surface evaluation、triage/candidate count、blocker
 顺序、pointer non-exposure 与 proof classification。
 
+ONNX parser 与 ParserRefitter diagnostic summary 也已进入独立同名文件。原 226 行 parser snapshot 分为
+105 行 snapshot 与 126 行 summary；原 188 行 ParserRefitter snapshot 分为 85 行 snapshot 与 108 行 summary。
+布局门禁可重组 Git blob `7a2fde67837713343938bc73130707d696b699d6` 与
+`725939901e71733723097025d1ee3e48a344ca2b`，并固定 copied diagnostics、public constructor/property 顺序、
+pointer non-exposure 与 copied-summary proof classification。
+
 OutputAllocator diagnostics 继续按 public design owner 与 internal managed runtime gate 分层。原 637 行
 `Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeGate.cs` 降为 38 行 state/constructor core；entries、snapshots、
 lifecycle、shared invocation、trampoline/state 与 formatting 进入 6 份 partial，request/result 类型各自成文件。原 503 行

@@ -149,7 +149,10 @@ engine，不说明输出语义或精度。未知模型默认不自动猜 binding
 ## Parser diagnostics 怎么保存
 
 parser failure 应至少记录 error count、code、description、node/file context 和 TensorRT line。仓库 runner 使用
-`TensorRtOnnxParserDiagnosticSnapshot` 与 summary，将字符串复制到 managed 侧，并可在 `ClearErrors()` 后继续诊断。
+`TensorRtOnnxParserDiagnosticSnapshot` 与 summary 将字符串复制到 managed 侧，并可在 `ClearErrors()` 后继续诊断；
+snapshot/summary 分别由 `TensorRtOnnxParserDiagnosticSnapshot.cs` 与 `TensorRtOnnxParserDiagnosticSummary.cs` 拥有，
+ParserRefitter 对应使用 `TensorRtOnnxParserRefitterDiagnosticSnapshot.cs` 与
+`TensorRtOnnxParserRefitterDiagnosticSummary.cs`。
 
 常见分层：
 

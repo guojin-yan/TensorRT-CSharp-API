@@ -337,6 +337,12 @@ gate is split into a 53-line evaluator and a 151-line result. The layout gate re
 `db5eb26e158d64f94dd678351a260f8bd41c7138` and `d1a7c4a34dde13ffa3fce824f5a95e0f0c528f30`,
 preserving known-surface evaluation, triage/candidate counts, blocker ordering, pointer non-exposure, and proof classification.
 
+ONNX parser and ParserRefitter diagnostic summaries now live in dedicated same-name files. The former 226-line parser
+snapshot is split into a 105-line snapshot and a 126-line summary; the former 188-line ParserRefitter snapshot is split
+into an 85-line snapshot and a 108-line summary. The layout gate recomposes Git blobs
+`7a2fde67837713343938bc73130707d696b699d6` and `725939901e71733723097025d1ee3e48a344ca2b`, preserving copied
+diagnostics, public constructor/property order, pointer non-exposure, and copied-summary proof classification.
+
 OutputAllocator diagnostics are split across the public design owner and its internal managed runtime gate. The former
 637-line `Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeGate.cs` is reduced to a 38-line state/constructor core;
 entries, snapshots, lifecycle, shared invocation, trampoline/state, and formatting live in six partials, with request/result

@@ -360,6 +360,16 @@ internal static class RepositorySourceReader
                 "TensorRtRnnV2BorrowedStateDesignGate.cs",
                 "TensorRtRnnV2BorrowedStateDesignGateResult.cs"
             ],
+            ["TensorRtOnnxParserDiagnosticSnapshot.cs"] =
+            [
+                "TensorRtOnnxParserDiagnosticSnapshot.cs",
+                "TensorRtOnnxParserDiagnosticSummary.cs"
+            ],
+            ["TensorRtOnnxParserRefitterDiagnosticSnapshot.cs"] =
+            [
+                "TensorRtOnnxParserRefitterDiagnosticSnapshot.cs",
+                "TensorRtOnnxParserRefitterDiagnosticSummary.cs"
+            ],
             ["TensorRtStreamIoInterfaceInfoDesignGate.cs"] =
             [
                 "TensorRtStreamIoInterfaceInfoDesignGate.cs",

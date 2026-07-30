@@ -7926,3 +7926,40 @@ prerequisite 顺序、pointer non-exposure、deferred rows 与 proof classificat
   Linux、package consumer、public package、post-publish、Owner acceptance 或 release proof。
 - 本机无仓库认可的 `pwsh`，未运行 exporter/B-tier 聚合；8 份 publishing 用户变更未触碰、未暂存；
   未 push、未触发 GitHub Actions、未执行远程发布操作。
+
+## 2026-07-30 ONNX Parser Diagnostic Summary Split
+
+本阶段继续整理 `JYPPX.TensorRtSharp/Parsing`，将 ONNX parser 与 ParserRefitter diagnostic summary 从对应
+snapshot 文件分离。copied diagnostics、public constructor/property 顺序、`ToSummary`/诊断文本、pointer
+non-exposure 与 copied-summary proof classification 保持不变。
+
+### 实现与门禁
+
+- 原 226 行 `TensorRtOnnxParserDiagnosticSnapshot.cs` 分为 105 行 snapshot 与 126 行
+  `TensorRtOnnxParserDiagnosticSummary.cs`；两份类型继续保留 public constructor。
+- 原 188 行 `TensorRtOnnxParserRefitterDiagnosticSnapshot.cs` 分为 85 行 snapshot 与 108 行
+  `TensorRtOnnxParserRefitterDiagnosticSummary.cs`；snapshot 保留 `ToSummary` 与自身 `ToString`。
+- `ManagedOnnxParserDiagnosticSummarySourceLayoutTests` 固定四个文件的精确 top-level type、public constructor、
+  method、public property、pointer-free/non-proof surface、test source-set 与文档 marker，并重组原源码。
+- 拆分前 Git blob 为 `7a2fde67837713343938bc73130707d696b699d6` 与
+  `725939901e71733723097025d1ee3e48a344ca2b`；normalized SHA-256 保持
+  `9239ea696671216091e72abcc5f3606c5be7e4021033d312cfb4ddb39cc8a2c9` 与
+  `0231f71dfc55d28c26d09ff152010165bf2b9d51214b9b1b1533d87e25f58e1a`。
+- test reader 显式展开两套 source-set；三份既有单文件消费测试改读组合，既有 DeferredReadonlyUplift consumer
+  沿用统一 reader；ONNX roundtrip 文章与双语 source-organization 同步真实 Summary owner。
+
+### 验证与边界
+
+- 新布局门禁与四个直接消费集合联合定向 `28/28`；`SourceLayoutTests` `395/395`；
+  统一 Managed 前缀集合 `794/794`。
+- `JYPPX.TensorRtSharp` 全目标框架与完整 `TensorRtSharp.sln` Debug build 均为
+  `0 warning / 0 error`；RuntimePackageReadiness UTF-8 ParseInput 为 `0 error`，对应质量测试 `2/2`。
+- 本批没有 readiness/candidate 对这两份源码的直接路径引用，因此 ignored deferred candidate evidence 保持
+  `270` 条引用、`156` 个唯一路径、`0` 缺失；引用的 `22` 份 JSON 全部可解析。
+- `JYPPX.TensorRtSharp` 多顶层公开类型文件由 `28` 降为 `26`；枚举和值类型集合继续保持内聚。
+- Generated/native/manifest/project/ABI 改动为 0；`git diff --check` 通过。构建后短暂进程已自然退出，复查未发现
+  引用本工作区的其他进程；Downloads 近三小时没有本批重资产命中；6 个已知 YoloVision/YOLOX Temp 目录继续保留。
+- source/type relocation 与 ONNX parser diagnostic summary split 不构成新的 TensorRT/CUDA runtime、real model、
+  Linux、package consumer、public package、post-publish、Owner acceptance 或 release proof。
+- 本机无仓库认可的 `pwsh`，未运行 exporter/B-tier 聚合；8 份 publishing 用户变更未触碰、未暂存；
+  未 push、未触发 GitHub Actions、未执行远程发布操作。
