@@ -42,6 +42,10 @@ The TRT10/CUDA12.9 Add/Sub smoke now runs the shared sample layer as well. Its p
 two successful comparisons. Its controlled mismatch records one mismatch at index 7 with maximum absolute error 0.25. This proves
 real build/enqueue/readback and fail-closed behavior while remaining synthetic runtime evidence.
 
+The smoke summary names aggregate and per-tensor completion separately as `ReferenceValidationCompleted`,
+`ReferenceValidationPassed`, and `ComparisonCompleted`. This prevents ambiguous duplicate fields and keeps metadata comparability
+distinct from completed value comparison.
+
 ## Reference JSON
 
 Each output maps to one traceable structured document:

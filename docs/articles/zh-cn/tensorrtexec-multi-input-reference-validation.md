@@ -42,6 +42,9 @@ engine 顺序保存 `Inputs`/`Outputs`，YoloVision JSON 写入 `inputTensors` �
 负向分支固定得到 `MismatchCount=1`、`FirstMismatchIndex=7`、`MaximumAbsoluteError=0.25`。这证明实际 build、enqueue、
 readback 与 fail-closed 行为，不改变 synthetic runtime 的证据分类。
 
+smoke summary 把总体与单 tensor 完成状态分开命名为 `ReferenceValidationCompleted`、
+`ReferenceValidationPassed` 和 `ComparisonCompleted`，避免匿名字段重名，也避免把 metadata 不可比较误写成数值比较完成。
+
 ## Reference JSON
 
 每个 output 使用独立、可追溯的 JSON：
