@@ -292,7 +292,8 @@ $plan = [pscustomobject]@{
   performsDelete = $false
   preservePackageKinds = @("managed", "bridge")
   preserveGitHubGeneratedSourceArchives = $true
-  nextAction = "Review every delete-after-owner-review package/version and Release asset, then provide explicit Owner confirmation before running a separate deletion command."
+  cleanupScript = "eng/Invoke-RetiredVendorPackageCleanup.ps1"
+  nextAction = "Run eng/Invoke-RetiredVendorPackageCleanup.ps1 without -ExecuteDeletion for live preflight. After explicit Owner confirmation of this fingerprint, rerun with -ExecuteDeletion and -ExpectedReviewFingerprint."
 }
 
 New-Item -ItemType Directory -Path $OutputDirectory -Force | Out-Null
@@ -349,7 +350,7 @@ $($retiredAssetRows -join "`r`n")
 |---|---|---:|---:|
 $($preservedRows -join "`r`n")
 
-Owner review is required before deletion. Preserve ``JYPPX.TensorRT.CSharp.API``, every ``.Bridge`` package, and GitHub-generated source archives.
+Owner review is required before deletion. Preserve ``JYPPX.TensorRT.CSharp.API``, every ``.Bridge`` package, and GitHub-generated source archives. Run ``eng/Invoke-RetiredVendorPackageCleanup.ps1`` without ``-ExecuteDeletion`` for a live, side-effect-free preflight.
 "@
 $markdown | Set-Content -LiteralPath $markdownPath -Encoding utf8
 

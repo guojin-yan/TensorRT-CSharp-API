@@ -61,7 +61,8 @@ $plan = [pscustomobject]@{
   performsRemoteQuery = $false
   performsDelete = $false
   remoteInventoryScript = "eng/Export-RetiredVendorPackageRemoteInventory.ps1"
-  nextAction = "Run eng/Export-RetiredVendorPackageRemoteInventory.ps1 as the formal owner, review its exact version/asset IDs and fingerprint, then request Owner confirmation before deletion."
+  cleanupScript = "eng/Invoke-RetiredVendorPackageCleanup.ps1"
+  nextAction = "Run the remote inventory, then run eng/Invoke-RetiredVendorPackageCleanup.ps1 in its default validate-only mode. Require explicit Owner confirmation of the exact fingerprint before -ExecuteDeletion."
 }
 
 New-Item -ItemType Directory -Path $OutputDirectory -Force | Out-Null
@@ -81,7 +82,7 @@ This is a local candidate inventory. It did not query or modify GitHub.
 |---|---|---|---|---|
 $($rows -join "`r`n")
 
-Preserve the managed package, every `.Bridge` package, and GitHub-generated source archives. Run `eng/Export-RetiredVendorPackageRemoteInventory.ps1` as the formal owner, verify the exact version/asset IDs and review fingerprint, and obtain Owner confirmation before deletion.
+Preserve the managed package, every `.Bridge` package, and GitHub-generated source archives. Run `eng/Export-RetiredVendorPackageRemoteInventory.ps1` as the formal owner, then run `eng/Invoke-RetiredVendorPackageCleanup.ps1` in validate-only mode. Verify the exact version/asset IDs and review fingerprint, and obtain Owner confirmation before `-ExecuteDeletion`.
 "@
 $markdown | Set-Content -LiteralPath $markdownPath -Encoding utf8
 $plan | ConvertTo-Json -Depth 8

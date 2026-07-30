@@ -178,6 +178,39 @@ public sealed class ExternalVendorRuntimePackagePolicyTests
         Assert.DoesNotContain("Remove-Item", script, StringComparison.OrdinalIgnoreCase);
     }
 
+    [Fact]
+    public void CleanupExecutorDefaultsToLivePreflightAndRequiresThreeDeletionGates()
+    {
+        string script = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "eng",
+            "Invoke-RetiredVendorPackageCleanup.ps1"));
+
+        Assert.Contains("SupportsShouldProcess = $true", script, StringComparison.Ordinal);
+        Assert.Contains("ConfirmImpact = \"High\"", script, StringComparison.Ordinal);
+        Assert.Contains("if (-not $ExecuteDeletion.IsPresent)", script, StringComparison.Ordinal);
+        Assert.Contains("-ExpectedReviewFingerprint is required with -ExecuteDeletion", script, StringComparison.Ordinal);
+        Assert.Contains("$ExpectedReviewFingerprint -ne $computedFingerprint", script, StringComparison.Ordinal);
+        Assert.Contains("$PSCmdlet.ShouldProcess", script, StringComparison.Ordinal);
+        Assert.Contains("livePreflightPassed", script, StringComparison.Ordinal);
+        Assert.Contains("Unreviewed retired package exists remotely", script, StringComparison.Ordinal);
+        Assert.Contains("Unreviewed package version exists", script, StringComparison.Ordinal);
+        Assert.Contains("Unreviewed retired Release asset exists", script, StringComparison.Ordinal);
+        Assert.Contains("$livePackageIdsByLength", script, StringComparison.Ordinal);
+        Assert.Contains("Sort-Object { $_.Length } -Descending", script, StringComparison.Ordinal);
+        Assert.Contains("\"--method\", \"DELETE\"", script, StringComparison.Ordinal);
+        Assert.Contains("/versions/$([long]$version.id)", script, StringComparison.Ordinal);
+        Assert.Contains("/releases/assets/$([long]$asset.id)", script, StringComparison.Ordinal);
+        Assert.Contains("Preserved package is missing after deletion", script, StringComparison.Ordinal);
+        Assert.Contains("Preserved Release asset is missing after deletion", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("Remove-Item", script, StringComparison.OrdinalIgnoreCase);
+
+        int executeGuard = script.IndexOf("if (-not $ExecuteDeletion.IsPresent)", StringComparison.Ordinal);
+        int shouldProcess = script.IndexOf("$PSCmdlet.ShouldProcess", StringComparison.Ordinal);
+        int firstDelete = script.IndexOf("\"--method\", \"DELETE\"", StringComparison.Ordinal);
+        Assert.True(executeGuard >= 0 && shouldProcess > executeGuard && firstDelete > shouldProcess);
+    }
+
     private static void CreatePackage(string path, string packageId, params string[] nativeEntries)
     {
         using ZipArchive archive = ZipFile.Open(path, ZipArchiveMode.Create);
