@@ -304,6 +304,14 @@ Git blobs `9ab81dadc09b84d03ad39d094acf16c97f25100a` and `85c565c4094b240fc76b5c
 scoped-buffer/engine ownership, dependency/driver classification, public property order, pointer non-exposure, deferred
 rows, and runtime-proof blockers.
 
+`TensorRtExecutionContextDeploymentSummary.cs` and `TensorRtBuilderConfigDeploymentSummary.cs` now own their respective
+top-level summaries. The former 424-line
+`TensorRtExecutionContextDeploymentSnapshot.cs` is split into a 270-line snapshot and a 157-line summary; the former
+408-line `TensorRtBuilderConfigDeploymentSnapshot.cs` is split into a 254-line snapshot and a 157-line summary. The layout
+gate recomposes the pre-split Git blobs `e0413b02864fae42c4d0c6872b96f2cee3f53e70` and
+`d7501f3ba89e00f9bb373d8892b0804f5cb91637`, preserving snapshot-to-summary mapping, public property order,
+diagnostic counts, pointer-free summaries, and non-proof semantics.
+
 OutputAllocator diagnostics are split across the public design owner and its internal managed runtime gate. The former
 637-line `Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeGate.cs` is reduced to a 38-line state/constructor core;
 entries, snapshots, lifecycle, shared invocation, trampoline/state, and formatting live in six partials, with request/result

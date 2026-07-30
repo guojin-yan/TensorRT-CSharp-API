@@ -267,6 +267,13 @@ boundary precheck 分为 176 行 evaluator 与 218 行 result；原 393 行 depe
 `85c565c4094b240fc76b5c0d1f4d66b308de6374`，并固定 scoped-buffer/engine ownership、dependency/driver 分类、
 公开属性顺序、pointer non-exposure、deferred-row 与 runtime-proof blocker 语义。
 
+`TensorRtExecutionContextDeploymentSummary.cs` 与 `TensorRtBuilderConfigDeploymentSummary.cs` 现在也各自拥有
+对应顶层 summary。原 424 行
+`TensorRtExecutionContextDeploymentSnapshot.cs` 分为 270 行 snapshot 与 157 行 summary；原 408 行
+`TensorRtBuilderConfigDeploymentSnapshot.cs` 分为 254 行 snapshot 与 157 行 summary。布局门禁可重组拆分前
+Git blob `e0413b02864fae42c4d0c6872b96f2cee3f53e70` 与 `d7501f3ba89e00f9bb373d8892b0804f5cb91637`，并固定
+snapshot-to-summary 映射、公开属性顺序、diagnostic count、pointer-free summary 与 non-proof 语义。
+
 OutputAllocator diagnostics 继续按 public design owner 与 internal managed runtime gate 分层。原 637 行
 `Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeGate.cs` 降为 38 行 state/constructor core；entries、snapshots、
 lifecycle、shared invocation、trampoline/state 与 formatting 进入 6 份 partial，request/result 类型各自成文件。原 503 行

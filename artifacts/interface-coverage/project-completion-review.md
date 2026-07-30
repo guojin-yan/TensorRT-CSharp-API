@@ -7746,3 +7746,38 @@ non-exposure、deferred rows 与 runtime-proof blocker 语义保持不变。
   real model、Linux、package consumer、public package、post-publish、Owner acceptance 或 release proof。
 - 本机无仓库认可的 `pwsh`，未运行 exporter/B-tier 聚合；8 份 publishing 用户变更未触碰、未暂存；
   未 push、未触发 GitHub Actions、未执行远程发布操作。
+
+## 2026-07-30 Deployment Snapshot Summary Split
+
+本阶段继续整理 `JYPPX.TensorRtSharp/Execution` 与 `JYPPX.TensorRtSharp/Builder`，将 ExecutionContext 和
+BuilderConfig deployment summary 从对应 snapshot 文件分离。snapshot-to-summary 映射、公开属性顺序、诊断计数、
+pointer-free summary 与 non-proof 语义保持不变。
+
+### 实现与门禁
+
+- 原 424 行 `TensorRtExecutionContextDeploymentSnapshot.cs` 分为 270 行 snapshot 与 157 行
+  `TensorRtExecutionContextDeploymentSummary.cs`；snapshot 保留构造、复制属性、`ToSummary` 与自身 `ToString`。
+- 原 408 行 `TensorRtBuilderConfigDeploymentSnapshot.cs` 分为 254 行 snapshot 与 157 行
+  `TensorRtBuilderConfigDeploymentSummary.cs`；summary 独立拥有构造、公开属性、派生状态与自身 `ToString`。
+- `ManagedDeploymentSnapshotSummarySourceLayoutTests` 固定四个文件的精确 top-level type、constructor、method、
+  public property、pointer-free surface、readiness/test source-set、直接消费测试和文档 marker，并重组原源码。
+- 拆分前 Git blob 为 `e0413b02864fae42c4d0c6872b96f2cee3f53e70` 与
+  `d7501f3ba89e00f9bb373d8892b0804f5cb91637`；normalized SHA-256 保持
+  `b39b5f61a4b3da0da42cb1b2cd49bc28323ce5c86ea5bd97a56cfc3c6e895a24` 与
+  `101a16504baeef0c98da3dc784faa0368e04183a92c216890890503556aa839e`。
+- test reader 显式展开两套 source-set；三个既有直接消费测试改读统一 reader；Windows API 完成说明与双语
+  source-organization 同步真实 summary owner。
+
+### 验证与边界
+
+- 新布局门禁与直接消费联合定向集合 `26/26`；`SourceLayoutTests` `330/330`；统一 Managed 前缀集合 `729/729`。
+- `JYPPX.TensorRtSharp` 全目标框架与完整 `TensorRtSharp.sln` Debug build 均为
+  `0 warning / 0 error`；RuntimePackageReadiness UTF-8 ParseInput 为 `0 error`，对应质量测试 `2/2`。
+- ignored deferred candidate evidence 更新为 `263` 条引用、`150` 个唯一路径、`0` 缺失；其中引用的
+  `22` 份 JSON 全部可解析，ignored 文件未强制提交。
+- Generated/native/manifest/project/ABI 改动为 0；`git diff --check` 通过。进程审计未发现引用本工作区的其他进程，
+  Downloads 近三小时没有本批重资产命中；6 个已知 YoloVision/YOLOX Temp 目录继续保留。
+- source/type relocation 与 deployment snapshot/summary split 不构成新的 TensorRT/CUDA runtime、real model、Linux、
+  package consumer、public package、post-publish、Owner acceptance 或 release proof。
+- 本机无仓库认可的 `pwsh`，未运行 exporter/B-tier 聚合；8 份 publishing 用户变更未触碰、未暂存；
+  未 push、未触发 GitHub Actions、未执行远程发布操作。

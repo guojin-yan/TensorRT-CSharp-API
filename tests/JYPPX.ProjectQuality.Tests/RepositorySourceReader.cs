@@ -310,6 +310,16 @@ internal static class RepositorySourceReader
                 "TensorRtRuntimeDeserializationDependencyDiagnostics.cs",
                 "TensorRtRuntimeDeserializationDependencyDiagnosticsResult.cs"
             ],
+            ["TensorRtExecutionContextDeploymentSnapshot.cs"] =
+            [
+                "TensorRtExecutionContextDeploymentSnapshot.cs",
+                "TensorRtExecutionContextDeploymentSummary.cs"
+            ],
+            ["TensorRtBuilderConfigDeploymentSnapshot.cs"] =
+            [
+                "TensorRtBuilderConfigDeploymentSnapshot.cs",
+                "TensorRtBuilderConfigDeploymentSummary.cs"
+            ],
             ["TensorRtStreamIoInterfaceInfoDesignGate.cs"] =
             [
                 "TensorRtStreamIoInterfaceInfoDesignGate.cs",
