@@ -284,6 +284,13 @@ pre-split Git blobs `ee3ae72d0750db446d8f44c7ca8f3e6aacd5e006` and `d8dcb0613a11
 ownership metadata/rule mapping, attach/detach lifecycle, public property order, pointer non-exposure, deferred rows,
 and runtime-proof blockers. Source organization does not promote any runtime proof.
 
+The Callback Core algorithm snapshot design gate and MemoryAllocation allocator interface-info design gate results now
+also have dedicated namesake files. The former 314-line algorithm gate is split into a 113-line evaluator and a 207-line
+result; the former 283-line allocator interface-info gate is split into a 114-line evaluator and a 175-line result. The
+layout gate recomposes the pre-split Git blobs `a7c9cca0316d8a52986b5ca3a1da64845b1afae8` and
+`695650b21a5bf5036728c26c3a4ece03798fd1f3`, preserving candidate interface/method sets, copied metadata shape,
+pointer non-exposure, deferred rows, and runtime-proof blockers.
+
 OutputAllocator diagnostics are split across the public design owner and its internal managed runtime gate. The former
 637-line `Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeGate.cs` is reduced to a 38-line state/constructor core;
 entries, snapshots, lifecycle, shared invocation, trampoline/state, and formatting live in six partials, with request/result

@@ -53,7 +53,11 @@
 - TRT10 deferred source：`native/src/tensorrt/v10/modules/deferred/cross_version_other_deferred.inc`
 - comparison matrix：`artifacts/interface-coverage/tensorrt-interface-comparison.csv`
 - design gate：`src/JYPPX.TensorRtSharp/Callbacks/Core/TensorRtAlgorithmSnapshotDesignGate.cs`
+- result model：`src/JYPPX.TensorRtSharp/Callbacks/Core/TensorRtAlgorithmSnapshotDesignGateResult.cs`
 - quality：`tests/JYPPX.ProjectQuality.Tests/AlgorithmSnapshotDesignGateTests.cs`
+
+源码职责保持清晰：design gate 文件只拥有两组 evaluation 入口，Result 文件拥有构造、公开属性、候选集合、
+阻塞项、诊断和 `ToString`。该归类不改变 public surface、pointer-free 边界或 non-proof 分类。
 
 ## 不可晋级项
 

@@ -129,6 +129,8 @@ public nint DebugTensor { get; }
 - `src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtAllocatorDryRunRequest.cs` 与同目录的 result/snapshot/delegate model 文件。
 - `src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtAllocatorLedgerSafetyGate.cs` 与
   `TensorRtAllocatorLedgerSafetyGateResult.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtAllocatorInterfaceInfoDesignGate.cs` 与
+  `TensorRtAllocatorInterfaceInfoDesignGateResult.cs`
 - `src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtOutputAllocatorCallbackOwner.cs`：只保留 owner state、constructor 与 properties。
 - `src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtOutputAllocatorCallbackOwner.DesignDiagnostic.cs`
 - `src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtOutputAllocatorCallbackOwner.Snapshots.cs`

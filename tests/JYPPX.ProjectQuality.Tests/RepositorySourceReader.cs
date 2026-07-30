@@ -195,6 +195,11 @@ internal static class RepositorySourceReader
                 "TensorRtOutputAllocatorAttachDetachDesignGate.cs",
                 "TensorRtOutputAllocatorAttachDetachDesignGateResult.cs"
             ],
+            ["TensorRtAllocatorInterfaceInfoDesignGate.cs"] =
+            [
+                "TensorRtAllocatorInterfaceInfoDesignGate.cs",
+                "TensorRtAllocatorInterfaceInfoDesignGateResult.cs"
+            ],
             ["TensorRtDebugListenerCallbackOwner.cs"] =
             [
                 "TensorRtDebugListenerCallbackOwner.cs",
@@ -216,6 +221,11 @@ internal static class RepositorySourceReader
                 "TensorRtCallbackOwnerClosureMatrix.Blockers.cs",
                 "TensorRtCallbackOwnerClosureMatrixRow.cs",
                 "TensorRtCallbackOwnerClosureMatrixResult.cs"
+            ],
+            ["TensorRtAlgorithmSnapshotDesignGate.cs"] =
+            [
+                "TensorRtAlgorithmSnapshotDesignGate.cs",
+                "TensorRtAlgorithmSnapshotDesignGateResult.cs"
             ],
             ["TensorRtOutputAllocatorRuntimeGate.cs"] =
             [
