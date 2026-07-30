@@ -7678,3 +7678,35 @@ shape、pointer non-exposure、deferred rows 与 runtime-proof blocker 语义保
   runtime、real model、Linux、package consumer、public package、post-publish、Owner acceptance 或 release proof。
 - 本机无仓库认可的 `pwsh`，未运行 exporter/B-tier 聚合；8 份 publishing 用户变更未触碰、未暂存；
   未 push、未触发 GitHub Actions、未执行远程发布操作。
+
+## 2026-07-30 Callback Allocator Readiness Snapshot Split
+
+本阶段完成 `JYPPX.TensorRtSharp/Callbacks` 多顶层公开类型收口，将 callback/allocator readiness snapshot 从
+聚合 evaluator 分离。gate 聚合顺序、blocked prerequisite 复制、公开属性顺序、summary、pointer non-exposure 与
+managed-readiness/non-proof 语义保持不变。
+
+### 实现与门禁
+
+- 原 261 行 `TensorRtCallbackAllocatorReadiness.cs` 分为 128 行 evaluator 与 138 行
+  `TensorRtCallbackAllocatorReadinessSnapshot.cs`；evaluator 只保留 `Evaluate` 与 `AddRange` helper。
+- `ManagedCallbackAllocatorReadinessSourceLayoutTests` 固定两个文件的精确 top-level type、constructor、method、
+  public property、pointer-free surface、test source-set、直接消费测试和文档 marker，并重组原源码。
+- 拆分前 Git blob 为 `133d913042fa2cd7aa0d13e0628b4bc1a485d1ae`；normalized SHA-256 保持
+  `50be00404eaf752c7c78c39e79d231a43f7334895024e755a8d0bc543b99d064`。
+- test reader 显式展开完整 source-set；既有直接消费测试改读统一 reader；boundary guide、callback safety roadmap
+  与双语 source-organization 同步真实 snapshot owner。
+
+### 验证与边界
+
+- 新布局门禁 `9/9`；直接消费类 `3/3`，联合定向集合 `12/12`；`SourceLayoutTests` `304/304`；
+  统一 Managed 前缀集合 `703/703`；`Callbacks` 下多顶层公开类型文件计数为 `0`。
+- `JYPPX.TensorRtSharp` 全目标框架与完整 `TensorRtSharp.sln` Debug build 均为
+  `0 warning / 0 error`；RuntimePackageReadiness UTF-8 ParseInput 为 `0 error`，对应质量测试 `2/2`。
+- ignored deferred candidate evidence 保持 `262` 条引用、`149` 个唯一路径、`0` 缺失；其中引用的
+  `22` 份 JSON 全部可解析，ignored 文件未强制提交。
+- Generated/native/manifest/project/ABI 改动为 0；`git diff --check` 通过。进程审计未发现引用本工作区的其他进程，
+  Downloads 近三小时没有本批重资产命中；6 个已知 YoloVision/YOLOX Temp 目录继续保留。
+- source/type relocation 与 readiness snapshot split 不构成新的 real callback runtime、TensorRT/CUDA runtime、
+  real model、Linux、package consumer、public package、post-publish、Owner acceptance 或 release proof。
+- 本机无仓库认可的 `pwsh`，未运行 exporter/B-tier 聚合；8 份 publishing 用户变更未触碰、未暂存；
+  未 push、未触发 GitHub Actions、未执行远程发布操作。

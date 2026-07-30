@@ -200,6 +200,11 @@ internal static class RepositorySourceReader
                 "TensorRtAllocatorInterfaceInfoDesignGate.cs",
                 "TensorRtAllocatorInterfaceInfoDesignGateResult.cs"
             ],
+            ["TensorRtCallbackAllocatorReadiness.cs"] =
+            [
+                "TensorRtCallbackAllocatorReadiness.cs",
+                "TensorRtCallbackAllocatorReadinessSnapshot.cs"
+            ],
             ["TensorRtDebugListenerCallbackOwner.cs"] =
             [
                 "TensorRtDebugListenerCallbackOwner.cs",

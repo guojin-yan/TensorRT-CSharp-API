@@ -75,6 +75,10 @@ flowchart LR
 
 `TensorRtCallbackAllocatorReadinessSnapshot` 是 callback / allocator 安全面的统一 managed readiness 汇总。它消费已有的 `TensorRtAllocatorLedgerSafetyGateResult`、`TensorRtOutputAllocatorRuntimeProofPrecheckResult` 和 `TensorRtDebugListenerRuntimeProofPrecheckResult`，只聚合已经复制到 C# 的 gate / precheck 证据，不调用 TensorRT，不接管 native owner，也不暴露 `IntPtr` / `nint`。
 
+源码职责已分开：`TensorRtCallbackAllocatorReadiness.cs` 只拥有聚合 `Evaluate` 与 blocker helper，
+`TensorRtCallbackAllocatorReadinessSnapshot.cs` 拥有 snapshot constructor、公开属性、summary 和 `ToString`。
+该归类不改变 managed-readiness/non-proof 边界。
+
 该 snapshot 解决的问题是：用户和发布门禁可以一次性看到 logger、profiler、progress monitor、allocator owner dry-run、allocator ledger safety gate、OutputAllocator owner/precheck、DebugListener owner/no-throw/precheck 的 managed readiness 状态。它的 `IsPublishSafeForManagedCallbacks` 只表示 managed wrapper 与 pointer-free gate 具备发布安全性；`IsRuntimeInvocationProofComplete` 才表示真实 runtime invocation proof 是否完成。
 
 当前阶段必须保持边界清晰：`TensorRtCallbackAllocatorReadinessSnapshot` 的 `RealCallbackRuntime` 与 `IsRealCallbackRuntimeProof` 仍为 `false`，`RuntimeProofBlocked` 和 `BlockedReasonCount` 用来解释为什么真实 TensorRT callback runtime proof 仍未完成。它不能作为真实 TensorRT callback runtime proof，也不能替代 package consumer 在兼容主机上触发 allocator、output allocator 或 debug listener callback 的证据。

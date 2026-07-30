@@ -291,6 +291,12 @@ layout gate recomposes the pre-split Git blobs `a7c9cca0316d8a52986b5ca3a1da6484
 `695650b21a5bf5036728c26c3a4ece03798fd1f3`, preserving candidate interface/method sets, copied metadata shape,
 pointer non-exposure, deferred rows, and runtime-proof blockers.
 
+The MemoryAllocation callback/allocator readiness evaluator and snapshot now also have dedicated namesake files. The
+former 261-line `TensorRtCallbackAllocatorReadiness.cs` is split into a 128-line evaluator and a 138-line snapshot. The
+layout gate recomposes the pre-split Git blob `133d913042fa2cd7aa0d13e0628b4bc1a485d1ae`, preserving gate aggregation
+order, blocked-prerequisite copying, public property order, summary, pointer non-exposure, and managed-readiness/non-proof
+semantics.
+
 OutputAllocator diagnostics are split across the public design owner and its internal managed runtime gate. The former
 637-line `Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeGate.cs` is reduced to a 38-line state/constructor core;
 entries, snapshots, lifecycle, shared invocation, trampoline/state, and formatting live in six partials, with request/result

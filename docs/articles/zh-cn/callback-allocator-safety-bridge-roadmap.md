@@ -106,7 +106,8 @@ public nint DebugTensor { get; }
 
 ### Pointer-free aggregation
 
-- `src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtCallbackAllocatorReadiness.cs`
+- `src/JYPPX.TensorRtSharp/Callbacks/MemoryAllocation/TensorRtCallbackAllocatorReadiness.cs` 与
+  `TensorRtCallbackAllocatorReadinessSnapshot.cs`
 - `src/JYPPX.TensorRtSharp/Execution/TensorRtExecutionContextCallbackAllocatorSafeControlSummary.cs`
 - `src/JYPPX.TensorRtSharp/Callbacks/Core/TensorRtCallbackOwnerClosureMatrix.cs`：只保留五个 family 的 Evaluate 顺序。
 - `src/JYPPX.TensorRtSharp/Callbacks/Core/TensorRtCallbackOwnerClosureMatrix.Allocators.cs`

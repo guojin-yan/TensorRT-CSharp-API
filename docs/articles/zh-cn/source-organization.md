@@ -256,6 +256,11 @@ interface-info gate 分为 114 行 evaluator 与 175 行 result。布局门禁�
 `a7c9cca0316d8a52986b5ca3a1da64845b1afae8` 与 `695650b21a5bf5036728c26c3a4ece03798fd1f3`，并固定候选接口/
 方法集合、copied metadata shape、pointer non-exposure、deferred-row 与 runtime-proof blocker 语义。
 
+MemoryAllocation 的 callback/allocator readiness evaluator 与 snapshot 现在也各自归入同名文件。原 261 行
+`TensorRtCallbackAllocatorReadiness.cs` 分为 128 行 evaluator 与 138 行 snapshot。布局门禁可重组拆分前 Git blob
+`133d913042fa2cd7aa0d13e0628b4bc1a485d1ae`，并固定 gate 聚合顺序、blocked prerequisite 复制、公开属性顺序、
+summary、pointer non-exposure 与 managed-readiness/non-proof 语义。
+
 OutputAllocator diagnostics 继续按 public design owner 与 internal managed runtime gate 分层。原 637 行
 `Callbacks/MemoryAllocation/TensorRtOutputAllocatorRuntimeGate.cs` 降为 38 行 state/constructor core；entries、snapshots、
 lifecycle、shared invocation、trampoline/state 与 formatting 进入 6 份 partial，request/result 类型各自成文件。原 503 行
