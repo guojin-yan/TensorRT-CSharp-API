@@ -10649,6 +10649,9 @@ JYPPX_StatusCode jyppx_trt10_resize_layer_set_resize_mode(JYPPX_TensorRtLayer* l
 #include "../common/debug_listener_real_non_null_attach_runtime_smoke.inc"
 #include "../common/debug_listener_process_debug_tensor_callback_trampoline.inc"
 #include "../common/debug_listener_real_callback_runtime_proof.inc"
+#define JYPPX_TRT_DEBUG_LISTENER_OWNER_API(name) jyppx_trt10_##name
+#include "../common/debug_listener_callback_owner.inc"
+#undef JYPPX_TRT_DEBUG_LISTENER_OWNER_API
 
 #include "modules/layers/convolution_scale_padding.inc"
 #include "modules/layers/deconvolution.inc"

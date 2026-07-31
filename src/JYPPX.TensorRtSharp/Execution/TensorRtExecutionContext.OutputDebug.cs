@@ -7,6 +7,74 @@ namespace JYPPX.TensorRtSharp;
 public sealed partial class TensorRtExecutionContext
 {
     /// <summary>
+    /// Attaches an owner-safe managed debug listener to this TensorRT 10/11 execution context.
+    /// 将 owner-safe 托管 debug listener 绑定到当前 TensorRT 10/11 execution context。
+    /// </summary>
+    /// <param name="listener">The callback owner borrowed by TensorRT until clear or context disposal. TensorRT 借用到清理或 context dispose 为止的 callback owner。</param>
+    public void SetDebugListener(TensorRtDebugListenerCallbackOwner listener)
+    {
+        if (listener == null)
+        {
+            throw new ArgumentNullException(nameof(listener));
+        }
+
+        if (TensorRtDebugListenerCallbackOwner.IsExecutingRuntimeCallbackOnCurrentThread)
+        {
+            throw new InvalidOperationException("A debug listener cannot be replaced from inside its own callback.");
+        }
+
+        lock (_debugListenerLeaseLock)
+        {
+            if (_debugListenerContextDisposed)
+            {
+                throw new ObjectDisposedException(nameof(TensorRtExecutionContext));
+            }
+
+            if (ReferenceEquals(_debugListenerKeepAlive, listener))
+            {
+                return;
+            }
+
+            TensorRtDebugListenerCallbackOwner? previous = _debugListenerKeepAlive;
+            if (previous != null)
+            {
+                NativeBridgeApi.DetachDebugListenerOwner(Line, previous.NativeHandle);
+                _debugListenerKeepAlive = null;
+                previous.DetachBorrower();
+            }
+
+            listener.ThrowIfDisposed();
+            listener.AttachBorrower(Line);
+            try
+            {
+                if (!NativeBridgeApi.AttachDebugListenerOwner(Line, listener.NativeHandle, _handle))
+                {
+                    throw new InvalidOperationException("TensorRT did not accept the debug listener callback owner.");
+                }
+
+                _debugListenerKeepAlive = listener;
+            }
+            catch
+            {
+                listener.DetachBorrower();
+                throw;
+            }
+        }
+    }
+
+    /// <summary>Gets whether this wrapper owns a managed debug-listener borrow. 获取当前 wrapper 是否持有 managed debug-listener 借用。</summary>
+    public bool HasManagedDebugListener
+    {
+        get
+        {
+            lock (_debugListenerLeaseLock)
+            {
+                return _debugListenerKeepAlive != null;
+            }
+        }
+    }
+
+    /// <summary>
     /// Gets whether the active TensorRT line supports per-tensor debug state on execution contexts.
     /// 获取当前 TensorRT 版本线是否支持 execution context 上的逐 tensor debug state。
     /// </summary>

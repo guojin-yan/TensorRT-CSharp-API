@@ -8344,6 +8344,9 @@ JYPPX_StatusCode jyppx_trt11_tensor_reset_dynamic_range(JYPPX_TensorRtTensor*)
 #include "../common/debug_listener_real_non_null_attach_runtime_smoke.inc"
 #include "../common/debug_listener_process_debug_tensor_callback_trampoline.inc"
 #include "../common/debug_listener_real_callback_runtime_proof.inc"
+#define JYPPX_TRT_DEBUG_LISTENER_OWNER_API(name) jyppx_trt11_##name
+#include "../common/debug_listener_callback_owner.inc"
+#undef JYPPX_TRT_DEBUG_LISTENER_OWNER_API
 
 #define jyppx_trt10_network_add_convolution_nd jyppx_trt11_network_add_convolution_nd
 #define jyppx_trt10_network_add_scale_nd jyppx_trt11_network_add_scale_nd

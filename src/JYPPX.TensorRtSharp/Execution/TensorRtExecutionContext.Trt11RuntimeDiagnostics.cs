@@ -107,7 +107,33 @@ public sealed partial class TensorRtExecutionContext
     /// <returns><see langword="true"/> when TensorRT accepts the clear operation. / TensorRT 接受清理操作时返回 <see langword="true"/>。</returns>
     public bool ClearDebugListener()
     {
-        return NativeBridgeApi.ClearExecutionContextDebugListener(Line, _handle);
+        if (TensorRtDebugListenerCallbackOwner.IsExecutingRuntimeCallbackOnCurrentThread)
+        {
+            throw new InvalidOperationException("A debug listener cannot be detached from inside its own callback.");
+        }
+
+        lock (_debugListenerLeaseLock)
+        {
+            if (_debugListenerContextDisposed)
+            {
+                throw new ObjectDisposedException(nameof(TensorRtExecutionContext));
+            }
+
+            TensorRtDebugListenerCallbackOwner? listener = _debugListenerKeepAlive;
+            if (listener == null)
+            {
+                return NativeBridgeApi.ClearExecutionContextDebugListener(Line, _handle);
+            }
+
+            bool detached = NativeBridgeApi.DetachDebugListenerOwner(Line, listener.NativeHandle);
+            if (detached)
+            {
+                _debugListenerKeepAlive = null;
+                listener.DetachBorrower();
+            }
+
+            return detached;
+        }
     }
 
     /// <summary>
@@ -387,6 +413,11 @@ public sealed partial class TensorRtExecutionContext
     /// </remarks>
     public TensorRtExecutionContextCallbackStateSnapshot ClearCallbackState(string outputTensorName)
     {
+        if (HasManagedDebugListener)
+        {
+            ClearDebugListener();
+        }
+
         NativeTensorRtExecutionContextCallbackStateInfo info =
             NativeBridgeApi.ClearExecutionContextCallbackState(Line, _handle, outputTensorName);
         return CreateCallbackStateSnapshot(info);

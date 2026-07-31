@@ -15,6 +15,9 @@ public sealed partial class TensorRtExecutionContext : IDisposable
 {
     private readonly SafeTensorRtObjectHandle _handle;
     private TensorRtProfiler? _profilerKeepAlive;
+    private readonly object _debugListenerLeaseLock = new object();
+    private TensorRtDebugListenerCallbackOwner? _debugListenerKeepAlive;
+    private bool _debugListenerContextDisposed;
     private readonly object _auxiliaryStreamLeaseLock = new object();
     private TensorRtAuxiliaryStreamHandleLease? _auxiliaryStreamLease;
     private int _auxiliaryStreamAssignedCount;
@@ -90,6 +93,12 @@ public sealed partial class TensorRtExecutionContext : IDisposable
     /// </summary>
     public void Dispose()
     {
+        if (TensorRtDebugListenerCallbackOwner.IsExecutingRuntimeCallbackOnCurrentThread)
+        {
+            throw new InvalidOperationException("An execution context cannot be disposed from inside its debug listener callback.");
+        }
+
+        TensorRtDebugListenerCallbackOwner? debugListener = DetachDebugListenerForDispose();
         TensorRtAuxiliaryStreamHandleLease? auxiliaryStreamLease;
         lock (_auxiliaryStreamLeaseLock)
         {
@@ -121,13 +130,54 @@ public sealed partial class TensorRtExecutionContext : IDisposable
             {
                 _handle.Dispose();
                 GC.KeepAlive(profiler);
+                GC.KeepAlive(debugListener);
             }
             finally
             {
                 auxiliaryStreamLease?.Dispose();
                 DetachProfiler();
+                debugListener?.DetachBorrower();
                 GC.SuppressFinalize(this);
             }
+        }
+    }
+
+    private TensorRtDebugListenerCallbackOwner? DetachDebugListenerForDispose()
+    {
+        lock (_debugListenerLeaseLock)
+        {
+            if (_debugListenerContextDisposed)
+            {
+                return null;
+            }
+
+            _debugListenerContextDisposed = true;
+            TensorRtDebugListenerCallbackOwner? listener = _debugListenerKeepAlive;
+            if (listener == null)
+            {
+                return null;
+            }
+
+            try
+            {
+                NativeBridgeApi.DetachDebugListenerOwner(Line, listener.NativeHandle);
+            }
+            catch (Exception exception) when (
+                exception is BridgeProbeException ||
+                exception is TensorRtException ||
+                exception is EntryPointNotFoundException ||
+                exception is DllNotFoundException ||
+                exception is BadImageFormatException ||
+                exception is ObjectDisposedException)
+            {
+                // Keep the owner alive until after context teardown when native detach is unavailable.
+            }
+            finally
+            {
+                _debugListenerKeepAlive = null;
+            }
+
+            return listener;
         }
     }
 

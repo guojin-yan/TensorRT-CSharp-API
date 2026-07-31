@@ -977,6 +977,10 @@
 #define JYPPX_API_TRT10_CUMULATIVE_LAYER_SET_OPERATION "jyppx_trt10_cumulative_layer_set_operation" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_CUMULATIVE_LAYER_SET_REVERSE "jyppx_trt10_cumulative_layer_set_reverse" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_DEBUG_LISTENER_GET_INTERFACE_INFO_DEFERRED "jyppx_trt10_debug_listener_get_interface_info_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_TRT10_DEBUG_LISTENER_OWNER_ATTACH "jyppx_trt10_debug_listener_owner_attach" // module=tensorrt; line=10; ownership=borrowed-by-context-until-detach; manualOverride=false
+#define JYPPX_API_TRT10_DEBUG_LISTENER_OWNER_CREATE "jyppx_trt10_debug_listener_owner_create" // module=tensorrt; line=10; ownership=caller-destroys; manualOverride=false
+#define JYPPX_API_TRT10_DEBUG_LISTENER_OWNER_DETACH "jyppx_trt10_debug_listener_owner_detach" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_TRT10_DEBUG_LISTENER_OWNER_GET_INFO "jyppx_trt10_debug_listener_owner_get_info" // module=tensorrt; line=10; ownership=caller-owned-copied-snapshot; manualOverride=false
 #define JYPPX_API_TRT10_DEBUG_LISTENER_PROCESS_DEBUG_TENSOR_DEFERRED "jyppx_trt10_debug_listener_process_debug_tensor_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_DECONVOLUTION_LAYER_GET_BIAS_WEIGHTS_INFO "jyppx_trt10_deconvolution_layer_get_bias_weights_info" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_DECONVOLUTION_LAYER_GET_DILATION_ND "jyppx_trt10_deconvolution_layer_get_dilation_nd" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
@@ -2268,6 +2272,10 @@
 #define JYPPX_API_TRT11_CUMULATIVE_LAYER_SET_OPERATION "jyppx_trt11_cumulative_layer_set_operation" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_CUMULATIVE_LAYER_SET_REVERSE "jyppx_trt11_cumulative_layer_set_reverse" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_DEBUG_LISTENER_GET_INTERFACE_INFO_DEFERRED "jyppx_trt11_debug_listener_get_interface_info_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_TRT11_DEBUG_LISTENER_OWNER_ATTACH "jyppx_trt11_debug_listener_owner_attach" // module=tensorrt; line=11; ownership=borrowed-by-context-until-detach; manualOverride=false
+#define JYPPX_API_TRT11_DEBUG_LISTENER_OWNER_CREATE "jyppx_trt11_debug_listener_owner_create" // module=tensorrt; line=11; ownership=caller-destroys; manualOverride=false
+#define JYPPX_API_TRT11_DEBUG_LISTENER_OWNER_DETACH "jyppx_trt11_debug_listener_owner_detach" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_TRT11_DEBUG_LISTENER_OWNER_GET_INFO "jyppx_trt11_debug_listener_owner_get_info" // module=tensorrt; line=11; ownership=caller-owned-copied-snapshot; manualOverride=false
 #define JYPPX_API_TRT11_DEBUG_LISTENER_PROCESS_DEBUG_TENSOR_DEFERRED "jyppx_trt11_debug_listener_process_debug_tensor_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_DECONVOLUTION_LAYER_GET_BIAS_WEIGHTS_INFO "jyppx_trt11_deconvolution_layer_get_bias_weights_info" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_DECONVOLUTION_LAYER_GET_DILATION_ND "jyppx_trt11_deconvolution_layer_get_dilation_nd" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false

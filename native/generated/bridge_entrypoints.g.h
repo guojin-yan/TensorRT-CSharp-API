@@ -2932,6 +2932,18 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt10_cumulative_layer_set_reverse(JYPPX_Ten
 // generated from manifest id=trt10-debug-listener-get-interface-info-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_debug_listener_get_interface_info_deferred(void);
 
+// generated from manifest id=trt10-debug-listener-owner-attach
+JYPPX_C_API(BridgeStatusCode) jyppx_trt10_debug_listener_owner_attach(JYPPX_TensorRtDebugListenerOwner* owner, JYPPX_TensorRtExecutionContext* context, JYPPX_Boolean* out_attached);
+
+// generated from manifest id=trt10-debug-listener-owner-create
+JYPPX_C_API(BridgeStatusCode) jyppx_trt10_debug_listener_owner_create(JYPPX_TensorRtDebugListenerCallback callback, void* user_state, JYPPX_TensorRtDebugListenerOwner** out_owner);
+
+// generated from manifest id=trt10-debug-listener-owner-detach
+JYPPX_C_API(BridgeStatusCode) jyppx_trt10_debug_listener_owner_detach(JYPPX_TensorRtDebugListenerOwner* owner, JYPPX_Boolean* out_detached);
+
+// generated from manifest id=trt10-debug-listener-owner-get-info
+JYPPX_C_API(BridgeStatusCode) jyppx_trt10_debug_listener_owner_get_info(JYPPX_TensorRtDebugListenerOwner* owner, JYPPX_TensorRtDebugListenerOwnerInfo* out_info);
+
 // generated from manifest id=trt10-debug-listener-process-debug-tensor-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_debug_listener_process_debug_tensor_deferred(void);
 
@@ -6804,6 +6816,18 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt11_cumulative_layer_set_reverse(JYPPX_Ten
 
 // generated from manifest id=trt11-debug-listener-get-interface-info-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_debug_listener_get_interface_info_deferred(void);
+
+// generated from manifest id=trt11-debug-listener-owner-attach
+JYPPX_C_API(BridgeStatusCode) jyppx_trt11_debug_listener_owner_attach(JYPPX_TensorRtDebugListenerOwner* owner, JYPPX_TensorRtExecutionContext* context, JYPPX_Boolean* out_attached);
+
+// generated from manifest id=trt11-debug-listener-owner-create
+JYPPX_C_API(BridgeStatusCode) jyppx_trt11_debug_listener_owner_create(JYPPX_TensorRtDebugListenerCallback callback, void* user_state, JYPPX_TensorRtDebugListenerOwner** out_owner);
+
+// generated from manifest id=trt11-debug-listener-owner-detach
+JYPPX_C_API(BridgeStatusCode) jyppx_trt11_debug_listener_owner_detach(JYPPX_TensorRtDebugListenerOwner* owner, JYPPX_Boolean* out_detached);
+
+// generated from manifest id=trt11-debug-listener-owner-get-info
+JYPPX_C_API(BridgeStatusCode) jyppx_trt11_debug_listener_owner_get_info(JYPPX_TensorRtDebugListenerOwner* owner, JYPPX_TensorRtDebugListenerOwnerInfo* out_info);
 
 // generated from manifest id=trt11-debug-listener-process-debug-tensor-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_debug_listener_process_debug_tensor_deferred(void);

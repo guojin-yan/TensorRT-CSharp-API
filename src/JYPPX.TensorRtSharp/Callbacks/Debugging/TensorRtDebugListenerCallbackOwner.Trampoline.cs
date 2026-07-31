@@ -139,6 +139,13 @@ public sealed partial class TensorRtDebugListenerCallbackOwner
         private string _lastDiagnostic = string.Empty;
         private string _lastReleaseDiagnostic = string.Empty;
 
+        public CallbackState(TensorRtDebugListenerHandler? handler)
+        {
+            Handler = handler;
+        }
+
+        public TensorRtDebugListenerHandler? Handler { get; }
+
         public long InvocationCount => Interlocked.Read(ref _invocationCount);
 
         public long ProcessDebugTensorCount => Interlocked.Read(ref _processDebugTensorCount);

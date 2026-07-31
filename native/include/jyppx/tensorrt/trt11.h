@@ -103,6 +103,10 @@ JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_allocator_owner_dry_run_attach_intent(
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_allocator_owner_dry_run_detach_intent(JYPPX_TensorRtAllocatorOwner* owner, const char* target_kind, JYPPX_TensorRtAllocatorOwnerStateInfo* out_info);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_allocator_owner_dry_run_ledger_record_allocation_intent(JYPPX_TensorRtAllocatorOwner* owner, uint64_t size, uint64_t alignment, uint64_t stream_value, JYPPX_TensorRtAllocatorOwnerStateInfo* out_info);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_allocator_owner_dry_run_ledger_record_release_intent(JYPPX_TensorRtAllocatorOwner* owner, uint64_t allocation_id, uint64_t stream_value, JYPPX_TensorRtAllocatorOwnerStateInfo* out_info);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_debug_listener_owner_create(JYPPX_TensorRtDebugListenerCallback callback, void* user_state, JYPPX_TensorRtDebugListenerOwner** out_owner);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_debug_listener_owner_attach(JYPPX_TensorRtDebugListenerOwner* owner, JYPPX_TensorRtExecutionContext* context, JYPPX_Boolean* out_attached);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_debug_listener_owner_detach(JYPPX_TensorRtDebugListenerOwner* owner, JYPPX_Boolean* out_detached);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_debug_listener_owner_get_info(JYPPX_TensorRtDebugListenerOwner* owner, JYPPX_TensorRtDebugListenerOwnerInfo* out_info);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_runtime_create(JYPPX_TensorRtLogger* logger, JYPPX_TensorRtRuntime** out_runtime);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_runtime_create_diagnostic(JYPPX_TensorRtLogger* logger, JYPPX_TensorRtRuntimeCreateDiagnosticInfo* out_info);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_builder_create(JYPPX_TensorRtLogger* logger, JYPPX_TensorRtBuilder** out_builder);

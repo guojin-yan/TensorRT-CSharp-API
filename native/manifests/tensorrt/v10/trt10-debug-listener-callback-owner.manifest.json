@@ -1,0 +1,57 @@
+{
+  "$schema": "../../bridge-api.schema.json",
+  "module": "tensorrt",
+  "versionLine": "10",
+  "apis": [
+    {
+      "id": "trt10-debug-listener-owner-create",
+      "entryPoint": "jyppx_trt10_debug_listener_owner_create",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-destroys",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": [
+        { "name": "callback", "type": "JYPPX_TensorRtDebugListenerCallback", "direction": "in", "managedType": "IntPtr", "moduleManagedType": "TensorRtDebugListenerNativeCallback" },
+        { "name": "user_state", "type": "void*", "direction": "in", "managedType": "IntPtr", "moduleManagedType": "IntPtr" },
+        { "name": "out_owner", "type": "JYPPX_TensorRtDebugListenerOwner**", "direction": "out", "ownership": "caller-destroys", "managedType": "out SafeTensorRtObjectHandle", "moduleManagedType": "out SafeTensorRtObjectHandle" }
+      ]
+    },
+    {
+      "id": "trt10-debug-listener-owner-attach",
+      "entryPoint": "jyppx_trt10_debug_listener_owner_attach",
+      "returnType": "BridgeStatusCode",
+      "ownership": "borrowed-by-context-until-detach",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": [
+        { "name": "owner", "type": "JYPPX_TensorRtDebugListenerOwner*", "direction": "in" },
+        { "name": "context", "type": "JYPPX_TensorRtExecutionContext*", "direction": "in" },
+        { "name": "out_attached", "type": "JYPPX_Boolean*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
+    {
+      "id": "trt10-debug-listener-owner-detach",
+      "entryPoint": "jyppx_trt10_debug_listener_owner_detach",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": [
+        { "name": "owner", "type": "JYPPX_TensorRtDebugListenerOwner*", "direction": "in" },
+        { "name": "out_detached", "type": "JYPPX_Boolean*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
+    {
+      "id": "trt10-debug-listener-owner-get-info",
+      "entryPoint": "jyppx_trt10_debug_listener_owner_get_info",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned-copied-snapshot",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10",
+      "parameters": [
+        { "name": "owner", "type": "JYPPX_TensorRtDebugListenerOwner*", "direction": "in" },
+        { "name": "out_info", "type": "JYPPX_TensorRtDebugListenerOwnerInfo*", "direction": "out" }
+      ]
+    }
+  ]
+}

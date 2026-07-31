@@ -8333,3 +8333,37 @@ artifact schema、独立参考脚本、文档和测试。
 - 本批不提交或发布模型、ONNX、engine、reference JSON/bin、mask bin、SVG、日志、SDK 或 nupkg；CUDA、cuDNN、
   TensorRT、NVRTC 仍由用户安装。managed、项目自有 `.Bridge` 和源码是唯一允许发布的产物类别。
 - 8 份 publishing 用户修改继续不覆盖、不暂存；本阶段不依赖这些文件制造文章或发布完成度。
+
+## 2026-07-31 TensorRT DebugListener Real Callback Runtime
+
+本阶段把此前的 DebugListener 设计 scaffold 收口为 TRT10/TRT11 共用的真实 owner-safe callback 路径。新增 native
+`DebugListenerCallbackOwner final : IDebugListener`、create/attach/detach/copied-info C ABI、managed handler/owner/runtime
+snapshot，以及 execution context 的 keep-alive、detach-before-release 和 callback 重入保护。callback 会立即复制名称、
+类型、位置与 shape；TensorRT-owned data address 和 CUDA stream 不进入 C ABI 或 public C# surface。
+
+TRT10.11/CUDA12.9 本机真实 smoke 构建 identity network，将 `debug_output` 标记为 build-time debug tensor，runtime
+启用 tensor debug state 后完成 non-null vtable attach、enqueue、一次 managed callback 和 detach。结果为
+`InvocationCount=1`、`FailureCount=0`、`InFlightCallbackCount=0`、shape `[1,4]`、
+`BorrowedPointerExposed=False`、`DetachCount=1`、`IsRealCallbackRuntimeProof=True`。
+
+该证据是 source-tree local TensorRT callback runtime。旧 scaffold/promotion gate 默认 false 继续作为兼容与防误晋级门禁；
+它不能覆盖真实 owner snapshot。TRT11 已纳入相同源码/manifest/ABI，实际 runtime 仍需匹配本机环境复验；Linux、clean
+package consumer、公开包、post-publish 和 Owner release proof 未由本次本机 smoke 创建。CUDA、cuDNN、TensorRT、模型和
+engine 均未打包或发布，8 份 publishing 用户修改未触碰、未暂存。
+
+### 最终生命周期与验证收口
+
+- native owner 增加编译期 copy/move deleted、nothrow destructor 与 `processDebugTensor noexcept` 断言；in-flight
+  计数归零与 condition-variable wait 使用同一状态锁，避免 detach drain 丢失唤醒。
+- managed callback 使用 thread-static depth 而不是单一 bool，嵌套 callback 返回后仍保持重入保护；context dispose
+  即使 native detach 不可用，也会等 native context handle 释放后再解除 owner borrow，避免提前销毁 vtable。
+- bindings generator 连续两次输出一致：`203 manifests / 4009 API records`。TensorRT header declaration missing 为 0；
+  TRT10 PE exports `1091/1091`、TRT11 `1238/1238`，missing 均为 0。
+- interface coverage exporter 实际完成：TRT8 `760 implemented / 120 deferred-only`、TRT10 `761 / 118`、TRT11
+  `814 / 87`。历史 direct deferred rows继续保留，不用删除历史记录制造覆盖率提升。
+- 两套 CUDA12 native bridge 重编译成功，保留既有 native warning；完整 `TensorRtSharp.sln` Debug build 为
+  `0 warning / 0 error`，本批合同与布局测试 `25/25`。
+- 最新 TRT10/CUDA12.9 DLL 再次完成真实 smoke：`InvocationCount=1`、`FailureCount=0`、
+  `InFlightCallbackCount=0`、`DetachCount=1`、`IsRealCallbackRuntimeProof=True`。TRT10 runner 的旧综合诊断仍因
+  硬编码 TRT11 allocator dry-run entry 输出 `SafeControlSurfaceVersionMismatch=Skipped`；真实 DebugListener 路径通过，
+  下一阶段需按实际 line 路由该诊断。

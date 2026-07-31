@@ -41,7 +41,8 @@ typedef enum JYPPX_TensorRtObjectKind
     JYPPX_TENSORRT_OBJECT_KIND_PROFILER = 22,
     JYPPX_TENSORRT_OBJECT_KIND_ONNX_PARSER_REFITTER = 23,
     JYPPX_TENSORRT_OBJECT_KIND_ALLOCATOR_CALLBACK_OWNER = 24,
-    JYPPX_TENSORRT_OBJECT_KIND_ONNX_CONFIG = 25
+    JYPPX_TENSORRT_OBJECT_KIND_ONNX_CONFIG = 25,
+    JYPPX_TENSORRT_OBJECT_KIND_DEBUG_LISTENER_CALLBACK_OWNER = 26
 } JYPPX_TensorRtObjectKind;
 
 typedef enum JYPPX_TensorRtProgressMonitorEventKind
@@ -85,6 +86,7 @@ typedef JYPPX_TensorRtObjectBase JYPPX_TensorRtProfiler;
 typedef JYPPX_TensorRtObjectBase JYPPX_TensorRtOnnxParserRefitter;
 typedef JYPPX_TensorRtObjectBase JYPPX_TensorRtAllocatorOwner;
 typedef JYPPX_TensorRtObjectBase JYPPX_TensorRtOnnxConfig;
+typedef JYPPX_TensorRtObjectBase JYPPX_TensorRtDebugListenerOwner;
 
 typedef JYPPX_StatusCode (*JYPPX_TensorRtLoggerCallback)(
     int32_t severity,
@@ -107,6 +109,23 @@ typedef JYPPX_StatusCode (*JYPPX_TensorRtProfilerCallback)(
     const char* layer_name,
     size_t layer_name_length,
     float milliseconds,
+    void* user_state);
+
+typedef JYPPX_StatusCode (*JYPPX_TensorRtDebugListenerCallback)(
+    uint32_t line,
+    const char* tensor_name,
+    size_t tensor_name_length,
+    int32_t data_type,
+    int32_t location,
+    int32_t shape_rank,
+    int64_t dim0,
+    int64_t dim1,
+    int64_t dim2,
+    int64_t dim3,
+    int64_t dim4,
+    int64_t dim5,
+    int64_t dim6,
+    int64_t dim7,
     void* user_state);
 
 typedef struct JYPPX_TensorRtAdapterInfo
@@ -218,6 +237,27 @@ typedef struct JYPPX_TensorRtAllocatorOwnerStateInfo
     char last_operation[64];
     char last_diagnostic[1024];
 } JYPPX_TensorRtAllocatorOwnerStateInfo;
+
+typedef struct JYPPX_TensorRtDebugListenerOwnerInfo
+{
+    uint32_t line;
+    uint64_t owner_id;
+    uint64_t invocation_count;
+    uint64_t failure_count;
+    uint64_t in_flight_callback_count;
+    uint64_t max_in_flight_callback_count;
+    uint64_t attach_count;
+    uint64_t detach_count;
+    int32_t last_status;
+    JYPPX_Boolean is_attached;
+    JYPPX_Boolean last_callback_succeeded;
+    int32_t last_data_type;
+    int32_t last_location;
+    int32_t last_shape_rank;
+    int64_t last_shape[8];
+    char last_tensor_name[256];
+    char last_diagnostic[1024];
+} JYPPX_TensorRtDebugListenerOwnerInfo;
 
 typedef struct JYPPX_TensorRtRuntimeCreateDiagnosticInfo
 {

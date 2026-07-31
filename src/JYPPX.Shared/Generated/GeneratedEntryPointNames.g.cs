@@ -982,6 +982,10 @@ internal static class GeneratedEntryPointNames
     public const string Trt10CumulativeLayerSetOperation = "jyppx_trt10_cumulative_layer_set_operation";
     public const string Trt10CumulativeLayerSetReverse = "jyppx_trt10_cumulative_layer_set_reverse";
     public const string Trt10DebugListenerGetInterfaceInfoDeferred = "jyppx_trt10_debug_listener_get_interface_info_deferred";
+    public const string Trt10DebugListenerOwnerAttach = "jyppx_trt10_debug_listener_owner_attach";
+    public const string Trt10DebugListenerOwnerCreate = "jyppx_trt10_debug_listener_owner_create";
+    public const string Trt10DebugListenerOwnerDetach = "jyppx_trt10_debug_listener_owner_detach";
+    public const string Trt10DebugListenerOwnerGetInfo = "jyppx_trt10_debug_listener_owner_get_info";
     public const string Trt10DebugListenerProcessDebugTensorDeferred = "jyppx_trt10_debug_listener_process_debug_tensor_deferred";
     public const string Trt10DeconvolutionLayerGetBiasWeightsInfo = "jyppx_trt10_deconvolution_layer_get_bias_weights_info";
     public const string Trt10DeconvolutionLayerGetDilationNd = "jyppx_trt10_deconvolution_layer_get_dilation_nd";
@@ -2273,6 +2277,10 @@ internal static class GeneratedEntryPointNames
     public const string Trt11CumulativeLayerSetOperation = "jyppx_trt11_cumulative_layer_set_operation";
     public const string Trt11CumulativeLayerSetReverse = "jyppx_trt11_cumulative_layer_set_reverse";
     public const string Trt11DebugListenerGetInterfaceInfoDeferred = "jyppx_trt11_debug_listener_get_interface_info_deferred";
+    public const string Trt11DebugListenerOwnerAttach = "jyppx_trt11_debug_listener_owner_attach";
+    public const string Trt11DebugListenerOwnerCreate = "jyppx_trt11_debug_listener_owner_create";
+    public const string Trt11DebugListenerOwnerDetach = "jyppx_trt11_debug_listener_owner_detach";
+    public const string Trt11DebugListenerOwnerGetInfo = "jyppx_trt11_debug_listener_owner_get_info";
     public const string Trt11DebugListenerProcessDebugTensorDeferred = "jyppx_trt11_debug_listener_process_debug_tensor_deferred";
     public const string Trt11DeconvolutionLayerGetBiasWeightsInfo = "jyppx_trt11_deconvolution_layer_get_bias_weights_info";
     public const string Trt11DeconvolutionLayerGetDilationNd = "jyppx_trt11_deconvolution_layer_get_dilation_nd";

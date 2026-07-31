@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
+using JYPPX.CudaSharp;
 using JYPPX.Shared.Interop;
 using JYPPX.TensorRtSharp;
 
@@ -48,7 +49,14 @@ internal static class Program
         Console.WriteLine($"Adapter Runtime={adapter.RuntimeCreationSupported} Builder={adapter.BuilderCreationSupported} Message={adapter.StatusMessage}");
 
         PrintDependencyProbe(line.Value);
-        PrintSafeControlSurface(enableDebugListenerRuntimeSmoke, runtimePackageKey);
+        try
+        {
+            PrintSafeControlSurface(enableDebugListenerRuntimeSmoke, runtimePackageKey);
+        }
+        catch (EntryPointNotFoundException exception) when (line.Value != TensorRtApiLine.TensorRt11)
+        {
+            Console.WriteLine($"SafeControlSurfaceVersionMismatch=Skipped Line={(int)line.Value} Reason={exception.Message}");
+        }
 
         if (!adapter.RuntimeCreationSupported || !adapter.BuilderCreationSupported)
         {
@@ -59,6 +67,10 @@ internal static class Program
         try
         {
             RunSafeControls(line.Value);
+            if (enableDebugListenerRuntimeSmoke)
+            {
+                RunRealDebugListenerRuntimeSmoke(line.Value, runtimePackageKey);
+            }
         }
         catch (Exception exception) when (IsSkippableEnvironmentException(exception))
         {
@@ -67,6 +79,99 @@ internal static class Program
         }
 
         Console.WriteLine("CallbackAllocatorSafeControlsSmokeRunner Passed=True");
+    }
+
+    private static void RunRealDebugListenerRuntimeSmoke(TensorRtApiLine line, string runtimePackageKey)
+    {
+        if (line != TensorRtApiLine.TensorRt10 && line != TensorRtApiLine.TensorRt11)
+        {
+            Console.WriteLine("DebugListenerRealRuntime=Skipped Reason=RequiresTensorRt10Or11");
+            return;
+        }
+
+        using TensorRtLogger logger = new TensorRtLogger(line);
+        using TensorRtRuntime runtime = new TensorRtRuntime(logger);
+        using TensorRtBuilder builder = new TensorRtBuilder(logger);
+        using TensorRtBuilderConfig config = builder.CreateBuilderConfig();
+        config.SetMemoryPoolLimit(TensorRtMemoryPoolType.Workspace, 32UL * 1024UL * 1024UL);
+        config.SetEngineCapability(TensorRtEngineCapability.Standard);
+        config.SetHardwareCompatibilityLevel(TensorRtHardwareCompatibilityLevel.None);
+
+        using TensorRtNetworkDefinition network = builder.CreateNetwork(TensorRtNetworkDefinitionCreationFlags.ExplicitBatch);
+        using TensorRtTensor input = network.AddInput("debug_input", TensorRtDataType.Float, new TensorRtDims(new[] { 1, 4 }));
+        using TensorRtLayer identity = network.AddIdentity(input);
+        identity.Name = "debug_identity";
+        using TensorRtTensor output = identity.GetOutput(0);
+        output.Name = "debug_output";
+        network.MarkOutput(output);
+        if (!network.MarkDebugTensor(output) || !network.IsDebugTensor(output))
+        {
+            throw new InvalidOperationException("TensorRT did not retain the build-time debug tensor mark.");
+        }
+
+        using TensorRtHostMemory hostMemory = builder.BuildSerializedNetwork(network, config);
+        using TensorRtEngine engine = runtime.Deserialize(hostMemory);
+        using TensorRtExecutionContext context = engine.CreateExecutionContext();
+        using CudaStream stream = new CudaStream();
+        using CudaMemory inputBuffer = new CudaMemory(4 * sizeof(float));
+        using CudaMemory outputBuffer = new CudaMemory(4 * sizeof(float));
+        inputBuffer.Fill(0, 4 * sizeof(float));
+        outputBuffer.Fill(0, 4 * sizeof(float));
+        context.SetTensorAddress("debug_input", inputBuffer);
+        context.SetTensorAddress("debug_output", outputBuffer);
+
+        TensorRtDebugTensorMetadataSnapshot managedMetadata = default;
+        using TensorRtDebugListenerCallbackOwner owner = new TensorRtDebugListenerCallbackOwner(
+            line,
+            metadata =>
+            {
+                managedMetadata = metadata;
+                return true;
+            });
+        context.SetDebugListener(owner);
+        context.SetTensorDebugState("debug_output", true);
+        context.EnqueueAsync(stream);
+        stream.Synchronize();
+
+        TensorRtDebugListenerRuntimeSnapshot attached = owner.GetRuntimeSnapshot();
+        bool cleared = context.ClearDebugListener();
+        TensorRtDebugListenerRuntimeSnapshot detached = owner.GetRuntimeSnapshot();
+        bool passed =
+            attached.IsAttached &&
+            attached.IsRealCallbackRuntimeProof &&
+            attached.InvocationCount > 0 &&
+            attached.FailureCount == 0 &&
+            attached.InFlightCallbackCount == 0 &&
+            string.Equals(attached.TensorName, "debug_output", StringComparison.Ordinal) &&
+            managedMetadata.MetadataCopied &&
+            string.Equals(managedMetadata.TensorName, "debug_output", StringComparison.Ordinal) &&
+            cleared &&
+            !detached.IsAttached &&
+            detached.DetachCount > 0 &&
+            !context.HasManagedDebugListener &&
+            !context.HasDebugListener;
+        if (!passed)
+        {
+            throw new InvalidOperationException(
+                "Real TensorRT debug listener callback runtime smoke did not satisfy attach/invoke/detach invariants. " +
+                "Attached=" + attached + " Detached=" + detached);
+        }
+
+        Console.WriteLine(
+            "DebugListenerRealRuntime=Passed" +
+            $" TensorRtLine={(int)line}" +
+            $" RuntimePackageKey={runtimePackageKey}" +
+            $" NativeVTableInstalled={attached.AttachCount > 0}" +
+            $" ProcessDebugTensorInvoked={attached.InvocationCount > 0}" +
+            $" InvocationCount={attached.InvocationCount}" +
+            $" FailureCount={attached.FailureCount}" +
+            $" InFlightCallbackCount={attached.InFlightCallbackCount}" +
+            $" TensorName={attached.TensorName}" +
+            $" Shape=[{string.Join(",", attached.ShapeDimensions)}]" +
+            $" MetadataCopied={managedMetadata.MetadataCopied}" +
+            $" BorrowedPointerExposed={attached.BorrowedPointerExposed}" +
+            $" DetachCount={detached.DetachCount}" +
+            $" IsRealCallbackRuntimeProof={attached.IsRealCallbackRuntimeProof}");
     }
 
     private static void RunSafeControls(TensorRtApiLine line)

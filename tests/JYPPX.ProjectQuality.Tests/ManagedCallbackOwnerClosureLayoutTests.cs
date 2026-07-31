@@ -8,7 +8,7 @@ namespace JYPPX.ProjectQuality.Tests;
 public sealed class ManagedCallbackOwnerClosureLayoutTests
 {
     private const string OwnerOriginalNormalizedSha256 =
-        "d1ce0f25a783b7a251312d376d3f171412e9777ae1868de434b14b926d30595e";
+        "2f83d2a3b83480ab4653b085622f9458566448a43e08e8d62d5b97571257c9db";
     private const string MatrixOriginalNormalizedSha256 =
         "85a441af723e7f924ec5d3534d61353b56553465e17efb349fac56b79e36869f";
 
@@ -17,7 +17,14 @@ public sealed class ManagedCallbackOwnerClosureLayoutTests
         { "TensorRtDebugListenerCallbackOwner.cs", Array.Empty<string>() },
         { "TensorRtDebugListenerCallbackOwner.DesignDiagnostic.cs", new[] { "RunDesignDiagnostic" } },
         { "TensorRtDebugListenerCallbackOwner.Snapshots.cs", new[] { "GetSnapshot", "CreateSnapshot" } },
-        { "TensorRtDebugListenerCallbackOwner.Lifecycle.cs", new[] { "Dispose", "FreeCallbackState" } },
+        {
+            "TensorRtDebugListenerCallbackOwner.Lifecycle.cs",
+            new[]
+            {
+                "Dispose", "AttachBorrower", "DetachBorrower", "ThrowIfDisposed", "ReleaseResources",
+                "FreeCallbackState"
+            }
+        },
         { "TensorRtDebugListenerCallbackOwner.ShapeFormatting.cs", new[] { "GetDimension", "FormatShape" } },
         {
             "TensorRtDebugListenerCallbackOwner.Trampoline.cs",

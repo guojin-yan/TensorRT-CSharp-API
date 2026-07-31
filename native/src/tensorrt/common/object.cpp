@@ -76,6 +76,8 @@ const char* kind_to_name(const JYPPX_TensorRtObjectKind kind)
         return "allocator-callback-owner";
     case JYPPX_TENSORRT_OBJECT_KIND_ONNX_CONFIG:
         return "onnx-config";
+    case JYPPX_TENSORRT_OBJECT_KIND_DEBUG_LISTENER_CALLBACK_OWNER:
+        return "debug-listener-callback-owner";
     default:
         return "unknown";
     }
