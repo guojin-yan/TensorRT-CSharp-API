@@ -8235,6 +8235,38 @@ TensorRtExec/OnnxToEngine generic runtime 采用一致的名称绑定、全输�
 - 真实 smoke 输出保留在 ignored `artifacts/temp`，不提交 engine/model/input 等重资产；8 份 publishing 用户变更
   未触碰、未暂存。
 
+## 2026-07-31 YoloVision Managed Extension Publication Dry Run
+
+本阶段把 `JYPPX.TensorRT.CSharp.API.YoloVision` 纳入 managed package workflow 和正式发布清单，同时保持
+`grape-yan` 只做日常 Actions 编译/打包验证。基础 managed、YoloVision extension 与 Bridge 是允许的候选；CUDA、
+cuDNN、TensorRT、NVRTC、模型和 engine 继续由用户自行安装或提供，不进入 nupkg 或 Release asset。
+
+### 实现与发布保护
+
+- `package-managed.yml` 同时构建基础 managed 与 YoloVision 两个纯 managed 包，以精确 ID/version allowlist 验证包集合，
+  并运行 YoloVision surface 和仓库外 PackageReference-only consumer。
+- clean consumer 只引用两个 nupkg，restore graph 中 ProjectReference/project library 为 0；只运行 capability/layout/options
+  等纯 managed 路径，固定要求 `NativeRuntimeLoaded=False`。
+- 新增本地双包 dry-run 与三包 publication handoff。handoff 要求 managed、YoloVision、Bridge 的 package ID、版本、
+  repository commit、SHA256、managed dependency 和 Bridge native entry 全部一致。
+- `release-quality-gate.yml` 允许正式仓库与 `grape-yan` 运行只读 package dry-run；publish、GitHub Release attach 与 docs
+  deploy 不随 dry-run 启用。
+- `package-managed.yml` 和 `release-bundle.yml` 的任何发布副作用都要求 `owner_publish_approved=true` 且
+  `github.repository_owner == 'guojin-yan'`；所有发布输入默认 `false`。
+- publication state、candidate inventory、Actions audit 和 workflow contract 同步识别 YoloVision managed extension；
+  vendor/full/meta/collection runtime package 仍然禁止。
+
+### 本地验证与边界
+
+- PowerShell parser `0` error；新增合同测试 `6/6`。
+- 真实双包 dry-run：2 PackageReference、0 ProjectReference、0 restore project library、0 native/vendor entry；YoloVision
+  surface 为 45 types / 424 members / 0 finding，consumer 输出 `Passed=True` 与 `NativeRuntimeLoaded=False`。
+- 三包 handoff 对旧 source commit 混配正确失败；重打 Bridge 后为 3 packages、版本/source commit 一致、0 vendor
+  runtime entry、1 个项目自有 Bridge native entry，且 `performsPublish=false`。
+- 本批记录的是本地/Actions artifact dry-run 与 Owner handoff 输入，不是公开 feed、TensorRT runtime、post-publish、
+  Owner release acceptance 或 release proof。最终提交、远程 Actions 与候选 hash 在本批完成时另行固定。
+- 8 份 publishing 用户修改继续保持未覆盖、未暂存；nupkg 和验证报告只留 ignored E 盘工作区。
+
 ## 2026-07-31 YOLOv8n Segmentation Real Multi-Output Runtime
 
 本阶段使用官方 Ultralytics `v8.3.0` `yolov8n-seg.pt` 闭合 YoloVision 的真实实例分割多输出路径。模型、导出 ONNX、

@@ -425,13 +425,13 @@ Formal releases run only from the `guojin-yan` repository. The `grape-yan` repos
 
 Current release workflows publish only:
 
-- `package-managed.yml`: `JYPPX.TensorRT.CSharp.API`;
+- `package-managed.yml`: `JYPPX.TensorRT.CSharp.API` and the pure managed `JYPPX.TensorRT.CSharp.API.YoloVision` extension;
 - `runtime-windows.yml` / `runtime-linux.yml`: `.Bridge` packages with `split_package_roles=bridge`;
 - `package-source.yml`: a tracked-files-only source archive.
 
-Every upload path runs `eng/Test-ExternalVendorRuntimePackagePolicy.ps1`. `release-bundle.yml` dispatches the managed, bridge, and source workflows but rejects retired full/vendor roles.
+Every upload path runs `eng/Test-ExternalVendorRuntimePackagePolicy.ps1`. The managed workflow requires an exact two-package ID/version allowlist, matching nuspec source commits, the YoloVision surface audit, and a repository-external managed-only consumer. `release-bundle.yml` defaults all publication/deployment inputs to `false`; any docs, package, or Release side effect additionally requires `owner_publish_approved=true` in the formal repository.
 
-For nuget.org publication, `NUGET_API_KEY` must be an active plain-text key with push permission for the `JYPPX.TensorRT.CSharp.API` package ID. A nuget.org `403` is non-retryable until the package owner supplies a valid package-scoped key.
+For nuget.org publication, `NUGET_API_KEY` must be an active plain-text key with push permission for both `JYPPX.TensorRT.CSharp.API` and `JYPPX.TensorRT.CSharp.API.YoloVision`, or for their owning account/organization. A nuget.org `403` is non-retryable until the package owner supplies a valid package-scoped key.
 
 <details>
 <summary>Historical vendor-package migration note</summary>
@@ -444,11 +444,11 @@ After explicit Owner fingerprint review, 65 retired GitHub Package versions and 
 
 Current formal release rules:
 
-- publish only `JYPPX.TensorRT.CSharp.API`, matching `.Bridge` packages, and tracked-files-only source archives;
+- publish only `JYPPX.TensorRT.CSharp.API`, explicitly allowlisted pure managed extensions such as `JYPPX.TensorRT.CSharp.API.YoloVision`, matching `.Bridge` packages, and tracked-files-only source archives;
 - keep NVIDIA libraries as consumer-installed machine prerequisites;
 - run `eng/Test-ExternalVendorRuntimePackagePolicy.ps1` on every pack/upload path;
 - run formal publication only from `guojin-yan`; use `grape-yan` for build/test validation only;
-- require same-commit managed/bridge provenance, clean external consumer evidence, post-publish verification, and Owner approval before release closure.
+- require same-commit managed/YoloVision/bridge provenance, clean external consumer evidence, post-publish verification, and Owner approval before release closure.
 
 </details>
 

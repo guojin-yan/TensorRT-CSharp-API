@@ -4,12 +4,12 @@ on:
   workflow_dispatch:
     inputs:
       managed_version:
-        description: Optional managed package version to audit
+        description: Optional managed API and YoloVision package version to audit
         required: false
         default: "4.0.6170"
         type: string
       release_tag:
-        description: Optional managed package GitHub Release tag to audit
+        description: Optional managed bundle GitHub Release tag to audit
         required: false
         default: "v4.0.6170"
         type: string
@@ -116,7 +116,9 @@ jobs:
             "-Repository",
             "$env:GH_REPO",
             "-NuGetApiKeyAvailable",
-            "$env:HAS_NUGET_API_KEY"
+            "$env:HAS_NUGET_API_KEY",
+            "-ManagedExtensionPackageId",
+            "JYPPX.TensorRT.CSharp.API.YoloVision"
           )
 
           if (-not [string]::IsNullOrWhiteSpace("${{ inputs.managed_version }}")) {

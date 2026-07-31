@@ -2,6 +2,7 @@
 param(
   [string]$RuntimePackageKey = "win-x64-trt11.0-cuda13.2-cudnn9.22",
   [string[]]$CompatibleBridgeRuntimePackageKey = @("win-x64-trt10.11-cuda12.9-cudnn9.22"),
+  [string]$PackageVersion = "4.0.0",
   [string]$RepositoryRoot
 )
 
@@ -62,6 +63,8 @@ function Read-NupkgMetadata {
   $metadata = @{
     id = ""
     version = ""
+    repositoryUrl = ""
+    repositoryCommit = ""
     targetFrameworks = @()
   }
 
@@ -79,6 +82,8 @@ function Read-NupkgMetadata {
           [xml]$xml = $reader.ReadToEnd()
           $metadata.id = [string]$xml.package.metadata.id
           $metadata.version = [string]$xml.package.metadata.version
+          $metadata.repositoryUrl = [string]$xml.package.metadata.repository.url
+          $metadata.repositoryCommit = ([string]$xml.package.metadata.repository.commit).ToLowerInvariant()
         }
         finally {
           $reader.Dispose()
@@ -151,6 +156,8 @@ function New-PackageInventoryItem {
     runtimePackageKey = $RuntimePackageKey
     packageId = [string]$metadata.id
     version = [string]$metadata.version
+    repositoryUrl = [string]$metadata.repositoryUrl
+    repositoryCommit = [string]$metadata.repositoryCommit
     fileName = $File.Name
     relativePath = ConvertTo-RelativePath -Path $File.FullName
     sizeBytes = $File.Length
@@ -182,6 +189,7 @@ function Get-PackagesFromDirectory {
 }
 
 $managedDirectory = Join-Path $RepositoryRoot "artifacts\managed"
+$managedExtensionDirectory = Join-Path $RepositoryRoot "artifacts\yolovision-nupkg"
 $runtimeDirectory = Join-Path $RepositoryRoot "artifacts\runtime-nupkg"
 $splitRuntimeRoot = Join-Path $RepositoryRoot "artifacts\runtime-split-nupkg"
 $selectedSplitDirectory = Join-Path $splitRuntimeRoot $RuntimePackageKey
@@ -189,6 +197,7 @@ $outputRoot = Join-Path $RepositoryRoot "artifacts\final-release"
 New-Item -ItemType Directory -Force -Path $outputRoot | Out-Null
 
 $managedPackages = @(Get-PackagesFromDirectory -Directory $managedDirectory -RootRole "managed")
+$managedExtensionPackages = @(Get-PackagesFromDirectory -Directory $managedExtensionDirectory -RootRole "managed-extension")
 $runtimePackages = @(Get-PackagesFromDirectory -Directory $runtimeDirectory -RootRole "full-runtime" -RuntimePackageKey $RuntimePackageKey)
 $splitRuntimePackages = @(Get-PackagesFromDirectory -Directory $selectedSplitDirectory -RootRole "split-runtime" -RuntimePackageKey $RuntimePackageKey)
 $compatibleBridgeRuntimeKeys = @($CompatibleBridgeRuntimePackageKey |
@@ -238,10 +247,13 @@ $compatibleBridgeRuntimeProofs = @(
   }
 )
 $compatibleBridgeRuntimeProofReady = $compatibleBridgeRuntimeProofs.Count -gt 0 -and @($compatibleBridgeRuntimeProofs | Where-Object { -not $_.ready }).Count -eq 0
-$allPackages = @($managedPackages + $runtimePackages + $splitRuntimePackages + $compatibleBridgePackages) |
+$allPackages = @($managedPackages + $managedExtensionPackages + $runtimePackages + $splitRuntimePackages + $compatibleBridgePackages) |
   Sort-Object role, packageId, version, fileName
 
-$managedPackageReady = @($allPackages | Where-Object { $_.role -eq "managed" -and $_.packageId -eq "JYPPX.TensorRT.CSharp.API" -and $_.version -eq "4.0.0" }).Count -gt 0
+$managedPackageCandidates = @($allPackages | Where-Object { $_.role -eq "managed" -and $_.packageId -eq "JYPPX.TensorRT.CSharp.API" })
+$managedExtensionPackageCandidates = @($allPackages | Where-Object { $_.role -eq "managed-extension" -and $_.packageId -eq "JYPPX.TensorRT.CSharp.API.YoloVision" })
+$managedPackageReady = $managedPackageCandidates.Count -eq 1 -and $managedPackageCandidates[0].version -eq $PackageVersion
+$managedExtensionPackageReady = $managedExtensionPackageCandidates.Count -eq 1 -and $managedExtensionPackageCandidates[0].version -eq $PackageVersion
 $fullRuntimeReady = $false
 $requiredSplitRoles = @("split-bridge")
 $presentRoles = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
@@ -251,10 +263,18 @@ foreach ($package in $allPackages) {
 $missingSplitRoles = @($requiredSplitRoles | Where-Object { -not $presentRoles.Contains($_) })
 $splitBridgePackageReady = $presentRoles.Contains("split-bridge")
 $splitRuntimePackagesReady = $missingSplitRoles.Count -eq 0
-$allowedPackages = @($allPackages | Where-Object { $_.role -in @("managed", "split-bridge") })
-$retiredPackageCandidates = @($allPackages | Where-Object { $_.role -notin @("managed", "split-bridge") })
+$allowedPackages = @($allPackages | Where-Object {
+    ($_.role -eq "managed" -and $_.packageId -eq "JYPPX.TensorRT.CSharp.API") -or
+    ($_.role -eq "managed-extension" -and $_.packageId -eq "JYPPX.TensorRT.CSharp.API.YoloVision") -or
+    $_.role -eq "split-bridge"
+  })
+$retiredPackageCandidates = @($allPackages | Where-Object { $_ -notin $allowedPackages })
 $sha256Ready = @($allowedPackages | Where-Object { -not $_.sha256Ready }).Count -eq 0 -and $allowedPackages.Count -gt 0
-$packageSetReady = $managedPackageReady -and $splitBridgePackageReady -and $splitRuntimePackagesReady -and $sha256Ready -and $retiredPackageCandidates.Count -eq 0
+$candidateAllowedPackages = @($allowedPackages | Where-Object { $_.version -eq $PackageVersion })
+$packageVersionsAligned = $allowedPackages.Count -ge 3 -and $candidateAllowedPackages.Count -eq $allowedPackages.Count
+$packageRepositoryCommits = @($allowedPackages | ForEach-Object { [string]$_.repositoryCommit } | Where-Object { $_ -match '^[a-f0-9]{40}$' } | Sort-Object -Unique)
+$packageSourceCommitsAligned = $allowedPackages.Count -ge 3 -and $packageRepositoryCommits.Count -eq 1 -and @($allowedPackages | Where-Object { [string]$_.repositoryCommit -notmatch '^[a-f0-9]{40}$' }).Count -eq 0
+$packageSetReady = $managedPackageReady -and $managedExtensionPackageReady -and $splitBridgePackageReady -and $splitRuntimePackagesReady -and $sha256Ready -and $packageVersionsAligned -and $packageSourceCommitsAligned -and $retiredPackageCandidates.Count -eq 0
 
 $record = [pscustomobject]@{
   generatedAtUtc = [DateTimeOffset]::UtcNow.ToString("O")
@@ -266,6 +286,7 @@ $record = [pscustomobject]@{
   canCloseReleaseIssue = $false
   packageCount = $allPackages.Count
   managedPackageCount = $managedPackages.Count
+  managedExtensionPackageCount = $managedExtensionPackages.Count
   fullRuntimePackageCount = $runtimePackages.Count
   allowedPackageCount = $allowedPackages.Count
   retiredPackageCandidateCount = $retiredPackageCandidates.Count
@@ -275,6 +296,7 @@ $record = [pscustomobject]@{
   compatibleBridgeRuntimeProofReady = $compatibleBridgeRuntimeProofReady
   compatibleBridgeRuntimeProofs = $compatibleBridgeRuntimeProofs
   managedPackageReady = $managedPackageReady
+  managedExtensionPackageReady = $managedExtensionPackageReady
   fullRuntimePackageReady = $fullRuntimeReady
   fullRuntimePackageRequired = $false
   vendorRuntimePackagesForbidden = $true
@@ -284,9 +306,12 @@ $record = [pscustomobject]@{
   splitBridgePackageReady = $splitBridgePackageReady
   splitRuntimePackagesReady = $splitRuntimePackagesReady
   sha256Ready = $sha256Ready
+  packageVersionsAligned = $packageVersionsAligned
+  packageSourceCommitsAligned = $packageSourceCommitsAligned
+  packageSourceCommit = if ($packageRepositoryCommits.Count -eq 1) { $packageRepositoryCommits[0] } else { "" }
   packageSetReady = $packageSetReady
   packages = @($allPackages)
-  proofBoundary = "Local package inventory accepts only managed and bridge candidates. Any full/vendor, collection, or meta candidate blocks packageSetReady. The inventory is not public channel proof, runtime execution proof, post-publish proof, or owner authorization."
+  proofBoundary = "Local package inventory accepts only the managed API, explicit managed extensions, and bridge candidates. Any full/vendor, collection, or meta candidate blocks packageSetReady. The inventory is not public channel proof, runtime execution proof, post-publish proof, or owner authorization."
   guardrails = @(
     "This inventory does not publish packages.",
     "Local feed and dependency-probe-only evidence are not post-publish proof.",
@@ -309,6 +334,7 @@ $lines.Add("- can publish publicly: ``$($record.canPublishPublicly)``")
 $lines.Add("- can use as public package proof: ``$($record.canUseAsPublicPackageProof)``")
 $lines.Add("- can close release issue: ``$($record.canCloseReleaseIssue)``")
 $lines.Add("- managed package ready: ``$managedPackageReady``")
+$lines.Add("- YoloVision managed extension ready: ``$managedExtensionPackageReady``")
 $lines.Add("- full/vendor runtime packages required: ``False``")
 $lines.Add("- retired package candidates found: ``$($retiredPackageCandidates.Count)``")
 $lines.Add("- split bridge package ready: ``$splitBridgePackageReady``")
@@ -316,14 +342,16 @@ $lines.Add("- split bridge package ready: ``$splitBridgePackageReady``")
   $lines.Add("- compatible bridge packages: ``$($compatibleBridgePackages.Count)``")
   $lines.Add("- compatible bridge runtime proof ready: ``$compatibleBridgeRuntimeProofReady``")
 $lines.Add("- SHA256 ready: ``$sha256Ready``")
+$lines.Add("- package versions aligned: ``$packageVersionsAligned``")
+$lines.Add("- package source commits aligned: ``$packageSourceCommitsAligned``")
 $lines.Add("- complete package set ready: ``$packageSetReady``")
 $lines.Add("")
 $lines.Add("## Packages")
 $lines.Add("")
-$lines.Add("| Role | Package ID | Version | Size MB | SHA256 | Path |")
-$lines.Add("| --- | --- | --- | ---: | --- | --- |")
+$lines.Add("| Role | Package ID | Version | Source commit | Size MB | SHA256 | Path |")
+$lines.Add("| --- | --- | --- | --- | ---: | --- | --- |")
 foreach ($package in $allPackages) {
-  $lines.Add("| $(ConvertTo-MarkdownCell $package.role) | $(ConvertTo-MarkdownCell $package.packageId) | $(ConvertTo-MarkdownCell $package.version) | $(ConvertTo-MarkdownCell $package.sizeMb) | $(ConvertTo-MarkdownCell $package.sha256) | $(ConvertTo-MarkdownCell $package.relativePath) |")
+  $lines.Add("| $(ConvertTo-MarkdownCell $package.role) | $(ConvertTo-MarkdownCell $package.packageId) | $(ConvertTo-MarkdownCell $package.version) | $(ConvertTo-MarkdownCell $package.repositoryCommit) | $(ConvertTo-MarkdownCell $package.sizeMb) | $(ConvertTo-MarkdownCell $package.sha256) | $(ConvertTo-MarkdownCell $package.relativePath) |")
 }
 
 $lines.Add("")

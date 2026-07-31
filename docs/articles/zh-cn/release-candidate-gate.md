@@ -90,7 +90,7 @@ cmake --build --preset win-x64-trt11-cuda13-release --parallel
 
 - 精确 TensorRT、CUDA、cuDNN root 校验。
 - 匹配 CMake preset 输出的 runtime asset collection。
-- managed package 与 matching runtime package pack 证据。
+- 基础 managed、YoloVision 纯 managed 扩展与 matching bridge package 的 pack/hash/source-commit 对齐证据。
 - package consumer restore/build/native asset copy 验证。
 - 兼容机器上的 package consumer smoke 证据；如果被 WDAC、driver/runtime 不兼容阻塞，应记录为环境 blocker，而不是 package layout failure。
 - private-feed 或 split-delivery readiness 必须要求 `local-validated`；`pending-local-validation` 不能视为 ready。
@@ -103,7 +103,7 @@ Linux Ubuntu 20.04/22.04/24.04 x64 都通过 GitHub-hosted runner 和匹配的 U
 
 在启用远端发布链前，请先确认：
 
-- `package-managed.yml` 在 `publish_to_nuget=true` 时必须使用仓库 secret `NUGET_API_KEY`，并要求它是纯文本 ASCII 的 nuget.org API key，且对 `JYPPX.TensorRT.CSharp.API` package ID 或其所属账号/组织拥有 push 权限。缺少该 secret 时 workflow 会在发布前失败，不再依赖 self-hosted Windows runner 当前用户的 NuGet 配置兜底。不要填加密后的本机凭据或其它机器导出的 token 片段。如果推送阶段返回 nuget.org `403`，表示 key 无效、过期或缺少该 package ID 的 scope，需要替换 secret 后再重跑 managed-only workflow。
+- `package-managed.yml` 固定打包并验证 `JYPPX.TensorRT.CSharp.API` 与 `JYPPX.TensorRT.CSharp.API.YoloVision` 两个包。发布必须同时满足 `owner_publish_approved=true`、正式仓库 owner、精确 ID/版本/source-commit allowlist；`publish_to_nuget=true` 时还要求仓库 secret `NUGET_API_KEY` 是纯文本 ASCII 的 nuget.org API key，并对两个 package ID 或其所属账号/组织拥有 push 权限。nuget.org `403` 是不可重试的权限错误，必须先替换失效、过期或 scope 不足的 key。
 - `runtime-windows.yml` 要求 Windows self-hosted runner 在线，并带有 `self-hosted`、`windows`、`x64` 标签。
 - `runtime-linux.yml` 可以通过 GitHub-hosted runner 和匹配的 Ubuntu job container 发布 Ubuntu 20.04、Ubuntu 22.04、Ubuntu 24.04 x64。Ubuntu 20.04 x64 使用 `runner_mode=hosted-container`，Ubuntu 24.04 x64 只覆盖现代组合，ARM/Jetson 目标需要单独建包线后才能发布。
 

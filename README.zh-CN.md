@@ -424,11 +424,11 @@ runtime 包为一个明确 TensorRT / CUDA / cuDNN 组合承载原生部署资�
 
 当前发布工作流只处理：
 
-- `package-managed.yml`：`JYPPX.TensorRT.CSharp.API`；
+- `package-managed.yml`：`JYPPX.TensorRT.CSharp.API` 与纯 managed 扩展 `JYPPX.TensorRT.CSharp.API.YoloVision`；
 - `runtime-windows.yml` / `runtime-linux.yml`：`split_package_roles=bridge` 的 `.Bridge` 包；
 - `package-source.yml`：仅含 Git 跟踪文件的源码归档。
 
-所有上传路径都会运行 `eng/Test-ExternalVendorRuntimePackagePolicy.ps1`。`release-bundle.yml` 只编排 managed、bridge 与 source，并拒绝已退休的 full/vendor roles。
+所有上传路径都会运行 `eng/Test-ExternalVendorRuntimePackagePolicy.ps1`。managed workflow 还会强制基础 API + YoloVision 两包的精确 ID/版本 allowlist、nuspec source commit 对齐、YoloVision surface audit 和仓库外纯 managed consumer。`release-bundle.yml` 的部署、package publish 与 Release attach 默认全部为 `false`；任何远端副作用还必须在正式仓库显式传入 `owner_publish_approved=true`。
 
 <details>
 <summary>Bridge-only 发布自动化说明</summary>
@@ -440,7 +440,7 @@ runtime 包为一个明确 TensorRT / CUDA / cuDNN 组合承载原生部署资�
 
 也可以用 `act` 在本机做 workflow dry-run，例如解析 `release-bundle.yml` 或 `runtime-linux.yml` 的调度图。`act` 适合做轻量检查，但不能替代正式发布证据：Windows hosted job 不能被 Linux 容器可靠复刻，self-hosted runtime job 仍依赖真实本机/runner 上的 CUDA、cuDNN、TensorRT 和签名环境。详见 `docs/articles/zh-cn/local-actions.md`。
 
-managed 与 bridge 可以独立版本，但必须绑定同一个源码提交。CUDA、cuDNN、TensorRT 和 NVRTC 由 consumer 自行安装，不再上传到 GitHub Packages 或 GitHub Releases。日常 Actions 先在 `grape-yan` 验证；正式发布只在 `guojin-yan` 执行。
+基础 managed、YoloVision 与 bridge 可以独立构建，但同一发布 handoff 必须使用同一版本和源码提交，并记录三个 nupkg 的 SHA256。CUDA、cuDNN、TensorRT 和 NVRTC 由 consumer 自行安装，不再上传到 GitHub Packages 或 GitHub Releases。日常 Actions 先在 `grape-yan` 运行零发布 dry-run；正式发布只在 `guojin-yan` 执行。
 
 历史远端 vendor 包清理结果：
 
@@ -453,12 +453,13 @@ managed 与 bridge 可以独立版本，但必须绑定同一个源码提交。C
 
 历史 package identity 只保留给清理与证据解释，不能重新 pack、push 或上传。
 
-远端 managed-only 发布示例：
+远端 managed bundle 发布示例：
 
 ```powershell
 gh workflow run release-bundle.yml `
   --ref TensorRtSharp4.0 `
   -f version=4.0.1 `
+  -f owner_publish_approved=true `
   -f publish_managed_to_nuget=true `
   -f publish_managed_to_github_packages=true
 ```
@@ -472,6 +473,7 @@ gh workflow run release-bundle.yml `
   --ref TensorRtSharp4.0 `
   -f version=4.0.0 `
   -f runtime_version=4.0.0 `
+  -f owner_publish_approved=true `
   -f run_windows_runtime_packaging=true `
   -f windows_runtime_delivery_mode=split `
   -f windows_split_package_roles=bridge `
@@ -494,7 +496,7 @@ gh workflow run release-bundle.yml `
   -f attach_runtime_to_github_release=false
 ```
 
-本地 managed-only 示例：
+本地 managed bundle 示例：
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\eng\Invoke-LocalReleaseBundle.ps1 `
@@ -516,9 +518,9 @@ powershell -ExecutionPolicy Bypass -File .\eng\Test-ExternalVendorRuntimePackage
   -PackagePath .\artifacts\runtime-split-nupkg\<runtime-key>
 ```
 
-`release-bundle.yml` 默认不再触发 runtime 打包。需要 runtime 时显式设置 `run_windows_runtime_packaging=true` 或 `run_linux_runtime_packaging=true`；如果启用 Linux runtime 但 `linux_runtime_keys` 为空，Linux 模块会干净 no-op。
+`release-bundle.yml` 默认不触发 docs deploy、runtime 打包、package publish 或 Release attach。需要 runtime validation 时显式设置 `run_windows_runtime_packaging=true` 或 `run_linux_runtime_packaging=true`；只有同时启用 publish/attach 参数时才需要 `owner_publish_approved=true`。如果启用 Linux runtime 但 `linux_runtime_keys` 为空，Linux 模块会干净 no-op。
 
-发布到 `nuget.org` 时，仓库 secret `NUGET_API_KEY` 应填写 NuGet 官网生成的纯文本 ASCII API key。这个 key 必须仍然有效，并且必须对 `JYPPX.TensorRT.CSharp.API` 这个 package ID 或其所属账号/组织拥有 push 权限。managed-package workflow 会在发布前校验该 secret；不要把加密后的本机凭据或机器导出的 token 片段填进 `NUGET_API_KEY`。如果推送阶段返回 nuget.org `403`，说明 key 无效、过期或没有该包 ID 的权限，需要用包 owner 账号重新生成有 scope 的 key 后再重跑 managed-only workflow。
+发布到 `nuget.org` 时，仓库 secret `NUGET_API_KEY` 应填写 NuGet 官网生成的纯文本 ASCII API key。这个 key 必须仍然有效，并且必须对 `JYPPX.TensorRT.CSharp.API`、`JYPPX.TensorRT.CSharp.API.YoloVision` 两个 package ID或其所属账号/组织拥有 push 权限。managed-package workflow 会在发布前校验该 secret；不要把加密后的本机凭据或机器导出的 token 片段填进 `NUGET_API_KEY`。如果推送阶段返回 nuget.org `403`，说明 key 无效、过期或没有对应包 ID 的权限，需要用包 owner 账号重新生成有 scope 的 key 后再重跑 managed bundle workflow。
 
 </details>
 

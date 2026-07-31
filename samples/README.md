@@ -23,6 +23,7 @@ That split keeps:
 | `RefittedPlan.PackageConsumer` | PackageReference-only persisted refitted-plan reload, enqueue, raw output hash, and owner cleanup example | runnable through the local-package proof script |
 | `Classification` | External ONNX classifier inference with legacy single-input and strict named multi-input binding, raw/task reference validation, and Top-K output | runnable with user-provided ONNX assets |
 | `YoloVision` | External YOLO-family ONNX vision sample with strict named multi-input binding, all-output reference validation, family/task profiles, preprocessing, and det/cls/seg/pose/OBB/semantic helpers | runnable with user-provided ONNX assets |
+| `YoloVision.ManagedPackageConsumer` | Repository-external template used to validate the managed API and YoloVision extension through PackageReference-only restore/build/run | runnable through `eng/Test-YoloVisionManagedPackageDryRun.ps1`; no NVIDIA runtime required |
 
 `YoloVision` also exposes an offline capability matrix for documentation, smoke, and asset-planning workflows:
 

@@ -22,7 +22,8 @@ public sealed class ReleaseQualityGateWorkflowTests
         Assert.True(CountOccurrences(workflow, "default: false") >= 3);
         Assert.Contains("package-managed-dry-run:", workflow, StringComparison.Ordinal);
         Assert.Contains("uses: ./.github/workflows/package-managed.yml", workflow, StringComparison.Ordinal);
-        Assert.Contains("github.repository_owner == 'guojin-yan'", workflow, StringComparison.Ordinal);
+        Assert.Contains("if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_package_managed_dry_run }}", workflow, StringComparison.Ordinal);
+        Assert.Contains("owner_publish_approved: false", workflow, StringComparison.Ordinal);
         Assert.Contains("publish_to_nuget: false", workflow, StringComparison.Ordinal);
         Assert.Contains("publish_to_github_packages: false", workflow, StringComparison.Ordinal);
         Assert.Contains("artifact_name: package-managed-dry-run", workflow, StringComparison.Ordinal);
@@ -88,7 +89,7 @@ public sealed class ReleaseQualityGateWorkflowTests
         Assert.Contains("run_package_managed_dry_run:", workflow, StringComparison.Ordinal);
         Assert.Contains("default: false", workflow, StringComparison.Ordinal);
         Assert.Contains("package-managed-dry-run:", workflow, StringComparison.Ordinal);
-        Assert.Contains("if: ${{ github.repository_owner == 'guojin-yan' && github.event_name == 'workflow_dispatch' && inputs.run_package_managed_dry_run }}", workflow, StringComparison.Ordinal);
+        Assert.Contains("if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_package_managed_dry_run }}", workflow, StringComparison.Ordinal);
         Assert.DoesNotContain("package-managed-dry-run:\n    if: ${{ github.event_name == 'push'", workflow, StringComparison.Ordinal);
         Assert.Contains("publish_to_nuget: false", workflow, StringComparison.Ordinal);
         Assert.Contains("publish_to_github_packages: false", workflow, StringComparison.Ordinal);
@@ -99,16 +100,19 @@ public sealed class ReleaseQualityGateWorkflowTests
         Assert.Contains("publish_to_nuget:", packageManagedWorkflow, StringComparison.Ordinal);
         Assert.Contains("publish_to_github_packages:", packageManagedWorkflow, StringComparison.Ordinal);
         Assert.True(CountOccurrences(packageManagedWorkflow, "default: false") >= 4);
-        Assert.Contains("if: ${{ inputs.publish_to_nuget && github.repository_owner == 'guojin-yan' }}", packageManagedWorkflow, StringComparison.Ordinal);
-        Assert.Contains("if: ${{ inputs.publish_to_github_packages && github.repository_owner == 'guojin-yan' }}", packageManagedWorkflow, StringComparison.Ordinal);
-        Assert.Contains("inputs.publish_to_nuget && github.repository_owner", actionsAudit, StringComparison.Ordinal);
-        Assert.Contains("inputs.publish_to_github_packages && github.repository_owner", actionsAudit, StringComparison.Ordinal);
+        Assert.Contains("owner_publish_approved: false", workflow, StringComparison.Ordinal);
+        Assert.Contains("if: ${{ inputs.publish_to_nuget && inputs.owner_publish_approved && github.repository_owner == 'guojin-yan' }}", packageManagedWorkflow, StringComparison.Ordinal);
+        Assert.Contains("if: ${{ inputs.publish_to_github_packages && inputs.owner_publish_approved && github.repository_owner == 'guojin-yan' }}", packageManagedWorkflow, StringComparison.Ordinal);
+        Assert.Contains("inputs.publish_to_nuget && inputs.owner_publish_approved && github.repository_owner", actionsAudit, StringComparison.Ordinal);
+        Assert.Contains("inputs.publish_to_github_packages && inputs.owner_publish_approved && github.repository_owner", actionsAudit, StringComparison.Ordinal);
         Assert.Contains("grape-yan repository is validation-only", actionsAudit, StringComparison.Ordinal);
 
         Assert.Contains("[object]$PublishManagedToNuGet = $false", remoteBundleScript, StringComparison.Ordinal);
+        Assert.Contains("[object]$OwnerPublishApproved = $false", remoteBundleScript, StringComparison.Ordinal);
         Assert.Contains("[object]$PublishRuntimeToGitHubPackages = $false", remoteBundleScript, StringComparison.Ordinal);
         Assert.Contains("Add-WorkflowInput -ArgumentList $arguments -Name \"publish_managed_to_nuget\"", remoteBundleScript, StringComparison.Ordinal);
         Assert.Contains("Add-WorkflowInput -ArgumentList $arguments -Name \"publish_managed_to_github_packages\"", remoteBundleScript, StringComparison.Ordinal);
+        Assert.Contains("Add-WorkflowInput -ArgumentList $arguments -Name \"owner_publish_approved\"", remoteBundleScript, StringComparison.Ordinal);
     }
 
     [Fact]

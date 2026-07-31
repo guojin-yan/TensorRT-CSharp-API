@@ -5,6 +5,7 @@ param(
   [ValidateSet("auto", "user", "org")]
   [string]$PackageOwnerKind = "auto",
   [string]$ManagedPackageId = "JYPPX.TensorRT.CSharp.API",
+  [string]$ManagedExtensionPackageId = "JYPPX.TensorRT.CSharp.API.YoloVision",
   [string]$ManagedVersion,
   [string]$ReleaseTag,
   [string[]]$RuntimeReleaseTag = @(),
@@ -248,20 +249,25 @@ else {
   }
 }
 
+$managedPackageIds = @(@($ManagedPackageId, $ManagedExtensionPackageId) |
+    Where-Object { -not [string]::IsNullOrWhiteSpace($_) } |
+    Select-Object -Unique)
 if (-not [string]::IsNullOrWhiteSpace($ManagedVersion)) {
-  $githubVersions = Resolve-GitHubPackageVersions -Owner $PackageOwner -OwnerKind $PackageOwnerKind -PackageId $ManagedPackageId
-  $githubVersionExists = @($githubVersions.versions | Where-Object { [string]$_.name -eq $ManagedVersion }).Count -gt 0
-  Add-Check `
-    -Name "managed package version exists in GitHub Packages" `
-    -Passed ($githubVersionExists -or -not $RequireManagedGitHubPackages.IsPresent) `
-    -Detail "$ManagedPackageId $ManagedVersion ownerKind=$($githubVersions.ownerKind) exists=$githubVersionExists"
+  foreach ($packageId in $managedPackageIds) {
+    $githubVersions = Resolve-GitHubPackageVersions -Owner $PackageOwner -OwnerKind $PackageOwnerKind -PackageId $packageId
+    $githubVersionExists = @($githubVersions.versions | Where-Object { [string]$_.name -eq $ManagedVersion }).Count -gt 0
+    Add-Check `
+      -Name "managed bundle package version exists in GitHub Packages: $packageId" `
+      -Passed ($githubVersionExists -or -not $RequireManagedGitHubPackages.IsPresent) `
+      -Detail "$packageId $ManagedVersion ownerKind=$($githubVersions.ownerKind) exists=$githubVersionExists"
 
-  $nugetOrgVersions = @(Get-NuGetOrgVersions -PackageId $ManagedPackageId)
-  $nugetOrgVersionExists = $nugetOrgVersions -contains $ManagedVersion
-  Add-Check `
-    -Name "managed package version exists on nuget.org" `
-    -Passed ($nugetOrgVersionExists -or -not $RequireManagedNuGetOrg.IsPresent) `
-    -Detail "$ManagedPackageId $ManagedVersion exists=$nugetOrgVersionExists"
+    $nugetOrgVersions = @(Get-NuGetOrgVersions -PackageId $packageId)
+    $nugetOrgVersionExists = $nugetOrgVersions -contains $ManagedVersion
+    Add-Check `
+      -Name "managed bundle package version exists on nuget.org: $packageId" `
+      -Passed ($nugetOrgVersionExists -or -not $RequireManagedNuGetOrg.IsPresent) `
+      -Detail "$packageId $ManagedVersion exists=$nugetOrgVersionExists"
+  }
 }
 
 if (-not [string]::IsNullOrWhiteSpace($ReleaseTag)) {
@@ -269,12 +275,14 @@ if (-not [string]::IsNullOrWhiteSpace($ReleaseTag)) {
   if ($releaseResult.success) {
     $release = $releaseResult.output | ConvertFrom-Json
     $assetNames = @($release.assets | ForEach-Object { [string]$_.name })
-    $expectedManagedAsset = if ([string]::IsNullOrWhiteSpace($ManagedVersion)) { "" } else { "$ManagedPackageId.$ManagedVersion.nupkg" }
-    $hasManagedReleaseAsset = -not [string]::IsNullOrWhiteSpace($expectedManagedAsset) -and ($assetNames -contains $expectedManagedAsset)
-    Add-Check `
-      -Name "managed package release asset exists" `
-      -Passed ($hasManagedReleaseAsset -or -not $RequireManagedReleaseAsset.IsPresent) `
-      -Detail "$ReleaseTag asset=$expectedManagedAsset exists=$hasManagedReleaseAsset assetCount=$($assetNames.Count)"
+    foreach ($packageId in $managedPackageIds) {
+      $expectedManagedAsset = if ([string]::IsNullOrWhiteSpace($ManagedVersion)) { "" } else { "$packageId.$ManagedVersion.nupkg" }
+      $hasManagedReleaseAsset = -not [string]::IsNullOrWhiteSpace($expectedManagedAsset) -and ($assetNames -contains $expectedManagedAsset)
+      Add-Check `
+        -Name "managed bundle Release asset exists: $packageId" `
+        -Passed ($hasManagedReleaseAsset -or -not $RequireManagedReleaseAsset.IsPresent) `
+        -Detail "$ReleaseTag asset=$expectedManagedAsset exists=$hasManagedReleaseAsset assetCount=$($assetNames.Count)"
+    }
   }
   else {
     Add-Check -Name "managed package release exists" -Passed (-not $RequireManagedReleaseAsset.IsPresent) -Detail "$ReleaseTag not found"
@@ -318,6 +326,8 @@ $failed = @($checks | Where-Object { -not $_.passed })
   packageOwner = $PackageOwner
   packageOwnerKind = $PackageOwnerKind
   managedPackageId = $ManagedPackageId
+  managedExtensionPackageId = $ManagedExtensionPackageId
+  managedPackageIds = $managedPackageIds
   managedVersion = $ManagedVersion
   releaseTag = $ReleaseTag
   runtimeReleaseTags = @($runtimeReleaseTags)

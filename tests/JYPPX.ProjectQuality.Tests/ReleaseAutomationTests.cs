@@ -101,11 +101,11 @@ public sealed class ReleaseAutomationTests
         string chineseGate = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "articles", "zh-cn", "release-candidate-gate.md"));
         string summaryScript = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "eng", "Export-ReleaseGateSummary.ps1"));
 
-        Assert.Contains("push permission for the `JYPPX.TensorRT.CSharp.API` package ID", englishReadme, StringComparison.Ordinal);
+        Assert.Contains("push permission for both `JYPPX.TensorRT.CSharp.API` and `JYPPX.TensorRT.CSharp.API.YoloVision`", englishReadme, StringComparison.Ordinal);
         Assert.Contains("nuget.org `403`", englishReadme, StringComparison.Ordinal);
-        Assert.Contains("JYPPX.TensorRT.CSharp.API` 这个 package ID", chineseReadme, StringComparison.Ordinal);
+        Assert.Contains("JYPPX.TensorRT.CSharp.API.YoloVision` 两个 package ID", chineseReadme, StringComparison.Ordinal);
         Assert.Contains("nuget.org `403`", chineseReadme, StringComparison.Ordinal);
-        Assert.Contains("push permission for `JYPPX.TensorRT.CSharp.API`", englishGate, StringComparison.Ordinal);
+        Assert.Contains("push permission for both package IDs", englishGate, StringComparison.Ordinal);
         Assert.Contains("nuget.org `403`", chineseGate, StringComparison.Ordinal);
         Assert.Contains("NUGET_API_KEY` must be an active plain-text nuget.org key", summaryScript, StringComparison.Ordinal);
     }
@@ -123,11 +123,13 @@ public sealed class ReleaseAutomationTests
             "-RunLinuxRuntimePackaging",
             "-LinuxRuntimeKeySet", "hosted-all",
             "-LinuxSplitPackageRoles", "bridge",
+            "-OwnerPublishApproved", "true",
             "-PublishRuntimeToGitHubPackages", "true",
             "-DryRun");
 
         Assert.Contains("gh workflow run release-bundle.yml", output, StringComparison.Ordinal);
         Assert.Contains("release_config_json=", output, StringComparison.Ordinal);
+        Assert.Contains("owner_publish_approved=true", output, StringComparison.Ordinal);
         Assert.DoesNotContain("cuda_cudnn_package_version", output, StringComparison.Ordinal);
         Assert.DoesNotContain("tensorrt_package_version", output, StringComparison.Ordinal);
         Assert.Contains("hosted-all", output, StringComparison.Ordinal);

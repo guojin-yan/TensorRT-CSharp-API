@@ -1,6 +1,9 @@
 [CmdletBinding()]
 param(
   [string[]]$PackagePath = @(),
+  [string[]]$ExpectedPackageId = @(),
+  [string]$ExpectedPackageVersion,
+  [switch]$RequireExactPackageSet,
   [switch]$StaticOnly,
   [string]$RepositoryRoot
 )
@@ -252,6 +255,7 @@ if (-not $StaticOnly.IsPresent) {
       $reader = [IO.StreamReader]::new($nuspecEntry.Open())
       try { [xml]$nuspec = $reader.ReadToEnd() } finally { $reader.Dispose() }
       $packageId = [string]$nuspec.package.metadata.id
+      $packageVersion = [string]$nuspec.package.metadata.version
       $kind = if (@($policy.managedPackageIds) -contains $packageId) {
         "managed"
       }
@@ -296,6 +300,7 @@ if (-not $StaticOnly.IsPresent) {
       $inspectedPackages.Add([pscustomobject]@{
         path = $packageFile
         packageId = $packageId
+        packageVersion = $packageVersion
         kind = $kind
         nativeEntries = @($nativeEntries.ToArray())
       })
@@ -306,10 +311,52 @@ if (-not $StaticOnly.IsPresent) {
   }
 }
 
+if ($RequireExactPackageSet.IsPresent) {
+  $expectedIds = @(
+    foreach ($value in @($ExpectedPackageId)) {
+      foreach ($token in @(([string]$value) -split '[,;]')) {
+        if (-not [string]::IsNullOrWhiteSpace($token)) {
+          $token.Trim()
+        }
+      }
+    }
+  ) | Sort-Object -Unique
+  if ($StaticOnly.IsPresent) {
+    Add-Failure "RequireExactPackageSet cannot be combined with StaticOnly."
+  }
+  if ($expectedIds.Count -eq 0) {
+    Add-Failure "RequireExactPackageSet requires at least one ExpectedPackageId."
+  }
+
+  $unexpectedPackages = @($inspectedPackages | Where-Object { $expectedIds -notcontains [string]$_.packageId })
+  foreach ($unexpectedPackage in $unexpectedPackages) {
+    Add-Failure "Package is outside the expected publication allowlist: $($unexpectedPackage.packageId) $($unexpectedPackage.packageVersion)"
+  }
+
+  foreach ($expectedId in $expectedIds) {
+    $matches = @($inspectedPackages | Where-Object { [string]::Equals([string]$_.packageId, $expectedId, [StringComparison]::Ordinal) })
+    if ($matches.Count -ne 1) {
+      Add-Failure "Expected exactly one package '$expectedId', found $($matches.Count)."
+      continue
+    }
+    if (-not [string]::IsNullOrWhiteSpace($ExpectedPackageVersion) -and
+        -not [string]::Equals([string]$matches[0].packageVersion, $ExpectedPackageVersion, [StringComparison]::Ordinal)) {
+      Add-Failure "Package '$expectedId' version '$($matches[0].packageVersion)' does not match expected version '$ExpectedPackageVersion'."
+    }
+  }
+
+  if ($inspectedPackages.Count -ne $expectedIds.Count) {
+    Add-Failure "Expected package set contains $($expectedIds.Count) package(s), but inspected $($inspectedPackages.Count)."
+  }
+}
+
 $result = [pscustomobject]@{
   policyId = [string]$policy.policyId
   policyPath = $policyPath
   staticOnly = $StaticOnly.IsPresent
+  requireExactPackageSet = $RequireExactPackageSet.IsPresent
+  expectedPackageIds = @($ExpectedPackageId)
+  expectedPackageVersion = $ExpectedPackageVersion
   inspectedPackageCount = $inspectedPackages.Count
   inspectedPackages = @($inspectedPackages.ToArray())
   failureCount = $failures.Count

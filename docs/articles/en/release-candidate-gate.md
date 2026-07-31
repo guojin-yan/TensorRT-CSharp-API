@@ -90,7 +90,7 @@ For any runtime package selected for release:
 
 - Validate explicit TensorRT, CUDA, and cuDNN roots before asset collection.
 - Collect runtime assets from the matching CMake preset output.
-- Pack the managed package and matching runtime package.
+- Pack the managed API, allowlisted pure managed extensions such as YoloVision, and the matching bridge package.
 - Run package consumer validation for restore/build/native asset copy.
 - Run package consumer smoke when the machine has a compatible driver/GPU/runtime stack.
 - Require `local-validated` before private-feed or split-delivery readiness can be treated as ready.
@@ -100,6 +100,6 @@ For any runtime package selected for release:
 
 Before using the remote publication lanes:
 
-- `package-managed.yml` with `publish_to_nuget=true` requires the repository secret `NUGET_API_KEY`, and that value must be a plain-text ASCII nuget.org API key with push permission for `JYPPX.TensorRT.CSharp.API` or its owning account/organization. The workflow fails before publication when the secret is missing, so official nuget.org pushes no longer depend on a self-hosted runner's current-user NuGet configuration. Encrypted local credential blobs and machine-generated exports are not valid secret values. A nuget.org `403` during push means the key is invalid, expired, or lacks the package-ID scope and must be replaced before rerunning the managed-only workflow.
+- `package-managed.yml` always packs and validates exactly `JYPPX.TensorRT.CSharp.API` plus `JYPPX.TensorRT.CSharp.API.YoloVision`. Publication requires `owner_publish_approved=true`, the formal repository owner, and an exact package ID/version/source-commit allowlist. With `publish_to_nuget=true`, `NUGET_API_KEY` must be a plain-text ASCII nuget.org API key with push permission for both package IDs or their owning account/organization. A nuget.org `403` is non-retryable until the package owner replaces the invalid, expired, or under-scoped key.
 - `runtime-windows.yml` requires the Windows self-hosted runner to stay online with the labels `self-hosted`, `windows`, and `x64`.
 - `runtime-linux.yml` can publish Ubuntu 20.04, Ubuntu 22.04, and Ubuntu 24.04 x64 through GitHub-hosted runners with distro-matched Ubuntu job containers. Ubuntu 20.04 uses `runner_mode=hosted-container`; Ubuntu 24.04 only covers the modern combinations; ARM/Jetson targets need separate package lines before publication.

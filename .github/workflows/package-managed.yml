@@ -13,6 +13,11 @@ on:
         required: false
         default: Release
         type: string
+      owner_publish_approved:
+        description: Explicit Owner approval for package or Release publication side effects
+        required: false
+        default: false
+        type: boolean
       publish_to_nuget:
         description: Publish package to nuget.org
         required: false
@@ -50,6 +55,11 @@ on:
         required: false
         default: Release
         type: string
+      owner_publish_approved:
+        description: Explicit Owner approval for package or Release publication side effects
+        required: false
+        default: false
+        type: boolean
       publish_to_nuget:
         description: Publish package to nuget.org
         required: false
@@ -80,8 +90,7 @@ on:
         required: false
 
 permissions:
-  contents: write
-  packages: write
+  contents: read
 
 jobs:
   pack:
@@ -96,9 +105,14 @@ jobs:
         shell: pwsh
         run: |
           pwsh -NoProfile -File .\eng\Test-ExternalVendorRuntimePackagePolicy.ps1 -StaticOnly
-          if ('${{ github.repository_owner }}' -ne 'guojin-yan' -and
-              ('${{ inputs.publish_to_nuget }}' -eq 'true' -or '${{ inputs.publish_to_github_packages }}' -eq 'true' -or '${{ inputs.attach_to_github_release }}' -eq 'true')) {
+          $hasPublicationSideEffect = '${{ inputs.publish_to_nuget }}' -eq 'true' -or
+            '${{ inputs.publish_to_github_packages }}' -eq 'true' -or
+            '${{ inputs.attach_to_github_release }}' -eq 'true'
+          if ($hasPublicationSideEffect -and '${{ github.repository_owner }}' -ne 'guojin-yan') {
             throw "The grape-yan repository is validation-only and cannot publish packages or Release assets."
+          }
+          if ($hasPublicationSideEffect -and '${{ inputs.owner_publish_approved }}' -ne 'true') {
+            throw "Package or Release publication requires owner_publish_approved=true."
           }
 
       - name: Setup .NET
@@ -140,16 +154,43 @@ jobs:
       - name: Validate public API bilingual documentation
         run: pwsh -NoProfile -File .\eng\Test-PublicApiBilingualDocumentation.ps1
 
-      - name: Test project quality
-        run: dotnet test .\tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj -c "${{ inputs.configuration }}" --no-build
+      - name: Test managed package publication contracts
+        run: dotnet test .\tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj -c "${{ inputs.configuration }}" --no-build --filter "FullyQualifiedName~ExternalVendorRuntimePackagePolicyTests|FullyQualifiedName~YoloVisionManagedPackagePublicationTests|FullyQualifiedName~YoloVisionLocalPackageConsumerTests|FullyQualifiedName~ReleaseAutomationTests|FullyQualifiedName~ReleaseQualityGateWorkflowTests"
 
       - name: Pack managed package
-        run: dotnet pack .\pack\JYPPX.TensorRT.CSharp.API\JYPPX.TensorRT.CSharp.API.csproj -c "${{ inputs.configuration }}" -o .\artifacts\managed -p:JYPPXPackageVersion=${{ steps.version.outputs.package_version }}
+        run: dotnet pack .\pack\JYPPX.TensorRT.CSharp.API\JYPPX.TensorRT.CSharp.API.csproj -c "${{ inputs.configuration }}" -o .\artifacts\managed -p:JYPPXPackageVersion=${{ steps.version.outputs.package_version }} -p:RepositoryCommit=${{ github.sha }} -p:ContinuousIntegrationBuild=true
 
-      - name: Validate managed package content
+      - name: Pack YoloVision managed extension
+        run: dotnet pack .\samples\YoloVision\YoloVision.csproj -c "${{ inputs.configuration }}" -o .\artifacts\managed -p:JYPPXPackageVersion=${{ steps.version.outputs.package_version }} -p:RepositoryCommit=${{ github.sha }} -p:ContinuousIntegrationBuild=true
+
+      - name: Validate exact managed package set
+        shell: pwsh
         run: |
-          pwsh -NoProfile -File .\eng\Test-ManagedPackageContent.ps1
-          pwsh -NoProfile -File .\eng\Test-ExternalVendorRuntimePackagePolicy.ps1 -PackagePath .\artifacts\managed
+          $version = '${{ steps.version.outputs.package_version }}'
+          $managedPath = ".\artifacts\managed\JYPPX.TensorRT.CSharp.API.$version.nupkg"
+          $yoloVisionPath = ".\artifacts\managed\JYPPX.TensorRT.CSharp.API.YoloVision.$version.nupkg"
+          pwsh -NoProfile -File .\eng\Test-ManagedPackageContent.ps1 -PackagePath $managedPath
+          pwsh -NoProfile -File .\eng\Test-ExternalVendorRuntimePackagePolicy.ps1 `
+            -PackagePath .\artifacts\managed `
+            -ExpectedPackageId 'JYPPX.TensorRT.CSharp.API,JYPPX.TensorRT.CSharp.API.YoloVision' `
+            -ExpectedPackageVersion $version `
+            -RequireExactPackageSet
+          pwsh -NoProfile -File .\eng\Test-YoloVisionPackageSurface.ps1 `
+            -PackagePath $yoloVisionPath `
+            -BuiltOutputDirectory ".\samples\YoloVision\bin\${{ inputs.configuration }}\net8.0" `
+            -ReportDirectory .\artifacts\yolovision\package-surface-audit `
+            -PackageVersion $version
+
+      - name: Run YoloVision managed package clean consumer
+        shell: pwsh
+        run: |
+          pwsh -NoProfile -File .\eng\Test-YoloVisionManagedPackageDryRun.ps1 `
+            -PackageDirectory .\artifacts\managed `
+            -PackageVersion '${{ steps.version.outputs.package_version }}' `
+            -ExpectedSourceCommit '${{ github.sha }}' `
+            -Configuration '${{ inputs.configuration }}' `
+            -OutputRoot (Join-Path $env:RUNNER_TEMP 'yolovision-managed-package-dry-run') `
+            -ReportDirectory .\artifacts\yolovision\managed-package-dry-run
 
       - name: Upload managed artifacts
         uses: actions/upload-artifact@v7
@@ -157,8 +198,40 @@ jobs:
           name: ${{ inputs.artifact_name }}
           path: artifacts/managed/*.nupkg
 
-      - name: Attach managed package to GitHub Release
-        if: ${{ inputs.attach_to_github_release && inputs.release_tag != '' }}
+      - name: Upload managed validation reports
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ inputs.artifact_name }}-reports
+          path: |
+            artifacts/yolovision/package-surface-audit/**
+            artifacts/yolovision/managed-package-dry-run/**
+
+  attach-github-release:
+    if: ${{ inputs.attach_to_github_release && inputs.release_tag != '' && inputs.owner_publish_approved && github.repository_owner == 'guojin-yan' }}
+    needs: pack
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Download managed package artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: ${{ inputs.artifact_name }}
+          path: artifacts/managed
+
+      - name: Revalidate Release package allowlist
+        shell: pwsh
+        run: |
+          pwsh -NoProfile -File .\eng\Test-ExternalVendorRuntimePackagePolicy.ps1 `
+            -PackagePath .\artifacts\managed `
+            -ExpectedPackageId 'JYPPX.TensorRT.CSharp.API,JYPPX.TensorRT.CSharp.API.YoloVision' `
+            -ExpectedPackageVersion '${{ needs.pack.outputs.package_version }}' `
+            -RequireExactPackageSet
+
+      - name: Attach managed packages to GitHub Release
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
@@ -166,10 +239,9 @@ jobs:
         run: |
           $releaseTag = "${{ inputs.release_tag }}"
           $packages = @(Get-ChildItem -LiteralPath .\artifacts\managed -Filter *.nupkg -File)
-          if ($packages.Count -eq 0) {
-            throw "No managed .nupkg files were found in artifacts/managed."
+          if ($packages.Count -ne 2) {
+            throw "Expected exactly two managed .nupkg files, found $($packages.Count)."
           }
-
           gh release view $releaseTag --repo "$env:GH_REPO" *> $null
           if ($LASTEXITCODE -ne 0) {
             gh release create $releaseTag --title $releaseTag --notes "Automated release for $releaseTag" --repo "$env:GH_REPO"
@@ -177,7 +249,6 @@ jobs:
               throw "Failed to create GitHub Release '$releaseTag'."
             }
           }
-
           foreach ($package in $packages) {
             gh release upload $releaseTag $package.FullName --clobber --repo "$env:GH_REPO"
             if ($LASTEXITCODE -ne 0) {
@@ -186,9 +257,12 @@ jobs:
           }
 
   publish-github-packages:
-    if: ${{ inputs.publish_to_github_packages && github.repository_owner == 'guojin-yan' }}
+    if: ${{ inputs.publish_to_github_packages && inputs.owner_publish_approved && github.repository_owner == 'guojin-yan' }}
     needs: pack
     runs-on: windows-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -201,7 +275,12 @@ jobs:
 
       - name: Revalidate GitHub Packages payload
         shell: pwsh
-        run: pwsh -NoProfile -File .\eng\Test-ExternalVendorRuntimePackagePolicy.ps1 -PackagePath .\artifacts\managed
+        run: |
+          pwsh -NoProfile -File .\eng\Test-ExternalVendorRuntimePackagePolicy.ps1 `
+            -PackagePath .\artifacts\managed `
+            -ExpectedPackageId 'JYPPX.TensorRT.CSharp.API,JYPPX.TensorRT.CSharp.API.YoloVision' `
+            -ExpectedPackageVersion '${{ needs.pack.outputs.package_version }}' `
+            -RequireExactPackageSet
 
       - name: Publish managed package to GitHub Packages
         shell: pwsh
@@ -217,9 +296,11 @@ jobs:
             -RetryDelaySeconds 15
 
   publish-nuget:
-    if: ${{ inputs.publish_to_nuget && github.repository_owner == 'guojin-yan' }}
+    if: ${{ inputs.publish_to_nuget && inputs.owner_publish_approved && github.repository_owner == 'guojin-yan' }}
     needs: pack
     runs-on: windows-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -246,7 +327,12 @@ jobs:
 
       - name: Revalidate nuget.org payload
         shell: pwsh
-        run: pwsh -NoProfile -File .\eng\Test-ExternalVendorRuntimePackagePolicy.ps1 -PackagePath .\artifacts\managed
+        run: |
+          pwsh -NoProfile -File .\eng\Test-ExternalVendorRuntimePackagePolicy.ps1 `
+            -PackagePath .\artifacts\managed `
+            -ExpectedPackageId 'JYPPX.TensorRT.CSharp.API,JYPPX.TensorRT.CSharp.API.YoloVision' `
+            -ExpectedPackageVersion '${{ needs.pack.outputs.package_version }}' `
+            -RequireExactPackageSet
 
       - name: Publish managed package to nuget.org
         shell: pwsh

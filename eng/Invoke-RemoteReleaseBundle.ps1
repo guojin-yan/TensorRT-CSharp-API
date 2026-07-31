@@ -5,7 +5,8 @@ param(
   [string]$Version = "4.0.0",
   [string]$RuntimeVersion,
   [string]$Configuration = "Release",
-  [object]$RunDocsRelease = $true,
+  [object]$OwnerPublishApproved = $false,
+  [object]$RunDocsRelease = $false,
   [switch]$RunWindowsRuntimePackaging,
   [string[]]$WindowsRuntimeKeys = @(),
   [string[]]$WindowsSplitPackageRoles = @(),
@@ -52,9 +53,9 @@ param(
   [object]$RunWindowsSmoke = $true,
   [object]$RunLinuxSmoke = $false,
   [object]$PublishManagedToNuGet = $false,
-  [object]$PublishManagedToGitHubPackages = $true,
+  [object]$PublishManagedToGitHubPackages = $false,
   [object]$PublishRuntimeToGitHubPackages = $false,
-  [object]$AttachRuntimeToGitHubRelease = $true,
+  [object]$AttachRuntimeToGitHubRelease = $false,
   [switch]$DryRun
 )
 
@@ -224,13 +225,22 @@ $retiredInputs = @(
 if ($retiredRoles.Count -gt 0 -or $retiredInputs.Count -gt 0 -or $WindowsIncludeMetaPackage.IsPresent -or $LinuxIncludeMetaPackage.IsPresent) {
   throw "Remote release accepts bridge packages only. CUDA/cuDNN, TensorRT, full-runtime, and collection/meta package inputs are retired."
 }
-$runDocsReleaseValue = ConvertFrom-BooleanInput -Value $RunDocsRelease -DefaultValue $true
+$ownerPublishApprovedValue = ConvertFrom-BooleanInput -Value $OwnerPublishApproved -DefaultValue $false
+$runDocsReleaseValue = ConvertFrom-BooleanInput -Value $RunDocsRelease -DefaultValue $false
 $runWindowsSmokeValue = ConvertFrom-BooleanInput -Value $RunWindowsSmoke -DefaultValue $true
 $runLinuxSmokeValue = ConvertFrom-BooleanInput -Value $RunLinuxSmoke -DefaultValue $false
 $publishManagedToNuGetValue = ConvertFrom-BooleanInput -Value $PublishManagedToNuGet -DefaultValue $false
-$publishManagedToGitHubPackagesValue = ConvertFrom-BooleanInput -Value $PublishManagedToGitHubPackages -DefaultValue $true
+$publishManagedToGitHubPackagesValue = ConvertFrom-BooleanInput -Value $PublishManagedToGitHubPackages -DefaultValue $false
 $publishRuntimeToGitHubPackagesValue = ConvertFrom-BooleanInput -Value $PublishRuntimeToGitHubPackages -DefaultValue $false
-$attachRuntimeToGitHubReleaseValue = ConvertFrom-BooleanInput -Value $AttachRuntimeToGitHubRelease -DefaultValue $true
+$attachRuntimeToGitHubReleaseValue = ConvertFrom-BooleanInput -Value $AttachRuntimeToGitHubRelease -DefaultValue $false
+$hasPublicationSideEffect = $runDocsReleaseValue -or
+  $publishManagedToNuGetValue -or
+  $publishManagedToGitHubPackagesValue -or
+  $publishRuntimeToGitHubPackagesValue -or
+  $attachRuntimeToGitHubReleaseValue
+if ($hasPublicationSideEffect -and -not $ownerPublishApprovedValue) {
+  throw "Remote release publication side effects require -OwnerPublishApproved true."
+}
 
 $releaseConfig = @{}
 Add-ReleaseConfigValue -Config $releaseConfig -Name "windows_runtime_delivery_mode" -Value $WindowsRuntimeDeliveryMode
@@ -269,6 +279,7 @@ $arguments.AddRange([string[]]@("workflow", "run", "release-bundle.yml", "--repo
 
 Add-WorkflowInput -ArgumentList $arguments -Name "version" -Value $Version
 Add-WorkflowInput -ArgumentList $arguments -Name "configuration" -Value $Configuration
+Add-WorkflowInput -ArgumentList $arguments -Name "owner_publish_approved" -Value (ConvertTo-WorkflowBoolean -Value $ownerPublishApprovedValue)
 Add-WorkflowInput -ArgumentList $arguments -Name "run_docs_release" -Value (ConvertTo-WorkflowBoolean -Value $runDocsReleaseValue)
 Add-WorkflowInput -ArgumentList $arguments -Name "runtime_version" -Value $RuntimeVersion
 Add-WorkflowInput -ArgumentList $arguments -Name "run_windows_runtime_packaging" -Value (ConvertTo-WorkflowBoolean -Value $RunWindowsRuntimePackaging.IsPresent)
