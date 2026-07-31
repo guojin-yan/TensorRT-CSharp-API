@@ -112,6 +112,13 @@ TRT10.11/CUDA12.9 与 TRT11.0/CUDA12.9 已使用本地 `4.0.10000-local.callback
 两条线均得到 invocation=1、failure/in-flight=0、detach=1；package policy 同时确认 managed 包无 native asset，
 每个 bridge 包只有项目自有 `jyppxtrtbridge.dll`。使用 `-SkipInstalledVendorAssetHashing` 的诊断运行不会晋级该证明。
 
+同一 package consumer 支持 `-DebugListenerScenario callback-return-false`、`callback-throw`、
+`attempted-no-invocation` 与 `missing-vendor-dependency` 四个受控负例。前两项必须观察到 invocation>0、failure>0、
+in-flight=0 和成功 detach；no-invocation 必须观察到 attach/detach 但 invocation=0；缺依赖必须在隔离 loader PATH
+下取得真实 `DllNotFoundException`/loader failure，或精确的 Windows guarded module-not-found code
+`3228369022`（`0xC06D007E`）。callback false/throw 时 TensorRT 仍可能完成 enqueue 且子进程退出 0，因此判定必须读取
+failure、LastStatus、handler outcome、in-flight 与 detach marker。负例通过只表示预期失败被拒绝，四级 proof 均保持 false。
+
 最新 DLL 的 TRT10.11/CUDA12.9 复验得到一次真实 callback、零 failure、零 in-flight、一次 detach，且
 `BorrowedPointerExposed=False`。native owner 的 drain wait 已用同一状态锁同步计数归零；managed context 在 native
 context handle 销毁后才解除 owner borrow，嵌套 managed callback 使用 depth 保护，避免 bool 提前复位。

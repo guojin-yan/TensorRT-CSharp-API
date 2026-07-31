@@ -14,6 +14,8 @@ param(
   [switch]$SkipInstalledVendorAssetHashing,
   [switch]$KeepConsumerOutput,
   [switch]$AllowRuntimeSmokeFailure,
+  [ValidateSet("success", "callback-return-false", "callback-throw", "attempted-no-invocation", "missing-vendor-dependency")]
+  [string]$DebugListenerScenario = "success",
   [string]$RepositoryRoot
 )
 
@@ -439,6 +441,7 @@ function Write-Reports {
   $lines.Add("- DebugListener metadata copied / borrowed pointer exposed: $($Result.debugListenerCallback.metadataCopied)/$($Result.debugListenerCallback.borrowedPointerExposed)")
   $lines.Add("- DebugListener detach count: $($Result.debugListenerCallback.detachCount)")
   $lines.Add("- local-package DebugListener callback runtime proof: $($Result.debugListenerCallback.isLocalPackageCallbackRuntimeProof)")
+  $lines.Add("- DebugListener negative control: ``$($Result.negativeControl.scenario)``; requested=$($Result.negativeControl.requested); passed=$($Result.negativeControl.passed)")
   $lines.Add("- source-tree/public-package/post-publish proof in this report: $($Result.proofScopes.sourceTree.isProof)/$($Result.proofScopes.publicPackage.isProof)/$($Result.proofScopes.postPublish.isProof)")
   $lines.Add("- compatible-host runtime promotion: $($Result.canPromoteCompatibleHostRuntimeProof)")
   $lines.Add("- public publish: $($Result.canPublishPublicly)")
@@ -460,6 +463,9 @@ $tensorRtLineExpression = switch ([string]$bridgeDefinition.tensorRtLine) {
   "10" { "TensorRtApiLine.TensorRt10" }
   "11" { "TensorRtApiLine.TensorRt11" }
   default { throw "Unsupported TensorRT line '$($bridgeDefinition.tensorRtLine)'." }
+}
+if ($DebugListenerScenario -ne "success" -and @("10", "11") -notcontains [string]$bridgeDefinition.tensorRtLine) {
+  throw "DebugListener negative controls require a TensorRT 10 or 11 runtime key."
 }
 
 if ([string]::IsNullOrWhiteSpace($ManagedPackageDirectory)) {
@@ -736,7 +742,10 @@ static void WriteCudaPreflight()
 try
 {
     TensorRtApiLine line = __TENSORRT_LINE__;
+    string debugListenerScenario = "__DEBUG_LISTENER_SCENARIO__";
+    bool negativeControlRequested = !string.Equals(debugListenerScenario, "success", StringComparison.Ordinal);
     Console.WriteLine("RuntimeSmokeRequested=True");
+    Console.WriteLine("DebugListenerCallbackScenario=" + debugListenerScenario);
     Console.WriteLine("ConsumerProjectRoot=" + Directory.GetCurrentDirectory());
     Console.WriteLine("BridgeFileName=" + NativeBridgePathResolver.GetBridgeFileName());
 
@@ -764,8 +773,9 @@ try
     outputTensor.Name = "output";
     network.MarkOutput(outputTensor);
     bool debugListenerCallbackRequired = line == TensorRtApiLine.TensorRt10 || line == TensorRtApiLine.TensorRt11;
+    bool debugListenerCallbackEnabled = !string.Equals(debugListenerScenario, "attempted-no-invocation", StringComparison.Ordinal);
     bool debugTensorMarked = false;
-    if (debugListenerCallbackRequired)
+    if (debugListenerCallbackRequired && debugListenerCallbackEnabled)
     {
         debugTensorMarked = network.MarkDebugTensor(outputTensor) && network.IsDebugTensor(outputTensor);
         if (!debugTensorMarked)
@@ -800,6 +810,7 @@ try
     }
 
     TensorRtDebugTensorMetadataSnapshot callbackMetadata = default;
+    string managedHandlerOutcome = "not-invoked";
     TensorRtDebugListenerCallbackOwner? debugListenerOwner = null;
     try
     {
@@ -810,22 +821,46 @@ try
                 metadata =>
                 {
                     callbackMetadata = metadata;
+                    if (string.Equals(debugListenerScenario, "callback-return-false", StringComparison.Ordinal))
+                    {
+                        managedHandlerOutcome = "returned-false";
+                        return false;
+                    }
+                    if (string.Equals(debugListenerScenario, "callback-throw", StringComparison.Ordinal))
+                    {
+                        managedHandlerOutcome = "threw-invalid-operation";
+                        throw new InvalidOperationException("Controlled DebugListener callback throw negative control.");
+                    }
+                    managedHandlerOutcome = "returned-true";
                     return true;
                 });
             context.SetDebugListener(debugListenerOwner);
-            context.SetTensorDebugState("output", true);
+            if (debugListenerCallbackEnabled)
+            {
+                context.SetTensorDebugState("output", true);
+            }
         }
 
-        TensorRtInferenceExecutionSummary execution = bindings.EnqueueAsync(stream, synchronize: true, runShapeInference: false);
-        float[] outputValues = bindings.ReadOutputSingles("output", inputValues.Length);
-        bool outputMatch = inputValues.Zip(outputValues, static (expected, actual) => Math.Abs(expected - actual) <= 0.0001f).All(static match => match);
-        Console.WriteLine("EnqueueCompleted=True");
+        TensorRtInferenceExecutionSummary? execution = null;
+        Exception? executionException = null;
+        bool enqueueCompleted = false;
+        bool outputMatch = false;
+        try
+        {
+            execution = bindings.EnqueueAsync(stream, synchronize: true, runShapeInference: false);
+            enqueueCompleted = true;
+            float[] outputValues = bindings.ReadOutputSingles("output", inputValues.Length);
+            outputMatch = inputValues.Zip(outputValues, static (expected, actual) => Math.Abs(expected - actual) <= 0.0001f).All(static match => match);
+        }
+        catch (Exception exception)
+        {
+            executionException = exception;
+        }
+        Console.WriteLine("EnqueueCompleted=" + enqueueCompleted);
         Console.WriteLine("ExecutionSummary=" + execution);
         Console.WriteLine("IdentityOutputMatch=" + outputMatch);
-        if (!outputMatch)
-        {
-            throw new InvalidOperationException("Identity output mismatch. Input=[" + string.Join(",", inputValues) + "] Output=[" + string.Join(",", outputValues) + "]");
-        }
+        Console.WriteLine("DebugListenerCallbackExecutionExceptionType=" + (executionException?.GetType().Name ?? ""));
+        Console.WriteLine("DebugListenerCallbackExecutionExceptionMessage=" + (executionException?.Message ?? ""));
 
         if (debugListenerOwner is not null)
         {
@@ -851,6 +886,41 @@ try
                 !attached.BorrowedPointerExposed &&
                 detached.DetachCount > 0 &&
                 detachedFromContext;
+            bool negativeCommonPassed =
+                attached.IsAttached &&
+                attached.AttachCount > 0 &&
+                attached.InFlightCallbackCount == 0 &&
+                !attached.BorrowedPointerExposed &&
+                !attached.IsRealCallbackRuntimeProof &&
+                detached.DetachCount > 0 &&
+                detachedFromContext;
+            bool negativeControlPassed = debugListenerScenario switch
+            {
+                "callback-return-false" =>
+                    negativeCommonPassed &&
+                    attached.InvocationCount > 0 &&
+                    attached.FailureCount > 0 &&
+                    !attached.LastCallbackSucceeded &&
+                    callbackMetadata.MetadataCopied &&
+                    string.Equals(managedHandlerOutcome, "returned-false", StringComparison.Ordinal),
+                "callback-throw" =>
+                    negativeCommonPassed &&
+                    attached.InvocationCount > 0 &&
+                    attached.FailureCount > 0 &&
+                    !attached.LastCallbackSucceeded &&
+                    callbackMetadata.MetadataCopied &&
+                    string.Equals(managedHandlerOutcome, "threw-invalid-operation", StringComparison.Ordinal),
+                "attempted-no-invocation" =>
+                    negativeCommonPassed &&
+                    attached.InvocationCount == 0 &&
+                    attached.FailureCount == 0 &&
+                    !callbackMetadata.MetadataCopied &&
+                    !debugTensorMarked &&
+                    enqueueCompleted &&
+                    outputMatch &&
+                    string.Equals(managedHandlerOutcome, "not-invoked", StringComparison.Ordinal),
+                _ => false,
+            };
 
             Console.WriteLine("DebugListenerCallbackRuntime=" + (callbackPassed ? "Passed" : "Failed"));
             Console.WriteLine("DebugListenerCallbackEvidenceScope=local-package");
@@ -867,11 +937,29 @@ try
             Console.WriteLine("DebugListenerCallbackDetached=" + detachedFromContext);
             Console.WriteLine("DebugListenerCallbackDetachCount=" + detached.DetachCount);
             Console.WriteLine("DebugListenerCallbackIsRealRuntimeProof=" + attached.IsRealCallbackRuntimeProof);
-            if (!callbackPassed)
+            Console.WriteLine("DebugListenerCallbackLastCallbackSucceeded=" + attached.LastCallbackSucceeded);
+            Console.WriteLine("DebugListenerCallbackLastStatus=" + attached.LastStatus);
+            Console.WriteLine("DebugListenerCallbackManagedHandlerOutcome=" + managedHandlerOutcome);
+            Console.WriteLine("DebugListenerNegativeControlPassed=" + negativeControlPassed);
+            if (!negativeControlRequested && executionException is not null)
+            {
+                throw new InvalidOperationException("Local-package identity enqueue failed.", executionException);
+            }
+            if (!negativeControlRequested && !outputMatch)
+            {
+                throw new InvalidOperationException("Identity output mismatch in local-package runtime smoke.");
+            }
+            if (!negativeControlRequested && !callbackPassed)
             {
                 throw new InvalidOperationException(
                     "Local-package DebugListener callback runtime did not satisfy attach/invoke/copy/detach invariants. Attached=" +
                     attached + " Detached=" + detached);
+            }
+            if (negativeControlRequested && !negativeControlPassed)
+            {
+                throw new InvalidOperationException(
+                    "Controlled local-package DebugListener negative scenario did not satisfy fail-closed invariants. Scenario=" +
+                    debugListenerScenario + " Attached=" + attached + " Detached=" + detached);
             }
         }
         else
@@ -880,7 +968,7 @@ try
             Console.WriteLine("DebugListenerCallbackEvidenceScope=local-package");
         }
 
-        Console.WriteLine("RuntimeSmoke=Passed");
+        Console.WriteLine(negativeControlRequested ? "RuntimeSmoke=ExpectedFailureVerified" : "RuntimeSmoke=Passed");
         return 0;
     }
     finally
@@ -903,6 +991,7 @@ catch (Exception exception)
 }
 '@
 $program = $program.Replace("__TENSORRT_LINE__", $tensorRtLineExpression)
+$program = $program.Replace("__DEBUG_LISTENER_SCENARIO__", $DebugListenerScenario)
 
 Set-Content -LiteralPath $nugetConfigPath -Value $nugetConfig -Encoding utf8
 Set-Content -LiteralPath $projectPath -Value $project -Encoding utf8
@@ -937,13 +1026,25 @@ Remove-Item -LiteralPath $stdoutPath, $stderrPath, $combinedPath -Force -ErrorAc
 $previousPath = $env:PATH
 $previousBridgePath = $env:JYPPX_NATIVE_BRIDGE_PATH
 $previousDevelopmentProbing = $env:JYPPX_ENABLE_DEVELOPMENT_PROBING
+$dotnetCommand = (Get-Command dotnet -ErrorAction Stop).Source
+$missingVendorDependencyIsolationApplied = $DebugListenerScenario -eq "missing-vendor-dependency"
 try {
-  $env:PATH = (@($runtimeSearchDirectories) + @($previousPath)) -join [System.IO.Path]::PathSeparator
+  if ($missingVendorDependencyIsolationApplied) {
+    $minimalPathEntries = @(@(
+      [System.IO.Path]::GetDirectoryName($dotnetCommand),
+      (Join-Path $env:SystemRoot "System32"),
+      $env:SystemRoot
+    ) | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -Unique)
+    $env:PATH = $minimalPathEntries -join [System.IO.Path]::PathSeparator
+  }
+  else {
+    $env:PATH = (@($runtimeSearchDirectories) + @($previousPath)) -join [System.IO.Path]::PathSeparator
+  }
   $env:JYPPX_NATIVE_BRIDGE_PATH = $null
   $env:JYPPX_ENABLE_DEVELOPMENT_PROBING = $null
   Push-Location $consumerRoot
   try {
-    & dotnet run --project $projectPath -c Release --no-build 1> $stdoutPath 2> $stderrPath
+    & $dotnetCommand run --project $projectPath -c Release --no-build 1> $stdoutPath 2> $stderrPath
     $exitCode = $LASTEXITCODE
   }
   finally {
@@ -967,6 +1068,8 @@ foreach ($line in $stderrLines) {
 @($stdoutLines + $stderrLines) | Set-Content -LiteralPath $combinedPath -Encoding utf8
 
 $debugListenerCallbackRequired = @("10", "11") -contains [string]$bridgeDefinition.tensorRtLine
+$negativeControlRequested = $DebugListenerScenario -ne "success"
+$debugListenerScenarioReported = Get-FirstMarkerValue -Lines $stdoutLines -Prefix "DebugListenerCallbackScenario="
 $debugListenerCallbackProgramRequired = (Get-FirstMarkerValue -Lines $stdoutLines -Prefix "DebugListenerCallbackRequired=") -eq "True"
 $debugListenerCallbackStatus = Get-FirstMarkerValue -Lines $stdoutLines -Prefix "DebugListenerCallbackRuntime="
 $debugListenerCallbackEvidenceScope = Get-FirstMarkerValue -Lines $stdoutLines -Prefix "DebugListenerCallbackEvidenceScope="
@@ -1002,7 +1105,60 @@ $debugListenerCallbackRuntimePassed =
   (Get-FirstMarkerValue -Lines $stdoutLines -Prefix "DebugListenerCallbackDetached=") -eq "True" -and
   $debugListenerDetachCountParsed -and $debugListenerDetachCount -gt 0 -and
   (Get-FirstMarkerValue -Lines $stdoutLines -Prefix "DebugListenerCallbackIsRealRuntimeProof=") -eq "True"
-$runtimeSmokePassed = $exitCode -eq 0 -and
+$debugListenerNegativeCommonPassed =
+  $debugListenerCallbackRequired -and
+  $debugListenerCallbackProgramRequired -and
+  $debugListenerScenarioReported -eq $DebugListenerScenario -and
+  $debugListenerCallbackStatus -eq "Failed" -and
+  $debugListenerCallbackEvidenceScope -eq "local-package" -and
+  $debugListenerAttachedText -eq "True" -and
+  $debugListenerNativeVTableInstalledText -eq "True" -and
+  $debugListenerInFlightCallbackCountParsed -and $debugListenerInFlightCallbackCount -eq 0 -and
+  (Get-FirstMarkerValue -Lines $stdoutLines -Prefix "DebugListenerCallbackBorrowedPointerExposed=") -eq "False" -and
+  (Get-FirstMarkerValue -Lines $stdoutLines -Prefix "DebugListenerCallbackClearReturned=") -eq "True" -and
+  (Get-FirstMarkerValue -Lines $stdoutLines -Prefix "DebugListenerCallbackDetached=") -eq "True" -and
+  $debugListenerDetachCountParsed -and $debugListenerDetachCount -gt 0 -and
+  (Get-FirstMarkerValue -Lines $stdoutLines -Prefix "DebugListenerCallbackIsRealRuntimeProof=") -eq "False" -and
+  (Get-FirstMarkerValue -Lines $stdoutLines -Prefix "DebugListenerNegativeControlPassed=") -eq "True"
+$combinedRuntimeOutput = @($stdoutLines + $stderrLines) -join "`n"
+$missingVendorDependencyObserved =
+  $missingVendorDependencyIsolationApplied -and
+  $exitCode -ne 0 -and
+  $combinedRuntimeOutput -match 'DllNotFoundException|BadImageFormatException|Unable to load DLL|specified module could not be found|找不到指定的模块|structured exception with code\s+3228369022'
+$negativeControlPassed = switch ($DebugListenerScenario) {
+  "callback-return-false" {
+    $debugListenerNegativeCommonPassed -and
+    $debugListenerInvocationCountParsed -and $debugListenerInvocationCount -gt 0 -and
+    $debugListenerFailureCountParsed -and $debugListenerFailureCount -gt 0 -and
+    (Get-FirstMarkerValue -Lines $stdoutLines -Prefix "DebugListenerCallbackMetadataCopied=") -eq "True" -and
+    (Get-FirstMarkerValue -Lines $stdoutLines -Prefix "DebugListenerCallbackLastCallbackSucceeded=") -eq "False" -and
+    (Get-FirstMarkerValue -Lines $stdoutLines -Prefix "DebugListenerCallbackManagedHandlerOutcome=") -eq "returned-false"
+    break
+  }
+  "callback-throw" {
+    $debugListenerNegativeCommonPassed -and
+    $debugListenerInvocationCountParsed -and $debugListenerInvocationCount -gt 0 -and
+    $debugListenerFailureCountParsed -and $debugListenerFailureCount -gt 0 -and
+    (Get-FirstMarkerValue -Lines $stdoutLines -Prefix "DebugListenerCallbackMetadataCopied=") -eq "True" -and
+    (Get-FirstMarkerValue -Lines $stdoutLines -Prefix "DebugListenerCallbackLastCallbackSucceeded=") -eq "False" -and
+    (Get-FirstMarkerValue -Lines $stdoutLines -Prefix "DebugListenerCallbackManagedHandlerOutcome=") -eq "threw-invalid-operation"
+    break
+  }
+  "attempted-no-invocation" {
+    $debugListenerNegativeCommonPassed -and
+    $debugListenerInvocationCountParsed -and $debugListenerInvocationCount -eq 0 -and
+    $debugListenerFailureCountParsed -and $debugListenerFailureCount -eq 0 -and
+    (Get-FirstMarkerValue -Lines $stdoutLines -Prefix "DebugListenerCallbackMetadataCopied=") -eq "False" -and
+    (Get-FirstMarkerValue -Lines $stdoutLines -Prefix "DebugListenerDebugTensorMarked=") -eq "False" -and
+    (Get-FirstMarkerValue -Lines $stdoutLines -Prefix "DebugListenerCallbackManagedHandlerOutcome=") -eq "not-invoked" -and
+    $exitCode -eq 0 -and
+    $combinedRuntimeOutput -match 'RuntimeSmoke=ExpectedFailureVerified'
+    break
+  }
+  "missing-vendor-dependency" { $missingVendorDependencyObserved; break }
+  default { $false; break }
+}
+$runtimeSmokePassed = -not $negativeControlRequested -and $exitCode -eq 0 -and
   (($stdoutLines -join "`n") -match "RuntimeSmoke=Passed") -and
   (($stdoutLines -join "`n") -match "EnqueueCompleted=True") -and
   (($stdoutLines -join "`n") -match "IdentityOutputMatch=True") -and
@@ -1036,6 +1192,7 @@ $usesPackageReferenceOnly =
   -not $usesDirectAssemblyReference -and
   -not $usesRepositorySourceProbe
 $isLocalPackageDebugListenerCallbackRuntimeProof =
+  -not $negativeControlRequested -and
   $debugListenerCallbackRuntimePassed -and
   $consumerRootOutsideRepository -and
   $usesPackageReferenceOnly -and
@@ -1082,8 +1239,8 @@ $result = [ordered]@{
   generatedAtUtc = [DateTime]::UtcNow.ToString("O")
   sourceRuntimeKey = $SourceRuntimeKey
   bridgePackageKey = [string]$bridgeDefinition.key
-  proofClassification = if ($SkipInstalledVendorAssetHashing.IsPresent) { "compatible-host-bridge-package-runtime-diagnostic" } elseif ($runtimeSmokePassed) { "compatible-host-bridge-package-runtime" } else { "compatible-host-bridge-package-runtime-failed" }
-  smokeStatus = if ($runtimeSmokePassed) { "passed" } else { "failed" }
+  proofClassification = if ($negativeControlPassed) { "local-package-debug-listener-negative-control" } elseif ($SkipInstalledVendorAssetHashing.IsPresent) { "compatible-host-bridge-package-runtime-diagnostic" } elseif ($runtimeSmokePassed) { "compatible-host-bridge-package-runtime" } else { "compatible-host-bridge-package-runtime-failed" }
+  smokeStatus = if ($negativeControlPassed) { "expected-failure-verified" } elseif ($runtimeSmokePassed) { "passed" } else { "failed" }
   exitCode = $exitCode
   engineSerializedBytes = $engineSerializedBytes
   enqueueCompleted = $enqueueCompleted
@@ -1100,10 +1257,22 @@ $result = [ordered]@{
   nativeAssetHashesComplete = -not $SkipInstalledVendorAssetHashing.IsPresent
   cudaPreflight = $cudaPreflight
   runtimeCreateDiagnostic = $runtimeCreateDiagnostic
+  negativeControl = [ordered]@{
+    scenario = $DebugListenerScenario
+    requested = $negativeControlRequested
+    passed = $negativeControlPassed
+    programReportedScenario = $debugListenerScenarioReported
+    programReportedPassed = (Get-FirstMarkerValue -Lines $stdoutLines -Prefix "DebugListenerNegativeControlPassed=") -eq "True"
+    missingVendorDependencyIsolationApplied = $missingVendorDependencyIsolationApplied
+    missingVendorDependencyObserved = $missingVendorDependencyObserved
+    knownModuleNotFoundStructuredExceptionCode = 3228369022
+    proofBoundary = "A passing negative control proves only that the selected failure was observed and rejected. It is not runtime, local-package, public-package, or post-publish proof."
+  }
   debugListenerCallback = [ordered]@{
-    status = if ($debugListenerCallbackRuntimePassed) { "passed" } elseif ($debugListenerCallbackRequired) { "failed" } else { "unsupported-tensorrt-line" }
-    evidenceKind = "debug-listener-real-callback-runtime"
+    status = if ($negativeControlPassed) { "expected-failure-verified" } elseif ($debugListenerCallbackRuntimePassed) { "passed" } elseif ($debugListenerCallbackRequired) { "failed" } else { "unsupported-tensorrt-line" }
+    evidenceKind = if ($negativeControlRequested) { "debug-listener-callback-negative-control" } else { "debug-listener-real-callback-runtime" }
     evidenceScope = "local-package"
+    scenario = $DebugListenerScenario
     requiredForTensorRtLine = $debugListenerCallbackRequired
     programReportedRequired = $debugListenerCallbackProgramRequired
     runtimeInvariantsSatisfied = $debugListenerCallbackRuntimePassed
@@ -1120,6 +1289,10 @@ $result = [ordered]@{
     detached = (Get-FirstMarkerValue -Lines $stdoutLines -Prefix "DebugListenerCallbackDetached=") -eq "True"
     detachCount = $debugListenerDetachCount
     isRealCallbackRuntimeProof = (Get-FirstMarkerValue -Lines $stdoutLines -Prefix "DebugListenerCallbackIsRealRuntimeProof=") -eq "True"
+    lastCallbackSucceeded = (Get-FirstMarkerValue -Lines $stdoutLines -Prefix "DebugListenerCallbackLastCallbackSucceeded=") -eq "True"
+    lastStatus = Get-FirstMarkerValue -Lines $stdoutLines -Prefix "DebugListenerCallbackLastStatus="
+    managedHandlerOutcome = Get-FirstMarkerValue -Lines $stdoutLines -Prefix "DebugListenerCallbackManagedHandlerOutcome="
+    executionExceptionType = Get-FirstMarkerValue -Lines $stdoutLines -Prefix "DebugListenerCallbackExecutionExceptionType="
     isLocalPackageCallbackRuntimeProof = $isLocalPackageDebugListenerCallbackRuntimeProof
     proofBoundary = "This callback proof is scoped to local managed and bridge packages restored into an external PackageReference-only consumer. It is not source-tree, public-package, or post-publish proof."
   }
@@ -1145,7 +1318,7 @@ $result = [ordered]@{
       boundary = "This pre-publish local package run cannot prove post-publish installation or execution."
     }
   }
-  runtimeProofBoundary = if ($SkipInstalledVendorAssetHashing.IsPresent) { "Diagnostic execution may record runtime and DebugListener callback behavior but skips installed vendor asset SHA256 values and cannot promote compatible-host or local-package callback runtime proof. Local package feeds are not public clean package-consumer proof." } else { "This record proves local managed plus bridge packages can build, serialize, deserialize, enqueue, verify an identity network, and complete a real DebugListener attach/invoke/detach cycle with system-installed vendor dependencies on this compatible host. The callback result is local-package proof only; it is not source-tree, public-package, or post-publish proof and does not clear other runtime lines." }
+  runtimeProofBoundary = if ($negativeControlRequested) { "This record is a controlled fail-closed negative test. Even when the expected failure is verified, runtime, local-package, public-package, and post-publish proof remain false." } elseif ($SkipInstalledVendorAssetHashing.IsPresent) { "Diagnostic execution may record runtime and DebugListener callback behavior but skips installed vendor asset SHA256 values and cannot promote compatible-host or local-package callback runtime proof. Local package feeds are not public clean package-consumer proof." } else { "This record proves local managed plus bridge packages can build, serialize, deserialize, enqueue, verify an identity network, and complete a real DebugListener attach/invoke/detach cycle with system-installed vendor dependencies on this compatible host. The callback result is local-package proof only; it is not source-tree, public-package, or post-publish proof and does not clear other runtime lines." }
   packages = [ordered]@{
     managed = [ordered]@{
       id = $managedPackage.Id
@@ -1225,7 +1398,10 @@ if (-not $KeepConsumerOutput.IsPresent) {
   Write-Host "Removed clean external runtime consumer output: $consumerRoot"
 }
 
-if (-not $runtimeSmokePassed -and -not $AllowRuntimeSmokeFailure.IsPresent) {
+if ($negativeControlRequested -and -not $negativeControlPassed) {
+  throw "Bridge package DebugListener negative control failed closed validation. Scenario=$DebugListenerScenario. See $ReportDirectory."
+}
+if (-not $negativeControlRequested -and -not $runtimeSmokePassed -and -not $AllowRuntimeSmokeFailure.IsPresent) {
   throw "Bridge package runtime smoke failed. See $ReportDirectory."
 }
 

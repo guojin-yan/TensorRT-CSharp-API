@@ -61,6 +61,39 @@ public sealed class DebugListenerLocalPackageRuntimeConsumerTests
         Assert.Contains("canCloseReleaseIssue = $false", script, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void RuntimeConsumerDefinesFourControlledFailClosedScenarios()
+    {
+        string script = ReadScript();
+
+        Assert.Contains("callback-return-false", script, StringComparison.Ordinal);
+        Assert.Contains("callback-throw", script, StringComparison.Ordinal);
+        Assert.Contains("attempted-no-invocation", script, StringComparison.Ordinal);
+        Assert.Contains("missing-vendor-dependency", script, StringComparison.Ordinal);
+        Assert.Contains("RuntimeSmoke=ExpectedFailureVerified", script, StringComparison.Ordinal);
+        Assert.Contains("local-package-debug-listener-negative-control", script, StringComparison.Ordinal);
+        Assert.Contains("debug-listener-callback-negative-control", script, StringComparison.Ordinal);
+        Assert.Contains("A passing negative control proves only that the selected failure was observed and rejected", script, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void RuntimeConsumerNegativeControlsRequireStructuredFailureEvidence()
+    {
+        string script = ReadScript();
+
+        Assert.Contains("$debugListenerFailureCountParsed -and $debugListenerFailureCount -gt 0", script, StringComparison.Ordinal);
+        Assert.Contains("DebugListenerCallbackManagedHandlerOutcome=", script, StringComparison.Ordinal);
+        Assert.Contains("DebugListenerCallbackLastCallbackSucceeded=", script, StringComparison.Ordinal);
+        Assert.Contains("DebugListenerNegativeControlPassed=", script, StringComparison.Ordinal);
+        Assert.Contains("$debugListenerInvocationCountParsed -and $debugListenerInvocationCount -eq 0", script, StringComparison.Ordinal);
+        Assert.Contains("$missingVendorDependencyIsolationApplied", script, StringComparison.Ordinal);
+        Assert.Contains("$missingVendorDependencyObserved", script, StringComparison.Ordinal);
+        Assert.Contains("structured exception with code\\s+3228369022", script, StringComparison.Ordinal);
+        Assert.Contains("knownModuleNotFoundStructuredExceptionCode = 3228369022", script, StringComparison.Ordinal);
+        Assert.Contains("-not $negativeControlRequested -and", script, StringComparison.Ordinal);
+        Assert.Contains("if ($negativeControlRequested -and -not $negativeControlPassed)", script, StringComparison.Ordinal);
+    }
+
     private static string ReadScript()
     {
         return File.ReadAllText(Path.Combine(
