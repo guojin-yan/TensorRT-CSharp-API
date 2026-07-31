@@ -133,6 +133,13 @@ native 现已把 borrowed getter 求值和 `getInterfaceInfo()` 一并放入 SEH
 invocation=1、failure/in-flight=0、detach=1。`--debug-listener-runtime-smoke-only` 仍可用于单独隔离 owner 路径，但不再是
 绕开 callback-state snapshot 异常的必要条件。
 
+四个 fail-closed 负例由 `eng/Test-BridgePackageRuntimeNegativeControlMatrix.ps1` 分别运行，并写入按 runtime key/scenario
+隔离的目录，避免覆盖 success report。矩阵会按 manifest 验证本机 TensorRT 根中的必需 DLL；默认开发根不完整时，只使用
+主机上已有的 assembled runtime，不把 vendor DLL 放入 bridge 包。callback-return-false、callback-throw、attempted-no-invocation 必须观察到 coherent、
+pointer-free callback-state；missing-vendor-dependency 在 context 创建前故意失败，必须记录 `observed=false`，且不能声称
+取得 snapshot。aggregate 要求所有 runtime、local callback、public-package、post-publish、publish 与 release-close proof
+标志均为 false；expected failure 只能证明所选错误被观察并被拒绝。
+
 ## Smoke And Readiness
 
 `CallbackAllocatorSafeControlsSmokeRunner` 和 full package consumer smoke 输出：

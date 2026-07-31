@@ -441,7 +441,7 @@ function Write-Reports {
   $lines.Add("- DebugListener metadata copied / borrowed pointer exposed: $($Result.debugListenerCallback.metadataCopied)/$($Result.debugListenerCallback.borrowedPointerExposed)")
   $lines.Add("- DebugListener detach count: $($Result.debugListenerCallback.detachCount)")
   $lines.Add("- local-package DebugListener callback runtime proof: $($Result.debugListenerCallback.isLocalPackageCallbackRuntimeProof)")
-  $lines.Add("- callback-state snapshot complete/coherent: $($Result.callbackStateSnapshot.complete)/$($Result.callbackStateSnapshot.coherent)")
+  $lines.Add("- callback-state snapshot observed/complete/coherent: $($Result.callbackStateSnapshot.observed)/$($Result.callbackStateSnapshot.complete)/$($Result.callbackStateSnapshot.coherent)")
   $lines.Add("- callback-state last status/operation: ``$($Result.callbackStateSnapshot.lastStatus)`` / ``$($Result.callbackStateSnapshot.lastOperation)``")
   $lines.Add("- DebugListener negative control: ``$($Result.negativeControl.scenario)``; requested=$($Result.negativeControl.requested); passed=$($Result.negativeControl.passed)")
   $lines.Add("- source-tree/public-package/post-publish proof in this report: $($Result.proofScopes.sourceTree.isProof)/$($Result.proofScopes.publicPackage.isProof)/$($Result.proofScopes.postPublish.isProof)")
@@ -1113,6 +1113,14 @@ $debugListenerInvocationCountParsed = [long]::TryParse($debugListenerInvocationC
 $debugListenerFailureCountParsed = [long]::TryParse($debugListenerFailureCountText, [ref]$debugListenerFailureCount)
 $debugListenerInFlightCallbackCountParsed = [long]::TryParse($debugListenerInFlightCallbackCountText, [ref]$debugListenerInFlightCallbackCount)
 $debugListenerDetachCountParsed = [long]::TryParse($debugListenerDetachCountText, [ref]$debugListenerDetachCount)
+$callbackStateSnapshotCompleteText = Get-FirstMarkerValue -Lines $stdoutLines -Prefix "CallbackStateSnapshotComplete="
+$callbackStateSnapshotIsCompleteText = Get-FirstMarkerValue -Lines $stdoutLines -Prefix "CallbackStateSnapshotIsComplete="
+$callbackStateSnapshotLastStatus = Get-FirstMarkerValue -Lines $stdoutLines -Prefix "CallbackStateSnapshotLastStatus="
+$callbackStateSnapshotLastOperation = Get-FirstMarkerValue -Lines $stdoutLines -Prefix "CallbackStateSnapshotLastOperation="
+$callbackStateSnapshotDiagnostic = Get-FirstMarkerValue -Lines $stdoutLines -Prefix "CallbackStateSnapshotDiagnostic="
+$callbackStateSnapshotObserved = -not [string]::IsNullOrWhiteSpace($callbackStateSnapshotCompleteText) -and
+  -not [string]::IsNullOrWhiteSpace($callbackStateSnapshotIsCompleteText) -and
+  -not [string]::IsNullOrWhiteSpace($callbackStateSnapshotLastStatus)
 $callbackStateSnapshotCoherent = (Get-FirstMarkerValue -Lines $stdoutLines -Prefix "CallbackStateSnapshotCoherent=") -eq "True"
 $debugListenerCallbackRuntimePassed =
   $debugListenerCallbackRequired -and
@@ -1287,16 +1295,17 @@ $result = [ordered]@{
   cudaPreflight = $cudaPreflight
   runtimeCreateDiagnostic = $runtimeCreateDiagnostic
   callbackStateSnapshot = [ordered]@{
-    complete = (Get-FirstMarkerValue -Lines $stdoutLines -Prefix "CallbackStateSnapshotComplete=") -eq "True"
-    snapshotIsComplete = (Get-FirstMarkerValue -Lines $stdoutLines -Prefix "CallbackStateSnapshotIsComplete=") -eq "True"
+    observed = $callbackStateSnapshotObserved
+    complete = $callbackStateSnapshotCompleteText -eq "True"
+    snapshotIsComplete = $callbackStateSnapshotIsCompleteText -eq "True"
     coherent = $callbackStateSnapshotCoherent
-    lastStatus = Get-FirstMarkerValue -Lines $stdoutLines -Prefix "CallbackStateSnapshotLastStatus="
-    lastOperation = Get-FirstMarkerValue -Lines $stdoutLines -Prefix "CallbackStateSnapshotLastOperation="
+    lastStatus = $callbackStateSnapshotLastStatus
+    lastOperation = $callbackStateSnapshotLastOperation
     hasOutputAllocator = (Get-FirstMarkerValue -Lines $stdoutLines -Prefix "CallbackStateSnapshotHasOutputAllocator=") -eq "True"
     hasTemporaryStorageAllocator = (Get-FirstMarkerValue -Lines $stdoutLines -Prefix "CallbackStateSnapshotHasTemporaryStorageAllocator=") -eq "True"
     hasDebugListener = (Get-FirstMarkerValue -Lines $stdoutLines -Prefix "CallbackStateSnapshotHasDebugListener=") -eq "True"
-    diagnostic = Get-FirstMarkerValue -Lines $stdoutLines -Prefix "CallbackStateSnapshotDiagnostic="
-    pointerFree = $true
+    diagnostic = $callbackStateSnapshotDiagnostic
+    pointerFree = $callbackStateSnapshotObserved -and $callbackStateSnapshotCoherent
     proofBoundary = "A coherent complete or partial callback-state snapshot is package runtime diagnostic evidence. It is not callback invocation, public-package, or post-publish proof."
   }
   negativeControl = [ordered]@{

@@ -106,8 +106,50 @@ public sealed class DebugListenerLocalPackageRuntimeConsumerTests
         Assert.Contains("CallbackStateSnapshotCoherent=", script, StringComparison.Ordinal);
         Assert.Contains("$callbackStateSnapshotCoherent", script, StringComparison.Ordinal);
         Assert.Contains("callbackStateSnapshot = [ordered]@{", script, StringComparison.Ordinal);
-        Assert.Contains("pointerFree = $true", script, StringComparison.Ordinal);
+        Assert.Contains("observed = $callbackStateSnapshotObserved", script, StringComparison.Ordinal);
+        Assert.Contains("pointerFree = $callbackStateSnapshotObserved -and $callbackStateSnapshotCoherent", script, StringComparison.Ordinal);
         Assert.Contains("It is not callback invocation, public-package, or post-publish proof", script, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void RuntimeConsumerDistinguishesObservedCallbackStateFromPreContextFailure()
+    {
+        string script = ReadScript();
+
+        Assert.Contains("$callbackStateSnapshotObserved", script, StringComparison.Ordinal);
+        Assert.Contains("observed = $callbackStateSnapshotObserved", script, StringComparison.Ordinal);
+        Assert.Contains("pointerFree = $callbackStateSnapshotObserved -and $callbackStateSnapshotCoherent", script, StringComparison.Ordinal);
+        Assert.Contains("callback-state snapshot observed/complete/coherent", script, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void NegativeControlMatrixRunsEachScenarioInAnIndependentEvidenceDirectory()
+    {
+        string matrix = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "eng",
+            "Test-BridgePackageRuntimeNegativeControlMatrix.ps1"));
+
+        Assert.Contains("callback-return-false", matrix, StringComparison.Ordinal);
+        Assert.Contains("callback-throw", matrix, StringComparison.Ordinal);
+        Assert.Contains("attempted-no-invocation", matrix, StringComparison.Ordinal);
+        Assert.Contains("missing-vendor-dependency", matrix, StringComparison.Ordinal);
+        Assert.Contains("$scenarioReportDirectory", matrix, StringComparison.Ordinal);
+        Assert.Contains("$scenarioOutputRoot", matrix, StringComparison.Ordinal);
+        Assert.Contains("\"jybnm\"", matrix, StringComparison.Ordinal);
+        Assert.Contains("\"r{0:D2}-s{1:D2}\"", matrix, StringComparison.Ordinal);
+        Assert.Contains("Resolve-TensorRtRuntimeRoot", matrix, StringComparison.Ordinal);
+        Assert.Contains("-TensorRtRoot", matrix, StringComparison.Ordinal);
+        Assert.Contains("bridge-package-runtime-negative-control-matrix.json", matrix, StringComparison.Ordinal);
+        Assert.Contains("callbackStateRequirementSatisfied", matrix, StringComparison.Ordinal);
+        Assert.Contains("trueProofFlags", matrix, StringComparison.Ordinal);
+        Assert.Contains("isRuntimeExecutionProof = $false", matrix, StringComparison.Ordinal);
+        Assert.Contains("isLocalPackageCallbackRuntimeProof = $false", matrix, StringComparison.Ordinal);
+        Assert.Contains("isPublicPackageProof = $false", matrix, StringComparison.Ordinal);
+        Assert.Contains("isPostPublishProof = $false", matrix, StringComparison.Ordinal);
+        Assert.Contains("canPublishPublicly = $false", matrix, StringComparison.Ordinal);
+        Assert.Contains("canCloseReleaseIssue = $false", matrix, StringComparison.Ordinal);
+        Assert.Contains("Expected negative failures verify fail-closed behavior only", matrix, StringComparison.Ordinal);
     }
 
     private static string ReadScript()
