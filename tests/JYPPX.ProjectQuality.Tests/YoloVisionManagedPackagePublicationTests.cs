@@ -43,6 +43,9 @@ public sealed class YoloVisionManagedPackagePublicationTests
         Assert.Contains("publish_to_github_packages: false", workflow, StringComparison.Ordinal);
         Assert.Contains("attach_to_github_release: false", workflow, StringComparison.Ordinal);
         Assert.Contains("package-managed-dry-run:\n", workflow.Replace("\r\n", "\n", StringComparison.Ordinal), StringComparison.Ordinal);
+        Assert.Contains("is still downgraded by package-managed.yml to contents: read", workflow, StringComparison.Ordinal);
+        Assert.Contains("contents: write", workflow, StringComparison.Ordinal);
+        Assert.Contains("packages: write", workflow, StringComparison.Ordinal);
         Assert.DoesNotContain("github.repository_owner == 'guojin-yan' && github.event_name == 'workflow_dispatch' && inputs.run_package_managed_dry_run", workflow, StringComparison.Ordinal);
     }
 
@@ -56,6 +59,15 @@ public sealed class YoloVisionManagedPackagePublicationTests
         Assert.Matches("run_docs_release:[\\s\\S]*?default: false", workflow);
         Assert.Matches("publish_managed_to_github_packages:[\\s\\S]*?default: false", workflow);
         Assert.Matches("attach_runtime_to_github_release:[\\s\\S]*?default: false", workflow);
+        string dispatchInputs = workflow[
+            (workflow.IndexOf("    inputs:", StringComparison.Ordinal) + "    inputs:".Length)..
+            workflow.IndexOf("\npermissions:", StringComparison.Ordinal)];
+        int dispatchInputCount = System.Text.RegularExpressions.Regex.Matches(
+            dispatchInputs,
+            "(?m)^      [a-z0-9_]+:$").Count;
+        Assert.InRange(dispatchInputCount, 1, 25);
+        Assert.DoesNotContain("      windows_cuda_cudnn_package_version:\n", workflow.Replace("\r\n", "\n", StringComparison.Ordinal), StringComparison.Ordinal);
+        Assert.DoesNotContain("      windows_tensorrt_package_version:\n", workflow.Replace("\r\n", "\n", StringComparison.Ordinal), StringComparison.Ordinal);
         Assert.Contains("Release publication side effects require owner_publish_approved=true", workflow, StringComparison.Ordinal);
         Assert.Contains("owner_publish_approved=$OWNER_PUBLISH_APPROVED", workflow, StringComparison.Ordinal);
         Assert.Contains("[object]$OwnerPublishApproved = $false", wrapper, StringComparison.Ordinal);

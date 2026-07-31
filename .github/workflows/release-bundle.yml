@@ -43,16 +43,6 @@ on:
         required: false
         default: "bridge"
         type: string
-      windows_cuda_cudnn_package_version:
-        description: Retired; must stay empty
-        required: false
-        default: ""
-        type: string
-      windows_tensorrt_package_version:
-        description: Retired; must stay empty
-        required: false
-        default: ""
-        type: string
       run_linux_runtime_packaging:
         description: Build and publish hosted Linux runtime packages
         required: false
@@ -155,8 +145,8 @@ jobs:
       RUN_WINDOWS_RUNTIME_PACKAGING: ${{ inputs.run_windows_runtime_packaging }}
       WINDOWS_RUNTIME_KEYS: ${{ inputs.windows_runtime_keys }}
       WINDOWS_SPLIT_PACKAGE_ROLES: ${{ inputs.windows_split_package_roles }}
-      WINDOWS_CUDA_CUDNN_PACKAGE_VERSION: ${{ inputs.windows_cuda_cudnn_package_version }}
-      WINDOWS_TENSORRT_PACKAGE_VERSION: ${{ inputs.windows_tensorrt_package_version }}
+      WINDOWS_CUDA_CUDNN_PACKAGE_VERSION: ""
+      WINDOWS_TENSORRT_PACKAGE_VERSION: ""
       RUN_LINUX_RUNTIME_PACKAGING: ${{ inputs.run_linux_runtime_packaging }}
       LINUX_RUNTIME_KEYS: ${{ inputs.linux_runtime_keys }}
       LINUX_RUNTIME_KEY_SET: ${{ inputs.linux_runtime_key_set }}
@@ -201,8 +191,6 @@ jobs:
             throw "Windows and Linux split_package_roles must be 'bridge'. NVIDIA runtime package roles are retired."
           }
           $retiredInputs = @(
-            '${{ inputs.windows_cuda_cudnn_package_version }}',
-            '${{ inputs.windows_tensorrt_package_version }}',
             '${{ inputs.linux_cuda_cudnn_package_version }}',
             '${{ inputs.linux_tensorrt_package_version }}'
           ) | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }

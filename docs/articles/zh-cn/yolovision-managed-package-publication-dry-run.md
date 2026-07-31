@@ -28,6 +28,10 @@ attach_to_github_release=false
 `grape-yan` 的 pack job 只有 `contents: read`。它会上传两个 nupkg 和独立 validation reports artifact，但不会运行
 NuGet push、GitHub Packages publish、Release create/upload 或 docs deploy。
 
+`release-quality-gate.yml` 的 reusable caller 必须声明被调用 workflow 中所有条件 job 可能需要的权限上限，否则 GitHub 会在
+job 启动前拒绝 workflow。`package-managed.yml` 会把实际 pack job 降为 `contents: read`；三个发布 job 还同时受发布输入、
+`owner_publish_approved` 和正式仓库 owner 条件保护，因此在 `grape-yan` 必定 skipped。
+
 ## 双包验证内容
 
 pack job 必须依次通过：

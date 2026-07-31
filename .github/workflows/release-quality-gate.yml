@@ -165,8 +165,11 @@ jobs:
   package-managed-dry-run:
     if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_package_managed_dry_run }}
     uses: ./.github/workflows/package-managed.yml
+    # Reusable workflows cannot elevate beyond the caller. The called pack job
+    # is still downgraded by package-managed.yml to contents: read.
     permissions:
-      contents: read
+      contents: write
+      packages: write
     with:
       version: 4.0.0
       configuration: Release
