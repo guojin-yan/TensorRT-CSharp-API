@@ -5,6 +5,7 @@ param(
   [string]$RuntimePackageDirectory,
   [string]$SplitPackageRoot,
   [string]$PackageConsumerReportDirectory,
+  [string]$BridgeRuntimeConsumerReportRoot,
   [string]$SplitCollectionConsumerReportDirectory,
   [string]$ReportDirectory,
   [switch]$FailOnBlocked,
@@ -1203,6 +1204,151 @@ function Get-BridgeConsumerEvidence {
       isFullRuntimeEvidence = $false
       isRuntimeExecutionEvidence = $false
       diagnostic = $_.Exception.Message
+    }
+  }
+}
+
+function New-BridgeRuntimeCallbackStateEvidence {
+  param(
+    [AllowNull()]
+    [object]$Snapshot
+  )
+
+  if ($null -eq $Snapshot) {
+    return [pscustomobject]@{
+      status = "missing"
+      complete = $false
+      snapshotIsComplete = $false
+      coherent = $false
+      lastStatus = "not-present"
+      lastOperation = ""
+      diagnostic = "bridge runtime consumer report does not contain callback-state snapshot evidence."
+      pointerFree = $false
+      isDiagnosticEvidence = $false
+      isRuntimeExecutionProof = $false
+      proofBoundary = "Missing callback-state evidence is not callback invocation, package runtime, public-package, or post-publish proof."
+    }
+  }
+
+  $complete = if ($Snapshot.PSObject.Properties.Name -contains "complete") { [bool]$Snapshot.complete } else { $false }
+  $snapshotIsComplete = if ($Snapshot.PSObject.Properties.Name -contains "snapshotIsComplete") { [bool]$Snapshot.snapshotIsComplete } else { $false }
+  $reportedCoherent = if ($Snapshot.PSObject.Properties.Name -contains "coherent") { [bool]$Snapshot.coherent } else { $false }
+  $lastStatus = if ($Snapshot.PSObject.Properties.Name -contains "lastStatus" -and -not [string]::IsNullOrWhiteSpace([string]$Snapshot.lastStatus)) { [string]$Snapshot.lastStatus } else { "not-present" }
+  $lastOperation = if ($Snapshot.PSObject.Properties.Name -contains "lastOperation") { [string]$Snapshot.lastOperation } else { "" }
+  $diagnostic = if ($Snapshot.PSObject.Properties.Name -contains "diagnostic") { [string]$Snapshot.diagnostic } else { "" }
+  $pointerFree = if ($Snapshot.PSObject.Properties.Name -contains "pointerFree") { [bool]$Snapshot.pointerFree } else { $false }
+  $completeShape = $complete -and $snapshotIsComplete -and [string]::Equals($lastStatus, "Ok", [System.StringComparison]::OrdinalIgnoreCase)
+  $partialShape = -not $complete -and -not $snapshotIsComplete -and
+    -not [string]::Equals($lastStatus, "Ok", [System.StringComparison]::OrdinalIgnoreCase) -and
+    -not [string]::IsNullOrWhiteSpace($lastOperation)
+  $coherent = $reportedCoherent -and ($completeShape -or $partialShape)
+  $status = if (-not $coherent) {
+    "incoherent"
+  }
+  elseif ($completeShape) {
+    "complete"
+  }
+  else {
+    "partial"
+  }
+
+  return [pscustomobject]@{
+    status = $status
+    complete = $complete
+    snapshotIsComplete = $snapshotIsComplete
+    coherent = $coherent
+    lastStatus = $lastStatus
+    lastOperation = $lastOperation
+    diagnostic = $diagnostic
+    pointerFree = $pointerFree
+    isDiagnosticEvidence = $coherent -and $pointerFree
+    isRuntimeExecutionProof = $false
+    proofBoundary = "A coherent complete or partial callback-state snapshot is pointer-free local-package diagnostic evidence. It is not callback invocation, public-package, or post-publish proof."
+  }
+}
+
+function Get-BridgeRuntimeConsumerEvidence {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$Key
+  )
+
+  $reportPath = Join-Path (Join-Path $BridgeRuntimeConsumerReportRoot $Key) "bridge-package-runtime-consumer-proof.json"
+  if (-not (Test-Path -LiteralPath $reportPath -PathType Leaf)) {
+    return [pscustomobject]@{
+      status = "missing"
+      reportPath = $reportPath
+      smokeStatus = "not-present"
+      exitCode = $null
+      isRuntimeExecutionEvidence = $false
+      isLocalPackageCallbackRuntimeProof = $false
+      callbackStateSnapshot = New-BridgeRuntimeCallbackStateEvidence -Snapshot $null
+      negativeControl = [pscustomobject]@{ scenario = "not-present"; requested = $false; passed = $false }
+      diagnostic = "bridge package runtime consumer report was not found."
+      proofBoundary = "Missing bridge runtime consumer evidence cannot prove runtime execution or any package publication scope."
+    }
+  }
+
+  try {
+    $report = Get-Content -LiteralPath $reportPath -Raw -Encoding utf8 | ConvertFrom-Json
+    if (-not [string]::Equals([string]$report.sourceRuntimeKey, $Key, [System.StringComparison]::Ordinal)) {
+      throw "bridge runtime consumer report key '$($report.sourceRuntimeKey)' does not match '$Key'."
+    }
+
+    $snapshot = if ($report.PSObject.Properties.Name -contains "callbackStateSnapshot") { $report.callbackStateSnapshot } else { $null }
+    $callbackStateSnapshot = New-BridgeRuntimeCallbackStateEvidence -Snapshot $snapshot
+    $smokeStatus = if ($report.PSObject.Properties.Name -contains "smokeStatus") { [string]$report.smokeStatus } else { "not-present" }
+    $exitCode = if ($report.PSObject.Properties.Name -contains "exitCode" -and $null -ne $report.exitCode) { [int]$report.exitCode } else { $null }
+    $isRuntimeExecutionEvidence = if ($report.PSObject.Properties.Name -contains "isRuntimeExecutionProof") { [bool]$report.isRuntimeExecutionProof } else { $false }
+    $isLocalPackageCallbackRuntimeProof = if ($report.PSObject.Properties.Name -contains "isLocalPackageDebugListenerCallbackRuntimeProof") { [bool]$report.isLocalPackageDebugListenerCallbackRuntimeProof } else { $false }
+    $negativeControl = if ($report.PSObject.Properties.Name -contains "negativeControl") {
+      [pscustomobject]@{
+        scenario = [string]$report.negativeControl.scenario
+        requested = [bool]$report.negativeControl.requested
+        passed = [bool]$report.negativeControl.passed
+      }
+    }
+    else {
+      [pscustomobject]@{ scenario = "not-present"; requested = $false; passed = $false }
+    }
+    $status = if ([string]$callbackStateSnapshot.status -eq "incoherent") {
+      "invalid-callback-state"
+    }
+    elseif ([string]$callbackStateSnapshot.status -eq "missing") {
+      "missing-callback-state"
+    }
+    elseif ([string]::Equals($smokeStatus, "passed", [System.StringComparison]::OrdinalIgnoreCase) -and $exitCode -eq 0) {
+      "ready"
+    }
+    else {
+      "diagnostic"
+    }
+
+    return [pscustomobject]@{
+      status = $status
+      reportPath = $reportPath
+      smokeStatus = $smokeStatus
+      exitCode = $exitCode
+      isRuntimeExecutionEvidence = $isRuntimeExecutionEvidence
+      isLocalPackageCallbackRuntimeProof = $isLocalPackageCallbackRuntimeProof
+      callbackStateSnapshot = $callbackStateSnapshot
+      negativeControl = $negativeControl
+      diagnostic = if ($status -eq "ready") { "bridge package runtime consumer evidence found with coherent callback-state diagnostics." } else { "bridge package runtime consumer evidence is diagnostic-only or has incomplete callback-state evidence." }
+      proofBoundary = "This readiness record preserves local-package runtime and callback-state diagnostics without promoting them to public-package or post-publish proof."
+    }
+  }
+  catch {
+    return [pscustomobject]@{
+      status = "invalid-report"
+      reportPath = $reportPath
+      smokeStatus = "invalid-report"
+      exitCode = $null
+      isRuntimeExecutionEvidence = $false
+      isLocalPackageCallbackRuntimeProof = $false
+      callbackStateSnapshot = New-BridgeRuntimeCallbackStateEvidence -Snapshot $null
+      negativeControl = [pscustomobject]@{ scenario = "not-present"; requested = $false; passed = $false }
+      diagnostic = $_.Exception.Message
+      proofBoundary = "An invalid bridge runtime consumer report is not runtime or publication proof."
     }
   }
 }
@@ -8355,11 +8501,11 @@ function Write-ReadinessReports {
   $lines = New-Object System.Collections.Generic.List[string]
   $lines.Add("# Runtime Package Readiness Summary")
   $lines.Add("")
-  $lines.Add("| Runtime key | Managed | Bridge package | Bridge consumer | Packable roles | Legacy collection | Legacy collection consumer | Host NVIDIA inputs | Retired package | Historical consumer | Overall | Runtime proof |")
-  $lines.Add("| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |")
+  $lines.Add("| Runtime key | Managed | Bridge package | Bridge consumer | Bridge runtime | Packable roles | Legacy collection | Legacy collection consumer | Host NVIDIA inputs | Retired package | Historical consumer | Overall | Runtime proof |")
+  $lines.Add("| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |")
   foreach ($result in $Results) {
     $splitComponentSummary = "$($result.splitPackages.status) $($result.splitPackages.foundCount)/$($result.splitPackages.expectedCount)"
-    $lines.Add("| $($result.key) | $($result.managedPackage.status) | $($result.bridgePackage.status) | $($result.bridgeConsumer.status) | $splitComponentSummary | $($result.splitCollectionPackage.status) | $($result.splitCollectionConsumer.status) | $($result.fullVendorInputs.status) | $($result.fullRuntimePackage.status) | $($result.fullPackageConsumer.status) | $($result.overallStatus) | $($result.runtimeProofStatus) |")
+    $lines.Add("| $($result.key) | $($result.managedPackage.status) | $($result.bridgePackage.status) | $($result.bridgeConsumer.status) | $($result.bridgeRuntimeConsumer.status) | $splitComponentSummary | $($result.splitCollectionPackage.status) | $($result.splitCollectionConsumer.status) | $($result.fullVendorInputs.status) | $($result.fullRuntimePackage.status) | $($result.fullPackageConsumer.status) | $($result.overallStatus) | $($result.runtimeProofStatus) |")
   }
 
   $lines.Add("")
@@ -8384,6 +8530,11 @@ function Write-ReadinessReports {
     $lines.Add("- bridge consumer execution-context auxiliary stream lifetime: $($result.bridgeConsumer.wrapperSurfaceCapabilities.hasExecutionContextAuxiliaryStreamLifetime); marker=``execution-context-auxiliary-stream-lifetime``; evidence-kind=compile-surface-proof; runtime-evidence=managed-safehandle-lease; proof=false")
     $lines.Add("- bridge consumer callback api-language safe controls: $($result.bridgeConsumer.wrapperSurfaceCapabilities.hasCallbackApiLanguageSafeControls); marker=``callback-api-language-safe-controls``; evidence-kind=compile-surface-proof; runtime-evidence=scalar-copy-api-language; proof=false")
     $lines.Add("- bridge consumer callback allocator safe-control summary: $($result.bridgeConsumer.wrapperSurfaceCapabilities.hasExecutionContextCallbackAllocatorSafeControlSummary); marker=``execution-context-callback-allocator-safe-control-summary``; evidence-kind=compile-surface-proof; runtime-evidence=copied-interface-info-safe-controls; proof=false")
+    $lines.Add("- bridge runtime consumer: $($result.bridgeRuntimeConsumer.status); smoke=$($result.bridgeRuntimeConsumer.smokeStatus); exit=$($result.bridgeRuntimeConsumer.exitCode); runtime-execution=$($result.bridgeRuntimeConsumer.isRuntimeExecutionEvidence); local-callback-proof=$($result.bridgeRuntimeConsumer.isLocalPackageCallbackRuntimeProof)")
+    $lines.Add("- bridge runtime callback-state snapshot: $($result.bridgeRuntimeConsumer.callbackStateSnapshot.status); complete=$($result.bridgeRuntimeConsumer.callbackStateSnapshot.complete); snapshot-is-complete=$($result.bridgeRuntimeConsumer.callbackStateSnapshot.snapshotIsComplete); coherent=$($result.bridgeRuntimeConsumer.callbackStateSnapshot.coherent); pointer-free=$($result.bridgeRuntimeConsumer.callbackStateSnapshot.pointerFree); last-status=``$($result.bridgeRuntimeConsumer.callbackStateSnapshot.lastStatus)``; last-operation=``$($result.bridgeRuntimeConsumer.callbackStateSnapshot.lastOperation)``; runtime-proof=$($result.bridgeRuntimeConsumer.callbackStateSnapshot.isRuntimeExecutionProof)")
+    $lines.Add("- bridge runtime callback-state diagnostic: $($result.bridgeRuntimeConsumer.callbackStateSnapshot.diagnostic)")
+    $lines.Add("- bridge runtime negative control: scenario=``$($result.bridgeRuntimeConsumer.negativeControl.scenario)``; requested=$($result.bridgeRuntimeConsumer.negativeControl.requested); passed=$($result.bridgeRuntimeConsumer.negativeControl.passed)")
+    $lines.Add("- bridge runtime evidence boundary: $($result.bridgeRuntimeConsumer.proofBoundary)")
     $lines.Add("- error recorder diagnostics design gate: $($result.errorRecorderDiagnosticsDesignGate.status); marker=``$($result.errorRecorderDiagnosticsDesignGate.marker)``; evidence-kind=$($result.errorRecorderDiagnosticsDesignGate.evidenceKind); runtime-evidence=$($result.errorRecorderDiagnosticsDesignGate.runtimeEvidenceKind); runtime-execution=$($result.errorRecorderDiagnosticsDesignGate.isRuntimeExecutionEvidence); proof=$($result.errorRecorderDiagnosticsDesignGate.isRuntimeExecutionProof); runtime-blocked=$($result.errorRecorderDiagnosticsDesignGate.runtimeProofBlocked); deferred-rows=$($result.errorRecorderDiagnosticsDesignGate.hasDeferredRowEvidence)")
     $lines.Add("- error recorder diagnostics design gate diagnostic: $($result.errorRecorderDiagnosticsDesignGate.diagnostic)")
     $lines.Add("- dimension expression snapshot design gate: $($result.dimensionExpressionSnapshotDesignGate.status); marker=``$($result.dimensionExpressionSnapshotDesignGate.marker)``; evidence-kind=$($result.dimensionExpressionSnapshotDesignGate.evidenceKind); runtime-evidence=$($result.dimensionExpressionSnapshotDesignGate.runtimeEvidenceKind); owner-lifetime=$($result.dimensionExpressionSnapshotDesignGate.ownerLifetimeKnown); expression-pointer=$($result.dimensionExpressionSnapshotDesignGate.expressionPointerExposed); expr-builder-create=$($result.dimensionExpressionSnapshotDesignGate.exprBuilderCreationEnabled); proof=$($result.dimensionExpressionSnapshotDesignGate.isRuntimeExecutionProof); runtime-blocked=$($result.dimensionExpressionSnapshotDesignGate.runtimeProofBlocked); deferred-rows=$($result.dimensionExpressionSnapshotDesignGate.hasDeferredRowEvidence)")
@@ -8981,6 +9132,13 @@ elseif (-not [System.IO.Path]::IsPathRooted($PackageConsumerReportDirectory)) {
   $PackageConsumerReportDirectory = [System.IO.Path]::GetFullPath((Join-Path $RepositoryRoot $PackageConsumerReportDirectory))
 }
 
+if ([string]::IsNullOrWhiteSpace($BridgeRuntimeConsumerReportRoot)) {
+  $BridgeRuntimeConsumerReportRoot = Join-Path $PackageConsumerReportDirectory "bridge-runtime"
+}
+elseif (-not [System.IO.Path]::IsPathRooted($BridgeRuntimeConsumerReportRoot)) {
+  $BridgeRuntimeConsumerReportRoot = [System.IO.Path]::GetFullPath((Join-Path $RepositoryRoot $BridgeRuntimeConsumerReportRoot))
+}
+
 if ([string]::IsNullOrWhiteSpace($SplitCollectionConsumerReportDirectory)) {
   $SplitCollectionConsumerReportDirectory = Join-Path $PackageConsumerReportDirectory "split-collection"
 }
@@ -9084,6 +9242,7 @@ foreach ($key in $keys) {
   }
 
   $bridgeConsumerEvidence = Get-BridgeConsumerEvidence -Key $key
+  $bridgeRuntimeConsumerEvidence = Get-BridgeRuntimeConsumerEvidence -Key $key
   $fullPackageConsumerEvidence = Get-FullPackageConsumerEvidence -Key $key
   $splitCollectionConsumerEvidence = Get-SplitCollectionConsumerEvidence -Key $key -PackageId ([string]$package.packageId)
   $runtimeExecutionEvidence = New-RuntimeExecutionEvidence -SplitCollectionConsumer $splitCollectionConsumerEvidence -FullPackageConsumer $fullPackageConsumerEvidence
@@ -9233,6 +9392,7 @@ foreach ($key in $keys) {
     managedPackage = $managedEvidence
     bridgePackage = $bridgePackageEvidence
     bridgeConsumer = $bridgeConsumerEvidence
+    bridgeRuntimeConsumer = $bridgeRuntimeConsumerEvidence
     splitPackages = [pscustomobject]@{
       status = $splitReadinessStatus
       expectedCount = $splitPackages.Count

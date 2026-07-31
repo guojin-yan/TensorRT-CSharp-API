@@ -1231,6 +1231,12 @@ public sealed class CallbackAllocatorBoundaryTests
         Assert.Contains("partial-state-diagnostics", smokeProgram);
         Assert.Contains("execution-context-callback-state-snapshot", bridgeConsumer);
         Assert.Contains("hasExecutionContextCallbackStateSnapshot", readiness);
+        Assert.Contains("Get-BridgeRuntimeConsumerEvidence", readiness);
+        Assert.Contains("New-BridgeRuntimeCallbackStateEvidence", readiness);
+        Assert.Contains("bridgeRuntimeConsumer = $bridgeRuntimeConsumerEvidence", readiness);
+        Assert.Contains("bridge runtime callback-state snapshot:", readiness);
+        Assert.Contains("callbackStateSnapshot.lastStatus", readiness);
+        Assert.Contains("callbackStateSnapshot.lastOperation", readiness);
 
         Assert.Contains("trt8-output-allocator-notify-shape-deferred", trt8Deferred);
         Assert.Contains("trt8-output-allocator-reallocate-output-deferred", trt8Deferred);

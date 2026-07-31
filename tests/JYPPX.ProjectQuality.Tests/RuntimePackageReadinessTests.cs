@@ -489,7 +489,7 @@ public sealed class RuntimePackageReadinessTests
     {
         string script = ReadSource("eng", "Test-RuntimePackageReadiness.ps1");
 
-        Assert.Contains("| Runtime key | Managed | Bridge package | Bridge consumer | Packable roles | Legacy collection | Legacy collection consumer | Host NVIDIA inputs | Retired package | Historical consumer | Overall | Runtime proof |", script);
+        Assert.Contains("| Runtime key | Managed | Bridge package | Bridge consumer | Bridge runtime | Packable roles | Legacy collection | Legacy collection consumer | Host NVIDIA inputs | Retired package | Historical consumer | Overall | Runtime proof |", script);
         Assert.Contains("bridge package consumer report was not found", script);
         Assert.Contains("bridge consumer native dependency", script);
         Assert.Contains("bridge consumer probe diagnostic", script);
@@ -596,6 +596,29 @@ public sealed class RuntimePackageReadinessTests
         Assert.Contains("| Vendor root | Exists | DLLs | LIBs | Missing expected assets | Import-library-only | Diagnostic |", script);
         Assert.Contains("vendor blockers: none", script);
         Assert.Contains("Missing kind", script);
+    }
+
+    [Fact]
+    public void RuntimeReadinessPreservesBridgeRuntimeCallbackStatePhaseAndStatus()
+    {
+        string script = ReadSource("eng", "Test-RuntimePackageReadiness.ps1");
+
+        Assert.Contains("BridgeRuntimeConsumerReportRoot", script);
+        Assert.Contains("Get-BridgeRuntimeConsumerEvidence", script);
+        Assert.Contains("New-BridgeRuntimeCallbackStateEvidence", script);
+        Assert.Contains("bridge-package-runtime-consumer-proof.json", script);
+        Assert.Contains("callbackStateSnapshot", script);
+        Assert.Contains("completeShape", script);
+        Assert.Contains("partialShape", script);
+        Assert.Contains("invalid-callback-state", script);
+        Assert.Contains("missing-callback-state", script);
+        Assert.Contains("bridgeRuntimeConsumer = $bridgeRuntimeConsumerEvidence", script);
+        Assert.Contains("bridge runtime callback-state snapshot:", script);
+        Assert.Contains("last-status=``$($result.bridgeRuntimeConsumer.callbackStateSnapshot.lastStatus)``", script);
+        Assert.Contains("last-operation=``$($result.bridgeRuntimeConsumer.callbackStateSnapshot.lastOperation)``", script);
+        Assert.Contains("bridge runtime callback-state diagnostic:", script);
+        Assert.Contains("bridge runtime negative control:", script);
+        Assert.Contains("It is not callback invocation, public-package, or post-publish proof", script);
     }
 
     private static string ReadSource(params string[] pathParts)

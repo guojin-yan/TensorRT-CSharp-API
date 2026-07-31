@@ -30,6 +30,21 @@
 
 需要真实 TensorRT/CUDA 初始化、engine build/deserialize、enqueue、output readback 和结果验证。driver/runtime incompatibility、异常或 skipped output 都不能写成通过。
 
+## Callback-State 诊断
+
+`bridgeRuntimeConsumer.callbackStateSnapshot` 从每条 runtime key 对应的
+`bridge-package-runtime-consumer-proof.json` 汇入正式 readiness JSON/Markdown。它把 aggregate snapshot 分为：
+
+- `complete`：`complete` 与 `snapshotIsComplete` 都为 true，且 `lastStatus=Ok`；
+- `partial`：两个 complete 标志都为 false，`lastStatus` 非 `Ok`，并保留非空 `lastOperation`；
+- `incoherent`：报告自称 coherent，但 complete/status/phase 组合不满足上述任一契约；
+- `missing`：旧报告尚未包含 callback-state 字段。
+
+TRT10/TRT11 的 vendor 默认 debug listener metadata 可能得到
+`snapshot-debug-listener-interface-info-partial`。这种 coherent partial 是 pointer-free 诊断，不是 callback invocation、
+public-package 或 post-publish proof。readiness 还保留 negative-control scenario/requested/passed，负例即使按预期失败也不会被
+升级为 runtime success。
+
 ## GitHub Release 路线
 
 GitHub Release 不是 NuGet feed。下载 managed 与 bridge `.nupkg` 后，先验证：
