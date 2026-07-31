@@ -441,6 +441,8 @@ function Write-Reports {
   $lines.Add("- DebugListener metadata copied / borrowed pointer exposed: $($Result.debugListenerCallback.metadataCopied)/$($Result.debugListenerCallback.borrowedPointerExposed)")
   $lines.Add("- DebugListener detach count: $($Result.debugListenerCallback.detachCount)")
   $lines.Add("- local-package DebugListener callback runtime proof: $($Result.debugListenerCallback.isLocalPackageCallbackRuntimeProof)")
+  $lines.Add("- callback-state snapshot complete/coherent: $($Result.callbackStateSnapshot.complete)/$($Result.callbackStateSnapshot.coherent)")
+  $lines.Add("- callback-state last status/operation: ``$($Result.callbackStateSnapshot.lastStatus)`` / ``$($Result.callbackStateSnapshot.lastOperation)``")
   $lines.Add("- DebugListener negative control: ``$($Result.negativeControl.scenario)``; requested=$($Result.negativeControl.requested); passed=$($Result.negativeControl.passed)")
   $lines.Add("- source-tree/public-package/post-publish proof in this report: $($Result.proofScopes.sourceTree.isProof)/$($Result.proofScopes.publicPackage.isProof)/$($Result.proofScopes.postPublish.isProof)")
   $lines.Add("- compatible-host runtime promotion: $($Result.canPromoteCompatibleHostRuntimeProof)")
@@ -809,6 +811,30 @@ try
         throw new InvalidOperationException("Identity network bindings are not ready for enqueue: " + readiness);
     }
 
+    bool callbackStateComplete = context.TryGetCallbackStateSnapshot(
+        "output",
+        out TensorRtExecutionContextCallbackStateSnapshot callbackStateSnapshot,
+        out string callbackStateDiagnostic);
+    bool callbackStateCoherent =
+        callbackStateComplete == callbackStateSnapshot.IsComplete &&
+        (callbackStateComplete
+            ? callbackStateSnapshot.LastStatus == BridgeStatusCode.Ok
+            : callbackStateSnapshot.LastStatus != BridgeStatusCode.Ok &&
+              !string.IsNullOrWhiteSpace(callbackStateSnapshot.LastOperation));
+    Console.WriteLine("CallbackStateSnapshotComplete=" + callbackStateComplete);
+    Console.WriteLine("CallbackStateSnapshotIsComplete=" + callbackStateSnapshot.IsComplete);
+    Console.WriteLine("CallbackStateSnapshotCoherent=" + callbackStateCoherent);
+    Console.WriteLine("CallbackStateSnapshotLastStatus=" + callbackStateSnapshot.LastStatus);
+    Console.WriteLine("CallbackStateSnapshotLastOperation=" + callbackStateSnapshot.LastOperation);
+    Console.WriteLine("CallbackStateSnapshotHasOutputAllocator=" + callbackStateSnapshot.HasOutputAllocator);
+    Console.WriteLine("CallbackStateSnapshotHasTemporaryStorageAllocator=" + callbackStateSnapshot.HasTemporaryStorageAllocator);
+    Console.WriteLine("CallbackStateSnapshotHasDebugListener=" + callbackStateSnapshot.HasDebugListener);
+    Console.WriteLine("CallbackStateSnapshotDiagnostic=" + callbackStateDiagnostic);
+    if (!callbackStateCoherent)
+    {
+        throw new InvalidOperationException("Callback-state snapshot completeness and partial-state diagnostics are inconsistent.");
+    }
+
     TensorRtDebugTensorMetadataSnapshot callbackMetadata = default;
     string managedHandlerOutcome = "not-invoked";
     TensorRtDebugListenerCallbackOwner? debugListenerOwner = null;
@@ -1087,6 +1113,7 @@ $debugListenerInvocationCountParsed = [long]::TryParse($debugListenerInvocationC
 $debugListenerFailureCountParsed = [long]::TryParse($debugListenerFailureCountText, [ref]$debugListenerFailureCount)
 $debugListenerInFlightCallbackCountParsed = [long]::TryParse($debugListenerInFlightCallbackCountText, [ref]$debugListenerInFlightCallbackCount)
 $debugListenerDetachCountParsed = [long]::TryParse($debugListenerDetachCountText, [ref]$debugListenerDetachCount)
+$callbackStateSnapshotCoherent = (Get-FirstMarkerValue -Lines $stdoutLines -Prefix "CallbackStateSnapshotCoherent=") -eq "True"
 $debugListenerCallbackRuntimePassed =
   $debugListenerCallbackRequired -and
   $debugListenerCallbackProgramRequired -and
@@ -1111,6 +1138,7 @@ $debugListenerNegativeCommonPassed =
   $debugListenerScenarioReported -eq $DebugListenerScenario -and
   $debugListenerCallbackStatus -eq "Failed" -and
   $debugListenerCallbackEvidenceScope -eq "local-package" -and
+  $callbackStateSnapshotCoherent -and
   $debugListenerAttachedText -eq "True" -and
   $debugListenerNativeVTableInstalledText -eq "True" -and
   $debugListenerInFlightCallbackCountParsed -and $debugListenerInFlightCallbackCount -eq 0 -and
@@ -1162,6 +1190,7 @@ $runtimeSmokePassed = -not $negativeControlRequested -and $exitCode -eq 0 -and
   (($stdoutLines -join "`n") -match "RuntimeSmoke=Passed") -and
   (($stdoutLines -join "`n") -match "EnqueueCompleted=True") -and
   (($stdoutLines -join "`n") -match "IdentityOutputMatch=True") -and
+  $callbackStateSnapshotCoherent -and
   (-not $debugListenerCallbackRequired -or $debugListenerCallbackRuntimePassed)
 $identityOutputMatch = (($stdoutLines -join "`n") -match "IdentityOutputMatch=True")
 $enqueueCompleted = (($stdoutLines -join "`n") -match "EnqueueCompleted=True")
@@ -1257,6 +1286,19 @@ $result = [ordered]@{
   nativeAssetHashesComplete = -not $SkipInstalledVendorAssetHashing.IsPresent
   cudaPreflight = $cudaPreflight
   runtimeCreateDiagnostic = $runtimeCreateDiagnostic
+  callbackStateSnapshot = [ordered]@{
+    complete = (Get-FirstMarkerValue -Lines $stdoutLines -Prefix "CallbackStateSnapshotComplete=") -eq "True"
+    snapshotIsComplete = (Get-FirstMarkerValue -Lines $stdoutLines -Prefix "CallbackStateSnapshotIsComplete=") -eq "True"
+    coherent = $callbackStateSnapshotCoherent
+    lastStatus = Get-FirstMarkerValue -Lines $stdoutLines -Prefix "CallbackStateSnapshotLastStatus="
+    lastOperation = Get-FirstMarkerValue -Lines $stdoutLines -Prefix "CallbackStateSnapshotLastOperation="
+    hasOutputAllocator = (Get-FirstMarkerValue -Lines $stdoutLines -Prefix "CallbackStateSnapshotHasOutputAllocator=") -eq "True"
+    hasTemporaryStorageAllocator = (Get-FirstMarkerValue -Lines $stdoutLines -Prefix "CallbackStateSnapshotHasTemporaryStorageAllocator=") -eq "True"
+    hasDebugListener = (Get-FirstMarkerValue -Lines $stdoutLines -Prefix "CallbackStateSnapshotHasDebugListener=") -eq "True"
+    diagnostic = Get-FirstMarkerValue -Lines $stdoutLines -Prefix "CallbackStateSnapshotDiagnostic="
+    pointerFree = $true
+    proofBoundary = "A coherent complete or partial callback-state snapshot is package runtime diagnostic evidence. It is not callback invocation, public-package, or post-publish proof."
+  }
   negativeControl = [ordered]@{
     scenario = $DebugListenerScenario
     requested = $negativeControlRequested

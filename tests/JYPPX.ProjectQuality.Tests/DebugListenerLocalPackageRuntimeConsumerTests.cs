@@ -94,6 +94,22 @@ public sealed class DebugListenerLocalPackageRuntimeConsumerTests
         Assert.Contains("if ($negativeControlRequested -and -not $negativeControlPassed)", script, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void RuntimeConsumerValidatesCompleteOrPartialCallbackStateThroughPackages()
+    {
+        string script = ReadScript();
+
+        Assert.Contains("context.TryGetCallbackStateSnapshot(", script, StringComparison.Ordinal);
+        Assert.Contains("callbackStateComplete == callbackStateSnapshot.IsComplete", script, StringComparison.Ordinal);
+        Assert.Contains("callbackStateSnapshot.LastStatus == BridgeStatusCode.Ok", script, StringComparison.Ordinal);
+        Assert.Contains("callbackStateSnapshot.LastStatus != BridgeStatusCode.Ok", script, StringComparison.Ordinal);
+        Assert.Contains("CallbackStateSnapshotCoherent=", script, StringComparison.Ordinal);
+        Assert.Contains("$callbackStateSnapshotCoherent", script, StringComparison.Ordinal);
+        Assert.Contains("callbackStateSnapshot = [ordered]@{", script, StringComparison.Ordinal);
+        Assert.Contains("pointerFree = $true", script, StringComparison.Ordinal);
+        Assert.Contains("It is not callback invocation, public-package, or post-publish proof", script, StringComparison.Ordinal);
+    }
+
     private static string ReadScript()
     {
         return File.ReadAllText(Path.Combine(

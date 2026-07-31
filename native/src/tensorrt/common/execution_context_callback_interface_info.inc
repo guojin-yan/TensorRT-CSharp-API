@@ -68,6 +68,149 @@ static JYPPX_StatusCode execution_context_copy_borrowed_interface_info(
 
     return copy_interface_info_to_buffer(info, output_buffer, output_buffer_size, out_required_size, out_major, out_minor);
 }
+
+static void reset_execution_context_callback_interface_info_outputs(
+    char* output_buffer,
+    const size_t output_buffer_size,
+    size_t* out_required_size,
+    int32_t* out_major,
+    int32_t* out_minor) noexcept
+{
+    if (output_buffer != nullptr && output_buffer_size != 0U)
+    {
+        output_buffer[0] = '\0';
+    }
+    *out_required_size = 0;
+    *out_major = 0;
+    *out_minor = 0;
+}
+
+static JYPPX_StatusCode execution_context_copy_output_allocator_interface_info_with_seh_guard(
+    nvinfer1::IExecutionContext* context_payload,
+    const char* tensor_name,
+    char* output_buffer,
+    const size_t output_buffer_size,
+    size_t* out_required_size,
+    int32_t* out_major,
+    int32_t* out_minor)
+{
+    constexpr const char* feature_name = "execution context output allocator interface info query";
+#if defined(_MSC_VER)
+    uint32_t seh_exception_code = 0;
+    __try
+    {
+        return execution_context_copy_borrowed_interface_info(
+            context_payload->getOutputAllocator(tensor_name),
+            output_buffer,
+            output_buffer_size,
+            out_required_size,
+            out_major,
+            out_minor,
+            feature_name,
+            "Execution context output allocator is not set for the requested tensor.");
+    }
+    __except (jyppx::tensorrt::capture_vendor_seh_exception_code(&seh_exception_code, GetExceptionCode()))
+    {
+        reset_execution_context_callback_interface_info_outputs(
+            output_buffer, output_buffer_size, out_required_size, out_major, out_minor);
+        return jyppx::tensorrt::report_vendor_seh_exception(kLine, feature_name, seh_exception_code);
+    }
+#else
+    return execution_context_copy_borrowed_interface_info(
+        context_payload->getOutputAllocator(tensor_name),
+        output_buffer,
+        output_buffer_size,
+        out_required_size,
+        out_major,
+        out_minor,
+        feature_name,
+        "Execution context output allocator is not set for the requested tensor.");
+#endif
+}
+
+static JYPPX_StatusCode execution_context_copy_temporary_storage_allocator_interface_info_with_seh_guard(
+    nvinfer1::IExecutionContext* context_payload,
+    char* output_buffer,
+    const size_t output_buffer_size,
+    size_t* out_required_size,
+    int32_t* out_major,
+    int32_t* out_minor)
+{
+    constexpr const char* feature_name = "execution context temporary storage allocator interface info query";
+#if defined(_MSC_VER)
+    uint32_t seh_exception_code = 0;
+    __try
+    {
+        return execution_context_copy_borrowed_interface_info(
+            context_payload->getTemporaryStorageAllocator(),
+            output_buffer,
+            output_buffer_size,
+            out_required_size,
+            out_major,
+            out_minor,
+            feature_name,
+            "Execution context temporary storage allocator is not set.");
+    }
+    __except (jyppx::tensorrt::capture_vendor_seh_exception_code(&seh_exception_code, GetExceptionCode()))
+    {
+        reset_execution_context_callback_interface_info_outputs(
+            output_buffer, output_buffer_size, out_required_size, out_major, out_minor);
+        return jyppx::tensorrt::report_vendor_seh_exception(kLine, feature_name, seh_exception_code);
+    }
+#else
+    return execution_context_copy_borrowed_interface_info(
+        context_payload->getTemporaryStorageAllocator(),
+        output_buffer,
+        output_buffer_size,
+        out_required_size,
+        out_major,
+        out_minor,
+        feature_name,
+        "Execution context temporary storage allocator is not set.");
+#endif
+}
+
+static JYPPX_StatusCode execution_context_copy_debug_listener_interface_info_with_seh_guard(
+    nvinfer1::IExecutionContext* context_payload,
+    char* output_buffer,
+    const size_t output_buffer_size,
+    size_t* out_required_size,
+    int32_t* out_major,
+    int32_t* out_minor)
+{
+    constexpr const char* feature_name = "execution context debug listener interface info query";
+#if defined(_MSC_VER)
+    uint32_t seh_exception_code = 0;
+    __try
+    {
+        return execution_context_copy_borrowed_interface_info(
+            context_payload->getDebugListener(),
+            output_buffer,
+            output_buffer_size,
+            out_required_size,
+            out_major,
+            out_minor,
+            feature_name,
+            "Execution context debug listener is not set.");
+    }
+    __except (jyppx::tensorrt::capture_vendor_seh_exception_code(&seh_exception_code, GetExceptionCode()))
+    {
+        reset_execution_context_callback_interface_info_outputs(
+            output_buffer, output_buffer_size, out_required_size, out_major, out_minor);
+        return jyppx::tensorrt::report_vendor_seh_exception(kLine, feature_name, seh_exception_code);
+    }
+#else
+    return execution_context_copy_borrowed_interface_info(
+        context_payload->getDebugListener(),
+        output_buffer,
+        output_buffer_size,
+        out_required_size,
+        out_major,
+        out_minor,
+        feature_name,
+        "Execution context debug listener is not set.");
+#endif
+}
 #endif
 
 JYPPX_StatusCode JYPPX_TRT_EXECUTION_CONTEXT_CALLBACK_INTERFACE_INFO_API(execution_context_get_output_allocator_interface_info)(
@@ -98,15 +241,14 @@ JYPPX_StatusCode JYPPX_TRT_EXECUTION_CONTEXT_CALLBACK_INTERFACE_INFO_API(executi
 
     try
     {
-        return execution_context_copy_borrowed_interface_info(
-            context_payload->getOutputAllocator(tensor_name),
+        return execution_context_copy_output_allocator_interface_info_with_seh_guard(
+            context_payload,
+            tensor_name,
             output_buffer,
             output_buffer_size,
             out_required_size,
             out_major,
-            out_minor,
-            "execution context output allocator interface info query",
-            "Execution context output allocator is not set for the requested tensor.");
+            out_minor);
     }
     catch (const std::exception& exception)
     {
@@ -160,15 +302,13 @@ JYPPX_StatusCode JYPPX_TRT_EXECUTION_CONTEXT_CALLBACK_INTERFACE_INFO_API(executi
 
     try
     {
-        return execution_context_copy_borrowed_interface_info(
-            context_payload->getTemporaryStorageAllocator(),
+        return execution_context_copy_temporary_storage_allocator_interface_info_with_seh_guard(
+            context_payload,
             output_buffer,
             output_buffer_size,
             out_required_size,
             out_major,
-            out_minor,
-            "execution context temporary storage allocator interface info query",
-            "Execution context temporary storage allocator is not set.");
+            out_minor);
     }
     catch (const std::exception& exception)
     {
@@ -222,15 +362,13 @@ JYPPX_StatusCode JYPPX_TRT_EXECUTION_CONTEXT_CALLBACK_INTERFACE_INFO_API(executi
 
     try
     {
-        return execution_context_copy_borrowed_interface_info(
-            context_payload->getDebugListener(),
+        return execution_context_copy_debug_listener_interface_info_with_seh_guard(
+            context_payload,
             output_buffer,
             output_buffer_size,
             out_required_size,
             out_major,
-            out_minor,
-            "execution context debug listener interface info query",
-            "Execution context debug listener is not set.");
+            out_minor);
     }
     catch (const std::exception& exception)
     {

@@ -706,8 +706,10 @@ function New-WrapperSurfaceCapabilityEvidence {
       categoryMarkers = @("execution-context-callback-state-snapshot")
       requiredMarkers = @(
         "TensorRtExecutionContext.GetCallbackStateSnapshot",
+        "TensorRtExecutionContext.TryGetCallbackStateSnapshot",
         "TensorRtExecutionContext.ClearCallbackState",
         "TensorRtExecutionContextCallbackStateSnapshot",
+        "IsComplete",
         "HasOutputAllocator",
         "HasTemporaryStorageAllocator",
         "HasDebugListener",

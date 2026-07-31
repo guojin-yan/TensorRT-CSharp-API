@@ -72,6 +72,18 @@ static void set_callback_state_status(
     copy_callback_state_text(out_info->last_diagnostic, sizeof(out_info->last_diagnostic), diagnostic);
 }
 
+static void record_callback_state_failure_if_unset(
+    JYPPX_TensorRtExecutionContextCallbackStateInfo* out_info,
+    const JYPPX_StatusCode status,
+    const char* operation,
+    const char* diagnostic) noexcept
+{
+    if (out_info->last_status == static_cast<int32_t>(JYPPX_STATUS_OK))
+    {
+        set_callback_state_status(out_info, status, operation, diagnostic);
+    }
+}
+
 #if JYPPX_HAS_TENSORRT
 static JYPPX_StatusCode callback_state_exception(const std::exception& exception)
 {
@@ -178,6 +190,22 @@ static JYPPX_StatusCode clear_temporary_storage_allocator_with_state_seh_guard(
 }
 
 #if JYPPX_TENSORRT_VERSION_MAJOR_NUM >= 10
+static void reset_callback_interface_info_state(
+    JYPPX_Boolean* out_available,
+    char* kind_buffer,
+    const size_t kind_buffer_size,
+    int32_t* out_major,
+    int32_t* out_minor) noexcept
+{
+    *out_available = JYPPX_FALSE;
+    *out_major = 0;
+    *out_minor = 0;
+    if (kind_buffer_size != 0U)
+    {
+        kind_buffer[0] = '\0';
+    }
+}
+
 template <typename TObject>
 static JYPPX_StatusCode copy_callback_interface_info_to_state_with_seh_guard(
     const TObject* object,
@@ -189,13 +217,7 @@ static JYPPX_StatusCode copy_callback_interface_info_to_state_with_seh_guard(
 {
     if (object == nullptr)
     {
-        *out_available = JYPPX_FALSE;
-        *out_major = 0;
-        *out_minor = 0;
-        if (kind_buffer_size != 0U)
-        {
-            kind_buffer[0] = '\0';
-        }
+        reset_callback_interface_info_state(out_available, kind_buffer, kind_buffer_size, out_major, out_minor);
         return JYPPX_STATUS_OK;
     }
 
@@ -212,13 +234,7 @@ static JYPPX_StatusCode copy_callback_interface_info_to_state_with_seh_guard(
     }
     __except (jyppx::tensorrt::capture_vendor_seh_exception_code(&seh_exception_code, GetExceptionCode()))
     {
-        *out_available = JYPPX_FALSE;
-        *out_major = 0;
-        *out_minor = 0;
-        if (kind_buffer_size != 0U)
-        {
-            kind_buffer[0] = '\0';
-        }
+        reset_callback_interface_info_state(out_available, kind_buffer, kind_buffer_size, out_major, out_minor);
         return jyppx::tensorrt::report_vendor_seh_exception(kLine, kExecutionContextCallbackStateFeature, seh_exception_code);
     }
 #else
@@ -228,6 +244,118 @@ static JYPPX_StatusCode copy_callback_interface_info_to_state_with_seh_guard(
     *out_minor = info.minor;
     copy_callback_state_text(kind_buffer, kind_buffer_size, info.kind);
     return JYPPX_STATUS_OK;
+#endif
+}
+
+static JYPPX_StatusCode snapshot_output_allocator_interface_info_with_seh_guard(
+    nvinfer1::IExecutionContext* context_payload,
+    const char* tensor_name,
+    JYPPX_TensorRtExecutionContextCallbackStateInfo* out_info)
+{
+#if defined(_MSC_VER)
+    uint32_t seh_exception_code = 0;
+    __try
+    {
+        return copy_callback_interface_info_to_state_with_seh_guard(
+            context_payload->getOutputAllocator(tensor_name),
+            &out_info->output_allocator_interface_info_available,
+            out_info->output_allocator_interface_kind,
+            sizeof(out_info->output_allocator_interface_kind),
+            &out_info->output_allocator_interface_major,
+            &out_info->output_allocator_interface_minor);
+    }
+    __except (jyppx::tensorrt::capture_vendor_seh_exception_code(&seh_exception_code, GetExceptionCode()))
+    {
+        reset_callback_interface_info_state(
+            &out_info->output_allocator_interface_info_available,
+            out_info->output_allocator_interface_kind,
+            sizeof(out_info->output_allocator_interface_kind),
+            &out_info->output_allocator_interface_major,
+            &out_info->output_allocator_interface_minor);
+        return jyppx::tensorrt::report_vendor_seh_exception(kLine, kExecutionContextCallbackStateFeature, seh_exception_code);
+    }
+#else
+    return copy_callback_interface_info_to_state_with_seh_guard(
+        context_payload->getOutputAllocator(tensor_name),
+        &out_info->output_allocator_interface_info_available,
+        out_info->output_allocator_interface_kind,
+        sizeof(out_info->output_allocator_interface_kind),
+        &out_info->output_allocator_interface_major,
+        &out_info->output_allocator_interface_minor);
+#endif
+}
+
+static JYPPX_StatusCode snapshot_temporary_storage_allocator_interface_info_with_seh_guard(
+    nvinfer1::IExecutionContext* context_payload,
+    JYPPX_TensorRtExecutionContextCallbackStateInfo* out_info)
+{
+#if defined(_MSC_VER)
+    uint32_t seh_exception_code = 0;
+    __try
+    {
+        return copy_callback_interface_info_to_state_with_seh_guard(
+            context_payload->getTemporaryStorageAllocator(),
+            &out_info->temporary_storage_allocator_interface_info_available,
+            out_info->temporary_storage_allocator_interface_kind,
+            sizeof(out_info->temporary_storage_allocator_interface_kind),
+            &out_info->temporary_storage_allocator_interface_major,
+            &out_info->temporary_storage_allocator_interface_minor);
+    }
+    __except (jyppx::tensorrt::capture_vendor_seh_exception_code(&seh_exception_code, GetExceptionCode()))
+    {
+        reset_callback_interface_info_state(
+            &out_info->temporary_storage_allocator_interface_info_available,
+            out_info->temporary_storage_allocator_interface_kind,
+            sizeof(out_info->temporary_storage_allocator_interface_kind),
+            &out_info->temporary_storage_allocator_interface_major,
+            &out_info->temporary_storage_allocator_interface_minor);
+        return jyppx::tensorrt::report_vendor_seh_exception(kLine, kExecutionContextCallbackStateFeature, seh_exception_code);
+    }
+#else
+    return copy_callback_interface_info_to_state_with_seh_guard(
+        context_payload->getTemporaryStorageAllocator(),
+        &out_info->temporary_storage_allocator_interface_info_available,
+        out_info->temporary_storage_allocator_interface_kind,
+        sizeof(out_info->temporary_storage_allocator_interface_kind),
+        &out_info->temporary_storage_allocator_interface_major,
+        &out_info->temporary_storage_allocator_interface_minor);
+#endif
+}
+
+static JYPPX_StatusCode snapshot_debug_listener_interface_info_with_seh_guard(
+    nvinfer1::IExecutionContext* context_payload,
+    JYPPX_TensorRtExecutionContextCallbackStateInfo* out_info)
+{
+#if defined(_MSC_VER)
+    uint32_t seh_exception_code = 0;
+    __try
+    {
+        return copy_callback_interface_info_to_state_with_seh_guard(
+            context_payload->getDebugListener(),
+            &out_info->debug_listener_interface_info_available,
+            out_info->debug_listener_interface_kind,
+            sizeof(out_info->debug_listener_interface_kind),
+            &out_info->debug_listener_interface_major,
+            &out_info->debug_listener_interface_minor);
+    }
+    __except (jyppx::tensorrt::capture_vendor_seh_exception_code(&seh_exception_code, GetExceptionCode()))
+    {
+        reset_callback_interface_info_state(
+            &out_info->debug_listener_interface_info_available,
+            out_info->debug_listener_interface_kind,
+            sizeof(out_info->debug_listener_interface_kind),
+            &out_info->debug_listener_interface_major,
+            &out_info->debug_listener_interface_minor);
+        return jyppx::tensorrt::report_vendor_seh_exception(kLine, kExecutionContextCallbackStateFeature, seh_exception_code);
+    }
+#else
+    return copy_callback_interface_info_to_state_with_seh_guard(
+        context_payload->getDebugListener(),
+        &out_info->debug_listener_interface_info_available,
+        out_info->debug_listener_interface_kind,
+        sizeof(out_info->debug_listener_interface_kind),
+        &out_info->debug_listener_interface_major,
+        &out_info->debug_listener_interface_minor);
 #endif
 }
 
@@ -283,59 +411,135 @@ static JYPPX_StatusCode populate_callback_state_snapshot(
     const char* tensor_name,
     JYPPX_TensorRtExecutionContextCallbackStateInfo* out_info)
 {
-    auto status = snapshot_output_allocator_presence_with_seh_guard(context_payload, tensor_name, out_info);
+    JYPPX_StatusCode status = JYPPX_STATUS_OK;
+    try
+    {
+        status = snapshot_output_allocator_presence_with_seh_guard(context_payload, tensor_name, out_info);
+    }
+    catch (const std::exception& exception)
+    {
+        status = callback_state_exception(exception);
+    }
+    catch (...)
+    {
+        status = callback_state_unknown_exception();
+    }
     if (status != JYPPX_STATUS_OK)
     {
+        set_callback_state_status(
+            out_info,
+            status,
+            "snapshot-output-allocator-presence",
+            "Output allocator presence query failed; the remaining callback snapshot fields were not queried.");
         return status;
     }
 
-    status = snapshot_temporary_storage_allocator_presence_with_seh_guard(context_payload, out_info);
+    try
+    {
+        status = snapshot_temporary_storage_allocator_presence_with_seh_guard(context_payload, out_info);
+    }
+    catch (const std::exception& exception)
+    {
+        status = callback_state_exception(exception);
+    }
+    catch (...)
+    {
+        status = callback_state_unknown_exception();
+    }
     if (status != JYPPX_STATUS_OK)
     {
+        set_callback_state_status(
+            out_info,
+            status,
+            "snapshot-temporary-storage-allocator-presence",
+            "Temporary-storage allocator presence query failed; the remaining callback snapshot fields were not queried.");
         return status;
     }
 
 #if JYPPX_TENSORRT_VERSION_MAJOR_NUM >= 10
-    status = snapshot_debug_listener_presence_with_seh_guard(context_payload, out_info);
+    try
+    {
+        status = snapshot_debug_listener_presence_with_seh_guard(context_payload, out_info);
+    }
+    catch (const std::exception& exception)
+    {
+        status = callback_state_exception(exception);
+    }
+    catch (...)
+    {
+        status = callback_state_unknown_exception();
+    }
     if (status != JYPPX_STATUS_OK)
     {
+        set_callback_state_status(
+            out_info,
+            status,
+            "snapshot-debug-listener-presence",
+            "Debug listener presence query failed; callback interface metadata was not queried.");
         return status;
     }
 
-    status = copy_callback_interface_info_to_state_with_seh_guard(
-        context_payload->getOutputAllocator(tensor_name),
-        &out_info->output_allocator_interface_info_available,
-        out_info->output_allocator_interface_kind,
-        sizeof(out_info->output_allocator_interface_kind),
-        &out_info->output_allocator_interface_major,
-        &out_info->output_allocator_interface_minor);
+    try
+    {
+        status = snapshot_output_allocator_interface_info_with_seh_guard(context_payload, tensor_name, out_info);
+    }
+    catch (const std::exception& exception)
+    {
+        status = callback_state_exception(exception);
+    }
+    catch (...)
+    {
+        status = callback_state_unknown_exception();
+    }
     if (status != JYPPX_STATUS_OK)
     {
-        return status;
+        record_callback_state_failure_if_unset(
+            out_info,
+            status,
+            "snapshot-output-allocator-interface-info-partial",
+            "Output allocator interface metadata was unavailable; presence state and other callback fields remain valid.");
     }
 
-    status = copy_callback_interface_info_to_state_with_seh_guard(
-        context_payload->getTemporaryStorageAllocator(),
-        &out_info->temporary_storage_allocator_interface_info_available,
-        out_info->temporary_storage_allocator_interface_kind,
-        sizeof(out_info->temporary_storage_allocator_interface_kind),
-        &out_info->temporary_storage_allocator_interface_major,
-        &out_info->temporary_storage_allocator_interface_minor);
+    try
+    {
+        status = snapshot_temporary_storage_allocator_interface_info_with_seh_guard(context_payload, out_info);
+    }
+    catch (const std::exception& exception)
+    {
+        status = callback_state_exception(exception);
+    }
+    catch (...)
+    {
+        status = callback_state_unknown_exception();
+    }
     if (status != JYPPX_STATUS_OK)
     {
-        return status;
+        record_callback_state_failure_if_unset(
+            out_info,
+            status,
+            "snapshot-temporary-storage-allocator-interface-info-partial",
+            "Temporary-storage allocator interface metadata was unavailable; presence state and other callback fields remain valid.");
     }
 
-    status = copy_callback_interface_info_to_state_with_seh_guard(
-        context_payload->getDebugListener(),
-        &out_info->debug_listener_interface_info_available,
-        out_info->debug_listener_interface_kind,
-        sizeof(out_info->debug_listener_interface_kind),
-        &out_info->debug_listener_interface_major,
-        &out_info->debug_listener_interface_minor);
+    try
+    {
+        status = snapshot_debug_listener_interface_info_with_seh_guard(context_payload, out_info);
+    }
+    catch (const std::exception& exception)
+    {
+        status = callback_state_exception(exception);
+    }
+    catch (...)
+    {
+        status = callback_state_unknown_exception();
+    }
     if (status != JYPPX_STATUS_OK)
     {
-        return status;
+        record_callback_state_failure_if_unset(
+            out_info,
+            status,
+            "snapshot-debug-listener-interface-info-partial",
+            "Debug listener interface metadata was unavailable; presence state and other callback fields remain valid.");
     }
 #else
     out_info->debug_listener_clear_supported = JYPPX_FALSE;
@@ -381,11 +585,14 @@ JYPPX_StatusCode JYPPX_TRT_EXECUTION_CONTEXT_CALLBACK_STATE_API(execution_contex
             return status;
         }
 
-        set_callback_state_status(
-            out_info,
-            JYPPX_STATUS_OK,
-            "snapshot",
-            "execution-context-callback-state-snapshot copied callback boundary state without exposing borrowed pointers.");
+        if (out_info->last_status == static_cast<int32_t>(JYPPX_STATUS_OK))
+        {
+            set_callback_state_status(
+                out_info,
+                JYPPX_STATUS_OK,
+                "snapshot",
+                "execution-context-callback-state-snapshot copied callback boundary state without exposing borrowed pointers.");
+        }
         return JYPPX_STATUS_OK;
     }
     catch (const std::exception& exception)
@@ -441,12 +648,14 @@ JYPPX_StatusCode JYPPX_TRT_EXECUTION_CONTEXT_CALLBACK_STATE_API(execution_contex
         status = clear_output_allocator_with_state_seh_guard(context_payload, tensor_name, out_info);
         if (status != JYPPX_STATUS_OK)
         {
+            set_callback_state_status(out_info, status, "clear-output-allocator", "Output allocator clear failed.");
             return status;
         }
 
         status = clear_temporary_storage_allocator_with_state_seh_guard(context_payload, out_info);
         if (status != JYPPX_STATUS_OK)
         {
+            set_callback_state_status(out_info, status, "clear-temporary-storage-allocator", "Temporary-storage allocator clear failed.");
             return status;
         }
 
@@ -454,6 +663,7 @@ JYPPX_StatusCode JYPPX_TRT_EXECUTION_CONTEXT_CALLBACK_STATE_API(execution_contex
         status = clear_debug_listener_with_state_seh_guard(context_payload, out_info);
         if (status != JYPPX_STATUS_OK)
         {
+            set_callback_state_status(out_info, status, "clear-debug-listener", "Debug listener clear failed.");
             return status;
         }
 #else
@@ -461,11 +671,14 @@ JYPPX_StatusCode JYPPX_TRT_EXECUTION_CONTEXT_CALLBACK_STATE_API(execution_contex
         out_info->debug_listener_cleared = JYPPX_FALSE;
 #endif
 
-        set_callback_state_status(
-            out_info,
-            JYPPX_STATUS_OK,
-            "clear",
-            "execution-context-callback-state-snapshot cleared supported callback attachments and copied post-clear state.");
+        if (out_info->last_status == static_cast<int32_t>(JYPPX_STATUS_OK))
+        {
+            set_callback_state_status(
+                out_info,
+                JYPPX_STATUS_OK,
+                "clear",
+                "execution-context-callback-state-snapshot cleared supported callback attachments and copied post-clear state.");
+        }
         return JYPPX_STATUS_OK;
     }
     catch (const std::exception& exception)

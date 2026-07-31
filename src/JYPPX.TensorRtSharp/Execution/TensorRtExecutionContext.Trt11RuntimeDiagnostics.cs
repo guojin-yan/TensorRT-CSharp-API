@@ -280,6 +280,56 @@ public sealed partial class TensorRtExecutionContext
     }
 
     /// <summary>
+    /// Tries to get a copied callback-state snapshot, including partial state when an individual native query fails.
+    /// 尝试获取回调状态副本；单个原生查询失败时仍返回已经复制出的 partial state。
+    /// </summary>
+    /// <param name="outputTensorName">The output tensor name used for output allocator queries. / 用于 output allocator 查询的输出 tensor 名称。</param>
+    /// <param name="snapshot">The complete or partial pointer-free snapshot. / 完整或部分可用的 pointer-free 快照。</param>
+    /// <returns><see langword="true"/> only when every snapshot phase completed successfully. / 仅当所有快照阶段均成功时返回 <see langword="true"/>。</returns>
+    public bool TryGetCallbackStateSnapshot(
+        string outputTensorName,
+        out TensorRtExecutionContextCallbackStateSnapshot snapshot)
+    {
+        return TryGetCallbackStateSnapshot(outputTensorName, out snapshot, out _);
+    }
+
+    /// <summary>
+    /// Tries to get a copied callback-state snapshot, including partial state and a failure diagnostic.
+    /// 尝试获取回调状态副本，并在失败时保留 partial state 与诊断信息。
+    /// </summary>
+    /// <param name="outputTensorName">The output tensor name used for output allocator queries. / 用于 output allocator 查询的输出 tensor 名称。</param>
+    /// <param name="snapshot">The complete or partial pointer-free snapshot. / 完整或部分可用的 pointer-free 快照。</param>
+    /// <param name="diagnostic">A copied native diagnostic for the first failed phase. / 首个失败阶段的原生诊断副本。</param>
+    /// <returns><see langword="true"/> only when every snapshot phase completed successfully. / 仅当所有快照阶段均成功时返回 <see langword="true"/>。</returns>
+    /// <remarks>
+    /// A <see langword="false"/> result does not invalidate fields collected before or after an optional interface-info
+    /// failure. Check <see cref="TensorRtExecutionContextCallbackStateSnapshot.LastOperation"/> and
+    /// <see cref="TensorRtExecutionContextCallbackStateSnapshot.LastStatus"/> before consuming partial metadata.
+    /// 返回 <see langword="false"/> 不会使可选 interface-info 失败前后已采集的字段失效；使用 partial metadata 前应检查
+    /// <see cref="TensorRtExecutionContextCallbackStateSnapshot.LastOperation"/> 与
+    /// <see cref="TensorRtExecutionContextCallbackStateSnapshot.LastStatus"/>。
+    /// </remarks>
+    public bool TryGetCallbackStateSnapshot(
+        string outputTensorName,
+        out TensorRtExecutionContextCallbackStateSnapshot snapshot,
+        out string diagnostic)
+    {
+        bool complete = NativeBridgeApi.TryGetExecutionContextCallbackStateSnapshot(
+            Line,
+            _handle,
+            outputTensorName,
+            out NativeTensorRtExecutionContextCallbackStateInfo info,
+            out diagnostic);
+        snapshot = CreateCallbackStateSnapshot(info);
+        if (string.IsNullOrEmpty(diagnostic))
+        {
+            diagnostic = snapshot.Diagnostic;
+        }
+
+        return complete;
+    }
+
+    /// <summary>
     /// Gets a pointer-free runtime diagnostic snapshot for one output tensor.
     /// 获取单个 output tensor 对应的 pointer-free 运行时诊断快照。
     /// </summary>

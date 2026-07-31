@@ -89,6 +89,17 @@ flowchart LR
 
 这个 summary 的作用是减少 smoke 与 package consumer 反复读取多个低层方法的成本：它只读现有 `TryGetOutputAllocatorInterfaceInfo`、`TryGetTemporaryStorageAllocatorInterfaceInfo`、`TryGetDebugListenerInterfaceInfo` 和 `GetCallbackStateSnapshot` 的 copy-out 结果。它不会暴露或拥有 borrowed pointer，不会执行 callback invocation，也不能作为真实 TensorRT callback runtime proof。
 
+`GetCallbackStateSnapshot` 对 presence 等核心阶段继续 fail-closed；某一个可选 interface-info getter 或
+`getInterfaceInfo()` 被 SEH guard 拒绝时，则返回保留已复制字段的 partial snapshot。调用方需要区分两种消费方式：
+
+- `GetCallbackStateSnapshot` 返回完整或 partial snapshot，检查 `IsComplete`、`LastStatus` 与 `LastOperation`；
+- `TryGetCallbackStateSnapshot` 在 partial 时返回 false，同时通过 out 参数返回同一个 pointer-free snapshot 和诊断。
+
+TRT10/TRT11 的真实 getter matrix 已覆盖 output allocator、temporary-storage allocator、debug listener 的 presence、
+三项 interface-info、aggregate snapshot 与 Try aggregate。vendor 默认 debug listener 的 interface metadata 可能触发
+`0xC0000005`，因此 `HasDebugListener=True` 不能推导出 `DebugListenerInterfaceInfoAvailable=True`。旧
+`JYPPX_TensorRtExecutionContextCallbackStateInfo` 布局保持不变；partial phase 复用既有 last-status/operation/diagnostic 字段。
+
 ## Callback Owner Closure Matrix
 
 `TensorRtCallbackOwnerClosureMatrix` / `TensorRtCallbackOwnerClosureMatrixResult` 是比 managed readiness 更细的一层 owner 闭环矩阵。它把 `GpuAllocator`、`GpuAsyncAllocator`、`OutputAllocator`、`DebugListener` 和 `StreamReaderWriter` 放到同一张 pointer-free 表中，逐列记录 managed owner state、SafeHandle/GCHandle keep-alive、native noncopyable owner storage、create/destroy 对称性、attach/detach/clear、detach-before-release、no-throw destructor、no-throw vtable、exception-to-status、in-flight accounting、borrowed pointer escape blocker、opt-in runtime smoke readiness 和 package-consumer proof requirement。

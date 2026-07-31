@@ -14,6 +14,7 @@ internal static class Program
         string runtimePackageKey = JYPPX.SampleSupport.SampleCommandLine.GetStringArgument(args, "--runtime-package-key", string.Empty);
         bool dependencyProbeOnly = JYPPX.SampleSupport.SampleCommandLine.HasSwitch(args, "--dependency-probe-only");
         bool debugListenerRuntimeSmokeOnly = JYPPX.SampleSupport.SampleCommandLine.HasSwitch(args, "--debug-listener-runtime-smoke-only");
+        string callbackStateGetterProbe = JYPPX.SampleSupport.SampleCommandLine.GetStringArgument(args, "--callback-state-getter-probe", string.Empty);
         bool enableDebugListenerRuntimeSmoke =
             debugListenerRuntimeSmokeOnly ||
             JYPPX.SampleSupport.SampleCommandLine.HasSwitch(args, "--enable-debug-listener-runtime-smoke");
@@ -60,6 +61,22 @@ internal static class Program
             return;
         }
 
+        if (!string.IsNullOrWhiteSpace(callbackStateGetterProbe))
+        {
+            try
+            {
+                RunCallbackStateGetterProbe(line.Value, callbackStateGetterProbe);
+                Console.WriteLine($"CallbackStateGetterProbe={callbackStateGetterProbe} Completed=True");
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine($"CallbackStateGetterProbe={callbackStateGetterProbe} Completed=False Exception={exception.GetType().Name}:{exception.Message}");
+                Environment.ExitCode = 3;
+            }
+
+            return;
+        }
+
         if (debugListenerRuntimeSmokeOnly)
         {
             try
@@ -92,6 +109,93 @@ internal static class Program
         }
 
         Console.WriteLine("CallbackAllocatorSafeControlsSmokeRunner Passed=True");
+    }
+
+    private static void RunCallbackStateGetterProbe(TensorRtApiLine line, string probe)
+    {
+        if (line != TensorRtApiLine.TensorRt10 && line != TensorRtApiLine.TensorRt11)
+        {
+            throw new InvalidOperationException("Callback-state getter probes require TensorRT 10 or TensorRT 11.");
+        }
+
+        using TensorRtLogger logger = new TensorRtLogger(line);
+        using TensorRtRuntime runtime = new TensorRtRuntime(logger);
+        using TensorRtBuilder builder = new TensorRtBuilder(logger);
+        using TensorRtBuilderConfig config = builder.CreateBuilderConfig();
+        config.SetMemoryPoolLimit(TensorRtMemoryPoolType.Workspace, 32UL * 1024UL * 1024UL);
+        config.SetEngineCapability(TensorRtEngineCapability.Standard);
+        config.SetHardwareCompatibilityLevel(TensorRtHardwareCompatibilityLevel.None);
+
+        using TensorRtNetworkDefinition network = builder.CreateNetwork(TensorRtNetworkDefinitionCreationFlags.ExplicitBatch);
+        using TensorRtTensor input = network.AddInput("callback_probe_input", TensorRtDataType.Float, new TensorRtDims(new[] { 1, 4 }));
+        using TensorRtLayer identity = network.AddIdentity(input);
+        using TensorRtTensor output = identity.GetOutput(0);
+        output.Name = "callback_probe_output";
+        network.MarkOutput(output);
+
+        using TensorRtHostMemory hostMemory = builder.BuildSerializedNetwork(network, config);
+        using TensorRtEngine engine = runtime.Deserialize(hostMemory);
+        using TensorRtExecutionContext context = engine.CreateExecutionContext();
+
+        Console.WriteLine($"CallbackStateGetterProbe={probe} Started=True TensorRtLine={(int)line}");
+        switch (probe.ToLowerInvariant())
+        {
+            case "has-output-allocator":
+                Console.WriteLine($"CallbackStateGetterProbeValue={context.HasOutputAllocator("callback_probe_output")}");
+                break;
+            case "has-temporary-storage-allocator":
+                Console.WriteLine($"CallbackStateGetterProbeValue={context.HasTemporaryStorageAllocator}");
+                break;
+            case "has-debug-listener":
+                Console.WriteLine($"CallbackStateGetterProbeValue={context.HasDebugListener}");
+                break;
+            case "output-allocator-interface-info":
+                Console.WriteLine($"CallbackStateGetterProbeValue={ProbeOutputAllocatorInterfaceInfo(context)}");
+                break;
+            case "temporary-storage-allocator-interface-info":
+                Console.WriteLine($"CallbackStateGetterProbeValue={ProbeTemporaryStorageAllocatorInterfaceInfo(context)}");
+                break;
+            case "debug-listener-interface-info":
+                Console.WriteLine($"CallbackStateGetterProbeValue={ProbeDebugListenerInterfaceInfo(context)}");
+                break;
+            case "callback-state-snapshot":
+                Console.WriteLine($"CallbackStateGetterProbeValue={context.GetCallbackStateSnapshot("callback_probe_output")}");
+                break;
+            case "try-callback-state-snapshot":
+                bool complete = context.TryGetCallbackStateSnapshot(
+                    "callback_probe_output",
+                    out TensorRtExecutionContextCallbackStateSnapshot snapshot,
+                    out string diagnostic);
+                Console.WriteLine($"CallbackStateGetterProbeValue=Complete={complete};Snapshot={snapshot};Diagnostic={SanitizeSmokeValue(diagnostic)}");
+                break;
+            default:
+                throw new ArgumentException($"Unknown callback-state getter probe '{probe}'.", nameof(probe));
+        }
+    }
+
+    private static string ProbeOutputAllocatorInterfaceInfo(TensorRtExecutionContext context)
+    {
+        bool available = context.TryGetOutputAllocatorInterfaceInfo(
+            "callback_probe_output",
+            out TensorRtInterfaceInfo info,
+            out string diagnostic);
+        return $"Available={available};Info={FormatInterfaceInfo(info, diagnostic)}";
+    }
+
+    private static string ProbeTemporaryStorageAllocatorInterfaceInfo(TensorRtExecutionContext context)
+    {
+        bool available = context.TryGetTemporaryStorageAllocatorInterfaceInfo(
+            out TensorRtInterfaceInfo info,
+            out string diagnostic);
+        return $"Available={available};Info={FormatInterfaceInfo(info, diagnostic)}";
+    }
+
+    private static string ProbeDebugListenerInterfaceInfo(TensorRtExecutionContext context)
+    {
+        bool available = context.TryGetDebugListenerInterfaceInfo(
+            out TensorRtInterfaceInfo info,
+            out string diagnostic);
+        return $"Available={available};Info={FormatInterfaceInfo(info, diagnostic)}";
     }
 
     private static void RunRealDebugListenerRuntimeSmoke(TensorRtApiLine line, string runtimePackageKey)
@@ -430,7 +534,7 @@ internal static class Program
         Console.WriteLine($"SafeControlSurfaceLine={(int)line}");
         Console.WriteLine("SafeControlSurface=allocator-debug-listener-safe-controls;callback-interface-info-safe-controls;execution-context-callback-state-snapshot;execution-context-callback-allocator-safe-control-summary;error-recorder-diagnostics-design-gate;dimension-expression-snapshot-design-gate;calibrator-metadata-design-gate;runtime-deserialization-boundary-precheck;runtime-deserialization-dependency-diagnostics;allocator-owner-dry-run-diagnostics;allocator-owner-native-dry-run-controls;allocator-owner-state-ledger-dry-run-controls;allocator-owner-internal-runtime-prototype;allocator-owner-ledger-safety-gate;output-allocator-internal-runtime-gate;output-allocator-callback-owner-design;output-allocator-attach-detach-design-gate;output-buffer-ownership-safety-gate;output-allocator-runtime-proof-precheck;debug-listener-callback-owner-design;debug-listener-attach-detach-design-gate;debug-listener-borrowed-tensor-safety-gate;debug-listener-attach-vtable-safety-gate;debug-listener-native-attach-nothrow-preflight;debug-listener-native-owner-address-design-gate;debug-listener-native-nothrow-vtable-design-gate;debug-listener-native-attach-entry-design-gate;debug-listener-native-detach-before-release-design-gate;debug-listener-native-owner-lifecycle-dry-run;debug-listener-native-attach-entry-runtime-scaffold;debug-listener-native-attach-entry-minimal-safety;debug-listener-native-owner-stable-identity;debug-listener-native-owner-noncopyable-storage;debug-listener-native-nothrow-destructor;debug-listener-native-owner-lifecycle-gate;debug-listener-native-attach-bridge-shape-gate;debug-listener-exception-status-mapping-gate;debug-listener-inflight-accounting-gate;debug-listener-native-nothrow-vtable-scaffold-gate;debug-listener-nothrow-vtable-callback-stub;debug-listener-borrowed-debug-tensor-metadata-runtime-gate;debug-listener-native-vtable-install-preflight;debug-listener-native-owner-vtable-install-experiment;debug-listener-runtime-proof-precheck;debug-listener-runtime-proof-attempt-preflight;debug-listener-real-non-null-attach-runtime-smoke;debug-listener-process-debug-tensor-callback-trampoline;callback-trampoline-shape;debug-listener-real-callback-runtime-proof;debug-listener-callback-proof-gap-report;callback-owner-closure-matrix;real-callback-runtime-blocked;attempted-no-invocation");
         Console.WriteLine("CallbackInterfaceInfoSafeControls=TryGetOutputAllocatorInterfaceInfo;TryGetTemporaryStorageAllocatorInterfaceInfo;TryGetDebugListenerInterfaceInfo");
-        Console.WriteLine("ExecutionContextCallbackStateSnapshot=GetCallbackStateSnapshot;ClearCallbackState;TensorRtExecutionContextCallbackStateSnapshot");
+        Console.WriteLine("ExecutionContextCallbackStateSnapshot=GetCallbackStateSnapshot;ClearCallbackState;TensorRtExecutionContextCallbackStateSnapshot;TryGetCallbackStateSnapshot;partial-state-diagnostics");
         Console.WriteLine("CallbackAllocatorSafeControlSummary=GetCallbackAllocatorSafeControlSummary;TensorRtExecutionContextCallbackAllocatorSafeControlSummary;copied-metadata-only;pointer-free;not-runtime-proof");
         Console.WriteLine("ExecutionContextRuntimeDiagnosticSnapshot=GetRuntimeDiagnosticSnapshot;TensorRtExecutionContextRuntimeDiagnosticSnapshot;pointer-free");
         Console.WriteLine("ExecutionContextRuntimeDiagnosticSummary=ToSummary;TensorRtExecutionContextRuntimeDiagnosticSummary;pointer-free;not-runtime-proof");

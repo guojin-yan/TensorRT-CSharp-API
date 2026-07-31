@@ -256,14 +256,15 @@ public sealed class CallbackAllocatorBoundaryTests
         Assert.Contains("full-package-consumer-report", readiness);
         Assert.Contains("missingSmokeMarkers", readiness);
 
-        Assert.Contains("realCallbackTrampolineGate", readme);
-        Assert.Contains("real-callback-trampoline-gate", readme);
-        Assert.Contains("realCallbackRuntimeEvidenceSchema", readme);
-        Assert.Contains("realCallbackRuntimeEvidence", readme);
-        Assert.Contains("EvidenceKind=real-callback-runtime", readme);
-        Assert.Contains("design gate only", readme);
-        Assert.Contains("not proof that TensorRT callbacks are enabled", readme);
-        Assert.Contains("real-callback-runtime", readme);
+        Assert.Contains("Only project-owned native bridge packages are active", readme);
+        Assert.Contains("CUDA, cuDNN, TensorRT, NVRTC", readme);
+        Assert.Contains("are never included", readme);
+        Assert.Contains("Test-BridgePackageRuntimeConsumer.ps1", readme);
+        Assert.Contains("real DebugListener attach/invoke/detach cycle", readme);
+        Assert.Contains("source-tree", readme);
+        Assert.Contains("local-package", readme);
+        Assert.Contains("public-package", readme);
+        Assert.Contains("post-publish", readme);
         Assert.Contains("RealCallbackRuntime=True", packageConsumer);
         Assert.Contains("SmokeResult=passed", packageConsumer);
         Assert.Contains("isRealCallbackRuntimeProof=true", packageConsumer);
@@ -461,7 +462,9 @@ public sealed class CallbackAllocatorBoundaryTests
         Assert.Contains("output-allocator-runtime-gate.md", docsToc);
         Assert.Contains("output-allocator-internal-runtime-gate", trampolineGate);
         Assert.Contains("output-allocator-internal-runtime-gate", schema);
-        Assert.Contains("outputAllocatorInternalRuntimeGate", runtimeSplitReadme);
+        Assert.Contains("Only project-owned native bridge packages are active", runtimeSplitReadme);
+        Assert.Contains("Test-BridgePackageRuntimeConsumer.ps1", runtimeSplitReadme);
+        Assert.Contains("real DebugListener attach/invoke/detach cycle", runtimeSplitReadme);
         Assert.Contains("output-allocator-internal-runtime-gate", smokeReadme);
 
         Assert.Contains("\"IOutputAllocator\",\"notifyShape\",\"IOutputAllocator::notifyShape\",\"other\",\"deferred-only\"", comparison);
@@ -1125,6 +1128,7 @@ public sealed class CallbackAllocatorBoundaryTests
         string header11 = ReadSource("native", "include", "jyppx", "tensorrt", "trt11.h");
         string types = ReadSource("native", "include", "jyppx", "tensorrt", "types.h");
         string nativeSource = ReadSource("native", "src", "tensorrt", "common", "execution_context_callback_state_snapshot.inc");
+        string callbackInterfaceNativeSource = ReadSource("native", "src", "tensorrt", "common", "execution_context_callback_interface_info.inc");
         string trt8Api = ReadSource("native", "src", "tensorrt", "v8", "api.cpp");
         string trt10Api = ReadSource("native", "src", "tensorrt", "v10", "api.cpp");
         string trt11Api = ReadSource("native", "src", "tensorrt", "v11", "api.cpp");
@@ -1170,11 +1174,23 @@ public sealed class CallbackAllocatorBoundaryTests
         Assert.Contains("context_payload->setTemporaryStorageAllocator(nullptr)", nativeSource);
         Assert.Contains("context_payload->setDebugListener(nullptr)", nativeSource);
         Assert.Contains("copy_callback_interface_info_to_state_with_seh_guard", nativeSource);
+        Assert.Contains("snapshot_output_allocator_interface_info_with_seh_guard", nativeSource);
+        Assert.Contains("snapshot_temporary_storage_allocator_interface_info_with_seh_guard", nativeSource);
+        Assert.Contains("snapshot_debug_listener_interface_info_with_seh_guard", nativeSource);
+        Assert.Contains("record_callback_state_failure_if_unset", nativeSource);
+        Assert.Contains("snapshot-debug-listener-interface-info-partial", nativeSource);
+        Assert.Contains("presence state and other callback fields remain valid", nativeSource);
         Assert.Contains("TensorRT 8 callback state snapshot does not include debug listener", nativeSource);
         Assert.DoesNotContain("reallocateOutput", nativeSource);
         Assert.DoesNotContain("notifyShape", nativeSource);
         Assert.DoesNotContain("processDebugTensor", nativeSource);
         Assert.DoesNotContain("reinterpret_cast<uintptr_t>", nativeSource);
+
+        Assert.Contains("execution_context_copy_output_allocator_interface_info_with_seh_guard", callbackInterfaceNativeSource);
+        Assert.Contains("execution_context_copy_temporary_storage_allocator_interface_info_with_seh_guard", callbackInterfaceNativeSource);
+        Assert.Contains("execution_context_copy_debug_listener_interface_info_with_seh_guard", callbackInterfaceNativeSource);
+        Assert.Contains("reset_execution_context_callback_interface_info_outputs", callbackInterfaceNativeSource);
+        Assert.Contains("__except (jyppx::tensorrt::capture_vendor_seh_exception_code", callbackInterfaceNativeSource);
 
         Assert.Contains("#include \"../common/execution_context_callback_state_snapshot.inc\"", trt8Api);
         Assert.Contains("#include \"../common/execution_context_callback_state_snapshot.inc\"", trt10Api);
@@ -1186,9 +1202,14 @@ public sealed class CallbackAllocatorBoundaryTests
         Assert.Contains("NativeMethodsTensorRt.jyppx_trt8_execution_context_clear_callback_state", interop);
         Assert.Contains("NativeMethodsTensorRt.jyppx_trt10_execution_context_clear_callback_state", interop);
         Assert.Contains("NativeMethodsTensorRt.jyppx_trt11_execution_context_clear_callback_state", interop);
+        Assert.Contains("public static bool TryGetExecutionContextCallbackStateSnapshot", interop);
+        Assert.Contains("InvokeGetExecutionContextCallbackStateSnapshot", interop);
+        Assert.Contains("info.LastStatus == (int)BridgeStatusCode.Ok", interop);
         Assert.Contains("NativeTensorRtExecutionContextCallbackStateInfo", nativeStructs);
 
         Assert.Contains("public TensorRtExecutionContextCallbackStateSnapshot GetCallbackStateSnapshot", wrapper);
+        Assert.Contains("public bool TryGetCallbackStateSnapshot", wrapper);
+        Assert.Contains("NativeBridgeApi.TryGetExecutionContextCallbackStateSnapshot", wrapper);
         Assert.Contains("public TensorRtExecutionContextCallbackStateSnapshot ClearCallbackState", wrapper);
         Assert.Contains("CreateCallbackStateSnapshot", wrapper);
         Assert.Contains("BridgeInfoMapper.ReadFixedUtf8(info.LastDiagnostic)", wrapper);
@@ -1197,6 +1218,7 @@ public sealed class CallbackAllocatorBoundaryTests
         Assert.Contains("public bool OutputAllocatorInterfaceInfoAvailable", snapshotWrapper);
         Assert.Contains("public bool DebugListenerClearSupported", snapshotWrapper);
         Assert.Contains("public BridgeStatusCode LastStatus", snapshotWrapper);
+        Assert.Contains("public bool IsComplete => LastStatus == BridgeStatusCode.Ok", snapshotWrapper);
         Assert.Contains("public string Diagnostic", snapshotWrapper);
         Assert.DoesNotContain("public IntPtr", snapshotWrapper + wrapper);
         Assert.DoesNotContain("public nint", snapshotWrapper + wrapper);
@@ -1204,6 +1226,9 @@ public sealed class CallbackAllocatorBoundaryTests
         Assert.Contains("ExecutionContextCallbackStateSnapshot=GetCallbackStateSnapshot;ClearCallbackState;TensorRtExecutionContextCallbackStateSnapshot", smokeProgram);
         Assert.Contains("context.GetCallbackStateSnapshot(outputTensorName)", smokeProgram);
         Assert.Contains("context.ClearCallbackState(outputTensorName)", smokeProgram);
+        Assert.Contains("--callback-state-getter-probe", smokeProgram);
+        Assert.Contains("try-callback-state-snapshot", smokeProgram);
+        Assert.Contains("partial-state-diagnostics", smokeProgram);
         Assert.Contains("execution-context-callback-state-snapshot", bridgeConsumer);
         Assert.Contains("hasExecutionContextCallbackStateSnapshot", readiness);
 

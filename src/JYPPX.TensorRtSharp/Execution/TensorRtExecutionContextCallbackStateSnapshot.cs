@@ -153,6 +153,12 @@ public sealed class TensorRtExecutionContextCallbackStateSnapshot
     public BridgeStatusCode LastStatus { get; }
 
     /// <summary>
+    /// Gets whether every native snapshot phase completed successfully.
+    /// 获取所有原生快照阶段是否都已成功完成。
+    /// </summary>
+    public bool IsComplete => LastStatus == BridgeStatusCode.Ok;
+
+    /// <summary>
     /// Gets the last native operation label copied into the snapshot.
     /// 获取复制到快照中的最后一个原生操作标签。
     /// </summary>

@@ -123,9 +123,15 @@ failure、LastStatus、handler outcome、in-flight 与 detach marker。负例通
 `BorrowedPointerExposed=False`。native owner 的 drain wait 已用同一状态锁同步计数归零；managed context 在 native
 context handle 销毁后才解除 owner borrow，嵌套 managed callback 使用 depth 保护，避免 bool 提前复位。
 
-TRT11.0/CUDA12.9 也通过同一 owner 路径，得到相同的一次 invocation、零 failure/in-flight 与一次 detach。TRT11 使用
-`--debug-listener-runtime-smoke-only`，避免旧综合 execution-context callback-state snapshot 的独立 SEH 诊断提前返回；
-该模式明确输出 `Mode=DebugListenerRuntimeSmokeOnly`，不能用于声称旧综合 safe controls 已通过。
+TRT11.0/CUDA12.9 也通过同一 owner 路径，得到相同的一次 invocation、零 failure/in-flight 与一次 detach。
+后续 getter matrix 在 TRT10.11 与 TRT11.0 都定位到 vendor 默认 debug listener 的 `getInterfaceInfo()` 可能触发
+`0xC0000005`；output allocator、temporary-storage allocator 与三项 presence getter 并不是本次首个失败阶段。
+native 现已把 borrowed getter 求值和 `getInterfaceInfo()` 一并放入 SEH guard，并在不扩展旧 caller-allocated struct
+的前提下用 `last_status`、`last_operation`、`last_diagnostic` 返回 partial phase。`GetCallbackStateSnapshot` 会保留已复制
+字段，`TryGetCallbackStateSnapshot` 对 partial 返回 false；TRT10/TRT11 的 phase 均为
+`snapshot-debug-listener-interface-info-partial`。TRT11 综合 safe controls 随后通过，且同一进程中的真实 callback 仍得到
+invocation=1、failure/in-flight=0、detach=1。`--debug-listener-runtime-smoke-only` 仍可用于单独隔离 owner 路径，但不再是
+绕开 callback-state snapshot 异常的必要条件。
 
 ## Smoke And Readiness
 

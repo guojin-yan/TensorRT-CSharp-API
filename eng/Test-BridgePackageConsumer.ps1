@@ -1359,6 +1359,15 @@ static class HighLevelWrapperSurfaceProbe
             };
         Func<TensorRtExecutionContext, string, TensorRtExecutionContextCallbackStateSnapshot> contextCallbackStateSnapshot =
             static (context, tensorName) => context.GetCallbackStateSnapshot(tensorName);
+        Func<TensorRtExecutionContext, string, (bool complete, TensorRtExecutionContextCallbackStateSnapshot snapshot, string diagnostic)> contextTryCallbackStateSnapshot =
+            static (context, tensorName) =>
+            {
+                bool complete = context.TryGetCallbackStateSnapshot(
+                    tensorName,
+                    out TensorRtExecutionContextCallbackStateSnapshot snapshot,
+                    out string diagnostic);
+                return (complete, snapshot, diagnostic);
+            };
         Func<TensorRtExecutionContext, string, TensorRtExecutionContextCallbackStateSnapshot> contextClearCallbackState =
             static (context, tensorName) => context.ClearCallbackState(tensorName);
         Func<TensorRtExecutionContextCallbackStateSnapshot, string> callbackStateSummary =
@@ -1375,6 +1384,7 @@ static class HighLevelWrapperSurfaceProbe
                 snapshot.OutputAllocatorCleared + ":" +
                 snapshot.TemporaryStorageAllocatorCleared + ":" +
                 snapshot.DebugListenerCleared + ":" +
+                snapshot.IsComplete + ":" +
                 snapshot.LastStatus + ":" +
                 snapshot.LastOperation + ":" +
                 snapshot.Diagnostic;
@@ -2866,6 +2876,7 @@ static class HighLevelWrapperSurfaceProbe
         _ = contextTemporaryStorageAllocatorInterfaceInfo;
         _ = contextDebugListenerInterfaceInfo;
         _ = contextCallbackStateSnapshot;
+        _ = contextTryCallbackStateSnapshot;
         _ = contextClearCallbackState;
         _ = callbackStateSummary;
         _ = contextRuntimeDiagnosticSnapshot;
@@ -3555,6 +3566,7 @@ static class HighLevelWrapperSurfaceProbe
             nameof(TensorRtExecutionContext.TryGetTemporaryStorageAllocatorInterfaceInfo),
             nameof(TensorRtExecutionContext.TryGetDebugListenerInterfaceInfo),
             nameof(TensorRtExecutionContext.GetCallbackStateSnapshot),
+            nameof(TensorRtExecutionContext.TryGetCallbackStateSnapshot),
             nameof(TensorRtExecutionContext.ClearCallbackState),
             nameof(TensorRtExecutionContext.GetRuntimeDiagnosticSnapshot),
             nameof(TensorRtExecutionContext.GetCallbackAllocatorSafeControlSummary),
@@ -3571,6 +3583,7 @@ static class HighLevelWrapperSurfaceProbe
             nameof(TensorRtExecutionContextCallbackStateSnapshot.OutputAllocatorCleared),
             nameof(TensorRtExecutionContextCallbackStateSnapshot.TemporaryStorageAllocatorCleared),
             nameof(TensorRtExecutionContextCallbackStateSnapshot.DebugListenerCleared),
+            nameof(TensorRtExecutionContextCallbackStateSnapshot.IsComplete),
             nameof(TensorRtExecutionContextCallbackStateSnapshot.LastStatus),
             nameof(TensorRtExecutionContextCallbackStateSnapshot.LastOperation),
             nameof(TensorRtExecutionContextCallbackStateSnapshot.Diagnostic),
