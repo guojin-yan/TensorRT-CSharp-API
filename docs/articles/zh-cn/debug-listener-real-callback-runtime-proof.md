@@ -139,10 +139,14 @@ TensorRT runtime path 中同样观察到 callback invocation，并满足完整 p
 
 ## Local Validation Snapshot
 
-当前 source-tree TRT10.11/CUDA12.9 实测为 `InvocationCount=1`、`FailureCount=0`、
+当前 source-tree TRT10.11/CUDA12.9 与 TRT11.0/CUDA12.9 均实测为 `InvocationCount=1`、`FailureCount=0`、
 `InFlightCallbackCount=0`、`DetachCount=1`、`IsRealCallbackRuntimeProof=True`。生成器幂等结果为
 `203 manifests / 4009 API records`；TRT10/TRT11 PE export parity 分别为 `1091/1091` 与 `1238/1238`，
 missing 均为 0。本批合同与布局测试 `25/25`，完整 solution Debug build `0 warning / 0 error`。
 
-这些数字只说明本机源码树、ABI 与真实 TRT10 callback 路径闭合，不替代 TRT11 runtime、Linux、bridge-only clean
-package consumer、公开包、post-publish 或 Owner release acceptance。
+TRT11 使用 `--debug-listener-runtime-smoke-only` 隔离真实 owner 路径，因为同一 vendor build 的旧综合 callback-state
+snapshot 由 SEH guard 捕获 `0xC0000005`。该模式仍执行 environment/adapter/safe-surface 检查，只是不让独立旧诊断阻断
+真实 callback；它不会把旧诊断写成通过。
+
+这些数字只说明本机源码树、ABI 与真实 TRT10/TRT11 callback 路径闭合，不替代 Linux、bridge-only clean package
+consumer、公开包、post-publish 或 Owner release acceptance。

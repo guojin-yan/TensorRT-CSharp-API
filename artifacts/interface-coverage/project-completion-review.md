@@ -8367,3 +8367,20 @@ engine 均未打包或发布，8 份 publishing 用户修改未触碰、未暂�
   `InFlightCallbackCount=0`、`DetachCount=1`、`IsRealCallbackRuntimeProof=True`。TRT10 runner 的旧综合诊断仍因
   硬编码 TRT11 allocator dry-run entry 输出 `SafeControlSurfaceVersionMismatch=Skipped`；真实 DebugListener 路径通过，
   下一阶段需按实际 line 路由该诊断。
+
+## 2026-07-31 DebugListener Cross-Version Runtime Smoke
+
+- `CallbackAllocatorSafeControlsSmokeRunner` 的 safe-control surface 现在显式接收已解析的 TensorRT line；error recorder、
+  dimension expression、calibrator、runtime deserialization、allocator dry-run/ledger、output allocator、DebugListener 与
+  closure readiness 均沿用该 line。TRT10 不再调用 TRT11 allocator entry，也不再输出
+  `SafeControlSurfaceVersionMismatch=Skipped`。
+- `TensorRtAllocatorLedgerSafetyGate.GetSnapshot` 增加 explicit-line overload；旧 overload 继续保持 TRT11 默认值兼容，
+  runner 的 TRT10 post-dispose snapshot 不再错误报告为 TRT11。
+- TRT10/CUDA12.9 综合 smoke 实际输出 `SafeControlSurfaceLine=10`，native allocator dry-run 与 ledger 均为
+  `Line=10 / Status=Ok`，完整 closure matrix继续输出，真实 DebugListener 回调仍为 1 次、零 failure/in-flight、proof true。
+- 现有 E 盘 TRT11.0/CUDA12.9 runtime 与 TRT11 bridge 通过 adapter runtime/builder probe。旧综合
+  `RunSafeControls` 的 execution-context callback-state snapshot 被 SEH guard 捕获 `0xC0000005`，因此新增
+  `--debug-listener-runtime-smoke-only`，只跳过该独立旧诊断，不把它伪装成通过。
+- TRT11 smoke-only 真实结果为 `InvocationCount=1`、`FailureCount=0`、`InFlightCallbackCount=0`、shape `[1,4]`、
+  `BorrowedPointerExposed=False`、`DetachCount=1`、`IsRealCallbackRuntimeProof=True`。这补齐 TRT11 source-tree local
+  callback runtime，但仍不是 package consumer、Linux、公开包或 post-publish proof。

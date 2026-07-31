@@ -358,8 +358,12 @@ public sealed class CallbackAllocatorBoundaryTests
         Assert.Contains("PointerFreeSurfaceReady", smokeProgram);
         Assert.Contains("new TensorRtAllocatorCallbackOwner", smokeProgram);
         Assert.Contains("RunDryRunDiagnostic(new TensorRtAllocatorDryRunRequest", smokeProgram);
-        Assert.Contains("RunNativeDryRunDiagnostic(TensorRtApiLine.TensorRt11", smokeProgram);
-        Assert.Contains("RunNativeStateLedgerDryRunDiagnostic(TensorRtApiLine.TensorRt11", smokeProgram);
+        Assert.Contains("RunNativeDryRunDiagnostic(line", smokeProgram);
+        Assert.Contains("RunNativeStateLedgerDryRunDiagnostic(line", smokeProgram);
+        Assert.Contains("PrintSafeControlSurface(probeLine", smokeProgram);
+        Assert.Contains("PrintSafeControlSurface(line.Value", smokeProgram);
+        Assert.Contains("SafeControlSurfaceLine=", smokeProgram);
+        Assert.DoesNotContain("SafeControlSurfaceVersionMismatch=Skipped", smokeProgram);
 
         Assert.Contains("allocator-owner-dry-run-diagnostics", bridgeConsumer);
         Assert.Contains("allocator-owner-native-dry-run-controls", bridgeConsumer);

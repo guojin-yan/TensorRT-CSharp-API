@@ -13,15 +13,18 @@ internal static class Program
         string requestedLine = JYPPX.SampleSupport.SampleCommandLine.GetStringArgument(args, "--tensor-rt-line", "auto");
         string runtimePackageKey = JYPPX.SampleSupport.SampleCommandLine.GetStringArgument(args, "--runtime-package-key", string.Empty);
         bool dependencyProbeOnly = JYPPX.SampleSupport.SampleCommandLine.HasSwitch(args, "--dependency-probe-only");
-        bool enableDebugListenerRuntimeSmoke = JYPPX.SampleSupport.SampleCommandLine.HasSwitch(args, "--enable-debug-listener-runtime-smoke");
+        bool debugListenerRuntimeSmokeOnly = JYPPX.SampleSupport.SampleCommandLine.HasSwitch(args, "--debug-listener-runtime-smoke-only");
+        bool enableDebugListenerRuntimeSmoke =
+            debugListenerRuntimeSmokeOnly ||
+            JYPPX.SampleSupport.SampleCommandLine.HasSwitch(args, "--enable-debug-listener-runtime-smoke");
 
-        Console.WriteLine($"CallbackAllocatorSafeControlsSmokeRunner TensorRtLineRequest={requestedLine} RuntimePackageKey={runtimePackageKey} DependencyProbeOnly={dependencyProbeOnly} EnableDebugListenerRuntimeSmoke={enableDebugListenerRuntimeSmoke}");
+        Console.WriteLine($"CallbackAllocatorSafeControlsSmokeRunner TensorRtLineRequest={requestedLine} RuntimePackageKey={runtimePackageKey} DependencyProbeOnly={dependencyProbeOnly} EnableDebugListenerRuntimeSmoke={enableDebugListenerRuntimeSmoke} DebugListenerRuntimeSmokeOnly={debugListenerRuntimeSmokeOnly}");
 
         if (dependencyProbeOnly)
         {
             TensorRtApiLine probeLine = ResolveProbeLine(requestedLine);
             PrintDependencyProbe(probeLine);
-            PrintSafeControlSurface(enableRuntimeSmoke: false, runtimePackageKey: runtimePackageKey);
+            PrintSafeControlSurface(probeLine, enableRuntimeSmoke: false, runtimePackageKey: runtimePackageKey);
             Console.WriteLine("Skipped=True Reason=DependencyProbeOnly");
             return;
         }
@@ -49,18 +52,28 @@ internal static class Program
         Console.WriteLine($"Adapter Runtime={adapter.RuntimeCreationSupported} Builder={adapter.BuilderCreationSupported} Message={adapter.StatusMessage}");
 
         PrintDependencyProbe(line.Value);
-        try
-        {
-            PrintSafeControlSurface(enableDebugListenerRuntimeSmoke, runtimePackageKey);
-        }
-        catch (EntryPointNotFoundException exception) when (line.Value != TensorRtApiLine.TensorRt11)
-        {
-            Console.WriteLine($"SafeControlSurfaceVersionMismatch=Skipped Line={(int)line.Value} Reason={exception.Message}");
-        }
+        PrintSafeControlSurface(line.Value, enableDebugListenerRuntimeSmoke, runtimePackageKey);
 
         if (!adapter.RuntimeCreationSupported || !adapter.BuilderCreationSupported)
         {
             Console.WriteLine($"Skipped=True Reason=AdapterNotReady:{adapter.StatusMessage}");
+            return;
+        }
+
+        if (debugListenerRuntimeSmokeOnly)
+        {
+            try
+            {
+                RunRealDebugListenerRuntimeSmoke(line.Value, runtimePackageKey);
+            }
+            catch (Exception exception) when (IsSkippableEnvironmentException(exception))
+            {
+                Console.WriteLine($"DebugListenerRealRuntime=Skipped Reason={exception.GetType().Name}:{exception.Message}");
+                Console.WriteLine($"Skipped=True Reason={exception.GetType().Name}:{exception.Message}");
+                return;
+            }
+
+            Console.WriteLine("CallbackAllocatorSafeControlsSmokeRunner Passed=True Mode=DebugListenerRuntimeSmokeOnly");
             return;
         }
 
@@ -409,8 +422,12 @@ internal static class Program
         Console.WriteLine($"DependencyProbe Line={(int)line} BridgeInitialized={dependencyProbe.BridgeInitialized} Candidates={dependencyProbe.NativeBridgeCandidates.Count} Loaded={dependencyProbe.LoadedModuleCount} SearchPathCandidates={dependencyProbe.SearchPathCandidateCount} Diagnostics={dependencyProbe.Diagnostics.Count} Message={dependencyProbe.BridgeDiagnostic}");
     }
 
-    private static void PrintSafeControlSurface(bool enableRuntimeSmoke = false, string runtimePackageKey = "")
+    private static void PrintSafeControlSurface(
+        TensorRtApiLine line,
+        bool enableRuntimeSmoke = false,
+        string runtimePackageKey = "")
     {
+        Console.WriteLine($"SafeControlSurfaceLine={(int)line}");
         Console.WriteLine("SafeControlSurface=allocator-debug-listener-safe-controls;callback-interface-info-safe-controls;execution-context-callback-state-snapshot;execution-context-callback-allocator-safe-control-summary;error-recorder-diagnostics-design-gate;dimension-expression-snapshot-design-gate;calibrator-metadata-design-gate;runtime-deserialization-boundary-precheck;runtime-deserialization-dependency-diagnostics;allocator-owner-dry-run-diagnostics;allocator-owner-native-dry-run-controls;allocator-owner-state-ledger-dry-run-controls;allocator-owner-internal-runtime-prototype;allocator-owner-ledger-safety-gate;output-allocator-internal-runtime-gate;output-allocator-callback-owner-design;output-allocator-attach-detach-design-gate;output-buffer-ownership-safety-gate;output-allocator-runtime-proof-precheck;debug-listener-callback-owner-design;debug-listener-attach-detach-design-gate;debug-listener-borrowed-tensor-safety-gate;debug-listener-attach-vtable-safety-gate;debug-listener-native-attach-nothrow-preflight;debug-listener-native-owner-address-design-gate;debug-listener-native-nothrow-vtable-design-gate;debug-listener-native-attach-entry-design-gate;debug-listener-native-detach-before-release-design-gate;debug-listener-native-owner-lifecycle-dry-run;debug-listener-native-attach-entry-runtime-scaffold;debug-listener-native-attach-entry-minimal-safety;debug-listener-native-owner-stable-identity;debug-listener-native-owner-noncopyable-storage;debug-listener-native-nothrow-destructor;debug-listener-native-owner-lifecycle-gate;debug-listener-native-attach-bridge-shape-gate;debug-listener-exception-status-mapping-gate;debug-listener-inflight-accounting-gate;debug-listener-native-nothrow-vtable-scaffold-gate;debug-listener-nothrow-vtable-callback-stub;debug-listener-borrowed-debug-tensor-metadata-runtime-gate;debug-listener-native-vtable-install-preflight;debug-listener-native-owner-vtable-install-experiment;debug-listener-runtime-proof-precheck;debug-listener-runtime-proof-attempt-preflight;debug-listener-real-non-null-attach-runtime-smoke;debug-listener-process-debug-tensor-callback-trampoline;callback-trampoline-shape;debug-listener-real-callback-runtime-proof;debug-listener-callback-proof-gap-report;callback-owner-closure-matrix;real-callback-runtime-blocked;attempted-no-invocation");
         Console.WriteLine("CallbackInterfaceInfoSafeControls=TryGetOutputAllocatorInterfaceInfo;TryGetTemporaryStorageAllocatorInterfaceInfo;TryGetDebugListenerInterfaceInfo");
         Console.WriteLine("ExecutionContextCallbackStateSnapshot=GetCallbackStateSnapshot;ClearCallbackState;TensorRtExecutionContextCallbackStateSnapshot");
@@ -423,56 +440,56 @@ internal static class Program
         Console.WriteLine("PluginCreatorV3MetadataDesignGate=EvaluateKnownSurface;TensorRtPluginCreatorV3MetadataDesignGateResult;design-gate-only;pointer-free;not-runtime-proof");
         Console.WriteLine("RefitterDiagnosticSnapshot=GetDiagnosticSnapshot;TensorRtRefitterDiagnosticSnapshot;copied-inventory;pointer-free");
         Console.WriteLine("RefitterDiagnosticSummary=ToSummary;TensorRtRefitterDiagnosticSummary;copied-inventory;pointer-free;not-runtime-proof");
-        PrintErrorRecorderDiagnosticsDesignGate();
-        PrintDimensionExpressionSnapshotDesignGate();
-        PrintCalibratorMetadataDesignGate();
-        PrintRuntimeDeserializationBoundaryPrecheck();
-        PrintRuntimeDeserializationDependencyDiagnostics();
-        PrintAllocatorOwnerDryRunDiagnostic();
+        PrintErrorRecorderDiagnosticsDesignGate(line);
+        PrintDimensionExpressionSnapshotDesignGate(line);
+        PrintCalibratorMetadataDesignGate(line);
+        PrintRuntimeDeserializationBoundaryPrecheck(line);
+        PrintRuntimeDeserializationDependencyDiagnostics(line);
+        PrintAllocatorOwnerDryRunDiagnostic(line);
         PrintAllocatorOwnerInternalRuntimePrototypeDiagnostic();
-        PrintAllocatorOwnerLedgerSafetyGateDiagnostic();
+        PrintAllocatorOwnerLedgerSafetyGateDiagnostic(line);
         PrintOutputAllocatorInternalRuntimeGateDiagnostic();
-        PrintOutputAllocatorCallbackOwnerDesignDiagnostic();
-        PrintDebugListenerCallbackOwnerDesignDiagnostic(enableRuntimeSmoke, runtimePackageKey);
-        PrintCallbackAllocatorReadinessSnapshot();
+        PrintOutputAllocatorCallbackOwnerDesignDiagnostic(line);
+        PrintDebugListenerCallbackOwnerDesignDiagnostic(line, enableRuntimeSmoke, runtimePackageKey);
+        PrintCallbackAllocatorReadinessSnapshot(line);
     }
 
-    private static void PrintErrorRecorderDiagnosticsDesignGate()
+    private static void PrintErrorRecorderDiagnosticsDesignGate(TensorRtApiLine line)
     {
         TensorRtErrorRecorderDiagnosticsDesignGateResult gate =
-            TensorRtErrorRecorderDiagnosticsDesignGate.EvaluateKnownSurface(TensorRtApiLine.TensorRt11);
+            TensorRtErrorRecorderDiagnosticsDesignGate.EvaluateKnownSurface(line);
         Console.WriteLine("ErrorRecorderDiagnosticsDesignGate=" + FormatErrorRecorderDiagnosticsDesignGate(gate));
     }
 
-    private static void PrintDimensionExpressionSnapshotDesignGate()
+    private static void PrintDimensionExpressionSnapshotDesignGate(TensorRtApiLine line)
     {
         TensorRtDimensionExpressionSnapshotDesignGateResult gate =
-            TensorRtDimensionExpressionSnapshotDesignGate.EvaluateKnownSurface(TensorRtApiLine.TensorRt11);
+            TensorRtDimensionExpressionSnapshotDesignGate.EvaluateKnownSurface(line);
         Console.WriteLine("DimensionExpressionSnapshotDesignGate=" + FormatDimensionExpressionSnapshotDesignGate(gate));
     }
 
-    private static void PrintCalibratorMetadataDesignGate()
+    private static void PrintCalibratorMetadataDesignGate(TensorRtApiLine line)
     {
         TensorRtCalibratorMetadataDesignGateResult gate =
-            TensorRtCalibratorMetadataDesignGate.EvaluateKnownSurface(TensorRtApiLine.TensorRt10);
+            TensorRtCalibratorMetadataDesignGate.EvaluateKnownSurface(line);
         Console.WriteLine("CalibratorMetadataDesignGate=" + FormatCalibratorMetadataDesignGate(gate));
     }
 
-    private static void PrintRuntimeDeserializationBoundaryPrecheck()
+    private static void PrintRuntimeDeserializationBoundaryPrecheck(TensorRtApiLine line)
     {
         TensorRtRuntimeDeserializationBoundaryPrecheckResult precheck =
-            TensorRtRuntimeDeserializationBoundaryPrecheck.EvaluateKnownSurface(TensorRtApiLine.TensorRt11);
+            TensorRtRuntimeDeserializationBoundaryPrecheck.EvaluateKnownSurface(line);
         Console.WriteLine("RuntimeDeserializationBoundaryPrecheck=" + FormatRuntimeDeserializationBoundaryPrecheck(precheck));
     }
 
-    private static void PrintRuntimeDeserializationDependencyDiagnostics()
+    private static void PrintRuntimeDeserializationDependencyDiagnostics(TensorRtApiLine line)
     {
         TensorRtRuntimeDeserializationDependencyDiagnosticsResult diagnostics =
-            TensorRtRuntimeDeserializationDependencyDiagnostics.EvaluateKnownSurface(TensorRtApiLine.TensorRt11);
+            TensorRtRuntimeDeserializationDependencyDiagnostics.EvaluateKnownSurface(line);
         Console.WriteLine("RuntimeDeserializationDependencyDiagnostics=" + FormatRuntimeDeserializationDependencyDiagnostics(diagnostics));
     }
 
-    private static void PrintAllocatorOwnerDryRunDiagnostic()
+    private static void PrintAllocatorOwnerDryRunDiagnostic(TensorRtApiLine line)
     {
         using TensorRtAllocatorCallbackOwner owner = new TensorRtAllocatorCallbackOwner(static request =>
             TensorRtAllocatorDryRunResult.Success($"dry-run:{request.Reason}:{request.Size}:{request.Alignment}"));
@@ -482,10 +499,10 @@ internal static class Program
 
         try
         {
-            TensorRtAllocatorNativeDryRunResult nativeResult = owner.RunNativeDryRunDiagnostic(TensorRtApiLine.TensorRt11, new TensorRtAllocatorDryRunRequest(8192, 512, "smoke-native"));
+            TensorRtAllocatorNativeDryRunResult nativeResult = owner.RunNativeDryRunDiagnostic(line, new TensorRtAllocatorDryRunRequest(8192, 512, "smoke-native"));
             Console.WriteLine($"AllocatorOwnerNativeDryRunControls=allocator-owner-native-dry-run-controls;{nameof(TensorRtAllocatorCallbackOwner.RunNativeDryRunDiagnostic)};{nameof(TensorRtAllocatorNativeDryRunResult)};Line={(int)nativeResult.Line};Status={nativeResult.LastStatus};Invocations={nativeResult.InvocationCount};Failures={nativeResult.FailureCount};Attached={nativeResult.IsAttached};Size={nativeResult.LastSize};Alignment={nativeResult.LastAlignment};Succeeded={nativeResult.Succeeded};Diagnostic={nativeResult.Diagnostic}");
 
-            TensorRtAllocatorOwnerStateDryRunResult stateResult = owner.RunNativeStateLedgerDryRunDiagnostic(TensorRtApiLine.TensorRt11, new TensorRtAllocatorDryRunRequest(16384, 1024, "smoke-ledger"), "IGpuAllocator", 0);
+            TensorRtAllocatorOwnerStateDryRunResult stateResult = owner.RunNativeStateLedgerDryRunDiagnostic(line, new TensorRtAllocatorDryRunRequest(16384, 1024, "smoke-ledger"), "IGpuAllocator", 0);
             Console.WriteLine($"AllocatorOwnerStateLedgerDryRunControls=allocator-owner-state-ledger-dry-run-controls;{nameof(TensorRtAllocatorCallbackOwner.RunNativeStateLedgerDryRunDiagnostic)};{nameof(TensorRtAllocatorOwnerStateDryRunResult)};Line={(int)stateResult.Line};OwnerId={stateResult.OwnerId};Status={stateResult.LastStatus};Transitions={stateResult.StateTransitionCount};Allocations={stateResult.LedgerAllocationCount};Releases={stateResult.LedgerReleaseCount};Failures={stateResult.LedgerFailureCount};Attached={stateResult.IsAttached};Live={stateResult.HasLiveAllocation};Operation={stateResult.LastOperation};Succeeded={stateResult.Succeeded};Diagnostic={stateResult.Diagnostic}");
         }
         catch (Exception exception) when (IsSkippableEnvironmentException(exception))
@@ -723,21 +740,21 @@ internal static class Program
         Console.WriteLine("AllocatorOwnerInternalRuntimePrototypeException=" + FormatInternalRuntimePrototype(failure));
     }
 
-    private static void PrintAllocatorOwnerLedgerSafetyGateDiagnostic()
+    private static void PrintAllocatorOwnerLedgerSafetyGateDiagnostic(TensorRtApiLine line)
     {
         using TensorRtAllocatorCallbackOwner owner = new TensorRtAllocatorCallbackOwner(static request =>
             TensorRtAllocatorDryRunResult.Success($"ledger-safety:{request.Reason}:{request.Size}:{request.Alignment}"));
 
         TensorRtAllocatorLedgerSafetyGateResult gate = TensorRtAllocatorLedgerSafetyGate.Evaluate(
             owner,
-            TensorRtApiLine.TensorRt11,
+            line,
             new TensorRtAllocatorDryRunRequest(16384, 1024, "smoke-ledger-safety"),
             "IGpuAllocator",
             0UL);
         Console.WriteLine("AllocatorOwnerLedgerSafetyGate=" + FormatAllocatorOwnerLedgerSafetyGate(gate));
 
         owner.Dispose();
-        TensorRtAllocatorLedgerSafetyGateResult dispose = TensorRtAllocatorLedgerSafetyGate.GetSnapshot(owner, "post-dispose");
+        TensorRtAllocatorLedgerSafetyGateResult dispose = TensorRtAllocatorLedgerSafetyGate.GetSnapshot(owner, line, "post-dispose");
         Console.WriteLine("AllocatorOwnerLedgerSafetyGateDispose=" + FormatAllocatorOwnerLedgerSafetyGate(dispose));
     }
 
@@ -955,7 +972,7 @@ internal static class Program
             $";ReleaseDiagnostic={SanitizeSmokeValue(ReadPrototypeProperty(result, "ReleaseDiagnostic"))}";
     }
 
-    private static void PrintOutputAllocatorCallbackOwnerDesignDiagnostic()
+    private static void PrintOutputAllocatorCallbackOwnerDesignDiagnostic(TensorRtApiLine line)
     {
         using TensorRtOutputAllocatorCallbackOwner owner = new TensorRtOutputAllocatorCallbackOwner();
         TensorRtOutputAllocatorCallbackRequest request = new TensorRtOutputAllocatorCallbackRequest(
@@ -966,7 +983,7 @@ internal static class Program
             "smoke-output-allocator-owner-design",
             true);
 
-        TensorRtOutputAllocatorCallbackOwnerSnapshot diagnostic = owner.RunDesignDiagnostic(TensorRtApiLine.TensorRt11, request, 0UL);
+        TensorRtOutputAllocatorCallbackOwnerSnapshot diagnostic = owner.RunDesignDiagnostic(line, request, 0UL);
         Console.WriteLine("OutputAllocatorCallbackOwnerDesign=" + FormatOutputAllocatorCallbackOwnerDesign(diagnostic));
 
         TensorRtOutputAllocatorCallbackOwnerSnapshot preDispose = owner.GetSnapshot("pre-dispose");
@@ -1143,13 +1160,13 @@ internal static class Program
             $";Diagnostic={SanitizeSmokeValue(result.Diagnostic)}";
     }
 
-    private static void PrintCallbackAllocatorReadinessSnapshot()
+    private static void PrintCallbackAllocatorReadinessSnapshot(TensorRtApiLine line)
     {
         using TensorRtAllocatorCallbackOwner allocatorOwner = new TensorRtAllocatorCallbackOwner(static request =>
             TensorRtAllocatorDryRunResult.Success($"readiness:{request.Reason}:{request.Size}:{request.Alignment}"));
         TensorRtAllocatorLedgerSafetyGateResult allocatorGate = TensorRtAllocatorLedgerSafetyGate.Evaluate(
             allocatorOwner,
-            TensorRtApiLine.TensorRt11,
+            line,
             new TensorRtAllocatorDryRunRequest(32768, 256, "smoke-readiness-allocator"),
             "IGpuAllocator",
             0UL);
@@ -1162,7 +1179,7 @@ internal static class Program
             new long[] { 1, 1000 },
             "smoke-readiness-output",
             hasCurrentMemory: true);
-        _ = outputOwner.RunDesignDiagnostic(TensorRtApiLine.TensorRt11, outputRequest, 0UL);
+        _ = outputOwner.RunDesignDiagnostic(line, outputRequest, 0UL);
         outputOwner.Dispose();
         TensorRtOutputAllocatorRuntimeProofPrecheckResult outputPrecheck =
             TensorRtOutputAllocatorRuntimeProofPrecheck.Evaluate(outputOwner.GetSnapshot("post-dispose-readiness"));
@@ -1176,7 +1193,7 @@ internal static class Program
             "smoke-readiness-debug-listener",
             isInput: true,
             isExecutionTensor: true);
-        _ = debugOwner.RunDesignDiagnostic(TensorRtApiLine.TensorRt11, debugRequest);
+        _ = debugOwner.RunDesignDiagnostic(line, debugRequest);
         debugOwner.Dispose();
         TensorRtDebugListenerRuntimeProofPrecheckResult debugPrecheck =
             TensorRtDebugListenerRuntimeProofPrecheck.Evaluate(debugOwner.GetSnapshot("post-dispose-readiness"));
@@ -1188,7 +1205,7 @@ internal static class Program
         Console.WriteLine("CallbackAllocatorReadinessSnapshot=" + FormatCallbackAllocatorReadinessSnapshot(readiness));
 
         TensorRtStreamIoInterfaceInfoDesignGateResult streamGate =
-            TensorRtStreamIoInterfaceInfoDesignGate.EvaluateKnownSurface(TensorRtApiLine.TensorRt11);
+            TensorRtStreamIoInterfaceInfoDesignGate.EvaluateKnownSurface(line);
         TensorRtCallbackOwnerClosureMatrixResult ownerClosureMatrix =
             TensorRtCallbackOwnerClosureMatrix.Evaluate(
                 allocatorGate,
@@ -1266,10 +1283,16 @@ internal static class Program
 
     private static void PrintDebugListenerCallbackOwnerDesignDiagnostic()
     {
-        PrintDebugListenerCallbackOwnerDesignDiagnostic(enableRuntimeSmoke: false, runtimePackageKey: string.Empty);
+        PrintDebugListenerCallbackOwnerDesignDiagnostic(
+            TensorRtApiLine.TensorRt11,
+            enableRuntimeSmoke: false,
+            runtimePackageKey: string.Empty);
     }
 
-    private static void PrintDebugListenerCallbackOwnerDesignDiagnostic(bool enableRuntimeSmoke, string runtimePackageKey)
+    private static void PrintDebugListenerCallbackOwnerDesignDiagnostic(
+        TensorRtApiLine line,
+        bool enableRuntimeSmoke,
+        string runtimePackageKey)
     {
         using TensorRtDebugListenerCallbackOwner owner = new TensorRtDebugListenerCallbackOwner();
         TensorRtDebugListenerCallbackRequest request = new TensorRtDebugListenerCallbackRequest(
@@ -1281,7 +1304,7 @@ internal static class Program
             isInput: true,
             isExecutionTensor: true);
 
-        TensorRtDebugListenerCallbackOwnerSnapshot diagnostic = owner.RunDesignDiagnostic(TensorRtApiLine.TensorRt11, request);
+        TensorRtDebugListenerCallbackOwnerSnapshot diagnostic = owner.RunDesignDiagnostic(line, request);
         Console.WriteLine("DebugListenerCallbackOwnerDesign=" + FormatDebugListenerCallbackOwnerDesign(diagnostic));
 
         TensorRtDebugListenerCallbackOwnerSnapshot preDispose = owner.GetSnapshot("pre-dispose");

@@ -31,7 +31,9 @@
 
 `Evaluate` 会触发 internal sync allocator prototype 诊断，并尝试运行 native state ledger dry-run。native bridge 或 vendor runtime 不可用时，错误会复制到 `NativeLedgerDiagnostic`，不会升级为 real callback proof。
 
-`GetSnapshot` 只复制当前托管 owner 生命周期状态，适合在 `Dispose` 后验证 release hook。它不会运行 native ledger。
+`GetSnapshot` 只复制当前托管 owner 生命周期状态，适合在 `Dispose` 后验证 release hook。旧 overload 保持 TRT11
+默认 line 以兼容既有调用；新 overload 接收显式 `TensorRtApiLine`，供 TRT8/TRT10/TRT11 runner 保留真实版本线。
+两种 overload 都不会运行 native ledger。
 
 ## 输出字段
 

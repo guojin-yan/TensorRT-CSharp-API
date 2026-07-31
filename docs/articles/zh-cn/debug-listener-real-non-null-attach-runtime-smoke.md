@@ -107,6 +107,10 @@ package report 时误晋级；二者的 evidence type 必须分开解析。
 `BorrowedPointerExposed=False`。native owner 的 drain wait 已用同一状态锁同步计数归零；managed context 在 native
 context handle 销毁后才解除 owner borrow，嵌套 managed callback 使用 depth 保护，避免 bool 提前复位。
 
+TRT11.0/CUDA12.9 也通过同一 owner 路径，得到相同的一次 invocation、零 failure/in-flight 与一次 detach。TRT11 使用
+`--debug-listener-runtime-smoke-only`，避免旧综合 execution-context callback-state snapshot 的独立 SEH 诊断提前返回；
+该模式明确输出 `Mode=DebugListenerRuntimeSmokeOnly`，不能用于声称旧综合 safe controls 已通过。
+
 ## Smoke And Readiness
 
 `CallbackAllocatorSafeControlsSmokeRunner` 和 full package consumer smoke 输出：

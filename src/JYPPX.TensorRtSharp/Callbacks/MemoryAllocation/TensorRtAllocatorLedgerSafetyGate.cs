@@ -84,6 +84,22 @@ public static class TensorRtAllocatorLedgerSafetyGate
         TensorRtAllocatorCallbackOwner owner,
         string operation = "snapshot")
     {
+        return GetSnapshot(owner, TensorRtApiLine.TensorRt11, operation);
+    }
+
+    /// <summary>
+    /// Copies the current managed owner lifecycle state for an explicit TensorRT API line.
+    /// 为显式 TensorRT API 版本线复制当前托管 owner 生命周期状态。
+    /// </summary>
+    /// <param name="owner">The managed allocator callback owner. 托管 allocator callback owner。</param>
+    /// <param name="line">The TensorRT API line represented by the snapshot. snapshot 表示的 TensorRT API 版本线。</param>
+    /// <param name="operation">The copied operation label. 复制出的操作标签。</param>
+    /// <returns>A pointer-free safety gate result with native ledger marked unavailable. native ledger 标为不可用的无 pointer 门禁结果。</returns>
+    public static TensorRtAllocatorLedgerSafetyGateResult GetSnapshot(
+        TensorRtAllocatorCallbackOwner owner,
+        TensorRtApiLine line,
+        string operation = "snapshot")
+    {
         if (owner == null)
         {
             throw new ArgumentNullException(nameof(owner));
@@ -92,7 +108,7 @@ public static class TensorRtAllocatorLedgerSafetyGate
         TensorRtAllocatorInternalRuntimePrototypeResult prototype =
             owner.GetInternalRuntimePrototypeSnapshot(operation);
         return new TensorRtAllocatorLedgerSafetyGateResult(
-            TensorRtApiLine.TensorRt11,
+            line,
             prototype,
             null,
             BridgeStatusCode.NotReady,

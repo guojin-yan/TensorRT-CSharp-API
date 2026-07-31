@@ -77,6 +77,10 @@ public sealed class AllocatorOwnerLedgerSafetyGateTests
         Assert.False(disposed.NativeLedgerAvailable);
         Assert.False(disposed.CanAttemptRuntimeProof);
         Assert.True(disposed.RuntimeProofBlocked);
+
+        TensorRtAllocatorLedgerSafetyGateResult trt10Snapshot =
+            TensorRtAllocatorLedgerSafetyGate.GetSnapshot(owner, TensorRtApiLine.TensorRt10, "trt10-post-dispose");
+        Assert.Equal(TensorRtApiLine.TensorRt10, trt10Snapshot.Line);
     }
 
     [Fact]

@@ -155,6 +155,8 @@ public sealed class DebugListenerRealRuntimeOwnerTests
         Assert.Contains("attached.IsRealCallbackRuntimeProof", source);
         Assert.Contains("DebugListenerRealRuntime=Passed", source);
         Assert.Contains("BorrowedPointerExposed={attached.BorrowedPointerExposed}", source);
+        Assert.Contains("--debug-listener-runtime-smoke-only", source);
+        Assert.Contains("Mode=DebugListenerRuntimeSmokeOnly", source);
     }
 
     private static IEnumerable<Type> GetExposedTypes(MemberInfo member)
