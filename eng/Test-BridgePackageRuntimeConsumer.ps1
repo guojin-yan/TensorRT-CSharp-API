@@ -418,9 +418,9 @@ function Write-Reports {
   $lines = New-Object System.Collections.Generic.List[string]
   $lines.Add("# Bridge Package Runtime Consumer Proof")
   $lines.Add("")
-  $lines.Add("| Runtime key | Classification | Smoke | Exit code | Identity output | Consumer outside repo |")
-  $lines.Add("| --- | --- | --- | ---: | --- | --- |")
-  $lines.Add("| $($Result.sourceRuntimeKey) | $($Result.proofClassification) | $($Result.smokeStatus) | $($Result.exitCode) | $($Result.identityOutputMatch) | $($Result.consumerRootOutsideRepository) |")
+  $lines.Add("| Runtime key | Classification | Smoke | Exit code | Identity output | DebugListener callback | Consumer outside repo |")
+  $lines.Add("| --- | --- | --- | ---: | --- | --- | --- |")
+  $lines.Add("| $($Result.sourceRuntimeKey) | $($Result.proofClassification) | $($Result.smokeStatus) | $($Result.exitCode) | $($Result.identityOutputMatch) | $($Result.debugListenerCallback.status) | $($Result.consumerRootOutsideRepository) |")
   $lines.Add("")
   $lines.Add("- managed package: ``$($Result.packages.managed.id) $($Result.packages.managed.version)``; SHA256=``$($Result.packages.managed.sha256)``")
   $lines.Add("  - source: ``$($Result.packages.managed.source.sourceDirectory)``; local feed=$($Result.packages.managed.source.isLocalPackageFeed); public feed proof=$($Result.packages.managed.source.publicFeedProof)")
@@ -434,6 +434,12 @@ function Write-Reports {
   $lines.Add("- enqueue completed: $($Result.enqueueCompleted)")
   $lines.Add("- runtime execution proof: $($Result.isRuntimeExecutionProof)")
   $lines.Add("- package-consumer runtime proof: $($Result.isPackageConsumerRuntimeProof)")
+  $lines.Add("- DebugListener evidence scope: ``$($Result.debugListenerCallback.evidenceScope)``")
+  $lines.Add("- DebugListener invocation/failure/in-flight: $($Result.debugListenerCallback.invocationCount)/$($Result.debugListenerCallback.failureCount)/$($Result.debugListenerCallback.inFlightCallbackCount)")
+  $lines.Add("- DebugListener metadata copied / borrowed pointer exposed: $($Result.debugListenerCallback.metadataCopied)/$($Result.debugListenerCallback.borrowedPointerExposed)")
+  $lines.Add("- DebugListener detach count: $($Result.debugListenerCallback.detachCount)")
+  $lines.Add("- local-package DebugListener callback runtime proof: $($Result.debugListenerCallback.isLocalPackageCallbackRuntimeProof)")
+  $lines.Add("- source-tree/public-package/post-publish proof in this report: $($Result.proofScopes.sourceTree.isProof)/$($Result.proofScopes.publicPackage.isProof)/$($Result.proofScopes.postPublish.isProof)")
   $lines.Add("- compatible-host runtime promotion: $($Result.canPromoteCompatibleHostRuntimeProof)")
   $lines.Add("- public publish: $($Result.canPublishPublicly)")
   $lines.Add("- release close: $($Result.canCloseReleaseIssue)")
@@ -757,6 +763,18 @@ try
     using TensorRtTensor outputTensor = identity.GetOutput(0);
     outputTensor.Name = "output";
     network.MarkOutput(outputTensor);
+    bool debugListenerCallbackRequired = line == TensorRtApiLine.TensorRt10 || line == TensorRtApiLine.TensorRt11;
+    bool debugTensorMarked = false;
+    if (debugListenerCallbackRequired)
+    {
+        debugTensorMarked = network.MarkDebugTensor(outputTensor) && network.IsDebugTensor(outputTensor);
+        if (!debugTensorMarked)
+        {
+            throw new InvalidOperationException("TensorRT did not retain the local-package DebugListener output mark.");
+        }
+    }
+    Console.WriteLine("DebugListenerCallbackRequired=" + debugListenerCallbackRequired);
+    Console.WriteLine("DebugListenerDebugTensorMarked=" + debugTensorMarked);
 
     using TensorRtHostMemory hostMemory = builder.BuildSerializedNetwork(network, config);
     byte[] serializedEngine = hostMemory.ToArray();
@@ -781,19 +799,101 @@ try
         throw new InvalidOperationException("Identity network bindings are not ready for enqueue: " + readiness);
     }
 
-    TensorRtInferenceExecutionSummary execution = bindings.EnqueueAsync(stream, synchronize: true, runShapeInference: false);
-    float[] outputValues = bindings.ReadOutputSingles("output", inputValues.Length);
-    bool outputMatch = inputValues.Zip(outputValues, static (expected, actual) => Math.Abs(expected - actual) <= 0.0001f).All(static match => match);
-    Console.WriteLine("EnqueueCompleted=True");
-    Console.WriteLine("ExecutionSummary=" + execution);
-    Console.WriteLine("IdentityOutputMatch=" + outputMatch);
-    if (!outputMatch)
+    TensorRtDebugTensorMetadataSnapshot callbackMetadata = default;
+    TensorRtDebugListenerCallbackOwner? debugListenerOwner = null;
+    try
     {
-        throw new InvalidOperationException("Identity output mismatch. Input=[" + string.Join(",", inputValues) + "] Output=[" + string.Join(",", outputValues) + "]");
-    }
+        if (debugListenerCallbackRequired)
+        {
+            debugListenerOwner = new TensorRtDebugListenerCallbackOwner(
+                line,
+                metadata =>
+                {
+                    callbackMetadata = metadata;
+                    return true;
+                });
+            context.SetDebugListener(debugListenerOwner);
+            context.SetTensorDebugState("output", true);
+        }
 
-    Console.WriteLine("RuntimeSmoke=Passed");
-    return 0;
+        TensorRtInferenceExecutionSummary execution = bindings.EnqueueAsync(stream, synchronize: true, runShapeInference: false);
+        float[] outputValues = bindings.ReadOutputSingles("output", inputValues.Length);
+        bool outputMatch = inputValues.Zip(outputValues, static (expected, actual) => Math.Abs(expected - actual) <= 0.0001f).All(static match => match);
+        Console.WriteLine("EnqueueCompleted=True");
+        Console.WriteLine("ExecutionSummary=" + execution);
+        Console.WriteLine("IdentityOutputMatch=" + outputMatch);
+        if (!outputMatch)
+        {
+            throw new InvalidOperationException("Identity output mismatch. Input=[" + string.Join(",", inputValues) + "] Output=[" + string.Join(",", outputValues) + "]");
+        }
+
+        if (debugListenerOwner is not null)
+        {
+            TensorRtDebugListenerRuntimeSnapshot attached = debugListenerOwner.GetRuntimeSnapshot();
+            bool clearReturned = context.ClearDebugListener();
+            TensorRtDebugListenerRuntimeSnapshot detached = debugListenerOwner.GetRuntimeSnapshot();
+            bool detachedFromContext =
+                clearReturned &&
+                !detached.IsAttached &&
+                !context.HasManagedDebugListener &&
+                !context.HasDebugListener;
+            bool callbackPassed =
+                attached.IsAttached &&
+                attached.AttachCount > 0 &&
+                attached.IsRealCallbackRuntimeProof &&
+                attached.InvocationCount > 0 &&
+                attached.FailureCount == 0 &&
+                attached.InFlightCallbackCount == 0 &&
+                string.Equals(attached.TensorName, "output", StringComparison.Ordinal) &&
+                attached.ShapeDimensions.SequenceEqual(new long[] { 1, 4 }) &&
+                callbackMetadata.MetadataCopied &&
+                string.Equals(callbackMetadata.TensorName, "output", StringComparison.Ordinal) &&
+                !attached.BorrowedPointerExposed &&
+                detached.DetachCount > 0 &&
+                detachedFromContext;
+
+            Console.WriteLine("DebugListenerCallbackRuntime=" + (callbackPassed ? "Passed" : "Failed"));
+            Console.WriteLine("DebugListenerCallbackEvidenceScope=local-package");
+            Console.WriteLine("DebugListenerCallbackAttached=" + attached.IsAttached);
+            Console.WriteLine("DebugListenerCallbackNativeVTableInstalled=" + (attached.AttachCount > 0));
+            Console.WriteLine("DebugListenerCallbackInvocationCount=" + attached.InvocationCount);
+            Console.WriteLine("DebugListenerCallbackFailureCount=" + attached.FailureCount);
+            Console.WriteLine("DebugListenerCallbackInFlightCallbackCount=" + attached.InFlightCallbackCount);
+            Console.WriteLine("DebugListenerCallbackTensorName=" + attached.TensorName);
+            Console.WriteLine("DebugListenerCallbackShape=[" + string.Join(",", attached.ShapeDimensions) + "]");
+            Console.WriteLine("DebugListenerCallbackMetadataCopied=" + callbackMetadata.MetadataCopied);
+            Console.WriteLine("DebugListenerCallbackBorrowedPointerExposed=" + attached.BorrowedPointerExposed);
+            Console.WriteLine("DebugListenerCallbackClearReturned=" + clearReturned);
+            Console.WriteLine("DebugListenerCallbackDetached=" + detachedFromContext);
+            Console.WriteLine("DebugListenerCallbackDetachCount=" + detached.DetachCount);
+            Console.WriteLine("DebugListenerCallbackIsRealRuntimeProof=" + attached.IsRealCallbackRuntimeProof);
+            if (!callbackPassed)
+            {
+                throw new InvalidOperationException(
+                    "Local-package DebugListener callback runtime did not satisfy attach/invoke/copy/detach invariants. Attached=" +
+                    attached + " Detached=" + detached);
+            }
+        }
+        else
+        {
+            Console.WriteLine("DebugListenerCallbackRuntime=SkippedUnsupportedTensorRtLine");
+            Console.WriteLine("DebugListenerCallbackEvidenceScope=local-package");
+        }
+
+        Console.WriteLine("RuntimeSmoke=Passed");
+        return 0;
+    }
+    finally
+    {
+        if (debugListenerOwner is not null)
+        {
+            if (context.HasManagedDebugListener)
+            {
+                context.ClearDebugListener();
+            }
+            debugListenerOwner.Dispose();
+        }
+    }
 }
 catch (Exception exception)
 {
@@ -866,10 +966,47 @@ foreach ($line in $stderrLines) {
 }
 @($stdoutLines + $stderrLines) | Set-Content -LiteralPath $combinedPath -Encoding utf8
 
+$debugListenerCallbackRequired = @("10", "11") -contains [string]$bridgeDefinition.tensorRtLine
+$debugListenerCallbackProgramRequired = (Get-FirstMarkerValue -Lines $stdoutLines -Prefix "DebugListenerCallbackRequired=") -eq "True"
+$debugListenerCallbackStatus = Get-FirstMarkerValue -Lines $stdoutLines -Prefix "DebugListenerCallbackRuntime="
+$debugListenerCallbackEvidenceScope = Get-FirstMarkerValue -Lines $stdoutLines -Prefix "DebugListenerCallbackEvidenceScope="
+$debugListenerAttachedText = Get-FirstMarkerValue -Lines $stdoutLines -Prefix "DebugListenerCallbackAttached="
+$debugListenerNativeVTableInstalledText = Get-FirstMarkerValue -Lines $stdoutLines -Prefix "DebugListenerCallbackNativeVTableInstalled="
+$debugListenerInvocationCountText = Get-FirstMarkerValue -Lines $stdoutLines -Prefix "DebugListenerCallbackInvocationCount="
+$debugListenerFailureCountText = Get-FirstMarkerValue -Lines $stdoutLines -Prefix "DebugListenerCallbackFailureCount="
+$debugListenerInFlightCallbackCountText = Get-FirstMarkerValue -Lines $stdoutLines -Prefix "DebugListenerCallbackInFlightCallbackCount="
+$debugListenerDetachCountText = Get-FirstMarkerValue -Lines $stdoutLines -Prefix "DebugListenerCallbackDetachCount="
+$debugListenerInvocationCount = 0L
+$debugListenerFailureCount = 0L
+$debugListenerInFlightCallbackCount = 0L
+$debugListenerDetachCount = 0L
+$debugListenerInvocationCountParsed = [long]::TryParse($debugListenerInvocationCountText, [ref]$debugListenerInvocationCount)
+$debugListenerFailureCountParsed = [long]::TryParse($debugListenerFailureCountText, [ref]$debugListenerFailureCount)
+$debugListenerInFlightCallbackCountParsed = [long]::TryParse($debugListenerInFlightCallbackCountText, [ref]$debugListenerInFlightCallbackCount)
+$debugListenerDetachCountParsed = [long]::TryParse($debugListenerDetachCountText, [ref]$debugListenerDetachCount)
+$debugListenerCallbackRuntimePassed =
+  $debugListenerCallbackRequired -and
+  $debugListenerCallbackProgramRequired -and
+  $debugListenerCallbackStatus -eq "Passed" -and
+  $debugListenerCallbackEvidenceScope -eq "local-package" -and
+  $debugListenerAttachedText -eq "True" -and
+  $debugListenerNativeVTableInstalledText -eq "True" -and
+  $debugListenerInvocationCountParsed -and $debugListenerInvocationCount -gt 0 -and
+  $debugListenerFailureCountParsed -and $debugListenerFailureCount -eq 0 -and
+  $debugListenerInFlightCallbackCountParsed -and $debugListenerInFlightCallbackCount -eq 0 -and
+  (Get-FirstMarkerValue -Lines $stdoutLines -Prefix "DebugListenerCallbackTensorName=") -eq "output" -and
+  (Get-FirstMarkerValue -Lines $stdoutLines -Prefix "DebugListenerCallbackShape=") -eq "[1,4]" -and
+  (Get-FirstMarkerValue -Lines $stdoutLines -Prefix "DebugListenerCallbackMetadataCopied=") -eq "True" -and
+  (Get-FirstMarkerValue -Lines $stdoutLines -Prefix "DebugListenerCallbackBorrowedPointerExposed=") -eq "False" -and
+  (Get-FirstMarkerValue -Lines $stdoutLines -Prefix "DebugListenerCallbackClearReturned=") -eq "True" -and
+  (Get-FirstMarkerValue -Lines $stdoutLines -Prefix "DebugListenerCallbackDetached=") -eq "True" -and
+  $debugListenerDetachCountParsed -and $debugListenerDetachCount -gt 0 -and
+  (Get-FirstMarkerValue -Lines $stdoutLines -Prefix "DebugListenerCallbackIsRealRuntimeProof=") -eq "True"
 $runtimeSmokePassed = $exitCode -eq 0 -and
   (($stdoutLines -join "`n") -match "RuntimeSmoke=Passed") -and
   (($stdoutLines -join "`n") -match "EnqueueCompleted=True") -and
-  (($stdoutLines -join "`n") -match "IdentityOutputMatch=True")
+  (($stdoutLines -join "`n") -match "IdentityOutputMatch=True") -and
+  (-not $debugListenerCallbackRequired -or $debugListenerCallbackRuntimePassed)
 $identityOutputMatch = (($stdoutLines -join "`n") -match "IdentityOutputMatch=True")
 $enqueueCompleted = (($stdoutLines -join "`n") -match "EnqueueCompleted=True")
 $serializedBytesText = Get-FirstMarkerValue -Lines $stdoutLines -Prefix "EngineSerializedBytes="
@@ -887,6 +1024,24 @@ else {
 Write-Host "PostRuntimeCollection=package-sources"
 $managedPackageSourceEvidence = Get-PackageSourceEvidence -Package $managedPackage -SourceDirectory $ManagedPackageDirectory -SourceName "jyppx-managed-local"
 $bridgePackageSourceEvidence = Get-PackageSourceEvidence -Package $bridgePackage -SourceDirectory $BridgePackageDirectory -SourceName "jyppx-bridge-local"
+$usesProjectReference = $project -match '<ProjectReference(?:\s|>)'
+$usesDirectAssemblyReference = $project -match '<Reference(?:\s|>)'
+$packageReferenceCount = ([regex]::Matches($project, '<PackageReference(?:\s|>)')).Count
+$usesRepositorySourceProbe =
+  $program.Contains($RepositoryRoot, [System.StringComparison]::OrdinalIgnoreCase) -or
+  $program -match 'RepositoryPaths|RepositoryRoot|src[\\/]JYPPX'
+$usesPackageReferenceOnly =
+  $packageReferenceCount -eq 2 -and
+  -not $usesProjectReference -and
+  -not $usesDirectAssemblyReference -and
+  -not $usesRepositorySourceProbe
+$isLocalPackageDebugListenerCallbackRuntimeProof =
+  $debugListenerCallbackRuntimePassed -and
+  $consumerRootOutsideRepository -and
+  $usesPackageReferenceOnly -and
+  $managedPackageSourceEvidence.isLocalPackageFeed -and
+  $bridgePackageSourceEvidence.isLocalPackageFeed -and
+  -not $SkipInstalledVendorAssetHashing.IsPresent
 $additionalPackageSources = @(
   @(Expand-KeyList -Values $AdditionalPackageSource) |
     ForEach-Object { Resolve-PackageSourceValue -Source $_ }
@@ -935,6 +1090,7 @@ $result = [ordered]@{
   identityOutputMatch = $identityOutputMatch
   isRuntimeExecutionProof = $runtimeSmokePassed
   isPackageConsumerRuntimeProof = $false
+  isLocalPackageDebugListenerCallbackRuntimeProof = $isLocalPackageDebugListenerCallbackRuntimeProof
   canPromoteCompatibleHostRuntimeProof = $runtimeSmokePassed -and -not $SkipInstalledVendorAssetHashing.IsPresent
   canPromoteRuntimeProof = $false
   canPublishPublicly = $false
@@ -944,7 +1100,52 @@ $result = [ordered]@{
   nativeAssetHashesComplete = -not $SkipInstalledVendorAssetHashing.IsPresent
   cudaPreflight = $cudaPreflight
   runtimeCreateDiagnostic = $runtimeCreateDiagnostic
-  runtimeProofBoundary = if ($SkipInstalledVendorAssetHashing.IsPresent) { "Diagnostic execution may record runtime behavior but skips installed vendor asset SHA256 values and cannot promote compatible-host runtime proof. Local package feeds are not public clean package-consumer proof." } else { "This record proves local managed plus bridge packages can build, serialize, deserialize, enqueue, and verify an identity network with system-installed vendor dependencies on this compatible host. Local package feeds are not public clean package-consumer proof, and this result does not clear other runtime lines." }
+  debugListenerCallback = [ordered]@{
+    status = if ($debugListenerCallbackRuntimePassed) { "passed" } elseif ($debugListenerCallbackRequired) { "failed" } else { "unsupported-tensorrt-line" }
+    evidenceKind = "debug-listener-real-callback-runtime"
+    evidenceScope = "local-package"
+    requiredForTensorRtLine = $debugListenerCallbackRequired
+    programReportedRequired = $debugListenerCallbackProgramRequired
+    runtimeInvariantsSatisfied = $debugListenerCallbackRuntimePassed
+    attached = $debugListenerAttachedText -eq "True"
+    nativeVTableInstalled = $debugListenerNativeVTableInstalledText -eq "True"
+    invocationCount = $debugListenerInvocationCount
+    failureCount = $debugListenerFailureCount
+    inFlightCallbackCount = $debugListenerInFlightCallbackCount
+    tensorName = Get-FirstMarkerValue -Lines $stdoutLines -Prefix "DebugListenerCallbackTensorName="
+    shape = Get-FirstMarkerValue -Lines $stdoutLines -Prefix "DebugListenerCallbackShape="
+    metadataCopied = (Get-FirstMarkerValue -Lines $stdoutLines -Prefix "DebugListenerCallbackMetadataCopied=") -eq "True"
+    borrowedPointerExposed = (Get-FirstMarkerValue -Lines $stdoutLines -Prefix "DebugListenerCallbackBorrowedPointerExposed=") -eq "True"
+    clearReturned = (Get-FirstMarkerValue -Lines $stdoutLines -Prefix "DebugListenerCallbackClearReturned=") -eq "True"
+    detached = (Get-FirstMarkerValue -Lines $stdoutLines -Prefix "DebugListenerCallbackDetached=") -eq "True"
+    detachCount = $debugListenerDetachCount
+    isRealCallbackRuntimeProof = (Get-FirstMarkerValue -Lines $stdoutLines -Prefix "DebugListenerCallbackIsRealRuntimeProof=") -eq "True"
+    isLocalPackageCallbackRuntimeProof = $isLocalPackageDebugListenerCallbackRuntimeProof
+    proofBoundary = "This callback proof is scoped to local managed and bridge packages restored into an external PackageReference-only consumer. It is not source-tree, public-package, or post-publish proof."
+  }
+  proofScopes = [ordered]@{
+    sourceTree = [ordered]@{
+      evidenceScope = "source-tree"
+      isProof = $false
+      boundary = "This report executes packaged assemblies and does not claim source-tree callback proof."
+    }
+    localPackage = [ordered]@{
+      evidenceScope = "local-package"
+      isProof = $isLocalPackageDebugListenerCallbackRuntimeProof
+      boundary = "Local package callback proof requires an external PackageReference-only consumer plus real invocation, copied metadata, pointer-free reporting, zero failure/in-flight callbacks, and successful detach."
+    }
+    publicPackage = [ordered]@{
+      evidenceScope = "public-package"
+      isProof = $false
+      boundary = "Local package directories cannot prove a public package channel."
+    }
+    postPublish = [ordered]@{
+      evidenceScope = "post-publish"
+      isProof = $false
+      boundary = "This pre-publish local package run cannot prove post-publish installation or execution."
+    }
+  }
+  runtimeProofBoundary = if ($SkipInstalledVendorAssetHashing.IsPresent) { "Diagnostic execution may record runtime and DebugListener callback behavior but skips installed vendor asset SHA256 values and cannot promote compatible-host or local-package callback runtime proof. Local package feeds are not public clean package-consumer proof." } else { "This record proves local managed plus bridge packages can build, serialize, deserialize, enqueue, verify an identity network, and complete a real DebugListener attach/invoke/detach cycle with system-installed vendor dependencies on this compatible host. The callback result is local-package proof only; it is not source-tree, public-package, or post-publish proof and does not clear other runtime lines." }
   packages = [ordered]@{
     managed = [ordered]@{
       id = $managedPackage.Id
@@ -977,8 +1178,11 @@ $result = [ordered]@{
     targetFramework = $TargetFramework
     runtimeIdentifier = $rid
     consumerRootOutsideRepository = $consumerRootOutsideRepository
-    usesPackageReferenceOnly = $project -notmatch "<ProjectReference"
-    usesProjectReference = $project -match "<ProjectReference"
+    packageReferenceCount = $packageReferenceCount
+    usesPackageReferenceOnly = $usesPackageReferenceOnly
+    usesProjectReference = $usesProjectReference
+    usesDirectAssemblyReference = $usesDirectAssemblyReference
+    usesRepositorySourceProbe = $usesRepositorySourceProbe
     outputDirectory = $outputDirectory
     outputPreserved = $KeepConsumerOutput.IsPresent
   }

@@ -25,6 +25,11 @@ Windows x64、Ubuntu 20.04/22.04/24.04、CUDA 11/12/13、TensorRT 8/10/11 可能
 5. 运行 dependency probe，记录系统安装依赖的 resolved path/version。
 6. 在兼容 GPU host 执行 runtime smoke，并保存 host metadata、runtime JSON、stdout/stderr 和 SHA256。
 
+本地发布前可运行 `eng/Test-BridgePackageRuntimeConsumer.ps1`。它在仓库外生成仅含 managed + `.Bridge` 两个
+`PackageReference` 的 consumer；TRT10/TRT11 还必须真实触发 DebugListener callback，并验证 invocation>0、
+failure/in-flight=0、copied metadata、无 borrowed pointer 暴露和 detach>0。报告只会把该结果标记为
+`local-package`，不会把它提升成 `public-package` 或 `post-publish`。
+
 ```powershell
 dotnet add package JYPPX.TensorRT.CSharp.API --version <version> --source <approved-source>
 dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.Bridge --version <version> --source <approved-source>

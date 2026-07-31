@@ -103,6 +103,15 @@ CUDA memory，安装 managed owner，启用 runtime tensor debug state 后执行
 该 marker 是 source-tree local runtime proof。历史 scaffold marker 仍可同时输出，用于验证旧 promotion gate 不会在缺少
 package report 时误晋级；二者的 evidence type 必须分开解析。
 
+`eng/Test-BridgePackageRuntimeConsumer.ps1` 还会在仓库外创建只引用本地 managed 与 `.Bridge` nupkg 的 clean consumer，
+在同一次 identity enqueue 中执行 debug tensor 标记、真实 callback 和 detach。该报告把证据域固定拆成
+`source-tree`、`local-package`、`public-package`、`post-publish`；只有 `local-package` 可以由本次运行晋级。晋级同时要求
+consumer 无 `ProjectReference`、直接程序集引用和源码探测，并满足 invocation>0、failure/in-flight=0、copied metadata、
+`BorrowedPointerExposed=False`、detach>0。缺少任一 marker 都按失败处理，不能用默认的零值代替证据。
+TRT10.11/CUDA12.9 与 TRT11.0/CUDA12.9 已使用本地 `4.0.10000-local.callback` managed/bridge nupkg 通过该路径，
+两条线均得到 invocation=1、failure/in-flight=0、detach=1；package policy 同时确认 managed 包无 native asset，
+每个 bridge 包只有项目自有 `jyppxtrtbridge.dll`。使用 `-SkipInstalledVendorAssetHashing` 的诊断运行不会晋级该证明。
+
 最新 DLL 的 TRT10.11/CUDA12.9 复验得到一次真实 callback、零 failure、零 in-flight、一次 detach，且
 `BorrowedPointerExposed=False`。native owner 的 drain wait 已用同一状态锁同步计数归零；managed context 在 native
 context handle 销毁后才解除 owner borrow，嵌套 managed callback 使用 depth 保护，避免 bool 提前复位。
@@ -150,4 +159,6 @@ TRT11.0/CUDA12.9 也通过同一 owner 路径，得到相同的一次 invocation
 - `IDebugListener::processDebugTensor` 已被 TensorRT 调用。
 - `real-callback-runtime` 可以被 promotion。
 
-只有 full package consumer smoke 同时报告 `EvidenceKind=real-callback-runtime`、`RuntimeEvidenceKind=real-callback-runtime`、`RealCallbackRuntime=True`、`IsRealCallbackRuntimeProof=True`、`ProcessDebugTensorInvoked=True`、`InvocationCount>0`、`FailureCount=0` 和完整 package report evidence，readiness 才允许把结果归类为真实 callback runtime proof。
+只有对应证据域的 consumer smoke 同时报告 `EvidenceKind=real-callback-runtime`、真实 invocation、零 failure/in-flight、
+pointer-free copied metadata、成功 detach 和完整 package identity，readiness 才能在该证据域内归类为真实 callback runtime
+proof。`local-package` 结果不能替代 `public-package` 或 `post-publish` 结果。
