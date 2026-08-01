@@ -104,7 +104,6 @@ public sealed class DebugListenerRealCallbackRuntimeProofTests
         string latest = ReadSource("docs", "articles", "zh-cn", "windows-api-completion-latest.md");
         string trampolineGate = ReadSource("docs", "articles", "zh-cn", "real-callback-trampoline-gate.md");
         string smokeReadme = ReadSource("smoke", "README.md");
-        string runtimeSplitReadme = ReadSource("pack", "runtime-split", "README.md");
         string toc = ReadSource("docs", "toc.yml");
         string index = ReadSource("docs", "index.md");
         string comparison = ReadSource("artifacts", "interface-coverage", "tensorrt-interface-comparison.csv");
@@ -136,7 +135,6 @@ public sealed class DebugListenerRealCallbackRuntimeProofTests
         Assert.Contains("debug-listener-real-callback-runtime-proof", latest);
         Assert.Contains("debug-listener-real-callback-runtime-proof", trampolineGate);
         Assert.Contains("debug-listener-real-callback-runtime-proof", smokeReadme);
-        Assert.Contains("debug-listener-real-callback-runtime-proof", runtimeSplitReadme);
         Assert.Contains("InvocationCount>0", packageConsumer);
         Assert.Contains("InvocationCount>0", doc);
         Assert.Contains("not proof", doc);

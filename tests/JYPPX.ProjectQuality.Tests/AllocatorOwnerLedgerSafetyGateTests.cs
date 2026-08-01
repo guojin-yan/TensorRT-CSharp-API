@@ -96,7 +96,6 @@ public sealed class AllocatorOwnerLedgerSafetyGateTests
         string latest = ReadSource("docs", "articles", "zh-cn", "windows-api-completion-latest.md");
         string docsIndex = ReadSource("docs", "index.md");
         string docsToc = ReadSource("docs", "toc.yml");
-        string runtimeSplitReadme = ReadSource("pack", "runtime-split", "README.md");
         string smokeReadme = ReadSource("smoke", "README.md");
         string readiness = ReadSource("eng", "Test-RuntimePackageReadiness.ps1");
         string bridgeConsumer = ReadSource("eng", "Test-BridgePackageConsumer.ps1");
@@ -142,7 +141,6 @@ public sealed class AllocatorOwnerLedgerSafetyGateTests
         Assert.Contains("allocator-owner-ledger-safety-gate", trampolineGate);
         Assert.Contains("allocator-owner-ledger-safety-gate", schema);
         Assert.Contains("allocator-owner-ledger-safety-gate", latest);
-        Assert.Contains("allocatorOwnerLedgerSafetyGate", runtimeSplitReadme);
         Assert.Contains("allocator-owner-ledger-safety-gate", smokeReadme);
 
         Assert.Contains("New-AllocatorOwnerLedgerSafetyGateEvidence", readiness);

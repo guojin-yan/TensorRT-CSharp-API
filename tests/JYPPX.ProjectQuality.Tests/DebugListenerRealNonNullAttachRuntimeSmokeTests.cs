@@ -123,7 +123,6 @@ public sealed class DebugListenerRealNonNullAttachRuntimeSmokeTests
         string latest = ReadSource("docs", "articles", "zh-cn", "windows-api-completion-latest.md");
         string trampolineGate = ReadSource("docs", "articles", "zh-cn", "real-callback-trampoline-gate.md");
         string smokeReadme = ReadSource("smoke", "README.md");
-        string runtimeSplitReadme = ReadSource("pack", "runtime-split", "README.md");
         string toc = ReadSource("docs", "toc.yml");
         string index = ReadSource("docs", "index.md");
         string comparison = ReadSource("artifacts", "interface-coverage", "tensorrt-interface-comparison.csv");
@@ -140,7 +139,6 @@ public sealed class DebugListenerRealNonNullAttachRuntimeSmokeTests
         AssertRuntimeSmokeNonProofMarkers(latest);
         AssertRuntimeSmokeNonProofMarkers(trampolineGate);
         AssertRuntimeSmokeNonProofMarkers(smokeReadme);
-        AssertRuntimeSmokeNonProofMarkers(runtimeSplitReadme);
         Assert.Contains("debug-listener-real-non-null-attach-runtime-smoke.md", toc);
         Assert.Contains("debug-listener-real-non-null-attach-runtime-smoke.md", index);
         Assert.Contains("DebugListenerRealNonNullAttachRuntimeSmokeAttempt final", nativeSource);
@@ -167,7 +165,6 @@ public sealed class DebugListenerRealNonNullAttachRuntimeSmokeTests
     {
         string packageConsumer = ReadSource("eng", "Test-PackageConsumer.ps1");
         string readiness = ReadSource("eng", "Test-RuntimePackageReadiness.ps1");
-        string runtimeSplitReadme = ReadSource("pack", "runtime-split", "README.md");
 
         Assert.Contains("\"runtime-smoke-skipped\"", packageConsumer);
         Assert.Contains("\"runtime-smoke-blocked\"", packageConsumer);
@@ -180,8 +177,6 @@ public sealed class DebugListenerRealNonNullAttachRuntimeSmokeTests
         Assert.Contains("RuntimeEvidenceKind=runtime-smoke-attempted", readiness);
         Assert.Contains("RuntimeEvidenceKind=runtime-smoke-failed", readiness);
         Assert.Contains("isRealCallbackRuntimeProof = $false", readiness);
-        Assert.Contains("runtime-smoke-skipped", runtimeSplitReadme);
-        Assert.Contains("remain insufficient on their own", runtimeSplitReadme);
     }
 
     private static TensorRtDebugListenerRealNonNullAttachRuntimeSmokeResult CreateRuntimeSmoke(bool optInEnabled, bool fullPackageConsumerReport)

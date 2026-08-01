@@ -194,7 +194,6 @@ public sealed class DebugListenerNativeAttachEntryRuntimeScaffoldTests
         string latest = ReadSource("docs", "articles", "zh-cn", "windows-api-completion-latest.md");
         string index = ReadSource("docs", "index.md");
         string toc = ReadSource("docs", "toc.yml");
-        string runtimeSplitReadme = ReadSource("pack", "runtime-split", "README.md");
         string smokeReadme = ReadSource("smoke", "README.md");
         string comparison = ReadSource("artifacts", "interface-coverage", "tensorrt-interface-comparison.csv");
 
@@ -255,7 +254,6 @@ public sealed class DebugListenerNativeAttachEntryRuntimeScaffoldTests
         Assert.Contains("debug-listener-native-attach-entry-runtime-scaffold", latest);
         Assert.Contains("debug-listener-native-attach-entry-runtime-scaffold", index);
         Assert.Contains("debug-listener-native-attach-entry-runtime-scaffold.md", toc);
-        Assert.Contains("debugListenerNativeAttachEntryRuntimeScaffold", runtimeSplitReadme);
         Assert.Contains("debug-listener-native-attach-entry-runtime-scaffold", smokeReadme);
 
         Assert.Contains("\"IDebugListener\",\"processDebugTensor\",\"IDebugListener::processDebugTensor\",\"other\",\"deferred-only\"", comparison);

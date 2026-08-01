@@ -123,7 +123,6 @@ public sealed class DebugListenerNoThrowVTableCallbackStubTests
         string latest = ReadSource("docs", "articles", "zh-cn", "windows-api-completion-latest.md");
         string trampolineGate = ReadSource("docs", "articles", "zh-cn", "real-callback-trampoline-gate.md");
         string smokeReadme = ReadSource("smoke", "README.md");
-        string runtimeSplitReadme = ReadSource("pack", "runtime-split", "README.md");
         string toc = ReadSource("docs", "toc.yml");
         string index = ReadSource("docs", "index.md");
         string comparison = ReadSource("artifacts", "interface-coverage", "tensorrt-interface-comparison.csv");
@@ -138,11 +137,9 @@ public sealed class DebugListenerNoThrowVTableCallbackStubTests
         AssertCallbackStubEvidenceKindMarkers(doc);
         AssertCallbackStubEvidenceKindMarkers(latest);
         AssertCallbackStubEvidenceKindMarkers(smokeReadme);
-        AssertCallbackStubEvidenceKindMarkers(runtimeSplitReadme);
         AssertCallbackStubOverviewMarkers(schema);
         AssertCallbackStubOverviewMarkers(trampolineGate);
         AssertCallbackStubOverviewMarkers(smokeReadme);
-        AssertCallbackStubOverviewMarkers(runtimeSplitReadme);
         Assert.Contains("debug-listener-nothrow-vtable-callback-stub.md", toc);
         Assert.Contains("debug-listener-nothrow-vtable-callback-stub.md", index);
         Assert.Contains("DebugListenerNoThrowVTableCallbackStub final", nativeSource);

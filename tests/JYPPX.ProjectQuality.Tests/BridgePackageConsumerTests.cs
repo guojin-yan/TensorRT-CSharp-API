@@ -421,6 +421,10 @@ public sealed class BridgePackageConsumerTests
         Assert.Contains("local-package", readme);
         Assert.Contains("public-package", readme);
         Assert.Contains("post-publish", readme);
+        Assert.Contains("not copied into this package inventory", readme);
+        Assert.DoesNotContain("RuntimeEvidenceKind=", readme);
+        Assert.DoesNotContain("IsRealCallbackRuntimeProof=", readme);
+        Assert.DoesNotContain("runtime-smoke-skipped", readme);
     }
 
     private static string ReadSource(params string[] pathParts)

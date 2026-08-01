@@ -242,7 +242,6 @@ public sealed class DebugListenerRuntimeProofPrecheckTests
         string trampolineGate = ReadSource("docs", "articles", "zh-cn", "real-callback-trampoline-gate.md");
         string schema = ReadSource("docs", "articles", "zh-cn", "real-callback-runtime-evidence-schema.md");
         string latest = ReadSource("docs", "articles", "zh-cn", "windows-api-completion-latest.md");
-        string runtimeSplitReadme = ReadSource("pack", "runtime-split", "README.md");
         string smokeReadme = ReadSource("smoke", "README.md");
         string comparison = ReadSource("artifacts", "interface-coverage", "tensorrt-interface-comparison.csv");
 
@@ -582,19 +581,6 @@ public sealed class DebugListenerRuntimeProofPrecheckTests
         Assert.Contains("debug-listener-native-attach-entry-runtime-scaffold", latest);
         Assert.Contains("debug-listener-native-owner-stable-identity", latest);
         Assert.Contains("debug-listener-native-owner-lifecycle-gate", latest);
-        Assert.Contains("debugListenerRuntimeProofPrecheck", runtimeSplitReadme);
-        Assert.Contains("debugListenerAttachDetachDesignGate", runtimeSplitReadme);
-        Assert.Contains("debugListenerBorrowedTensorSafetyGate", runtimeSplitReadme);
-        Assert.Contains("debugListenerAttachVTableSafetyGate", runtimeSplitReadme);
-        Assert.Contains("debugListenerNativeAttachNoThrowPreflight", runtimeSplitReadme);
-        Assert.Contains("debugListenerNativeOwnerAddressDesignGate", runtimeSplitReadme);
-        Assert.Contains("debugListenerNativeNoThrowVTableDesignGate", runtimeSplitReadme);
-        Assert.Contains("debugListenerNativeAttachEntryDesignGate", runtimeSplitReadme);
-        Assert.Contains("debugListenerNativeDetachBeforeReleaseDesignGate", runtimeSplitReadme);
-        Assert.Contains("debugListenerNativeOwnerLifecycleDryRun", runtimeSplitReadme);
-        Assert.Contains("debugListenerNativeAttachEntryRuntimeScaffold", runtimeSplitReadme);
-        Assert.Contains("debugListenerNativeOwnerStableIdentity", runtimeSplitReadme);
-        Assert.Contains("debugListenerNativeOwnerLifecycleGate", runtimeSplitReadme);
         Assert.Contains("debug-listener-runtime-proof-precheck", smokeReadme);
         Assert.Contains("debug-listener-attach-detach-design-gate", smokeReadme);
         Assert.Contains("debug-listener-borrowed-tensor-safety-gate", smokeReadme);

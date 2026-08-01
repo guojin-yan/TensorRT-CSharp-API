@@ -102,7 +102,6 @@ public sealed class DebugListenerNativeOwnerVTableInstallExperimentTests
         string latest = ReadSource("docs", "articles", "zh-cn", "windows-api-completion-latest.md");
         string trampolineGate = ReadSource("docs", "articles", "zh-cn", "real-callback-trampoline-gate.md");
         string smokeReadme = ReadSource("smoke", "README.md");
-        string runtimeSplitReadme = ReadSource("pack", "runtime-split", "README.md");
         string toc = ReadSource("docs", "toc.yml");
         string index = ReadSource("docs", "index.md");
         string comparison = ReadSource("artifacts", "interface-coverage", "tensorrt-interface-comparison.csv");
@@ -119,7 +118,6 @@ public sealed class DebugListenerNativeOwnerVTableInstallExperimentTests
         AssertExperimentEvidenceKindMarkers(latest);
         AssertExperimentEvidenceKindMarkers(trampolineGate);
         AssertExperimentEvidenceKindMarkers(smokeReadme);
-        AssertExperimentEvidenceKindMarkers(runtimeSplitReadme);
         Assert.Contains("debug-listener-native-owner-vtable-install-experiment.md", toc);
         Assert.Contains("debug-listener-native-owner-vtable-install-experiment.md", index);
         Assert.Contains("DebugListener Native Owner VTable Install Experiment", preflightDoc);

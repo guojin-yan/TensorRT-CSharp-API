@@ -117,7 +117,6 @@ public sealed class OutputAllocatorCallbackOwnerDesignTests
         string designDoc = ReadSource("docs", "articles", "zh-cn", "output-allocator-callback-owner-design.md");
         string trampolineGate = ReadSource("docs", "articles", "zh-cn", "real-callback-trampoline-gate.md");
         string schema = ReadSource("docs", "articles", "zh-cn", "real-callback-runtime-evidence-schema.md");
-        string runtimeSplitReadme = ReadSource("pack", "runtime-split", "README.md");
         string smokeReadme = ReadSource("smoke", "README.md");
         string comparison = ReadSource("artifacts", "interface-coverage", "tensorrt-interface-comparison.csv");
 
@@ -154,7 +153,6 @@ public sealed class OutputAllocatorCallbackOwnerDesignTests
         Assert.Contains("not proof", designDoc);
         Assert.Contains("output-allocator-callback-owner-design", trampolineGate);
         Assert.Contains("output-allocator-callback-owner-design", schema);
-        Assert.Contains("outputAllocatorCallbackOwnerDesign", runtimeSplitReadme);
         Assert.Contains("output-allocator-callback-owner-design", smokeReadme);
 
         Assert.Contains("\"IOutputAllocator\",\"notifyShape\",\"IOutputAllocator::notifyShape\",\"other\",\"deferred-only\"", comparison);

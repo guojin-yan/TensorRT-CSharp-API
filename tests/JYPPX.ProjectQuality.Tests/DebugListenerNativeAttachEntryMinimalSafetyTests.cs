@@ -101,7 +101,6 @@ public sealed class DebugListenerNativeAttachEntryMinimalSafetyTests
         string latest = ReadSource("docs", "articles", "zh-cn", "windows-api-completion-latest.md");
         string trampolineGate = ReadSource("docs", "articles", "zh-cn", "real-callback-trampoline-gate.md");
         string smokeReadme = ReadSource("smoke", "README.md");
-        string runtimeSplitReadme = ReadSource("pack", "runtime-split", "README.md");
         string toc = ReadSource("docs", "toc.yml");
         string index = ReadSource("docs", "index.md");
         string comparison = ReadSource("artifacts", "interface-coverage", "tensorrt-interface-comparison.csv");
@@ -116,7 +115,6 @@ public sealed class DebugListenerNativeAttachEntryMinimalSafetyTests
         AssertMinimalSafetyEvidenceText(latest);
         AssertMinimalSafetyEvidenceText(trampolineGate);
         AssertMinimalSafetyEvidenceText(smokeReadme);
-        AssertMinimalSafetyEvidenceText(runtimeSplitReadme);
         Assert.Contains("debug-listener-native-attach-entry-minimal-safety.md", toc);
         Assert.Contains("debug-listener-native-attach-entry-minimal-safety.md", index);
         Assert.Contains("DebugListenerNativeAttachEntryMinimalSafety final", nativeSource);

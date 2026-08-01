@@ -129,7 +129,6 @@ public sealed class OutputBufferOwnershipSafetyGateTests
         string trampolineGate = ReadSource("docs", "articles", "zh-cn", "real-callback-trampoline-gate.md");
         string schema = ReadSource("docs", "articles", "zh-cn", "real-callback-runtime-evidence-schema.md");
         string latest = ReadSource("docs", "articles", "zh-cn", "windows-api-completion-latest.md");
-        string runtimeSplitReadme = ReadSource("pack", "runtime-split", "README.md");
         string smokeReadme = ReadSource("smoke", "README.md");
         string comparison = ReadSource("artifacts", "interface-coverage", "tensorrt-interface-comparison.csv");
 
@@ -180,7 +179,6 @@ public sealed class OutputBufferOwnershipSafetyGateTests
         Assert.Contains("output-buffer-ownership-safety-gate", trampolineGate);
         Assert.Contains("output-buffer-ownership-safety-gate", schema);
         Assert.Contains("output-buffer-ownership-safety-gate", latest);
-        Assert.Contains("outputBufferOwnershipSafetyGate", runtimeSplitReadme);
         Assert.Contains("output-buffer-ownership-safety-gate", smokeReadme);
 
         Assert.Contains("\"IOutputAllocator\",\"notifyShape\",\"IOutputAllocator::notifyShape\",\"other\",\"deferred-only\"", comparison);

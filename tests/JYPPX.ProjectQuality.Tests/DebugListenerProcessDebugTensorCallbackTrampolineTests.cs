@@ -88,7 +88,6 @@ public sealed class DebugListenerProcessDebugTensorCallbackTrampolineTests
         string latest = ReadSource("docs", "articles", "zh-cn", "windows-api-completion-latest.md");
         string trampolineGate = ReadSource("docs", "articles", "zh-cn", "real-callback-trampoline-gate.md");
         string smokeReadme = ReadSource("smoke", "README.md");
-        string runtimeSplitReadme = ReadSource("pack", "runtime-split", "README.md");
         string toc = ReadSource("docs", "toc.yml");
         string index = ReadSource("docs", "index.md");
         string comparison = ReadSource("artifacts", "interface-coverage", "tensorrt-interface-comparison.csv");
@@ -120,7 +119,6 @@ public sealed class DebugListenerProcessDebugTensorCallbackTrampolineTests
         Assert.Contains("callback-trampoline-shape", latest);
         Assert.Contains("callback-trampoline-shape", trampolineGate);
         Assert.Contains("callback-trampoline-shape", smokeReadme);
-        Assert.Contains("callback-trampoline-shape", runtimeSplitReadme);
         Assert.Contains("debug-listener-process-debug-tensor-callback-trampoline.md", toc);
         Assert.Contains("debug-listener-process-debug-tensor-callback-trampoline.md", index);
         Assert.Contains("not proof", doc);
@@ -135,14 +133,12 @@ public sealed class DebugListenerProcessDebugTensorCallbackTrampolineTests
     {
         string packageConsumer = ReadSource("eng", "Test-PackageConsumer.ps1");
         string readiness = ReadSource("eng", "Test-RuntimePackageReadiness.ps1");
-        string runtimeSplitReadme = ReadSource("pack", "runtime-split", "README.md");
 
         Assert.Contains("\"callback-trampoline-shape\"", packageConsumer);
         Assert.Contains("DebugListenerProcessDebugTensorCallbackTrampoline=", packageConsumer);
         Assert.Contains("RuntimeEvidenceKind=callback-trampoline-shape", readiness);
         Assert.Contains("isRealCallbackRuntimeProof = $false", readiness);
         Assert.Contains("canPromoteRealCallbackRuntime = $false", readiness);
-        Assert.Contains("callback-trampoline-shape", runtimeSplitReadme);
     }
 
     private static TensorRtDebugListenerProcessDebugTensorCallbackTrampolineResult CreateTrampoline()

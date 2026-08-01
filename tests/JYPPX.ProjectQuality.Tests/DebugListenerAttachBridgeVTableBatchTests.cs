@@ -94,7 +94,6 @@ public sealed class DebugListenerAttachBridgeVTableBatchTests
         string schema = ReadSource("docs", "articles", "zh-cn", "real-callback-runtime-evidence-schema.md");
         string trampolineGate = ReadSource("docs", "articles", "zh-cn", "real-callback-trampoline-gate.md");
         string latest = ReadSource("docs", "articles", "zh-cn", "windows-api-completion-latest.md");
-        string runtimeSplitReadme = ReadSource("pack", "runtime-split", "README.md");
         string smokeReadme = ReadSource("smoke", "README.md");
         string comparison = ReadSource("artifacts", "interface-coverage", "tensorrt-interface-comparison.csv");
 
@@ -219,7 +218,6 @@ public sealed class DebugListenerAttachBridgeVTableBatchTests
         AssertBatchMarkers(schema);
         AssertBatchMarkers(trampolineGate);
         AssertBatchMarkers(latest);
-        AssertBatchMarkers(runtimeSplitReadme);
         AssertBatchMarkers(smokeReadme);
         Assert.Contains("not proof", attachBridgeDoc);
         Assert.Contains("not proof", mappingDoc);

@@ -221,7 +221,6 @@ public sealed class DebugListenerNativeOwnerLifecycleDryRunTests
         string latest = ReadSource("docs", "articles", "zh-cn", "windows-api-completion-latest.md");
         string index = ReadSource("docs", "index.md");
         string toc = ReadSource("docs", "toc.yml");
-        string runtimeSplitReadme = ReadSource("pack", "runtime-split", "README.md");
         string smokeReadme = ReadSource("smoke", "README.md");
         string comparison = ReadSource("artifacts", "interface-coverage", "tensorrt-interface-comparison.csv");
 
@@ -288,7 +287,6 @@ public sealed class DebugListenerNativeOwnerLifecycleDryRunTests
         Assert.Contains("debug-listener-native-owner-lifecycle-dry-run", latest);
         Assert.Contains("debug-listener-native-owner-lifecycle-dry-run", index);
         Assert.Contains("debug-listener-native-owner-lifecycle-dry-run.md", toc);
-        Assert.Contains("debugListenerNativeOwnerLifecycleDryRun", runtimeSplitReadme);
         Assert.Contains("debug-listener-native-owner-lifecycle-dry-run", smokeReadme);
 
         Assert.Contains("\"IDebugListener\",\"processDebugTensor\",\"IDebugListener::processDebugTensor\",\"other\",\"deferred-only\"", comparison);

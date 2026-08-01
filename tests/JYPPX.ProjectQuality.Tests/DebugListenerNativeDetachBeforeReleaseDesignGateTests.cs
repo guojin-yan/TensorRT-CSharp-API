@@ -175,7 +175,6 @@ public sealed class DebugListenerNativeDetachBeforeReleaseDesignGateTests
         string latest = ReadSource("docs", "articles", "zh-cn", "windows-api-completion-latest.md");
         string index = ReadSource("docs", "index.md");
         string toc = ReadSource("docs", "toc.yml");
-        string runtimeSplitReadme = ReadSource("pack", "runtime-split", "README.md");
         string smokeReadme = ReadSource("smoke", "README.md");
         string comparison = ReadSource("artifacts", "interface-coverage", "tensorrt-interface-comparison.csv");
 
@@ -239,7 +238,6 @@ public sealed class DebugListenerNativeDetachBeforeReleaseDesignGateTests
         Assert.Contains("debug-listener-native-detach-before-release-design-gate", latest);
         Assert.Contains("debug-listener-native-detach-before-release-design-gate", index);
         Assert.Contains("debug-listener-native-detach-before-release-design-gate.md", toc);
-        Assert.Contains("debugListenerNativeDetachBeforeReleaseDesignGate", runtimeSplitReadme);
         Assert.Contains("debug-listener-native-detach-before-release-design-gate", smokeReadme);
 
         Assert.Contains("\"IDebugListener\",\"processDebugTensor\",\"IDebugListener::processDebugTensor\",\"other\",\"deferred-only\"", comparison);

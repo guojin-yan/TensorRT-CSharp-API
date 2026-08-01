@@ -82,7 +82,6 @@ public sealed class DebugListenerCallbackProofGapReportTests
         string doc = ReadSource("docs", "articles", "zh-cn", "debug-listener-callback-proof-gap-report.md");
         string schema = ReadSource("docs", "articles", "zh-cn", "real-callback-runtime-evidence-schema.md");
         string smokeReadme = ReadSource("smoke", "README.md");
-        string runtimeSplitReadme = ReadSource("pack", "runtime-split", "README.md");
         string toc = ReadSource("docs", "toc.yml");
         string index = ReadSource("docs", "index.md");
 
@@ -94,7 +93,6 @@ public sealed class DebugListenerCallbackProofGapReportTests
         AssertGapReportMarkers(doc);
         AssertGapReportMarkers(schema);
         AssertGapReportMarkers(smokeReadme);
-        AssertGapReportMarkers(runtimeSplitReadme);
         AssertActionableGapMarkers(source);
         AssertActionableGapMarkers(smoke);
         AssertActionableGapMarkers(bridgeConsumer);
@@ -104,7 +102,6 @@ public sealed class DebugListenerCallbackProofGapReportTests
         Assert.Contains("IsRealCallbackRuntimeProof=False", doc);
         Assert.Contains("IsRealCallbackRuntimeProof=False", schema);
         Assert.Contains("IsRealCallbackRuntimeProof=False", smokeReadme);
-        Assert.Contains("IsRealCallbackRuntimeProof=False", runtimeSplitReadme);
         Assert.Contains("DebugListenerCallbackProofGapReport=", smoke);
         Assert.Contains("DebugListenerCallbackProofGapReport=", packageConsumer);
         Assert.Contains("New-DebugListenerCallbackProofGapReportEvidence", readiness);

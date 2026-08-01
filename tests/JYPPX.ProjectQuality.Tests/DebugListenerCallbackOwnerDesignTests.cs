@@ -148,7 +148,6 @@ public sealed class DebugListenerCallbackOwnerDesignTests
         string trampolineGate = ReadSource("docs", "articles", "zh-cn", "real-callback-trampoline-gate.md");
         string schema = ReadSource("docs", "articles", "zh-cn", "real-callback-runtime-evidence-schema.md");
         string latest = ReadSource("docs", "articles", "zh-cn", "windows-api-completion-latest.md");
-        string runtimeSplitReadme = ReadSource("pack", "runtime-split", "README.md");
         string smokeReadme = ReadSource("smoke", "README.md");
         string comparison = ReadSource("artifacts", "interface-coverage", "tensorrt-interface-comparison.csv");
 
@@ -194,7 +193,6 @@ public sealed class DebugListenerCallbackOwnerDesignTests
         Assert.Contains("debug-listener-callback-owner-design", trampolineGate);
         Assert.Contains("debug-listener-callback-owner-design", schema);
         Assert.Contains("debug-listener-callback-owner-design", latest);
-        Assert.Contains("debugListenerCallbackOwnerDesign", runtimeSplitReadme);
         Assert.Contains("debug-listener-callback-owner-design", smokeReadme);
 
         Assert.Contains("\"IDebugListener\",\"processDebugTensor\",\"IDebugListener::processDebugTensor\",\"other\",\"deferred-only\"", comparison);

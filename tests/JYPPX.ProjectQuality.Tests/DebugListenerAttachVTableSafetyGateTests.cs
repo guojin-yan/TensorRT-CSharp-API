@@ -135,7 +135,6 @@ public sealed class DebugListenerAttachVTableSafetyGateTests
         string latest = ReadSource("docs", "articles", "zh-cn", "windows-api-completion-latest.md");
         string index = ReadSource("docs", "index.md");
         string toc = ReadSource("docs", "toc.yml");
-        string runtimeSplitReadme = ReadSource("pack", "runtime-split", "README.md");
         string smokeReadme = ReadSource("smoke", "README.md");
         string comparison = ReadSource("artifacts", "interface-coverage", "tensorrt-interface-comparison.csv");
 
@@ -192,7 +191,6 @@ public sealed class DebugListenerAttachVTableSafetyGateTests
         Assert.Contains("debug-listener-attach-vtable-safety-gate", latest);
         Assert.Contains("debug-listener-attach-vtable-safety-gate", index);
         Assert.Contains("debug-listener-attach-vtable-safety-gate.md", toc);
-        Assert.Contains("debugListenerAttachVTableSafetyGate", runtimeSplitReadme);
         Assert.Contains("debug-listener-attach-vtable-safety-gate", smokeReadme);
 
         Assert.Contains("\"IDebugListener\",\"processDebugTensor\",\"IDebugListener::processDebugTensor\",\"other\",\"deferred-only\"", comparison);
