@@ -45,6 +45,24 @@ TRT10/TRT11 的 vendor 默认 debug listener metadata 可能得到
 public-package 或 post-publish proof。readiness 还保留 negative-control scenario/requested/passed，负例即使按预期失败也不会被
 升级为 runtime success。
 
+## Release Evidence 中的 Callback 汇总
+
+`eng/Export-BridgeCallbackRuntimeEvidenceSummary.ps1` 只读 TRT10.11/CUDA12.9 与 TRT11.0/CUDA12.9 的
+`bridge-package-runtime-consumer-proof.json`，生成
+`artifacts/final-release/bridge-callback-runtime-evidence-summary.json` / `.md`。每条线必须同时满足：
+
+- success report 的 runtime execution 与 local-package callback proof 为 true；
+- callback-state 已观察、coherent、pointer-free，complete 与 partial 都允许，但状态组合必须由源报告负责；
+- callback 已 attach、安装 native vtable、真实 invocation 大于 0；
+- failure 与 in-flight 都为 0，clear/detach 成功；
+- `source-tree`、`public-package`、`post-publish` scope 不得被本地包报告误置为 true；
+- `canPromoteRuntimeProof`、`canPublishPublicly`、`canCloseReleaseIssue` 保持 false。
+
+摘要中的 `sourceReportsContainRuntimeExecutionProof=true` 和
+`sourceReportsContainLocalPackageCallbackRuntimeProof=true` 表示源报告已经证明对应本地包执行；摘要本身没有执行 callback，
+所以 `isRuntimeExecutionProof=false`。`Export-ReleaseEvidenceBundle.ps1` 只读消费该摘要，不会把本地 feed 提升为公开包、
+post-publish、发布授权或 release close proof。
+
 ## GitHub Release 路线
 
 GitHub Release 不是 NuGet feed。下载 managed 与 bridge `.nupkg` 后，先验证：

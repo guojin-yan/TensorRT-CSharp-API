@@ -108,7 +108,7 @@ package report 时误晋级；二者的 evidence type 必须分开解析。
 `source-tree`、`local-package`、`public-package`、`post-publish`；只有 `local-package` 可以由本次运行晋级。晋级同时要求
 consumer 无 `ProjectReference`、直接程序集引用和源码探测，并满足 invocation>0、failure/in-flight=0、copied metadata、
 `BorrowedPointerExposed=False`、detach>0。缺少任一 marker 都按失败处理，不能用默认的零值代替证据。
-TRT10.11/CUDA12.9 与 TRT11.0/CUDA12.9 已使用本地 `4.0.10000-local.callback` managed/bridge nupkg 通过该路径，
+TRT10.11/CUDA12.9 与 TRT11.0/CUDA12.9 已使用本地 `4.0.10001-local.callbackstate` managed/bridge nupkg 通过该路径，
 两条线均得到 invocation=1、failure/in-flight=0、detach=1；package policy 同时确认 managed 包无 native asset，
 每个 bridge 包只有项目自有 `jyppxtrtbridge.dll`。使用 `-SkipInstalledVendorAssetHashing` 的诊断运行不会晋级该证明。
 
@@ -139,6 +139,11 @@ invocation=1、failure/in-flight=0、detach=1。`--debug-listener-runtime-smoke-
 pointer-free callback-state；missing-vendor-dependency 在 context 创建前故意失败，必须记录 `observed=false`，且不能声称
 取得 snapshot。aggregate 要求所有 runtime、local callback、public-package、post-publish、publish 与 release-close proof
 标志均为 false；expected failure 只能证明所选错误被观察并被拒绝。
+
+`eng/Export-BridgeCallbackRuntimeEvidenceSummary.ps1` 会把两条 success report 投影成独立的 read-only summary。
+TRT10 callback-state 为 complete，TRT11 为 coherent partial；两条线都要求 observed/coherent/pointer-free、invocation=1、
+failure/in-flight=0 和成功 detach。summary 可以记录源报告含有 local-package callback runtime proof，但 summary 自身固定不是
+runtime execution、public-package 或 post-publish proof，也不能批准发布或关闭 release。
 
 ## Smoke And Readiness
 

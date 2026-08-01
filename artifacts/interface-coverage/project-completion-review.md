@@ -1,5 +1,36 @@
 # TensorRtSharp4.0 完成情况审查
 
+## 2026-08-01 Bridge Callback Runtime Evidence 下游分域汇总
+
+本阶段把 TRT10/TRT11 bridge-only 本地包消费者已经取得的真实 DebugListener callback 与 callback-state 证据，
+以只读方式接入 release evidence。目标是消除“历史静态 gate 仍为 false”与“本地包真实 callback 已通过”之间的阅读歧义，
+同时保持 local-package、public-package、post-publish 与 Owner release proof 严格分域。
+
+### 实现
+
+- 新增 `eng/Export-BridgeCallbackRuntimeEvidenceSummary.ps1`，默认读取 TRT10.11/CUDA12.9 与
+  TRT11.0/CUDA12.9 两份 success report，输出独立 JSON/Markdown。
+- 每条记录严格验证 source runtime key、smoke、runtime execution、callback-state observed/coherent/pointer-free、
+  attach/vtable/invocation、零 failure/in-flight、clear/detach 和 local-package scope。
+- 任一 source-tree/public-package/post-publish 越界，或 runtime promotion/public publish/release close 标志为 true，
+  都会产生 finding 并阻止 `allRequiredLocalPackageCallbackProofObserved`。
+- `Export-ReleaseEvidenceBundle.ps1` 先刷新并只读消费摘要；bundle 显式保存 source report proof 与 summary 自身 proof 的区别。
+- 新增 `BridgeCallbackRuntimeEvidenceSummaryTests`，使用临时 fixture 覆盖 2/2 正例、public scope 越界和缺失报告负例。
+
+### 真实验证
+
+- TRT10.11/CUDA12.9：callback-state complete/coherent/pointer-free，invocation `1`、failure/in-flight `0`、detach `1`。
+- TRT11.0/CUDA12.9：callback-state coherent partial/pointer-free，last operation 为
+  `snapshot-debug-listener-interface-info-partial`，invocation `1`、failure/in-flight `0`、detach `1`。
+- 实际摘要：required/observed `2/2`、finding `0`、source reports contain runtime/local callback proof 为 true。
+- 摘要自身 `isRuntimeExecutionProof=false`、public/post-publish proof=false、can promote/publish/close=false。
+
+### 证据边界
+
+- summary 是源报告的只读投影，不重新执行 callback，也不是新的 runtime proof。
+- 本地 PackageReference-only consumer 不等于公开渠道 clean consumer；不能替代 public package 或 post-publish proof。
+- 本阶段不打包、不上传、不发布 NVIDIA vendor runtime，发布物政策继续只有 managed、C# 扩展、项目自有 bridge 与源码。
+
 ## 2026-07-31 YOLOv8n-seg Bridge-Only 本地包消费者闭环
 
 本阶段把已完成的 YOLOv8n-seg source-tree 真实案例推进到仓库外 clean consumer。消费者只使用 managed API、

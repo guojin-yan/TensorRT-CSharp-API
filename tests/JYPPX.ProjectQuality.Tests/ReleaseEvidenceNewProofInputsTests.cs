@@ -60,6 +60,28 @@ public sealed class ReleaseEvidenceNewProofInputsTests
         Assert.False(root.GetProperty("trt11BridgeRuntimeConsumerIsRuntimeExecutionProof").GetBoolean());
         Assert.False(root.GetProperty("trt11BridgeRuntimeConsumerIsPackageConsumerRuntimeProof").GetBoolean());
         Assert.False(root.GetProperty("trt11BridgeRuntimeConsumerCanPromoteRuntimeProof").GetBoolean());
+
+        Assert.Equal("local-package-callback-runtime-observed", root.GetProperty("bridgeCallbackRuntimeEvidenceSummaryState").GetString());
+        Assert.Equal("local-package", root.GetProperty("bridgeCallbackRuntimeEvidenceSummaryScope").GetString());
+        Assert.Equal(2, root.GetProperty("bridgeCallbackRuntimeEvidenceSummaryRequiredRuntimeKeyCount").GetInt32());
+        Assert.Equal(2, root.GetProperty("bridgeCallbackRuntimeEvidenceSummaryObservedRuntimeKeyCount").GetInt32());
+        Assert.True(root.GetProperty("bridgeCallbackRuntimeEvidenceSummaryAllRequiredObserved").GetBoolean());
+        Assert.True(root.GetProperty("bridgeCallbackRuntimeEvidenceSummarySourceRuntimeProof").GetBoolean());
+        Assert.True(root.GetProperty("bridgeCallbackRuntimeEvidenceSummarySourceLocalCallbackProof").GetBoolean());
+        Assert.False(root.GetProperty("bridgeCallbackRuntimeEvidenceSummaryIsRuntimeProof").GetBoolean());
+        Assert.False(root.GetProperty("bridgeCallbackRuntimeEvidenceSummaryIsPublicPackageProof").GetBoolean());
+        Assert.False(root.GetProperty("bridgeCallbackRuntimeEvidenceSummaryIsPostPublishProof").GetBoolean());
+        Assert.False(root.GetProperty("bridgeCallbackRuntimeEvidenceSummaryCanPromoteRuntimeProof").GetBoolean());
+        Assert.False(root.GetProperty("bridgeCallbackRuntimeEvidenceSummaryCanPublishPublicly").GetBoolean());
+        Assert.False(root.GetProperty("bridgeCallbackRuntimeEvidenceSummaryCanCloseReleaseIssue").GetBoolean());
+        Assert.Equal(0, root.GetProperty("bridgeCallbackRuntimeEvidenceSummaryFindingCount").GetInt32());
+
+        JsonElement callbackSummary = root.GetProperty("bridgeCallbackRuntimeEvidenceSummary");
+        Assert.False(callbackSummary.GetProperty("isRuntimeExecutionProof").GetBoolean());
+        Assert.False(callbackSummary.GetProperty("isPublicPackageProof").GetBoolean());
+        Assert.False(callbackSummary.GetProperty("isPostPublishProof").GetBoolean());
+        Assert.Equal(2, callbackSummary.GetProperty("rows").GetArrayLength());
+
         Assert.Equal("classified-owner-action-required", root.GetProperty("trt11RootCauseReportState").GetString());
         Assert.Equal("createInferRuntime-null", root.GetProperty("trt11RootCauseFailureSignature").GetString());
         Assert.Equal("trt11-create-runtime-null-cuda-runtime-error", root.GetProperty("trt11RootCauseCategory").GetString());
