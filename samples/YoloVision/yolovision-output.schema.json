@@ -559,6 +559,17 @@
           "type": "string",
           "enum": ["raw", "logits", "probabilities"]
         },
+        "classCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "hasObjectness": {
+          "type": ["boolean", "null"]
+        },
+        "coordinateSpace": {
+          "type": "string",
+          "const": "model-input-pixels"
+        },
         "angleUnit": {
           "type": "string",
           "enum": [

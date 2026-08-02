@@ -11,7 +11,7 @@ This matrix is not `real-model-runtime` proof. Real promotion still requires own
 | YOLOv5 | det, cls, seg | Managed postprocess ready; requires owner assets. |
 | YOLOv6 | det | Managed postprocess ready; requires owner assets. |
 | YOLOv7 | det, pose | Pose requires auxiliary metadata. |
-| YOLOv8 | det, cls, seg, obb, pose | Official YOLOv8n classification, segmentation, embedded pose, and embedded-angle OBB source-tree proofs; detection requires a separate audited asset. |
+| YOLOv8 | det, cls, seg, obb, pose | Official YOLOv8n detection, classification, segmentation, embedded pose, and embedded-angle OBB source-tree proofs. |
 | YOLOv9 | det, seg | Planned runtime proof; managed decode surface available. |
 | YOLOv10 | det | Managed `[1,N,6]` xyxy/score/classId decoder ready; owner assets and runtime proof still required. |
 | YOLOv11 | det, cls, seg, obb, pose | Planned runtime proof; matrix-ready. |

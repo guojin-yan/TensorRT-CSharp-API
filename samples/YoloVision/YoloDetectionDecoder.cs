@@ -8,6 +8,15 @@ public static class YoloDetectionDecoder
 {
     public static IReadOnlyList<YoloDetection> Decode(float[] values, int[] dims, YoloPostprocessOptions options)
     {
+        return Decode(values, dims, options, allowTrailingAuxiliaryChannels: false);
+    }
+
+    internal static IReadOnlyList<YoloDetection> Decode(
+        float[] values,
+        int[] dims,
+        YoloPostprocessOptions options,
+        bool allowTrailingAuxiliaryChannels)
+    {
         if (values == null)
         {
             throw new ArgumentNullException(nameof(values));
@@ -35,9 +44,15 @@ public static class YoloDetectionDecoder
         bool hasObjectness = ResolveHasObjectness(channelCount, options);
         int classOffset = hasObjectness ? 5 : 4;
         int classCount = options.ClassCount > 0 ? options.ClassCount : channelCount - classOffset;
-        if (classCount <= 0 || classOffset + classCount > channelCount)
+        bool invalidChannelContract = classCount <= 0
+            || classOffset + classCount > channelCount
+            || (!allowTrailingAuxiliaryChannels && classOffset + classCount != channelCount);
+        if (invalidChannelContract)
         {
-            throw new NotSupportedException($"YOLO output channel count {channelCount} does not leave room for {classCount} class scores.");
+            throw new NotSupportedException(
+                allowTrailingAuxiliaryChannels
+                    ? $"YOLO output channel count {channelCount} does not leave room for {classCount} class scores before auxiliary channels."
+                    : $"YOLO output channel count {channelCount} must equal {classOffset} box/objectness channels plus exactly {classCount} class scores.");
         }
 
         List<YoloDetection> candidates = new List<YoloDetection>();

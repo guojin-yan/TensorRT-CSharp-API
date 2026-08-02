@@ -299,6 +299,25 @@ public sealed class YoloVisionManagedPipelineTests
     }
 
     [Fact]
+    public void DetectionDecoderRequiresConfiguredClassesToConsumeEveryScoreChannel()
+    {
+        YoloPostprocessOptions options = new YoloPostprocessOptions(
+            YoloOutputLayout.BoxesFirst,
+            hasObjectness: false,
+            classCount: 2,
+            confidenceThreshold: 0.25f,
+            iouThreshold: 0.45f,
+            topK: 10,
+            applyNms: true);
+
+        NotSupportedException error = Assert.Throws<NotSupportedException>(() => YoloDetectionDecoder.Decode(
+            new[] { 10.0f, 10.0f, 2.0f, 2.0f, 0.8f, 0.1f, 0.05f },
+            new[] { 1, 1, 7 },
+            options));
+        Assert.Contains("plus exactly 2 class scores", error.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void YoloXDecoderTransformsRawGridAndStrideCoordinatesBeforeNms()
     {
         YoloModelProfile profile = YoloModelProfile.FromArgs(new[]
@@ -1464,6 +1483,10 @@ public sealed class YoloVisionManagedPipelineTests
             Assert.Equal("in-memory-from-onnx", root.GetProperty("engine").GetProperty("materialization").GetString());
             Assert.Equal(64, root.GetProperty("engine").GetProperty("modelSha256").GetString()!.Length);
             Assert.Equal("boxes", root.GetProperty("outputs")[0].GetProperty("role").GetString());
+            JsonElement postprocess = root.GetProperty("postprocess");
+            Assert.Equal(2, postprocess.GetProperty("classCount").GetInt32());
+            Assert.False(postprocess.GetProperty("hasObjectness").GetBoolean());
+            Assert.Equal("model-input-pixels", postprocess.GetProperty("coordinateSpace").GetString());
             Assert.Single(root.GetProperty("predictions").EnumerateArray());
             Assert.Equal("person", root.GetProperty("predictions")[0].GetProperty("className").GetString());
             Assert.False(root.GetProperty("boundary").GetProperty("isRuntimeProof").GetBoolean());

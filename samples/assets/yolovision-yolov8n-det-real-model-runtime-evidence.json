@@ -1,0 +1,215 @@
+{
+  "schemaVersion": 1,
+  "recordKind": "sample-run-evidence-record",
+  "recordId": "yolovision-yolov8n-det-win-x64-trt10.11-cuda12.9-20260802",
+  "sampleName": "YoloVision",
+  "family": "yolov8",
+  "task": "det",
+  "proofClassification": "real-model-runtime",
+  "validatorState": "real-model-runtime",
+  "templateOnly": false,
+  "isSmokePassed": true,
+  "canPromoteRealModelRuntime": true,
+  "canPromotePackageConsumerRuntime": false,
+  "executedUtcDate": "2026-08-02",
+  "sourceBaseCommit": "a932bbefc53bf7b3d5764035ad399e60ebc95734",
+  "implementationNote": "The exact detection class-channel contract, reference diagnostics, manifest, scripts, evidence, tests, and documentation are committed together after this working-tree execution.",
+  "license": {
+    "name": "GNU Affero General Public License v3.0",
+    "spdxId": "AGPL-3.0-only",
+    "manifest": "samples/assets/yolovision-yolov8n-det-official-assets.json",
+    "publicRedistributionOwnerApproval": false
+  },
+  "host": {
+    "os": "Microsoft Windows 11 Home Chinese, NT 10.0.26200.0",
+    "rid": "win-x64",
+    "cpu": "AMD Ryzen 7 5800H with Radeon Graphics",
+    "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+    "gpuMemoryMiB": 6144,
+    "driverVersion": "576.02",
+    "cudaVersion": "12.9",
+    "tensorRtVersion": "10.11.0.33",
+    "dotnetSdkVersion": "10.0.301",
+    "bridgeSha256": "74d89fd7e1cb414751ca943298e003ecf48cadcda3e4c1952e5a2d5ba0b0cfc9"
+  },
+  "assets": {
+    "weights": {
+      "fileName": "yolov8n.pt",
+      "length": 6549796,
+      "sha256": "f59b3d833e2ff32e194b5bb8e08d211dc7c5bdf144b90d2c8412c47ccfc83b36"
+    },
+    "onnx": {
+      "fileName": "yolov8n.onnx",
+      "length": 12851047,
+      "sha256": "db28a49ffbb0425f39ae56252e7e0b43d06b357416c7da58872e285560b4221e"
+    },
+    "image": {
+      "fileName": "bus.jpg",
+      "length": 137419,
+      "sha256": "c02019c4979c191eb739ddd944445ef408dad5679acab6fd520ef9d434bfbc63"
+    },
+    "ppm": {
+      "fileName": "bus.ppm",
+      "length": 2624416,
+      "sha256": "6cdb4b6728a36516826f9adb9387774a6b5db0a49837d515c9045324e04e8688"
+    },
+    "labels": {
+      "fileName": "coco.names",
+      "classCount": 80,
+      "length": 621,
+      "sha256": "bd17f1ee35d5f3c862a4894605855abbb9dda4b0621fdb0ac4c2c8c7bb7e730a",
+      "source": "coco.yaml names in integer-key order",
+      "matchesModelNamesExactly": true
+    },
+    "runtimeInputTensor": {
+      "shape": [1, 3, 640, 640],
+      "elementCount": 1228800,
+      "length": 4915200,
+      "sha256": "46a0278967f1230ef8db59b0b8311a3aba3dce45233f1ba68821418ae02a574d"
+    }
+  },
+  "modelContract": {
+    "input": {
+      "name": "images",
+      "shape": [1, 3, 640, 640],
+      "dataType": "float32",
+      "preprocess": "center-letterbox; RGB; NCHW; scale=1/255; fill=114"
+    },
+    "outputs": [
+      {
+        "name": "output0",
+        "shape": [1, 84, 8400],
+        "elementCount": 705600,
+        "role": "detection-rows",
+        "layout": "channels-first",
+        "boxChannelCount": 4,
+        "classCount": 80,
+        "hasObjectness": false
+      }
+    ],
+    "postprocess": {
+      "classCount": 80,
+      "confidenceThreshold": 0.25,
+      "iouThreshold": 0.45,
+      "topK": 10,
+      "applyNms": true,
+      "nmsMode": "ClassAware",
+      "coordinateSpace": "model-input-pixels",
+      "classChannelContract": "pure detection output must consume every channel exactly"
+    }
+  },
+  "independentReferenceValidation": {
+    "script": "eng/Invoke-YoloVisionDetectionReference.py",
+    "providers": ["CPUExecutionProvider", "PyTorch CPU"],
+    "ultralyticsVersion": "8.4.21",
+    "torchVersion": "2.10.0+cpu",
+    "onnxVersion": "1.15.0",
+    "onnxRuntimeVersion": "1.15.0",
+    "pytorchOnnxRuntimeMaximumAbsoluteError": 0.002044677734375,
+    "referenceInput": "the exact C# letterbox tensor",
+    "rawReferenceSha256": "6b7d8acb790fde1d41aa503e8d6a09ead9e4ea8e447f503b8fddab998c7387d6",
+    "postprocessReferenceSha256": "eae23c95dafee3904fb8adc519e90045929491ccbea613a32ed69f2290e405c0",
+    "canonicalImageReferenceSha256": "5a3ee95ce1c03a281fe3ded109c90e7364b32d3ac77dbd182fca3a39958f0862",
+    "reportSha256": "aa7eb6b6ac3ce877592959aae6f9e3b9a6791a65eb85de4331bbb73e06631635",
+    "passed": true
+  },
+  "csharpLetterboxValidation": {
+    "sourceSize": [810, 1080],
+    "targetSize": [640, 640],
+    "resizedSize": [480, 640],
+    "padding": [80, 0],
+    "scale": [0.5925926, 0.5925926],
+    "tensorMaximumAbsoluteErrorAgainstUltralytics": 0.003921627998352051,
+    "tensorMeanAbsoluteErrorAgainstUltralytics": 0.00033520336728543043,
+    "canonicalOutputMaximumAbsoluteError": 7.0901641845703125,
+    "passed": true,
+    "interpretation": "The recorded interpolation difference is isolated by generating the raw runtime reference from the exact C# tensor."
+  },
+  "runtimeReferenceValidation": {
+    "requested": true,
+    "completed": true,
+    "passed": true,
+    "absoluteTolerance": 0.02,
+    "relativeTolerance": 0.05,
+    "toleranceInterpretation": "Combined coordinate/score tensor: relative tolerance covers box coordinates; absolute tolerance covers values near zero; final retained boxes have an independent strict comparison.",
+    "nanPolicy": "reject",
+    "infinityPolicy": "exact",
+    "tensors": [
+      {
+        "name": "output0",
+        "shape": [1, 84, 8400],
+        "comparedValueCount": 705600,
+        "mismatchCount": 0,
+        "firstMismatchIndex": -1,
+        "maximumAbsoluteError": 2.9351807,
+        "maximumRelativeError": 1.0,
+        "referenceSha256": "6b7d8acb790fde1d41aa503e8d6a09ead9e4ea8e447f503b8fddab998c7387d6"
+      }
+    ]
+  },
+  "detectionPostprocessValidation": {
+    "referenceFramework": "Ultralytics/PyTorch CPU NMS over the exact C# input tensor",
+    "referenceSha256": "eae23c95dafee3904fb8adc519e90045929491ccbea613a32ed69f2290e405c0",
+    "comparisonSha256": "2d5d889ff8e67edb304c106d0a50b14b64676deded32918d27e017d9c08be4c4",
+    "predictionCount": 5,
+    "classIds": [0, 0, 0, 5, 0],
+    "classNames": ["person", "person", "person", "bus", "person"],
+    "thresholds": {
+      "minimumBoxIoU": 0.995,
+      "maximumScoreAbsoluteError": 0.01
+    },
+    "minimumObservedBoxIoU": 0.9998413061042335,
+    "maximumObservedScoreAbsoluteError": 0.00010285853881830676,
+    "predictions": [
+      { "rank": 1, "className": "person", "tensorRtScore": 0.890559, "boxIoU": 0.9999149882658622, "passed": true },
+      { "rank": 2, "className": "person", "tensorRtScore": 0.882960, "boxIoU": 0.999923822602353, "passed": true },
+      { "rank": 3, "className": "person", "tensorRtScore": 0.878742, "boxIoU": 0.9999731362406585, "passed": true },
+      { "rank": 4, "className": "bus", "tensorRtScore": 0.841657, "boxIoU": 0.9999225335832777, "passed": true },
+      { "rank": 5, "className": "person", "tensorRtScore": 0.438099, "boxIoU": 0.9998413061042335, "passed": true }
+    ],
+    "passed": true
+  },
+  "controlledNegativeValidation": {
+    "mutation": "reference output0 coordinate index 0 += 125",
+    "referenceSha256": "a7a90c131822752f2091fa5f8417d8f6ccecf84bd85695cc35f6b05a897cf163",
+    "absoluteTolerance": 0.02,
+    "relativeTolerance": 0.05,
+    "exitCode": 1,
+    "mismatchCount": 1,
+    "firstMismatchIndex": 0,
+    "firstActual": 3.3009284,
+    "firstExpected": 128.30081,
+    "maximumAbsoluteError": 124.999886,
+    "passed": false,
+    "failClosed": true
+  },
+  "artifacts": {
+    "outputJsonSha256": "ad1571e063d0c81da61522e3a23b54adf24160bf1a161697aab1ab67c86dceb7",
+    "visualizationSvgSha256": "65b479b3b400a7e2ec52e57271adee5a4297a2e935053f5ec7aaa127d39476f9",
+    "positiveRunLogSha256": "9caa3a20d19eb2654a81a3eb0b89ea0273dfbeddb5f6ed40a26f6493c3d56c15",
+    "controlledNegativeRunLogSha256": "c42fc538ec68a47518352e2c6402093b7ad27ed9b0c886f200d9652861060e37",
+    "referenceReportSha256": "aa7eb6b6ac3ce877592959aae6f9e3b9a6791a65eb85de4331bbb73e06631635",
+    "postprocessComparisonSha256": "2d5d889ff8e67edb304c106d0a50b14b64676deded32918d27e017d9c08be4c4"
+  },
+  "commands": {
+    "acquisition": "pwsh -NoProfile -ExecutionPolicy Bypass -File ./eng/Acquire-YoloV8DetectionOfficialAssets.ps1 -AssetRoot <E-drive-root> -PythonPath <python>",
+    "reference": "python ./eng/Invoke-YoloVisionDetectionReference.py --weights <pt> --coco-yaml <yaml> --image <jpg> --onnx <onnx> --output-directory <reference-dir> --csharp-tensor <tensor> --actual-output <output-json>",
+    "runtime": "dotnet ./samples/YoloVision/bin/Release/net8.0/YoloVision.dll --model <onnx> --labels <labels> --image <ppm> --preprocessed-output <tensor> --input-shape 1x3x640x640 --tensor-rt-line 10 --family v8 --task det --layout channels-first --has-objectness false --class-count 80 --confidence 0.25 --iou-threshold 0.45 --top-k 10 --nms-mode class-aware --reference-outputs output0:<reference> --reference-abs-tolerance 0.02 --reference-rel-tolerance 0.05 --output-json <json> --visualization <svg>"
+  },
+  "proofBoundary": {
+    "sourceTreeRealModelRuntime": true,
+    "publicRedistributionApproved": false,
+    "packageConsumerRuntimeProof": false,
+    "publicPackageProof": false,
+    "postPublishProof": false,
+    "ownerReleaseAcceptance": false,
+    "releaseProof": false,
+    "performsPublish": false,
+    "uploadsAssets": false
+  },
+  "notes": [
+    "The repository commits this small record only; model, ONNX, image, tensor, reference, SVG, and logs remain outside Git on E drive.",
+    "NVIDIA CUDA, cuDNN, TensorRT, and NVRTC remain user-installed dependencies and are not redistributed by this project.",
+    "Source-tree real-model-runtime does not replace clean package-consumer, public-package, post-publish, Owner authorization, or release evidence."
+  ]
+}

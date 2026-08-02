@@ -259,6 +259,18 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-YoloVisionOutputReport.
 
 仓库不会把大型模型、图片和 label 直接塞进源码，因为这些资产有体积和 license 限制。已有的 acquisition/backfill 入口都要求 owner 明确来源、license、SHA256 和输出日志。
 
+YOLOv8n Detection 官方路径：
+
+```text
+eng/Acquire-YoloV8DetectionOfficialAssets.ps1
+eng/Invoke-YoloVisionDetectionReference.py
+samples/assets/yolovision-yolov8n-det-official-assets.json
+samples/assets/yolovision-yolov8n-det-real-model-runtime-evidence.json
+docs/articles/zh-cn/yolovision-yolov8-det-real-asset-tutorial.md
+```
+
+官方 `yolov8n.pt` 导出为 `images:[1,3,640,640] -> output0:[1,84,8400]`，即 4 个 box 通道加 80 个 COCO class 通道，没有独立 objectness。TensorRT 对 705,600 个值完成 reference 校验，4 个 person 与 1 个 bus 的最终框对 PyTorch CPU reference 的最小 IoU 为 `0.999841`。这仍只是 source-tree real-model-runtime，不批准模型再分发，也不替代 package-consumer、post-publish 或 release proof。
+
 YOLOv10n 官方路径：
 
 ```text

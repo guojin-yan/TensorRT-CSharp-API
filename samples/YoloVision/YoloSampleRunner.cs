@@ -47,6 +47,19 @@ public static class YoloSampleRunner
         int[] outputShape,
         YoloModelProfile profile)
     {
+        return DecodeDetections(
+            values,
+            outputShape,
+            profile,
+            allowTrailingAuxiliaryChannels: profile?.TaskType != YoloTaskType.Detection);
+    }
+
+    private static IReadOnlyList<YoloDetection> DecodeDetections(
+        float[] values,
+        int[] outputShape,
+        YoloModelProfile profile,
+        bool allowTrailingAuxiliaryChannels)
+    {
         if (profile == null)
         {
             throw new ArgumentNullException(nameof(profile));
@@ -60,7 +73,11 @@ public static class YoloSampleRunner
         float[] detectionValues = profile.Family == YoloModelFamily.YoloX
             ? YoloXOutputDecoder.TransformRawOutput(values, outputShape, profile.InputShape, profile.Postprocess)
             : values;
-        return YoloDetectionDecoder.Decode(detectionValues, outputShape, profile.Postprocess);
+        return YoloDetectionDecoder.Decode(
+            detectionValues,
+            outputShape,
+            profile.Postprocess,
+            allowTrailingAuxiliaryChannels);
     }
 
     public static YoloVisionResult DecodeRuntimeOutputs(
@@ -109,7 +126,11 @@ public static class YoloSampleRunner
         }
 
         YoloModelProfile detectionProfile = CreateDetectionProfileForAuxiliary(profile, boxShape, metadata.MaskCoefficientCount);
-        IReadOnlyList<YoloDetection> detections = DecodeDetections(boxValues, boxShape, detectionProfile);
+        IReadOnlyList<YoloDetection> detections = DecodeDetections(
+            boxValues,
+            boxShape,
+            detectionProfile,
+            allowTrailingAuxiliaryChannels: true);
         float[][] coefficients = ReadPerBoxAuxiliaryRows(boxValues, boxShape, detectionProfile.Postprocess, metadata.AuxiliaryChannelStart, metadata.MaskCoefficientCount, metadata.AuxiliaryLayout);
         PrototypeTensor prototypes = PrototypeTensor.FromValues(prototypeValues, prototypeShape);
 
@@ -153,7 +174,11 @@ public static class YoloSampleRunner
         }
 
         YoloModelProfile detectionProfile = CreateDetectionProfile(profile);
-        IReadOnlyList<YoloDetection> detections = DecodeDetections(boxValues, boxShape, detectionProfile);
+        IReadOnlyList<YoloDetection> detections = DecodeDetections(
+            boxValues,
+            boxShape,
+            detectionProfile,
+            allowTrailingAuxiliaryChannels: true);
         float[][] keypointRows = ReadAuxiliaryRows(keypointValues, keypointShape, metadata.PoseKeypointCount * metadata.PoseKeypointStride, metadata.AuxiliaryLayout);
 
         List<YoloPosePrediction> poses = new List<YoloPosePrediction>();
@@ -193,7 +218,11 @@ public static class YoloSampleRunner
         int auxiliaryWidth = checked(metadata.PoseKeypointCount * metadata.PoseKeypointStride);
         YoloModelProfile detectionProfile = CreateDetectionProfileForAuxiliary(profile, outputShape, auxiliaryWidth);
         int channelStart = ValidateEmbeddedAuxiliaryContract(outputShape, detectionProfile.Postprocess, metadata, auxiliaryWidth);
-        IReadOnlyList<YoloDetection> detections = DecodeDetections(values, outputShape, detectionProfile);
+        IReadOnlyList<YoloDetection> detections = DecodeDetections(
+            values,
+            outputShape,
+            detectionProfile,
+            allowTrailingAuxiliaryChannels: true);
         float[][] keypointRows = ReadPerBoxAuxiliaryRows(
             values,
             outputShape,
@@ -234,7 +263,11 @@ public static class YoloSampleRunner
         }
 
         YoloModelProfile detectionProfile = CreateObbCandidateProfile(CreateDetectionProfile(profile));
-        IReadOnlyList<YoloDetection> detections = DecodeDetections(boxValues, boxShape, detectionProfile);
+        IReadOnlyList<YoloDetection> detections = DecodeDetections(
+            boxValues,
+            boxShape,
+            detectionProfile,
+            allowTrailingAuxiliaryChannels: true);
         float[][] angleRows = ReadAuxiliaryRows(angleValues, angleShape, 1, metadata.AuxiliaryLayout);
 
         List<YoloObbDetection> orientedBoxes = new List<YoloObbDetection>();
@@ -273,7 +306,11 @@ public static class YoloSampleRunner
             metadata,
             angleWidth,
             "OBB angle");
-        IReadOnlyList<YoloDetection> detections = DecodeDetections(values, outputShape, detectionProfile);
+        IReadOnlyList<YoloDetection> detections = DecodeDetections(
+            values,
+            outputShape,
+            detectionProfile,
+            allowTrailingAuxiliaryChannels: true);
         float[][] angleRows = ReadPerBoxAuxiliaryRows(
             values,
             outputShape,

@@ -78,10 +78,13 @@ dotnet run --project .\samples\YoloVision -- --list-capabilities --json
 
 当前 source-tree 真实运行证据只覆盖：
 
+- YOLOv8n detection 的官方 `[1,84,8400]` raw head、80 类与 class-aware NMS 路径。
+- YOLOv8n classification 的官方 1000 类 Softmax 概率路径。
+- YOLOv8n segmentation、embedded pose 与 embedded-angle OBB 路径。
 - YOLOv10 detection 的官方六列 end-to-end 输出路径。
 - YOLOX-S detection 的官方 raw grid/stride 输出路径。
 
-其他 entry 多数仍是 `managed-postprocess-ready`、`planned-runtime-proof`、`requires owner assets` 或 future planning。
+其余 family/task entry 多数仍是 `managed-postprocess-ready`、`planned-runtime-proof`、`requires owner assets` 或 future planning；上述源码树结果也不自动成为 package-consumer 或 post-publish proof。
 
 ### 第三层：任务输出契约
 

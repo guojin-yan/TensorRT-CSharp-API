@@ -403,6 +403,8 @@ internal static partial class TensorRtOnnxSample
 
         int mismatchCount = 0;
         int firstMismatchIndex = -1;
+        float firstMismatchActualValue = 0.0f;
+        float firstMismatchReferenceValue = 0.0f;
         float maximumAbsoluteError = 0.0f;
         float maximumRelativeError = 0.0f;
         for (int index = 0; index < output.Values.Length; index++)
@@ -421,6 +423,8 @@ internal static partial class TensorRtOnnxSample
                 if (firstMismatchIndex < 0)
                 {
                     firstMismatchIndex = index;
+                    firstMismatchActualValue = output.Values[index];
+                    firstMismatchReferenceValue = referenceValues[index];
                 }
             }
         }
@@ -442,7 +446,9 @@ internal static partial class TensorRtOnnxSample
             maximumRelativeError,
             completed: true,
             passed,
-            passed ? "all reference values matched" : $"{mismatchCount} reference values did not match");
+            passed
+                ? "all reference values matched"
+                : $"{mismatchCount} reference values did not match; first actual={firstMismatchActualValue:R}, expected={firstMismatchReferenceValue:R}");
     }
 
     private static bool ReferenceValuesMatch(

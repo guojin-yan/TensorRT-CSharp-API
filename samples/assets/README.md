@@ -36,6 +36,17 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Acquire-YoloV10OfficialAsset
 
 This acquisition is not runtime proof, package-consumer-runtime proof, or redistribution approval. AGPL-3.0-only assets require owner review before any public redistribution decision.
 
+## Official YOLOv8n Detection acquisition
+
+`yolovision-yolov8n-det-official-assets.json` pins the Ultralytics `v8.3.0` detection weight, COCO YAML, source license, official `bus.jpg`, deterministic PPM, and exact 80-line labels. The acquisition script rejects C-drive output and performs no export, runtime, upload, or publish operation:
+
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Acquire-YoloV8DetectionOfficialAssets.ps1 `
+  -PythonPath C:\path\to\python.exe
+```
+
+`eng/Invoke-YoloVisionDetectionReference.py` validates `images:[1,3,640,640] -> output0:[1,84,8400]`, creates the raw ONNX Runtime reference for the exact C# letterbox tensor, retains a canonical image-pipeline comparison, and independently runs the Ultralytics/PyTorch NMS path. `yolovision-yolov8n-det-real-model-runtime-evidence.json` records the source-tree TensorRT 10.11 full-tensor, five-box, and controlled-negative results. Heavy assets remain on E drive; package-consumer, public redistribution, and release claims remain false.
+
 ## Official YOLOv8n Pose acquisition
 
 `yolovision-yolov8n-pose-official-assets.json` pins the Ultralytics `v8.3.0` release weight, source-commit license, human-containing `bus.jpg`, and deterministic P6 RGB PPM derivative. The acquisition script rejects C-drive output, verifies all lengths/SHA256 values, and never exports, runs, or publishes assets:

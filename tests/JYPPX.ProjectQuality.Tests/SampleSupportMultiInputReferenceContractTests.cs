@@ -139,6 +139,8 @@ public sealed class SampleSupportMultiInputReferenceContractTests
         Assert.Contains("must have exactly one source", inputs, StringComparison.Ordinal);
         Assert.Contains("--reference-outputs must match captured outputs exactly", references, StringComparison.Ordinal);
         Assert.Contains("FirstMismatchIndex", references, StringComparison.Ordinal);
+        Assert.Contains("first actual=", references, StringComparison.Ordinal);
+        Assert.Contains("expected=", references, StringComparison.Ordinal);
         Assert.Contains("RunSampleSupportMultiInput", smoke, StringComparison.Ordinal);
         Assert.Contains("SampleSupportMismatchRun", smoke, StringComparison.Ordinal);
         Assert.Contains("\"inputTensors\"", yoloSchema, StringComparison.Ordinal);

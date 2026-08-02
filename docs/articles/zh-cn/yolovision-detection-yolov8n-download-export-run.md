@@ -1,5 +1,7 @@
 # YoloVision YOLOv8n Detection 下载、导出与运行
 
+> 本文的 owner 执行路径已经在 2026-08-02 使用官方 Ultralytics `v8.3.0` `yolov8n.pt`、真实 bus 图片、TensorRT 10.11 与 CUDA 12.9 完成。实际清单、reference 工具、短证据和逐值/逐框结果分别位于 `samples/assets/yolovision-yolov8n-det-official-assets.json`、`eng/Invoke-YoloVisionDetectionReference.py`、`samples/assets/yolovision-yolov8n-det-real-model-runtime-evidence.json` 和 `yolovision-yolov8-det-real-asset-tutorial.md`。本文后续通用命令仍可用于其他模型，但不再代表当前官方案例“等待 owner 回填”。
+
 ## 适用读者
 
 本文适合以下读者：
@@ -29,7 +31,7 @@ YoloVision 是统一 YOLO-family 样例入口，覆盖 YOLOv5/v6/v7/v8/v9/v10/v1
 
 当你已经有一台可运行 TensorRT 的 Windows 或 Linux 兼容主机，并希望验证一个真实 YOLO 检测模型时，可以从本文开始。本文假设模型资产由 owner 自行下载和确认许可证；仓库不内置权重、图片、engine 或私有日志。
 
-这条路径适合做三类工作：一是本地验证 TensorRtSharp4.0 的模型部署体验；二是为公众号或博客写一篇完整的 YOLOv8n deployment walkthrough；三是为后续 `real-model-runtime` proof 收集字段，但本文本身仍是 owner-action-required 材料。
+这条路径适合做三类工作：一是本地验证 TensorRtSharp4.0 的模型部署体验；二是为公众号或博客写一篇完整的 YOLOv8n deployment walkthrough；三是复现仓库已有的 `real-model-runtime` 证据。换用其他模型、图片或导出器时仍需建立独立记录。
 
 ## 操作路径
 
@@ -236,12 +238,11 @@ candidate template 中的 proofChecklist.requiredEvidenceLines、proofChecklist.
 
 ## 下一步
 
-完成 YOLOv8n detection 后，建议继续沿同一证据结构扩展：
+YOLOv8n detection、classification、segmentation、pose 与 OBB 的源码树真实案例均已完成。下一步建议继续沿同一证据结构扩展：
 
-1. YOLOv8n classification，验证 top-k、labels 和 softmax 输出。
-2. YOLOv8n segmentation，验证 detection 与 mask prototype 的对应关系。
-3. YOLOv8 pose 与 OBB，验证 keypoint、angle 单位和坐标缩放。
-4. YOLOv5/v6/v7/v9/v10/v11/v26，逐个记录实际输出 layout 差异，而不是仅修改 family 字符串。
-5. 在仓库外 clean package consumer 中重复真实模型运行，补充 package-consumer-runtime 证据。
+1. 为 semantic segmentation 选择许可证与输出合同明确的真实模型。
+2. 为 YOLOv5/v6/v7/v9/v11/v26 逐个记录实际输出 layout 差异，而不是仅修改 family 字符串。
+3. 在仓库外 clean package consumer 中重复真实模型运行，补充 package-consumer-runtime 证据。
+4. 公开包发布后再建立 post-publish proof；本地源码树结果不能替代它。
 
 只有真实模型、真实输入、可复现命令、完整输出和 validator 同时成立，文章中的运行结果才可以作为公开案例引用。

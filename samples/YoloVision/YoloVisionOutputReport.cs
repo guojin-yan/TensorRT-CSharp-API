@@ -595,6 +595,17 @@ public static class YoloVisionOutputReport
         writer.WriteBoolean("applyNms", profile.Postprocess.ApplyNms);
         writer.WriteString("nmsMode", profile.Postprocess.NmsMode.ToString());
         writer.WriteString("layout", profile.Postprocess.Layout.ToString());
+        writer.WriteNumber("classCount", profile.Postprocess.ClassCount);
+        writer.WritePropertyName("hasObjectness");
+        if (profile.Postprocess.HasObjectness.HasValue)
+        {
+            writer.WriteBooleanValue(profile.Postprocess.HasObjectness.Value);
+        }
+        else
+        {
+            writer.WriteNullValue();
+        }
+        writer.WriteString("coordinateSpace", "model-input-pixels");
         writer.WriteString("classificationScoreMode", profile.Postprocess.ClassificationScoreMode.ToString().ToLowerInvariant());
         writer.WriteString("angleUnit", "unknown");
         writer.WriteString("angleRange", "owner-record-required");

@@ -191,9 +191,11 @@ public sealed class YoloVisionRealAssetCandidatePackTests
         }
 
         string detection = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "articles", "zh-cn", "yolovision-yolov8-det-real-asset-tutorial.md"));
-        Assert.Contains("owner-action-required", detection, StringComparison.Ordinal);
-        Assert.Contains("不是 runtime proof", detection, StringComparison.Ordinal);
-        Assert.Contains("TensorRtExec", detection, StringComparison.Ordinal);
+        Assert.Contains("real-model-runtime", detection, StringComparison.Ordinal);
+        Assert.Contains("YoloVision Passed=True", detection, StringComparison.Ordinal);
+        Assert.Contains("705,600", detection, StringComparison.Ordinal);
+        Assert.Contains("package-consumer", detection, StringComparison.Ordinal);
+        Assert.Contains("公开再分发", detection, StringComparison.Ordinal);
 
         string segmentation = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "articles", "zh-cn", "yolovision-yolov8-seg-real-asset-tutorial.md"));
         Assert.Contains("real-model-runtime", segmentation, StringComparison.Ordinal);

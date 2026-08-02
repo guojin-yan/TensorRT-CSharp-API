@@ -669,6 +669,141 @@ public sealed class YoloVisionReferenceAssetAcquisitionTests
         }
     }
 
+    [Fact]
+    public void YoloV8DetectionOfficialManifestPinsExactRawHeadAndEdriveReferenceWorkflow()
+    {
+        string manifestPath = Path.Combine(
+            RepositoryPaths.Root,
+            "samples",
+            "assets",
+            "yolovision-yolov8n-det-official-assets.json");
+        string acquisitionPath = Path.Combine(
+            RepositoryPaths.Root,
+            "eng",
+            "Acquire-YoloV8DetectionOfficialAssets.ps1");
+        string referencePath = Path.Combine(
+            RepositoryPaths.Root,
+            "eng",
+            "Invoke-YoloVisionDetectionReference.py");
+        Assert.True(File.Exists(manifestPath), manifestPath);
+        Assert.True(File.Exists(acquisitionPath), acquisitionPath);
+        Assert.True(File.Exists(referencePath), referencePath);
+
+        using JsonDocument document = JsonDocument.Parse(File.ReadAllText(manifestPath));
+        JsonElement root = document.RootElement;
+        Assert.Equal("yolovision-yolov8n-det-official-asset-acquisition-manifest", root.GetProperty("recordKind").GetString());
+        Assert.Equal(177482232, root.GetProperty("upstreamReleaseId").GetInt64());
+        Assert.Equal("6e43d1e1e5db72afbf686dee6745669bcb124b0a", root.GetProperty("upstreamSourceCommit").GetString());
+        Assert.Equal("AGPL-3.0-only", root.GetProperty("license").GetProperty("spdxId").GetString());
+        Assert.False(root.GetProperty("license").GetProperty("publicRedistributionOwnerApproval").GetBoolean());
+
+        JsonElement[] assets = root.GetProperty("assets").EnumerateArray().ToArray();
+        Assert.Equal(4, assets.Length);
+        Assert.All(assets, static asset =>
+        {
+            Assert.True(asset.GetProperty("expectedLength").GetInt64() > 0);
+            Assert.Equal(64, asset.GetProperty("expectedSha256").GetString()!.Length);
+        });
+        JsonElement weights = assets.Single(static asset => asset.GetProperty("id").GetString() == "yolov8n-det-pt");
+        Assert.Equal(195719301, weights.GetProperty("githubReleaseAssetId").GetInt64());
+        Assert.Equal("f59b3d833e2ff32e194b5bb8e08d211dc7c5bdf144b90d2c8412c47ccfc83b36", weights.GetProperty("expectedSha256").GetString());
+
+        JsonElement output = Assert.Single(root.GetProperty("modelContract").GetProperty("outputs").EnumerateArray());
+        Assert.Equal(new[] { 1, 84, 8400 }, output.GetProperty("shape").EnumerateArray().Select(static item => item.GetInt32()).ToArray());
+        Assert.Equal(80, output.GetProperty("classCount").GetInt32());
+        Assert.Equal(4, output.GetProperty("boxChannelCount").GetInt32());
+        Assert.False(output.GetProperty("hasObjectness").GetBoolean());
+        Assert.Equal("channels-first", output.GetProperty("layout").GetString());
+        Assert.Equal(80, root.GetProperty("derivedLabels").GetProperty("classCount").GetInt32());
+
+        string acquisition = File.ReadAllText(acquisitionPath);
+        Assert.Contains("Test-DriveIsNotC", acquisition, StringComparison.Ordinal);
+        Assert.Contains("expectedSha256", acquisition, StringComparison.Ordinal);
+        Assert.Contains("performsExport = $false", acquisition, StringComparison.Ordinal);
+        Assert.Contains("performsRuntime = $false", acquisition, StringComparison.Ordinal);
+        Assert.Contains("performsPublish = $false", acquisition, StringComparison.Ordinal);
+        Assert.DoesNotContain("dotnet nuget push", acquisition, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("gh release upload", acquisition, StringComparison.OrdinalIgnoreCase);
+
+        string reference = File.ReadAllText(referencePath);
+        Assert.Contains("CPUExecutionProvider", reference, StringComparison.Ordinal);
+        Assert.Contains("non_max_suppression", reference, StringComparison.Ordinal);
+        Assert.Contains("output0.tampered.reference.json", reference, StringComparison.Ordinal);
+        Assert.Contains("csharp-letterbox-input", reference, StringComparison.Ordinal);
+        Assert.Contains("minimum-box-iou", reference, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void YoloV8DetectionRealRuntimeEvidenceProvesFullTensorBoxesAndNegativeReference()
+    {
+        string evidencePath = Path.Combine(
+            RepositoryPaths.Root,
+            "samples",
+            "assets",
+            "yolovision-yolov8n-det-real-model-runtime-evidence.json");
+        using JsonDocument document = JsonDocument.Parse(File.ReadAllText(evidencePath));
+        JsonElement root = document.RootElement;
+        Assert.Equal("real-model-runtime", root.GetProperty("proofClassification").GetString());
+        Assert.False(root.GetProperty("templateOnly").GetBoolean());
+        Assert.True(root.GetProperty("isSmokePassed").GetBoolean());
+        Assert.True(root.GetProperty("canPromoteRealModelRuntime").GetBoolean());
+        Assert.False(root.GetProperty("canPromotePackageConsumerRuntime").GetBoolean());
+
+        JsonElement output = Assert.Single(root.GetProperty("modelContract").GetProperty("outputs").EnumerateArray());
+        Assert.Equal(new[] { 1, 84, 8400 }, output.GetProperty("shape").EnumerateArray().Select(static item => item.GetInt32()).ToArray());
+        Assert.Equal(705_600, output.GetProperty("elementCount").GetInt32());
+        Assert.Equal(80, output.GetProperty("classCount").GetInt32());
+        Assert.False(output.GetProperty("hasObjectness").GetBoolean());
+
+        JsonElement raw = root.GetProperty("runtimeReferenceValidation");
+        Assert.True(raw.GetProperty("passed").GetBoolean());
+        Assert.Equal(0.05, raw.GetProperty("relativeTolerance").GetDouble());
+        JsonElement tensor = Assert.Single(raw.GetProperty("tensors").EnumerateArray());
+        Assert.Equal(705_600, tensor.GetProperty("comparedValueCount").GetInt32());
+        Assert.Equal(0, tensor.GetProperty("mismatchCount").GetInt32());
+
+        JsonElement postprocess = root.GetProperty("detectionPostprocessValidation");
+        Assert.True(postprocess.GetProperty("passed").GetBoolean());
+        Assert.Equal(5, postprocess.GetProperty("predictionCount").GetInt32());
+        Assert.Equal(new[] { 0, 0, 0, 5, 0 }, postprocess.GetProperty("classIds").EnumerateArray().Select(static item => item.GetInt32()).ToArray());
+        Assert.True(postprocess.GetProperty("minimumObservedBoxIoU").GetDouble() >= postprocess.GetProperty("thresholds").GetProperty("minimumBoxIoU").GetDouble());
+        Assert.True(postprocess.GetProperty("maximumObservedScoreAbsoluteError").GetDouble() <= postprocess.GetProperty("thresholds").GetProperty("maximumScoreAbsoluteError").GetDouble());
+
+        JsonElement negative = root.GetProperty("controlledNegativeValidation");
+        Assert.Equal(1, negative.GetProperty("exitCode").GetInt32());
+        Assert.Equal(1, negative.GetProperty("mismatchCount").GetInt32());
+        Assert.Equal(0, negative.GetProperty("firstMismatchIndex").GetInt32());
+        Assert.True(negative.GetProperty("failClosed").GetBoolean());
+        Assert.False(negative.GetProperty("passed").GetBoolean());
+
+        JsonElement boundary = root.GetProperty("proofBoundary");
+        Assert.True(boundary.GetProperty("sourceTreeRealModelRuntime").GetBoolean());
+        foreach (string name in new[]
+        {
+            "publicRedistributionApproved",
+            "packageConsumerRuntimeProof",
+            "publicPackageProof",
+            "postPublishProof",
+            "ownerReleaseAcceptance",
+            "releaseProof",
+            "performsPublish",
+            "uploadsAssets"
+        })
+        {
+            Assert.False(boundary.GetProperty(name).GetBoolean(), name);
+        }
+
+        string readme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "YoloVision", "README.md"));
+        string tutorial = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "articles", "zh-cn", "yolovision-yolov8-det-real-asset-tutorial.md"));
+        foreach (string text in new[] { readme, tutorial })
+        {
+            Assert.Contains("[1,84,8400]", text, StringComparison.Ordinal);
+            Assert.Contains("705,600", text, StringComparison.Ordinal);
+            Assert.Contains("0.999841", text, StringComparison.Ordinal);
+            Assert.Contains("package-consumer", text, StringComparison.OrdinalIgnoreCase);
+        }
+    }
+
     private static object NewAsset(
         string id,
         string role,
