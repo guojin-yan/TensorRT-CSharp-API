@@ -56,16 +56,18 @@ public sealed partial class TensorRtExecutionContext
     }
 
     /// <summary>
-    /// Clears the externally supplied device-memory block for this execution context.
-    /// 清除当前 execution context 外部传入的 device memory 块。
+    /// Clears the externally supplied device-memory block for this TensorRT 10 or 11 execution context.
+    /// 清除当前 TensorRT 10 或 11 execution context 外部传入的 device memory 块。
     /// </summary>
     /// <remarks>
-    /// Use this only after queued inference work has completed. The managed wrapper does not expose the raw native pointer.
-    /// 请仅在已提交的推理任务完成后使用。托管封装不会向普通用户暴露原生裸指针。
+    /// Retired SafeHandle leases remain alive until context disposal, so a premature clear cannot free memory still used
+    /// by queued inference. The native binding is nevertheless cleared immediately and must be rebound before inference.
+    /// 历史 SafeHandle lease 会保留到 context 释放，因此提前清理不会释放已排队推理仍在使用的内存；但 native 绑定会立即
+    /// 清空，继续推理前必须重新绑定。
     /// </remarks>
     public void ClearDeviceMemory()
     {
-        NativeBridgeApi.ClearExecutionContextDeviceMemory(Line, _handle);
+        ClearDeviceMemoryCore();
     }
 
     /// <summary>

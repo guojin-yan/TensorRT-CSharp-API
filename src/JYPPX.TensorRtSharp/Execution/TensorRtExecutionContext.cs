@@ -24,6 +24,11 @@ public sealed partial class TensorRtExecutionContext : IDisposable
     private bool _auxiliaryStreamsCleared = true;
     private bool _auxiliaryStreamContextDisposed;
     private string _auxiliaryStreamDiagnostic = "No caller-provided auxiliary CUDA streams are assigned.";
+    private readonly object _deviceMemoryLeaseLock = new object();
+    private readonly List<TensorRtDeviceMemoryHandleLease> _retiredDeviceMemoryLeases = new List<TensorRtDeviceMemoryHandleLease>();
+    private TensorRtDeviceMemoryHandleLease? _deviceMemoryLease;
+    private bool _deviceMemoryContextDisposed;
+    private int _boundDeviceMemorySizeInBytes;
 
     internal TensorRtExecutionContext(TensorRtApiLine line, SafeTensorRtObjectHandle handle)
     {
@@ -116,6 +121,18 @@ public sealed partial class TensorRtExecutionContext : IDisposable
             _auxiliaryStreamDiagnostic = "Execution context disposed; auxiliary stream leases were released after native context teardown.";
         }
 
+        TensorRtDeviceMemoryHandleLease? deviceMemoryLease;
+        TensorRtDeviceMemoryHandleLease[] retiredDeviceMemoryLeases;
+        lock (_deviceMemoryLeaseLock)
+        {
+            _deviceMemoryContextDisposed = true;
+            deviceMemoryLease = _deviceMemoryLease;
+            _deviceMemoryLease = null;
+            retiredDeviceMemoryLeases = _retiredDeviceMemoryLeases.ToArray();
+            _retiredDeviceMemoryLeases.Clear();
+            _boundDeviceMemorySizeInBytes = 0;
+        }
+
         TensorRtProfiler? profiler = _profilerKeepAlive;
         try
         {
@@ -134,6 +151,11 @@ public sealed partial class TensorRtExecutionContext : IDisposable
             }
             finally
             {
+                deviceMemoryLease?.Dispose();
+                for (int i = retiredDeviceMemoryLeases.Length - 1; i >= 0; i--)
+                {
+                    retiredDeviceMemoryLeases[i].Dispose();
+                }
                 auxiliaryStreamLease?.Dispose();
                 DetachProfiler();
                 debugListener?.DetachBorrower();

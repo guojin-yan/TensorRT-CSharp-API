@@ -4445,6 +4445,11 @@ JYPPX_StatusCode jyppx_trt11_execution_context_set_device_memory(JYPPX_TensorRtE
 #endif
 }
 
+JYPPX_StatusCode jyppx_trt11_execution_context_set_device_memory_v2(JYPPX_TensorRtExecutionContext* context, JYPPX_CudaMemory* memory)
+{
+    return jyppx_trt11_execution_context_set_device_memory(context, memory);
+}
+
 JYPPX_StatusCode jyppx_trt11_execution_context_get_device_memory_size(JYPPX_TensorRtExecutionContext* context, size_t* out_size)
 {
     auto status = jyppx::tensorrt::validate_output_pointer(out_size, "out_size");

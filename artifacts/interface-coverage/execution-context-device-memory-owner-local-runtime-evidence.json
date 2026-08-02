@@ -1,0 +1,78 @@
+{
+  "recordKind": "execution-context-device-memory-owner-local-runtime-evidence",
+  "generatedAtUtc": "2026-08-02T20:28:37.1082742Z",
+  "sourceHeadBeforeBatch": "a72851d38b065ad7ee5e951e44d7b0dec3848cce",
+  "evidenceClassification": "project-reference-local-runtime",
+  "host": {
+    "operatingSystem": "Microsoft Windows NT 10.0.26200.0",
+    "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+    "driverVersion": "576.02"
+  },
+  "smoke": {
+    "project": "smoke/NetworkConvolutionScaleSmokeRunner/NetworkConvolutionScaleSmokeRunner.csproj",
+    "assemblyRelativePath": "smoke/NetworkConvolutionScaleSmokeRunner/bin/Release/net8.0/NetworkConvolutionScaleSmokeRunner.dll",
+    "assemblyLength": 17920,
+    "assemblySha256": "4C574074D6B80E4EBBD9B147FF64E1A7D25759C9CBD52D7ED6B812AA56E2C78C",
+    "networkSource": "TensorRT API constructed convolution-scale-padding network",
+    "usesExternalModel": false
+  },
+  "sourceTreeRuntimePassedLines": [8, 10],
+  "nativeBridgeBuildPassedLines": [10, 11],
+  "runtimeCases": [
+    {
+      "tensorRtLine": 8,
+      "tensorRtVersion": "8.6.1",
+      "cudaToolkitVersion": "12.1",
+      "runtimeResult": "passed",
+      "nativeBuildInThisBatch": false,
+      "nativeBuildNote": "TRT8 native implementation was unchanged; the existing local bridge was used for compatibility runtime validation.",
+      "bridgeRelativePath": "build-out/win-x64-trt8-cuda12-release/bin/Release/jyppxtrtbridge.dll",
+      "bridgeLength": 1063424,
+      "bridgeSha256": "0BE882C59CAA35F06EB90568E1399F592EF5770C984CC9211BE4369FDDD050E7",
+      "outputMarkers": [
+        "ContextDeviceMemory Set=True V2=False Size=1024 CallerWrappersDisposed=True RetainedLeases=2",
+        "ConvolutionScalePaddingOutputMatch=True"
+      ]
+    },
+    {
+      "tensorRtLine": 10,
+      "tensorRtVersion": "10.11.0",
+      "cudaToolkitVersion": "12.9",
+      "runtimeResult": "passed",
+      "nativeBuildInThisBatch": true,
+      "bridgeRelativePath": "build-out/win-x64-trt10-cuda12-release/bin/Release/jyppxtrtbridge.dll",
+      "bridgeLength": 1143808,
+      "bridgeSha256": "0DA3F8751D10F3F221FA7C4145BA8DD2927B7D98A8AFDCE4645531792B3B42E8",
+      "outputMarkers": [
+        "ContextDeviceMemory Set=True V2=True Size=1024 CallerWrappersDisposed=True RetainedLeases=2",
+        "ContextDeviceMemory Clear=True Bound=False BoundSize=0 RetainedLeases=2",
+        "ConvolutionScalePaddingOutputMatch=True"
+      ]
+    },
+    {
+      "tensorRtLine": 11,
+      "tensorRtVersion": "11.0.0",
+      "cudaToolkitVersion": "13.2",
+      "runtimeResult": "blocked-at-create-infer-runtime",
+      "nativeBuildInThisBatch": true,
+      "bridgeRelativePath": "build-out/win-x64-trt11-cuda13-release/bin/Release/jyppxtrtbridge.dll",
+      "bridgeLength": 909312,
+      "bridgeSha256": "D2DDC2B62FD02D42E0EB2A2AAC191922585A44EFFACCDD7761CC5FF57EE6ABCE",
+      "failureMarker": "createInferRuntime returned a null TensorRT object.",
+      "deviceMemoryApiReached": false
+    }
+  ],
+  "isLocalRuntimeEvidence": true,
+  "isAllSupportedLinesRuntimeProof": false,
+  "isPackageConsumerRuntimeProof": false,
+  "isPublicCleanPackageConsumerProof": false,
+  "isPostPublishProof": false,
+  "canPromoteRuntimeProof": false,
+  "canPublishPublicly": false,
+  "canCloseReleaseIssue": false,
+  "usesExternalModel": false,
+  "devicePointerRecorded": false,
+  "fullSmokeOutputStored": false,
+  "performsPublish": false,
+  "boundary": "This ProjectReference evidence proves the owner-safe device-memory path on this local TRT8/TRT10 host only. TRT11 stopped before device-memory binding. It is not clean package-consumer, all-version, Linux, post-publish, or release authorization evidence."
+}

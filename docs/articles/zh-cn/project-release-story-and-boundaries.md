@@ -115,10 +115,10 @@ artifacts/interface-coverage/interface-coverage-summary.md
 
 当前扫描记录：
 
-- manifest API count：4009；
+- manifest API count：4012；
 - TensorRT 8.6：880 scanned / 880 matched / 880 source present / 760 implemented / 120 deferred-only；
-- TensorRT 10.11：879 scanned / 879 matched / 879 source present / 761 implemented / 118 deferred-only；
-- TensorRT 11.0：901 scanned / 901 matched / 901 source present / 814 implemented / 87 deferred-only；
+- TensorRT 10.11：879 scanned / 879 matched / 879 source present / 762 implemented / 117 deferred-only；
+- TensorRT 11.0：901 scanned / 901 matched / 901 source present / 815 implemented / 86 deferred-only；
 - CUDA 11.6 到 13.2 均有独立扫描与 version line 数据。
 
 这些数字说明 header、manifest 和 native source checklist 已高度闭合。

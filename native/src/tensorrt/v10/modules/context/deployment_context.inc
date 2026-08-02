@@ -25,6 +25,28 @@ JYPPX_StatusCode jyppx_trt10_execution_context_set_device_memory(JYPPX_TensorRtE
 #endif
 }
 
+JYPPX_StatusCode jyppx_trt10_execution_context_set_device_memory_v2(JYPPX_TensorRtExecutionContext* context, JYPPX_CudaMemory* memory)
+{
+    return jyppx_trt10_execution_context_set_device_memory(context, memory);
+}
+
+JYPPX_StatusCode jyppx_trt10_execution_context_clear_device_memory_v2(JYPPX_TensorRtExecutionContext* context)
+{
+#if JYPPX_HAS_TENSORRT && JYPPX_TENSORRT_VERSION_MAJOR_NUM == 10
+    nvinfer1::IExecutionContext* context_payload = nullptr;
+    auto status = get_context_payload_ext(context, &context_payload, "execution context device memory v2 clear");
+    if (status != JYPPX_STATUS_OK) { return status; }
+    context_payload->setDeviceMemoryV2(nullptr, 0);
+    return JYPPX_STATUS_OK;
+#elif JYPPX_HAS_TENSORRT
+    (void)context;
+    return jyppx::tensorrt::report_vendor_mismatch(kLine, JYPPX_TENSORRT_VERSION_MAJOR_NUM, "execution context device memory v2 clear");
+#else
+    (void)context;
+    return jyppx::tensorrt::report_vendor_missing(kLine, "execution context device memory v2 clear");
+#endif
+}
+
 JYPPX_StatusCode jyppx_trt10_execution_context_get_max_output_size(JYPPX_TensorRtExecutionContext* context, const char* tensor_name, int64_t* out_size)
 {
     auto status = jyppx::tensorrt::validate_output_pointer(out_size, "out_size");

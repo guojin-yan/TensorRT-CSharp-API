@@ -79,12 +79,12 @@ internal static class Program
         using TensorRtHostMemory hostMemory = builder.BuildSerializedNetwork(network, config);
         using TensorRtEngine engine = runtime.Deserialize(hostMemory);
         using TensorRtEngineInspector inspector = engine.CreateInspector();
-        using TensorRtExecutionContext context = engine.CreateExecutionContext();
+        using TensorRtExecutionContext context = engine.CreateExecutionContextWithoutDeviceMemory();
         using CudaStream stream = new CudaStream();
         using CudaEvent inputConsumedEvent = new CudaEvent();
         using CudaMemory inputMemory = new CudaMemory(inputValues.Length * sizeof(float));
         using CudaMemory outputMemory = new CudaMemory(expectedValues.Length * sizeof(float));
-        using CudaMemory? contextDeviceMemory = TryCreateAndSetContextDeploymentMemory(context, engine);
+        bool contextDeviceMemoryBound = TryCreateAndSetContextDeploymentMemory(context, engine);
 
         context.PersistentCacheLimitInBytes = 0;
         context.SetInputConsumedEvent(inputConsumedEvent);
@@ -94,12 +94,23 @@ internal static class Program
         context.SetTensorAddress("input", inputMemory);
         context.SetTensorAddress("output", outputMemory);
 
-        Console.WriteLine($"ContextDeployment DeviceMemorySize={TryGetContextDeviceMemorySize(context)} PersistentCache={context.PersistentCacheLimitInBytes} InputBound={context.IsTensorAddressBound("input")} OutputBound={context.IsTensorAddressBound("output")}");
+        Console.WriteLine($"ContextDeployment DeviceMemorySize={TryGetContextDeviceMemorySize(context)} Bound={context.HasBoundDeviceMemory} BoundSize={context.BoundDeviceMemorySizeInBytes} RetainedLeases={context.RetainedDeviceMemoryLeaseCount} SourceWrappersDisposed={contextDeviceMemoryBound} PersistentCache={context.PersistentCacheLimitInBytes} InputBound={context.IsTensorAddressBound("input")} OutputBound={context.IsTensorAddressBound("output")}");
         context.EnqueueAsync(stream);
         stream.Synchronize();
 
         float[] outputValues = outputMemory.ToSingleArray(expectedValues.Length);
         AssertClose("ConvolutionScalePadding", expectedValues, outputValues, 0.0001f);
+
+        if (contextDeviceMemoryBound && line != TensorRtApiLine.TensorRt8)
+        {
+            int retainedBeforeClear = context.RetainedDeviceMemoryLeaseCount;
+            context.ClearDeviceMemory();
+            if (context.HasBoundDeviceMemory || context.BoundDeviceMemorySizeInBytes != 0 || context.RetainedDeviceMemoryLeaseCount != retainedBeforeClear)
+            {
+                throw new InvalidOperationException("Device-memory clear did not preserve retired leases while clearing the current native binding.");
+            }
+            Console.WriteLine($"ContextDeviceMemory Clear=True Bound={context.HasBoundDeviceMemory} BoundSize={context.BoundDeviceMemorySizeInBytes} RetainedLeases={context.RetainedDeviceMemoryLeaseCount}");
+        }
 
         IReadOnlyList<TensorRtTensorInfo> tensors = engine.GetIOTensors();
         string tensorSummary = string.Join("; ", tensors.Select(tensor => $"{tensor.Index}:{tensor.Name}:{tensor.IOMode}:{tensor.DataType}:{tensor.Shape}"));
@@ -109,18 +120,37 @@ internal static class Program
 
     }
 
-    static CudaMemory? TryCreateAndSetContextDeploymentMemory(TensorRtExecutionContext context, TensorRtEngine engine)
+    static bool TryCreateAndSetContextDeploymentMemory(TensorRtExecutionContext context, TensorRtEngine engine)
     {
-        if (engine.DeviceMemorySizeInBytes == 0 || engine.DeviceMemorySizeInBytes > int.MaxValue)
+        if (engine.DeviceMemorySizeInBytes > int.MaxValue)
         {
             Console.WriteLine($"ContextDeviceMemory Skipped=True Size={engine.DeviceMemorySizeInBytes}");
-            return null;
+            return false;
         }
 
-        CudaMemory deviceMemory = new CudaMemory(checked((int)engine.DeviceMemorySizeInBytes));
-        context.SetDeviceMemory(deviceMemory);
-        Console.WriteLine($"ContextDeviceMemory Set=True Size={deviceMemory.SizeInBytes}");
-        return deviceMemory;
+        int sizeInBytes = checked((int)Math.Max(engine.DeviceMemorySizeInBytes, 1UL));
+        CudaMemory compatibilityMemory = new CudaMemory(sizeInBytes);
+        context.SetDeviceMemory(compatibilityMemory);
+        compatibilityMemory.Dispose();
+
+        CudaMemory activeMemory = new CudaMemory(sizeInBytes);
+        if (context.Line == TensorRtApiLine.TensorRt8)
+        {
+            context.SetDeviceMemory(activeMemory);
+        }
+        else
+        {
+            context.SetDeviceMemoryV2(activeMemory);
+        }
+        activeMemory.Dispose();
+
+        if (!context.HasBoundDeviceMemory || context.BoundDeviceMemorySizeInBytes != sizeInBytes || context.RetainedDeviceMemoryLeaseCount != 2)
+        {
+            throw new InvalidOperationException("Device-memory owner lease state did not survive caller wrapper disposal and rebinding.");
+        }
+
+        Console.WriteLine($"ContextDeviceMemory Set=True V2={context.Line != TensorRtApiLine.TensorRt8} Size={sizeInBytes} CallerWrappersDisposed=True RetainedLeases={context.RetainedDeviceMemoryLeaseCount}");
+        return true;
     }
 
     static string TryGetContextDeviceMemorySize(TensorRtExecutionContext context)

@@ -3271,6 +3271,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt10_execution_context_all_input_shapes_spe
 // generated from manifest id=trt10-execution-context-clear-aux-streams
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_execution_context_clear_aux_streams(JYPPX_TensorRtExecutionContext* context);
 
+// generated from manifest id=trt10-execution-context-clear-device-memory-v2
+JYPPX_C_API(BridgeStatusCode) jyppx_trt10_execution_context_clear_device_memory_v2(JYPPX_TensorRtExecutionContext* context);
+
 // generated from manifest id=trt10-execution-context-clear-profiler
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_execution_context_clear_profiler(JYPPX_TensorRtExecutionContext* context);
 
@@ -3375,6 +3378,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt10_execution_context_set_debug_sync(JYPPX
 
 // generated from manifest id=trt10-execution-context-set-device-memory
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_execution_context_set_device_memory(JYPPX_TensorRtExecutionContext* context, JYPPX_CudaMemory* memory);
+
+// generated from manifest id=trt10-execution-context-set-device-memory-v2
+JYPPX_C_API(BridgeStatusCode) jyppx_trt10_execution_context_set_device_memory_v2(JYPPX_TensorRtExecutionContext* context, JYPPX_CudaMemory* memory);
 
 // generated from manifest id=trt10-execution-context-set-device-memory-v2-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_execution_context_set_device_memory_v2_deferred(void);
@@ -7146,6 +7152,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt11_execution_context_set_debug_sync(JYPPX
 
 // generated from manifest id=trt11-execution-context-set-device-memory
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_execution_context_set_device_memory(JYPPX_TensorRtExecutionContext* context, JYPPX_CudaMemory* memory);
+
+// generated from manifest id=trt11-execution-context-set-device-memory-v2
+JYPPX_C_API(BridgeStatusCode) jyppx_trt11_execution_context_set_device_memory_v2(JYPPX_TensorRtExecutionContext* context, JYPPX_CudaMemory* memory);
 
 // generated from manifest id=trt11-execution-context-set-device-memory-v2-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_execution_context_set_device_memory_v2_deferred(void);

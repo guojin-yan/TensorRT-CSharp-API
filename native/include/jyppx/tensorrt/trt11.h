@@ -911,6 +911,7 @@ JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_execution_context_get_optimization_pro
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_execution_context_set_optimization_profile_async(JYPPX_TensorRtExecutionContext* context, int32_t profile_index, JYPPX_CudaStream* stream);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_execution_context_get_max_output_size(JYPPX_TensorRtExecutionContext* context, const char* tensor_name, int64_t* out_size);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_execution_context_set_device_memory(JYPPX_TensorRtExecutionContext* context, JYPPX_CudaMemory* memory);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_execution_context_set_device_memory_v2(JYPPX_TensorRtExecutionContext* context, JYPPX_CudaMemory* memory);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_execution_context_clear_device_memory(JYPPX_TensorRtExecutionContext* context);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_execution_context_get_device_memory_size(JYPPX_TensorRtExecutionContext* context, size_t* out_size);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_execution_context_update_device_memory_size_for_shapes(JYPPX_TensorRtExecutionContext* context, size_t* out_size);

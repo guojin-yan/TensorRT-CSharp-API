@@ -293,6 +293,18 @@ internal static partial class NativeBridgeApi
         NativeStatus.ThrowIfFailed(status);
     }
 
+    public static void SetExecutionContextDeviceMemoryV2(TensorRtApiLine line, SafeTensorRtObjectHandle context, SafeCudaMemoryHandle memory)
+    {
+        BridgeStatusCode status = line switch
+        {
+            TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_execution_context_set_device_memory_v2(context, memory),
+            TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_execution_context_set_device_memory_v2(context, memory),
+            TensorRtApiLine.TensorRt8 => throw new NotSupportedException("TensorRT 8 does not expose setDeviceMemoryV2."),
+            _ => throw UnsupportedLine()
+        };
+        NativeStatus.ThrowIfFailed(status);
+    }
+
     public static ulong GetExecutionContextDeviceMemorySize(TensorRtApiLine line, SafeTensorRtObjectHandle context)
     {
         UIntPtr size;

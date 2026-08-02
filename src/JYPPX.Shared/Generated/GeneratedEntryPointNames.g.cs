@@ -1095,6 +1095,7 @@ internal static class GeneratedEntryPointNames
     public const string Trt10ExecutionContextAllInputDimensionsSpecified = "jyppx_trt10_execution_context_all_input_dimensions_specified";
     public const string Trt10ExecutionContextAllInputShapesSpecified = "jyppx_trt10_execution_context_all_input_shapes_specified";
     public const string Trt10ExecutionContextClearAuxStreams = "jyppx_trt10_execution_context_clear_aux_streams";
+    public const string Trt10ExecutionContextClearDeviceMemoryV2 = "jyppx_trt10_execution_context_clear_device_memory_v2";
     public const string Trt10ExecutionContextClearProfiler = "jyppx_trt10_execution_context_clear_profiler";
     public const string Trt10ExecutionContextDebugListenerGetApiLanguage = "jyppx_trt10_execution_context_get_debug_listener_api_language";
     public const string Trt10ExecutionContextDebugListenerGetInterfaceInfo = "jyppx_trt10_execution_context_get_debug_listener_interface_info";
@@ -1130,6 +1131,7 @@ internal static class GeneratedEntryPointNames
     public const string Trt10ExecutionContextSetDebugListenerDeferred = "jyppx_trt10_execution_context_set_debug_listener_deferred";
     public const string Trt10ExecutionContextSetDebugSync = "jyppx_trt10_execution_context_set_debug_sync";
     public const string Trt10ExecutionContextSetDeviceMemory = "jyppx_trt10_execution_context_set_device_memory";
+    public const string Trt10ExecutionContextSetDeviceMemoryV2 = "jyppx_trt10_execution_context_set_device_memory_v2";
     public const string Trt10ExecutionContextSetDeviceMemoryV2Deferred = "jyppx_trt10_execution_context_set_device_memory_v2_deferred";
     public const string Trt10ExecutionContextSetEnqueueEmitsProfile = "jyppx_trt10_execution_context_set_enqueue_emits_profile";
     public const string Trt10ExecutionContextSetErrorRecorderDeferred = "jyppx_trt10_execution_context_set_error_recorder_deferred";
@@ -2387,6 +2389,7 @@ internal static class GeneratedEntryPointNames
     public const string Trt11ExecutionContextSetCommunicatorDeferred = "jyppx_trt11_execution_context_set_communicator_deferred";
     public const string Trt11ExecutionContextSetDebugSync = "jyppx_trt11_execution_context_set_debug_sync";
     public const string Trt11ExecutionContextSetDeviceMemory = "jyppx_trt11_execution_context_set_device_memory";
+    public const string Trt11ExecutionContextSetDeviceMemoryV2 = "jyppx_trt11_execution_context_set_device_memory_v2";
     public const string Trt11ExecutionContextSetDeviceMemoryV2Deferred = "jyppx_trt11_execution_context_set_device_memory_v2_deferred";
     public const string Trt11ExecutionContextSetEnqueueEmitsProfile = "jyppx_trt11_execution_context_set_enqueue_emits_profile";
     public const string Trt11ExecutionContextSetInputConsumedEvent = "jyppx_trt11_execution_context_set_input_consumed_event";

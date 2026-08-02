@@ -4,6 +4,8 @@
   href: articles/zh-cn/windows-api-completion-latest.md
 - name: Execution Context Auxiliary Stream Lifetime
   href: articles/zh-cn/execution-context-auxiliary-stream-lifetime.md
+- name: Execution Context Device Memory Lifetime
+  href: articles/zh-cn/execution-context-device-memory-lifetime.md
 # Release proof boundary: canPublishPublicly=false; canCloseReleaseIssue=false; navigation entries are not proof.
 # DebugListener runtime proof attempt marker index:
 # debug-listener-runtime-proof-attempt-preflight

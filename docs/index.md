@@ -51,6 +51,7 @@ Chinese articles:
 - [Windows API Completion](articles/zh-cn/windows-api-completion.md)
 - [Latest Windows API Status](articles/zh-cn/windows-api-completion-latest.md)
 - [ExecutionContext And Inference Binding Tutorial](articles/zh-cn/inference-bindings-tutorial.md)
+- [Execution Context Device Memory Lifetime](articles/zh-cn/execution-context-device-memory-lifetime.md)
 - [Blog InferenceBindings Identity Network](articles/zh-cn/blog-inference-bindings-identity-network.md)
 - [Dynamic Shape Optimization Profile Tutorial](articles/zh-cn/dynamic-shape-optimization-profile-tutorial.md)
 - [Blog Dynamic Shape Optimization Profile](articles/zh-cn/blog-dynamic-shape-optimization-profile.md)

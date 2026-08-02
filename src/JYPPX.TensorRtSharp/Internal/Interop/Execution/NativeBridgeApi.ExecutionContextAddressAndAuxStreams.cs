@@ -41,8 +41,14 @@ internal static partial class NativeBridgeApi
 
     public static void ClearExecutionContextDeviceMemory(TensorRtApiLine line, SafeTensorRtObjectHandle context)
     {
-        EnsureTensorRt11DeploymentApi(line, nameof(ClearExecutionContextDeviceMemory));
-        NativeStatus.ThrowIfFailed(NativeMethodsTensorRt.jyppx_trt11_execution_context_clear_device_memory(context));
+        BridgeStatusCode status = line switch
+        {
+            TensorRtApiLine.TensorRt10 => NativeMethodsTensorRt.jyppx_trt10_execution_context_clear_device_memory_v2(context),
+            TensorRtApiLine.TensorRt11 => NativeMethodsTensorRt.jyppx_trt11_execution_context_clear_device_memory(context),
+            TensorRtApiLine.TensorRt8 => throw new NotSupportedException("TensorRT 8 does not expose a size-aware device-memory clear operation."),
+            _ => throw UnsupportedLine()
+        };
+        NativeStatus.ThrowIfFailed(status);
     }
 
     public static bool ClearExecutionContextInputConsumedEvent(TensorRtApiLine line, SafeTensorRtObjectHandle context)

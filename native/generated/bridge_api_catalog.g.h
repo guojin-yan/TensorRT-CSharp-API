@@ -1090,6 +1090,7 @@
 #define JYPPX_API_TRT10_EXECUTION_CONTEXT_ALL_INPUT_DIMENSIONS_SPECIFIED "jyppx_trt10_execution_context_all_input_dimensions_specified" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_EXECUTION_CONTEXT_ALL_INPUT_SHAPES_SPECIFIED "jyppx_trt10_execution_context_all_input_shapes_specified" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_EXECUTION_CONTEXT_CLEAR_AUX_STREAMS "jyppx_trt10_execution_context_clear_aux_streams" // module=tensorrt; line=10; ownership=context-owned; manualOverride=false
+#define JYPPX_API_TRT10_EXECUTION_CONTEXT_CLEAR_DEVICE_MEMORY_V2 "jyppx_trt10_execution_context_clear_device_memory_v2" // module=tensorrt; line=10; ownership=context-owned; manualOverride=false
 #define JYPPX_API_TRT10_EXECUTION_CONTEXT_CLEAR_PROFILER "jyppx_trt10_execution_context_clear_profiler" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_EXECUTION_CONTEXT_DEBUG_LISTENER_GET_API_LANGUAGE "jyppx_trt10_execution_context_get_debug_listener_api_language" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_EXECUTION_CONTEXT_DEBUG_LISTENER_GET_INTERFACE_INFO "jyppx_trt10_execution_context_get_debug_listener_interface_info" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
@@ -1125,6 +1126,7 @@
 #define JYPPX_API_TRT10_EXECUTION_CONTEXT_SET_DEBUG_LISTENER_DEFERRED "jyppx_trt10_execution_context_set_debug_listener_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_EXECUTION_CONTEXT_SET_DEBUG_SYNC "jyppx_trt10_execution_context_set_debug_sync" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_EXECUTION_CONTEXT_SET_DEVICE_MEMORY "jyppx_trt10_execution_context_set_device_memory" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_TRT10_EXECUTION_CONTEXT_SET_DEVICE_MEMORY_V2 "jyppx_trt10_execution_context_set_device_memory_v2" // module=tensorrt; line=10; ownership=context-borrows-memory-managed-lease; manualOverride=false
 #define JYPPX_API_TRT10_EXECUTION_CONTEXT_SET_DEVICE_MEMORY_V2_DEFERRED "jyppx_trt10_execution_context_set_device_memory_v2_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_EXECUTION_CONTEXT_SET_ENQUEUE_EMITS_PROFILE "jyppx_trt10_execution_context_set_enqueue_emits_profile" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_EXECUTION_CONTEXT_SET_ERROR_RECORDER_DEFERRED "jyppx_trt10_execution_context_set_error_recorder_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
@@ -2382,6 +2384,7 @@
 #define JYPPX_API_TRT11_EXECUTION_CONTEXT_SET_COMMUNICATOR_DEFERRED "jyppx_trt11_execution_context_set_communicator_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_EXECUTION_CONTEXT_SET_DEBUG_SYNC "jyppx_trt11_execution_context_set_debug_sync" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_EXECUTION_CONTEXT_SET_DEVICE_MEMORY "jyppx_trt11_execution_context_set_device_memory" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_TRT11_EXECUTION_CONTEXT_SET_DEVICE_MEMORY_V2 "jyppx_trt11_execution_context_set_device_memory_v2" // module=tensorrt; line=11; ownership=context-borrows-memory-managed-lease; manualOverride=false
 #define JYPPX_API_TRT11_EXECUTION_CONTEXT_SET_DEVICE_MEMORY_V2_DEFERRED "jyppx_trt11_execution_context_set_device_memory_v2_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_EXECUTION_CONTEXT_SET_ENQUEUE_EMITS_PROFILE "jyppx_trt11_execution_context_set_enqueue_emits_profile" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_EXECUTION_CONTEXT_SET_INPUT_CONSUMED_EVENT "jyppx_trt11_execution_context_set_input_consumed_event" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
