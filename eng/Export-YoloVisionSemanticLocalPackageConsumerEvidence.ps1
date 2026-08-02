@@ -51,7 +51,10 @@ Assert-Equal $report.consumer.projectReferenceCount 0 "ProjectReference count"
 Assert-Equal $report.consumer.directAssemblyReferenceCount 0 "Direct assembly reference count"
 Assert-Equal $report.consumer.restoredProjectLibraryCount 0 "Restored project library count"
 Assert-Equal $report.consumer.packageSourceKind "local-file-feed-only" "Package source kind"
+Assert-Equal $report.consumer.packageSourceIsolation "one-selected-nupkg-per-feed" "Package source isolation"
 Assert-Equal $report.consumer.packageSourceCount 3 "Package source count"
+Assert-Equal $report.consumer.restoredPackageHashesMatchSelected $true "Restored package hash match"
+Assert-Equal @($report.consumer.restoredPackageHashChecks).Count 3 "Restored package hash check count"
 Assert-Equal $report.consumer.workspaceDrive "E:" "Consumer workspace drive"
 Assert-Equal $report.consumer.workspaceRemovedAfterValidation $true "Consumer workspace removal"
 Assert-Equal $report.consumer.nativeBridgePathEnvironmentVariableSet $false "JYPPX_NATIVE_BRIDGE_PATH state"
@@ -129,6 +132,7 @@ $evidence = [pscustomobject][ordered]@{
   packageConsumer = [pscustomobject][ordered]@{
     targetFramework = [string]$report.consumer.targetFramework
     packageSourceKind = [string]$report.consumer.packageSourceKind
+    packageSourceIsolation = [string]$report.consumer.packageSourceIsolation
     remotePackageSourceCount = 0
     packageCount = @($report.packages).Count
     packages = @($report.packages | ForEach-Object {
@@ -143,6 +147,7 @@ $evidence = [pscustomobject][ordered]@{
     projectReferenceCount = 0
     directAssemblyReferenceCount = 0
     restoredProjectLibraryCount = 0
+    restoredPackageHashesMatchSelected = $true
     nativeBridgeCopiedByNuGet = [bool]$report.nativeDependency.bridgeCopiedByNuGet
     nativeBridgePathEnvironmentVariableSet = $false
     tensorRtCudaAndCudnnAreExternalDependencies = $true

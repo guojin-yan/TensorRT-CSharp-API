@@ -20,6 +20,10 @@ Ultralytics/PyTorch CPU comparison, and controlled raw-reference and mask-integr
 `eng/Test-YoloVisionSemanticLocalPackageConsumer.ps1` selects the LRASPP semantic case, compares
 the full raw tensor and 102,400-pixel class-index map, and requires raw-reference plus artifact
 integrity mutations to fail closed.
+`eng/Test-YoloVisionClassificationLocalPackageConsumer.ps1` selects official YOLOv8n-cls,
+compares all 1,000 probabilities and the independent Top-5 order, and requires a single-value
+reference mutation to fail closed. Every scenario restores from isolated one-package feeds and
+checks the restored nupkg SHA256 against the selected package.
 
 Passing this sample is `local-package-consumer-runtime` engineering evidence. It is not proof that
 the packages were downloaded from a public feed, not public redistribution approval, and not

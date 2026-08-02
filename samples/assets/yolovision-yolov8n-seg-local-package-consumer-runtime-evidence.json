@@ -1,266 +1,268 @@
 {
-    "schemaVersion":  1,
-    "recordKind":  "yolovision-local-package-consumer-runtime-evidence",
-    "recordName":  "yolovision-yolov8n-seg-local-package-consumer-trt10.11",
-    "generatedAtUtc":  "2026-07-30T21:25:58.1062956Z",
-    "templateOnly":  false,
-    "sampleName":  "YoloVision.PackageConsumer",
-    "proofClassification":  "local-package-consumer-runtime",
-    "repositoryHeadAtExecution":  "44edab73284882744f1a66bdfa0708cb1e4d3c04",
-    "fullLocalReportSha256":  "043187b9e33b171bfdfd8df2f9a83504edd6e87df5427290807c1ea986446f65",
-    "packageConsumer":  {
-                            "targetFramework":  "net8.0",
-                            "packageSourceKind":  "local-file-feed-only",
-                            "remotePackageSourceCount":  0,
-                            "packageCount":  3,
-                            "packages":  [
-                                             {
-                                                 "role":  "managed-api",
-                                                 "id":  "JYPPX.TensorRT.CSharp.API",
-                                                 "version":  "4.0.0",
-                                                 "length":  15105609,
-                                                 "sha256":  "2d8d97291d3001401876c6f72f22b686ca1d54e5f2fc90b09ad5135f69c3824d"
-                                             },
-                                             {
-                                                 "role":  "yolovision",
-                                                 "id":  "JYPPX.TensorRT.CSharp.API.YoloVision",
-                                                 "version":  "4.0.0",
-                                                 "length":  104420,
-                                                 "sha256":  "5ca02b5aa526bb153b010d129aa018c115daac6494b179957bccaebb9f824f26"
-                                             },
-                                             {
-                                                 "role":  "bridge-only",
-                                                 "id":  "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge",
-                                                 "version":  "4.0.0",
-                                                 "length":  371773,
-                                                 "sha256":  "dd4e34d428c03c0b373c34b4942b3d2f9ac97024ab4da59f4a734f572263fca5"
-                                             }
-                                         ],
-                            "projectReferenceCount":  0,
-                            "directAssemblyReferenceCount":  0,
-                            "restoredProjectLibraryCount":  0,
-                            "nativeBridgeCopiedByNuGet":  true,
-                            "nativeBridgePathEnvironmentVariableSet":  false,
-                            "tensorRtCudaAndCudnnAreExternalDependencies":  true,
-                            "vendorRuntimePackageEntryCount":  0,
-                            "bridgeNativePackageEntryCount":  1,
-                            "workspaceDrive":  "E:",
-                            "workspaceRemovedAfterValidation":  true,
-                            "restoreExitCode":  0,
-                            "buildExitCode":  0,
-                            "runtimeExitCode":  0
-                        },
-    "assets":  {
-                   "modelSha256":  "08b5c61368d4ddec5e647522fc55a93c42a9e0c581770aae48b87bba65a9b21d",
-                   "modelWeightsSha256":  "a7cd8f929e1903d78a12a48efecab430209f18dc46cb96c3599a5980c63c423c",
-                   "labelsSha256":  "4d4aaea7bee6be2f675d9b53a9195ca36dfe6429f7479f29155da522a6c85930",
-                   "imageSha256":  "6cb94c9cd0781412598fe179246b09041af4303d388a5ba3c55f760dff11ec2c",
-                   "inputTensorElementCount":  1228800,
-                   "inputTensorSha256":  "3a37e91ca77118ae168b367583faea65f61613ba71a38413f6adf794d88d0488",
-                   "referenceOutput0Sha256":  "a607dd1d80dbb85a1a77f5354c7669e357c2caf8d0a9cd93328397d1858bde5f",
-                   "referenceOutput1Sha256":  "3cc8387483187bc5d86ef8e82943e215caadefbbf41a8523d9ffc4c6b040f8d5",
-                   "heavyAssetsRemainOutsideGit":  true,
-                   "publicRedistributionOwnerApproval":  false
-               },
-    "runtimeEnvironment":  {
-                               "os":  "Microsoft Windows 10.0.26200 ",
-                               "gpu":  "NVIDIA GeForce RTX 3060 Laptop GPU",
-                               "driverVersion":  "576.02",
-                               "dotnetVersion":  "10.0.301",
-                               "tensorRtVersion":  "10.11.0",
-                               "cudaToolkitVersion":  "12.9",
-                               "nativeBridgeSha256":  "37aeae086e8f4800d2a000540eb352ff3d0f53073e159bd029b50d07278c6077"
-                           },
-    "modelContract":  {
-                          "input":  {
-                                        "name":  "images",
-                                        "shape":  [
-                                                      1,
-                                                      3,
-                                                      640,
-                                                      640
-                                                  ],
-                                        "dataType":  "float32"
-                                    },
-                          "outputs":  [
-                                          {
-                                              "name":  "output0",
-                                              "shape":  [
-                                                            1,
-                                                            116,
-                                                            8400
-                                                        ],
-                                              "role":  "detection-rows-with-32-mask-coefficients"
-                                          },
-                                          {
-                                              "name":  "output1",
-                                              "shape":  [
-                                                            1,
-                                                            32,
-                                                            160,
-                                                            160
-                                                        ],
-                                              "role":  "mask-prototypes"
-                                          }
-                                      ]
-                      },
-    "rawTensorReferenceValidation":  {
-                                         "sourceClassification":  "independent-onnxruntime-cpu-execution-provider",
-                                         "absoluteTolerance":  0.02,
-                                         "relativeTolerance":  0.03,
-                                         "tensorCount":  2,
-                                         "comparedElementCount":  1793600,
-                                         "mismatchCount":  0,
-                                         "tensors":  [
-                                                         {
-                                                             "tensorName":  "output0",
-                                                             "actualShape":  [
-                                                                                 1,
-                                                                                 116,
-                                                                                 8400
-                                                                             ],
-                                                             "referenceShape":  [
-                                                                                    1,
-                                                                                    116,
-                                                                                    8400
-                                                                                ],
-                                                             "comparedElementCount":  974400,
-                                                             "mismatchCount":  0,
-                                                             "firstMismatchIndex":  -1,
-                                                             "maximumAbsoluteError":  1.8667145,
-                                                             "maximumRelativeError":  1.9638834,
-                                                             "referenceSha256":  "a607dd1d80dbb85a1a77f5354c7669e357c2caf8d0a9cd93328397d1858bde5f",
-                                                             "sourceClassification":  "independent-onnxruntime-cpu-execution-provider",
-                                                             "passed":  true
-                                                         },
-                                                         {
-                                                             "tensorName":  "output1",
-                                                             "actualShape":  [
-                                                                                 1,
-                                                                                 32,
-                                                                                 160,
-                                                                                 160
-                                                                             ],
-                                                             "referenceShape":  [
-                                                                                    1,
-                                                                                    32,
-                                                                                    160,
-                                                                                    160
-                                                                                ],
-                                                             "comparedElementCount":  819200,
-                                                             "mismatchCount":  0,
-                                                             "firstMismatchIndex":  -1,
-                                                             "maximumAbsoluteError":  0.0107803345,
-                                                             "maximumRelativeError":  1.9979289,
-                                                             "referenceSha256":  "3cc8387483187bc5d86ef8e82943e215caadefbbf41a8523d9ffc4c6b040f8d5",
-                                                             "sourceClassification":  "independent-onnxruntime-cpu-execution-provider",
-                                                             "passed":  true
-                                                         }
-                                                     ],
-                                         "completed":  true,
-                                         "passed":  true
-                                     },
-    "maskArtifacts":  {
-                          "runtimeManifestSha256":  "4e9f9d34a3362fc642a3e7e43933a016491564cd59d7e3cbe2aeafd59135dc6e",
-                          "archivedManifestSha256":  "1fd62be0c472a5e6353b8bbdc0ced95bc4b5eb1b28ebdcfe9b07260a63f75311",
-                          "artifactFileCount":  13,
-                          "predictionCount":  4,
-                          "sourceThresholdedMaskCount":  4,
-                          "spatialTransformApplied":  true
-                      },
-    "independentPostprocessValidation":  {
-                                             "evidenceClassification":  "local-package-consumer-runtime",
-                                             "referenceFramework":  "Ultralytics PyTorch",
-                                             "pythonVersion":  "3.10.20",
-                                             "ultralyticsVersion":  "8.4.21",
-                                             "torchVersion":  "2.10.0+cpu",
-                                             "referenceSha256":  "a9ce9d68a09238e64e7b876ad573025c6497a4bfddc5acd456894b6a8506b706",
-                                             "comparisonSha256":  "079b68284d18a699c67ec0c85677f16646f45fa1525a06e9b9aa03d1a235e37b",
-                                             "thresholds":  {
-                                                                "maximumBoxCoordinateAbsoluteError":  1.0,
-                                                                "maximumScoreAbsoluteError":  0.01,
-                                                                "minimumBoxIoU":  0.995,
-                                                                "minimumMaskIoU":  0.99
-                                                            },
-                                             "predictionCount":  4,
-                                             "comparisons":  [
-                                                                 {
-                                                                     "classId":  16,
-                                                                     "className":  "dog",
-                                                                     "maximumBoxCoordinateAbsoluteError":  0.074061035156262278,
-                                                                     "scoreAbsoluteError":  0.00042643836517330946,
-                                                                     "boxIoU":  0.99966688811157356,
-                                                                     "maskIoU":  0.99589552238805956,
-                                                                     "passed":  true
-                                                                 },
-                                                                 {
-                                                                     "classId":  1,
-                                                                     "className":  "bicycle",
-                                                                     "maximumBoxCoordinateAbsoluteError":  0.12613068359377166,
-                                                                     "scoreAbsoluteError":  0.000478209539031993,
-                                                                     "boxIoU":  0.99936420924628444,
-                                                                     "maskIoU":  0.99572869219998938,
-                                                                     "passed":  true
-                                                                 },
-                                                                 {
-                                                                     "classId":  7,
-                                                                     "className":  "truck",
-                                                                     "maximumBoxCoordinateAbsoluteError":  0.1935721484375108,
-                                                                     "scoreAbsoluteError":  0.0051559778317260552,
-                                                                     "boxIoU":  0.99843640349360963,
-                                                                     "maskIoU":  0.99681670121409538,
-                                                                     "passed":  true
-                                                                 },
-                                                                 {
-                                                                     "classId":  2,
-                                                                     "className":  "car",
-                                                                     "maximumBoxCoordinateAbsoluteError":  0.15023853515626229,
-                                                                     "scoreAbsoluteError":  0.0066960106927489993,
-                                                                     "boxIoU":  0.99867251702396043,
-                                                                     "maskIoU":  0.991141296323638,
-                                                                     "passed":  true
-                                                                 }
-                                                             ],
-                                             "passed":  true
-                                         },
-    "controlledNegativeValidation":  {
-                                         "kind":  "single-reference-value-mutation",
-                                         "mutationIndex":  0,
-                                         "mutationDelta":  10000,
-                                         "mutatedReferenceSha256":  "6fba6d892c621807d940c4996aa4795268a07c9362ac4c1a225ddc845f09286e",
-                                         "exitCode":  1,
-                                         "tensorName":  "output0",
-                                         "comparedElementCount":  974400,
-                                         "mismatchCount":  1,
-                                         "firstMismatchIndex":  0,
-                                         "validationPassed":  false,
-                                         "failClosed":  true
-                                     },
-    "controlledArtifactIntegrityValidation":  {
-                                                  "kind":  "source-thresholded-mask-single-byte-mutation-with-unchanged-manifest-sha256",
-                                                  "expectedSha256":  "41b3e6eff14307f05659f770a4e579104e4067e84756dbce89ae374f0303912d",
-                                                  "originalSha256":  "41b3e6eff14307f05659f770a4e579104e4067e84756dbce89ae374f0303912d",
-                                                  "mutatedSha256":  "ad1632a687ffd2b4495464a1e8ca7c925699c3f2e98b4bf45d94054d672135f4",
-                                                  "exitCode":  1,
-                                                  "diagnostic":  "Thresholded mask SHA256 does not match the manifest.",
-                                                  "failClosed":  true
-                                              },
-    "proofBoundary":  {
-                          "localPackageConsumerRuntimeEvidence":  true,
-                          "sourceTreeRuntimeProof":  false,
-                          "publicPackageProof":  false,
-                          "packagesDownloadedFromPublicFeed":  false,
-                          "postPublishProof":  false,
-                          "publicRedistributionOwnerApproval":  false,
-                          "ownerReleaseAcceptance":  false,
-                          "releaseProof":  false,
-                          "performsPublish":  false,
-                          "uploadsAssets":  false
-                      },
-    "notes":  [
-                  "This record proves a clean local-file-feed PackageReference restore/build/run, not a public-feed package consumer.",
-                  "The managed API, YoloVision, and bridge-only nupkg hashes are fixed; CUDA, cuDNN, and TensorRT are external host dependencies.",
-                  "The AGPL-3.0-only weights, ONNX, references, masks, logs, and runtime outputs remain outside Git and are not approved for public redistribution.",
-                  "Local package-consumer evidence does not substitute for public-package, post-publish, Owner acceptance, or release proof."
-              ]
+  "schemaVersion": 1,
+  "recordKind": "yolovision-local-package-consumer-runtime-evidence",
+  "recordName": "yolovision-yolov8n-seg-local-package-consumer-trt10.11",
+  "generatedAtUtc": "08/02/2026 22:19:54",
+  "templateOnly": false,
+  "sampleName": "YoloVision.PackageConsumer",
+  "proofClassification": "local-package-consumer-runtime",
+  "repositoryHeadAtExecution": "8cfba6a48cc1f5ea36bab8905c56ae8c999b1611",
+  "fullLocalReportSha256": "46b981e7639e8bd3259310100cdc729a03dcfa572b9be56bbb919a9bc787e713",
+  "packageConsumer": {
+    "targetFramework": "net8.0",
+    "packageSourceKind": "local-file-feed-only",
+    "packageSourceIsolation": "one-selected-nupkg-per-feed",
+    "remotePackageSourceCount": 0,
+    "packageCount": 3,
+    "packages": [
+      {
+        "role": "managed-api",
+        "id": "JYPPX.TensorRT.CSharp.API",
+        "version": "4.0.0",
+        "length": 15230224,
+        "sha256": "b0069c4d0bec54f9a998f8c7519fc3d5096fc34b1b72ee02ab26a0b14b4f08d7"
+      },
+      {
+        "role": "yolovision",
+        "id": "JYPPX.TensorRT.CSharp.API.YoloVision",
+        "version": "4.0.0",
+        "length": 114430,
+        "sha256": "88c7c9a00765963c5fe5ca3a2de4e46dd6c0de7bf136989a67d196185066cc62"
+      },
+      {
+        "role": "bridge-only",
+        "id": "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge",
+        "version": "4.0.0",
+        "length": 376972,
+        "sha256": "b0531fbe271583b0f7808a0a9907f72b3ac8f99199dcc5e3b83bdb85157a821b"
+      }
+    ],
+    "projectReferenceCount": 0,
+    "directAssemblyReferenceCount": 0,
+    "restoredProjectLibraryCount": 0,
+    "restoredPackageHashesMatchSelected": true,
+    "nativeBridgeCopiedByNuGet": true,
+    "nativeBridgePathEnvironmentVariableSet": false,
+    "tensorRtCudaAndCudnnAreExternalDependencies": true,
+    "vendorRuntimePackageEntryCount": 0,
+    "bridgeNativePackageEntryCount": 1,
+    "workspaceDrive": "E:",
+    "workspaceRemovedAfterValidation": true,
+    "restoreExitCode": 0,
+    "buildExitCode": 0,
+    "runtimeExitCode": 0
+  },
+  "assets": {
+    "modelSha256": "08b5c61368d4ddec5e647522fc55a93c42a9e0c581770aae48b87bba65a9b21d",
+    "modelWeightsSha256": "a7cd8f929e1903d78a12a48efecab430209f18dc46cb96c3599a5980c63c423c",
+    "labelsSha256": "4d4aaea7bee6be2f675d9b53a9195ca36dfe6429f7479f29155da522a6c85930",
+    "imageSha256": "6cb94c9cd0781412598fe179246b09041af4303d388a5ba3c55f760dff11ec2c",
+    "inputTensorElementCount": 1228800,
+    "inputTensorSha256": "3a37e91ca77118ae168b367583faea65f61613ba71a38413f6adf794d88d0488",
+    "referenceOutput0Sha256": "a607dd1d80dbb85a1a77f5354c7669e357c2caf8d0a9cd93328397d1858bde5f",
+    "referenceOutput1Sha256": "3cc8387483187bc5d86ef8e82943e215caadefbbf41a8523d9ffc4c6b040f8d5",
+    "heavyAssetsRemainOutsideGit": true,
+    "publicRedistributionOwnerApproval": false
+  },
+  "runtimeEnvironment": {
+    "os": "Microsoft Windows 10.0.26200",
+    "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+    "driverVersion": "576.02",
+    "dotnetVersion": "10.0.301",
+    "tensorRtVersion": "10.11.0",
+    "cudaToolkitVersion": "12.9",
+    "nativeBridgeSha256": "74d89fd7e1cb414751ca943298e003ecf48cadcda3e4c1952e5a2d5ba0b0cfc9"
+  },
+  "modelContract": {
+    "input": {
+      "name": "images",
+      "shape": [
+        1,
+        3,
+        640,
+        640
+      ],
+      "dataType": "float32"
+    },
+    "outputs": [
+      {
+        "name": "output0",
+        "shape": [
+          1,
+          116,
+          8400
+        ],
+        "role": "detection-rows-with-32-mask-coefficients"
+      },
+      {
+        "name": "output1",
+        "shape": [
+          1,
+          32,
+          160,
+          160
+        ],
+        "role": "mask-prototypes"
+      }
+    ]
+  },
+  "rawTensorReferenceValidation": {
+    "sourceClassification": "independent-onnxruntime-cpu-execution-provider",
+    "absoluteTolerance": 0.02,
+    "relativeTolerance": 0.03,
+    "tensorCount": 2,
+    "comparedElementCount": 1793600,
+    "mismatchCount": 0,
+    "tensors": [
+      {
+        "tensorName": "output0",
+        "actualShape": [
+          1,
+          116,
+          8400
+        ],
+        "referenceShape": [
+          1,
+          116,
+          8400
+        ],
+        "comparedElementCount": 974400,
+        "mismatchCount": 0,
+        "firstMismatchIndex": -1,
+        "maximumAbsoluteError": 1.1924133,
+        "maximumRelativeError": 1.9936548,
+        "referenceSha256": "a607dd1d80dbb85a1a77f5354c7669e357c2caf8d0a9cd93328397d1858bde5f",
+        "sourceClassification": "independent-onnxruntime-cpu-execution-provider",
+        "passed": true
+      },
+      {
+        "tensorName": "output1",
+        "actualShape": [
+          1,
+          32,
+          160,
+          160
+        ],
+        "referenceShape": [
+          1,
+          32,
+          160,
+          160
+        ],
+        "comparedElementCount": 819200,
+        "mismatchCount": 0,
+        "firstMismatchIndex": -1,
+        "maximumAbsoluteError": 0.011473894,
+        "maximumRelativeError": 1.9984908,
+        "referenceSha256": "3cc8387483187bc5d86ef8e82943e215caadefbbf41a8523d9ffc4c6b040f8d5",
+        "sourceClassification": "independent-onnxruntime-cpu-execution-provider",
+        "passed": true
+      }
+    ],
+    "completed": true,
+    "passed": true
+  },
+  "maskArtifacts": {
+    "runtimeManifestSha256": "0a0086f68498ae123bf778b52d53957396b93a60685b0abe8999ce263f1c7a61",
+    "archivedManifestSha256": "19346b4c7cde9de5173847306166b0061a4d5bf0bede348f3aa6b548cc2e897d",
+    "artifactFileCount": 13,
+    "predictionCount": 4,
+    "sourceThresholdedMaskCount": 4,
+    "spatialTransformApplied": true
+  },
+  "independentPostprocessValidation": {
+    "evidenceClassification": "local-package-consumer-runtime",
+    "referenceFramework": "Ultralytics PyTorch",
+    "pythonVersion": "3.10.20",
+    "ultralyticsVersion": "8.4.21",
+    "torchVersion": "2.10.0+cpu",
+    "referenceSha256": "a9ce9d68a09238e64e7b876ad573025c6497a4bfddc5acd456894b6a8506b706",
+    "comparisonSha256": "468b702868c6dde565bc598d2f9a1a0cd336fb617581c55e240cdfbdcb87ef2c",
+    "thresholds": {
+      "maximumBoxCoordinateAbsoluteError": 1.0,
+      "maximumScoreAbsoluteError": 0.01,
+      "minimumBoxIoU": 0.995,
+      "minimumMaskIoU": 0.99
+    },
+    "predictionCount": 4,
+    "comparisons": [
+      {
+        "classId": 16,
+        "className": "dog",
+        "maximumBoxCoordinateAbsoluteError": 0.0706210351562504,
+        "scoreAbsoluteError": 0.0004342383651733117,
+        "boxIoU": 0.9996855021415767,
+        "maskIoU": 0.9958688699360341,
+        "passed": true
+      },
+      {
+        "classId": 1,
+        "className": "bicycle",
+        "maximumBoxCoordinateAbsoluteError": 0.1292506835937388,
+        "scoreAbsoluteError": 0.0004950095390320319,
+        "boxIoU": 0.9993528972144728,
+        "maskIoU": 0.9957464154688691,
+        "passed": true
+      },
+      {
+        "classId": 7,
+        "className": "truck",
+        "maximumBoxCoordinateAbsoluteError": 0.1927221484374968,
+        "scoreAbsoluteError": 0.005462287831726087,
+        "boxIoU": 0.9984865347610292,
+        "maskIoU": 0.996742671009772,
+        "passed": true
+      },
+      {
+        "classId": 2,
+        "className": "car",
+        "maximumBoxCoordinateAbsoluteError": 0.14840853515624985,
+        "scoreAbsoluteError": 0.0068770506927490205,
+        "boxIoU": 0.9987239576698513,
+        "maskIoU": 0.9912144702842377,
+        "passed": true
+      }
+    ],
+    "passed": true
+  },
+  "controlledNegativeValidation": {
+    "kind": "single-reference-value-mutation",
+    "mutationIndex": 0,
+    "mutationDelta": 10000.0,
+    "mutatedReferenceSha256": "6fba6d892c621807d940c4996aa4795268a07c9362ac4c1a225ddc845f09286e",
+    "exitCode": 1,
+    "tensorName": "output0",
+    "comparedElementCount": 974400,
+    "mismatchCount": 1,
+    "firstMismatchIndex": 0,
+    "validationPassed": false,
+    "failClosed": true
+  },
+  "controlledArtifactIntegrityValidation": {
+    "kind": "source-thresholded-mask-single-byte-mutation-with-unchanged-manifest-sha256",
+    "expectedSha256": "9cb89ef4b4dfd0ffe50460621ed1c72dc2d375dcb6aa264fd4eb10a4304f07f1",
+    "originalSha256": "9cb89ef4b4dfd0ffe50460621ed1c72dc2d375dcb6aa264fd4eb10a4304f07f1",
+    "mutatedSha256": "7d19c67bb98613c8486f35d5c09c82465a24a0748e27490a6396de61fee9fee4",
+    "exitCode": 1,
+    "diagnostic": "Thresholded mask SHA256 does not match the manifest.",
+    "failClosed": true
+  },
+  "proofBoundary": {
+    "localPackageConsumerRuntimeEvidence": true,
+    "sourceTreeRuntimeProof": false,
+    "publicPackageProof": false,
+    "packagesDownloadedFromPublicFeed": false,
+    "postPublishProof": false,
+    "publicRedistributionOwnerApproval": false,
+    "ownerReleaseAcceptance": false,
+    "releaseProof": false,
+    "performsPublish": false,
+    "uploadsAssets": false
+  },
+  "notes": [
+    "This record proves a clean local-file-feed PackageReference restore/build/run, not a public-feed package consumer.",
+    "The managed API, YoloVision, and bridge-only nupkg hashes are fixed; CUDA, cuDNN, and TensorRT are external host dependencies.",
+    "The AGPL-3.0-only weights, ONNX, references, masks, logs, and runtime outputs remain outside Git and are not approved for public redistribution.",
+    "Local package-consumer evidence does not substitute for public-package, post-publish, Owner acceptance, or release proof."
+  ]
 }

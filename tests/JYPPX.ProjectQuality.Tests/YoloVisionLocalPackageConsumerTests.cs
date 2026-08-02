@@ -70,6 +70,10 @@ public sealed class YoloVisionLocalPackageConsumerTests
         Assert.Contains("--packages", script, StringComparison.Ordinal);
         Assert.Contains("projectReferenceCount = 0", script, StringComparison.Ordinal);
         Assert.Contains("restoredProjectLibraryCount", script, StringComparison.Ordinal);
+        Assert.Contains("isolated-local-feeds", script, StringComparison.Ordinal);
+        Assert.Contains("one-selected-nupkg-per-feed", script, StringComparison.Ordinal);
+        Assert.Contains("restoredPackageHashesMatchSelected", script, StringComparison.Ordinal);
+        Assert.Contains("Restored package '$($package.Id)' SHA256 does not match", script, StringComparison.Ordinal);
         Assert.Contains("YoloVision Passed=True", script, StringComparison.Ordinal);
         Assert.Contains("passed-local-package-consumer-runtime", script, StringComparison.Ordinal);
         Assert.Contains("isPackageConsumerRuntimeProof = $false", script, StringComparison.Ordinal);
@@ -141,6 +145,8 @@ public sealed class YoloVisionLocalPackageConsumerTests
         Assert.Equal(0, consumer.GetProperty("projectReferenceCount").GetInt32());
         Assert.Equal(0, consumer.GetProperty("directAssemblyReferenceCount").GetInt32());
         Assert.Equal(0, consumer.GetProperty("restoredProjectLibraryCount").GetInt32());
+        Assert.Equal("one-selected-nupkg-per-feed", consumer.GetProperty("packageSourceIsolation").GetString());
+        Assert.True(consumer.GetProperty("restoredPackageHashesMatchSelected").GetBoolean());
         Assert.False(consumer.GetProperty("nativeBridgePathEnvironmentVariableSet").GetBoolean());
         Assert.True(consumer.GetProperty("tensorRtCudaAndCudnnAreExternalDependencies").GetBoolean());
         Assert.Equal(0, consumer.GetProperty("vendorRuntimePackageEntryCount").GetInt32());
@@ -268,6 +274,8 @@ public sealed class YoloVisionLocalPackageConsumerTests
         Assert.Equal(0, consumer.GetProperty("projectReferenceCount").GetInt32());
         Assert.Equal(0, consumer.GetProperty("directAssemblyReferenceCount").GetInt32());
         Assert.Equal(0, consumer.GetProperty("restoredProjectLibraryCount").GetInt32());
+        Assert.Equal("one-selected-nupkg-per-feed", consumer.GetProperty("packageSourceIsolation").GetString());
+        Assert.True(consumer.GetProperty("restoredPackageHashesMatchSelected").GetBoolean());
         Assert.False(consumer.GetProperty("nativeBridgePathEnvironmentVariableSet").GetBoolean());
         Assert.True(consumer.GetProperty("tensorRtCudaAndCudnnAreExternalDependencies").GetBoolean());
         Assert.Equal(0, consumer.GetProperty("vendorRuntimePackageEntryCount").GetInt32());
@@ -311,6 +319,114 @@ public sealed class YoloVisionLocalPackageConsumerTests
         Assert.Equal(1, artifactNegative.GetProperty("exitCode").GetInt32());
         Assert.Contains("artifact-sha256", artifactNegative.GetProperty("findings").EnumerateArray().Select(static item => item.GetString()));
         Assert.True(artifactNegative.GetProperty("failClosed").GetBoolean());
+
+        JsonElement boundary = root.GetProperty("proofBoundary");
+        Assert.True(boundary.GetProperty("localPackageConsumerRuntimeEvidence").GetBoolean());
+        foreach (string name in new[]
+        {
+            "sourceTreeRuntimeProof", "publicPackageProof", "packagesDownloadedFromPublicFeed", "postPublishProof",
+            "publicRedistributionOwnerApproval", "ownerReleaseAcceptance", "releaseProof", "performsPublish", "uploadsAssets"
+        })
+        {
+            Assert.False(boundary.GetProperty(name).GetBoolean());
+        }
+    }
+
+    [Fact]
+    public void ClassificationConsumerUsesOnlySelectedLocalPackagesAndRequiresFullProbabilityEvidence()
+    {
+        string runner = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "eng", "Test-YoloVisionLocalPackageConsumer.ps1"));
+        string entrypoint = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "eng", "Test-YoloVisionClassificationLocalPackageConsumer.ps1"));
+        string exporter = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "eng", "Export-YoloVisionClassificationLocalPackageConsumerEvidence.ps1"));
+
+        Assert.Contains("yolov8-classification", entrypoint, StringComparison.Ordinal);
+        Assert.Contains("Test-YoloVisionLocalPackageConsumer.ps1", entrypoint, StringComparison.Ordinal);
+        foreach (string term in new[]
+        {
+            "--classification-output", "--classification-score-mode", "probabilities",
+            "--no-nms", "--nms-mode", "none", "output0:$ReferenceOutput0Path",
+            "--reference-abs-tolerance", "0.001", "--reference-rel-tolerance",
+            "input-ultralytics-1x3x224x224.fp32.bin", "minibus,police_van,trolleybus,golfcart,jinrikisha",
+            "controlled-reference-negative", "one-selected-nupkg-per-feed", "restoredPackageHashesMatchSelected",
+            "vendorRuntimePackageEntryCount", "assetsRemainOnEDrive = $true", "uploadsAssets = $false"
+        })
+        {
+            Assert.Contains(term, runner, StringComparison.Ordinal);
+        }
+
+        Assert.Contains("RawValues=", exporter, StringComparison.Ordinal);
+        Assert.Contains("Top5=", exporter, StringComparison.Ordinal);
+        Assert.Contains("PublicPackageProof=False", exporter, StringComparison.Ordinal);
+        Assert.Contains("OwnerReleaseAcceptance=False", exporter, StringComparison.Ordinal);
+        foreach (string script in new[] { runner, entrypoint, exporter })
+        {
+            Assert.DoesNotContain("api.nuget.org", script, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("dotnet nuget push", script, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("gh release upload", script, StringComparison.OrdinalIgnoreCase);
+        }
+    }
+
+    [Fact]
+    public void ClassificationLocalPackageConsumerEvidenceClosesRawTop5AndNegativeChecksWithoutPromotion()
+    {
+        string evidencePath = Path.Combine(
+            RepositoryPaths.Root,
+            "samples",
+            "assets",
+            "yolovision-yolov8n-cls-local-package-consumer-runtime-evidence.json");
+        using JsonDocument document = JsonDocument.Parse(File.ReadAllText(evidencePath));
+        JsonElement root = document.RootElement;
+
+        Assert.Equal("yolovision-local-package-consumer-runtime-evidence", root.GetProperty("recordKind").GetString());
+        Assert.Equal("local-package-consumer-runtime", root.GetProperty("proofClassification").GetString());
+        Assert.Equal("yolov8", root.GetProperty("family").GetString());
+        Assert.Equal("cls", root.GetProperty("task").GetString());
+        Assert.Matches("^\\d{4}-\\d{2}-\\d{2}T", root.GetProperty("generatedAtUtc").GetString()!);
+        Assert.Matches("^[0-9a-f]{64}$", root.GetProperty("fullLocalReportSha256").GetString()!);
+
+        JsonElement consumer = root.GetProperty("packageConsumer");
+        Assert.Equal("local-file-feed-only", consumer.GetProperty("packageSourceKind").GetString());
+        Assert.Equal("one-selected-nupkg-per-feed", consumer.GetProperty("packageSourceIsolation").GetString());
+        Assert.Equal(0, consumer.GetProperty("remotePackageSourceCount").GetInt32());
+        Assert.Equal(3, consumer.GetProperty("packageCount").GetInt32());
+        Assert.Equal(0, consumer.GetProperty("projectReferenceCount").GetInt32());
+        Assert.Equal(0, consumer.GetProperty("directAssemblyReferenceCount").GetInt32());
+        Assert.Equal(0, consumer.GetProperty("restoredProjectLibraryCount").GetInt32());
+        Assert.True(consumer.GetProperty("restoredPackageHashesMatchSelected").GetBoolean());
+        Assert.False(consumer.GetProperty("nativeBridgePathEnvironmentVariableSet").GetBoolean());
+        Assert.True(consumer.GetProperty("tensorRtCudaAndCudnnAreExternalDependencies").GetBoolean());
+        Assert.Equal(0, consumer.GetProperty("vendorRuntimePackageEntryCount").GetInt32());
+        Assert.Equal(1, consumer.GetProperty("bridgeNativePackageEntryCount").GetInt32());
+        Assert.Equal("E:", consumer.GetProperty("workspaceDrive").GetString());
+        Assert.True(consumer.GetProperty("workspaceRemovedAfterValidation").GetBoolean());
+        Assert.Equal(new[] { "managed-api", "yolovision", "bridge-only" },
+            consumer.GetProperty("packages").EnumerateArray().Select(static package => package.GetProperty("role").GetString()).ToArray());
+
+        JsonElement assets = root.GetProperty("assets");
+        Assert.True(assets.GetProperty("onnxStoredUnderWorkspaceModelsDirectory").GetBoolean());
+        Assert.True(assets.GetProperty("heavyAssetsRemainOutsideGit").GetBoolean());
+        Assert.False(assets.GetProperty("publicRedistributionOwnerApproval").GetBoolean());
+        Assert.Equal("630c022a99885d59f633ab5a614738f8a49be7f361e340fd3ff89b8c19b0768f", assets.GetProperty("onnxSha256").GetString());
+        Assert.Equal("05e47521b07652eee70942902ab5bf070edc9da7067466a5433c7cdd29fb1a62", assets.GetProperty("authoritativeInputTensorSha256").GetString());
+
+        JsonElement raw = root.GetProperty("rawTensorReferenceValidation");
+        Assert.Equal(1, raw.GetProperty("tensorCount").GetInt32());
+        Assert.Equal(1_000, raw.GetProperty("comparedElementCount").GetInt64());
+        Assert.Equal(0, raw.GetProperty("mismatchCount").GetInt64());
+        Assert.True(raw.GetProperty("passed").GetBoolean());
+
+        JsonElement top5 = root.GetProperty("top5Validation");
+        Assert.Equal(5, top5.GetProperty("predictionCount").GetInt32());
+        Assert.True(top5.GetProperty("sameIndicesAndOrderAsIndependentReference").GetBoolean());
+        Assert.True(top5.GetProperty("passed").GetBoolean());
+        Assert.Equal(new[] { "minibus", "police_van", "trolleybus", "golfcart", "jinrikisha" },
+            top5.GetProperty("predictions").EnumerateArray().Select(static item => item.GetProperty("className").GetString()).ToArray());
+
+        JsonElement negative = root.GetProperty("controlledNegativeValidation");
+        Assert.Equal(1, negative.GetProperty("exitCode").GetInt32());
+        Assert.Equal(1, negative.GetProperty("mismatchCount").GetInt64());
+        Assert.Equal(0, negative.GetProperty("firstMismatchIndex").GetInt64());
+        Assert.True(negative.GetProperty("failClosed").GetBoolean());
 
         JsonElement boundary = root.GetProperty("proofBoundary");
         Assert.True(boundary.GetProperty("localPackageConsumerRuntimeEvidence").GetBoolean());

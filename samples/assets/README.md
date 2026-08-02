@@ -129,6 +129,8 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Acquire-TorchVisionLrasppOff
 
 `eng/Test-YoloVisionSemanticLocalPackageConsumer.ps1` repeats the LRASPP runtime through a repository-external project that references only the managed API, YoloVision, and bridge-only packages. `yolovision-lraspp-semantic-local-package-consumer-runtime-evidence.json` fixes the three package hashes, zero-mismatch raw/class-index comparisons, and two fail-closed negatives. CUDA, cuDNN, and TensorRT remain user-installed dependencies; this local-feed record is not public-package or release proof.
 
+`eng/Test-YoloVisionClassificationLocalPackageConsumer.ps1` runs the official YOLOv8n-cls graph through the same isolated three-package path. `yolovision-yolov8n-cls-local-package-consumer-runtime-evidence.json` records all 1,000 probability comparisons, the independent Top-5 order, a fail-closed single-value negative, and restored-package hash equality. The ONNX remains in the outer `models` directory and is not uploaded.
+
 Recommended local names:
 
 | Sample | Local files |

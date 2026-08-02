@@ -1,0 +1,198 @@
+{
+  "schemaVersion": 1,
+  "recordKind": "yolovision-local-package-consumer-runtime-evidence",
+  "recordName": "yolovision-yolov8n-cls-local-package-consumer-trt10.11",
+  "generatedAtUtc": "2026-08-02T22:29:22.8938980Z",
+  "templateOnly": false,
+  "sampleName": "YoloVision.PackageConsumer",
+  "family": "yolov8",
+  "task": "cls",
+  "proofClassification": "local-package-consumer-runtime",
+  "repositoryHeadAtExecution": "8cfba6a48cc1f5ea36bab8905c56ae8c999b1611",
+  "fullLocalReportSha256": "7a2d303c1de181f17bc1c03fdfe8b030c3f4295413b3dc68e47a2eaeef4f014d",
+  "packageConsumer": {
+    "targetFramework": "net8.0",
+    "packageSourceKind": "local-file-feed-only",
+    "packageSourceIsolation": "one-selected-nupkg-per-feed",
+    "remotePackageSourceCount": 0,
+    "packageCount": 3,
+    "packages": [
+      {
+        "role": "managed-api",
+        "id": "JYPPX.TensorRT.CSharp.API",
+        "version": "4.0.0",
+        "length": 15230224,
+        "sha256": "b0069c4d0bec54f9a998f8c7519fc3d5096fc34b1b72ee02ab26a0b14b4f08d7"
+      },
+      {
+        "role": "yolovision",
+        "id": "JYPPX.TensorRT.CSharp.API.YoloVision",
+        "version": "4.0.0",
+        "length": 114430,
+        "sha256": "88c7c9a00765963c5fe5ca3a2de4e46dd6c0de7bf136989a67d196185066cc62"
+      },
+      {
+        "role": "bridge-only",
+        "id": "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge",
+        "version": "4.0.0",
+        "length": 376972,
+        "sha256": "b0531fbe271583b0f7808a0a9907f72b3ac8f99199dcc5e3b83bdb85157a821b"
+      }
+    ],
+    "projectReferenceCount": 0,
+    "directAssemblyReferenceCount": 0,
+    "restoredProjectLibraryCount": 0,
+    "restoredPackageHashesMatchSelected": true,
+    "nativeBridgeCopiedByNuGet": true,
+    "nativeBridgePathEnvironmentVariableSet": false,
+    "tensorRtCudaAndCudnnAreExternalDependencies": true,
+    "vendorRuntimePackageEntryCount": 0,
+    "bridgeNativePackageEntryCount": 1,
+    "workspaceDrive": "E:",
+    "workspaceRemovedAfterValidation": true,
+    "restoreExitCode": 0,
+    "buildExitCode": 0,
+    "runtimeExitCode": 0
+  },
+  "assets": {
+    "weightsSha256": "11fa19f2aea79bc960d680a13f82f22105982b325eb9e17a4a5e1a9f8245980a",
+    "onnxSha256": "630c022a99885d59f633ab5a614738f8a49be7f361e340fd3ff89b8c19b0768f",
+    "labelsSha256": "dcc60e7297d33ea2b0efeab10074e4ac07d3fdd702fb1fb7ace169ee684240dd",
+    "imageSha256": "c02019c4979c191eb739ddd944445ef408dad5679acab6fd520ef9d434bfbc63",
+    "authoritativeInputTensorSha256": "05e47521b07652eee70942902ab5bf070edc9da7067466a5433c7cdd29fb1a62",
+    "authoritativeInputTensorElementCount": 150528,
+    "rawReferenceSha256": "ded68dd048acdee3a38e95dc46490517e85ece8346f1ebe627bdd88cdb307697",
+    "onnxStoredUnderWorkspaceModelsDirectory": true,
+    "heavyAssetsRemainOutsideGit": true,
+    "publicRedistributionOwnerApproval": false
+  },
+  "runtimeEnvironment": {
+    "os": "Microsoft Windows 10.0.26200",
+    "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+    "driverVersion": "576.02",
+    "dotnetVersion": "10.0.301",
+    "tensorRtVersion": "10.11.0",
+    "cudaToolkitVersion": "12.9",
+    "nativeBridgeSha256": "74d89fd7e1cb414751ca943298e003ecf48cadcda3e4c1952e5a2d5ba0b0cfc9"
+  },
+  "modelContract": {
+    "input": {
+      "name": "images",
+      "shape": [
+        1,
+        3,
+        224,
+        224
+      ],
+      "dataType": "float32",
+      "preprocess": "authoritative Ultralytics shorter-side-to-224 center-crop tensor; RGB; NCHW; scale=1/255"
+    },
+    "outputs": [
+      {
+        "name": "output0",
+        "shape": [
+          1,
+          1000
+        ],
+        "role": "probabilities",
+        "lastOnnxNode": "Softmax",
+        "classificationScoreMode": "probabilities"
+      }
+    ],
+    "postprocess": {
+      "classCount": 1000,
+      "confidenceThreshold": 0.0,
+      "topK": 5,
+      "applyNms": false,
+      "nmsMode": "None"
+    }
+  },
+  "rawTensorReferenceValidation": {
+    "sourceClassification": "official-yolov8n-cls-onnxruntime-cpu",
+    "absoluteTolerance": 0.001,
+    "relativeTolerance": 0.001,
+    "tensorCount": 1,
+    "comparedElementCount": 1000,
+    "mismatchCount": 0,
+    "tensor": {
+      "tensorName": "output0",
+      "actualShape": [
+        1,
+        1000
+      ],
+      "referenceShape": [
+        1,
+        1000
+      ],
+      "maximumAbsoluteError": 5.9604645E-07,
+      "maximumRelativeError": 8.423144E-06,
+      "referenceSha256": "ded68dd048acdee3a38e95dc46490517e85ece8346f1ebe627bdd88cdb307697"
+    },
+    "completed": true,
+    "passed": true
+  },
+  "top5Validation": {
+    "sameIndicesAndOrderAsIndependentReference": true,
+    "predictionCount": 5,
+    "predictions": [
+      {
+        "classId": 654,
+        "className": "minibus",
+        "score": 0.50488305
+      },
+      {
+        "classId": 734,
+        "className": "police_van",
+        "score": 0.2934018
+      },
+      {
+        "classId": 874,
+        "className": "trolleybus",
+        "score": 0.04973289
+      },
+      {
+        "classId": 575,
+        "className": "golfcart",
+        "score": 0.018500658
+      },
+      {
+        "classId": 612,
+        "className": "jinrikisha",
+        "score": 0.017727314
+      }
+    ],
+    "passed": true
+  },
+  "controlledNegativeValidation": {
+    "kind": "single-reference-value-mutation",
+    "mutationIndex": 0,
+    "mutationDelta": 0.125,
+    "mutatedReferenceSha256": "d3954a21323a3508e7c89501dad8610730788791e9964fef655bb3c4575a63e5",
+    "exitCode": 1,
+    "tensorName": "output0",
+    "comparedElementCount": 1000,
+    "mismatchCount": 1,
+    "firstMismatchIndex": 0,
+    "validationPassed": false,
+    "failClosed": true
+  },
+  "proofBoundary": {
+    "localPackageConsumerRuntimeEvidence": true,
+    "sourceTreeRuntimeProof": false,
+    "publicPackageProof": false,
+    "packagesDownloadedFromPublicFeed": false,
+    "postPublishProof": false,
+    "publicRedistributionOwnerApproval": false,
+    "ownerReleaseAcceptance": false,
+    "releaseProof": false,
+    "performsPublish": false,
+    "uploadsAssets": false
+  },
+  "notes": [
+    "This record proves a clean local-file-feed PackageReference restore/build/run, not a public-feed package consumer.",
+    "The managed API, YoloVision, and bridge-only nupkg hashes are fixed; CUDA, cuDNN, and TensorRT are external host dependencies.",
+    "The AGPL-3.0-only weights, ONNX, image, labels, tensor, reference, SVG, logs, and full report remain on E drive outside Git and are not approved for repository redistribution.",
+    "The converted ONNX remains under the outer workspace models directory for a future separately governed Model Zoo.",
+    "Local package-consumer evidence does not substitute for public-package, post-publish, Owner acceptance, or release proof."
+  ]
+}
