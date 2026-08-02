@@ -150,6 +150,10 @@ public sealed class FinalPublishProofGateAndOwnerExecutionPackTests
         Assert.False(gate.GetProperty("canPromoteRuntimeProof").GetBoolean());
         Assert.Equal(0, gate.GetProperty("failedBlockerCount").GetInt32());
         Assert.True(gate.GetProperty("failedActionRequiredCount").GetInt32() >= 1);
+        Assert.True(gate.GetProperty("sourceTreeRealModelRuntimeReady").GetBoolean());
+        Assert.Equal(6, gate.GetProperty("sourceTreeRealModelRuntimeReadyTaskCount").GetInt32());
+        Assert.Equal(0, gate.GetProperty("sourceTreeRealModelRuntimeMissingTaskCount").GetInt32());
+        Assert.False(gate.GetProperty("sourceTreeRealModelRuntimeCanPromotePackageConsumer").GetBoolean());
         Assert.Equal("blocked-owner-external-proof-execution-result-required", gate.GetProperty("ownerExternalProofResultImportState").GetString());
         Assert.Equal(6, gate.GetProperty("ownerExternalProofResultLaneCount").GetInt32());
         Assert.Equal(6, gate.GetProperty("ownerExternalProofResultBlockedLaneCount").GetInt32());
@@ -169,11 +173,16 @@ public sealed class FinalPublishProofGateAndOwnerExecutionPackTests
         Assert.Contains(items, item => item.GetProperty("id").GetString() == "no-automatic-nuget-push" && item.GetProperty("passed").GetBoolean());
         Assert.Contains(items, item => item.GetProperty("id").GetString() == "no-yolodet-live" && item.GetProperty("passed").GetBoolean());
         Assert.Contains(items, item => item.GetProperty("id").GetString() == "no-sample-run-substitute-package-consumer" && item.GetProperty("passed").GetBoolean());
+        Assert.Contains(items, item => item.GetProperty("id").GetString() == "six-task-source-tree-real-model-runtime-ready" && item.GetProperty("passed").GetBoolean());
         Assert.Contains(items, item => item.GetProperty("id").GetString() == "owner-external-proof-result-import-structurally-safe" && item.GetProperty("passed").GetBoolean());
         Assert.Contains(items, item => item.GetProperty("id").GetString() == "owner-external-proof-result-import-owner-proof-required" && !item.GetProperty("passed").GetBoolean());
         Assert.Contains(items, item => item.GetProperty("id").GetString() == "owner-result-candidate-bridge-structurally-safe" && item.GetProperty("passed").GetBoolean());
         Assert.Contains(items, item => item.GetProperty("id").GetString() == "owner-result-candidate-bridge-real-proof-required" && !item.GetProperty("passed").GetBoolean());
-        Assert.Contains(items, item => item.GetProperty("id").GetString() == "real-model-runtime-owner-proof-required" && !item.GetProperty("passed").GetBoolean());
+        JsonElement realModelReleaseIntake = Assert.Single(
+            items,
+            item => item.GetProperty("id").GetString() == "real-model-runtime-owner-proof-required");
+        Assert.False(realModelReleaseIntake.GetProperty("passed").GetBoolean());
+        Assert.Contains("committed source-tree real-model runtime proof", realModelReleaseIntake.GetProperty("detail").GetString(), StringComparison.OrdinalIgnoreCase);
         Assert.Contains(items, item => item.GetProperty("id").GetString() == "post-publish-verification-owner-proof-required" && !item.GetProperty("passed").GetBoolean());
         Assert.Contains(items, item => item.GetProperty("id").GetString() == "final-owner-real-input-template-pack-safe" && item.GetProperty("passed").GetBoolean());
         Assert.Contains(items, item => item.GetProperty("id").GetString() == "final-owner-real-input-template-pack-owner-input-required" && !item.GetProperty("passed").GetBoolean());

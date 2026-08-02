@@ -534,7 +534,7 @@ native bridge 需要根据 TensorRT/CUDA 版本选择 CMake preset，并配置 v
 
 ### YoloVision 是否真的支持所有任务
 
-托管配置/decoder surface 覆盖六任务，但真实模型证据按 family/task/exporter 独立收集。YOLOX 非 detection 是明确 unsupported boundary。
+托管配置/decoder surface 覆盖六任务；官方 YOLOv8n det/cls/seg/pose/obb 和 torchvision LRASPP sem 已有经过审计的源码树 real-model-runtime 记录。真实模型证据仍按 family/task/exporter 独立收集，这六个案例不能外推成所有组合都已验证；YOLOX 非 detection 是明确 unsupported boundary。
 
 ### 可以只安装小 NuGet 包吗
 
@@ -542,7 +542,7 @@ native bridge 需要根据 TensorRT/CUDA 版本选择 CMake preset，并配置 v
 
 ### 为什么现在不发布
 
-当前还缺 owner authorization、clean package consumer、Linux runner、完整 real-model lanes 和 post-publish proof。发布动作也受用户的 GitHub Actions 配额冻结要求约束。
+六任务源码树 real-model-runtime 已经 `6/6`，但正式发布仍缺 Owner 最终准入导入与授权、clean public package consumer、Linux runner、公开渠道发布后验证和最终 release close decision。源码树运行记录不能替代这些外部 proof；在用户明确授权 tag、Release 和推包前，项目继续保持不发布。
 
 ## 配图与宣传素材建议
 

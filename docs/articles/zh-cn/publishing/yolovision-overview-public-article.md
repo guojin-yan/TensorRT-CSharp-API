@@ -390,4 +390,4 @@ YoloVision 可以支撑 real-model-runtime proof，但不能直接支撑 package
 
 ## 下一步
 
-下一步应把 YOLOv8n 六任务模板继续回填真实 owner 资产，并扩展到 YOLOv5、YOLOv6、YOLOv7、YOLOv9、YOLOv10、YOLO11、YOLO26 和 custom 模型。每篇模型案例文章都要包含模型获取、license、导出命令、TensorRtExec/OnnxToEngine build-only report、YoloVision run command、输出 JSON、可视化截图和 proof boundary；在 owner 提供真实 public package source、clean consumer、hash、host metadata 和 strict validator 前，不要把任何样例证据写成 package-consumer-runtime proof。
+官方 YOLOv8n det/cls/seg/pose/obb 和 torchvision LRASPP sem 的六个 source-tree 真实模型案例已经完成，下一步是把这些记录严格导入 Owner 最终准入，并继续扩展 YOLOv5、YOLOv6、YOLOv7、YOLOv9、YOLOv10、YOLO11、YOLO26 和 custom 模型。每篇模型案例文章都要包含模型获取、license、转换或导出命令、TensorRtExec/OnnxToEngine build-only report、YoloVision run command、输出 JSON、可视化截图和 proof boundary；转换后的 ONNX 暂存于仓库外层 `models` 目录且不上传 GitHub。在 Owner 提供真实 public package source、clean consumer、hash、host metadata 和 strict validator 前，不要把任何源码树样例证据写成 package-consumer-runtime proof。

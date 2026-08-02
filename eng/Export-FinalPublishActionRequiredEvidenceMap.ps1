@@ -51,6 +51,19 @@ function Read-JsonOrNull {
   return Get-Content -LiteralPath $resolved -Raw -Encoding utf8 | ConvertFrom-Json
 }
 
+function Get-PropertyOrDefault {
+  param([AllowNull()][object]$Object, [string]$Name, [AllowNull()][object]$DefaultValue)
+  if ($null -eq $Object) {
+    return $DefaultValue
+  }
+
+  if ($Object.PSObject.Properties.Name -contains $Name) {
+    return $Object.PSObject.Properties[$Name].Value
+  }
+
+  return $DefaultValue
+}
+
 function ConvertTo-MarkdownCell {
   param([AllowNull()][object]$Value)
   if ($null -eq $Value) { return "" }
@@ -189,6 +202,10 @@ $map = [pscustomobject]@{
   finalGateState = [string]$finalGate.validationState
   failedBlockerCount = [int]$finalGate.failedBlockerCount
   actionRequiredCount = @($mapped).Count
+  sourceTreeRealModelRuntimeReady = [bool](Get-PropertyOrDefault -Object $finalGate -Name "sourceTreeRealModelRuntimeReady" -DefaultValue $false)
+  sourceTreeRealModelRuntimeReadyTaskCount = [int](Get-PropertyOrDefault -Object $finalGate -Name "sourceTreeRealModelRuntimeReadyTaskCount" -DefaultValue 0)
+  sourceTreeRealModelRuntimeMissingTaskCount = [int](Get-PropertyOrDefault -Object $finalGate -Name "sourceTreeRealModelRuntimeMissingTaskCount" -DefaultValue 6)
+  sourceTreeRealModelRuntimeCanPromotePackageConsumer = [bool](Get-PropertyOrDefault -Object $finalGate -Name "sourceTreeRealModelRuntimeCanPromotePackageConsumer" -DefaultValue $false)
   yoloVisionIntakeTaskCount = if ($null -ne $intake) { [int]$intake.taskCount } else { 0 }
   yoloVisionBackfillGroupCount = if ($null -ne $backfill) { [int]$backfill.groupCount } else { 0 }
   packageConsumerRouteCount = if ($null -ne $packageConsumerDualRoutePlan) { [int]$packageConsumerDualRoutePlan.routeCount } else { 0 }
@@ -249,6 +266,10 @@ Generated at: ``$($map.generatedAtUtc)``
 - finalGateState: ``$($map.finalGateState)``
 - failedBlockerCount: ``$($map.failedBlockerCount)``
 - actionRequiredCount: ``$($map.actionRequiredCount)``
+- sourceTreeRealModelRuntimeReady: ``$($map.sourceTreeRealModelRuntimeReady)``
+- sourceTreeRealModelRuntimeReadyTaskCount: ``$($map.sourceTreeRealModelRuntimeReadyTaskCount)``
+- sourceTreeRealModelRuntimeMissingTaskCount: ``$($map.sourceTreeRealModelRuntimeMissingTaskCount)``
+- sourceTreeRealModelRuntimeCanPromotePackageConsumer: ``$($map.sourceTreeRealModelRuntimeCanPromotePackageConsumer)``
 - yoloVisionIntakeTaskCount: ``$($map.yoloVisionIntakeTaskCount)``
 - yoloVisionBackfillGroupCount: ``$($map.yoloVisionBackfillGroupCount)``
 - packageConsumerRouteCount: ``$($map.packageConsumerRouteCount)``

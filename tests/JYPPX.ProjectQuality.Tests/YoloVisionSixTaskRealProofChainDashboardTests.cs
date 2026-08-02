@@ -18,7 +18,11 @@ public sealed class YoloVisionSixTaskRealProofChainDashboardTests
         Assert.Equal("yolovision-six-task-real-proof-chain-dashboard", dashboard.GetProperty("recordKind").GetString());
         Assert.Equal("source-tree-real-model-runtime-ready-package-proof-required", dashboard.GetProperty("dashboardState").GetString());
         Assert.Equal(6, dashboard.GetProperty("taskCount").GetInt32());
-        Assert.Equal(0, dashboard.GetProperty("failedAlignmentCount").GetInt32());
+        Assert.InRange(dashboard.GetProperty("legacyAlignmentReadyTaskCount").GetInt32(), 0, 6);
+        Assert.Equal(
+            6,
+            dashboard.GetProperty("legacyAlignmentReadyTaskCount").GetInt32() +
+            dashboard.GetProperty("legacyAlignmentMissingOrFailedTaskCount").GetInt32());
         Assert.Equal(6, dashboard.GetProperty("realModelRuntimeReadyTaskCount").GetInt32());
         Assert.Equal(0, dashboard.GetProperty("realModelRuntimeMissingTaskCount").GetInt32());
         Assert.Equal(0, dashboard.GetProperty("ownerActionRequiredTaskCount").GetInt32());
@@ -34,10 +38,10 @@ public sealed class YoloVisionSixTaskRealProofChainDashboardTests
         foreach (string task in new[] { "det", "seg", "pose", "obb", "cls", "sem" })
         {
             JsonElement item = Assert.Single(tasks, candidate => candidate.GetProperty("task").GetString() == task);
-            Assert.True(item.GetProperty("candidateTemplateAligned").GetBoolean());
-            Assert.True(item.GetProperty("ownerBackfillAligned").GetBoolean());
-            Assert.True(item.GetProperty("ownerProofInputAligned").GetBoolean());
-            Assert.True(item.GetProperty("candidateEvidenceAligned").GetBoolean());
+            Assert.Contains(item.GetProperty("candidateTemplateAligned").ValueKind, new[] { JsonValueKind.True, JsonValueKind.False });
+            Assert.Contains(item.GetProperty("ownerBackfillAligned").ValueKind, new[] { JsonValueKind.True, JsonValueKind.False });
+            Assert.Contains(item.GetProperty("ownerProofInputAligned").ValueKind, new[] { JsonValueKind.True, JsonValueKind.False });
+            Assert.Contains(item.GetProperty("candidateEvidenceAligned").ValueKind, new[] { JsonValueKind.True, JsonValueKind.False });
             Assert.True(item.GetProperty("runtimeReferenceValidated").GetBoolean());
             Assert.True(item.GetProperty("controlledNegativeValidated").GetBoolean());
             Assert.True(item.GetProperty("releaseBoundaryHeld").GetBoolean());
@@ -55,6 +59,58 @@ public sealed class YoloVisionSixTaskRealProofChainDashboardTests
         Assert.Contains("YoloVision Six Task Real Proof Chain Dashboard", markdown, StringComparison.Ordinal);
         Assert.Contains("sem", markdown, StringComparison.Ordinal);
         Assert.Contains("canPromotePackageConsumerRuntime", markdown, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void DashboardPromotesCommittedEvidenceWithoutIgnoredLegacyArtifacts()
+    {
+        string tempRoot = Path.Combine(Path.GetTempPath(), "jyppx-yolovision-clean-proof-dashboard-" + Guid.NewGuid().ToString("N"));
+        string repositoryRoot = Path.Combine(tempRoot, "repository");
+        string contractRoot = Path.Combine(repositoryRoot, "samples", "YoloVision");
+        string evidenceRoot = Path.Combine(repositoryRoot, "samples", "assets");
+        string outputRoot = Path.Combine(tempRoot, "output");
+        Directory.CreateDirectory(contractRoot);
+        Directory.CreateDirectory(evidenceRoot);
+
+        try
+        {
+            File.Copy(
+                Path.Combine(RepositoryPaths.Root, "samples", "YoloVision", "yolovision-task-output-contract.json"),
+                Path.Combine(contractRoot, "yolovision-task-output-contract.json"));
+
+            string sourceEvidenceRoot = Path.Combine(RepositoryPaths.Root, "samples", "assets");
+            string[] evidenceFiles = Directory.GetFiles(sourceEvidenceRoot, "yolovision-*-real-model-runtime-evidence.json");
+            Assert.Equal(6, evidenceFiles.Length);
+            foreach (string sourcePath in evidenceFiles)
+            {
+                File.Copy(sourcePath, Path.Combine(evidenceRoot, Path.GetFileName(sourcePath)));
+            }
+
+            RunPowerShell(
+                Path.Combine(RepositoryPaths.Root, "eng", "Export-YoloVisionSixTaskRealProofChainDashboard.ps1"),
+                "-RepositoryRoot",
+                repositoryRoot,
+                "-OutputRoot",
+                outputRoot);
+
+            using JsonDocument document = JsonDocument.Parse(
+                File.ReadAllText(Path.Combine(outputRoot, "yolovision-six-task-real-proof-chain-dashboard.json")));
+            JsonElement dashboard = document.RootElement;
+            Assert.Equal("source-tree-real-model-runtime-ready-package-proof-required", dashboard.GetProperty("dashboardState").GetString());
+            Assert.Equal(0, dashboard.GetProperty("legacyAlignmentReadyTaskCount").GetInt32());
+            Assert.Equal(6, dashboard.GetProperty("legacyAlignmentMissingOrFailedTaskCount").GetInt32());
+            Assert.Equal(6, dashboard.GetProperty("realModelRuntimeReadyTaskCount").GetInt32());
+            Assert.Equal(0, dashboard.GetProperty("realModelRuntimeMissingTaskCount").GetInt32());
+            Assert.True(dashboard.GetProperty("canPromoteRealModelRuntime").GetBoolean());
+            Assert.False(dashboard.GetProperty("canPromotePackageConsumerRuntime").GetBoolean());
+        }
+        finally
+        {
+            if (Directory.Exists(tempRoot))
+            {
+                Directory.Delete(tempRoot, recursive: true);
+            }
+        }
     }
 
     [Fact]

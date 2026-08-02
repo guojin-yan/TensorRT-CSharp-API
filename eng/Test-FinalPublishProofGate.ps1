@@ -113,7 +113,13 @@ function Test-LiveStaleClaimAbsent {
   return @($liveMatches)
 }
 
+$sixTaskDashboardExporter = Join-Path $RepositoryRoot "eng\Export-YoloVisionSixTaskRealProofChainDashboard.ps1"
+& $sixTaskDashboardExporter `
+  -RepositoryRoot $RepositoryRoot `
+  -OutputRoot (Join-Path $RepositoryRoot "artifacts\yolovision") | Out-Null
+
 $laneWorklist = Read-JsonOrNull "artifacts\final-release\release-close-proof-lane-worklist.json"
+$sixTaskDashboard = Read-JsonOrNull "artifacts\yolovision\yolovision-six-task-real-proof-chain-dashboard.json"
 $yoloValidation = Read-JsonOrNull "artifacts\user-acceptance\yolovision-real-asset-owner-proof-input-validation.json"
 $packageOwnerValidation = Read-JsonOrNull "artifacts\final-release\package-consumer-runtime-proof-owner-input-validation.json"
 $postPublishValidation = Read-JsonOrNull "artifacts\final-release\post-publish-verification-validation.json"
@@ -125,11 +131,28 @@ $ownerExternalProofResultImportValidation = Read-JsonOrNull "artifacts\final-rel
 $realProofRecordCandidateFromOwnerResultImportValidation = Read-JsonOrNull "artifacts\final-release\real-proof-record-candidate-from-owner-result-import-validation.json"
 $finalOwnerRealInputTemplatePackValidation = Read-JsonOrNull "artifacts\final-release\final-owner-real-input-template-pack-validation.json"
 
+$sourceTreeRealModelRuntimeReady = $null -ne $sixTaskDashboard -and
+  [string](Get-PropertyOrDefault -Object $sixTaskDashboard -Name "recordKind" -DefaultValue "") -eq "yolovision-six-task-real-proof-chain-dashboard" -and
+  [int](Get-PropertyOrDefault -Object $sixTaskDashboard -Name "taskCount" -DefaultValue 0) -eq 6 -and
+  [int](Get-PropertyOrDefault -Object $sixTaskDashboard -Name "realModelRuntimeReadyTaskCount" -DefaultValue 0) -eq 6 -and
+  [int](Get-PropertyOrDefault -Object $sixTaskDashboard -Name "realModelRuntimeMissingTaskCount" -DefaultValue 6) -eq 0 -and
+  [bool](Get-PropertyOrDefault -Object $sixTaskDashboard -Name "canPromoteRealModelRuntime" -DefaultValue $false) -and
+  -not [bool](Get-PropertyOrDefault -Object $sixTaskDashboard -Name "canPromotePackageConsumerRuntime" -DefaultValue $true) -and
+  -not [bool](Get-PropertyOrDefault -Object $sixTaskDashboard -Name "canPublishPublicly" -DefaultValue $true) -and
+  -not [bool](Get-PropertyOrDefault -Object $sixTaskDashboard -Name "canCloseReleaseIssue" -DefaultValue $true)
+$realModelReleaseIntakeDetail = if ($sourceTreeRealModelRuntimeReady) {
+  "All six YoloVision tasks have committed source-tree real-model runtime proof. Final release intake still requires importing that evidence into the strict Owner acceptance record; this does not negate or rerun the source-tree proof."
+}
+else {
+  "Source-tree real-model runtime evidence is incomplete; final release intake also requires real YoloVision logs, output JSON, hashes, host metadata, and Owner review."
+}
+
 $items = New-Object System.Collections.Generic.List[object]
 $items.Add((New-ValidationItem "no-automatic-nuget-push" $true "blocker" "Final publish proof gate does not execute dotnet nuget push and only writes validation artifacts.")) | Out-Null
 $items.Add((New-ValidationItem "release-lane-worklist-present" ($null -ne $laneWorklist -and [string](Get-PropertyOrDefault -Object $laneWorklist -Name "recordKind" -DefaultValue "") -eq "release-close-proof-lane-worklist") "blocker" "release-close-proof-lane-worklist.json must exist.")) | Out-Null
 $items.Add((New-ValidationItem "release-lane-worklist-non-proof" ($null -ne $laneWorklist -and -not [bool](Get-PropertyOrDefault -Object $laneWorklist -Name "canCloseReleaseIssue" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $laneWorklist -Name "canPublishPublicly" -DefaultValue $true)) "blocker" "Proof lane worklist must not publish or close the release.")) | Out-Null
-$items.Add((New-ValidationItem "real-model-runtime-owner-proof-required" ($null -ne $yoloValidation -and [bool](Get-PropertyOrDefault -Object $yoloValidation -Name "candidateReadyForRealModelRuntime" -DefaultValue $false)) "action-required" "real-model-runtime still requires real YoloVision logs, output JSON, hashes, host metadata, and owner review.")) | Out-Null
+$items.Add((New-ValidationItem "six-task-source-tree-real-model-runtime-ready" $sourceTreeRealModelRuntimeReady "blocker" "All six committed YoloVision real-model runtime records must pass fail-closed raw-reference, controlled-negative, and release-boundary validation.")) | Out-Null
+$items.Add((New-ValidationItem "real-model-runtime-owner-proof-required" ($null -ne $yoloValidation -and [bool](Get-PropertyOrDefault -Object $yoloValidation -Name "candidateReadyForRealModelRuntime" -DefaultValue $false)) "action-required" $realModelReleaseIntakeDetail)) | Out-Null
 $items.Add((New-ValidationItem "package-consumer-runtime-owner-proof-required" ($null -ne $packageOwnerValidation -and [bool](Get-PropertyOrDefault -Object $packageOwnerValidation -Name "canPromoteRuntimeProof" -DefaultValue $false)) "action-required" "package-consumer-runtime still requires clean external consumer proof with public package source.")) | Out-Null
 $items.Add((New-ValidationItem "post-publish-verification-owner-proof-required" ($null -ne $postPublishValidation -and [bool](Get-PropertyOrDefault -Object $postPublishValidation -Name "isPostPublishVerificationProof" -DefaultValue $false)) "action-required" "post-publish verification requires public channel publish and clean install/run logs.")) | Out-Null
 $finalOwnerRealInputTemplatePackPresent = $null -ne $finalOwnerRealInputTemplatePackValidation -and [string](Get-PropertyOrDefault -Object $finalOwnerRealInputTemplatePackValidation -Name "recordKind" -DefaultValue "") -eq "final-owner-real-input-template-pack-validation"
@@ -216,6 +239,7 @@ if ($failedBlockerCount -ne 0) {
 
 $sourceArtifacts = @(
   "artifacts/final-release/release-close-proof-lane-worklist.json",
+  "artifacts/yolovision/yolovision-six-task-real-proof-chain-dashboard.json",
   "artifacts/user-acceptance/yolovision-real-asset-owner-proof-input-validation.json",
   "artifacts/final-release/package-consumer-runtime-proof-owner-input-validation.json",
   "artifacts/final-release/post-publish-verification-validation.json",
@@ -227,7 +251,7 @@ $sourceArtifacts = @(
   "artifacts/final-release/public-docs-package-metadata-gate.json"
 )
 
-$boundary = "Final publish proof gate blocks release until real-model-runtime, package-consumer-runtime, post-publish verification, public owner confirmation, and public docs/package metadata gate are all safe. If release-proof-dashboard-validation or public-docs-package-metadata-gate exists and has failed blockers, this gate remains blocked. It does not run dotnet nuget push and does not accept build-only, dry-run, template, local feed, ProjectReference, direct .nupkg, TensorRtExec report, YoloVision matrix, screenshot, sidecar-only report, skipped run, or blocked-by-cuda-driver substitutes."
+$boundary = "Six-task source-tree real-model runtime proof is validated separately from final Owner release intake. The gate still blocks release until strict Owner intake, package-consumer-runtime, post-publish verification, public owner confirmation, and public docs/package metadata are all safe. It does not run dotnet nuget push and does not accept build-only, dry-run, template, local feed, ProjectReference, direct .nupkg, TensorRtExec report, YoloVision matrix, screenshot, sidecar-only report, skipped run, or blocked-by-cuda-driver substitutes."
 
 $report = [pscustomobject]@{
   recordKind = "final-publish-proof-gate-report"
@@ -240,6 +264,10 @@ $report = [pscustomobject]@{
   isRuntimeExecutionProof = $false
   isPackageConsumerRuntimeProof = $false
   isPostPublishProof = $false
+  sourceTreeRealModelRuntimeReady = [bool]$sourceTreeRealModelRuntimeReady
+  sourceTreeRealModelRuntimeReadyTaskCount = [int](Get-PropertyOrDefault -Object $sixTaskDashboard -Name "realModelRuntimeReadyTaskCount" -DefaultValue 0)
+  sourceTreeRealModelRuntimeMissingTaskCount = [int](Get-PropertyOrDefault -Object $sixTaskDashboard -Name "realModelRuntimeMissingTaskCount" -DefaultValue 6)
+  sourceTreeRealModelRuntimeCanPromotePackageConsumer = [bool](Get-PropertyOrDefault -Object $sixTaskDashboard -Name "canPromotePackageConsumerRuntime" -DefaultValue $false)
   ownerExternalProofResultImportState = [string](Get-PropertyOrDefault -Object $ownerExternalProofResultImportValidation -Name "validationState" -DefaultValue "missing-owner-external-proof-execution-result-import-validation")
   ownerExternalProofResultLaneCount = [int](Get-PropertyOrDefault -Object $ownerExternalProofResultImportValidation -Name "ownerExternalProofResultLaneCount" -DefaultValue 0)
   ownerExternalProofResultBlockedLaneCount = [int](Get-PropertyOrDefault -Object $ownerExternalProofResultImportValidation -Name "ownerExternalProofResultBlockedLaneCount" -DefaultValue 0)
@@ -289,6 +317,10 @@ Generated at: ``$($report.generatedAtUtc)``
 - canPublishPublicly: ``False``
 - canCloseReleaseIssue: ``False``
 - canPromoteRuntimeProof: ``False``
+- sourceTreeRealModelRuntimeReady: ``$($report.sourceTreeRealModelRuntimeReady)``
+- sourceTreeRealModelRuntimeReadyTaskCount: ``$($report.sourceTreeRealModelRuntimeReadyTaskCount)``
+- sourceTreeRealModelRuntimeMissingTaskCount: ``$($report.sourceTreeRealModelRuntimeMissingTaskCount)``
+- sourceTreeRealModelRuntimeCanPromotePackageConsumer: ``$($report.sourceTreeRealModelRuntimeCanPromotePackageConsumer)``
 - failedBlockerCount: ``$($report.failedBlockerCount)``
 - failedActionRequiredCount: ``$($report.failedActionRequiredCount)``
 

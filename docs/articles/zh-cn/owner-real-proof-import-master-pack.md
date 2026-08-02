@@ -15,9 +15,9 @@
 
 ## YoloVision 辅助链路边界
 
-当前仓库里已有 `Import-YoloVisionRealAssetOwnerProofInput.ps1` 和 `Test-YoloVisionRealAssetOwnerProofInput.ps1`，这条链路已经覆盖 `det/seg/pose/obb/cls/sem` 六任务 YOLOv8n owner input candidate，但仍然只是 Owner 输入收集与候选转换链路。
+当前仓库里已有 `Import-YoloVisionRealAssetOwnerProofInput.ps1` 和 `Test-YoloVisionRealAssetOwnerProofInput.ps1`，这条辅助链路覆盖 `det/seg/pose/obb/cls/sem` 六任务 Owner input candidate。与这条可选候选链路分开，`samples/assets` 已提交官方 YOLOv8n det/cls/seg/pose/obb 和 torchvision LRASPP sem 的六份 source-tree real-model-runtime evidence；`Export-YoloVisionSixTaskRealProofChainDashboard.ps1` 会 fail-closed 校验这些记录，当前结果为 `6/6` source-tree runtime ready。
 
-即使六任务模板与 `yolovision-task-output-contract.json` 对齐，它也不能替代完整 release proof：必须继续补齐真实运行日志、SHA256、host/package metadata、Owner review，以及独立的 package-consumer-runtime、post-publish-verification 和 release issue close 记录。
+六任务源码树记录仍然不能替代完整 release proof：它们不等于 `real-case-evidence-record.json` 已被 Owner 最终准入链正式导入和接受，也不证明 clean package-consumer-runtime、public package、post-publish-verification 或 release issue close。最终发布门中的 `real-model-runtime-owner-proof-required` 表示 Owner 准入导入仍待执行，不表示六个源码树真实模型案例缺失。
 
 它可以帮助收集完整六任务 owner 输入，但不能替代完整的 YoloVision `det/cls/seg/obb/pose/sem` 真实运行 proof。完整发布 proof 仍必须落到 `real-case-evidence-record.json` 并通过 `Test-RealCaseEvidenceRecord.ps1 -FailOnNotProof`。
 

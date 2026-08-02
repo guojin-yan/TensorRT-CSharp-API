@@ -233,7 +233,7 @@ $taskItems = @($dashboardItems)
 $failedAlignmentCount = @($taskItems | Where-Object { -not $_.candidateTemplateAligned -or -not $_.ownerBackfillAligned -or -not $_.ownerProofInputAligned -or -not $_.candidateEvidenceAligned }).Count
 $realModelRuntimeMissingTaskCount = @($taskItems | Where-Object { -not $_.sourceTreeRealModelEvidenceReady }).Count
 $ownerActionRequiredTaskCount = $realModelRuntimeMissingTaskCount
-$canPromoteRealModelRuntime = $failedAlignmentCount -eq 0 -and $realModelRuntimeMissingTaskCount -eq 0
+$canPromoteRealModelRuntime = $realModelRuntimeMissingTaskCount -eq 0
 $dashboardState = if ($canPromoteRealModelRuntime) {
   "source-tree-real-model-runtime-ready-package-proof-required"
 }
@@ -247,6 +247,8 @@ $dashboard = [pscustomobject]@{
   dashboardState = $dashboardState
   taskCount = $taskItems.Count
   failedAlignmentCount = $failedAlignmentCount
+  legacyAlignmentReadyTaskCount = @($taskItems | Where-Object { $_.candidateTemplateAligned -and $_.ownerBackfillAligned -and $_.ownerProofInputAligned -and $_.candidateEvidenceAligned }).Count
+  legacyAlignmentMissingOrFailedTaskCount = $failedAlignmentCount
   realModelRuntimeReadyTaskCount = @($taskItems | Where-Object { $_.sourceTreeRealModelEvidenceReady }).Count
   realModelRuntimeMissingTaskCount = $realModelRuntimeMissingTaskCount
   ownerActionRequiredTaskCount = $ownerActionRequiredTaskCount
@@ -256,7 +258,7 @@ $dashboard = [pscustomobject]@{
   canCloseReleaseIssue = $false
   canPromoteRealModelRuntime = [bool]$canPromoteRealModelRuntime
   canPromotePackageConsumerRuntime = $false
-  proofBoundary = "This dashboard fail-closed validates committed source-tree real-model runtime records for all six tasks. It does not itself run models, does not prove clean package consumption, does not approve asset redistribution, does not publish, and cannot close release authorization."
+  proofBoundary = "This dashboard fail-closed validates committed source-tree real-model runtime records for all six tasks. Optional ignored legacy candidate/Owner artifacts are diagnostic only and cannot block or promote source-tree proof. It does not itself run models, does not prove clean package consumption, does not approve asset redistribution, does not publish, and cannot close release authorization."
   sourceArtifacts = @(
     $contractPath,
     $candidateValidationPath,
@@ -289,6 +291,8 @@ $markdown = @"
 | dashboardState | ``$($dashboard.dashboardState)`` |
 | taskCount | ``$($dashboard.taskCount)`` |
 | failedAlignmentCount | ``$($dashboard.failedAlignmentCount)`` |
+| legacyAlignmentReadyTaskCount | ``$($dashboard.legacyAlignmentReadyTaskCount)`` |
+| legacyAlignmentMissingOrFailedTaskCount | ``$($dashboard.legacyAlignmentMissingOrFailedTaskCount)`` |
 | realModelRuntimeReadyTaskCount | ``$($dashboard.realModelRuntimeReadyTaskCount)`` |
 | realModelRuntimeMissingTaskCount | ``$($dashboard.realModelRuntimeMissingTaskCount)`` |
 | ownerActionRequiredTaskCount | ``$($dashboard.ownerActionRequiredTaskCount)`` |

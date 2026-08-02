@@ -119,6 +119,10 @@ public sealed class YoloVisionOwnerRealEvidenceIntakeTests
         Assert.Equal(6, map.GetProperty("actionRequiredCount").GetInt32());
         Assert.Equal(6, map.GetProperty("yoloVisionIntakeTaskCount").GetInt32());
         Assert.Equal(8, map.GetProperty("yoloVisionBackfillGroupCount").GetInt32());
+        Assert.True(map.GetProperty("sourceTreeRealModelRuntimeReady").GetBoolean());
+        Assert.Equal(6, map.GetProperty("sourceTreeRealModelRuntimeReadyTaskCount").GetInt32());
+        Assert.Equal(0, map.GetProperty("sourceTreeRealModelRuntimeMissingTaskCount").GetInt32());
+        Assert.False(map.GetProperty("sourceTreeRealModelRuntimeCanPromotePackageConsumer").GetBoolean());
         Assert.False(map.GetProperty("performsPublish").GetBoolean());
         Assert.False(map.GetProperty("canPublishPublicly").GetBoolean());
         Assert.False(map.GetProperty("canCloseReleaseIssue").GetBoolean());

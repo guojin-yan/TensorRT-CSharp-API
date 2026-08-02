@@ -18,14 +18,14 @@
 
 | Lane | 当前状态 | 需要的记录 | 阻塞原因 |
 | --- | --- | --- | --- |
-| real-model-runtime | blocked-owner-action-required | `real-case-evidence-record.json` | 缺少 YoloVision det/cls/seg/obb/pose/sem 真实运行证据 |
+| real-model-runtime | blocked-owner-action-required | `real-case-evidence-record.json` | 六任务源码树真实模型记录已 `6/6`，仍待 Owner 最终准入导入与接受 |
 | package-consumer-runtime | template-only | `package-consumer-runtime-proof-record.json` | 缺少仓库外部 clean consumer 包消费 proof |
 | post-publish-verification | template-only | `post-publish-verification-record.json` | 尚未真实公开发布 |
 | release-issue-close | blocked-template-only | `release-issue-close-record.json` | 缺少 owner final close decision 和全部真实 proof |
 
 ## YoloVision Owner Delta
 
-YoloVision 每个任务都还需要 Owner 回填：
+YoloVision 六任务的源码树运行记录已经提交；最终 Owner 准入仍需逐项导入、复核或确认：
 
 - model source
 - model license
@@ -48,9 +48,9 @@ YoloVision 每个任务都还需要 Owner 回填：
 - `pose`
 - `sem`
 
-现有 `YoloVisionRealAssetOwnerProofInput` 已覆盖 YOLOv8n 的 `det/seg/pose/obb/cls/sem` 六任务辅助链路，但它仍然不能替代完整 real-case proof。
+现有 `YoloVisionRealAssetOwnerProofInput` 覆盖 YOLOv8n 的 `det/seg/pose/obb/cls/sem` 六任务辅助链路。它是兼容旧 Owner 输入流程的诊断材料，不参与源码树 proof 的晋级判定。
 
-这条链路只证明六任务 Owner 输入模板、候选 evidence 和 contract 没有漂移；发布冻结仍然要求真实外部执行日志、SHA256、host/package metadata、Owner review，以及 package-consumer-runtime/post-publish/release close 证据。
+`samples/assets` 中六份已提交 real-model-runtime evidence 分别覆盖官方 YOLOv8n det/cls/seg/pose/obb 和 torchvision LRASPP sem；`Export-YoloVisionSixTaskRealProofChainDashboard.ps1` 当前 fail-closed 校验结果为 `6/6` source-tree runtime ready。Dashboard 不能替代完整 real-case proof：发布冻结仍要求将这些记录导入并通过 Owner 最终准入，还必须独立补齐 package-consumer-runtime、Linux runner、post-publish verification 和 release close 证据；源码树运行不能直接晋级为这些外部 proof。
 
 ## Package Consumer Final Preflight Delta
 
