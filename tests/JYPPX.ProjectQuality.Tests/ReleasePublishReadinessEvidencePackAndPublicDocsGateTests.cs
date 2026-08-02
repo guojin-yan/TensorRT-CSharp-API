@@ -24,6 +24,15 @@ public sealed class ReleasePublishReadinessEvidencePackAndPublicDocsGateTests
         Assert.False(gate.GetProperty("canCloseReleaseIssue").GetBoolean());
         Assert.False(gate.GetProperty("canPromoteRuntimeProof").GetBoolean());
         Assert.Empty(gate.GetProperty("blockedMatches").EnumerateArray());
+        Assert.Equal("inline-plus-markdown-heading-and-table-header", gate.GetProperty("boundaryContextMode").GetString());
+        JsonElement[] allowedMatches = gate.GetProperty("allowedBoundaryMatches").EnumerateArray().ToArray();
+        Assert.Contains(allowedMatches, static item =>
+            item.GetProperty("file").GetString() == "README.md" &&
+            item.GetProperty("text").GetString()!.Contains("without `ProjectReference`", StringComparison.Ordinal));
+        Assert.Contains(allowedMatches, static item =>
+            item.GetProperty("file").GetString()!.Replace('\\', '/') == "docs/articles/zh-cn/why-not-plain-pinvoke.md" &&
+            item.GetProperty("text").GetString()!.Contains("用 ProjectReference 证明包可用", StringComparison.Ordinal) &&
+            item.GetProperty("structuredContext").GetString()!.Contains("不应采用的修复", StringComparison.Ordinal));
 
         string raw = gate.GetRawText();
         foreach (string marker in new[]

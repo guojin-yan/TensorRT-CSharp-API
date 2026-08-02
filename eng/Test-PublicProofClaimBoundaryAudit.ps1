@@ -82,9 +82,14 @@ function Add-Finding {
 }
 
 function Test-NegatedContext {
-  param([string]$Text)
+  param(
+    [string]$Text,
+    [string]$MarkdownHeadingContext = ""
+  )
 
-  return $Text -match "(not|cannot|can't|must not|blocked|non-proof|not proof|不是|不能|不可|不得|不把|仍需|需要|未|没有|保持|false|owner-action|required|template|draft|不表示|不等于|避免|误写|不能替代|不是 proof|不证明|只表示|only|does not|cannot replace|is not|publishability|可发布性)"
+  $inlineNegationPattern = "(not|cannot|can't|must not|blocked|non-proof|not proof|不是|不能|不可|不得|不把|仍需|需要|未|没有|false|owner-action|required|template|draft|不表示|不等于|避免|误写|不能替代|不是 proof|不证明|只表示|does not|cannot replace|is not)"
+  $headingNegationPattern = "(cannot|must not|forbidden|prohibited|not proof|不能|不可|不得|不应|禁止|不得替代|不能宣传|以下材料不得)"
+  return $Text -match $inlineNegationPattern -or $MarkdownHeadingContext -match $headingNegationPattern
 }
 
 function Test-FileContainsAll {
@@ -142,33 +147,43 @@ foreach ($root in $scanRoots) {
 }
 
 $findings = New-Object System.Collections.Generic.List[object]
-$proofClaimPattern = "(runbook|dashboard|candidate|draft|dry-run|local feed|ProjectReference|direct \.nupkg|build-only|local nupkg|direct nupkg).{0,80}(proof passed|proof-ready|ready to publish|published|release closed|can close release issue|can publish|可发布|已发布|可以关闭|发布完成|证明已通过)"
-$failedBlockerPattern = "failedBlockerCount\s*=\s*0.{0,80}(ready|proof-ready|can publish|可发布|可关闭|ready to publish)"
-$blockedPublishPattern = "blocked-final-publish-real-proof-required.{0,80}(ready|can publish|可发布|approved|发布批准|可以发布)"
+$proofClaimPattern = "(runbook|dashboard|candidate|draft|dry-run|local feed|ProjectReference|direct \.nupkg|build-only|local nupkg|direct nupkg).{0,80}(proof passed|proof-ready|ready to publish|published|release closed|can close release issue|can publish|可发布(?!性)|已发布|可以关闭|发布完成|证明已通过)"
+$failedBlockerPattern = "failedBlockerCount\s*=\s*0.{0,80}(ready|proof-ready|can publish|可发布(?!性)|可关闭(?!性)|ready to publish)"
+$blockedPublishPattern = "blocked-final-publish-real-proof-required.{0,80}(ready|can publish|可发布(?!性)|approved|发布批准|可以发布)"
 $oldSamplePattern = "(samples[/\\]YoloDet|YoloDet\.csproj)"
 
 foreach ($file in $files) {
   $relativePath = [IO.Path]::GetRelativePath($RepositoryRoot, $file).Replace("\", "/")
   $lines = Get-Content -LiteralPath $file -Encoding utf8 -ErrorAction SilentlyContinue
+  $markdownHeadings = [string[]]::new(7)
   for ($i = 0; $i -lt $lines.Count; $i++) {
     $line = [string]$lines[$i]
     if ([string]::IsNullOrWhiteSpace($line)) {
       continue
     }
 
-    if ($line -match $oldSamplePattern -and -not (Test-NegatedContext $line)) {
+    if ($relativePath.EndsWith(".md", [StringComparison]::OrdinalIgnoreCase) -and $line -match "^\s*(#{1,6})\s+(?<title>.+?)\s*#*\s*$") {
+      $headingLevel = ([string]$Matches[1]).Length
+      $markdownHeadings[$headingLevel] = [string]$Matches.title
+      for ($clearLevel = $headingLevel + 1; $clearLevel -le 6; $clearLevel++) {
+        $markdownHeadings[$clearLevel] = ""
+      }
+    }
+    $markdownHeadingContext = @($markdownHeadings | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }) -join " / "
+
+    if ($line -match $oldSamplePattern -and -not (Test-NegatedContext -Text $line -MarkdownHeadingContext $markdownHeadingContext)) {
       Add-Finding $findings "old-yolo-det-public-entry" "blocker" $relativePath ($i + 1) $line "公开入口不应恢复旧 YOLO 检测样例名。"
     }
 
-    if ($line -match $proofClaimPattern -and -not (Test-NegatedContext $line)) {
+    if ($line -match $proofClaimPattern -and -not (Test-NegatedContext -Text $line -MarkdownHeadingContext $markdownHeadingContext)) {
       Add-Finding $findings "non-proof-artifact-promoted" "blocker" $relativePath ($i + 1) $line "疑似把 runbook/dashboard/candidate/draft/dry-run/local feed/ProjectReference/direct nupkg/build-only 晋级为 proof 或发布完成。"
     }
 
-    if ($line -match $failedBlockerPattern -and -not (Test-NegatedContext $line)) {
+    if ($line -match $failedBlockerPattern -and -not (Test-NegatedContext -Text $line -MarkdownHeadingContext $markdownHeadingContext)) {
       Add-Finding $findings "failed-blocker-zero-promoted" "blocker" $relativePath ($i + 1) $line "疑似把 failedBlockerCount=0 解读为 ready。"
     }
 
-    if ($line -match $blockedPublishPattern -and -not (Test-NegatedContext $line)) {
+    if ($line -match $blockedPublishPattern -and -not (Test-NegatedContext -Text $line -MarkdownHeadingContext $markdownHeadingContext)) {
       Add-Finding $findings "blocked-final-publish-promoted" "blocker" $relativePath ($i + 1) $line "疑似把 blocked final publish proof gate 描述为可发布。"
     }
   }
@@ -262,6 +277,7 @@ $record = [pscustomobject]@{
   scannedFileCount = $files.Count
   publicFreezeRequiredCount = $publicFreezeRequiredCount
   publicFreezeFindingCount = $publicFreezeFindingCount
+  negationContextMode = "inline-plus-markdown-heading-stack"
   findingCount = $findings.Count
   blockedFindingCount = $blockedFindingCount
   canPublishPublicly = $false

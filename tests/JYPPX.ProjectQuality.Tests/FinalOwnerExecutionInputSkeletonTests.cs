@@ -37,7 +37,10 @@ public sealed class FinalOwnerExecutionInputSkeletonTests
         Assert.Equal(0, skeleton.GetProperty("packageConsumerOwnerRuntimeSmokeFieldAlignmentFailedBlockerCount").GetInt32());
 
         int requiredFieldCount = skeleton.GetProperty("requiredFieldCount").GetInt32();
-        Assert.True(requiredFieldCount >= 47);
+        Assert.Equal(49, requiredFieldCount);
+        Assert.Equal(9, skeleton.GetProperty("laneCount").GetInt32());
+        Assert.True(skeleton.GetProperty("laneRequiredFieldCount").GetInt32() >= 60);
+        Assert.Equal(10, skeleton.GetProperty("fieldGroupCount").GetInt32());
         Assert.Equal(requiredFieldCount, skeleton.GetProperty("missingFieldCount").GetInt32());
         Assert.Equal(requiredFieldCount, skeleton.GetProperty("placeholderFieldCount").GetInt32());
         Assert.Equal(0, skeleton.GetProperty("readyForImportFieldCount").GetInt32());
@@ -75,7 +78,8 @@ public sealed class FinalOwnerExecutionInputSkeletonTests
         using JsonDocument validationDocument = ReadFinalReleaseJson("final-owner-execution-input-skeleton-validation.json");
         JsonElement validation = validationDocument.RootElement;
         Assert.Equal("final-owner-execution-input-skeleton-validation", validation.GetProperty("recordKind").GetString());
-        Assert.Equal("blocked-final-owner-real-input-required", validation.GetProperty("validationState").GetString());
+        Assert.Equal("final-owner-execution-input-skeleton-validation-ready-non-proof", validation.GetProperty("validationState").GetString());
+        Assert.Equal(49, validation.GetProperty("compatibilityFieldCount").GetInt32());
         Assert.Equal(0, validation.GetProperty("failedBlockerCount").GetInt32());
         Assert.Equal("blocked-owner-compatible-host-runtime-smoke-field-alignment", validation.GetProperty("packageConsumerOwnerRuntimeSmokeFieldAlignmentState").GetString());
         Assert.Equal("blocked-owner-compatible-host-runtime-smoke-field-alignment-valid", validation.GetProperty("packageConsumerOwnerRuntimeSmokeFieldAlignmentValidationState").GetString());

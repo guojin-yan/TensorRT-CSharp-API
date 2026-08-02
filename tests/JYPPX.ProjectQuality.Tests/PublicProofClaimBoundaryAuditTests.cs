@@ -22,8 +22,67 @@ public sealed class PublicProofClaimBoundaryAuditTests
         Assert.Equal(0, audit.GetProperty("publicFreezeFindingCount").GetInt32());
         Assert.Equal(0, audit.GetProperty("findingCount").GetInt32());
         Assert.Equal(0, audit.GetProperty("blockedFindingCount").GetInt32());
+        Assert.Equal("inline-plus-markdown-heading-stack", audit.GetProperty("negationContextMode").GetString());
         AssertFlagsStayNonProof(audit);
         AssertBoundary(audit.GetProperty("boundary").GetString()!);
+    }
+
+    [Fact]
+    public void MarkdownNegativeSectionsAreSafeButRealPromotionStillFailsClosed()
+    {
+        string fixtureRoot = Path.Combine(Path.GetTempPath(), $"public-proof-boundary-{Guid.NewGuid():N}");
+        string docsRoot = Path.Combine(fixtureRoot, "docs");
+        string outputRoot = Path.Combine(fixtureRoot, "output");
+        Directory.CreateDirectory(docsRoot);
+        Directory.CreateDirectory(outputRoot);
+
+        try
+        {
+            File.WriteAllText(Path.Combine(docsRoot, "claims.md"), """
+                # Claims
+
+                ## Cannot claim
+
+                - local feed is published.
+
+                ## 以下材料不得替代发布证明
+
+                - failedBlockerCount=0 means ready to publish.
+
+                ## Current release status
+
+                - candidate 可发布性 audit is active.
+                - local feed is published.
+                - failedBlockerCount=0 means ready to publish.
+                """);
+
+            RunPowerShell(
+                "Test-PublicProofClaimBoundaryAudit.ps1",
+                "-RepositoryRoot",
+                fixtureRoot,
+                "-OutputDirectory",
+                outputRoot);
+
+            using JsonDocument document = JsonDocument.Parse(File.ReadAllText(
+                Path.Combine(outputRoot, "public-proof-claim-boundary-audit.json")));
+            JsonElement audit = document.RootElement;
+            JsonElement[] findings = audit.GetProperty("findings").EnumerateArray().ToArray();
+
+            Assert.Equal("inline-plus-markdown-heading-stack", audit.GetProperty("negationContextMode").GetString());
+            Assert.Contains(findings, static item =>
+                item.GetProperty("id").GetString() == "non-proof-artifact-promoted" &&
+                item.GetProperty("line").GetInt32() == 14);
+            Assert.Contains(findings, static item =>
+                item.GetProperty("id").GetString() == "failed-blocker-zero-promoted" &&
+                item.GetProperty("line").GetInt32() == 15);
+            Assert.DoesNotContain(findings, static item =>
+                item.GetProperty("path").GetString() == "docs/claims.md" &&
+                item.GetProperty("line").GetInt32() is 5 or 9 or 13);
+        }
+        finally
+        {
+            Directory.Delete(fixtureRoot, recursive: true);
+        }
     }
 
     [Fact]

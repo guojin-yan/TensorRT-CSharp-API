@@ -274,7 +274,7 @@ $blockers = @(
     "build success as runtime proof",
     "dependency probe as smoke pass"
   ) -Boundary "TRT11 failed compatible-host attempt is useful evidence but cannot promote runtime proof until smokeStatus=passed and strict proof conditions hold."
-  New-BlockerLane -Order 5 -Id "deferred-readonly-implementation-batch" -Title "Deferred readonly/API design-gate implementation batch" -CurrentState "$($sourceStates.deferredBTierWorkPackageState); workItems=$($sourceStates.deferredBTierWorkItemCount)/$($sourceStates.deferredBTierWorkItemTargetCount); closed=$($sourceStates.deferredBTierClosedWorkItemCount); remaining=$($sourceStates.deferredBTierRemainingWorkItemCount)" -OwnerNextAction "Do not repeat btier-001 through btier-045. Select a newly audited candidate or a separately evidenced runtime/model gap, then require native implementation, generated bindings, high-level wrapper, docs, smoke/quality tests, and version guards." -RequiredEvidence @(
+  New-BlockerLane -Order 5 -Id "deferred-readonly-implementation-batch" -Title "Deferred readonly/API design-gate implementation batch" -CurrentState "$($sourceStates.deferredBTierWorkPackageState); workItems=$($sourceStates.deferredBTierWorkItemCount)/$($sourceStates.deferredBTierWorkItemTargetCount); closed=$($sourceStates.deferredBTierClosedWorkItemCount); remaining=$($sourceStates.deferredBTierRemainingWorkItemCount)" -OwnerNextAction "Do not repeat btier-001 through btier-$($sourceStates.deferredBTierClosedWorkItemCount.ToString('D3')). Select a newly audited candidate or a separately evidenced runtime/model gap, then require native implementation, generated bindings, high-level wrapper, docs, smoke/quality tests, and version guards." -RequiredEvidence @(
     "deferred B-tier work-item proof closure ledger",
     "manifest entry with correct version guard",
     "native implementation",
@@ -294,7 +294,7 @@ $blockers = @(
     "public raw IntPtr creator/recorder/allocator",
     "callback trampoline without owner proof",
     "borrowed pointer with unclear lifetime"
-  ) -Boundary "The 45 ledgered B-tier items have source-quality proof closure, not runtime or release proof. New API rows become real only after native/source, wrapper, version guard, docs, and tests agree."
+  ) -Boundary "The $($sourceStates.deferredBTierClosedWorkItemCount) ledgered B-tier items have source-quality proof closure, not runtime or release proof. New API rows become real only after native/source, wrapper, version guard, docs, and tests agree."
   New-BlockerLane -Order 6 -Id "project-quality-shard-runbook" -Title "ProjectQuality shard runbook and gate" -CurrentState $projectQualityShardRunbookState -OwnerNextAction "Keep shard runbook and zh-cn article current when new release-heavy tests are added; continue recording passed TRX hashes and refreshing class coverage." -RequiredEvidence @(
     "artifacts/test-analysis/project-quality-shard-runbook.md",
     "docs/articles/zh-cn/project-quality-sharded-gate.md",

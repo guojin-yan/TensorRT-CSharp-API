@@ -86,7 +86,7 @@ public sealed class FinalOwnerExecutionOneScreenPackTests
             "owner-review",
             "post-publish-downloaded-package-hash",
             "dual-package-nuget-route-owner-proof",
-            "dual-package-github-runtime-route-owner-proof",
+            "dual-package-github-bridge-route-owner-proof",
             "rollback-review",
             "final-close-decision",
             "strict-validator-chain"

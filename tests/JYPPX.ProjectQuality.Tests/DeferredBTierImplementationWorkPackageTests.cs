@@ -36,8 +36,8 @@ public sealed class DeferredBTierImplementationWorkPackageTests
         Assert.Equal(40, root.GetProperty("stableWorkItemKeyCount").GetInt32());
         Assert.Equal(60, root.GetProperty("workItemTargetCount").GetInt32());
         Assert.Equal(aliasRoot.GetProperty("closureCandidateCount").GetInt32(), root.GetProperty("workItemCount").GetInt32());
-        Assert.Equal(45, root.GetProperty("workItemCount").GetInt32());
-        Assert.Equal(45, root.GetProperty("closedWorkItemCount").GetInt32());
+        Assert.Equal(51, root.GetProperty("workItemCount").GetInt32());
+        Assert.Equal(51, root.GetProperty("closedWorkItemCount").GetInt32());
         Assert.Equal(0, root.GetProperty("remainingWorkItemCount").GetInt32());
         Assert.False(root.GetProperty("performsPublish").GetBoolean());
         Assert.False(root.GetProperty("canPublishPublicly").GetBoolean());

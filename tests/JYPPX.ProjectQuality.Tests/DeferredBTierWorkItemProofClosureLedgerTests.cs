@@ -14,20 +14,20 @@ public sealed class DeferredBTierWorkItemProofClosureLedgerTests
 
         Assert.Equal("deferred-btier-work-item-proof-closure-ledger", root.GetProperty("recordKind").GetString());
         Assert.Equal("source-quality-proof-closed", root.GetProperty("closureState").GetString());
-        Assert.Equal(45, root.GetProperty("closedWorkItemCount").GetInt32());
+        Assert.Equal(51, root.GetProperty("closedWorkItemCount").GetInt32());
 
         string[] closedIds = root.GetProperty("closedWorkItemIds")
             .EnumerateArray()
             .Select(static value => value.GetString()!)
             .ToArray();
-        Assert.Equal(45, closedIds.Length);
-        Assert.Equal(45, closedIds.Distinct(StringComparer.Ordinal).Count());
+        Assert.Equal(51, closedIds.Length);
+        Assert.Equal(51, closedIds.Distinct(StringComparer.Ordinal).Count());
         Assert.Equal("btier-001", closedIds[0]);
-        Assert.Equal("btier-045", closedIds[^1]);
+        Assert.Equal("btier-051", closedIds[^1]);
 
         JsonElement[] batches = root.GetProperty("closureBatches").EnumerateArray().ToArray();
-        Assert.Equal(4, batches.Length);
-        Assert.Equal(45, batches.Sum(static batch => batch.GetProperty("closedWorkItemCount").GetInt32()));
+        Assert.Equal(5, batches.Length);
+        Assert.Equal(51, batches.Sum(static batch => batch.GetProperty("closedWorkItemCount").GetInt32()));
         Assert.All(batches, static batch =>
         {
             Assert.NotEmpty(batch.GetProperty("evidence").EnumerateArray());
@@ -49,7 +49,7 @@ public sealed class DeferredBTierWorkItemProofClosureLedgerTests
     public void GeneratedWorkPackageConsumesLedgerAndLeavesNoClosedItemPending()
     {
         string output = RunPowerShell("Export-DeferredBTierImplementationWorkPackage.ps1");
-        Assert.Contains("ClosedWorkItemCount=45", output, StringComparison.Ordinal);
+        Assert.Contains("ClosedWorkItemCount=51", output, StringComparison.Ordinal);
         Assert.Contains("RemainingWorkItemCount=0", output, StringComparison.Ordinal);
 
         using JsonDocument ledger = ReadJson("artifacts", "interface-coverage", "deferred-btier-work-item-proof-closure-ledger.json");

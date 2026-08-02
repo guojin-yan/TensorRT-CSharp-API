@@ -16,6 +16,9 @@ param(
   [switch]$MissingOnly,
   [ValidateRange(1, 100)]
   [int]$DurationRankingCount = 20,
+  [string]$SharedEvidenceLockPath = "",
+  [ValidateRange(1, 7200)]
+  [int]$SharedEvidenceLockTimeoutSeconds = 1800,
   [switch]$RefreshInventory,
   [switch]$PreviewOnly,
   [switch]$ContinueOnFailure
@@ -23,6 +26,7 @@ param(
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
+$sharedEvidenceLock = $null
 
 $repositoryRoot = Split-Path -Parent $PSScriptRoot
 if ([string]::IsNullOrWhiteSpace($TestProject)) {
@@ -44,6 +48,13 @@ if ([string]::IsNullOrWhiteSpace($OutputRoot)) {
 }
 elseif (-not [IO.Path]::IsPathRooted($OutputRoot)) {
   $OutputRoot = Join-Path $repositoryRoot $OutputRoot
+}
+
+if ([string]::IsNullOrWhiteSpace($SharedEvidenceLockPath)) {
+  $SharedEvidenceLockPath = Join-Path $repositoryRoot "artifacts\test-analysis\project-quality-shared-evidence.lock"
+}
+elseif (-not [IO.Path]::IsPathRooted($SharedEvidenceLockPath)) {
+  $SharedEvidenceLockPath = Join-Path $repositoryRoot $SharedEvidenceLockPath
 }
 
 if ($MissingOnly) {
@@ -167,6 +178,46 @@ function Get-TrxCounters {
   }
 }
 
+function Enter-SharedEvidenceLock {
+  param(
+    [Parameter(Mandatory = $true)][string]$Path,
+    [Parameter(Mandatory = $true)][int]$TimeoutSeconds
+  )
+
+  $directory = Split-Path -Parent $Path
+  if (-not [string]::IsNullOrWhiteSpace($directory)) {
+    New-Item -ItemType Directory -Force -Path $directory | Out-Null
+  }
+
+  $waitStartedAt = [DateTime]::UtcNow
+  $attemptCount = 0
+  while ($true) {
+    $attemptCount++
+    try {
+      $stream = [IO.File]::Open(
+        $Path,
+        [IO.FileMode]::OpenOrCreate,
+        [IO.FileAccess]::ReadWrite,
+        [IO.FileShare]::None)
+      $acquiredAt = [DateTime]::UtcNow
+      return [pscustomobject][ordered]@{
+        stream = $stream
+        waitStartedAtUtc = $waitStartedAt.ToString("O")
+        acquiredAtUtc = $acquiredAt.ToString("O")
+        waitDurationSeconds = [Math]::Round(($acquiredAt - $waitStartedAt).TotalSeconds, 3)
+        attemptCount = $attemptCount
+      }
+    }
+    catch [IO.IOException] {
+      $waitedSeconds = ([DateTime]::UtcNow - $waitStartedAt).TotalSeconds
+      if ($waitedSeconds -ge $TimeoutSeconds) {
+        throw "Timed out after $([Math]::Round($waitedSeconds, 3))s waiting for the ProjectQuality shared evidence lock '$Path'. No tests were started by this runner."
+      }
+      Start-Sleep -Milliseconds 250
+    }
+  }
+}
+
 $inventory = Get-Content -LiteralPath $InventoryPath -Raw | ConvertFrom-Json
 $inventorySha256 = (Get-FileHash -LiteralPath $InventoryPath -Algorithm SHA256).Hash.ToLowerInvariant()
 $coverage = $null
@@ -286,6 +337,37 @@ if ($executionUnits.Count -eq 0 -and -not $MissingOnly) {
 New-Item -ItemType Directory -Force -Path $OutputRoot | Out-Null
 $runDirectory = Join-Path $OutputRoot $RunId
 New-Item -ItemType Directory -Force -Path $runDirectory | Out-Null
+
+$sharedEvidenceLockAcquiredAt = $null
+$sharedEvidenceLockReleasedAt = $null
+$sharedEvidenceLockWaitStartedAtUtc = ""
+$sharedEvidenceLockAcquiredAtUtc = ""
+$sharedEvidenceLockReleasedAtUtc = ""
+$sharedEvidenceLockWaitDurationSeconds = 0.0
+$sharedEvidenceLockHeldDurationSeconds = 0.0
+$sharedEvidenceLockAttemptCount = 0
+trap {
+  if ($null -ne $sharedEvidenceLock) {
+    $sharedEvidenceLock.Dispose()
+    $sharedEvidenceLock = $null
+  }
+  throw $_
+}
+
+if (-not $PreviewOnly) {
+  Write-Host "Waiting for ProjectQuality shared evidence lock: $SharedEvidenceLockPath"
+  $lockAdmission = Enter-SharedEvidenceLock -Path $SharedEvidenceLockPath -TimeoutSeconds $SharedEvidenceLockTimeoutSeconds
+  $sharedEvidenceLock = $lockAdmission.stream
+  $sharedEvidenceLockWaitStartedAtUtc = [string]$lockAdmission.waitStartedAtUtc
+  $sharedEvidenceLockAcquiredAtUtc = [string]$lockAdmission.acquiredAtUtc
+  $sharedEvidenceLockWaitDurationSeconds = [double]$lockAdmission.waitDurationSeconds
+  $sharedEvidenceLockAttemptCount = [int]$lockAdmission.attemptCount
+  $sharedEvidenceLockAcquiredAt = [DateTime]::Parse(
+    $sharedEvidenceLockAcquiredAtUtc,
+    [Globalization.CultureInfo]::InvariantCulture,
+    [Globalization.DateTimeStyles]::RoundtripKind)
+  Write-Host "ProjectQuality shared evidence lock acquired: wait=$($sharedEvidenceLockWaitDurationSeconds)s attempts=$sharedEvidenceLockAttemptCount"
+}
 
 $results = [Collections.Generic.List[object]]::new()
 foreach ($executionUnit in $executionUnits) {
@@ -480,6 +562,15 @@ foreach ($executionUnit in $executionUnits) {
   Write-Host "Shard $shardId finished: state=$state exitCode=$exitCode duration=${durationSeconds}s total=$($counters.total) passed=$($counters.passed) failed=$($counters.failed)"
 }
 
+if ($null -ne $sharedEvidenceLock) {
+  $sharedEvidenceLockReleasedAt = [DateTime]::UtcNow
+  $sharedEvidenceLockReleasedAtUtc = $sharedEvidenceLockReleasedAt.ToString("O")
+  $sharedEvidenceLockHeldDurationSeconds = [Math]::Round(($sharedEvidenceLockReleasedAt - $sharedEvidenceLockAcquiredAt).TotalSeconds, 3)
+  $sharedEvidenceLock.Dispose()
+  $sharedEvidenceLock = $null
+  Write-Host "ProjectQuality shared evidence lock released: held=$($sharedEvidenceLockHeldDurationSeconds)s"
+}
+
 $passedResults = @($results | Where-Object state -eq "passed")
 $failedResults = @($results | Where-Object state -eq "failed")
 $timedOutResults = @($results | Where-Object state -eq "timed-out")
@@ -537,6 +628,23 @@ $summary = [pscustomobject][ordered]@{
   requestedBatches = @($requestedBatches)
   classNamePattern = $ClassNamePattern
   durationRankingCount = $DurationRankingCount
+  sharedEvidenceIsolation = [pscustomobject][ordered]@{
+    mode = "cross-process-exclusive-file-lock"
+    scope = "artifacts/final-release"
+    required = $true
+    lockPath = ConvertTo-RelativePath $SharedEvidenceLockPath
+    lockWaitTimeoutSeconds = $SharedEvidenceLockTimeoutSeconds
+    acquired = -not [bool]$PreviewOnly
+    released = -not [bool]$PreviewOnly
+    waitStartedAtUtc = $sharedEvidenceLockWaitStartedAtUtc
+    acquiredAtUtc = $sharedEvidenceLockAcquiredAtUtc
+    releasedAtUtc = $sharedEvidenceLockReleasedAtUtc
+    waitDurationSeconds = $sharedEvidenceLockWaitDurationSeconds
+    heldDurationSeconds = $sharedEvidenceLockHeldDurationSeconds
+    attemptCount = $sharedEvidenceLockAttemptCount
+    testTimeoutStartsAfterLockAcquired = $true
+    previewDoesNotAcquireLock = $true
+  }
   executionUnitCount = $results.Count
   classLevelExecutionUnitCount = $classLevelExecutionUnitCount
   shardCount = $results.Count
@@ -569,6 +677,12 @@ $markdown.Add("- Run ID：``$RunId``")
 $markdown.Add("- 状态：``$summaryState``")
 $markdown.Add("- Preview：``$([bool]$PreviewOnly)``")
 $markdown.Add("- 每分片超时：``$TimeoutSeconds`` 秒")
+$markdown.Add("- 共享 evidence 隔离：``$($summary.sharedEvidenceIsolation.mode)``")
+$markdown.Add("- 共享 evidence 范围：``$($summary.sharedEvidenceIsolation.scope)``")
+$markdown.Add("- 锁路径：``$($summary.sharedEvidenceIsolation.lockPath)``")
+$markdown.Add("- 锁等待上限：``$($summary.sharedEvidenceIsolation.lockWaitTimeoutSeconds)`` 秒（不占用测试超时）")
+$markdown.Add("- 锁已获取/释放：``$($summary.sharedEvidenceIsolation.acquired)`` / ``$($summary.sharedEvidenceIsolation.released)``")
+$markdown.Add("- 锁等待/持有：``$($summary.sharedEvidenceIsolation.waitDurationSeconds)`` / ``$($summary.sharedEvidenceIsolation.heldDurationSeconds)`` 秒")
 $markdown.Add("- 分片：``$($requestedShards -join ', ')``")
 $markdown.Add("- 批次大小：``$BatchSize``（0 表示整个分片）")
 $markdown.Add("- 指定批次：``$(if ($requestedBatches.Count -gt 0) { $requestedBatches -join ', ' } else { '全部' })``")

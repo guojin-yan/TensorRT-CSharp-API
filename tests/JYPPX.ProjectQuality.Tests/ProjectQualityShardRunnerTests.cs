@@ -68,6 +68,16 @@ public sealed class ProjectQualityShardRunnerTests
         Assert.False(summary.GetProperty("canCloseReleaseIssue").GetBoolean());
         Assert.Contains("not test passes", summary.GetProperty("boundary").GetString(), StringComparison.Ordinal);
 
+        JsonElement isolation = summary.GetProperty("sharedEvidenceIsolation");
+        Assert.Equal("cross-process-exclusive-file-lock", isolation.GetProperty("mode").GetString());
+        Assert.Equal("artifacts/final-release", isolation.GetProperty("scope").GetString());
+        Assert.True(isolation.GetProperty("required").GetBoolean());
+        Assert.False(isolation.GetProperty("acquired").GetBoolean());
+        Assert.False(isolation.GetProperty("released").GetBoolean());
+        Assert.Equal(1800, isolation.GetProperty("lockWaitTimeoutSeconds").GetInt32());
+        Assert.True(isolation.GetProperty("testTimeoutStartsAfterLockAcquired").GetBoolean());
+        Assert.True(isolation.GetProperty("previewDoesNotAcquireLock").GetBoolean());
+
         JsonElement[] previewResults = summary.GetProperty("results").EnumerateArray().ToArray();
         Assert.Equal(new[] { "G-M", "T-Z" }, previewResults.Select(static item => item.GetProperty("id").GetString()).ToArray());
         Assert.All(previewResults, static item =>
@@ -96,6 +106,9 @@ public sealed class ProjectQualityShardRunnerTests
         Assert.Contains("classNames", runnerSource, StringComparison.Ordinal);
         Assert.Contains("DOTNET_CLI_USE_MSBUILD_SERVER", runnerSource, StringComparison.Ordinal);
         Assert.Contains("MSBUILDDISABLENODEREUSE", runnerSource, StringComparison.Ordinal);
+        Assert.Contains("[IO.FileShare]::None", runnerSource, StringComparison.Ordinal);
+        Assert.Contains("SharedEvidenceLockTimeoutSeconds", runnerSource, StringComparison.Ordinal);
+        Assert.Contains("No tests were started by this runner", runnerSource, StringComparison.Ordinal);
 
         string batchPreviewOutput = RunPowerShell(
             Path.Combine(RepositoryPaths.Root, "eng", "Invoke-ProjectQualityTestShards.ps1"),
@@ -131,6 +144,62 @@ public sealed class ProjectQualityShardRunnerTests
         Assert.Equal(15, batchResult.GetProperty("classNames").GetArrayLength());
         Assert.StartsWith("JYPPX.ProjectQuality.Tests.", batchResult.GetProperty("firstClass").GetString(), StringComparison.Ordinal);
         Assert.StartsWith("JYPPX.ProjectQuality.Tests.", batchResult.GetProperty("lastClass").GetString(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void SharedEvidenceLockContentionFailsClosedBeforeStartingTests()
+    {
+        string fixtureRoot = Path.Combine(Path.GetTempPath(), $"project-quality-shared-evidence-lock-{Guid.NewGuid():N}");
+        string outputRoot = Path.Combine(fixtureRoot, "output");
+        string lockPath = Path.Combine(fixtureRoot, "shared-evidence.lock");
+        string inventoryPath = Path.Combine(fixtureRoot, "inventory.json");
+        Directory.CreateDirectory(fixtureRoot);
+        File.WriteAllText(inventoryPath, JsonSerializer.Serialize(new
+        {
+            recordKind = "project-quality-test-inventory",
+            shards = new object[]
+            {
+                new
+                {
+                    id = "A-F",
+                    classes = new[] { "JYPPX.ProjectQuality.Tests.ArticleRoadmap30PlusTests" },
+                },
+            },
+        }));
+
+        try
+        {
+            using (FileStream heldLock = File.Open(lockPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None))
+            {
+                Stopwatch stopwatch = Stopwatch.StartNew();
+                string failure = RunPowerShellExpectFailure(
+                    Path.Combine(RepositoryPaths.Root, "eng", "Invoke-ProjectQualityTestShards.ps1"),
+                    "-Shard",
+                    "A-F",
+                    "-InventoryPath",
+                    inventoryPath,
+                    "-OutputRoot",
+                    outputRoot,
+                    "-SharedEvidenceLockPath",
+                    lockPath,
+                    "-SharedEvidenceLockTimeoutSeconds",
+                    "1",
+                    "-TimeoutSeconds",
+                    "120",
+                    "-RunId",
+                    "lock-contention");
+                stopwatch.Stop();
+
+                Assert.Contains("waiting for the ProjectQuality shared evidence lock", failure, StringComparison.Ordinal);
+                Assert.Contains("No tests were started by this runner", failure, StringComparison.Ordinal);
+                Assert.True(stopwatch.Elapsed < TimeSpan.FromSeconds(15), $"Lock admission took {stopwatch.Elapsed}.");
+                Assert.False(File.Exists(Path.Combine(outputRoot, "lock-contention", "summary.json")));
+            }
+        }
+        finally
+        {
+            Directory.Delete(fixtureRoot, recursive: true);
+        }
     }
 
     [Fact]

@@ -18,6 +18,8 @@ if (-not (Test-Path -LiteralPath $resolvedInputPath -PathType Leaf)) {
 
 $record = Get-Content -LiteralPath $resolvedInputPath -Raw -Encoding utf8 | ConvertFrom-Json
 $lanes = @(Convert-ToArray (Get-PropertyOrDefault -Object $record -Name "lanes" -DefaultValue @()))
+$fieldGroups = @(Convert-ToArray (Get-PropertyOrDefault -Object $record -Name "fieldGroups" -DefaultValue @()))
+$compatibilityFields = @($fieldGroups | ForEach-Object { Convert-ToArray (Get-PropertyOrDefault -Object $_ -Name "fields" -DefaultValue @()) })
 $ids = @($lanes | ForEach-Object { [string]$_.id })
 $requiredIds = @("public-package-url-hash", "external-clean-consumer-post-publish", "article-publication", "yolovision-real-model", "final-owner-rollback-review", "final-owner-close-decision", "github-ci-evidence", "release-evidence-bundle-hash-review", "classification-audit-hash-review")
 $missingIds = @($requiredIds | Where-Object { $ids -notcontains $_ })
@@ -27,6 +29,7 @@ $items = @(
   New-OwnerValidationItem "lane-coverage" ($missingIds.Count -eq 0 -and $lanes.Count -ge 9) "blocker" "Skeleton must cover all final Owner proof lanes."
   New-OwnerValidationItem "required-fields" ([int](Get-PropertyOrDefault -Object $record -Name "requiredFieldCount" -DefaultValue 0) -ge 40) "blocker" "Skeleton must expose enough concrete Owner fields."
   New-OwnerValidationItem "template-artifact" (-not [string]::IsNullOrWhiteSpace([string](Get-PropertyOrDefault -Object $record -Name "templateArtifact" -DefaultValue ""))) "blocker" "Template artifact path is required."
+  New-OwnerValidationItem "compatible-field-schema" ($compatibilityFields.Count -ge 49 -and @($compatibilityFields | Where-Object { [string]$_.fieldPath -like "dualPackageRoutes.*" }).Count -eq 8) "blocker" "Skeleton must retain the stable real-input field schema and eight dual-package route fields."
   New-OwnerValidationItem "non-proof-flags" (-not [bool](Get-PropertyOrDefault -Object $record -Name "performsPublish" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "usesPublishToken" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "canPublishPublicly" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "canCloseReleaseIssue" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "isRuntimeExecutionProof" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "isPostPublishProof" -DefaultValue $true) -and -not [bool](Get-PropertyOrDefault -Object $record -Name "isReleaseCloseProof" -DefaultValue $true)) "blocker" "Skeleton must not publish, use tokens, close, or claim proof."
   New-OwnerValidationItem "boundary" ($boundary.Contains("not runtime proof", [StringComparison]::OrdinalIgnoreCase) -and $boundary.Contains("not post-publish proof", [StringComparison]::OrdinalIgnoreCase) -and $boundary.Contains("not package push", [StringComparison]::OrdinalIgnoreCase)) "blocker" "Boundary must be explicit."
 )
@@ -37,7 +40,11 @@ $validation = [pscustomobject]@{
   generatedAtUtc = [DateTimeOffset]::UtcNow.ToString("O")
   validationState = $state
   laneCount = $lanes.Count
+  compatibilityFieldCount = $compatibilityFields.Count
   requiredFieldCount = [int](Get-PropertyOrDefault -Object $record -Name "requiredFieldCount" -DefaultValue 0)
+  packageConsumerOwnerRuntimeSmokeFieldAlignmentState = [string](Get-PropertyOrDefault -Object $record -Name "packageConsumerOwnerRuntimeSmokeFieldAlignmentState" -DefaultValue "missing-package-consumer-owner-runtime-smoke-field-alignment")
+  packageConsumerOwnerRuntimeSmokeFieldAlignmentValidationState = [string](Get-PropertyOrDefault -Object $record -Name "packageConsumerOwnerRuntimeSmokeFieldAlignmentValidationState" -DefaultValue "missing-package-consumer-owner-runtime-smoke-field-alignment-validation")
+  packageConsumerOwnerRuntimeSmokeFieldAlignmentMissingRequiredFieldCount = [int](Get-PropertyOrDefault -Object $record -Name "packageConsumerOwnerRuntimeSmokeFieldAlignmentMissingRequiredFieldCount" -DefaultValue -1)
   missingRequiredLaneCount = $missingIds.Count
   failedBlockerCount = $failedBlockers.Count
   validationItems = @($items)

@@ -50,15 +50,19 @@ function New-GateItem {
 }
 
 function Test-AllowedBoundaryContext {
-  param([string]$Line)
+  param(
+    [string]$Line,
+    [string]$StructuredContext = ""
+  )
 
-  $lower = $Line.ToLowerInvariant()
+  $lower = ($Line + " " + $StructuredContext).ToLowerInvariant()
   foreach ($marker in @(
       "not proof",
       "not runtime proof",
       "not package-consumer",
       "not post-publish",
       "does not",
+      "without",
       "cannot",
       "must not",
       "no ",
@@ -71,6 +75,7 @@ function Test-AllowedBoundaryContext {
       "forbidden",
       "non-proof",
       "不是",
+      "不应",
       "不能",
       "不得",
       "不可",
@@ -161,16 +166,40 @@ $allowedBoundaryMatches = New-Object System.Collections.Generic.List[object]
 foreach ($file in @($files | Sort-Object -Unique)) {
   $relative = ConvertTo-RelativePath -Path $file
   $lines = Get-Content -LiteralPath $file -Encoding utf8
+  $isMarkdown = $relative.EndsWith(".md", [StringComparison]::OrdinalIgnoreCase)
+  $markdownHeadings = [string[]]::new(7)
+  $markdownTableHeader = ""
   for ($i = 0; $i -lt $lines.Count; $i++) {
     $line = [string]$lines[$i]
+    if ($isMarkdown) {
+      if ($line -match "^\s*(#{1,6})\s+(?<title>.+?)\s*#*\s*$") {
+        $headingLevel = ([string]$Matches[1]).Length
+        $markdownHeadings[$headingLevel] = [string]$Matches.title
+        for ($clearLevel = $headingLevel + 1; $clearLevel -le 6; $clearLevel++) {
+          $markdownHeadings[$clearLevel] = ""
+        }
+        $markdownTableHeader = ""
+      }
+      elseif ($line -match "^\s*\|.*\|\s*$") {
+        $nextLine = if ($i + 1 -lt $lines.Count) { [string]$lines[$i + 1] } else { "" }
+        if ($nextLine -match "^\s*\|(?:\s*:?-+:?\s*\|)+\s*$") {
+          $markdownTableHeader = $line
+        }
+      }
+      elseif (-not [string]::IsNullOrWhiteSpace($line)) {
+        $markdownTableHeader = ""
+      }
+    }
+    $structuredContext = (@($markdownHeadings | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }) + @($markdownTableHeader)) -join " / "
     foreach ($rule in $rules) {
       if ($line -match $rule.pattern) {
-        $allowed = Test-AllowedBoundaryContext -Line $line
+        $allowed = Test-AllowedBoundaryContext -Line $line -StructuredContext $structuredContext
         $record = [pscustomobject]@{
           ruleId = $rule.id
           file = $relative
           line = $i + 1
           allowedBoundaryContext = $allowed
+          structuredContext = $structuredContext
           text = $line.Trim()
         }
 
@@ -233,6 +262,7 @@ $report = [ordered]@{
   matchCount = $claimMatches.Count
   allowedBoundaryMatchCount = $allowedBoundaryMatches.Count
   blockedMatchCount = $blockedMatches.Count
+  boundaryContextMode = "inline-plus-markdown-heading-and-table-header"
   blockedMatches = @($blockedMatches.ToArray())
   allowedBoundaryMatches = @($allowedBoundaryMatches.ToArray())
   validationItems = @($items.ToArray())

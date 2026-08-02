@@ -66,7 +66,7 @@ public sealed class FinalProofReadinessBlockerDashboardTests
         Assert.Equal("owner-action-required", sourceStates.GetProperty("yoloVisionLicenseApprovalState").GetString());
         Assert.Equal(22, sourceStates.GetProperty("yoloVisionLicenseOwnerActionRequiredCount").GetInt32());
         Assert.Equal("source-quality-proof-closed", sourceStates.GetProperty("deferredBTierWorkPackageState").GetString());
-        Assert.Equal(45, sourceStates.GetProperty("deferredBTierClosedWorkItemCount").GetInt32());
+        Assert.Equal(51, sourceStates.GetProperty("deferredBTierClosedWorkItemCount").GetInt32());
         Assert.Equal(0, sourceStates.GetProperty("deferredBTierRemainingWorkItemCount").GetInt32());
         Assert.Equal("runbook-ready-non-proof", sourceStates.GetProperty("projectQualityShardRunbookState").GetString());
         Assert.True(sourceStates.GetProperty("projectQualityShardRunbookReady").GetBoolean());
@@ -112,9 +112,9 @@ public sealed class FinalProofReadinessBlockerDashboardTests
 
         JsonElement deferredLane = root.GetProperty("blockers").EnumerateArray().Single(item => item.GetProperty("id").GetString() == "deferred-readonly-implementation-batch");
         Assert.Contains("source-quality-proof-closed", deferredLane.GetProperty("currentState").GetString(), StringComparison.Ordinal);
-        Assert.Contains("closed=45", deferredLane.GetProperty("currentState").GetString(), StringComparison.Ordinal);
+        Assert.Contains("closed=51", deferredLane.GetProperty("currentState").GetString(), StringComparison.Ordinal);
         Assert.Contains("remaining=0", deferredLane.GetProperty("currentState").GetString(), StringComparison.Ordinal);
-        Assert.Contains("Do not repeat btier-001 through btier-045", deferredLane.GetProperty("ownerNextAction").GetString(), StringComparison.Ordinal);
+        Assert.Contains("Do not repeat btier-001 through btier-051", deferredLane.GetProperty("ownerNextAction").GetString(), StringComparison.Ordinal);
         Assert.Contains("deferred B-tier work-item proof closure ledger", deferredLane.GetProperty("requiredEvidence").EnumerateArray().Select(static item => item.GetString()!));
         Assert.Contains(
             "TRT11 runtime DLL resolution report",
