@@ -237,20 +237,6 @@ jobs:
             fi
           fi
 
-      - name: Ensure GitHub Release Exists
-        if: ${{ inputs.attach_runtime_to_github_release }}
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          title="$RELEASE_TAG"
-          notes="Automated release for $RELEASE_TAG"
-          if gh release view "$RELEASE_TAG" --repo "$GH_REPO" >/dev/null 2>&1; then
-            echo "Release $RELEASE_TAG already exists."
-          else
-            gh release create "$RELEASE_TAG" --title "$title" --notes "$notes" --repo "$GH_REPO"
-          fi
-
       - name: Dispatch child workflows
         id: dispatch
         shell: bash
@@ -428,6 +414,7 @@ jobs:
 
           dispatch_workflow "package-source" \
             -f "version=$RELEASE_VERSION" \
+            -f "owner_publish_approved=$OWNER_PUBLISH_APPROVED" \
             -f "release_tag=$RELEASE_TAG" \
             -f "attach_to_github_release=$ATTACH_RUNTIME_TO_GITHUB_RELEASE"
 
@@ -614,7 +601,10 @@ jobs:
       - name: Validate downloaded release packages
         if: ${{ inputs.attach_runtime_to_github_release }}
         shell: pwsh
-        run: pwsh -NoProfile -File .\eng\Test-ExternalVendorRuntimePackagePolicy.ps1 -PackagePath (Join-Path $env:RUNNER_TEMP 'release-bundle-downloads')
+        run: |
+          $downloadRoot = Join-Path $env:RUNNER_TEMP 'release-bundle-downloads'
+          pwsh -NoProfile -File .\eng\Test-ExternalVendorRuntimePackagePolicy.ps1 -PackagePath $downloadRoot
+          pwsh -NoProfile -File .\eng\Test-PublicationLicenseReadiness.ps1 -ArtifactPath $downloadRoot
 
       - name: Create or update GitHub Release
         if: ${{ inputs.attach_runtime_to_github_release }}
@@ -648,6 +638,12 @@ jobs:
           tag="v$RELEASE_VERSION"
           title="$tag"
           notes="Automated release for $tag"
+
+          if ! gh release view "$tag" --repo "$GH_REPO" >/dev/null 2>&1; then
+            if ! gh release create "$tag" --title "$title" --notes "$notes" --repo "$GH_REPO"; then
+              gh release view "$tag" --repo "$GH_REPO" >/dev/null 2>&1
+            fi
+          fi
 
           gh release upload "$tag" "${files[@]}" --clobber --repo "$GH_REPO"
 

@@ -114,7 +114,7 @@ jobs:
           dotnet test .\tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj `
             -c Debug `
             --no-build `
-            --filter "FullyQualifiedName~ReleaseAutomationTests|FullyQualifiedName~ReleaseQualityGateWorkflowTests" `
+            --filter "FullyQualifiedName~ReleaseAutomationTests|FullyQualifiedName~ReleaseQualityGateWorkflowTests|FullyQualifiedName~PublicationLicenseReadinessTests" `
             --logger "trx;LogFileName=release-quality-gate.trx" `
             --results-directory .\artifacts\release-quality-gate\test-results
 

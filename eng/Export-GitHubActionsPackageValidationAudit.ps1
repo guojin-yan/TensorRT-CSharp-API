@@ -157,7 +157,7 @@ $releaseQualityHasSourceGate = Test-ContainsAll -Text $releaseQualityWorkflow -N
 $releaseQualitySourceOnlyFilterClean =
   (Test-ContainsAll -Text $releaseQualityWorkflow -Needles @(
     "Run source-only release quality tests",
-    "--filter `"FullyQualifiedName~ReleaseAutomationTests|FullyQualifiedName~ReleaseQualityGateWorkflowTests`""
+    "--filter `"FullyQualifiedName~ReleaseAutomationTests|FullyQualifiedName~ReleaseQualityGateWorkflowTests|FullyQualifiedName~PublicationLicenseReadinessTests`""
   )) -and
   -not $releaseQualityWorkflow.Contains("FinalReleaseMarkdownRenderingTests", [StringComparison]::Ordinal) -and
   -not $releaseQualityWorkflow.Contains("RnnV2BorrowedStateDesignGateTests", [StringComparison]::Ordinal) -and

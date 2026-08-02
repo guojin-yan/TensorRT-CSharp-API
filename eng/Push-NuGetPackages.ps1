@@ -72,6 +72,9 @@ switch ($SortMode) {
   }
 }
 
+$licenseGatePath = Join-Path $PSScriptRoot "Test-PublicationLicenseReadiness.ps1"
+& $licenseGatePath -ArtifactPath @($packages | ForEach-Object { $_.FullName })
+
 function Test-IsAsciiText {
   param(
     [Parameter(Mandatory = $true)]

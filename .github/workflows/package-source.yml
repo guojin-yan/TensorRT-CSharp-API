@@ -8,6 +8,11 @@ on:
         required: false
         default: 4.0.0
         type: string
+      owner_publish_approved:
+        description: Explicit Owner approval for GitHub Release publication side effects
+        required: false
+        default: false
+        type: boolean
       artifact_name:
         description: Uploaded artifact name
         required: false
@@ -29,6 +34,10 @@ on:
         required: false
         default: 4.0.0
         type: string
+      owner_publish_approved:
+        required: false
+        default: false
+        type: boolean
       artifact_name:
         required: false
         default: source-package
@@ -43,7 +52,7 @@ on:
         type: boolean
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   pack:
@@ -61,6 +70,9 @@ jobs:
           if ('${{ github.repository_owner }}' -ne 'guojin-yan' -and '${{ inputs.attach_to_github_release }}' -eq 'true') {
             throw "The grape-yan repository is validation-only and cannot upload Release assets."
           }
+          if ('${{ inputs.attach_to_github_release }}' -eq 'true' -and '${{ inputs.owner_publish_approved }}' -ne 'true') {
+            throw "Source archive publication requires owner_publish_approved=true."
+          }
 
       - name: Create tracked source archive
         shell: pwsh
@@ -74,8 +86,27 @@ jobs:
             artifacts/source/*.zip
             artifacts/source/*.json
 
+  attach-source:
+    if: ${{ inputs.attach_to_github_release && inputs.release_tag != '' && inputs.owner_publish_approved && github.repository_owner == 'guojin-yan' }}
+    needs: pack
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Download source artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: ${{ inputs.artifact_name }}
+          path: artifacts/source
+
+      - name: Validate source archive license
+        shell: pwsh
+        run: pwsh -NoProfile -File ./eng/Test-PublicationLicenseReadiness.ps1 -ArtifactPath ./artifacts/source
+
       - name: Attach source archive to GitHub Release
-        if: ${{ inputs.attach_to_github_release && inputs.release_tag != '' && github.repository_owner == 'guojin-yan' }}
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
@@ -83,7 +114,13 @@ jobs:
         run: |
           gh release view "${{ inputs.release_tag }}" --repo "$env:GH_REPO" *> $null
           if ($LASTEXITCODE -ne 0) {
-            throw "Release '${{ inputs.release_tag }}' does not exist."
+            gh release create "${{ inputs.release_tag }}" --title "${{ inputs.release_tag }}" --notes "Automated source release for ${{ inputs.release_tag }}" --repo "$env:GH_REPO"
+            if ($LASTEXITCODE -ne 0) {
+              gh release view "${{ inputs.release_tag }}" --repo "$env:GH_REPO" *> $null
+              if ($LASTEXITCODE -ne 0) {
+                throw "Failed to create or observe Release '${{ inputs.release_tag }}'."
+              }
+            }
           }
           Get-ChildItem -LiteralPath ./artifacts/source -Filter *.zip -File | ForEach-Object {
             gh release upload "${{ inputs.release_tag }}" $_.FullName --clobber --repo "$env:GH_REPO"

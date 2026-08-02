@@ -34,7 +34,7 @@ public sealed class ReleaseQualityGateWorkflowTests
         Assert.DoesNotContain("Test-PublicApiBilingualDocumentation.ps1 -SkipBuild", workflow, StringComparison.Ordinal);
         Assert.Contains("public-api-documentation-closure.*", workflow, StringComparison.Ordinal);
         Assert.Contains("Run source-only release quality tests", workflow, StringComparison.Ordinal);
-        Assert.Contains("--filter \"FullyQualifiedName~ReleaseAutomationTests|FullyQualifiedName~ReleaseQualityGateWorkflowTests\"", workflow, StringComparison.Ordinal);
+        Assert.Contains("--filter \"FullyQualifiedName~ReleaseAutomationTests|FullyQualifiedName~ReleaseQualityGateWorkflowTests|FullyQualifiedName~PublicationLicenseReadinessTests\"", workflow, StringComparison.Ordinal);
         Assert.DoesNotContain("FinalReleaseMarkdownRenderingTests", workflow, StringComparison.Ordinal);
         Assert.DoesNotContain("RnnV2BorrowedStateDesignGateTests", workflow, StringComparison.Ordinal);
         Assert.DoesNotContain("EngineAndRnnReadonlyDiagnosticsTests", workflow, StringComparison.Ordinal);

@@ -78,9 +78,11 @@ bridge 包必须只包含一个项目自有 native bridge 文件。禁止运行�
 ## 发布前确认
 
 - 两个 managed 包和每个 bridge 包均通过 external vendor runtime policy，未包含 NVIDIA 厂商二进制。
+- 每个 nupkg 声明非占位的 license expression 或包含非空 license file；源码归档根目录包含 Owner 确认的许可证文件。
 - managed/YoloVision clean consumer 不包含 `ProjectReference`，包版本与 source commit 对齐。
 - 第一版主要演示能构建；需要 GPU 的运行结果只按实际兼容主机证据描述。
 - 文档不得把 local build、dry run、local feed 或模板记录写成公开发布和 post-publish proof。
 - `IDebugListener::processDebugTensor` 等 deferred callback 不得宣称已有真实 runtime proof，除非存在可复核的兼容主机调用记录。
 - grape-yan 仅用于日常 Action 编译检查；两项验证工作流通过后，源码提交同步到 guojin-yan 正式仓库。
 - 所有上传、GitHub Release 和 NuGet push 开关保持关闭，直到 Owner 明确批准目标版本、包清单、SHA256 和发布渠道。
+- `Test-PublicationLicenseReadiness.ps1` 必须在任何 Release 创建、资产上传或 package push 之前通过；当前许可证未决时应 fail closed。

@@ -436,6 +436,8 @@
     href: articles/zh-cn/runtime-packages.md
   - name: NVIDIA Runtime External Dependency Policy
     href: articles/zh-cn/external-vendor-runtime-package-policy.md
+  - name: Publication License Readiness
+    href: articles/zh-cn/publication-license-readiness.md
   - name: Runtime Distribution Strategy
     href: articles/zh-cn/runtime-distribution-strategy.md
   - name: Package Consumer Validation

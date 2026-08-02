@@ -338,27 +338,7 @@ jobs:
         run: dotnet build TensorRtSharp.sln -c "${{ inputs.configuration }}" --no-restore
 
       - name: Test first release core package contracts
-        run: dotnet test .\tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj -c "${{ inputs.configuration }}" --no-build --filter "FullyQualifiedName~RuntimeManifestTests|FullyQualifiedName~ManagedPackageTests|FullyQualifiedName~ExternalVendorRuntimePackagePolicyTests|FullyQualifiedName~BridgePackageConsumerTests|FullyQualifiedName~YoloVisionManagedPackagePublicationTests|FullyQualifiedName~ReleaseAutomationTests|FullyQualifiedName~ReleaseQualityGateWorkflowTests"
-
-      - name: Ensure GitHub Release exists
-        if: ${{ inputs.attach_to_github_release && inputs.release_tag != '' }}
-        shell: pwsh
-        env:
-          GH_TOKEN: ${{ github.token }}
-          GH_REPO: ${{ github.repository }}
-        run: |
-          $tag = '${{ inputs.release_tag }}'
-          gh release view $tag --repo "$env:GH_REPO" *> $null
-          if ($LASTEXITCODE -eq 0) {
-            Write-Host "Release $tag already exists."
-            return
-          }
-
-          Write-Host "Creating release $tag before runtime asset upload."
-          gh release create $tag --title $tag --notes "Automated runtime release for $tag" --repo "$env:GH_REPO"
-          if ($LASTEXITCODE -ne 0) {
-            throw "Failed to create GitHub Release '$tag' with exit code $LASTEXITCODE."
-          }
+        run: dotnet test .\tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj -c "${{ inputs.configuration }}" --no-build --filter "FullyQualifiedName~RuntimeManifestTests|FullyQualifiedName~ManagedPackageTests|FullyQualifiedName~ExternalVendorRuntimePackagePolicyTests|FullyQualifiedName~PublicationLicenseReadinessTests|FullyQualifiedName~BridgePackageConsumerTests|FullyQualifiedName~YoloVisionManagedPackagePublicationTests|FullyQualifiedName~ReleaseAutomationTests|FullyQualifiedName~ReleaseQualityGateWorkflowTests"
 
       - name: Retired full-runtime packages
         if: ${{ false }}
@@ -563,9 +543,22 @@ jobs:
 
             if ('${{ inputs.attach_to_github_release }}' -eq 'true' -and -not [string]::IsNullOrWhiteSpace('${{ inputs.release_tag }}')) {
               $splitPackageRoot = Join-Path '.\artifacts\runtime-split-nupkg' $key
+              pwsh -NoProfile -File .\eng\Test-PublicationLicenseReadiness.ps1 -ArtifactPath $splitPackageRoot
               $packages = @(Get-ChildItem -LiteralPath $splitPackageRoot -Filter *.nupkg -Recurse | Sort-Object FullName)
               if ($packages.Count -eq 0) {
                 throw "No Windows split runtime packages were found for runtime key '$key' under '$splitPackageRoot'."
+              }
+
+              $releaseTag = '${{ inputs.release_tag }}'
+              gh release view $releaseTag --repo "$env:GH_REPO" *> $null
+              if ($LASTEXITCODE -ne 0) {
+                gh release create $releaseTag --title $releaseTag --notes "Automated runtime release for $releaseTag" --repo "$env:GH_REPO"
+                if ($LASTEXITCODE -ne 0) {
+                  gh release view $releaseTag --repo "$env:GH_REPO" *> $null
+                  if ($LASTEXITCODE -ne 0) {
+                    throw "Failed to create or observe GitHub Release '$releaseTag'."
+                  }
+                }
               }
 
               foreach ($package in $packages) {
@@ -660,6 +653,8 @@ jobs:
             throw "No Windows runtime packages were found for direct release upload."
           }
 
+          pwsh -NoProfile -File .\eng\Test-PublicationLicenseReadiness.ps1 -ArtifactPath .\artifacts\runtime-nupkg
+
           foreach ($package in $packages) {
             Write-Host "Uploading release asset: $($package.FullName)"
             gh release upload "${{ inputs.release_tag }}" $package.FullName --clobber --repo "$env:GH_REPO"
@@ -679,6 +674,7 @@ jobs:
           Write-Host "Skipping the final bulk upload to avoid duplicate large release asset transfers."
           return
 
+          pwsh -NoProfile -File .\eng\Test-PublicationLicenseReadiness.ps1 -ArtifactPath .\artifacts\runtime-split-nupkg
           $packages = @(Get-ChildItem -LiteralPath .\artifacts\runtime-split-nupkg -Filter *.nupkg -Recurse | Sort-Object FullName)
           if ($packages.Count -eq 0) {
             Write-Host "No remaining Windows split runtime packages were found; direct split release assets may have already been uploaded after each runtime key."

@@ -8431,3 +8431,21 @@ engine 均未打包或发布，8 份 publishing 用户修改未触碰、未暂�
   NuGet/GitHub Packages/GitHub Release 发布 job skipped。
 - 本批没有 Linux bridge runtime proof、公开 package、post-publish 或 Owner acceptance；CUDA、cuDNN、TensorRT、
   NVRTC 继续由用户安装，8 份 publishing 用户修改继续隔离。
+
+## 2026-08-02 Publication License Fail-Closed Gate
+
+- 新增 `pack/publication-license-policy.json` 与 `eng/Test-PublicationLicenseReadiness.ps1`。本地 build、pack 和 dry run
+  在 `ownerDecisionState=required` 时仍可执行，但动态发布物检查必须先取得 Owner 的 `approved` 决策，并精确匹配
+  `selectedPackageLicense.type/value` 与 `selectedSourceArchiveLicenseFileName`。
+- NuGet push、GitHub Packages push、GitHub Release 创建和资产上传均在副作用前执行许可证门禁；source workflow 的
+  默认权限降为 `contents: read`，只有显式 Owner 授权且正式仓库 attach job 才取得 `contents: write`。
+- 门禁支持 nuspec expression/file 两类许可证，检查包内 license file、源码归档根许可证、占位值和 ZIP 路径穿越；
+  PowerShell 5.1/7 static gate 均通过，专项测试 `7/7`，首发包发布契约精确集合 `55/55`。
+- 冻结候选 `ee3f96a` 被动态门禁以 9 条 finding 正确拒绝：1 条 Owner 许可证决策未批准、7 个 nupkg 无 license
+  metadata、1 个源码归档无根许可证。直接调用 NuGet push 入口也在任何 push 前被同一门禁终止。
+- 完整 Solution Release build 为 `0 warning / 0 error`；DocFX 构建 497 conceptual inputs、470 managed reference
+  inputs，`0 warning / 0 error`；7 个改动 workflow 通过结构化 YAML 解析，strict release quality gate required
+  finding 为 0。
+- 本批不选择 MIT、Apache-2.0 或商业许可证，不重打候选，也不创建 tag、Release 或公开 package。`ee3f96a`
+  降级为 pre-license diagnostic candidate；Linux、公开 clean consumer、post-publish 与 Owner acceptance 仍未完成，
+  8 份 publishing 用户修改继续不覆盖、不暂存。

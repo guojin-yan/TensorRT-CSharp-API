@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "policyId": "declared-license-required-before-publication",
+  "ownerDecisionState": "required",
+  "publicationRequiresDeclaredLicense": true,
+  "dryRunMayProceedWithoutDeclaredLicense": true,
+  "acceptedPackageLicenseTypes": [
+    "expression",
+    "file"
+  ],
+  "disallowedLicenseValues": [
+    "",
+    "NOASSERTION",
+    "NONE",
+    "UNLICENSED",
+    "TBD",
+    "TODO"
+  ],
+  "sourceArchiveLicenseFileNames": [
+    "LICENSE",
+    "LICENSE.txt",
+    "LICENSE.md",
+    "COPYING",
+    "COPYING.txt",
+    "COPYING.md"
+  ],
+  "selectedPackageLicense": {
+    "type": "",
+    "value": ""
+  },
+  "selectedSourceArchiveLicenseFileName": ""
+}

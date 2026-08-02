@@ -155,7 +155,7 @@ jobs:
         run: pwsh -NoProfile -File .\eng\Test-PublicApiBilingualDocumentation.ps1
 
       - name: Test managed package publication contracts
-        run: dotnet test .\tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj -c "${{ inputs.configuration }}" --no-build --filter "FullyQualifiedName~ExternalVendorRuntimePackagePolicyTests|FullyQualifiedName~YoloVisionManagedPackagePublicationTests|FullyQualifiedName~YoloVisionLocalPackageConsumerTests|FullyQualifiedName~ReleaseAutomationTests|FullyQualifiedName~ReleaseQualityGateWorkflowTests"
+        run: dotnet test .\tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj -c "${{ inputs.configuration }}" --no-build --filter "FullyQualifiedName~ExternalVendorRuntimePackagePolicyTests|FullyQualifiedName~PublicationLicenseReadinessTests|FullyQualifiedName~YoloVisionManagedPackagePublicationTests|FullyQualifiedName~YoloVisionLocalPackageConsumerTests|FullyQualifiedName~ReleaseAutomationTests|FullyQualifiedName~ReleaseQualityGateWorkflowTests"
 
       - name: Pack managed package
         run: dotnet pack .\pack\JYPPX.TensorRT.CSharp.API\JYPPX.TensorRT.CSharp.API.csproj -c "${{ inputs.configuration }}" -o .\artifacts\managed -p:JYPPXPackageVersion=${{ steps.version.outputs.package_version }} -p:RepositoryCommit=${{ github.sha }} -p:ContinuousIntegrationBuild=true
@@ -230,6 +230,8 @@ jobs:
             -ExpectedPackageId 'JYPPX.TensorRT.CSharp.API,JYPPX.TensorRT.CSharp.API.YoloVision' `
             -ExpectedPackageVersion '${{ needs.pack.outputs.package_version }}' `
             -RequireExactPackageSet
+          pwsh -NoProfile -File .\eng\Test-PublicationLicenseReadiness.ps1 `
+            -ArtifactPath .\artifacts\managed
 
       - name: Attach managed packages to GitHub Release
         shell: pwsh

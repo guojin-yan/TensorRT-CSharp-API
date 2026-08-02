@@ -433,6 +433,8 @@ Every upload path runs `eng/Test-ExternalVendorRuntimePackagePolicy.ps1`. The ma
 
 For nuget.org publication, `NUGET_API_KEY` must be an active plain-text key with push permission for both `JYPPX.TensorRT.CSharp.API` and `JYPPX.TensorRT.CSharp.API.YoloVision`, or for their owning account/organization. A nuget.org `403` is non-retryable until the package owner supplies a valid package-scoped key.
 
+Public publication also requires `eng/Test-PublicationLicenseReadiness.ps1` to pass. Local pack/dry-run may continue while the license is an Owner decision, but no GitHub Release creation, Release upload, NuGet push, or GitHub Packages push may occur until every nupkg declares a non-placeholder license and the tracked source archive contains the selected root license file.
+
 <details>
 <summary>Historical vendor-package migration note</summary>
 

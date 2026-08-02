@@ -48,7 +48,7 @@ jobs:
           dotnet test .\tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj
           -c Debug
           --no-build
-          --filter "FullyQualifiedName~ExternalVendorRuntimePackagePolicyTests"
+          --filter "FullyQualifiedName~ExternalVendorRuntimePackagePolicyTests|FullyQualifiedName~PublicationLicenseReadinessTests"
 
       - name: Verify no publishing capability
         shell: pwsh

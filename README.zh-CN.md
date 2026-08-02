@@ -522,6 +522,8 @@ powershell -ExecutionPolicy Bypass -File .\eng\Test-ExternalVendorRuntimePackage
 
 发布到 `nuget.org` 时，仓库 secret `NUGET_API_KEY` 应填写 NuGet 官网生成的纯文本 ASCII API key。这个 key 必须仍然有效，并且必须对 `JYPPX.TensorRT.CSharp.API`、`JYPPX.TensorRT.CSharp.API.YoloVision` 两个 package ID或其所属账号/组织拥有 push 权限。managed-package workflow 会在发布前校验该 secret；不要把加密后的本机凭据或机器导出的 token 片段填进 `NUGET_API_KEY`。如果推送阶段返回 nuget.org `403`，说明 key 无效、过期或没有对应包 ID 的权限，需要用包 owner 账号重新生成有 scope 的 key 后再重跑 managed bundle workflow。
 
+公开发布还必须通过 `eng/Test-PublicationLicenseReadiness.ps1`。许可证由 Owner 决定前可以继续本地 pack/dry run，但每个 nupkg 尚未声明非占位许可证、tracked source archive 尚未包含最终根许可证文件时，不允许创建 GitHub Release、上传 Release 资产或推送 NuGet/GitHub Packages。
+
 </details>
 
 ## 仓库布局

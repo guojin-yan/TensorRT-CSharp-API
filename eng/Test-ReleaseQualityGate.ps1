@@ -120,7 +120,7 @@ Add-Check -Id "workflow-public-api-documentation" -Passed (
 ) -Required $true -Detail "Workflow must fail on compiler-reported missing XML documentation and non-bilingual public documentation."
 Add-Check -Id "workflow-source-only-test-filter" -Passed (
   $workflow.Contains("Run source-only release quality tests", [StringComparison]::Ordinal) -and
-  $workflow.Contains("--filter ""FullyQualifiedName~ReleaseAutomationTests|FullyQualifiedName~ReleaseQualityGateWorkflowTests""", [StringComparison]::Ordinal) -and
+  $workflow.Contains("--filter ""FullyQualifiedName~ReleaseAutomationTests|FullyQualifiedName~ReleaseQualityGateWorkflowTests|FullyQualifiedName~PublicationLicenseReadinessTests""", [StringComparison]::Ordinal) -and
   -not $workflow.Contains("FinalReleaseMarkdownRenderingTests", [StringComparison]::Ordinal) -and
   -not $workflow.Contains("RnnV2BorrowedStateDesignGateTests", [StringComparison]::Ordinal) -and
   -not $workflow.Contains("EngineAndRnnReadonlyDiagnosticsTests", [StringComparison]::Ordinal) -and
