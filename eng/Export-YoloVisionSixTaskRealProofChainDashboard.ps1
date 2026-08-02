@@ -1,7 +1,8 @@
 [CmdletBinding()]
 param(
   [string]$OutputRoot,
-  [string]$RepositoryRoot
+  [string]$RepositoryRoot,
+  [string]$EvidenceRoot = "samples/assets"
 )
 
 $ErrorActionPreference = "Stop"
@@ -21,15 +22,25 @@ $utf8 = [System.Text.UTF8Encoding]::new($false)
 [Console]::OutputEncoding = $utf8
 $OutputEncoding = $utf8
 
-function Read-JsonOrNull {
-  param([string]$RelativePath)
+function Resolve-RepositoryPath {
+  param([string]$Path)
 
-  $path = Join-Path $RepositoryRoot $RelativePath
-  if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
+  if ([IO.Path]::IsPathRooted($Path)) {
+    return $Path
+  }
+
+  return Join-Path $RepositoryRoot $Path
+}
+
+function Read-JsonOrNull {
+  param([string]$Path)
+
+  $resolvedPath = Resolve-RepositoryPath -Path $Path
+  if (-not (Test-Path -LiteralPath $resolvedPath -PathType Leaf)) {
     return $null
   }
 
-  return Get-Content -LiteralPath $path -Raw -Encoding utf8 | ConvertFrom-Json
+  return Get-Content -LiteralPath $resolvedPath -Raw -Encoding utf8 | ConvertFrom-Json
 }
 
 function Get-PropertyOrDefault {
@@ -63,6 +74,14 @@ $ownerProofInputValidationPath = "artifacts/user-acceptance/yolovision-real-asse
 $ownerProofImportReportPath = "artifacts/user-acceptance/yolovision-real-asset-owner-proof-import-report.json"
 $candidateEvidencePath = "artifacts/user-acceptance/yolovision-real-asset-owner-sample-run-evidence.candidate.json"
 $finalFreezePath = "artifacts/final-release/release-candidate-final-evidence-freeze.json"
+$realModelEvidencePaths = @{
+  det = Join-Path $EvidenceRoot "yolovision-yolov8n-det-real-model-runtime-evidence.json"
+  cls = Join-Path $EvidenceRoot "yolovision-yolov8n-cls-real-model-runtime-evidence.json"
+  seg = Join-Path $EvidenceRoot "yolovision-yolov8n-seg-real-model-runtime-evidence.json"
+  obb = Join-Path $EvidenceRoot "yolovision-yolov8n-obb-real-model-runtime-evidence.json"
+  pose = Join-Path $EvidenceRoot "yolovision-yolov8n-pose-real-model-runtime-evidence.json"
+  sem = Join-Path $EvidenceRoot "yolovision-torchvision-lraspp-real-model-runtime-evidence.json"
+}
 
 $contract = Read-JsonOrNull $contractPath
 if ($null -eq $contract) {
@@ -101,6 +120,11 @@ $dashboardItems = @()
 
 foreach ($taskContract in $tasks) {
   $task = [string]$taskContract.task
+  $realModelEvidencePath = [string]$realModelEvidencePaths[$task]
+  $realModelEvidence = Read-JsonOrNull $realModelEvidencePath
+  $runtimeReferenceValidation = Get-PropertyOrDefault -Object $realModelEvidence -Name "runtimeReferenceValidation" -DefaultValue $null
+  $controlledNegativeValidation = Get-PropertyOrDefault -Object $realModelEvidence -Name "controlledNegativeValidation" -DefaultValue $null
+  $proofBoundary = Get-PropertyOrDefault -Object $realModelEvidence -Name "proofBoundary" -DefaultValue $null
   $candidateRecord = @($candidateRecords | Where-Object { [string]$_.task -eq $task } | Select-Object -First 1)
   $ownerBackfillRecord = @($ownerBackfillRecords | Where-Object { [string]$_.task -eq $task } | Select-Object -First 1)
   $candidateEvidenceRecord = @($candidateEvidenceCases | Where-Object { [string]$_.task -eq $task } | Select-Object -First 1)
@@ -139,38 +163,100 @@ foreach ($taskContract in $tasks) {
     -not [bool](Get-PropertyOrDefault -Object $candidateEvidenceRecord[0] -Name "canPromotePackageConsumerRuntime" -DefaultValue $true) -and
     [string](Get-PropertyOrDefault -Object $candidateEvidenceRecord[0] -Name "proofBoundary" -DefaultValue "") -match "never package-consumer-runtime"
 
+  $runtimeReferenceValidated = $null -ne $runtimeReferenceValidation -and
+    [bool](Get-PropertyOrDefault -Object $runtimeReferenceValidation -Name "passed" -DefaultValue $false)
+  $controlledNegativeValidated = $null -ne $controlledNegativeValidation -and
+    -not [bool](Get-PropertyOrDefault -Object $controlledNegativeValidation -Name "passed" -DefaultValue $true) -and
+    [int](Get-PropertyOrDefault -Object $controlledNegativeValidation -Name "exitCode" -DefaultValue 0) -ne 0 -and
+    [int](Get-PropertyOrDefault -Object $controlledNegativeValidation -Name "mismatchCount" -DefaultValue 0) -gt 0
+  $releaseBoundaryHeld = $null -ne $proofBoundary -and
+    [bool](Get-PropertyOrDefault -Object $proofBoundary -Name "sourceTreeRealModelRuntime" -DefaultValue $false) -and
+    -not [bool](Get-PropertyOrDefault -Object $proofBoundary -Name "publicRedistributionApproved" -DefaultValue $true) -and
+    -not [bool](Get-PropertyOrDefault -Object $proofBoundary -Name "packageConsumerRuntimeProof" -DefaultValue $true) -and
+    -not [bool](Get-PropertyOrDefault -Object $proofBoundary -Name "publicPackageProof" -DefaultValue $true) -and
+    -not [bool](Get-PropertyOrDefault -Object $proofBoundary -Name "postPublishProof" -DefaultValue $true) -and
+    -not [bool](Get-PropertyOrDefault -Object $proofBoundary -Name "ownerReleaseAcceptance" -DefaultValue $true) -and
+    -not [bool](Get-PropertyOrDefault -Object $proofBoundary -Name "releaseProof" -DefaultValue $true) -and
+    -not [bool](Get-PropertyOrDefault -Object $proofBoundary -Name "performsPublish" -DefaultValue $true) -and
+    -not [bool](Get-PropertyOrDefault -Object $proofBoundary -Name "uploadsAssets" -DefaultValue $true)
+  $realModelEvidenceReady = $null -ne $realModelEvidence -and
+    [string](Get-PropertyOrDefault -Object $realModelEvidence -Name "recordKind" -DefaultValue "") -eq "sample-run-evidence-record" -and
+    [string](Get-PropertyOrDefault -Object $realModelEvidence -Name "proofClassification" -DefaultValue "") -eq "real-model-runtime" -and
+    [string](Get-PropertyOrDefault -Object $realModelEvidence -Name "validatorState" -DefaultValue "") -eq "real-model-runtime" -and
+    -not [bool](Get-PropertyOrDefault -Object $realModelEvidence -Name "templateOnly" -DefaultValue $true) -and
+    [bool](Get-PropertyOrDefault -Object $realModelEvidence -Name "isSmokePassed" -DefaultValue $false) -and
+    [bool](Get-PropertyOrDefault -Object $realModelEvidence -Name "canPromoteRealModelRuntime" -DefaultValue $false) -and
+    -not [bool](Get-PropertyOrDefault -Object $realModelEvidence -Name "canPromotePackageConsumerRuntime" -DefaultValue $false) -and
+    $runtimeReferenceValidated -and
+    $controlledNegativeValidated -and
+    $releaseBoundaryHeld
+
+  $evidenceRecordId = [string](Get-PropertyOrDefault -Object $realModelEvidence -Name "recordId" -DefaultValue "")
+  if ([string]::IsNullOrWhiteSpace($evidenceRecordId)) {
+    $evidenceRecordId = [string](Get-PropertyOrDefault -Object $realModelEvidence -Name "recordName" -DefaultValue "")
+  }
+
   $dashboardItems += [pscustomobject]@{
       task = $task
       contractRequiredMetadata = $requiredMetadata
       candidateTemplateAligned = [bool]$candidateTemplateAligned
       ownerBackfillAligned = [bool]$ownerBackfillAligned
       ownerProofInputAligned = [bool]$ownerProofInputAligned
-      ownerActionRequiredCount = [int]$ownerActionRequiredCount
+      legacyOwnerIntakeMissingFieldCount = [int]$ownerActionRequiredCount
       candidateEvidenceAligned = [bool]$candidateEvidenceAligned
-      realOwnerEvidenceReady = $false
-      canPromoteRealModelRuntime = $false
+      realModelEvidencePath = $realModelEvidencePath.Replace("\", "/")
+      realModelEvidenceRecordId = $evidenceRecordId
+      runtimeReferenceValidated = [bool]$runtimeReferenceValidated
+      controlledNegativeValidated = [bool]$controlledNegativeValidated
+      releaseBoundaryHeld = [bool]$releaseBoundaryHeld
+      sourceTreeRealModelEvidenceReady = [bool]$realModelEvidenceReady
+      realOwnerEvidenceReady = [bool]$realModelEvidenceReady
+      ownerActionRequiredCount = if ($realModelEvidenceReady) { 0 } else { 1 }
+      canPromoteRealModelRuntime = [bool]$realModelEvidenceReady
       canPromotePackageConsumerRuntime = $false
-      blockingReason = "Owner must provide real logs, output JSON, hashes, host metadata, package metadata, and review for yolov8n-$task. Template/candidate/report evidence remains non-proof."
+      remainingRequirement = if ($realModelEvidenceReady) {
+        "Source-tree real-model runtime proof is ready. Clean package-consumer, public-package, post-publish, and owner release evidence remain required."
+      }
+      else {
+        "A complete fail-closed source-tree real-model runtime record is still required for task $task."
+      }
+      blockingReason = if ($realModelEvidenceReady) {
+        "Package-consumer/public/release promotion remains blocked; source-tree real-model runtime proof is ready."
+      }
+      else {
+        "Source-tree real-model runtime proof is incomplete or violates its proof boundary."
+      }
     }
 }
 
 $taskItems = @($dashboardItems)
 $failedAlignmentCount = @($taskItems | Where-Object { -not $_.candidateTemplateAligned -or -not $_.ownerBackfillAligned -or -not $_.ownerProofInputAligned -or -not $_.candidateEvidenceAligned }).Count
-$ownerActionRequiredTaskCount = @($taskItems | Where-Object { -not $_.realOwnerEvidenceReady }).Count
+$realModelRuntimeMissingTaskCount = @($taskItems | Where-Object { -not $_.sourceTreeRealModelEvidenceReady }).Count
+$ownerActionRequiredTaskCount = $realModelRuntimeMissingTaskCount
+$canPromoteRealModelRuntime = $failedAlignmentCount -eq 0 -and $realModelRuntimeMissingTaskCount -eq 0
+$dashboardState = if ($canPromoteRealModelRuntime) {
+  "source-tree-real-model-runtime-ready-package-proof-required"
+}
+else {
+  "blocked-source-tree-real-model-runtime-proof-required"
+}
 
 $dashboard = [pscustomobject]@{
   recordKind = "yolovision-six-task-real-proof-chain-dashboard"
   generatedAtUtc = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
-  dashboardState = "blocked-real-owner-proof-required"
+  dashboardState = $dashboardState
   taskCount = $taskItems.Count
   failedAlignmentCount = $failedAlignmentCount
+  realModelRuntimeReadyTaskCount = @($taskItems | Where-Object { $_.sourceTreeRealModelEvidenceReady }).Count
+  realModelRuntimeMissingTaskCount = $realModelRuntimeMissingTaskCount
   ownerActionRequiredTaskCount = $ownerActionRequiredTaskCount
+  packageConsumerProofRequiredTaskCount = @($taskItems | Where-Object { -not $_.canPromotePackageConsumerRuntime }).Count
   performsPublish = $false
   canPublishPublicly = $false
   canCloseReleaseIssue = $false
-  canPromoteRealModelRuntime = $false
+  canPromoteRealModelRuntime = [bool]$canPromoteRealModelRuntime
   canPromotePackageConsumerRuntime = $false
-  proofBoundary = "This dashboard proves six-task template/contract alignment only. It does not run models, does not run package consumers, does not publish, and cannot replace owner-filled real logs, hashes, host metadata, package metadata, or review."
+  proofBoundary = "This dashboard fail-closed validates committed source-tree real-model runtime records for all six tasks. It does not itself run models, does not prove clean package consumption, does not approve asset redistribution, does not publish, and cannot close release authorization."
   sourceArtifacts = @(
     $contractPath,
     $candidateValidationPath,
@@ -179,7 +265,7 @@ $dashboard = [pscustomobject]@{
     $ownerProofImportReportPath,
     $candidateEvidencePath,
     $finalFreezePath
-  )
+  ) + @($realModelEvidencePaths.Values | ForEach-Object { ([string]$_).Replace("\", "/") } | Sort-Object)
   finalFreezeState = [string](Get-PropertyOrDefault -Object $finalFreeze -Name "freezeState" -DefaultValue "missing")
   ownerProofInputValidationState = [string](Get-PropertyOrDefault -Object $ownerProofInputValidation -Name "validationState" -DefaultValue "missing")
   ownerProofImportValidationState = [string](Get-PropertyOrDefault -Object $ownerProofImportReport -Name "validationState" -DefaultValue "missing")
@@ -192,7 +278,7 @@ $markdownPath = Join-Path $OutputRoot "yolovision-six-task-real-proof-chain-dash
 $dashboard | ConvertTo-Json -Depth 20 | Set-Content -LiteralPath $jsonPath -Encoding utf8
 
 $rows = foreach ($item in $taskItems) {
-  "| $(ConvertTo-MarkdownCell $item.task) | $(ConvertTo-MarkdownCell ($item.contractRequiredMetadata -join ', ')) | ``$($item.candidateTemplateAligned)`` | ``$($item.ownerBackfillAligned)`` | ``$($item.ownerProofInputAligned)`` | ``$($item.candidateEvidenceAligned)`` | ``$($item.realOwnerEvidenceReady)`` | ``$($item.canPromoteRealModelRuntime)`` | $(ConvertTo-MarkdownCell $item.blockingReason) |"
+  "| $(ConvertTo-MarkdownCell $item.task) | $(ConvertTo-MarkdownCell ($item.contractRequiredMetadata -join ', ')) | ``$($item.candidateTemplateAligned)`` | ``$($item.ownerBackfillAligned)`` | ``$($item.ownerProofInputAligned)`` | ``$($item.candidateEvidenceAligned)`` | ``$($item.sourceTreeRealModelEvidenceReady)`` | ``$($item.runtimeReferenceValidated)`` | ``$($item.controlledNegativeValidated)`` | ``$($item.releaseBoundaryHeld)`` | ``$($item.canPromoteRealModelRuntime)`` | $(ConvertTo-MarkdownCell $item.remainingRequirement) |"
 }
 
 $markdown = @"
@@ -203,7 +289,10 @@ $markdown = @"
 | dashboardState | ``$($dashboard.dashboardState)`` |
 | taskCount | ``$($dashboard.taskCount)`` |
 | failedAlignmentCount | ``$($dashboard.failedAlignmentCount)`` |
+| realModelRuntimeReadyTaskCount | ``$($dashboard.realModelRuntimeReadyTaskCount)`` |
+| realModelRuntimeMissingTaskCount | ``$($dashboard.realModelRuntimeMissingTaskCount)`` |
 | ownerActionRequiredTaskCount | ``$($dashboard.ownerActionRequiredTaskCount)`` |
+| packageConsumerProofRequiredTaskCount | ``$($dashboard.packageConsumerProofRequiredTaskCount)`` |
 | performsPublish | ``$($dashboard.performsPublish)`` |
 | canPublishPublicly | ``$($dashboard.canPublishPublicly)`` |
 | canCloseReleaseIssue | ``$($dashboard.canCloseReleaseIssue)`` |
@@ -217,8 +306,8 @@ $($dashboard.proofBoundary)
 
 ## Task Chain
 
-| Task | Contract Metadata | Candidate Template | Owner Backfill | Owner Proof Input | Candidate Evidence | Real Owner Evidence Ready | Can Promote Runtime | Blocking Reason |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Task | Contract Metadata | Candidate Template | Owner Backfill | Owner Proof Input | Candidate Evidence | Real Model Evidence | Raw Reference | Controlled Negative | Boundary Held | Can Promote Runtime | Remaining Requirement |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 $($rows -join "`n")
 "@
 
@@ -227,4 +316,4 @@ $markdown | Set-Content -LiteralPath $markdownPath -Encoding utf8
 Write-Output "YoloVision six-task real proof chain dashboard written:"
 Write-Output "  $jsonPath"
 Write-Output "  $markdownPath"
-Write-Output "TaskCount=$($dashboard.taskCount) FailedAlignmentCount=$($dashboard.failedAlignmentCount) OwnerActionRequiredTaskCount=$($dashboard.ownerActionRequiredTaskCount)"
+Write-Output "TaskCount=$($dashboard.taskCount) FailedAlignmentCount=$($dashboard.failedAlignmentCount) RealModelRuntimeReadyTaskCount=$($dashboard.realModelRuntimeReadyTaskCount) RealModelRuntimeMissingTaskCount=$($dashboard.realModelRuntimeMissingTaskCount)"
