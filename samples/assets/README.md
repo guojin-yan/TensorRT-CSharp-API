@@ -62,6 +62,17 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Acquire-YoloV8ObbOfficialAss
 
 `yolovision-yolov8n-obb-real-model-runtime-evidence.json` records the source-tree TensorRT 10.11 case for `output0:[1,20,21504]`, the 430,080-value ONNX Runtime comparison, the independent Ultralytics/PyTorch rotated-box comparison, and the controlled negative reference mutation. It does not approve asset redistribution, package publication, or release.
 
+## Official YOLOv8n Classification acquisition
+
+`yolovision-yolov8n-cls-official-assets.json` pins the Ultralytics `v8.3.0` classification weight, source-commit ImageNet map/license/image, deterministic PPM and exact 1000-line labels. The acquisition script rejects C-drive output and performs no export, runtime, upload, or publish operation:
+
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Acquire-YoloV8ClassificationOfficialAssets.ps1 `
+  -PythonPath C:\path\to\python.exe
+```
+
+`eng/Invoke-YoloVisionClassificationReference.py` verifies the static `images:[1,3,224,224] -> output0:[1,1000]` Softmax graph, derives the authoritative Ultralytics center-crop tensor, compares PyTorch with ONNX Runtime, and writes positive plus controlled-negative structured references. `yolovision-yolov8n-cls-real-model-runtime-evidence.json` records the source-tree TensorRT 10.11 full-vector and Top-5 result. Models, ONNX, image, labels, tensors, references, SVGs, and logs stay in the outer E-drive workspace. The record is not package-consumer proof, public asset redistribution approval, or release authorization.
+
 ## Local Asset Layout
 
 Keep large or license-sensitive files in a local `models\` folder at the repository root, or in another owner-controlled path. Do not commit model weights, downloaded images, `.plan` engines, private build reports, or run logs unless their license and size have been explicitly approved.

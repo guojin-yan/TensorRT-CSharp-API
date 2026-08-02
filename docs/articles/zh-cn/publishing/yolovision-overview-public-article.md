@@ -160,7 +160,7 @@ dotnet run --project .\samples\YoloVision\YoloVision.csproj -- --model E:\Tensor
 Classification：
 
 ```powershell
-dotnet run --project .\samples\YoloVision\YoloVision.csproj -- --model E:\TensorRtSharpAssets\models\yolo-cls.onnx --labels E:\TensorRtSharpAssets\models\labels.txt --input-data E:\TensorRtSharpAssets\tensors\cls-fp32.bin --input-shape 1x3x224x224 --family custom --task cls --classification-output logits --topK 5 --output E:\TensorRtSharpAssets\reports\yolo-cls-output.json
+dotnet run --project .\samples\YoloVision\YoloVision.csproj -- --model E:\TensorRtSharpAssets\models\yolo-cls.onnx --labels E:\TensorRtSharpAssets\models\labels.txt --input-data E:\TensorRtSharpAssets\tensors\cls-fp32.bin --input-shape 1x3x224x224 --family custom --task cls --classification-output output0 --classification-score-mode probabilities --confidence 0 --top-k 5 --output E:\TensorRtSharpAssets\reports\yolo-cls-output.json
 ```
 
 Segmentation：
@@ -245,7 +245,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-YoloVisionOutputReport.
 | Task | 必须明确的输出语义 | 常见遗漏 |
 | --- | --- | --- |
 | det | box format、score rule、class count、objectness、NMS mode、end-to-end column order | 把 [1,N,6] 和 raw head 当成同一布局 |
-| cls | logits/topK、labels path、class count、softmaxApplied | 只展示 top-1，不记录 labels 和 score 规则 |
+| cls | classification score mode、Top-K、labels path、class count、graph softmax 状态 | 只展示 top-1，不记录 labels 和 score 规则 |
 | seg | boxes、mask coefficients、prototype shape/layout、crop/resize policy、mask threshold | 只画 mask，不保存 prototype 和缩放规则 |
 | obb | angle output、angle unit/range、rotated box format、rotated NMS | 把角度当作普通 box 坐标或忽略单位 |
 | pose | keypoint count、stride、coordinate layout、visibility/score、skeleton metadata | 只画点，不记录 keypoint tensor layout |

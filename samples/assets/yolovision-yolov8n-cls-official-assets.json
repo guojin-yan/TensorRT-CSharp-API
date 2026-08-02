@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 1,
+  "recordKind": "yolovision-yolov8n-cls-official-asset-acquisition-manifest",
+  "assetSetId": "ultralytics-yolov8n-cls-v8.3.0-agpl-3.0",
+  "sampleName": "YoloVision",
+  "upstreamAssetsRepository": "https://github.com/ultralytics/assets",
+  "upstreamReleaseTag": "v8.3.0",
+  "upstreamReleaseId": 177482232,
+  "upstreamReleasePublishedUtc": "2024-09-29T17:59:56Z",
+  "upstreamSourceRepository": "https://github.com/ultralytics/ultralytics",
+  "upstreamSourceCommit": "6e43d1e1e5db72afbf686dee6745669bcb124b0a",
+  "license": {
+    "name": "GNU Affero General Public License v3.0",
+    "spdxId": "AGPL-3.0-only",
+    "sourceUrl": "https://raw.githubusercontent.com/ultralytics/ultralytics/6e43d1e1e5db72afbf686dee6745669bcb124b0a/LICENSE",
+    "publicRedistributionOwnerApproval": false,
+    "note": "The repository records provenance and hashes only. It does not redistribute the model, image, ONNX, tensor, labels, or runtime artifacts."
+  },
+  "assets": [
+    {
+      "id": "yolov8n-cls-pt",
+      "role": "model-weights",
+      "fileName": "yolov8n-cls.pt",
+      "url": "https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8n-cls.pt",
+      "githubReleaseAssetId": 195719213,
+      "expectedLength": 5563076,
+      "expectedSha256": "11fa19f2aea79bc960d680a13f82f22105982b325eb9e17a4a5e1a9f8245980a",
+      "hashProvenance": "repository-pinned-after-first-download-from-the-exact-official-release-asset-id; upstream-release-api-digest-was-empty"
+    },
+    {
+      "id": "ultralytics-imagenet-yaml",
+      "role": "label-map-source",
+      "fileName": "ImageNet.yaml",
+      "url": "https://raw.githubusercontent.com/ultralytics/ultralytics/6e43d1e1e5db72afbf686dee6745669bcb124b0a/ultralytics/cfg/datasets/ImageNet.yaml",
+      "expectedLength": 42507,
+      "expectedSha256": "3f9b74af030d657da2bbba28064779c528bbe66eba71c0733b45e20400461a15",
+      "hashProvenance": "source-commit-content-hash-pinned"
+    },
+    {
+      "id": "ultralytics-license-v8.3.0",
+      "role": "license",
+      "fileName": "LICENSE.ultralytics-6e43d1e1.txt",
+      "url": "https://raw.githubusercontent.com/ultralytics/ultralytics/6e43d1e1e5db72afbf686dee6745669bcb124b0a/LICENSE",
+      "expectedLength": 34523,
+      "expectedSha256": "0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0",
+      "hashProvenance": "source-commit-content-hash-pinned"
+    },
+    {
+      "id": "ultralytics-bus-jpg",
+      "role": "input-image",
+      "fileName": "bus.jpg",
+      "url": "https://raw.githubusercontent.com/ultralytics/ultralytics/6e43d1e1e5db72afbf686dee6745669bcb124b0a/ultralytics/assets/bus.jpg",
+      "expectedLength": 137419,
+      "expectedSha256": "c02019c4979c191eb739ddd944445ef408dad5679acab6fd520ef9d434bfbc63",
+      "hashProvenance": "source-commit-content-hash-pinned"
+    }
+  ],
+  "derivedInput": {
+    "sourceAssetId": "ultralytics-bus-jpg",
+    "fileName": "bus.ppm",
+    "format": "P6 RGB PPM",
+    "width": 810,
+    "height": 1080,
+    "expectedLength": 2624416,
+    "expectedSha256": "6cdb4b6728a36516826f9adb9387774a6b5db0a49837d515c9045324e04e8688",
+    "derivation": "Pillow Image.open(source).convert('RGB').save(destination, format='PPM')"
+  },
+  "derivedLabels": {
+    "sourceAssetId": "ultralytics-imagenet-yaml",
+    "fileName": "imagenet-yolov8n-cls.names",
+    "classCount": 1000,
+    "expectedLength": 10511,
+    "expectedSha256": "dcc60e7297d33ea2b0efeab10074e4ac07d3fdd702fb1fb7ace169ee684240dd",
+    "derivation": "ImageNet.yaml map values in YAML insertion order joined with LF and one final LF",
+    "importantBoundary": "The ImageNet.yaml names section is not byte-for-byte equivalent to model.names. The map values match all 1000 embedded model names exactly."
+  },
+  "modelContract": {
+    "task": "classification",
+    "input": {
+      "name": "images",
+      "shape": [1, 3, 224, 224],
+      "dataType": "float32",
+      "layout": "NCHW"
+    },
+    "outputs": [
+      {
+        "name": "output0",
+        "shape": [1, 1000],
+        "dataType": "float32",
+        "role": "probabilities",
+        "lastOnnxNode": "Softmax",
+        "classCount": 1000
+      }
+    ],
+    "preprocess": {
+      "resize": "shorter-side-to-224",
+      "crop": "center-224x224",
+      "interpolation": "bilinear-antialias",
+      "colorOrder": "RGB",
+      "scale": "1/255",
+      "mean": [0.0, 0.0, 0.0],
+      "standardDeviation": [1.0, 1.0, 1.0]
+    },
+    "postprocess": {
+      "classificationScoreMode": "probabilities",
+      "topK": 5,
+      "confidenceThreshold": 0.0,
+      "probabilityValidation": "all finite, every value in [0,1], sum within 0.001 of 1"
+    }
+  },
+  "exportContract": {
+    "ultralyticsVersion": "8.4.21",
+    "command": "yolo export model=yolov8n-cls.pt format=onnx imgsz=224 opset=17 simplify=True dynamic=False batch=1 device=cpu",
+    "onnxLength": 10911331,
+    "onnxSha256": "630c022a99885d59f633ab5a614738f8a49be7f361e340fd3ff89b8c19b0768f"
+  },
+  "acquisition": {
+    "script": "eng/Acquire-YoloV8ClassificationOfficialAssets.ps1",
+    "referenceScript": "eng/Invoke-YoloVisionClassificationReference.py",
+    "defaultRoot": "E:/GitSpace/TensorRT-CSharp-API-4.0/downloads/yolov8n-cls-ultralytics-v8.3.0",
+    "rejectsCDrive": true
+  },
+  "proofBoundary": {
+    "assetAcquisitionOnly": true,
+    "canPublishPublicly": false,
+    "canPromoteRealModelRuntime": false,
+    "canPromotePackageConsumerRuntime": false,
+    "performsExport": false,
+    "performsRuntime": false,
+    "performsPublish": false,
+    "uploadsAssets": false
+  }
+}

@@ -1,0 +1,180 @@
+{
+  "schemaVersion": 1,
+  "recordKind": "sample-run-evidence-record",
+  "recordId": "yolovision-yolov8n-cls-win-x64-trt10.11-cuda12.9-20260802",
+  "sampleName": "YoloVision",
+  "family": "yolov8",
+  "task": "cls",
+  "proofClassification": "real-model-runtime",
+  "validatorState": "real-model-runtime",
+  "templateOnly": false,
+  "isSmokePassed": true,
+  "canPromoteRealModelRuntime": true,
+  "canPromotePackageConsumerRuntime": false,
+  "executedUtcDate": "2026-08-02",
+  "sourceBaseCommit": "e7f463c9bc730c6dce6383c4aa0ef0923d841635",
+  "implementationNote": "The classification score contract, center-crop implementation, final report semantics, manifest, evidence, tests, and documentation are committed together after this working-tree execution.",
+  "license": {
+    "name": "GNU Affero General Public License v3.0",
+    "spdxId": "AGPL-3.0-only",
+    "manifest": "samples/assets/yolovision-yolov8n-cls-official-assets.json",
+    "publicRedistributionOwnerApproval": false
+  },
+  "host": {
+    "os": "Microsoft Windows 11 Home Chinese, NT 10.0.26200.0",
+    "rid": "win-x64",
+    "cpu": "AMD Ryzen 7 5800H with Radeon Graphics",
+    "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+    "gpuMemoryMiB": 6144,
+    "driverVersion": "576.02",
+    "cudaVersion": "12.9",
+    "tensorRtVersion": "10.11.0.33",
+    "dotnetSdkVersion": "10.0.301",
+    "bridgeSha256": "74d89fd7e1cb414751ca943298e003ecf48cadcda3e4c1952e5a2d5ba0b0cfc9"
+  },
+  "assets": {
+    "weights": {
+      "fileName": "yolov8n-cls.pt",
+      "length": 5563076,
+      "sha256": "11fa19f2aea79bc960d680a13f82f22105982b325eb9e17a4a5e1a9f8245980a"
+    },
+    "onnx": {
+      "fileName": "yolov8n-cls.onnx",
+      "length": 10911331,
+      "sha256": "630c022a99885d59f633ab5a614738f8a49be7f361e340fd3ff89b8c19b0768f"
+    },
+    "image": {
+      "fileName": "bus.jpg",
+      "length": 137419,
+      "sha256": "c02019c4979c191eb739ddd944445ef408dad5679acab6fd520ef9d434bfbc63"
+    },
+    "labels": {
+      "fileName": "imagenet-yolov8n-cls.names",
+      "classCount": 1000,
+      "length": 10511,
+      "sha256": "dcc60e7297d33ea2b0efeab10074e4ac07d3fdd702fb1fb7ace169ee684240dd",
+      "source": "ImageNet.yaml map values in insertion order",
+      "matchesModelNamesExactly": true
+    },
+    "authoritativeInputTensor": {
+      "shape": [1, 3, 224, 224],
+      "elementCount": 150528,
+      "length": 602112,
+      "sha256": "05e47521b07652eee70942902ab5bf070edc9da7067466a5433c7cdd29fb1a62"
+    }
+  },
+  "modelContract": {
+    "input": {
+      "name": "images",
+      "shape": [1, 3, 224, 224],
+      "dataType": "float32",
+      "preprocess": "shorter-side-to-224; center-crop-224x224; RGB; NCHW; scale=1/255; mean=0,0,0; std=1,1,1"
+    },
+    "outputs": [
+      {
+        "name": "output0",
+        "shape": [1, 1000],
+        "elementCount": 1000,
+        "role": "probabilities",
+        "lastOnnxNode": "Softmax",
+        "classificationScoreMode": "probabilities"
+      }
+    ],
+    "postprocess": {
+      "classCount": 1000,
+      "confidenceThreshold": 0.0,
+      "topK": 5,
+      "applyNms": false,
+      "nmsMode": "None",
+      "probabilitySumTolerance": 0.001
+    }
+  },
+  "independentReferenceValidation": {
+    "script": "eng/Invoke-YoloVisionClassificationReference.py",
+    "providers": ["CPUExecutionProvider", "PyTorch CPU"],
+    "ultralyticsVersion": "8.4.21",
+    "torchVersion": "2.10.0+cpu",
+    "onnxVersion": "1.15.0",
+    "onnxRuntimeVersion": "1.15.0",
+    "probabilitySum": 1.0000003576278687,
+    "pytorchOnnxRuntimeMaximumAbsoluteError": 3.5762786865234375e-7,
+    "outputTensorSha256": "36828ab3a69fb2605e082b0d1dd951c802e92644c033ffe9ddac9c4dba3c2c31",
+    "referenceSha256": "ded68dd048acdee3a38e95dc46490517e85ece8346f1ebe627bdd88cdb307697",
+    "passed": true
+  },
+  "csharpCenterCropValidation": {
+    "tensorSha256": "1180d493252fa668f2979c0dbb8ec16ea84778eef56c08116178d195aace9325",
+    "inputMaximumAbsoluteError": 0.003921627998352051,
+    "inputMeanAbsoluteError": 0.0003833704104181379,
+    "outputMaximumAbsoluteError": 0.0033118128776550293,
+    "sameTop5IndicesAndOrder": true,
+    "passed": true
+  },
+  "runtimeReferenceValidation": {
+    "requested": true,
+    "completed": true,
+    "passed": true,
+    "absoluteTolerance": 0.001,
+    "relativeTolerance": 0.001,
+    "nanPolicy": "reject",
+    "infinityPolicy": "exact",
+    "tensors": [
+      {
+        "name": "output0",
+        "shape": [1, 1000],
+        "comparedValueCount": 1000,
+        "mismatchCount": 0,
+        "firstMismatchIndex": -1,
+        "maximumAbsoluteError": 0.0005927086,
+        "maximumRelativeError": 0.02103427,
+        "actualValueSha256": "6df90e22918d4fbc7dc95bd16b24b23b2b5a5a3cb92b653f0ab9bdfe7732d441"
+      }
+    ]
+  },
+  "top5Validation": {
+    "passed": true,
+    "sameIndicesAndOrderAsUltralyticsPyTorchAndOnnxRuntime": true,
+    "predictions": [
+      { "rank": 1, "classIndex": 654, "className": "minibus", "tensorRtScore": 0.504948 },
+      { "rank": 2, "classIndex": 734, "className": "police_van", "tensorRtScore": 0.292809 },
+      { "rank": 3, "classIndex": 874, "className": "trolleybus", "tensorRtScore": 0.049876 },
+      { "rank": 4, "classIndex": 575, "className": "golfcart", "tensorRtScore": 0.018730 },
+      { "rank": 5, "classIndex": 612, "className": "jinrikisha", "tensorRtScore": 0.017923 }
+    ]
+  },
+  "controlledNegativeValidation": {
+    "mutation": "reference output0 index 0 += 0.125",
+    "referenceSha256": "12aa9cf66d6503c6d1a8195090711ab6af56666928531916b99d45284ff50d00",
+    "absoluteTolerance": 0.001,
+    "relativeTolerance": 0.001,
+    "exitCode": 1,
+    "mismatchCount": 1,
+    "firstMismatchIndex": 0,
+    "maximumAbsoluteError": 0.125,
+    "passed": false,
+    "failClosed": true
+  },
+  "artifacts": {
+    "outputJsonSha256": "c472efe590810861a512b9fbc6d4680ad2ab7eba674cd55b62ad5cf6dd6861b6",
+    "visualizationSvgSha256": "b8f0b66efa8a933d4d6411bcae2f27a7feee97aee0e3f94a065e43f9d2d0776a",
+    "positiveRunLogSha256": "e5d82189b74fa31506a9e36f0416ed8d31e784c96e41b47cca4e2637732ce0be",
+    "controlledNegativeRunLogSha256": "cec36da2451c306a9ceaaf9252d0fae98f24c4f49ff3c07712bc45e7acd4fd66",
+    "referenceReportSha256": "600945dabdb33a1503c6be3d85ce3f10f63f710e2be651305f6b2563747612f8"
+  },
+  "commands": {
+    "acquisition": "pwsh -NoProfile -ExecutionPolicy Bypass -File ./eng/Acquire-YoloV8ClassificationOfficialAssets.ps1 -AssetRoot <E-drive-root> -PythonPath <python>",
+    "reference": "python ./eng/Invoke-YoloVisionClassificationReference.py --weights <pt> --imagenet-yaml <yaml> --image <jpg> --onnx <onnx> --output-directory <reference-dir> --csharp-tensor <tensor>",
+    "runtime": "dotnet run --project ./samples/YoloVision -c Release --no-build -- --model <onnx> --labels <labels> --input-data <authoritative-tensor> --family v8 --task cls --classification-output output0 --class-count 1000 --classification-score-mode probabilities --confidence 0 --top-k 5 --reference-outputs output0:<reference> --reference-abs-tolerance 0.001 --reference-rel-tolerance 0.001 --output-json <json> --visualization-svg <svg>"
+  },
+  "proofBoundary": {
+    "sourceTreeRealModelRuntime": true,
+    "publicRedistributionApproved": false,
+    "packageConsumerRuntimeProof": false,
+    "publicPackageProof": false,
+    "postPublishProof": false,
+    "ownerReleaseAcceptance": false,
+    "releaseProof": false,
+    "performsPublish": false,
+    "uploadsAssets": false
+  }
+}

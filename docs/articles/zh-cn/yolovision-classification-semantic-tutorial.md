@@ -9,7 +9,7 @@ Classification（`cls`）和 Semantic Segmentation（`sem`）都不产生检测�
 | 项目 | Classification `cls` | Semantic Segmentation `sem` |
 | --- | --- | --- |
 | 典型输出 | `[C]`、`[1,C]`、`[C,1]` | `[C,H,W]`、`[1,C,H,W]`、`[1,H,W,C]` |
-| 主输出 role | `logits` | `semantic` |
+| 主输出 role | `raw-scores` / `logits` / `probabilities` | `semantic` |
 | 核心操作 | threshold、降序排序、Top-K | layout 归一化、逐像素 argmax |
 | labels 用途 | class id 到类别名 | class index 到像素类别名/颜色 |
 | NMS | 不使用 | 不使用 |
@@ -80,7 +80,7 @@ Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\cls-sem\sem\labels\p
 
 ## 预处理输入
 
-YoloVision 内置 `.bmp`/`.ppm` 路径支持 stretch 或 letterbox、RGB/BGR、NCHW/NHWC 和 normalization scale。先用 `--preprocess-only` 固化 tensor 和 hash：
+YoloVision 内置 `.bmp`/`.ppm` 路径支持 stretch、letterbox 或抗锯齿短边缩放 + center crop，并支持 RGB/BGR、NCHW/NHWC 和 normalization scale。先用 `--preprocess-only` 固化 tensor 和 hash：
 
 ```powershell
 dotnet run --project .\samples\YoloVision -- `
@@ -90,21 +90,22 @@ dotnet run --project .\samples\YoloVision -- `
   --input-shape 1x3x224x224 `
   --tensor-layout NCHW `
   --color-order RGB `
-  --resize letterbox
+  --resize shorter-side-center-crop `
+  --resize-shorter-side 224
 ```
 
-这一步是 preprocessing evidence，不是 TensorRT enqueue。分类模型常见的“短边 resize + center crop + mean/std”不能由通用 `letterbox` 自动替代；语义分割也可能要求特殊 padding 和 resize-back。遇到不匹配的模型，使用 owner-approved preprocess pipeline 生成 float32 tensor，并把工具版本、完整命令、输出元素数和 SHA256 一起归档。
+这一步是 preprocessing evidence，不是 TensorRT enqueue。官方 YOLOv8n-cls 使用短边 224 + center crop 224、RGB/NCHW、`1/255`、mean 0/std 1；其他分类模型仍要以 exporter 合同为准。语义分割也可能要求特殊 padding 和 resize-back。遇到不匹配的模型，使用 owner-approved preprocess pipeline 生成 float32 tensor，并把工具版本、完整命令、输出元素数和 SHA256 一起归档。
 
 ## Classification 输出契约
 
-`YoloSampleRunner.DecodeClassifications` 接受 `[C]`、`[1,C]` 和 `[C,1]`。如果提供 `--class-count`，decoder 最多读取配置的类别数；否则从 shape 推导。随后依次执行：
+`YoloSampleRunner.DecodeClassifications` 接受 `[C]`、`[1,C]` 和 `[C,1]`。如果提供 `--class-count`，它必须与输出类别数严格相等；否则从 shape 推导。随后依次执行：
 
-1. 将原始 float 值与 class index 组合。
-2. 使用 `--confidence` 过滤。
-3. 按 score 降序排序。
-4. 使用 `--top-k` 截断。
+1. 拒绝 NaN/Infinity。
+2. 按 `--classification-score-mode raw|logits|probabilities` 保留、softmax 或严格验证分数。
+3. 使用 `--confidence` 过滤。
+4. 按 score 降序排序并用 `--top-k` 截断。
 
-当前 decoder 不自动执行 softmax。`--classification-output logits` 中的 `logits` 是输出 tensor 名/role 绑定，不是“请求程序执行 softmax”的开关。owner 必须记录模型输出究竟是 raw logits、sigmoid score 还是 probability；否则即使 Top-K 顺序看似合理，score 也不可解释。
+decoder 只有在显式指定 `--classification-score-mode logits` 时才执行数值稳定 softmax。`probabilities` 模式要求每项位于 `[0,1]` 且总和在 `1 +/- 0.001` 内；`raw` 保留旧接口语义。owner 必须记录模型输出究竟是 raw logits、sigmoid score 还是 probability；否则即使 Top-K 顺序看似合理，score 也不可解释。
 
 labels 行数应与 class count 一致，且行序就是 class id。labels 内容或顺序变化后必须重新计算 `labelsSha256`，不能只审查 Top-K 截图。
 
@@ -166,7 +167,7 @@ dotnet run --project .\samples\YoloVision -- `
   --labels E:\TensorRtSharpAssets\cases\cls-sem\cls\labels\labels.txt `
   --input-data E:\TensorRtSharpAssets\cases\cls-sem\cls\tensors\input-fp32.bin `
   --input-shape 1x3x224x224 `
-  --classification-output logits `
+  --classification-output output0 --classification-score-mode probabilities `
   --class-count 1000 --top-k 5 `
   --preflight-report E:\TensorRtSharpAssets\cases\cls-sem\cls\reports\preflight.json
 ```
@@ -197,7 +198,7 @@ dotnet run --project .\samples\YoloVision -- `
   --labels E:\TensorRtSharpAssets\cases\cls-sem\cls\labels\labels.txt `
   --input-data E:\TensorRtSharpAssets\cases\cls-sem\cls\tensors\input-fp32.bin `
   --input-shape 1x3x224x224 `
-  --classification-output logits `
+  --classification-output output0 --classification-score-mode probabilities `
   --class-count 1000 --confidence 0 --top-k 5 `
   --output-json E:\TensorRtSharpAssets\cases\cls-sem\cls\reports\output.json `
   --visualization-svg E:\TensorRtSharpAssets\cases\cls-sem\cls\reports\topk.svg
@@ -251,7 +252,7 @@ Expected real-log marker: YoloVision Passed=True
 - schema：`samples/YoloVision/yolovision-output.schema.json`
 - task contract：`samples/YoloVision/yolovision-task-output-contract.json`
 
-分类 output JSON 应核对 `task=cls`、`outputs[].role=logits`、shape、`postprocess.topK`、每个 prediction 的 `classId`、`className` 和 `score`。语义 output JSON 应核对 `task=sem`、`outputs[].role=semantic`、shape、`classCount`、`width`、`height` 和 `valueCount=C*H*W`。
+分类 output JSON 应核对 `task=cls`、`outputs[].role=probabilities`、`postprocess.classificationScoreMode=probabilities`、shape、`postprocess.topK`、每个 prediction 的 `classId`、`className` 和 `score`。语义 output JSON 应核对 `task=sem`、`outputs[].role=semantic`、shape、`classCount`、`width`、`height` 和 `valueCount=C*H*W`。
 
 两者都应包含 model/input/output identity、SHA256、runtime host metadata 和严格 boundary。示例 JSON 中的 `synthetic-ramp`、空 hash 和 `isRuntimeProof=false` 是 schema 演示，不是可晋级证据。
 
@@ -287,7 +288,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-YoloVisionOutputReport.
 | 现象 | 优先检查 | 处理 |
 | --- | --- | --- |
 | Top-K 类别稳定但明显错误 | labels 行序、RGB/BGR、center crop、mean/std | 对照 exporter 预处理，重建 tensor 并更新 hash |
-| Top-K score 超出 `[0,1]` | raw logits 被当成 probability | 记录 activation 语义；在 owner adapter 中显式 softmax，不能假称 runner 已执行 |
+| Top-K score 超出 `[0,1]` | raw logits 被当成 probability | 记录 activation 语义；使用 `--classification-score-mode logits` 显式 softmax |
 | 分类只输出一个类别 | `--top-k`、`--confidence`、输出 shape | 查看 binding 和 JSON shape，确认不是 `[1,1]` 或阈值过高 |
 | sem shape 被当成 NCHW | `--class-count` 与 NHWC 最后一维 | 用 exporter/Netron/binding 证明 layout，消除维度歧义 |
 | sem SVG 边界错位 | letterbox/crop/padding/resize-back | 记录 scale/pad，把 class map 还原到原图坐标后再 review |

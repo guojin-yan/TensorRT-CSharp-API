@@ -201,6 +201,145 @@ public sealed class YoloVisionReferenceAssetAcquisitionTests
     }
 
     [Fact]
+    public void YoloV8ClassificationOfficialManifestPinsSoftmaxLabelsAndCenterCropAcquisition()
+    {
+        string manifestPath = Path.Combine(
+            RepositoryPaths.Root,
+            "samples",
+            "assets",
+            "yolovision-yolov8n-cls-official-assets.json");
+        string acquisitionPath = Path.Combine(
+            RepositoryPaths.Root,
+            "eng",
+            "Acquire-YoloV8ClassificationOfficialAssets.ps1");
+        string referencePath = Path.Combine(
+            RepositoryPaths.Root,
+            "eng",
+            "Invoke-YoloVisionClassificationReference.py");
+        Assert.True(File.Exists(manifestPath), manifestPath);
+        Assert.True(File.Exists(acquisitionPath), acquisitionPath);
+        Assert.True(File.Exists(referencePath), referencePath);
+
+        using JsonDocument document = JsonDocument.Parse(File.ReadAllText(manifestPath));
+        JsonElement root = document.RootElement;
+        Assert.Equal("yolovision-yolov8n-cls-official-asset-acquisition-manifest", root.GetProperty("recordKind").GetString());
+        Assert.Equal(177482232, root.GetProperty("upstreamReleaseId").GetInt64());
+        Assert.Equal("6e43d1e1e5db72afbf686dee6745669bcb124b0a", root.GetProperty("upstreamSourceCommit").GetString());
+        Assert.Equal("AGPL-3.0-only", root.GetProperty("license").GetProperty("spdxId").GetString());
+        Assert.False(root.GetProperty("license").GetProperty("publicRedistributionOwnerApproval").GetBoolean());
+
+        JsonElement[] assets = root.GetProperty("assets").EnumerateArray().ToArray();
+        Assert.Equal(4, assets.Length);
+        Assert.All(assets, static asset =>
+        {
+            Assert.True(asset.GetProperty("expectedLength").GetInt64() > 0);
+            Assert.Equal(64, asset.GetProperty("expectedSha256").GetString()!.Length);
+        });
+        JsonElement weights = assets.Single(static asset => asset.GetProperty("id").GetString() == "yolov8n-cls-pt");
+        Assert.Equal(195719213, weights.GetProperty("githubReleaseAssetId").GetInt64());
+
+        JsonElement labels = root.GetProperty("derivedLabels");
+        Assert.Equal(1000, labels.GetProperty("classCount").GetInt32());
+        Assert.Contains("map", labels.GetProperty("derivation").GetString(), StringComparison.Ordinal);
+        Assert.Contains("not", labels.GetProperty("importantBoundary").GetString(), StringComparison.OrdinalIgnoreCase);
+
+        JsonElement input = root.GetProperty("modelContract").GetProperty("input");
+        Assert.Equal(new[] { 1, 3, 224, 224 }, input.GetProperty("shape").EnumerateArray().Select(static item => item.GetInt32()).ToArray());
+        JsonElement output = Assert.Single(root.GetProperty("modelContract").GetProperty("outputs").EnumerateArray());
+        Assert.Equal(new[] { 1, 1000 }, output.GetProperty("shape").EnumerateArray().Select(static item => item.GetInt32()).ToArray());
+        Assert.Equal("probabilities", output.GetProperty("role").GetString());
+        Assert.Equal("Softmax", output.GetProperty("lastOnnxNode").GetString());
+        Assert.Equal("probabilities", root.GetProperty("modelContract").GetProperty("postprocess").GetProperty("classificationScoreMode").GetString());
+
+        string acquisition = File.ReadAllText(acquisitionPath);
+        Assert.Contains("Test-DriveIsNotC", acquisition, StringComparison.Ordinal);
+        Assert.Contains("expectedSha256", acquisition, StringComparison.Ordinal);
+        Assert.Contains("performsExport = $false", acquisition, StringComparison.Ordinal);
+        Assert.Contains("performsRuntime = $false", acquisition, StringComparison.Ordinal);
+        Assert.Contains("performsPublish = $false", acquisition, StringComparison.Ordinal);
+        Assert.DoesNotContain("dotnet nuget push", acquisition, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("gh release upload", acquisition, StringComparison.OrdinalIgnoreCase);
+
+        string reference = File.ReadAllText(referencePath);
+        Assert.Contains("CPUExecutionProvider", reference, StringComparison.Ordinal);
+        Assert.Contains("lastOnnxNode", reference, StringComparison.Ordinal);
+        Assert.Contains("output0.tampered.reference.json", reference, StringComparison.Ordinal);
+        Assert.Contains("sameTop5IndicesAndOrder", reference, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void YoloV8ClassificationRealRuntimeEvidenceProvesFullVectorTop5AndNegativeReference()
+    {
+        string evidencePath = Path.Combine(
+            RepositoryPaths.Root,
+            "samples",
+            "assets",
+            "yolovision-yolov8n-cls-real-model-runtime-evidence.json");
+        using JsonDocument document = JsonDocument.Parse(File.ReadAllText(evidencePath));
+        JsonElement root = document.RootElement;
+        Assert.Equal("real-model-runtime", root.GetProperty("proofClassification").GetString());
+        Assert.False(root.GetProperty("templateOnly").GetBoolean());
+        Assert.True(root.GetProperty("isSmokePassed").GetBoolean());
+        Assert.True(root.GetProperty("canPromoteRealModelRuntime").GetBoolean());
+
+        JsonElement output = Assert.Single(root.GetProperty("modelContract").GetProperty("outputs").EnumerateArray());
+        Assert.Equal(new[] { 1, 1000 }, output.GetProperty("shape").EnumerateArray().Select(static item => item.GetInt32()).ToArray());
+        Assert.Equal("probabilities", output.GetProperty("role").GetString());
+        Assert.Equal("Softmax", output.GetProperty("lastOnnxNode").GetString());
+        Assert.False(root.GetProperty("modelContract").GetProperty("postprocess").GetProperty("applyNms").GetBoolean());
+
+        JsonElement independent = root.GetProperty("independentReferenceValidation");
+        Assert.True(independent.GetProperty("passed").GetBoolean());
+        Assert.True(independent.GetProperty("pytorchOnnxRuntimeMaximumAbsoluteError").GetDouble() < 1e-5);
+        Assert.True(root.GetProperty("csharpCenterCropValidation").GetProperty("sameTop5IndicesAndOrder").GetBoolean());
+
+        JsonElement raw = root.GetProperty("runtimeReferenceValidation");
+        Assert.True(raw.GetProperty("passed").GetBoolean());
+        JsonElement tensor = Assert.Single(raw.GetProperty("tensors").EnumerateArray());
+        Assert.Equal(1000, tensor.GetProperty("comparedValueCount").GetInt32());
+        Assert.Equal(0, tensor.GetProperty("mismatchCount").GetInt32());
+        Assert.True(tensor.GetProperty("maximumAbsoluteError").GetDouble() <= raw.GetProperty("absoluteTolerance").GetDouble());
+
+        JsonElement top5 = root.GetProperty("top5Validation");
+        Assert.True(top5.GetProperty("passed").GetBoolean());
+        Assert.Equal(new[] { 654, 734, 874, 575, 612 }, top5.GetProperty("predictions").EnumerateArray().Select(static item => item.GetProperty("classIndex").GetInt32()).ToArray());
+
+        JsonElement negative = root.GetProperty("controlledNegativeValidation");
+        Assert.Equal(1, negative.GetProperty("exitCode").GetInt32());
+        Assert.Equal(1, negative.GetProperty("mismatchCount").GetInt32());
+        Assert.Equal(0, negative.GetProperty("firstMismatchIndex").GetInt32());
+        Assert.True(negative.GetProperty("failClosed").GetBoolean());
+
+        JsonElement boundary = root.GetProperty("proofBoundary");
+        Assert.True(boundary.GetProperty("sourceTreeRealModelRuntime").GetBoolean());
+        foreach (string name in new[]
+        {
+            "publicRedistributionApproved",
+            "packageConsumerRuntimeProof",
+            "publicPackageProof",
+            "postPublishProof",
+            "ownerReleaseAcceptance",
+            "releaseProof",
+            "performsPublish",
+            "uploadsAssets"
+        })
+        {
+            Assert.False(boundary.GetProperty(name).GetBoolean(), name);
+        }
+
+        string tutorial = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "docs",
+            "articles",
+            "zh-cn",
+            "yolovision-classification-yolov8n-labels-topk-guide.md"));
+        Assert.Contains("[1,1000]", tutorial, StringComparison.Ordinal);
+        Assert.Contains("Mismatches=1", tutorial, StringComparison.Ordinal);
+        Assert.Contains("classification-score-mode probabilities", tutorial, StringComparison.Ordinal);
+        Assert.Contains("package-consumer-runtime", tutorial, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void YoloV8ObbRealRuntimeEvidenceProvesRawAndRotatedGeometryComparisons()
     {
         string evidencePath = Path.Combine(

@@ -227,7 +227,8 @@ public static class YoloVisionPreflightReport
                     scale = profile.Preprocess.Scale,
                     normalize = profile.Preprocess.Normalize,
                     preserveAspectRatio = profile.Preprocess.PreserveAspectRatio,
-                    letterboxAlignment = profile.Preprocess.LetterboxAlignment
+                    letterboxAlignment = profile.Preprocess.LetterboxAlignment,
+                    resizeShorterSide = profile.Preprocess.ResizeShorterSide
                 },
                 postprocess = new
                 {
@@ -238,7 +239,8 @@ public static class YoloVisionPreflightReport
                     iouThreshold = profile.Postprocess.IouThreshold,
                     topK = profile.Postprocess.TopK,
                     applyNms = profile.Postprocess.ApplyNms,
-                    nmsMode = profile.Postprocess.NmsMode.ToString()
+                    nmsMode = profile.Postprocess.NmsMode.ToString(),
+                    classificationScoreMode = profile.Postprocess.ClassificationScoreMode.ToString().ToLowerInvariant()
                 }
             },
             assets = new

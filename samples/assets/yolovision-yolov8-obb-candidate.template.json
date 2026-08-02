@@ -47,6 +47,7 @@
     "boxFormat": "cx,cy,w,h,angle",
     "outputShape": "1x(4+classes+angle)x8400 or owner-confirmed",
     "layout": "auto",
+    "auxiliaryLayout": "channels-first-or-boxes-first-owner-confirmed",
     "hasObjectness": "auto",
     "angleUnit": "radians-or-owner-confirmed",
     "rotatedBoxLayout": "cx,cy,w,h,angle",

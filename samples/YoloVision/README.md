@@ -45,7 +45,7 @@ dotnet run --project .\samples\YoloVision -- `
 
 The repository does not bundle detector models, label files, or images because those assets have separate licensing and size constraints. The sample uses a synthetic input tensor by default, so detections are useful as pipeline evidence rather than as image-quality evidence.
 
-For real image evidence, either preprocess the image outside the runner into the model's exact tensor layout and pass the tensor with `--input-data`, or use `--image` for the built-in `.bmp` / `.ppm` preprocessing path. The built-in path decodes the image, applies stretch or letterbox resize, RGB/BGR channel order, optional normalization, NCHW/NHWC layout, writes a float32 tensor to `--preprocessed-output`, and feeds that tensor through the same `--input-data` runtime path. The runner accepts float32 `.bin`/`.raw` files or comma/space/newline separated text with exactly `N*C*H*W` values. `--input` is intentionally narrower: it accepts a raw byte tensor with the same element count and normalizes bytes to `[0,1]`.
+For real image evidence, either preprocess the image outside the runner into the model's exact tensor layout and pass the tensor with `--input-data`, or use `--image` for the built-in `.bmp` / `.ppm` preprocessing path. The built-in path supports stretch, letterbox, and antialiased shorter-side center crop, RGB/BGR channel order, optional normalization, NCHW/NHWC layout, writes a float32 tensor to `--preprocessed-output`, and feeds that tensor through the same `--input-data` runtime path. Classification defaults to `1x3x224x224`, shorter-side-to-224 center crop, RGB/NCHW, and `1/255`; detection-style profiles keep their existing letterbox defaults. The runner accepts float32 `.bin`/`.raw` files or comma/space/newline separated text with exactly `N*C*H*W` values. `--input` is intentionally narrower: it accepts a raw byte tensor with the same element count and normalizes bytes to `[0,1]`.
 
 Use `--preprocess-only` when preparing evidence or a `trtexec --loadInputs` run before the TensorRtSharp bridge is available:
 
@@ -95,7 +95,7 @@ The matrix currently covers `custom`, YOLOv5/v6/v7/v8/v9/v10/v11/v26, detection-
 | Task | Alias | Decode path | Required metadata | Evidence level |
 | --- | --- | --- | --- | --- |
 | Detection | `det` | Single-output boxes with score filtering and class-aware/class-agnostic NMS | none | runtime-smoke-ready |
-| Classification | `cls` | Single-output logits/top-k classification decoder | none | managed-smoke-ready |
+| Classification | `cls` | Strict raw/logits/probabilities decoder and Top-K | classification score mode | source-tree-real-model-runtime |
 | Segmentation | `seg` | Detection rows plus mask prototype composition | mask coefficient count, prototype tensor role, optional auxiliary channel start/layout | managed-metadata-ready |
 | Oriented bounding box | `obb` | Embedded or separate angle channels plus probabilistic-IoU rotated Fast-NMS | angle unit and exact auxiliary start/layout, or a separate angle tensor role | source-tree-real-model-runtime |
 | Pose | `pose` | Embedded keypoint channels or a separate keypoint tensor | keypoint count/stride, exact auxiliary start/layout for embedded output | source-tree-real-model-runtime |
@@ -265,8 +265,8 @@ dotnet run --project .\samples\YoloVision -- --model .\models\yolo-det.onnx --la
 # YOLOv10 end-to-end detection: [1,N,6] = x1,y1,x2,y2,score,classId; no second NMS
 dotnet run --project .\samples\YoloVision -- --model .\models\yolov10n.onnx --labels .\models\coco.names --image .\models\det.ppm --preprocessed-output .\models\yolov10n-fp32.bin --input-shape 1x3x640x640 --family v10 --task det --layout end2end --class-count 80 --confidence 0.25 --output .\artifacts\yolovision\yolov10n-output.json
 
-# Classification
-dotnet run --project .\samples\YoloVision -- --model .\models\yolo-cls.onnx --labels .\models\labels.txt --input-data .\models\cls-fp32.bin --input-shape 1x3x224x224 --family custom --task cls --classification-output logits
+# Official YOLOv8n classification export (graph output already contains Softmax)
+dotnet run --project .\samples\YoloVision -- --model .\models\yolov8n-cls.onnx --labels .\models\imagenet-yolov8n-cls.names --image .\models\bus.ppm --family v8 --task cls --classification-output output0 --classification-score-mode probabilities --top-k 5
 
 # Segmentation with explicit source-image mask mapping
 dotnet run --project .\samples\YoloVision -- --model .\models\yolo-seg.onnx --labels .\models\coco.names --image .\models\seg.ppm --preprocessed-output .\models\seg-fp32.bin --input-shape 1x3x640x640 --family v8 --task seg --output-role-map output0:det,output1:mask-prototypes --mask-coefficient-count 32 --mask-threshold 0.5 --mask-spatial-transform --mask-coordinate-space model-input --mask-crop-to-box true --segmentation-mask-output-directory .\artifacts\yolovision\segmentation-masks
@@ -284,6 +284,10 @@ dotnet run --project .\samples\YoloVision -- --model .\models\yolo-sem.onnx --la
 These skeletons are documentation and proof-record scaffolding, not bundled proof. A real `real-model-runtime` record still needs the exact model SHA256, labels SHA256, image SHA256, preprocessed tensor SHA256, run log SHA256, stdout/stderr summaries, expected evidence lines, license notes, and owner approval.
 
 Dedicated role options are also accepted: `--detection-output`, `--classification-output`, `--semantic-output`, `--mask-prototypes-output`, `--pose-keypoints-output`, and `--obb-angle-output`. If no explicit role is supplied, the runner uses conservative tensor-name heuristics such as `proto`, `keypoint`, `angle`, `semantic`, `logits`, `box`, or `detect`.
+
+Classification score semantics are explicit. `--classification-score-mode raw` preserves legacy scores, `logits` applies numerically stable softmax, and `probabilities` rejects non-finite/out-of-range values or vectors whose sum differs from 1 by more than `0.001`. A configured `--class-count` must exactly equal the output vector length; silent truncation is not allowed.
+
+The official YOLOv8n-cls source-tree case is pinned by `samples/assets/yolovision-yolov8n-cls-official-assets.json` and recorded by `samples/assets/yolovision-yolov8n-cls-real-model-runtime-evidence.json`. Its `output0:[1,1000]` graph ends in Softmax, all 1000 TensorRT values pass the ONNX Runtime reference at absolute/relative tolerance `0.001`, and a controlled single-value mutation fails closed. This is not package-consumer-runtime proof, asset redistribution approval, or release authorization.
 
 When the sample runs with the default synthetic tensor, it is pipeline evidence only. It does not prove real object detection quality.
 

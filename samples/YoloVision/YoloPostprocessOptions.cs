@@ -25,6 +25,29 @@ public sealed class YoloPostprocessOptions
         int topK,
         bool applyNms,
         YoloNmsMode nmsMode)
+        : this(
+            layout,
+            hasObjectness,
+            classCount,
+            confidenceThreshold,
+            iouThreshold,
+            topK,
+            applyNms,
+            nmsMode,
+            YoloClassificationScoreMode.Raw)
+    {
+    }
+
+    public YoloPostprocessOptions(
+        YoloOutputLayout layout,
+        bool? hasObjectness,
+        int classCount,
+        float confidenceThreshold,
+        float iouThreshold,
+        int topK,
+        bool applyNms,
+        YoloNmsMode nmsMode,
+        YoloClassificationScoreMode classificationScoreMode)
     {
         if (classCount < 0)
         {
@@ -46,6 +69,11 @@ public sealed class YoloPostprocessOptions
             throw new ArgumentOutOfRangeException(nameof(topK), "TopK must be positive.");
         }
 
+        if (!Enum.IsDefined(classificationScoreMode))
+        {
+            throw new ArgumentOutOfRangeException(nameof(classificationScoreMode), "Classification score mode is not defined.");
+        }
+
         if (layout == YoloOutputLayout.EndToEndNms)
         {
             hasObjectness = false;
@@ -65,6 +93,7 @@ public sealed class YoloPostprocessOptions
         TopK = topK;
         ApplyNms = applyNms;
         NmsMode = nmsMode;
+        ClassificationScoreMode = classificationScoreMode;
     }
 
     public YoloOutputLayout Layout { get; }
@@ -82,6 +111,8 @@ public sealed class YoloPostprocessOptions
     public bool ApplyNms { get; }
 
     public YoloNmsMode NmsMode { get; }
+
+    public YoloClassificationScoreMode ClassificationScoreMode { get; }
 
     public static YoloPostprocessOptions Default { get; } = new YoloPostprocessOptions(
         YoloOutputLayout.Auto,

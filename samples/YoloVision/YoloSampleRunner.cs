@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace YoloVisionSample;
 
 public static class YoloSampleRunner
 {
+    private const double ClassificationProbabilitySumTolerance = 1e-3;
+
     private const int BoxChannelCount = 4;
 
     public static YoloVisionResult DecodeOutput(
@@ -360,8 +363,11 @@ public static class YoloSampleRunner
         }
 
         int classCount = GetClassificationClassCount(values, outputShape, profile);
-        return values
-            .Take(classCount)
+        float[] scores = TransformClassificationScores(
+            values,
+            classCount,
+            profile.Postprocess.ClassificationScoreMode);
+        return scores
             .Select(static (score, index) => new YoloClassificationPrediction(index, score))
             .Where(item => item.Score >= profile.Postprocess.ConfidenceThreshold)
             .OrderByDescending(static item => item.Score)
@@ -424,22 +430,94 @@ public static class YoloSampleRunner
 
         ValidateValueCount(values, outputShape);
         int configuredClassCount = profile.Postprocess.ClassCount;
+        int actualClassCount;
         if (outputShape.Length == 1)
         {
-            return configuredClassCount > 0 ? Math.Min(configuredClassCount, outputShape[0]) : outputShape[0];
+            actualClassCount = outputShape[0];
         }
-
-        if (outputShape.Length == 2 && outputShape[0] == 1)
+        else if (outputShape.Length == 2 && outputShape[0] == 1)
         {
-            return configuredClassCount > 0 ? Math.Min(configuredClassCount, outputShape[1]) : outputShape[1];
+            actualClassCount = outputShape[1];
         }
-
-        if (outputShape.Length == 2 && outputShape[1] == 1)
+        else if (outputShape.Length == 2 && outputShape[1] == 1)
         {
-            return configuredClassCount > 0 ? Math.Min(configuredClassCount, outputShape[0]) : outputShape[0];
+            actualClassCount = outputShape[0];
+        }
+        else
+        {
+            throw new NotSupportedException("Classification output is expected to be [C], [1,C], or [C,1].");
         }
 
-        throw new NotSupportedException("Classification output is expected to be [C], [1,C], or [C,1].");
+        if (configuredClassCount > 0 && configuredClassCount != actualClassCount)
+        {
+            throw new InvalidDataException(
+                $"Classification class count mismatch: configured {configuredClassCount}, output contains {actualClassCount} scores.");
+        }
+
+        return actualClassCount;
+    }
+
+    private static float[] TransformClassificationScores(
+        float[] values,
+        int classCount,
+        YoloClassificationScoreMode scoreMode)
+    {
+        for (int index = 0; index < classCount; index++)
+        {
+            if (!float.IsFinite(values[index]))
+            {
+                throw new InvalidDataException($"Classification output contains a non-finite score at index {index}.");
+            }
+        }
+
+        if (scoreMode == YoloClassificationScoreMode.Raw)
+        {
+            return values.Take(classCount).ToArray();
+        }
+
+        if (scoreMode == YoloClassificationScoreMode.Probabilities)
+        {
+            double sum = 0.0;
+            float[] probabilities = new float[classCount];
+            for (int index = 0; index < classCount; index++)
+            {
+                float probability = values[index];
+                if (probability < 0.0f || probability > 1.0f)
+                {
+                    throw new InvalidDataException(
+                        $"Classification probability at index {index} is outside [0, 1]: {probability:R}.");
+                }
+
+                probabilities[index] = probability;
+                sum += probability;
+            }
+
+            if (Math.Abs(sum - 1.0) > ClassificationProbabilitySumTolerance)
+            {
+                throw new InvalidDataException(
+                    $"Classification probabilities must sum to 1 within {ClassificationProbabilitySumTolerance:R}; observed {sum:R}.");
+            }
+
+            return probabilities;
+        }
+
+        float maximum = values.Take(classCount).Max();
+        double exponentialSum = 0.0;
+        double[] exponentials = new double[classCount];
+        for (int index = 0; index < classCount; index++)
+        {
+            double exponential = Math.Exp(values[index] - maximum);
+            exponentials[index] = exponential;
+            exponentialSum += exponential;
+        }
+
+        float[] softmax = new float[classCount];
+        for (int index = 0; index < classCount; index++)
+        {
+            softmax[index] = (float)(exponentials[index] / exponentialSum);
+        }
+
+        return softmax;
     }
 
     private static YoloModelProfile CreateDetectionProfile(YoloModelProfile profile)

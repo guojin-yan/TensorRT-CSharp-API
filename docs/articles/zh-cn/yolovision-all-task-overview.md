@@ -259,7 +259,7 @@ dotnet run --project .\samples\YoloVision -- --model E:\TensorRtSharpAssets\case
 ### Classification
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- --model E:\TensorRtSharpAssets\cases\cls\models\model.onnx --labels E:\TensorRtSharpAssets\cases\cls\labels\labels.txt --input-data E:\TensorRtSharpAssets\cases\cls\tensors\input.fp32.bin --input-shape 1x3x224x224 --family v8 --task cls --classification-output logits --class-count 1000 --top-k 5 --output-json E:\TensorRtSharpAssets\cases\cls\reports\output.json --visualization-svg E:\TensorRtSharpAssets\cases\cls\reports\output.svg
+dotnet run --project .\samples\YoloVision -- --model E:\TensorRtSharpAssets\cases\cls\models\model.onnx --labels E:\TensorRtSharpAssets\cases\cls\labels\labels.txt --input-data E:\TensorRtSharpAssets\cases\cls\tensors\input.fp32.bin --input-shape 1x3x224x224 --family v8 --task cls --classification-output output0 --classification-score-mode probabilities --confidence 0 --class-count 1000 --top-k 5 --output-json E:\TensorRtSharpAssets\cases\cls\reports\output.json --visualization-svg E:\TensorRtSharpAssets\cases\cls\reports\output.svg
 ```
 
 ### Instance Segmentation

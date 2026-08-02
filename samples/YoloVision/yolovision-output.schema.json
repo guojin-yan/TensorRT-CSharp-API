@@ -170,7 +170,8 @@
               "type": "string",
               "enum": [
                 "letterbox",
-                "stretch"
+                "stretch",
+                "shorter-side-center-crop"
               ]
             },
             "alignment": {
@@ -214,6 +215,21 @@
               "type": "integer",
               "minimum": 0,
               "maximum": 255
+            },
+            "centerCropEnabled": {
+              "type": "boolean"
+            },
+            "resizeShorterSide": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "cropX": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "cropY": {
+              "type": "integer",
+              "minimum": 0
             }
           }
         }
@@ -340,6 +356,8 @@
               "scores",
             "classes",
             "logits",
+            "probabilities",
+            "raw-scores",
             "masks",
             "maskCoefficients",
             "prototypes",
@@ -536,6 +554,10 @@
           "type": "number",
           "minimum": 0,
           "maximum": 1
+        },
+        "classificationScoreMode": {
+          "type": "string",
+          "enum": ["raw", "logits", "probabilities"]
         },
         "angleUnit": {
           "type": "string",

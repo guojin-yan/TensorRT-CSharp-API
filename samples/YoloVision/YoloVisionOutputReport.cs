@@ -282,7 +282,7 @@ public static class YoloVisionOutputReport
         WriteInputTensors(writer, context.RuntimeInputTensors);
         WriteEngine(writer, context);
         WriteRuntime(writer, context);
-        WriteOutputs(writer, outputs);
+        WriteOutputs(writer, outputs, profile);
         WriteReferenceValidation(writer, context.RuntimeReferenceValidation);
         if (bindingReport != null)
         {
@@ -435,6 +435,10 @@ public static class YoloVisionOutputReport
         writer.WriteNumber("scaleX", imagePreprocess.ResizeScaleX);
         writer.WriteNumber("scaleY", imagePreprocess.ResizeScaleY);
         writer.WriteNumber("fillValue", imagePreprocess.FillValue);
+        writer.WriteBoolean("centerCropEnabled", imagePreprocess.CenterCropEnabled);
+        writer.WriteNumber("resizeShorterSide", imagePreprocess.ResizeShorterSide);
+        writer.WriteNumber("cropX", imagePreprocess.CropX);
+        writer.WriteNumber("cropY", imagePreprocess.CropY);
         writer.WriteEndObject();
     }
 
@@ -469,7 +473,7 @@ public static class YoloVisionOutputReport
         writer.WriteEndObject();
     }
 
-    private static void WriteOutputs(Utf8JsonWriter writer, YoloRuntimeOutputSet outputs)
+    private static void WriteOutputs(Utf8JsonWriter writer, YoloRuntimeOutputSet outputs, YoloModelProfile profile)
     {
         writer.WritePropertyName("outputs");
         writer.WriteStartArray();
@@ -477,7 +481,11 @@ public static class YoloVisionOutputReport
         {
             writer.WriteStartObject();
             writer.WriteString("name", output.Name);
-            writer.WriteString("role", ToSchemaRole(output.Role));
+            writer.WriteString(
+                "role",
+                output.Role == YoloOutputTensorRole.Classification
+                    ? ToClassificationSchemaRole(profile.Postprocess.ClassificationScoreMode)
+                    : ToSchemaRole(output.Role));
             writer.WritePropertyName("shape");
             WriteIntArray(writer, output.Shape);
             writer.WriteNumber("elementCount", output.ElementCount);
@@ -587,6 +595,7 @@ public static class YoloVisionOutputReport
         writer.WriteBoolean("applyNms", profile.Postprocess.ApplyNms);
         writer.WriteString("nmsMode", profile.Postprocess.NmsMode.ToString());
         writer.WriteString("layout", profile.Postprocess.Layout.ToString());
+        writer.WriteString("classificationScoreMode", profile.Postprocess.ClassificationScoreMode.ToString().ToLowerInvariant());
         writer.WriteString("angleUnit", "unknown");
         writer.WriteString("angleRange", "owner-record-required");
         writer.WriteEndObject();
@@ -906,13 +915,23 @@ public static class YoloVisionOutputReport
         return role switch
         {
             YoloOutputTensorRole.Detection => "boxes",
-            YoloOutputTensorRole.Classification => "logits",
+            YoloOutputTensorRole.Classification => "classification-scores",
             YoloOutputTensorRole.SemanticMap => "semantic",
             YoloOutputTensorRole.MaskPrototypes => "prototypes",
             YoloOutputTensorRole.MaskCoefficients => "maskCoefficients",
             YoloOutputTensorRole.ObbAngles => "obb",
             YoloOutputTensorRole.PoseKeypoints => "keypoints",
             _ => "unknown"
+        };
+    }
+
+    private static string ToClassificationSchemaRole(YoloClassificationScoreMode scoreMode)
+    {
+        return scoreMode switch
+        {
+            YoloClassificationScoreMode.Logits => "logits",
+            YoloClassificationScoreMode.Probabilities => "probabilities",
+            _ => "raw-scores"
         };
     }
 }

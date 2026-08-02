@@ -91,6 +91,70 @@ public sealed class YoloVisionManagedPipelineTests
     }
 
     [Fact]
+    public void ClassificationProfileUsesOfficialCenterCropProbabilityReadyDefaults()
+    {
+        YoloModelProfile profile = YoloModelProfile.FromArgs(new[]
+        {
+            "--family", "v8",
+            "--task", "cls"
+        }, labelCount: 1000);
+
+        Assert.Equal(new[] { 1, 3, 224, 224 }, profile.InputShape);
+        Assert.Equal("shorter-side-center-crop", profile.Preprocess.ResizeMode);
+        Assert.Equal(224, profile.Preprocess.ResizeShorterSide);
+        Assert.Equal("RGB", profile.Preprocess.ColorOrder);
+        Assert.Equal("NCHW", profile.Preprocess.TensorLayout);
+        Assert.Equal(1.0f / 255.0f, profile.Preprocess.Scale);
+        Assert.Equal(0.0f, profile.Postprocess.ConfidenceThreshold);
+        Assert.Equal(1000, profile.Postprocess.ClassCount);
+        Assert.Equal(YoloClassificationScoreMode.Raw, profile.Postprocess.ClassificationScoreMode);
+        Assert.False(profile.Postprocess.ApplyNms);
+        Assert.Equal(YoloNmsMode.None, profile.Postprocess.NmsMode);
+    }
+
+    [Fact]
+    public void ClassificationCenterCropPreprocessRecordsExactResizeAndCropGeometry()
+    {
+        string directory = Path.Combine(Path.GetTempPath(), "jyppx-yolovision-classification-crop-tests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(directory);
+        string imagePath = Path.Combine(directory, "input.ppm");
+        string tensorPath = Path.Combine(directory, "input.fp32.bin");
+        try
+        {
+            File.WriteAllText(
+                imagePath,
+                "P3\n4 2\n255\n255 0 0 0 255 0 0 0 255 255 255 255\n255 0 0 0 255 0 0 0 255 255 255 255\n");
+            YoloModelProfile profile = YoloModelProfile.FromArgs(new[]
+            {
+                "--family", "v8",
+                "--task", "cls",
+                "--input-shape", "1x3x2x2"
+            }, labelCount: 4);
+
+            YoloImagePreprocessResult result = YoloImagePreprocessor.Preprocess(
+                imagePath,
+                tensorPath,
+                profile.InputShape,
+                profile.Preprocess);
+
+            Assert.True(result.CenterCropEnabled);
+            Assert.False(result.LetterboxEnabled);
+            Assert.Equal("shorter-side-center-crop", result.ResizeMode);
+            Assert.Equal(2, result.ResizeShorterSide);
+            Assert.Equal(4, result.ResizedWidth);
+            Assert.Equal(2, result.ResizedHeight);
+            Assert.Equal(1, result.CropX);
+            Assert.Equal(0, result.CropY);
+            Assert.Equal(12, result.TensorElementCount);
+            Assert.Equal(0, result.FillValue);
+        }
+        finally
+        {
+            Directory.Delete(directory, recursive: true);
+        }
+    }
+
+    [Fact]
     public void LayoutInferenceRecognizesCommonRank3Outputs()
     {
         Assert.Equal(YoloOutputLayout.ChannelsFirst, YoloOutputLayoutInference.InferRank3(new[] { 1, 84, 8400 }, YoloOutputLayout.Auto));
@@ -192,6 +256,16 @@ public sealed class YoloVisionManagedPipelineTests
             iouThreshold: float.PositiveInfinity,
             topK: 10,
             applyNms: true));
+        Assert.Throws<ArgumentOutOfRangeException>(() => new YoloPostprocessOptions(
+            YoloOutputLayout.Auto,
+            hasObjectness: null,
+            classCount: 2,
+            confidenceThreshold: 0.0f,
+            iouThreshold: 0.45f,
+            topK: 2,
+            applyNms: false,
+            nmsMode: YoloNmsMode.None,
+            classificationScoreMode: (YoloClassificationScoreMode)999));
     }
 
     [Fact]
@@ -317,6 +391,132 @@ public sealed class YoloVisionManagedPipelineTests
         Assert.Equal(2, semantic.SemanticMap.Width);
         Assert.Equal(1, semantic.SemanticMap.Height);
         Assert.Equal(new[] { 0.1f, 0.2f, 0.9f, 0.8f }, semantic.SemanticMap.Values);
+    }
+
+    [Fact]
+    public void ClassificationDecoderSupportsExplicitProbabilityAndLogitContracts()
+    {
+        YoloModelProfile probabilityProfile = YoloModelProfile.FromArgs(new[]
+        {
+            "--task", "cls",
+            "--class-count", "3",
+            "--confidence", "0",
+            "--top-k", "3",
+            "--classification-score-mode", "probabilities"
+        }, labelCount: 0);
+        YoloModelProfile logitProfile = YoloModelProfile.FromArgs(new[]
+        {
+            "--task", "cls",
+            "--class-count", "3",
+            "--confidence", "0",
+            "--top-k", "3",
+            "--classification-score-mode", "logits"
+        }, labelCount: 0);
+
+        IReadOnlyList<YoloClassificationPrediction> probabilities = YoloSampleRunner.DecodeClassifications(
+            new[] { 0.1f, 0.7f, 0.2f },
+            new[] { 1, 3 },
+            probabilityProfile);
+        IReadOnlyList<YoloClassificationPrediction> softmax = YoloSampleRunner.DecodeClassifications(
+            new[] { 1000.0f, 1002.0f, 1001.0f },
+            new[] { 3, 1 },
+            logitProfile);
+
+        Assert.Equal(YoloClassificationScoreMode.Probabilities, probabilityProfile.Postprocess.ClassificationScoreMode);
+        Assert.Equal(new[] { 1, 2, 0 }, probabilities.Select(static item => item.ClassIndex).ToArray());
+        Assert.Equal(new[] { 1, 2, 0 }, softmax.Select(static item => item.ClassIndex).ToArray());
+        Assert.Equal(1.0f, softmax.Sum(static item => item.Score), 6);
+        Assert.Equal(0.66524094f, softmax[0].Score, 6);
+    }
+
+    [Fact]
+    public void ClassificationDecoderRejectsAmbiguousOrMalformedScoreVectors()
+    {
+        YoloModelProfile probabilities = YoloModelProfile.FromArgs(new[]
+        {
+            "--task", "cls",
+            "--class-count", "3",
+            "--classification-score-mode", "probabilities"
+        }, labelCount: 0);
+        YoloModelProfile raw = YoloModelProfile.FromArgs(new[]
+        {
+            "--task", "cls",
+            "--class-count", "2"
+        }, labelCount: 0);
+
+        Assert.Throws<InvalidDataException>(() => YoloSampleRunner.DecodeClassifications(
+            new[] { 0.2f, 0.3f, 0.4f },
+            new[] { 1, 3 },
+            probabilities));
+        Assert.Throws<InvalidDataException>(() => YoloSampleRunner.DecodeClassifications(
+            new[] { 0.2f, 1.1f, -0.3f },
+            new[] { 3 },
+            probabilities));
+        Assert.Throws<InvalidDataException>(() => YoloSampleRunner.DecodeClassifications(
+            new[] { 0.2f, float.NaN },
+            new[] { 1, 2 },
+            raw));
+        Assert.Throws<InvalidDataException>(() => YoloSampleRunner.DecodeClassifications(
+            new[] { 0.2f, 0.3f, 0.5f },
+            new[] { 1, 3 },
+            raw));
+        Assert.Throws<ArgumentException>(() => YoloModelProfile.FromArgs(new[]
+        {
+            "--task", "cls",
+            "--classification-score-mode", "owner-confirmed"
+        }, labelCount: 0));
+    }
+
+    [Fact]
+    public void ClassificationScoreModeIsWrittenToOutputAndPreflightReports()
+    {
+        YoloModelProfile profile = YoloModelProfile.FromArgs(new[]
+        {
+            "--task", "cls",
+            "--class-count", "2",
+            "--confidence", "0",
+            "--classification-score-mode", "probabilities"
+        }, labelCount: 0);
+        YoloRuntimeOutputSet outputs = new YoloRuntimeOutputSet(new[]
+        {
+            new YoloRuntimeOutputTensor(
+                "output0",
+                YoloOutputTensorRole.Classification,
+                new[] { 0.25f, 0.75f },
+                new[] { 1, 2 })
+        });
+        YoloVisionResult result = YoloSampleRunner.DecodeRuntimeOutputs(outputs, profile);
+
+        using JsonDocument output = JsonDocument.Parse(YoloVisionOutputReport.ToJson(
+            new YoloVisionOutputReportContext(
+                "model.onnx",
+                string.Empty,
+                string.Empty,
+                "ramp",
+                new[] { 1, 3, 224, 224 },
+                tensorRtLine: 10,
+                profileIndex: 0,
+                engineDeviceMemoryBytes: 0,
+                elapsedMilliseconds: 1.0),
+            outputs,
+            profile,
+            result,
+            new[] { "zero", "one" }));
+        YoloVisionPreflightResult preflight = YoloVisionPreflightReport.Create(
+            new[] { "--task", "cls", "--classification-score-mode", "probabilities" },
+            profile,
+            "missing.onnx",
+            "missing.labels",
+            string.Empty,
+            string.Empty,
+            string.Empty,
+            Array.Empty<string>(),
+            metadata: null);
+        using JsonDocument preflightJson = JsonDocument.Parse(preflight.Json);
+
+        Assert.Equal("probabilities", output.RootElement.GetProperty("postprocess").GetProperty("classificationScoreMode").GetString());
+        Assert.Equal("probabilities", output.RootElement.GetProperty("outputs")[0].GetProperty("role").GetString());
+        Assert.Equal("probabilities", preflightJson.RootElement.GetProperty("profile").GetProperty("postprocess").GetProperty("classificationScoreMode").GetString());
     }
 
     [Fact]

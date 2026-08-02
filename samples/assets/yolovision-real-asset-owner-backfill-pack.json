@@ -550,7 +550,8 @@
         "angleRange": "owner-required",
         "rotatedBoxLayout": "owner-required",
         "coordinateSpace": "owner-required",
-        "rotatedNmsMode": "owner-required"
+        "rotatedNmsMode": "owner-required",
+        "auxiliaryLayout": "owner-required"
       },
       "articleEvidence": {
         "readiness": "owner-action-required",
@@ -618,7 +619,7 @@
         "proofBoundary": "TensorRtExec build report, command transcript, stdout/stderr logs, and engine hash are build evidence only; they are not real-model-runtime proof and never package-consumer-runtime proof."
       },
       "yoloVision": {
-        "runCommand": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8n-cls.onnx --labels .\\models\\imagenet.names --input-data .\\models\\yolov8n-cls-fp32.bin --input-shape 1x3x224x224 --family v8 --task cls --classification-output logits",
+        "runCommand": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8n-cls.onnx --labels .\\models\\imagenet-yolov8n-cls.names --input-data .\\models\\yolov8n-cls-fp32.bin --input-shape 1x3x224x224 --family v8 --task cls --classification-output output0 --classification-score-mode probabilities --confidence 0 --top-k 5",
         "expectedEvidenceLines": [
           "Profile Family=v8 Task=cls",
           "Classification Class=",
@@ -636,7 +637,7 @@
         "outputJsonSha256": "owner-required"
       },
       "yoloVisionPreflight": {
-        "command": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8n-cls.onnx --labels .\\models\\imagenet.names --input-data .\\models\\yolov8n-cls-fp32.bin --input-shape 1x3x224x224 --family v8 --task cls --classification-output logits --preflight --preflight-report .\\models\\yolov8n-cls-preflight.json",
+        "command": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8n-cls.onnx --labels .\\models\\imagenet-yolov8n-cls.names --input-data .\\models\\yolov8n-cls-fp32.bin --input-shape 1x3x224x224 --family v8 --task cls --classification-output output0 --classification-score-mode probabilities --confidence 0 --top-k 5 --preflight --preflight-report .\\models\\yolov8n-cls-preflight.json",
         "reportPath": "models/yolov8n-cls-preflight.json",
         "reportSha256": "owner-required",
         "schemaPath": "samples/YoloVision/yolovision-preflight.schema.json",
@@ -665,7 +666,8 @@
         "labelsSha256": "owner-required",
         "topK": 5,
         "classScoreField": "owner-required",
-        "softmaxApplied": "owner-required"
+        "softmaxApplied": "owner-required",
+        "classificationScoreMode": "owner-required"
       },
       "articleEvidence": {
         "readiness": "owner-action-required",

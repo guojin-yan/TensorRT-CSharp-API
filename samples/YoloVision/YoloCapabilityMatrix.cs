@@ -67,7 +67,7 @@ public static class YoloCapabilityMatrix
     private static readonly (YoloTaskType Task, string Alias, string DecodePath, string AuxiliaryMetadata, string EvidenceLevel)[] Tasks =
     {
         (YoloTaskType.Detection, "det", "single-output boxes with score filtering and class-aware/class-agnostic NMS", "none", "runtime-smoke-ready"),
-        (YoloTaskType.Classification, "cls", "single-output logits/top-k classification decoder", "none", "managed-smoke-ready"),
+        (YoloTaskType.Classification, "cls", "single-output raw/logits/probabilities decoder with strict class count and top-k", "classification score mode", "source-tree-real-model-runtime"),
         (YoloTaskType.Segmentation, "seg", "detection rows plus mask prototype composition", "mask coefficient count, prototype tensor role, optional auxiliary channel start/layout", "managed-metadata-ready"),
         (YoloTaskType.OrientedBoundingBox, "obb", "embedded or separate angle channels plus probabilistic-IoU rotated Fast-NMS", "angle unit and exact auxiliary start/layout for embedded output, or a separate angle tensor role", "source-tree-real-model-runtime"),
         (YoloTaskType.Pose, "pose", "detection rows plus keypoint tensor mapping", "keypoint count, keypoint stride, optional auxiliary layout", "managed-metadata-ready"),

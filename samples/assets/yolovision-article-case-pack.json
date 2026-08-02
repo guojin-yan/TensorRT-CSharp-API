@@ -121,7 +121,7 @@
       "yoloVisionRunCommand": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8n-obb.onnx --labels .\\models\\dota.names --input-data .\\models\\yolov8n-obb-fp32.bin --input-shape 1x3x1024x1024 --family v8 --task obb --output-role-map boxes:det,angles:obb-angle --obb-angle-output angles",
       "yoloVisionPreflightReportPath": "models/yolov8n-obb-preflight.json",
       "yoloVisionPreflightCommand": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8n-obb.onnx --labels .\\models\\dota.names --input-data .\\models\\yolov8n-obb-fp32.bin --input-shape 1x3x1024x1024 --family v8 --task obb --output-role-map boxes:det,angles:obb-angle --obb-angle-output angles --preflight --preflight-report .\\models\\yolov8n-obb-preflight.json",
-      "requiredOutputMetadata": ["angleUnit", "angleRange", "rotatedBoxLayout", "coordinateSpace", "rotatedNmsMode"],
+      "requiredOutputMetadata": ["angleUnit", "angleRange", "rotatedBoxLayout", "coordinateSpace", "rotatedNmsMode", "auxiliaryLayout"],
       "expectedEvidenceLines": ["Profile Family=v8 Task=obb", "OrientedBoxes=", "YoloVision Passed=True"],
       "canPromoteRealModelRuntime": false
     },
@@ -135,10 +135,10 @@
       "inputShape": "1x3x224x224",
       "exportCommand": "yolo export model=.\\models\\yolov8n-cls.pt format=onnx opset=12 dynamic=True simplify=True imgsz=224",
       "tensorRtExecBuildCommand": "dotnet run --project .\\applications\\TensorRtExec -- --onnx .\\models\\yolov8n-cls.onnx --saveEngine .\\models\\yolov8n-cls.plan --minShapes images:1x3x224x224 --optShapes images:1x3x224x224 --maxShapes images:8x3x224x224 --fp16 --buildOnly --exportReport .\\models\\yolov8n-cls-build-report.json",
-      "yoloVisionRunCommand": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8n-cls.onnx --labels .\\models\\imagenet.names --input-data .\\models\\yolov8n-cls-fp32.bin --input-shape 1x3x224x224 --family v8 --task cls --classification-output logits",
+      "yoloVisionRunCommand": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8n-cls.onnx --labels .\\models\\imagenet-yolov8n-cls.names --input-data .\\models\\yolov8n-cls-fp32.bin --input-shape 1x3x224x224 --family v8 --task cls --classification-output output0 --classification-score-mode probabilities --confidence 0 --top-k 5",
       "yoloVisionPreflightReportPath": "models/yolov8n-cls-preflight.json",
-      "yoloVisionPreflightCommand": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8n-cls.onnx --labels .\\models\\imagenet.names --input-data .\\models\\yolov8n-cls-fp32.bin --input-shape 1x3x224x224 --family v8 --task cls --classification-output logits --preflight --preflight-report .\\models\\yolov8n-cls-preflight.json",
-      "requiredOutputMetadata": ["classCount", "labelsSha256", "topK", "classScoreField", "softmaxApplied"],
+      "yoloVisionPreflightCommand": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8n-cls.onnx --labels .\\models\\imagenet-yolov8n-cls.names --input-data .\\models\\yolov8n-cls-fp32.bin --input-shape 1x3x224x224 --family v8 --task cls --classification-output output0 --classification-score-mode probabilities --confidence 0 --top-k 5 --preflight --preflight-report .\\models\\yolov8n-cls-preflight.json",
+      "requiredOutputMetadata": ["classCount", "labelsSha256", "topK", "classScoreField", "softmaxApplied", "classificationScoreMode"],
       "expectedEvidenceLines": ["Profile Family=v8 Task=cls", "Classification Class=", "YoloVision Passed=True"],
       "canPromoteRealModelRuntime": false
     },

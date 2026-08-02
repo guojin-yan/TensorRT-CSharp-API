@@ -12,6 +12,27 @@ public sealed class YoloPreprocessOptions
         bool normalize,
         bool preserveAspectRatio,
         string letterboxAlignment)
+        : this(
+            tensorLayout,
+            colorOrder,
+            resizeMode,
+            scale,
+            normalize,
+            preserveAspectRatio,
+            letterboxAlignment,
+            resizeShorterSide: 0)
+    {
+    }
+
+    public YoloPreprocessOptions(
+        string tensorLayout,
+        string colorOrder,
+        string resizeMode,
+        float scale,
+        bool normalize,
+        bool preserveAspectRatio,
+        string letterboxAlignment,
+        int resizeShorterSide)
     {
         TensorLayout = string.IsNullOrWhiteSpace(tensorLayout) ? "NCHW" : tensorLayout;
         ColorOrder = string.IsNullOrWhiteSpace(colorOrder) ? "RGB" : colorOrder;
@@ -20,6 +41,9 @@ public sealed class YoloPreprocessOptions
         Normalize = normalize;
         PreserveAspectRatio = preserveAspectRatio;
         LetterboxAlignment = string.IsNullOrWhiteSpace(letterboxAlignment) ? "center" : letterboxAlignment;
+        ResizeShorterSide = resizeShorterSide >= 0
+            ? resizeShorterSide
+            : throw new ArgumentOutOfRangeException(nameof(resizeShorterSide), "Resize shorter side must be zero or positive.");
     }
 
     public string TensorLayout { get; }
@@ -35,6 +59,8 @@ public sealed class YoloPreprocessOptions
     public bool PreserveAspectRatio { get; }
 
     public string LetterboxAlignment { get; }
+
+    public int ResizeShorterSide { get; }
 
     public static YoloPreprocessOptions Default { get; } = new YoloPreprocessOptions(
         "NCHW",

@@ -51,14 +51,27 @@ public sealed class YoloModelProfile
             throw new NotSupportedException("The built-in YOLOX profile supports detection models only.");
         }
 
+        string tensorLayout = GetStringArgument(args, "--tensor-layout", "NCHW");
+        string defaultInputShape = taskType == YoloTaskType.Classification ? "1x3x224x224" : "1x3x640x640";
+        int[] inputShape = ParseShape(GetStringArgument(args, "--input-shape", defaultInputShape), "--input-shape");
         YoloOutputLayout layout = YoloOutputLayoutInference.Parse(GetStringArgument(args, "--layout", "auto"));
         bool? hasObjectness = ParseOptionalBoolean(GetStringArgument(args, "--has-objectness", "auto"));
         int classCount = GetPositiveIntArgument(args, "--class-count", Math.Max(0, labelCount));
-        float confidence = GetFloatArgument(args, "--confidence", YoloPostprocessOptions.Default.ConfidenceThreshold);
+        float confidence = GetFloatArgument(
+            args,
+            "--confidence",
+            taskType == YoloTaskType.Classification ? 0.0f : YoloPostprocessOptions.Default.ConfidenceThreshold);
         float iouThreshold = GetFloatArgument(args, "--iou-threshold", YoloPostprocessOptions.Default.IouThreshold);
         int topK = GetPositiveIntArgument(args, "--top-k", 10);
         YoloNmsMode nmsMode = ParseNmsMode(GetStringArgument(args, "--nms-mode", "class-aware"));
+        YoloClassificationScoreMode classificationScoreMode = ParseClassificationScoreMode(
+            GetStringArgument(args, "--classification-score-mode", "raw"));
         bool applyNms = !HasSwitch(args, "--no-nms") && nmsMode != YoloNmsMode.None;
+        if (taskType is YoloTaskType.Classification or YoloTaskType.SemanticSegmentation)
+        {
+            applyNms = false;
+            nmsMode = YoloNmsMode.None;
+        }
         bool yoloX = family == YoloModelFamily.YoloX;
         if (HasSwitch(args, "--normalize") && HasSwitch(args, "--no-normalize"))
         {
@@ -68,15 +81,23 @@ public sealed class YoloModelProfile
         bool normalize = yoloX
             ? HasSwitch(args, "--normalize")
             : !HasSwitch(args, "--no-normalize");
+        string defaultResizeMode = taskType == YoloTaskType.Classification
+            ? "shorter-side-center-crop"
+            : "letterbox";
+        int resizeShorterSide = GetPositiveIntArgument(
+            args,
+            "--resize-shorter-side",
+            GetInputShorterSide(inputShape, tensorLayout));
 
         YoloPreprocessOptions preprocess = new YoloPreprocessOptions(
-            GetStringArgument(args, "--tensor-layout", "NCHW"),
+            tensorLayout,
             GetStringArgument(args, "--color-order", yoloX ? "BGR" : "RGB"),
-            GetStringArgument(args, "--resize", "letterbox"),
+            GetStringArgument(args, "--resize", defaultResizeMode),
             GetFloatArgument(args, "--scale", yoloX ? 1.0f : 1.0f / 255.0f),
             normalize,
             preserveAspectRatio: !HasSwitch(args, "--stretch"),
-            GetStringArgument(args, "--letterbox-alignment", yoloX ? "top-left" : "center"));
+            GetStringArgument(args, "--letterbox-alignment", yoloX ? "top-left" : "center"),
+            resizeShorterSide);
 
         YoloPostprocessOptions postprocess = new YoloPostprocessOptions(
             layout,
@@ -86,16 +107,30 @@ public sealed class YoloModelProfile
             iouThreshold,
             topK,
             applyNms,
-            nmsMode);
+            nmsMode,
+            classificationScoreMode);
 
         return new YoloModelProfile(
             family,
             taskType,
             GetStringArgument(args, "--input-name", string.Empty),
             GetStringArgument(args, "--output-name", string.Empty),
-            ParseShape(GetStringArgument(args, "--input-shape", "1x3x640x640"), "--input-shape"),
+            inputShape,
             preprocess,
             postprocess);
+    }
+
+    private static int GetInputShorterSide(int[] inputShape, string tensorLayout)
+    {
+        if (inputShape.Length != 4)
+        {
+            return 224;
+        }
+
+        string normalizedLayout = Normalize(tensorLayout);
+        int height = normalizedLayout is "nhwc" or "channelslast" ? inputShape[1] : inputShape[2];
+        int width = normalizedLayout is "nhwc" or "channelslast" ? inputShape[2] : inputShape[3];
+        return Math.Min(height, width);
     }
 
     private static YoloModelFamily ParseFamily(string value)
@@ -140,6 +175,18 @@ public sealed class YoloModelProfile
             "classagnostic" or "agnostic" or "global" => YoloNmsMode.ClassAgnostic,
             "none" or "off" or "disabled" or "disable" => YoloNmsMode.None,
             _ => throw new ArgumentException($"Unsupported YOLO NMS mode '{value}'.")
+        };
+    }
+
+    private static YoloClassificationScoreMode ParseClassificationScoreMode(string value)
+    {
+        string normalized = Normalize(value);
+        return normalized switch
+        {
+            "" or "raw" => YoloClassificationScoreMode.Raw,
+            "logit" or "logits" or "softmax" => YoloClassificationScoreMode.Logits,
+            "probability" or "probabilities" or "prob" => YoloClassificationScoreMode.Probabilities,
+            _ => throw new ArgumentException($"Unsupported classification score mode '{value}'. Use raw, logits, or probabilities.")
         };
     }
 

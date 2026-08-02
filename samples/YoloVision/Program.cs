@@ -137,7 +137,7 @@ public static class YoloVisionCommand
             OnnxSampleMultiOutputResult result = TensorRtOnnxSample.RunSingleFloatInputOutputs(options);
             OnnxSampleOutputTensor primaryOutput = result.PrimaryOutput;
             Console.WriteLine($"YoloVision TensorRtLine={(int)result.Line} Model={options.ModelPath}");
-            Console.WriteLine($"Profile Family={profile.Family} Task={profile.TaskType} Layout={profile.Postprocess.Layout} Nms={profile.Postprocess.ApplyNms} NmsMode={profile.Postprocess.NmsMode}");
+            Console.WriteLine($"Profile Family={profile.Family} Task={profile.TaskType} Layout={profile.Postprocess.Layout} Nms={profile.Postprocess.ApplyNms} NmsMode={profile.Postprocess.NmsMode} ClassificationScoreMode={profile.Postprocess.ClassificationScoreMode}");
             Console.WriteLine($"InputSource={(options.UsesExternalInput ? "external" : "synthetic")} InputFile={GetInputFileSummary(options)}");
             if (imagePreprocess != null)
             {
@@ -484,7 +484,8 @@ public static class YoloVisionCommand
         Console.WriteLine(
             $"ImagePreprocessConfig Mode={result.ResizeMode} Layout={result.TensorLayout} Color={result.ColorOrder} " +
             $"Target={result.TargetWidth}x{result.TargetHeight} Resized={result.ResizedWidth}x{result.ResizedHeight} " +
-            $"Pad={result.PadX},{result.PadY} Alignment={result.LetterboxAlignment} Scale={result.ResizeScaleX:0.######},{result.ResizeScaleY:0.######} " +
+            $"Pad={result.PadX},{result.PadY} Crop={result.CropX},{result.CropY} ShorterSide={result.ResizeShorterSide} " +
+            $"Alignment={result.LetterboxAlignment} Scale={result.ResizeScaleX:0.######},{result.ResizeScaleY:0.######} " +
             $"Normalize={result.Normalized} ValueScale={result.Scale:0.########} Fill={result.FillValue}");
     }
 
@@ -594,12 +595,14 @@ public static class YoloVisionCommand
         Console.WriteLine("  --layout auto|channels-first|boxes-first|end2end");
         Console.WriteLine("  --has-objectness auto|true|false");
         Console.WriteLine("  --class-count <count>     Defaults to labels count when labels are provided.");
-        Console.WriteLine("  --confidence <value>      Default: 0.25");
+        Console.WriteLine("  --confidence <value>      Default: 0 for classification; 0.25 for other tasks.");
         Console.WriteLine("  --iou-threshold <value>   Default: 0.45");
         Console.WriteLine("  --top-k <count>           Default: 10");
+        Console.WriteLine("  --classification-score-mode raw|logits|probabilities  Raw preserves legacy scores; logits applies stable softmax; probabilities validates [0,1] and sum=1.");
         Console.WriteLine("  --nms-mode class-aware|class-agnostic|none");
         Console.WriteLine("  --no-nms                  Keep score filtering only.");
-        Console.WriteLine("  --tensor-layout NCHW|NHWC --color-order RGB|BGR --resize letterbox|stretch");
+        Console.WriteLine("  --tensor-layout NCHW|NHWC --color-order RGB|BGR --resize letterbox|stretch|shorter-side-center-crop");
+        Console.WriteLine("  --resize-shorter-side <n> Classification defaults to the shorter input side (224 for the default profile).");
         Console.WriteLine("  --letterbox-alignment center|top-left  YOLOX defaults to top-left; other families default to center.");
         Console.WriteLine("  --normalize|--no-normalize  YOLOX defaults to raw 0..255 values; other families default to 1/255 normalization.");
         Console.WriteLine("  --output-role-map <map>   Example: boxes:det,proto:mask-prototypes,kpts:pose-keypoints,angle:obb-angles.");

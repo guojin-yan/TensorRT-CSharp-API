@@ -31,6 +31,65 @@ public sealed class YoloImagePreprocessResult
         float resizeScaleX,
         float resizeScaleY,
         byte fillValue)
+        : this(
+            sourcePath,
+            sourceSha256,
+            sourceWidth,
+            sourceHeight,
+            tensorPath,
+            tensorSha256,
+            tensorElementCount,
+            targetWidth,
+            targetHeight,
+            tensorLayout,
+            colorOrder,
+            resizeMode,
+            normalized,
+            scale,
+            letterboxEnabled,
+            letterboxAlignment,
+            resizedWidth,
+            resizedHeight,
+            padX,
+            padY,
+            resizeScaleX,
+            resizeScaleY,
+            fillValue,
+            centerCropEnabled: false,
+            resizeShorterSide: 0,
+            cropX: 0,
+            cropY: 0)
+    {
+    }
+
+    public YoloImagePreprocessResult(
+        string sourcePath,
+        string sourceSha256,
+        int sourceWidth,
+        int sourceHeight,
+        string tensorPath,
+        string tensorSha256,
+        int tensorElementCount,
+        int targetWidth,
+        int targetHeight,
+        string tensorLayout,
+        string colorOrder,
+        string resizeMode,
+        bool normalized,
+        float scale,
+        bool letterboxEnabled,
+        string letterboxAlignment,
+        int resizedWidth,
+        int resizedHeight,
+        int padX,
+        int padY,
+        float resizeScaleX,
+        float resizeScaleY,
+        byte fillValue,
+        bool centerCropEnabled,
+        int resizeShorterSide,
+        int cropX,
+        int cropY)
     {
         SourcePath = sourcePath ?? string.Empty;
         SourceSha256 = sourceSha256 ?? string.Empty;
@@ -55,6 +114,10 @@ public sealed class YoloImagePreprocessResult
         ResizeScaleX = resizeScaleX;
         ResizeScaleY = resizeScaleY;
         FillValue = fillValue;
+        CenterCropEnabled = centerCropEnabled;
+        ResizeShorterSide = resizeShorterSide;
+        CropX = cropX;
+        CropY = cropY;
     }
 
     public string SourcePath { get; }
@@ -102,6 +165,14 @@ public sealed class YoloImagePreprocessResult
     public float ResizeScaleY { get; }
 
     public byte FillValue { get; }
+
+    public bool CenterCropEnabled { get; }
+
+    public int ResizeShorterSide { get; }
+
+    public int CropX { get; }
+
+    public int CropY { get; }
 }
 
 public static class YoloImagePreprocessor
@@ -143,6 +214,7 @@ public static class YoloImagePreprocessor
         string layout = NormalizeLayout(options.TensorLayout);
         string colorOrder = NormalizeColorOrder(options.ColorOrder);
         string letterboxAlignment = NormalizeLetterboxAlignment(options.LetterboxAlignment);
+        string resizeMode = NormalizeResizeMode(options.ResizeMode);
         ResolveInputShape(inputShape, layout, out int channelCount, out int targetHeight, out int targetWidth);
         if (channelCount != 3)
         {
@@ -150,9 +222,34 @@ public static class YoloImagePreprocessor
         }
 
         SampleRgbImage image = SampleRgbImageDecoder.Decode(fullImagePath);
-        bool letterbox = options.PreserveAspectRatio && !string.Equals(options.ResizeMode, "stretch", StringComparison.OrdinalIgnoreCase);
-        ResizePlan plan = CreateResizePlan(image.Width, image.Height, targetWidth, targetHeight, letterbox, letterboxAlignment);
-        byte[] targetPixels = ResizeToTarget(image, plan, DefaultLetterboxFill);
+        bool centerCrop = string.Equals(resizeMode, "shorter-side-center-crop", StringComparison.Ordinal);
+        bool letterbox = !centerCrop && options.PreserveAspectRatio && !string.Equals(resizeMode, "stretch", StringComparison.Ordinal);
+        ResizePlan plan;
+        byte[] targetPixels;
+        int resizeShorterSide = 0;
+        int cropX = 0;
+        int cropY = 0;
+        byte fillValue = centerCrop ? (byte)0 : DefaultLetterboxFill;
+        if (centerCrop)
+        {
+            resizeShorterSide = options.ResizeShorterSide > 0
+                ? options.ResizeShorterSide
+                : Math.Min(targetWidth, targetHeight);
+            plan = CreateCenterCropResizePlan(
+                image.Width,
+                image.Height,
+                targetWidth,
+                targetHeight,
+                resizeShorterSide,
+                out cropX,
+                out cropY);
+            targetPixels = ResizeAndCenterCrop(image, plan.ResizedWidth, plan.ResizedHeight, targetWidth, targetHeight, cropX, cropY);
+        }
+        else
+        {
+            plan = CreateResizePlan(image.Width, image.Height, targetWidth, targetHeight, letterbox, letterboxAlignment);
+            targetPixels = ResizeToTarget(image, plan, fillValue);
+        }
         float[] tensor = ToTensor(targetPixels, targetWidth, targetHeight, layout, colorOrder, options.Normalize, options.Scale);
 
         string fullTensorPath = Path.GetFullPath(tensorPath);
@@ -175,7 +272,7 @@ public static class YoloImagePreprocessor
             targetHeight,
             layout,
             colorOrder,
-            letterbox ? "letterbox" : "stretch",
+            centerCrop ? resizeMode : letterbox ? "letterbox" : "stretch",
             options.Normalize,
             options.Scale,
             letterbox,
@@ -186,7 +283,127 @@ public static class YoloImagePreprocessor
             plan.PadY,
             plan.ResizeScaleX,
             plan.ResizeScaleY,
-            DefaultLetterboxFill);
+            fillValue,
+            centerCrop,
+            resizeShorterSide,
+            cropX,
+            cropY);
+    }
+
+    private static ResizePlan CreateCenterCropResizePlan(
+        int sourceWidth,
+        int sourceHeight,
+        int targetWidth,
+        int targetHeight,
+        int resizeShorterSide,
+        out int cropX,
+        out int cropY)
+    {
+        int resizedWidth;
+        int resizedHeight;
+        if (sourceWidth <= sourceHeight)
+        {
+            resizedWidth = resizeShorterSide;
+            resizedHeight = Math.Max(1, (int)(resizeShorterSide * sourceHeight / (double)sourceWidth));
+        }
+        else
+        {
+            resizedHeight = resizeShorterSide;
+            resizedWidth = Math.Max(1, (int)(resizeShorterSide * sourceWidth / (double)sourceHeight));
+        }
+        if (resizedWidth < targetWidth || resizedHeight < targetHeight)
+        {
+            throw new ArgumentException(
+                "Resize shorter side does not produce an image large enough for the requested center crop.");
+        }
+
+        cropX = (resizedWidth - targetWidth) / 2;
+        cropY = (resizedHeight - targetHeight) / 2;
+        return new ResizePlan(
+            targetWidth,
+            targetHeight,
+            resizedWidth,
+            resizedHeight,
+            0,
+            0,
+            resizedWidth / (float)sourceWidth,
+            resizedHeight / (float)sourceHeight);
+    }
+
+    private static byte[] ResizeAndCenterCrop(
+        SampleRgbImage image,
+        int resizedWidth,
+        int resizedHeight,
+        int targetWidth,
+        int targetHeight,
+        int cropX,
+        int cropY)
+    {
+        byte[] resized = ResizeBilinearAntialiased(image, resizedWidth, resizedHeight);
+        byte[] target = new byte[checked(targetWidth * targetHeight * 3)];
+        for (int y = 0; y < targetHeight; y++)
+        {
+            int sourceOffset = ((y + cropY) * resizedWidth + cropX) * 3;
+            int targetOffset = y * targetWidth * 3;
+            Buffer.BlockCopy(resized, sourceOffset, target, targetOffset, targetWidth * 3);
+        }
+
+        return target;
+    }
+
+    private static byte[] ResizeBilinearAntialiased(SampleRgbImage image, int targetWidth, int targetHeight)
+    {
+        double scaleX = image.Width / (double)targetWidth;
+        double scaleY = image.Height / (double)targetHeight;
+        double filterScaleX = Math.Max(1.0, scaleX);
+        double filterScaleY = Math.Max(1.0, scaleY);
+        byte[] target = new byte[checked(targetWidth * targetHeight * 3)];
+        for (int y = 0; y < targetHeight; y++)
+        {
+            double sourceCenterY = (y + 0.5) * scaleY;
+            int sourceYStart = Math.Max(0, (int)Math.Ceiling(sourceCenterY - filterScaleY - 0.5));
+            int sourceYEnd = Math.Min(image.Height - 1, (int)Math.Floor(sourceCenterY + filterScaleY - 0.5));
+            for (int x = 0; x < targetWidth; x++)
+            {
+                double sourceCenterX = (x + 0.5) * scaleX;
+                int sourceXStart = Math.Max(0, (int)Math.Ceiling(sourceCenterX - filterScaleX - 0.5));
+                int sourceXEnd = Math.Min(image.Width - 1, (int)Math.Floor(sourceCenterX + filterScaleX - 0.5));
+                double weightSum = 0.0;
+                double red = 0.0;
+                double green = 0.0;
+                double blue = 0.0;
+                for (int sourceY = sourceYStart; sourceY <= sourceYEnd; sourceY++)
+                {
+                    double yWeight = Math.Max(
+                        0.0,
+                        1.0 - Math.Abs((sourceY + 0.5 - sourceCenterY) / filterScaleY));
+                    for (int sourceX = sourceXStart; sourceX <= sourceXEnd; sourceX++)
+                    {
+                        double xWeight = Math.Max(
+                            0.0,
+                            1.0 - Math.Abs((sourceX + 0.5 - sourceCenterX) / filterScaleX));
+                        double weight = xWeight * yWeight;
+                        int sourceIndex = (sourceY * image.Width + sourceX) * 3;
+                        weightSum += weight;
+                        red += image.Pixels[sourceIndex] * weight;
+                        green += image.Pixels[sourceIndex + 1] * weight;
+                        blue += image.Pixels[sourceIndex + 2] * weight;
+                    }
+                }
+
+                int targetIndex = (y * targetWidth + x) * 3;
+                target[targetIndex] = ToByte(red / weightSum);
+                target[targetIndex + 1] = ToByte(green / weightSum);
+                target[targetIndex + 2] = ToByte(blue / weightSum);
+            }
+        }
+
+        return target;
+    }
+
+    private static byte ToByte(double value)
+    {
+        return (byte)Math.Clamp((int)Math.Round(value, MidpointRounding.AwayFromZero), 0, 255);
     }
 
     private static ResizePlan CreateResizePlan(int sourceWidth, int sourceHeight, int targetWidth, int targetHeight, bool letterbox, string letterboxAlignment)
@@ -349,6 +566,19 @@ public static class YoloImagePreprocessor
             "" or "center" or "centered" => "center",
             "topleft" or "top-left" => "top-left",
             _ => throw new ArgumentException($"Unsupported letterbox alignment '{value}'. Use center or top-left.")
+        };
+    }
+
+    private static string NormalizeResizeMode(string value)
+    {
+        string normalized = (value ?? string.Empty).Trim().Replace('_', '-').ToLowerInvariant();
+        return normalized switch
+        {
+            "" or "letterbox" => "letterbox",
+            "stretch" => "stretch",
+            "shorter-side-center-crop" or "center-crop" => "shorter-side-center-crop",
+            _ => throw new ArgumentException(
+                $"Unsupported resize mode '{value}'. Use letterbox, stretch, or shorter-side-center-crop.")
         };
     }
 

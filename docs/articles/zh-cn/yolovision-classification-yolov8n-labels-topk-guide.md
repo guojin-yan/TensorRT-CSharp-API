@@ -1,130 +1,90 @@
-# YoloVision YOLOv8n Classification Labels 与 Top-K 指南
+# YoloVision YOLOv8n Classification：Labels、中心裁剪与 Top-K 实战
 
 ## 适用读者
 
-本文适合需要验证图像分类模型、labels 顺序和 Top-K 结果的部署工程师，也适合需要把 `samples/YoloVision` 输出接入 C# 业务系统或文章案例的维护者。
+本文面向需要把 YOLOv8n-cls 部署到 TensorRT 10.x、核对 ImageNet labels 顺序，或为 C# 分类接口准备可复核演示材料的开发者。
 
 ## 解决问题
 
-本文解决：
+这条案例收口四个容易被忽略的问题：
 
-1. YOLOv8n-cls 模型、labels、输入图片和预处理 tensor 如何形成可复核资产。
-2. logits、probability、softmax 和 Top-K 的边界如何明确记录。
-3. 分类输出 JSON、SVG、运行日志和 SHA256 如何关联。
-4. 如何区分 build-only、分类 runtime 候选和 package-consumer-runtime proof。
+1. 官方 ONNX 输出是 `[1,1000]` Softmax probabilities，不是 logits。
+2. Ultralytics 8.4.21 使用短边缩放到 224 后中心裁剪，不使用检测任务的 letterbox。
+3. `ImageNet.yaml` 的简化 `names` 与权重内嵌名称不完全一致，精确 labels 必须从 `map` 顺序派生。
+4. Top-5 一致还不够，运行证据还要比较全部 1000 个原始概率，并提供受控负例。
 
 ## 背景与场景
 
-分类没有 box、NMS 和 mask，但 labels 行序、类别数、输入预处理和 score 语义一旦漂移，结果会稳定地“错得很像真的”。因此分类案例需要把模型输出向量、labels 和输入图像作为一个整体验证，而不是只截一张 Top-5 截图。
+分类模型没有 box、mask 和 NMS，看起来比检测简单，但 labels、预处理或 softmax 语义只要错一个，结果就会稳定地“看起来合理但实际错误”。本案例固定官方资产、导出版本、输入 tensor、完整输出 reference 和日志哈希，让每一层都能独立复查。
 
-## 文章定位
+当前已验证环境为 Windows 11、RTX 3060 Laptop GPU、驱动 576.02、CUDA 12.9、TensorRT 10.11、Ultralytics 8.4.21。该记录是源码树 `real-model-runtime`，仍不是 `package-consumer-runtime` proof，也不是模型再分发或发布授权。
 
-本文面向希望用 `samples/YoloVision` 跑 YOLOv8n-cls 或类似 classification 模型的开发者。Classification 没有 box、NMS 和 mask，表面上比 detection 简单，但它对 labels 顺序、softmax 约定、Top-K 输出和输入尺寸非常敏感。
+## 官方资产合同
 
-本文给出从模型来源、ONNX 导出、TensorRtExec build-only、YoloVision 运行到输出 JSON/SVG 的完整文章结构。它用于真实资产回填和公众号/博客发布，不是 runtime proof。
+机器可读清单位于：
 
-## 适用场景
+- `samples/assets/yolovision-yolov8n-cls-official-assets.json`
+- `samples/assets/yolovision-yolov8n-cls-real-model-runtime-evidence.json`
+- `eng/Acquire-YoloV8ClassificationOfficialAssets.ps1`
+- `eng/Invoke-YoloVisionClassificationReference.py`
 
-当你需要验证一个分类模型是否可以通过 TensorRtSharp4.0 的 runtime package 被 C# 项目消费时，可以从 YOLOv8n-cls 开始。典型输入 shape 是 `1x3x224x224`，labels 通常来自 ImageNet 或自定义分类集。
+固定资产如下：
 
-这篇文章特别适合解释“为什么 labels 文件也是 proof 的一部分”。如果 labels 顺序错了，即使 logits 数值正确，最终类别名也会错。
+| 资产 | 固定来源 | SHA256 |
+| --- | --- | --- |
+| `yolov8n-cls.pt` | Ultralytics assets `v8.3.0`，Release asset ID `195719213` | `11fa19f2...8245980a` |
+| `ImageNet.yaml` | Ultralytics commit `6e43d1e1...124b0a` | `3f9b74af...0461a15` |
+| `bus.jpg` | 同一 Ultralytics commit | `c02019c4...34bfbc63` |
+| `LICENSE` | 同一 Ultralytics commit | `0d96a4ff...079abcb0` |
 
-## 模型与许可证
+上游 Release API 没有为权重提供 digest。清单中的权重 SHA256 是从精确 Release asset ID 首次下载后固定的仓库校验值，不冒充上游签名。
 
-owner 需要记录：
+## Labels 为什么取 `map`
 
-- `yolov8n-cls.pt` 来源、许可证和 SHA256。
-- ONNX 导出命令、opset、输入尺寸和 SHA256。
-- labels 文件来源、许可证、class count 和 SHA256。
-- 输入图片来源、许可证和 SHA256。
-- 是否在模型图中已经包含 softmax。
+`ImageNet.yaml` 同时包含简化的 `names` 和 WordNet `map`。权重内嵌 `model.names` 与 `map` 的 1000 个 value 按插入顺序完全一致；与简化 `names` 有 564 个字符串差异，其中 305 个不是简单的空格转下划线。
 
-如果模型输出是 logits，YoloVision 或上层应用要明确是否执行 softmax；如果模型输出已经是 probability，就不能重复 softmax 后再解释 Top-K。
+例如：
 
-## 导出 ONNX
+| 索引 | `model.names` / `map` | 简化 `names` |
+| --- | --- | --- |
+| 4 | `hammerhead` | `hammerhead shark` |
+| 15 | `robin` | `American robin` |
+| 20 | `water_ouzel` | `American dipper` |
 
-```powershell
-yolo export model=.\models\yolov8n-cls.pt format=onnx opset=12 dynamic=True simplify=True imgsz=224
+派生后的 `imagenet-yolov8n-cls.names` 共 1000 行，SHA256 为 `dcc60e72...84240dd`。不要把 `names` 的可读性优化误当成权重的精确 label contract。
+
+## 输出分数合同
+
+YoloVision 现在提供显式 `--classification-score-mode`：
+
+| 模式 | 行为 |
+| --- | --- |
+| `raw` | 保留旧接口语义，只做 finite 检查、阈值、排序和 Top-K |
+| `logits` | 对有限 logits 执行数值稳定 softmax，再做 Top-K |
+| `probabilities` | 要求每项有限且位于 `[0,1]`，总和与 1 的误差不超过 `0.001` |
+
+配置了 `--class-count` 后，值必须与输出向量长度严格相等，不再静默截断。官方 YOLOv8n-cls ONNX 的末节点是 `Softmax`，所以必须使用 `--classification-score-mode probabilities`，不能再标记成 logits，也不能重复执行 softmax。
+
+## 预处理合同
+
+Ultralytics 8.4.21 的实际 transform 为：
+
+```text
+Resize(shorter-side=224, bilinear, antialias)
+CenterCrop(224, 224)
+RGB -> float32 NCHW
+scale = 1/255
+mean = 0,0,0
+std = 1,1,1
 ```
 
-导出后记录：
-
-- input tensor name，例如 `images`。
-- input shape，例如 `1x3x224x224`。
-- output tensor name，例如 `logits`。
-- class count。
-- output score type：`logits` 或 `probabilities`。
-- labels 文件顺序。
-
-## TensorRtExec Build-Only
-
-```powershell
-dotnet run --project .\applications\TensorRtExec -- `
-  --onnx .\models\yolov8n-cls.onnx `
-  --saveEngine .\models\yolov8n-cls.plan `
-  --minShapes images:1x3x224x224 `
-  --optShapes images:1x3x224x224 `
-  --maxShapes images:8x3x224x224 `
-  --fp16 `
-  --buildOnly `
-  --exportReport .\models\yolov8n-cls-build-report.json
-```
-
-这一步验证 ONNX parser、profile 和 engine serialization。它不能证明分类结果可信，因为它不包含真实输入运行、labels 对齐和 Top-K 输出 review。
-
-## YoloVision 离线 Preflight
-
-真实运行前先生成配置预检报告：
-
-```powershell
-dotnet run --project .\samples\YoloVision -- --model .\models\yolov8n-cls.onnx --labels .\models\imagenet.names --input-data .\models\yolov8n-cls-fp32.bin --input-shape 1x3x224x224 --family v8 --task cls --classification-output logits --preflight --preflight-report .\models\yolov8n-cls-preflight.json
-```
-
-报告的 schema 必须是 `yolovision-preflight.v1`，分类必须是 `precheck`；它只检查资产、profile 和分类输出配置，不是 labels/top-k 的 runtime proof。
-
-## YoloVision 运行
-
-```powershell
-dotnet run --project .\samples\YoloVision -- `
-  --model .\models\yolov8n-cls.onnx `
-  --labels .\models\imagenet.names `
-  --input-data .\models\yolov8n-cls-fp32.bin `
-  --input-shape 1x3x224x224 `
-  --family v8 `
-  --task cls `
-  --classification-output logits
-```
-
-真实日志至少应包含：
-
-- `Profile Family=v8 Task=cls`
-- `InputSource=external`
-- `Classification Class=... Score=...`
-- `Postprocess Task=cls`
-- owner 提供的 YoloVision 成功标记日志行：`YoloVision Passed=True`
-
-如果日志只来自 synthetic tensor，它只能证明分类 decoder 能执行，不能证明真实图片分类正确。
-
-## Top-K 输出解释
-
-建议输出 JSON 包含：
-
-- `classCount`
-- `labelsSha256`
-- `topK`
-- `classScoreField`
-- `softmaxApplied`
-- `topPredictions[index].classId`
-- `topPredictions[index].className`
-- `topPredictions[index].score`
-- `inputPreprocess`
-
-文章中建议展示 Top-5，并说明每个 score 的来源。如果输出是 logits，score 是否经过 softmax 必须写清楚；如果输出是 probabilities，Top-K 排序可以直接使用概率。
+这不是传统 ImageNet `mean/std`，也不是 letterbox。YoloVision 的 `cls` profile 现在默认 `1x3x224x224`、`shorter-side-center-crop`、RGB、NCHW、`1/255` 和 confidence 0。C# 抗锯齿缩放与 Ultralytics tensor 的最大像素差为 `1/255`、平均绝对误差 `0.000383371`，ORT Top-5 索引和顺序完全一致。其他模型若不符合这些默认值，仍应使用 owner-approved preprocess pipeline，并固定工具版本、参数和 tensor hash。
 
 ## 可复用资产目录与完整验证
 
-建议为 YOLOv8n-cls 建立独立的 E 盘 case workspace，把模型、分类 labels、输入图、预处理 tensor、engine、报告和日志分开保存，避免模型和临时包落到系统盘：
+大文件全部放在 E 盘，不提交到源码仓库：
 
+```text
 E:\TensorRtSharpAssets\cases\yolov8n-cls\models
 E:\TensorRtSharpAssets\cases\yolov8n-cls\labels
 E:\TensorRtSharpAssets\cases\yolov8n-cls\images
@@ -132,90 +92,132 @@ E:\TensorRtSharpAssets\cases\yolov8n-cls\tensors
 E:\TensorRtSharpAssets\cases\yolov8n-cls\engines
 E:\TensorRtSharpAssets\cases\yolov8n-cls\reports
 E:\TensorRtSharpAssets\cases\yolov8n-cls\logs
-
-从 `samples/assets/yolovision-yolov8-cls-candidate.template.json` 开始回填 `model.sourceUrl`、`model.downloadUrl`、`model.license`、`model.sha256`、`labels.sourceUrl`、`labels.sha256`、`labels.classCount`、`input.imageSha256`、`input.preprocessedTensorSha256`，以及 `outputMetadata.classificationOutput`、`outputMetadata.outputShape`、`outputMetadata.classCount`、`outputMetadata.labelsPath`、`outputMetadata.topK`、`outputMetadata.classScoreField` 和 `outputMetadata.postprocessMetadata.activation`。`classScoreField` 要明确是 logits 还是 probability，不能把两者混用。
-
-模型、labels、原图、预处理 tensor、engine、build report、preflight report、output JSON、overlay SVG 和 run log 分别计算 SHA256：
-
-```powershell
-Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-cls\models\yolov8n-cls.onnx
-Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-cls\labels\imagenet.names
-Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-cls\images\cat.ppm
-Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-cls\tensors\cat-fp32.bin
 ```
 
-先只做预处理，确认 224 输入、RGB、NCHW、归一化和 tensor hash：
+本仓库默认使用外层 `downloads/yolov8n-cls-ultralytics-v8.3.0`，脚本会拒绝 C 盘路径。
+
+### 1. 获取资产
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- --preprocess-only --image E:\TensorRtSharpAssets\cases\yolov8n-cls\images\cat.ppm --preprocessed-output E:\TensorRtSharpAssets\cases\yolov8n-cls\tensors\cat-fp32.bin --input-shape 1x3x224x224 --tensor-layout NCHW --color-order RGB --resize letterbox
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Acquire-YoloV8ClassificationOfficialAssets.ps1 `
+  -AssetRoot E:\TensorRtSharpAssets\cases\yolov8n-cls `
+  -PythonPath C:\path\to\python.exe
 ```
 
-这条命令只适用于 owner 已确认导出契约使用 letterbox 的模型。标准 classification pipeline 可能要求先按短边 resize，再做 center crop；YoloVision 当前通用 CLI 不会隐式补做 center crop。遇到这种模型时，应使用 owner-approved preprocess pipeline 生成同一 `cat-fp32.bin`，记录 resize/crop/normalize 命令与工具版本，再计算 tensor SHA256。未对齐 center crop 的可执行输入不能作为分类正确性 proof。
+脚本只下载、校验和派生 PPM/labels，`performsExport=false`、`performsRuntime=false`、`performsPublish=false`。资产获取本身不是 runtime proof。
 
-分类运行保留显式 output role、Top-K 和输出产物：
+### 2. 导出和生成独立 reference
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- --model E:\TensorRtSharpAssets\cases\yolov8n-cls\models\yolov8n-cls.onnx --labels E:\TensorRtSharpAssets\cases\yolov8n-cls\labels\imagenet.names --input-data E:\TensorRtSharpAssets\cases\yolov8n-cls\tensors\cat-fp32.bin --input-shape 1x3x224x224 --family v8 --task cls --classification-output logits --top-k 5 --output-json E:\TensorRtSharpAssets\cases\yolov8n-cls\reports\yolov8n-cls-output.json --visualization-svg E:\TensorRtSharpAssets\cases\yolov8n-cls\reports\yolov8n-cls-output.svg
+python .\eng\Invoke-YoloVisionClassificationReference.py `
+  --weights E:\TensorRtSharpAssets\cases\yolov8n-cls\source\yolov8n-cls.pt `
+  --imagenet-yaml E:\TensorRtSharpAssets\cases\yolov8n-cls\source\ImageNet.yaml `
+  --image E:\TensorRtSharpAssets\cases\yolov8n-cls\source\bus.jpg `
+  --onnx E:\TensorRtSharpAssets\cases\yolov8n-cls\source\yolov8n-cls.onnx `
+  --output-directory E:\TensorRtSharpAssets\cases\yolov8n-cls\reports\independent-reference `
+  --export-onnx
 ```
 
-当前 `yolovision-output.v1` 的分类记录包含 `postprocess.topK`，每个 prediction 至少包含 `task=cls`、`classId`、`className` 和 `score`。输出 JSON 还应关联 `classCount`、`labelsSha256`、`modelSha256`、`imageSha256`、`preprocessedTensorSha256`、score 语义和 run log hash。程序不会替 owner 推断模型是否已经执行 softmax；`softmaxApplied`、label locale 和 score precision 必须在 candidate metadata 或 owner 记录中明确。
+导出固定为 opset 17、static batch 1、simplify。ONNX checker 确认 `images:[1,3,224,224] -> output0:[1,1000]`，末节点为 Softmax。PyTorch 与 ONNX Runtime 的最大绝对误差为 `3.5762787e-7`。
 
-建议按以下顺序验证：
+### 3. 验证 C# 直接图片预处理
+
+```powershell
+dotnet run --project .\samples\YoloVision -c Release -- `
+  --preprocess-only `
+  --image E:\TensorRtSharpAssets\cases\yolov8n-cls\derived\bus.ppm `
+  --preprocessed-output E:\TensorRtSharpAssets\cases\yolov8n-cls\tensors\bus-csharp.fp32.bin `
+  --family v8 --task cls `
+  --tensor-layout NCHW --color-order RGB `
+  --resize shorter-side-center-crop --resize-shorter-side 224
+```
+
+### 4. TensorRT 完整运行
+
+```powershell
+dotnet run --project .\samples\YoloVision -c Release -- `
+  --model E:\TensorRtSharpAssets\cases\yolov8n-cls\source\yolov8n-cls.onnx `
+  --labels E:\TensorRtSharpAssets\cases\yolov8n-cls\reports\independent-reference\imagenet-yolov8n-cls.names `
+  --input-data E:\TensorRtSharpAssets\cases\yolov8n-cls\reports\independent-reference\input-ultralytics-1x3x224x224.fp32.bin `
+  --family v8 --task cls --classification-output output0 `
+  --classification-score-mode probabilities --confidence 0 --top-k 5 `
+  --reference-outputs output0:E:\TensorRtSharpAssets\cases\yolov8n-cls\reports\independent-reference\output0.reference.json `
+  --reference-abs-tolerance 0.001 --reference-rel-tolerance 0.001 `
+  --output-json E:\TensorRtSharpAssets\cases\yolov8n-cls\reports\yolovision-output.json `
+  --visualization-svg E:\TensorRtSharpAssets\cases\yolov8n-cls\reports\yolovision-output.svg
+```
+
+## 实测结果
+
+TensorRT 对全部 1000 个概率完成 comparison：
+
+```text
+Passed=True Compared=1000 Mismatches=0 FirstMismatch=-1
+MaxAbs=0.0005927086
+YoloVision Passed=True
+```
+
+Top-5 为：
+
+| 排名 | 索引 | 类别 | TensorRT score |
+| --- | ---: | --- | ---: |
+| 1 | 654 | `minibus` | 0.504948 |
+| 2 | 734 | `police_van` | 0.292809 |
+| 3 | 874 | `trolleybus` | 0.049876 |
+| 4 | 575 | `golfcart` | 0.018730 |
+| 5 | 612 | `jinrikisha` | 0.017923 |
+
+结构化输出的 `postprocess.classificationScoreMode` 和 `outputs[0].role` 都应为 `probabilities`；`postprocess.topK=5`，prediction 包含 `classId`、`className` 和 `score`。
+
+## 受控负例
+
+reference 脚本只修改索引 0：`value += 0.125`。使用同一 `0.001` 容差运行后得到：
+
+```text
+exit code = 1
+Mismatches=1
+FirstMismatch=0
+MaxAbs=0.125
+YoloVision Passed=False
+```
+
+这证明容差可以吸收 TensorRT tactic 的微小数值波动，但不会放过受控数据篡改。
+
+## Owner Backfill Checklist（候选模板字段）
+
+通用回填仍从 `samples/assets/yolovision-yolov8-cls-candidate.template.json` 开始，字段包括 `model.sourceUrl`、`model.downloadUrl`、`model.license`、`model.sha256`、`labels.sourceUrl`、`labels.sha256`、`labels.classCount`、`input.imageSha256`、`input.preprocessedTensorSha256`、`outputMetadata.classificationOutput`、`outputMetadata.outputShape`、`outputMetadata.classCount`、`outputMetadata.labelsPath`、`outputMetadata.topK`、`outputMetadata.classScoreField` 和 `outputMetadata.postprocessMetadata.activation`。
+
+哈希用标准命令复核：
+
+```powershell
+Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-cls\source\yolov8n-cls.onnx
+Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-cls\reports\independent-reference\imagenet-yolov8n-cls.names
+```
+
+## 代码与文件入口
+
+- `samples/YoloVision/YoloClassificationScoreMode.cs`
+- `samples/YoloVision/YoloSampleRunner.cs`
+- `samples/YoloVision/YoloImagePreprocessor.cs`
+- `samples/YoloVision/YoloVisionOutputReport.cs`
+- `samples/YoloVision/yolovision-task-output-contract.json`
+- `samples/YoloVision/yolovision-output.schema.json`
+
+## 验证命令
 
 ```powershell
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-YoloVisionOutputReport.ps1 -Strict
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-YoloVisionRealAssetCandidate.ps1
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-SampleRunEvidenceRecord.ps1
+dotnet test .\tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj -c Release --filter FullyQualifiedName~YoloVision
 ```
 
-只有 owner 回填真实模型、labels、输入 hash、class count、Top-K、score/softmax 语义、`YoloVision Passed=True`、stdout/stderr summary、run log hash 并通过 validator 后，才能形成 `real-model-runtime` 候选。TensorRtExec build-only、preflight、Top-K 截图、分类 SVG、local feed 和 direct `.nupkg` 仍不是 `package-consumer-runtime` proof。
+## Proof Boundary（边界说明）
 
-## 代码与文件入口
+模型、ONNX、图片、labels、tensor、reference、SVG 和日志只保存在 E 盘，不进入 Git。源码树真实运行可以证明当前 C# 接口、bridge 和本机 TensorRT 的主链路，但仍不是 `package-consumer-runtime` proof。
 
-- `samples/YoloVision/YoloSampleRunner.cs`：分类 logits/top-k 解码。
-- `samples/YoloVision/YoloVisionOutputReport.cs`：`task=cls`、`classId`、`className`、`score` 和 `postprocess.topK` 输出。
-- `samples/YoloVision/YoloVisionVisualizationWriter.cs`：Top-K 分类 SVG。
-- `samples/YoloVision/yolovision-task-output-contract.json`：classification output role 与必填 metadata。
-- `samples/YoloVision/Program.cs`：`--task cls`、`--classification-output`、`--top-k`、输出参数入口。
-- `eng/Test-YoloVisionRealAssetCandidate.ps1`：分类 candidate、labels 和证据字段验证。
-
-## 图示建议
-
-建议准备：
-
-1. Netron 中分类输入/output tensor 和 class vector shape。
-2. labels 前几行、class count 与模型输出维度对照表。
-3. 原图、预处理输入和 Top-5 SVG/JSON 对照。
-4. logits 与 probability/softmax 语义说明。
-5. 输出 JSON、run log 和 SHA256 关联示意图。
-
-截图和 Top-K 表格只用于人工理解，不能替代真实输入、结构化输出、run log、hash 和 validator。
-
-## 常见问题
-
-如果分类结果完全不对，优先检查输入尺寸、center crop、resize、RGB/BGR、均值方差、labels 顺序和 softmax。分类模型的错误经常来自预处理差异，而不是 TensorRT engine 本身。
-
-如果 Top-K 类别名为空，检查 labels 文件行数和 class count 是否一致。如果 score 看起来都很接近，检查是否把 logits 当 probability 展示。
-
-如果输出只有一个类别，检查 `--top-k`、输出 tensor role 和 class vector shape；如果 SVG 与 JSON 的类别顺序不一致，优先以 JSON 为准并检查 labels 文件编码和行尾。
-
-## 边界说明（Proof Boundary）
-
-本文、Top-K 表格、TensorRtExec report、YoloVision matrix、OnnxToEngine report、readonly diagnostics、template、dry-run、build-only、sidecar-only report、screenshot、local feed、ProjectReference、direct `.nupkg` 都不是 runtime proof。
-
-真实 classification runtime proof 必须包含 owner 提供的模型、labels、输入图片、preprocessed tensor、run log、SHA256、host metadata、许可证说明和 owner review。`package-consumer-runtime` proof 仍需要外部 clean consumer 从公开包来源运行。
-
-## Owner Backfill Checklist
-
-- 保存模型、ONNX、labels、图片、preprocessed tensor 和 run log SHA256。
-- 记录 labels 行数、class count、Top-K 和 softmax 策略。
-- 保存 TensorRtExec build-only report。
-- 保存 YoloVision 运行命令和 owner 提供的成功标记日志行。
-- 提供 Top-K 输出 JSON，至少包含 class id、class name 和 score。
-- 由 owner review 分类结果是否符合输入图片语义。
+build-only、dry-run、template、local feed、ProjectReference、direct `.nupkg`、TensorRtExec report、YoloVision matrix、OnnxToEngine report、readonly diagnostics 和截图都不能替代真实运行，也不能授权 tag、Release、NuGet 或 GitHub Packages 发布。
 
 ## 下一步
 
-完成 YOLOv8n-cls 后，应增加不同 class count、logits/probability、224/320 输入尺寸和 labels locale 的 golden output，并覆盖 YOLOv11 classification。每个模型都要记录真实 output shape 和 score 语义，不能只复制 `topK=5`。
-
-随后在 clean package consumer 中重复同一分类输入，补充 package-consumer-runtime；source-tree `real-model-runtime`、Top-K 截图和 TensorRtExec report 都不能关闭发布 proof blocker。
+后续用同一 score-mode 合同覆盖 YOLOv11-cls、自定义 logits 模型和不同输入尺寸；每个模型必须重新确认输出是否已经包含 Softmax，不能复制本案例的 `probabilities` 设置后直接套用。
