@@ -85,7 +85,18 @@ public sealed class DemoModelInventoryTests
         foreach (JsonElement model in models.EnumerateArray())
         {
             string id = Assert.IsType<string>(model.GetProperty("id").GetString());
+            JsonElement acquisition = model.GetProperty("acquisition");
+            JsonElement conversion = model.GetProperty("conversion");
+            JsonElement onnx = model.GetProperty("onnx");
             Assert.Contains($"`{id}`", catalog, StringComparison.Ordinal);
+            Assert.Contains(Assert.IsType<string>(acquisition.GetProperty("sourceUrl").GetString()), catalog, StringComparison.Ordinal);
+            Assert.Contains(Assert.IsType<string>(acquisition.GetProperty("pinnedRevision").GetString()), catalog, StringComparison.Ordinal);
+            Assert.Contains(Assert.IsType<string>(acquisition.GetProperty("script").GetString()), catalog, StringComparison.Ordinal);
+            Assert.Contains(Assert.IsType<string>(conversion.GetProperty("kind").GetString()), catalog, StringComparison.Ordinal);
+            Assert.Contains(Assert.IsType<string>(conversion.GetProperty("command").GetString()), catalog, StringComparison.Ordinal);
+            Assert.Contains(Assert.IsType<string>(conversion.GetProperty("toolchain").GetString()), catalog, StringComparison.Ordinal);
+            Assert.Contains(Assert.IsType<string>(onnx.GetProperty("workspaceRelativePath").GetString()), catalog, StringComparison.Ordinal);
+            Assert.Contains(Assert.IsType<string>(onnx.GetProperty("sha256").GetString()), catalog, StringComparison.Ordinal);
             foreach (JsonElement article in model.GetProperty("articles").EnumerateArray())
             {
                 string relativePath = Assert.IsType<string>(article.GetString());
@@ -99,7 +110,8 @@ public sealed class DemoModelInventoryTests
                 RepositoryPaths.Root,
                 runtimeEvidence.Replace('/', Path.DirectorySeparatorChar));
             Assert.True(File.Exists(runtimeEvidencePath), runtimeEvidence);
-            Assert.Contains("real-model-runtime", File.ReadAllText(runtimeEvidencePath), StringComparison.Ordinal);
+            using JsonDocument runtimeEvidenceDocument = JsonDocument.Parse(File.ReadAllText(runtimeEvidencePath));
+            AssertRuntimeEvidenceIsPositiveAndNonPublishing(runtimeEvidence, runtimeEvidenceDocument.RootElement);
             Assert.True(runtimeEvidencePaths.Add(runtimeEvidence), runtimeEvidence);
         }
 
@@ -114,6 +126,88 @@ public sealed class DemoModelInventoryTests
         Assert.Contains("modelRootOutsideGitRepository = $true", syncScript, StringComparison.Ordinal);
         Assert.Contains("uploadsAssets = $false", syncScript, StringComparison.Ordinal);
         Assert.Contains("performsPublish = $false", syncScript, StringComparison.Ordinal);
+    }
+
+    private static void AssertRuntimeEvidenceIsPositiveAndNonPublishing(string path, JsonElement evidence)
+    {
+        Assert.Equal(1, evidence.GetProperty("schemaVersion").GetInt32());
+        Assert.DoesNotContain(".template.", path, StringComparison.OrdinalIgnoreCase);
+
+        string recordKind = Assert.IsType<string>(evidence.GetProperty("recordKind").GetString());
+        string proofClassification = Assert.IsType<string>(evidence.GetProperty("proofClassification").GetString());
+        Assert.Contains(proofClassification, new[] { "real-model-runtime", "source-tree-real-model-runtime" });
+
+        if (recordKind == "sample-run-evidence-record")
+        {
+            Assert.Equal("real-model-runtime", proofClassification);
+            Assert.False(evidence.GetProperty("templateOnly").GetBoolean());
+            Assert.True(evidence.GetProperty("isSmokePassed").GetBoolean());
+            Assert.True(evidence.GetProperty("canPromoteRealModelRuntime").GetBoolean());
+            Assert.Equal("real-model-runtime", evidence.GetProperty("validatorState").GetString());
+            if (evidence.TryGetProperty("canPromotePackageConsumerRuntime", out JsonElement packagePromotion))
+            {
+                Assert.False(packagePromotion.GetBoolean());
+            }
+
+            AssertNonPublishingBoundary(evidence.GetProperty("proofBoundary"));
+            return;
+        }
+
+        if (recordKind == "onnxtoengine-mnist-real-model-runtime-evidence")
+        {
+            JsonElement runtime = evidence.GetProperty("runtimeValidation");
+            Assert.Equal(0, runtime.GetProperty("exitCode").GetInt32());
+            Assert.True(runtime.GetProperty("inferenceRan").GetBoolean());
+            Assert.True(runtime.GetProperty("outputMatch").GetBoolean());
+            Assert.True(runtime.GetProperty("isRealModelRuntimeProof").GetBoolean());
+            Assert.True(runtime.GetProperty("passed").GetBoolean());
+
+            JsonElement negative = evidence.GetProperty("controlledNegativeValidation");
+            Assert.NotEqual(0, negative.GetProperty("exitCode").GetInt32());
+            Assert.False(negative.GetProperty("outputMatch").GetBoolean());
+            Assert.False(negative.GetProperty("isRealModelRuntimeProof").GetBoolean());
+            Assert.True(negative.GetProperty("failClosed").GetBoolean());
+            AssertNonPublishingBoundary(evidence.GetProperty("proofBoundary"));
+            return;
+        }
+
+        Assert.Contains(recordKind, new[]
+        {
+            "yolov10-official-source-tree-runtime-proof-closure",
+            "yolox-official-source-tree-runtime-proof-closure"
+        });
+        Assert.Equal("source-tree-real-model-runtime", proofClassification);
+        Assert.Equal("passed", evidence.GetProperty("engineBuild").GetProperty("status").GetString());
+        JsonElement closureRuntime = evidence.GetProperty("runtime");
+        Assert.Equal("passed", closureRuntime.GetProperty("status").GetString());
+        Assert.Equal("YoloVision Passed=True", closureRuntime.GetProperty("passedMarker").GetString());
+        Assert.True(closureRuntime.GetProperty("predictionCount").GetInt32() > 0);
+        AssertNonPublishingBoundary(evidence.GetProperty("boundary"));
+    }
+
+    private static void AssertNonPublishingBoundary(JsonElement boundary)
+    {
+        Assert.Equal(JsonValueKind.Object, boundary.ValueKind);
+        foreach (string propertyName in new[]
+        {
+            "packageConsumerRuntimeProof",
+            "isPackageConsumerRuntimeProof",
+            "publicPackageProof",
+            "postPublishProof",
+            "isPostPublishProof",
+            "ownerReleaseAcceptance",
+            "canPublishPublicly",
+            "releaseProof",
+            "canCloseReleaseIssue",
+            "performsPublish",
+            "uploadsAssets"
+        })
+        {
+            if (boundary.TryGetProperty(propertyName, out JsonElement value))
+            {
+                Assert.False(value.GetBoolean());
+            }
+        }
     }
 
     private static JsonDocument LoadInventory()

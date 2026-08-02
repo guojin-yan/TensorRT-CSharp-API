@@ -38,6 +38,122 @@ models/
     SemanticSegmentation/lraspp-mobilenet-v3-large-torchvision-v0.25.0/
 ```
 
+## 逐模型可复现合同
+
+以下字段逐项对应 `demo-model-inventory.json`。获取脚本负责下载或定位固定资产；转换命令说明如何得到 ONNX。
+`upstream-onnx-no-local-conversion` 表示上游已经发布 ONNX，此时“转换方式”就是不重复转换，而是获取固定发布资产并校验
+SHA256。命令里的 `<downloads>`、`<models>` 和 `<artifacts>` 是本机目录占位符。
+
+### `classification-resnet18-imagenet1k-v1`
+
+- 获取 URL：<https://download.pytorch.org/models/resnet18-f37072fd.pth>
+- 固定 revision：`torchvision-v0.25.0@8ac84ee75afb1c327902156b5336f56ad63b7e2f`
+- 获取脚本：`eng/Acquire-TorchVisionResNet18OfficialAssets.ps1`
+- 转换类型：`local-weight-export`
+- 转换命令：`python eng/Export-ClassificationResNet18Onnx.py --weights <downloads>/resnet18-f37072fd.pth --onnx <models>/resnet18-imagenet1k-v1.onnx --labels <models>/imagenet1k.names --report <models>/resnet18-onnx-export.json`
+- 工具链：`PyTorch 2.10.0+cpu; torchvision 0.25.0+cpu; opset 17`
+- ONNX 暂存：`models/Classification/resnet18-torchvision-v0.25.0/resnet18-imagenet1k-v1.onnx`
+- SHA256：`ead3558569edd88aa73a4eb46acbe6c38dee113933234547f04a0f6e48169903`
+
+### `onnxtoengine-nvidia-mnist-opset8`
+
+- 获取 URL：<https://github.com/onnx/models/tree/main/validated/vision/classification/mnist>
+- 固定 revision：`TensorRT-10.11.0.33-sample-data`
+- 获取/验证脚本：`eng/Test-TensorRtExecMnistOnnxRuntimeReference.ps1`
+- 转换类型：`upstream-onnx-no-local-conversion`
+- 转换说明：`Copy mnist.onnx from the user-installed TensorRT data/mnist directory; no local framework-to-ONNX conversion is performed.`
+- 工具链：`upstream ONNX opset 8`
+- ONNX 暂存：`models/OnnxToEngine/MNIST/nvidia-tensorrt-10.11/mnist.onnx`
+- SHA256：`2f06e72de813a8635c9bc0397ac447a601bdbfa7df4bebc278723b958831c9bf`
+
+### `yolovision-yolov8n-detection-v8.3.0`
+
+- 获取 URL：<https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8n.pt>
+- 固定 revision：`ultralytics-v8.3.0@6e43d1e1e5db72afbf686dee6745669bcb124b0a`
+- 获取脚本：`eng/Acquire-YoloV8DetectionOfficialAssets.ps1`
+- 转换类型：`local-weight-export`
+- 转换命令：`yolo export model=yolov8n.pt format=onnx imgsz=640 opset=17 simplify=True dynamic=False batch=1 device=cpu`
+- 工具链：`Ultralytics 8.4.21; opset 17`
+- ONNX 暂存：`models/YoloVision/Detection/yolov8n-ultralytics-v8.3.0/yolov8n.onnx`
+- SHA256：`db28a49ffbb0425f39ae56252e7e0b43d06b357416c7da58872e285560b4221e`
+
+### `yolovision-yolov10n-detection-v1.1`
+
+- 获取 URL：<https://github.com/THU-MIG/yolov10/releases/download/v1.1/yolov10n.onnx>
+- 固定 revision：`v1.1@799ff3be47d21173bcf29b351820d4b8e955e0fe`
+- 获取脚本：`eng/Acquire-YoloV10OfficialAssets.ps1`
+- 转换类型：`upstream-onnx-no-local-conversion`
+- 转换说明：`Use the hash-pinned official v1.1 ONNX release asset; no local conversion is required.`
+- 工具链：`upstream release ONNX`
+- ONNX 暂存：`models/YoloVision/Detection/yolov10n-thu-mig-v1.1/yolov10n.onnx`
+- SHA256：`7025ea1913f9a259cf8a8465ed608e10610d1bb376db2e0348b13e3bd286e0d3`
+
+### `yolovision-yolox-s-detection-0.1.1rc0`
+
+- 获取 URL：<https://github.com/Megvii-BaseDetection/YOLOX/releases/download/0.1.1rc0/yolox_s.onnx>
+- 固定 revision：`0.1.1rc0@e1052df71842031413f6030723c3607b839c80ce`
+- 获取脚本：`eng/Acquire-YoloXOfficialAssets.ps1`
+- 转换类型：`upstream-onnx-no-local-conversion`
+- 转换说明：`Use the official ONNX release asset; upstream reproduction command: python3 tools/export_onnx.py --output-name yolox_s.onnx -n yolox-s -c yolox_s.pth`
+- 工具链：`upstream YOLOX exporter; opset 11 release graph`
+- ONNX 暂存：`models/YoloVision/Detection/yolox-s-megvii-v0.1.1rc0/yolox_s.onnx`
+- SHA256：`c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063`
+
+### `yolovision-yolov8n-classification-v8.3.0`
+
+- 获取 URL：<https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8n-cls.pt>
+- 固定 revision：`ultralytics-v8.3.0@6e43d1e1e5db72afbf686dee6745669bcb124b0a`
+- 获取脚本：`eng/Acquire-YoloV8ClassificationOfficialAssets.ps1`
+- 转换类型：`local-weight-export`
+- 转换命令：`yolo export model=yolov8n-cls.pt format=onnx imgsz=224 opset=17 simplify=True dynamic=False batch=1 device=cpu`
+- 工具链：`Ultralytics 8.4.21; opset 17`
+- ONNX 暂存：`models/YoloVision/Classification/yolov8n-cls-ultralytics-v8.3.0/yolov8n-cls.onnx`
+- SHA256：`630c022a99885d59f633ab5a614738f8a49be7f361e340fd3ff89b8c19b0768f`
+
+### `yolovision-yolov8n-instance-segmentation-v8.3.0`
+
+- 获取 URL：<https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8n-seg.pt>
+- 固定 revision：`ultralytics-v8.3.0@6e43d1e1e5db72afbf686dee6745669bcb124b0a`
+- 获取脚本：`eng/Acquire-YoloV8SegOfficialAssets.ps1`
+- 转换类型：`local-weight-export`
+- 转换命令：`yolo export model=yolov8n-seg.pt format=onnx imgsz=640 opset=17 simplify=True dynamic=False batch=1 device=cpu`
+- 工具链：`Ultralytics 8.4.21; opset 17`
+- ONNX 暂存：`models/YoloVision/InstanceSegmentation/yolov8n-seg-ultralytics-v8.3.0/yolov8n-seg.onnx`
+- SHA256：`08b5c61368d4ddec5e647522fc55a93c42a9e0c581770aae48b87bba65a9b21d`
+
+### `yolovision-yolov8n-pose-v8.3.0`
+
+- 获取 URL：<https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8n-pose.pt>
+- 固定 revision：`ultralytics-v8.3.0@6e43d1e1e5db72afbf686dee6745669bcb124b0a`
+- 获取脚本：`eng/Acquire-YoloV8PoseOfficialAssets.ps1`
+- 转换类型：`local-weight-export`
+- 转换命令：`yolo export model=yolov8n-pose.pt format=onnx imgsz=640 opset=17 simplify=True dynamic=False batch=1 device=cpu`
+- 工具链：`Ultralytics 8.4.21; opset 17`
+- ONNX 暂存：`models/YoloVision/Pose/yolov8n-pose-ultralytics-v8.3.0/yolov8n-pose.onnx`
+- SHA256：`ed1e8d2d2aeb8a2c66e642a16295a72a2990393e3a3843325537da7e11c8a899`
+
+### `yolovision-yolov8n-obb-v8.3.0`
+
+- 获取 URL：<https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8n-obb.pt>
+- 固定 revision：`ultralytics-v8.3.0@6e43d1e1e5db72afbf686dee6745669bcb124b0a`
+- 获取脚本：`eng/Acquire-YoloV8ObbOfficialAssets.ps1`
+- 转换类型：`local-weight-export`
+- 转换命令：`yolo export model=yolov8n-obb.pt format=onnx imgsz=1024 opset=17 simplify=True dynamic=False batch=1 device=cpu`
+- 工具链：`Ultralytics 8.4.21; opset 17`
+- ONNX 暂存：`models/YoloVision/OrientedBoundingBox/yolov8n-obb-ultralytics-v8.3.0/yolov8n-obb.onnx`
+- SHA256：`5f2701ef5326fb5a691999438cfc55a69656323c21ffddebaff8968ab6de2e92`
+
+### `yolovision-lraspp-mobilenet-v3-large-v0.25.0`
+
+- 获取 URL：<https://download.pytorch.org/models/lraspp_mobilenet_v3_large-d234d4ea.pth>
+- 固定 revision：`torchvision-v0.25.0@8ac84ee75afb1c327902156b5336f56ad63b7e2f`
+- 获取脚本：`eng/Acquire-TorchVisionLrasppOfficialAssets.ps1`
+- 转换类型：`local-weight-export`
+- 转换命令：`python eng/Invoke-YoloVisionSemanticReference.py --weights <models>/lraspp_mobilenet_v3_large-d234d4ea.pth --image <downloads>/dog.jpg --onnx <models>/lraspp-mobilenet-v3-large-320.onnx --output-directory <artifacts> --export-onnx`
+- 工具链：`PyTorch 2.10.0+cpu; torchvision 0.25.0+cpu; opset 17`
+- ONNX 暂存：`models/YoloVision/SemanticSegmentation/lraspp-mobilenet-v3-large-torchvision-v0.25.0/lraspp-mobilenet-v3-large-320.onnx`
+- SHA256：`3cb94e561bdefe606ed7d1a2c4d0296409bec066f3a39a9fe9dabd72b23728f8`
+
 ## Classification：TorchVision ResNet18
 
 清单 ID：`classification-resnet18-imagenet1k-v1`。
