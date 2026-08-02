@@ -171,6 +171,52 @@ public static class YoloSampleRunner
         return YoloVisionResult.FromPoses(poses, "Decoded pose keypoints from detection rows and keypoint tensor.");
     }
 
+    public static YoloVisionResult DecodeEmbeddedPoseOutput(
+        float[] values,
+        int[] outputShape,
+        YoloModelProfile profile,
+        YoloMultiOutputMetadata metadata)
+    {
+        if (metadata == null)
+        {
+            throw new ArgumentNullException(nameof(metadata));
+        }
+
+        if (metadata.PoseKeypointCount <= 0)
+        {
+            throw new ArgumentException("Pose metadata must declare a positive keypoint count.", nameof(metadata));
+        }
+
+        int auxiliaryWidth = checked(metadata.PoseKeypointCount * metadata.PoseKeypointStride);
+        YoloModelProfile detectionProfile = CreateDetectionProfileForAuxiliary(profile, outputShape, auxiliaryWidth);
+        int channelStart = ValidateEmbeddedAuxiliaryContract(outputShape, detectionProfile.Postprocess, metadata, auxiliaryWidth);
+        IReadOnlyList<YoloDetection> detections = DecodeDetections(values, outputShape, detectionProfile);
+        float[][] keypointRows = ReadPerBoxAuxiliaryRows(
+            values,
+            outputShape,
+            detectionProfile.Postprocess,
+            channelStart,
+            auxiliaryWidth,
+            metadata.AuxiliaryLayout);
+
+        List<YoloPosePrediction> poses = new List<YoloPosePrediction>();
+        foreach (YoloDetection detection in detections)
+        {
+            if (detection.SourceIndex < 0 || detection.SourceIndex >= keypointRows.Length)
+            {
+                continue;
+            }
+
+            YoloPoseKeypoint[] keypoints = YoloPoseDecoder.DecodeFlatKeypoints(
+                keypointRows[detection.SourceIndex],
+                metadata.PoseKeypointCount,
+                metadata.PoseKeypointStride);
+            poses.Add(new YoloPosePrediction(detection, keypoints));
+        }
+
+        return YoloVisionResult.FromPoses(poses, "Decoded pose keypoints from channels embedded in the detection tensor.");
+    }
+
     public static YoloVisionResult DecodeObbOutputs(
         float[] boxValues,
         int[] boxShape,
@@ -228,8 +274,10 @@ public static class YoloSampleRunner
         }
 
         YoloRuntimeOutputTensor detection = outputs.GetRequired(YoloOutputTensorRole.Detection);
-        YoloRuntimeOutputTensor keypoints = outputs.GetRequired(YoloOutputTensorRole.PoseKeypoints);
-        return DecodePoseOutputs(detection.Values, detection.Shape, keypoints.Values, keypoints.Shape, profile, metadata);
+        YoloRuntimeOutputTensor? keypoints = outputs.TryGet(YoloOutputTensorRole.PoseKeypoints);
+        return keypoints == null
+            ? DecodeEmbeddedPoseOutput(detection.Values, detection.Shape, profile, metadata)
+            : DecodePoseOutputs(detection.Values, detection.Shape, keypoints.Values, keypoints.Shape, profile, metadata);
     }
 
     private static YoloVisionResult DecodeObbRuntimeOutputs(YoloRuntimeOutputSet outputs, YoloModelProfile profile, YoloMultiOutputMetadata? metadata)
@@ -453,6 +501,44 @@ public static class YoloSampleRunner
 
         _ = values;
         return BoxChannelCount + (hasObjectness ? 1 : 0) + classCount;
+    }
+
+    private static int ValidateEmbeddedAuxiliaryContract(
+        int[] outputShape,
+        YoloPostprocessOptions postprocess,
+        YoloMultiOutputMetadata metadata,
+        int auxiliaryWidth)
+    {
+        if (postprocess.ClassCount <= 0)
+        {
+            throw new NotSupportedException("Embedded pose output requires a known class count so detection and keypoint channels cannot be confused.");
+        }
+
+        YoloOutputLayout detectionLayout = YoloOutputLayoutInference.InferRank3(outputShape, postprocess.Layout);
+        YoloOutputLayout requestedAuxiliaryLayout = metadata.AuxiliaryLayout == YoloOutputLayout.Auto
+            ? postprocess.Layout
+            : metadata.AuxiliaryLayout;
+        YoloOutputLayout auxiliaryLayout = YoloOutputLayoutInference.InferRank3(outputShape, requestedAuxiliaryLayout);
+        if (auxiliaryLayout != detectionLayout)
+        {
+            throw new NotSupportedException("Embedded pose keypoints must use the same tensor layout as the detection channels.");
+        }
+
+        int channelCount = detectionLayout == YoloOutputLayout.ChannelsFirst ? outputShape[1] : outputShape[2];
+        bool hasObjectness = postprocess.HasObjectness ?? InferHasObjectnessForAuxiliary(outputShape, postprocess, auxiliaryWidth);
+        int expectedChannelStart = BoxChannelCount + (hasObjectness ? 1 : 0) + postprocess.ClassCount;
+        int channelStart = metadata.AuxiliaryChannelStart ?? expectedChannelStart;
+        if (channelStart != expectedChannelStart)
+        {
+            throw new NotSupportedException($"Embedded pose auxiliary channel start {channelStart} does not match the detection prefix width {expectedChannelStart}.");
+        }
+
+        if (channelStart + auxiliaryWidth != channelCount)
+        {
+            throw new NotSupportedException($"Embedded pose output has {channelCount} channels, but detection prefix {channelStart} and keypoint width {auxiliaryWidth} require exactly {channelStart + auxiliaryWidth}.");
+        }
+
+        return channelStart;
     }
 
     private static float[][] ReadAuxiliaryRows(float[] values, int[] outputShape, int auxiliaryWidth, YoloOutputLayout requestedLayout, int channelStart = 0)

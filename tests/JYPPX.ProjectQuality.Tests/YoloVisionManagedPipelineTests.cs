@@ -1301,6 +1301,140 @@ public sealed class YoloVisionManagedPipelineTests
     }
 
     [Fact]
+    public void EmbeddedPoseDecodesOfficialYoloV8ChannelsFirstContract()
+    {
+        YoloModelProfile profile = CreateEmbeddedPoseProfile("channels-first", applyNms: false);
+        float[] values =
+        {
+            10, 20,
+            11, 21,
+            4, 6,
+            5, 7,
+            0.8f, 0.9f,
+            1, 5,
+            2, 6,
+            0.7f, 0.9f,
+            3, 7,
+            4, 8,
+            0.6f, 0.8f
+        };
+
+        YoloVisionResult result = YoloSampleRunner.DecodeEmbeddedPoseOutput(
+            values,
+            new[] { 1, 11, 2 },
+            profile,
+            YoloMultiOutputMetadata.ForPose(keypointCount: 2, auxiliaryChannelStart: 5));
+
+        Assert.Equal(2, result.Poses.Count);
+        Assert.Equal(1, result.Poses[0].Detection.SourceIndex);
+        Assert.Equal(5, result.Poses[0].Keypoints[0].X);
+        Assert.Equal(8, result.Poses[0].Keypoints[1].Y);
+    }
+
+    [Fact]
+    public void EmbeddedPoseDecodesBoxesFirstAndInfersAuxiliaryStart()
+    {
+        YoloModelProfile profile = CreateEmbeddedPoseProfile("boxes-first", applyNms: false);
+        float[] values =
+        {
+            10, 11, 4, 5, 0.8f, 1, 2, 0.7f, 3, 4, 0.6f,
+            20, 21, 6, 7, 0.9f, 5, 6, 0.9f, 7, 8, 0.8f
+        };
+
+        YoloVisionResult result = YoloSampleRunner.DecodeEmbeddedPoseOutput(
+            values,
+            new[] { 1, 2, 11 },
+            profile,
+            YoloMultiOutputMetadata.ForPose(keypointCount: 2, auxiliaryLayout: YoloOutputLayout.BoxesFirst));
+
+        Assert.Equal(2, result.Poses.Count);
+        Assert.Equal(20, result.Poses[0].Detection.CenterX);
+        Assert.Equal(5, result.Poses[0].Keypoints[0].X);
+        Assert.Equal(8, result.Poses[0].Keypoints[1].Y);
+    }
+
+    [Fact]
+    public void EmbeddedPoseUsesSourceIndexAfterNms()
+    {
+        YoloModelProfile profile = CreateEmbeddedPoseProfile("boxes-first", applyNms: true);
+        float[] values =
+        {
+            10, 10, 4, 4, 0.8f, 1, 2, 0.7f, 3, 4, 0.6f,
+            10.1f, 10.1f, 4, 4, 0.9f, 11, 12, 0.9f, 13, 14, 0.8f
+        };
+
+        YoloVisionResult result = YoloSampleRunner.DecodeEmbeddedPoseOutput(
+            values,
+            new[] { 1, 2, 11 },
+            profile,
+            YoloMultiOutputMetadata.ForPose(keypointCount: 2));
+
+        YoloPosePrediction pose = Assert.Single(result.Poses);
+        Assert.Equal(1, pose.Detection.SourceIndex);
+        Assert.Equal(11, pose.Keypoints[0].X);
+        Assert.Equal(14, pose.Keypoints[1].Y);
+    }
+
+    [Fact]
+    public void EmbeddedPoseRuntimeFallbackKeepsIndependentTensorPathCompatible()
+    {
+        YoloModelProfile profile = CreateEmbeddedPoseProfile("boxes-first", applyNms: false);
+        YoloMultiOutputMetadata metadata = YoloMultiOutputMetadata.ForPose(keypointCount: 2, auxiliaryLayout: YoloOutputLayout.BoxesFirst);
+        YoloRuntimeOutputSet embeddedOutputs = new YoloRuntimeOutputSet(new[]
+        {
+            new YoloRuntimeOutputTensor("output0", YoloOutputTensorRole.Detection, new[] { 10, 10, 4, 4, 0.8f, 1, 2, 0.7f, 3, 4, 0.6f }, new[] { 1, 1, 11 })
+        });
+        YoloRuntimeOutputSet independentOutputs = new YoloRuntimeOutputSet(new[]
+        {
+            new YoloRuntimeOutputTensor("boxes", YoloOutputTensorRole.Detection, new[] { 10, 10, 4, 4, 0.8f }, new[] { 1, 1, 5 }),
+            new YoloRuntimeOutputTensor("keypoints", YoloOutputTensorRole.PoseKeypoints, new[] { 1, 2, 0.7f, 3, 4, 0.6f }, new[] { 1, 1, 6 })
+        });
+
+        YoloVisionResult embedded = YoloSampleRunner.DecodeRuntimeOutputs(embeddedOutputs, profile, metadata);
+        YoloVisionResult independent = YoloSampleRunner.DecodeRuntimeOutputs(independentOutputs, profile, metadata);
+
+        Assert.Equal(embedded.Poses[0].Detection.CenterX, independent.Poses[0].Detection.CenterX);
+        Assert.Equal(embedded.Poses[0].Keypoints[1].Y, independent.Poses[0].Keypoints[1].Y);
+        Assert.Contains("embedded", embedded.Diagnostic, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("keypoint tensor", independent.Diagnostic, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Theory]
+    [InlineData(6, 11)]
+    [InlineData(5, 12)]
+    public void EmbeddedPoseRejectsChannelsThatCannotBeExplainedExactly(int auxiliaryStart, int channelCount)
+    {
+        YoloModelProfile profile = CreateEmbeddedPoseProfile("boxes-first", applyNms: false);
+
+        Assert.Throws<NotSupportedException>(() => YoloSampleRunner.DecodeEmbeddedPoseOutput(
+            new float[channelCount],
+            new[] { 1, 1, channelCount },
+            profile,
+            YoloMultiOutputMetadata.ForPose(keypointCount: 2, auxiliaryChannelStart: auxiliaryStart)));
+    }
+
+    private static YoloModelProfile CreateEmbeddedPoseProfile(string layout, bool applyNms)
+    {
+        List<string> args = new List<string>
+        {
+            "--task", "pose",
+            "--family", "yolov8",
+            "--layout", layout,
+            "--class-count", "1",
+            "--has-objectness", "auto",
+            "--confidence", "0.25",
+            "--iou-threshold", "0.45",
+            "--top-k", "4"
+        };
+        if (!applyNms)
+        {
+            args.Add("--no-nms");
+        }
+
+        return YoloModelProfile.FromArgs(args.ToArray(), labelCount: 0);
+    }
+
+    [Fact]
     public void RuntimeOutputSetRoutesPoseAndObbRolesToManagedDecoders()
     {
         YoloModelProfile poseProfile = YoloModelProfile.FromArgs(new[]

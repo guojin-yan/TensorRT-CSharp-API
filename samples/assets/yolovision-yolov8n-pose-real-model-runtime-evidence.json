@@ -1,0 +1,143 @@
+{
+  "schemaVersion": 1,
+  "recordKind": "sample-run-evidence-record",
+  "recordName": "yolovision-yolov8n-pose-ultralytics-v8.3.0-trt10.11",
+  "generatedAtUtc": "2026-08-02T08:00:00Z",
+  "templateOnly": false,
+  "sampleName": "YoloVision",
+  "manifestPath": "samples/assets/yolovision-yolov8n-pose-official-assets.json",
+  "proofClassification": "real-model-runtime",
+  "modelPath": "E:\\GitSpace\\TensorRT-CSharp-API-4.0\\downloads\\yolov8n-pose-ultralytics-v8.3.0\\source\\yolov8n-pose.onnx",
+  "modelSha256": "ed1e8d2d2aeb8a2c66e642a16295a72a2990393e3a3843325537da7e11c8a899",
+  "modelLicense": "AGPL-3.0-only; Ultralytics v8.3.0 source commit 6e43d1e1e5db72afbf686dee6745669bcb124b0a reviewed for this local runtime case; public redistribution remains unapproved",
+  "labelsPath": "E:\\GitSpace\\TensorRT-CSharp-API-4.0\\downloads\\yolox-apache\\derived\\coco.names",
+  "labelsSha256": "4d4aaea7bee6be2f675d9b53a9195ca36dfe6429f7479f29155da522a6c85930",
+  "labelsLicense": "Apache-2.0; hash-pinned YOLOX-derived COCO label list; only class 0 person is used by this model",
+  "inputAssetPath": "E:\\GitSpace\\TensorRT-CSharp-API-4.0\\downloads\\yolov8n-pose-ultralytics-v8.3.0\\derived\\bus.ppm",
+  "inputAssetSha256": "6cdb4b6728a36516826f9adb9387774a6b5db0a49837d515c9045324e04e8688",
+  "inputAssetLicense": "Ultralytics source-commit asset locally derived from bus.jpg; public redistribution remains unapproved",
+  "preprocessedInputTensorPath": "E:\\GitSpace\\TensorRT-CSharp-API-4.0\\downloads\\yolov8n-pose-ultralytics-v8.3.0\\runtime\\bus-1x3x640x640-rgb-letterbox.fp32.bin",
+  "preprocessedInputTensorSha256": "46a0278967f1230ef8db59b0b8311a3aba3dce45233f1ba68821418ae02a574d",
+  "preprocessedInputTensorElementCount": 1228800,
+  "engineMaterialization": "in-memory-from-onnx",
+  "sampleRunCommand": "dotnet .\\samples\\YoloVision\\bin\\Release\\net8.0\\YoloVision.dll --model E:\\GitSpace\\TensorRT-CSharp-API-4.0\\downloads\\yolov8n-pose-ultralytics-v8.3.0\\source\\yolov8n-pose.onnx --labels E:\\GitSpace\\TensorRT-CSharp-API-4.0\\downloads\\yolox-apache\\derived\\coco.names --image E:\\GitSpace\\TensorRT-CSharp-API-4.0\\downloads\\yolov8n-pose-ultralytics-v8.3.0\\derived\\bus.ppm --preprocessed-output E:\\GitSpace\\TensorRT-CSharp-API-4.0\\downloads\\yolov8n-pose-ultralytics-v8.3.0\\runtime\\bus-1x3x640x640-rgb-letterbox.fp32.bin --input-shape 1x3x640x640 --tensor-rt-line 10 --family v8 --task pose --class-count 1 --layout channels-first --has-objectness auto --confidence 0.25 --iou-threshold 0.45 --top-k 10 --keypoint-count 17 --keypoint-stride 3 --aux-channel-start 5 --aux-layout channels-first --reference-outputs output0:E:\\GitSpace\\TensorRT-CSharp-API-4.0\\downloads\\yolov8n-pose-ultralytics-v8.3.0\\reference\\output0.reference.json --reference-abs-tolerance 1.25 --reference-rel-tolerance 0.05 --output-json E:\\GitSpace\\TensorRT-CSharp-API-4.0\\downloads\\yolov8n-pose-ultralytics-v8.3.0\\runtime\\yolovision-yolov8n-pose-output.json --visualization E:\\GitSpace\\TensorRT-CSharp-API-4.0\\downloads\\yolov8n-pose-ultralytics-v8.3.0\\runtime\\yolovision-yolov8n-pose-output.svg",
+  "sampleRunLogPath": "E:\\GitSpace\\TensorRT-CSharp-API-4.0\\downloads\\yolov8n-pose-ultralytics-v8.3.0\\runtime\\yolovision-yolov8n-pose-runtime.log",
+  "sampleRunLogSha256": "dc23a821b360b1ece6debbb6428501388d01ac2933af01f69e5039c2252f8241",
+  "outputJsonSha256": "5a5d556ae3602ae6730b8a0e95caa5474d03e0e7cd69b35b35891d6bb1f13e76",
+  "visualizationSha256": "6bd94882b9b3e4c31ed34be27f73cdb951a15ff01ee476cea231dec9421376f9",
+  "stdoutSummary": "YoloVision loaded the official YOLOv8n-pose ONNX with TensorRT 10.11, bound images/output0, validated all 470400 raw values against an ONNX Runtime CPU reference, decoded four person poses with 17 keypoints each from embedded channels, wrote JSON/SVG, and ended with YoloVision Passed=True.",
+  "stderrSummary": "",
+  "expectedEvidenceLines": [
+    "YoloVision TensorRtLine=10",
+    "Profile Family=YoloV8 Task=Pose Layout=ChannelsFirst",
+    "BindingMetadata Index=1 Name=output0 Mode=Output DataType=Float Shape=[1, 56, 8400]",
+    "ReferenceOutputValidation Requested=True Completed=True Passed=True Tensors=1",
+    "Postprocess Task=Pose;Detections=4",
+    "Poses=4",
+    "Pose Class=person",
+    "OutputValidated=True",
+    "YoloVision Passed=True"
+  ],
+  "isSmokePassed": true,
+  "canPromoteRealModelRuntime": true,
+  "validatorState": "real-model-runtime",
+  "failureReasons": [],
+  "runtimeEnvironment": {
+    "os": "Windows",
+    "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+    "driverVersion": "576.02",
+    "cudaToolkitVersion": "12.9",
+    "tensorRtVersion": "10.11.0.33",
+    "precision": "fp32",
+    "nativeBridgeSha256": "74d89fd7e1cb414751ca943298e003ecf48cadcda3e4c1952e5a2d5ba0b0cfc9"
+  },
+  "modelContract": {
+    "input": {
+      "name": "images",
+      "shape": [1, 3, 640, 640],
+      "dataType": "float32"
+    },
+    "outputs": [
+      {
+        "name": "output0",
+        "shape": [1, 56, 8400],
+        "role": "detection-rows-with-embedded-pose-keypoints",
+        "boxChannels": 4,
+        "classCount": 1,
+        "hasObjectness": false,
+        "auxiliaryChannelStart": 5,
+        "keypointCount": 17,
+        "keypointStride": 3
+      }
+    ]
+  },
+  "runtimeReferenceValidation": {
+    "sourceClassification": "independent-onnxruntime-cpu-execution-provider",
+    "absoluteTolerance": 1.25,
+    "relativeTolerance": 0.05,
+    "coordinateToleranceRationale": "The uniform comparator covers coordinate and confidence channels together; the 1.25 model-pixel absolute tolerance covers backend coordinate variation while the independent comparison separately constrains box, keypoint, and score errors.",
+    "passed": true,
+    "tensors": [
+      {
+        "name": "output0",
+        "referenceSha256": "73752d18797b5c9336359b99eef4cadfb8d263e5925fd489648ce3072ef440f1",
+        "comparedValueCount": 470400,
+        "mismatchCount": 0,
+        "firstMismatchIndex": -1,
+        "maximumAbsoluteError": 1.156311,
+        "maximumRelativeError": 1.4689058,
+        "passed": true
+      }
+    ]
+  },
+  "posePostprocessValidation": {
+    "sourceClassification": "independent-ultralytics-pytorch-cpu-reference",
+    "referenceSha256": "771f90902bc7b16acaef8b029035c9d4f4a8981526bed278cdc114e2e6872192",
+    "comparisonSha256": "70f8e59a6ad9ff8caaaf39a561e00467a0099538deb0728d5ac7540212d63d53",
+    "thresholds": {
+      "minimumBoxIoU": 0.98,
+      "maximumScoreError": 0.03,
+      "minimumKeypointScore": 0.25,
+      "maximumKeypointCoordinateError": 5.0,
+      "maximumKeypointScoreError": 0.03
+    },
+    "predictionCount": 4,
+    "minimumObservedBoxIoU": 0.9988154879300515,
+    "maximumObservedScoreError": 0.0002713224613952736,
+    "maximumObservedKeypointCoordinateError": 3.9198617673473293,
+    "maximumObservedKeypointScoreError": 0.005183294805145233,
+    "passed": true
+  },
+  "controlledNegativeValidation": {
+    "kind": "single-reference-value-mutation",
+    "mutatedReferenceSha256": "272d4d593cd99db69d8c4407363695e24e236f9cfc26caaf8d6b193ff5bbc641",
+    "runLogSha256": "a8f95214ae415079cf0fd493e5b6d067c040e7fb1eb2c8ae88c13df0121c4193",
+    "mutatedIndex": 0,
+    "delta": 10000.0,
+    "exitCode": 1,
+    "comparedValueCount": 470400,
+    "mismatchCount": 1,
+    "firstMismatchIndex": 0,
+    "completed": true,
+    "passed": false,
+    "failClosed": true
+  },
+  "outputReportValidation": {
+    "state": "yolovision-output-report-ready",
+    "failedBlockers": 0,
+    "reportSha256": "109193612838805392ae932dafe5ef3bc8701e7e3fb5067946afcc8ca9c119d1",
+    "passed": true
+  },
+  "proofBoundary": {
+    "sourceTreeRealModelRuntime": true,
+    "publicRedistributionApproved": false,
+    "packageConsumerRuntimeProof": false,
+    "publicPackageProof": false,
+    "postPublishProof": false,
+    "ownerReleaseAcceptance": false,
+    "releaseProof": false,
+    "performsPublish": false,
+    "uploadsAssets": false,
+    "notes": "This record proves one source-tree TensorRT pose run and independent references only. It does not redistribute assets or approve publication/release."
+  }
+}

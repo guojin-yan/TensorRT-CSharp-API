@@ -15,7 +15,7 @@
 | YOLOv5 | documented | det / cls / seg | Ultralytics YOLOv5 release 或用户自训模型 | 使用官方 export.py 或等价导出，固定 opset、input size、dynamic axes | not-proof，等待 owner 资产 |
 | YOLOv6 | documented | det | Meituan YOLOv6 release 或用户自训模型 | 使用官方部署脚本导出 ONNX，记录 decode 方式和 NMS 位置 | not-proof |
 | YOLOv7 | documented | det / pose variants | WongKinYiu YOLOv7 release 或用户自训模型 | 导出时记录 end-to-end NMS 是否在图内 | not-proof |
-| YOLOv8 | documented | det / cls / seg / obb / pose | Ultralytics YOLOv8 模型或用户自训模型 | `yolo export format=onnx`，记录 imgsz、dynamic、simplify、opset | not-proof |
+| YOLOv8 | source-tree real-model-runtime ready | det / cls / seg / obb / pose | Ultralytics YOLOv8 模型或用户自训模型 | `yolo export format=onnx`，记录 imgsz、dynamic、simplify、opset | 官方 YOLOv8n seg/pose source-tree proof；其他任务等待 owner 资产 |
 | YOLOv9 | documented | det / seg variants | YOLOv9 release 或用户自训模型 | 记录 dual branch/head 输出是否已简化 | not-proof |
 | YOLOv10 | source-tree real-model-runtime ready | det | THU-MIG YOLOv10 或用户自训模型 | `[1,N,6]` 使用 `--layout end2end`；其他输出必须记录真实 metadata | official YOLOv10n v1.1 source-tree proof；not package-consumer-runtime |
 | YOLOv11 | documented | det / cls / seg / obb / pose | Ultralytics YOLOv11 模型或用户自训模型 | 与 v8 类似，但必须记录实际导出命令和输出 tensor metadata | not-proof |
@@ -29,7 +29,7 @@
 | Classification | `cls` | `YoloVisionResult` classification path | 分类模型输入 tensor，labels 必须匹配 logits | logits tensor name、class count、top-k rule | 单输出 logits/top-k | managed smoke ready；real model not-proof |
 | Segmentation | `seg` | `YoloMaskComposer`、`DecodeSegmentationOutputs` | detection 输入 + mask proto metadata | boxes tensor、mask coefficient count、prototype tensor shape/layout | mask coefficient/prototype compose；crop/resize 由 owner 记录 | managed metadata ready；real model not-proof |
 | Oriented Bounding Box | `obb` | `YoloObbDecoder`、`DecodeObbOutputs` | 检测输入 + angle tensor metadata | angle channel/tensor name、degree/radian flag | box + angle conversion，NMS 策略需记录 | managed metadata ready；real model not-proof |
-| Pose | `pose` | `YoloPoseDecoder`、`DecodePoseOutputs` | 检测输入 + keypoint metadata | keypoint count、stride、tensor role/layout | keypoint tensor mapping；skeleton 可在文章中说明 | managed metadata ready；real model not-proof |
+| Pose | `pose` | `YoloPoseDecoder`、`DecodeEmbeddedPoseOutput`、`DecodePoseOutputs` | 单 tensor 内嵌通道或 detection + keypoint 双 tensor | keypoint count/stride、内嵌起点、tensor layout | NMS 后按 `SourceIndex` 对齐；无法精确解释的通道拒绝解码 | 官方 YOLOv8n-pose source-tree real-model-runtime；not package-consumer-runtime |
 | Semantic Segmentation | `sem` | `YoloSemanticMap` path | semantic model输入 tensor | semantic tensor name、class count、map width/height | 单输出 semantic map decoder | managed smoke ready；real model not-proof |
 
 ## 模型获取与资产记录
@@ -107,14 +107,17 @@ Pose：
 
 ```powershell
 dotnet run --project .\samples\YoloVision -- `
-  --model .\models\yolo-pose.onnx `
-  --labels .\models\labels.txt `
-  --input-data .\models\pose-fp32.bin `
+  --model .\models\yolov8n-pose.onnx `
+  --labels .\models\coco.names `
+  --image .\models\person.ppm `
+  --preprocessed-output .\models\pose-fp32.bin `
   --input-shape 1x3x640x640 `
   --family v8 `
   --task pose `
-  --output-role-map boxes:det,keypoints:pose-keypoints `
-  --pose-keypoint-count 17
+  --class-count 1 `
+  --layout channels-first `
+  --keypoint-count 17 --keypoint-stride 3 `
+  --aux-channel-start 5 --aux-layout channels-first
 ```
 
 OBB：

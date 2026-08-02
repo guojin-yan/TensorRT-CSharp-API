@@ -9,6 +9,138 @@ namespace JYPPX.ProjectQuality.Tests;
 public sealed class YoloVisionReferenceAssetAcquisitionTests
 {
     [Fact]
+    public void YoloV8PoseOfficialManifestPinsEmbeddedChannelsAndHumanInput()
+    {
+        string manifestPath = Path.Combine(
+            RepositoryPaths.Root,
+            "samples",
+            "assets",
+            "yolovision-yolov8n-pose-official-assets.json");
+        string scriptPath = Path.Combine(
+            RepositoryPaths.Root,
+            "eng",
+            "Acquire-YoloV8PoseOfficialAssets.ps1");
+        Assert.True(File.Exists(manifestPath), manifestPath);
+        Assert.True(File.Exists(scriptPath), scriptPath);
+
+        using JsonDocument document = JsonDocument.Parse(File.ReadAllText(manifestPath));
+        JsonElement root = document.RootElement;
+        Assert.Equal("yolovision-yolov8n-pose-official-asset-acquisition-manifest", root.GetProperty("recordKind").GetString());
+        Assert.Equal(177482232, root.GetProperty("upstreamReleaseId").GetInt64());
+        Assert.Equal("6e43d1e1e5db72afbf686dee6745669bcb124b0a", root.GetProperty("upstreamSourceCommit").GetString());
+        Assert.Equal("AGPL-3.0-only", root.GetProperty("license").GetProperty("spdxId").GetString());
+        Assert.False(root.GetProperty("license").GetProperty("publicRedistributionOwnerApproval").GetBoolean());
+
+        JsonElement output = Assert.Single(root.GetProperty("modelContract").GetProperty("outputs").EnumerateArray());
+        Assert.Equal(new[] { 1, 56, 8400 }, output.GetProperty("shape").EnumerateArray().Select(static value => value.GetInt32()).ToArray());
+        Assert.Equal("detection-rows-with-embedded-pose-keypoints", output.GetProperty("role").GetString());
+        Assert.Equal(5, output.GetProperty("auxiliaryChannelStart").GetInt32());
+        Assert.Equal(17, output.GetProperty("keypointCount").GetInt32());
+        Assert.Equal(3, output.GetProperty("keypointStride").GetInt32());
+
+        JsonElement[] assets = root.GetProperty("assets").EnumerateArray().ToArray();
+        Assert.Equal(3, assets.Length);
+        Assert.All(assets, static asset =>
+        {
+            Assert.True(asset.GetProperty("expectedLength").GetInt64() > 0);
+            Assert.Equal(64, asset.GetProperty("expectedSha256").GetString()!.Length);
+        });
+        JsonElement weights = assets.Single(static asset => asset.GetProperty("id").GetString() == "yolov8n-pose-pt");
+        Assert.Equal(195719300, weights.GetProperty("githubReleaseAssetId").GetInt64());
+        JsonElement image = assets.Single(static asset => asset.GetProperty("id").GetString() == "ultralytics-bus-jpg");
+        Assert.Contains(root.GetProperty("upstreamSourceCommit").GetString()!, image.GetProperty("url").GetString()!, StringComparison.Ordinal);
+
+        JsonElement derived = root.GetProperty("derivedInput");
+        Assert.Equal("P6 RGB PPM", derived.GetProperty("format").GetString());
+        Assert.Equal(810, derived.GetProperty("width").GetInt32());
+        Assert.Equal(1080, derived.GetProperty("height").GetInt32());
+        Assert.Equal(64, derived.GetProperty("expectedSha256").GetString()!.Length);
+
+        string script = File.ReadAllText(scriptPath);
+        Assert.Contains("Test-DriveIsNotC", script, StringComparison.Ordinal);
+        Assert.Contains("JYPPX_YOLO_PYTHON", script, StringComparison.Ordinal);
+        Assert.Contains("expectedSha256", script, StringComparison.Ordinal);
+        Assert.Contains("upstream Release did not publish a digest", script, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("performsExport = $false", script, StringComparison.Ordinal);
+        Assert.Contains("performsRuntime = $false", script, StringComparison.Ordinal);
+        Assert.Contains("performsPublish = $false", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("dotnet nuget push", script, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("gh release upload", script, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void YoloV8PoseRealRuntimeEvidenceProvesEmbeddedDecodeAndKeepsReleaseBoundariesFalse()
+    {
+        string evidencePath = Path.Combine(
+            RepositoryPaths.Root,
+            "samples",
+            "assets",
+            "yolovision-yolov8n-pose-real-model-runtime-evidence.json");
+        Assert.True(File.Exists(evidencePath), evidencePath);
+
+        using JsonDocument document = JsonDocument.Parse(File.ReadAllText(evidencePath));
+        JsonElement root = document.RootElement;
+        Assert.Equal("sample-run-evidence-record", root.GetProperty("recordKind").GetString());
+        Assert.Equal("real-model-runtime", root.GetProperty("proofClassification").GetString());
+        Assert.False(root.GetProperty("templateOnly").GetBoolean());
+        Assert.True(root.GetProperty("isSmokePassed").GetBoolean());
+        Assert.True(root.GetProperty("canPromoteRealModelRuntime").GetBoolean());
+        Assert.Equal("ed1e8d2d2aeb8a2c66e642a16295a72a2990393e3a3843325537da7e11c8a899", root.GetProperty("modelSha256").GetString());
+
+        JsonElement output = Assert.Single(root.GetProperty("modelContract").GetProperty("outputs").EnumerateArray());
+        Assert.Equal(new[] { 1, 56, 8400 }, output.GetProperty("shape").EnumerateArray().Select(static value => value.GetInt32()).ToArray());
+        Assert.Equal(5, output.GetProperty("auxiliaryChannelStart").GetInt32());
+        Assert.Equal(17, output.GetProperty("keypointCount").GetInt32());
+        Assert.Equal(3, output.GetProperty("keypointStride").GetInt32());
+
+        JsonElement raw = root.GetProperty("runtimeReferenceValidation");
+        Assert.True(raw.GetProperty("passed").GetBoolean());
+        JsonElement rawTensor = Assert.Single(raw.GetProperty("tensors").EnumerateArray());
+        Assert.Equal(470_400, rawTensor.GetProperty("comparedValueCount").GetInt32());
+        Assert.Equal(0, rawTensor.GetProperty("mismatchCount").GetInt32());
+
+        JsonElement pose = root.GetProperty("posePostprocessValidation");
+        Assert.True(pose.GetProperty("passed").GetBoolean());
+        Assert.Equal(4, pose.GetProperty("predictionCount").GetInt32());
+        Assert.True(pose.GetProperty("minimumObservedBoxIoU").GetDouble() >= pose.GetProperty("thresholds").GetProperty("minimumBoxIoU").GetDouble());
+        Assert.True(pose.GetProperty("maximumObservedKeypointCoordinateError").GetDouble() <= pose.GetProperty("thresholds").GetProperty("maximumKeypointCoordinateError").GetDouble());
+
+        JsonElement negative = root.GetProperty("controlledNegativeValidation");
+        Assert.Equal(1, negative.GetProperty("exitCode").GetInt32());
+        Assert.Equal(1, negative.GetProperty("mismatchCount").GetInt32());
+        Assert.Equal(0, negative.GetProperty("firstMismatchIndex").GetInt32());
+        Assert.True(negative.GetProperty("failClosed").GetBoolean());
+        Assert.False(negative.GetProperty("passed").GetBoolean());
+
+        JsonElement boundary = root.GetProperty("proofBoundary");
+        Assert.True(boundary.GetProperty("sourceTreeRealModelRuntime").GetBoolean());
+        foreach (string name in new[]
+        {
+            "publicRedistributionApproved",
+            "packageConsumerRuntimeProof",
+            "publicPackageProof",
+            "postPublishProof",
+            "ownerReleaseAcceptance",
+            "releaseProof",
+            "performsPublish",
+            "uploadsAssets"
+        })
+        {
+            Assert.False(boundary.GetProperty(name).GetBoolean(), name);
+        }
+
+        string readme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "YoloVision", "README.md"));
+        string tutorial = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "articles", "zh-cn", "yolovision-pose-tutorial.md"));
+        foreach (string text in new[] { readme, tutorial })
+        {
+            Assert.Contains("[1,56,8400]", text, StringComparison.Ordinal);
+            Assert.Contains("--aux-channel-start", text, StringComparison.Ordinal);
+            Assert.Contains("real-model-runtime", text, StringComparison.Ordinal);
+            Assert.Contains("package-consumer", text, StringComparison.OrdinalIgnoreCase);
+        }
+    }
+
+    [Fact]
     public void YoloV8SegmentationOfficialManifestPinsReleaseAssetLicenseAndOutputRoles()
     {
         string manifestPath = Path.Combine(

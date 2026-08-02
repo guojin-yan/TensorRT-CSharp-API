@@ -1,4 +1,4 @@
-# YoloVision Pose 多输出实战教程
+# YoloVision Pose 单输出内嵌通道与多输出实战教程
 
 Pose 模型在 detection 的 box/class/score 之外，还为每个候选目标输出一组 keypoints。工程上最危险的不是少画一个点，而是 detection 行、NMS 后目标、keypoint 行、坐标空间和 stride 没有使用同一份模型契约。本文绑定 `samples/YoloVision` 的当前实现，从 E 盘资产目录、ONNX build-only、preflight、真实运行、JSON/SVG 到证据回填形成完整路径。
 
@@ -7,13 +7,13 @@ Pose 模型在 detection 的 box/class/score 之外，还为每个候选目标�
 YoloVision 的 managed pose 路径已经支持：
 
 1. 将 TensorRT 输出复制为无指针的 `YoloRuntimeOutputTensor`。
-2. 通过显式 output role 区分 detection tensor 与 pose keypoint tensor。
-3. 对 detection rows 执行 score filtering 和配置的 NMS。
-4. 保留每个 detection 的 `SourceIndex`，用原始候选行选择对应 keypoint row。
-5. 接受 `[1,N,K*stride]` 或 `[1,K*stride,N]` 的 rank-3 keypoint tensor。
-6. 解析 `x,y` 或 `x,y,score`，生成 `YoloPosePrediction`。
-7. 将 box、class、score 和 keypoints 写入 `yolovision-output.v1` JSON。
-8. 生成 box 加关键点圆点的有界 SVG 预览。
+2. 解码官方 YOLOv8n-pose 常见的单输出 `output0:[1,56,8400]`：4 个 box 通道、1 个 person class 通道、17×3 个 keypoint 通道。
+3. 继续兼容 detection tensor 与独立 pose keypoint tensor 的旧 API。
+4. 对 detection rows 执行 score filtering 和配置的 NMS。
+5. 保留每个 detection 的 `SourceIndex`，用原始候选行选择对应 keypoint row。
+6. 单输出同时接受 `[1,C,N]` / `[1,N,C]`；独立 keypoint tensor 接受 `[1,N,K*stride]` / `[1,K*stride,N]`。
+7. 对内嵌输出要求 detection 前缀与 `K*stride` 精确解释全部通道，额外或错位通道直接失败。
+8. 解析 `x,y` 或 `x,y,score`，生成 `YoloPosePrediction`，并写入 JSON/SVG。
 
 当前通用路径不推断骨架连接、不做关键点类别重排，也不自动把 letterbox 后的关键点逆变换到原图坐标。SVG 会将绝对值直接当作模型画布坐标，将绝对值不超过 `1.5` 的数按 normalized coordinate 缩放。owner 必须确认 exporter 坐标空间，不能依赖这个显示启发式替代模型合同。
 
@@ -21,11 +21,12 @@ YoloVision 的 managed pose 路径已经支持：
 
 | 项目 | 当前要求 | 失败风险 |
 | --- | --- | --- |
-| Detection output | box/class/score rows | 目标筛选与 keypoint 行错位 |
-| Keypoint output | 每个候选一行 `K*stride` | tensor role 或 layout 错误 |
+| 官方单输出 | `[1,56,8400]` / `[1,8400,56]` | detection 前缀与 keypoint slice 错位 |
+| 独立 keypoint 输出 | 每个候选一行 `K*stride` | tensor role 或 layout 错误 |
 | `K` | `--pose-keypoint-count` 或 `--keypoint-count` | 行宽不匹配 |
 | stride | `--keypoint-stride`，默认 3，最小 2 | score 列解释错误 |
-| layout | `--aux-layout boxes-first|channels-first` | N/K 维交换 |
+| 内嵌起点 | 官方 YOLOv8n-pose 为 `--aux-channel-start 5` | class 与 keypoint 通道混读 |
+| layout | `--layout` 与 `--aux-layout` 必须与同一 tensor 一致 | N/C 维交换 |
 | coordinate space | exporter/owner 显式记录 | 原图 overlay 偏移 |
 | skeleton map | owner 侧记录 | 点位含义无法审核 |
 
@@ -40,6 +41,33 @@ kept detection -> detection.SourceIndex -> keypointRows[SourceIndex]
 ```
 
 不能使用 NMS 后结果数组的下标。否则第一个保留目标如果来自原始第 37 行，错误实现会读取 keypoint 第 0 行，box 与人体点位会发生静默串线。
+
+## 已审计官方案例
+
+仓库已记录一个真实 source-tree `real-model-runtime` 案例：
+
+- 权重：Ultralytics `v8.3.0` `yolov8n-pose.pt`，Release asset ID `195719300`。
+- 权重 SHA256：`c6fa93dd1ee4a2c18c900a45c1d864a1c6f7aba75d84f91648a30b7fb641d212`。
+- 来源 commit：`6e43d1e1e5db72afbf686dee6745669bcb124b0a`，许可证 `AGPL-3.0-only`。
+- 输入：同 commit 的 `bus.jpg`，本地派生 P6 RGB `bus.ppm`，SHA256 `6cdb4b6728a36516826f9adb9387774a6b5db0a49837d515c9045324e04e8688`。
+- ONNX：`images:[1,3,640,640] -> output0:[1,56,8400]`，SHA256 `ed1e8d2d2aeb8a2c66e642a16295a72a2990393e3a3843325537da7e11c8a899`。
+- 运行时：TensorRT 10.11.0.33、CUDA 12.9、RTX 3060 Laptop GPU。
+
+获取脚本只在 E 盘工作，不导出、不运行、不发布：
+
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass `
+  -File .\eng\Acquire-YoloV8PoseOfficialAssets.ps1 `
+  -PythonPath C:\path\to\python.exe
+
+# 已有资产时严格离线复核
+pwsh -NoProfile -ExecutionPolicy Bypass `
+  -File .\eng\Acquire-YoloV8PoseOfficialAssets.ps1 `
+  -PythonPath C:\path\to\python.exe `
+  -Offline
+```
+
+manifest 位于 `samples/assets/yolovision-yolov8n-pose-official-assets.json`，轻量运行记录位于 `samples/assets/yolovision-yolov8n-pose-real-model-runtime-evidence.json`。`.pt`、ONNX、图片、engine、reference、tensor、SVG 和日志都不进入仓库。
 
 ## E 盘资产目录
 
@@ -86,7 +114,7 @@ Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-pose\labels\
 Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-pose\images\input.ppm
 ```
 
-不要从模型名称推断输出合同。应先用 Netron、ONNX 元数据或 TensorRtExec binding report 确认实际的 `images`、`boxes`、`keypoints` 名称与 shape。
+不要从模型名称推断输出合同。应先用 ONNX checker、Netron 或 TensorRtExec binding report 确认实际 tensor 名与 shape。官方案例经 ONNX checker 确认为单个 `output0:[1,56,8400]`，不是 `boxes + keypoints` 两个输出。
 
 ## TensorRtExec build-only
 
@@ -104,7 +132,24 @@ dotnet run --project .\applications\TensorRtExec -- `
 
 `--exportReport` 是当前真实参数。build-only report 只能证明构建路径和配置被执行，不能证明 keypoint 行与 box 对齐，更不能替代 `real-model-runtime`。
 
-## 显式 output role
+## 单输出与显式 output role
+
+官方单输出不需要伪造第二个 tensor role。主输出自动作为 detection tensor，再由 metadata 声明内嵌 keypoint slice：
+
+```text
+--task pose
+--class-count 1
+--layout channels-first
+--has-objectness auto
+--keypoint-count 17
+--keypoint-stride 3
+--aux-channel-start 5
+--aux-layout channels-first
+```
+
+`5 + 17*3 = 56` 必须精确成立。`--aux-channel-start 6`、多出一个尾部通道、layout 冲突或未知 class count 都会 fail closed。
+
+对于真正返回两个输出的模型，继续使用旧合同：
 
 推荐同时记录 role map 和专用参数，真实命令至少保留一种明确声明：
 
@@ -130,9 +175,8 @@ dotnet run --project .\samples\YoloVision -- `
   --family v8 --task pose `
   --class-count 1 `
   --layout auto --has-objectness auto `
-  --output-role-map boxes:det,keypoints:pose-keypoints `
-  --pose-keypoint-count 17 --keypoint-stride 3 `
-  --aux-layout boxes-first `
+  --keypoint-count 17 --keypoint-stride 3 `
+  --aux-channel-start 5 --aux-layout channels-first `
   --preflight --strict-preflight `
   --preflight-report E:\TensorRtSharpAssets\cases\yolov8n-pose\reports\preflight.json
 ```
@@ -152,15 +196,20 @@ dotnet run --project .\samples\YoloVision -- `
   --class-count 1 `
   --layout auto --has-objectness auto `
   --nms-mode class-aware --confidence 0.25 --iou-threshold 0.45 `
-  --output-role-map boxes:det,keypoints:pose-keypoints `
-  --pose-keypoint-count 17 --keypoint-stride 3 `
-  --aux-layout boxes-first `
+  --keypoint-count 17 --keypoint-stride 3 `
+  --aux-channel-start 5 --aux-layout channels-first `
+  --reference-outputs output0:E:\TensorRtSharpAssets\cases\yolov8n-pose\references\output0.reference.json `
+  --reference-abs-tolerance 1.25 --reference-rel-tolerance 0.05 `
   --output-json E:\TensorRtSharpAssets\cases\yolov8n-pose\reports\output.json `
   --visualization-svg E:\TensorRtSharpAssets\cases\yolov8n-pose\overlays\pose-preview.svg `
   *> E:\TensorRtSharpAssets\cases\yolov8n-pose\logs\run.log
 ```
 
-真实日志至少应包含 `Profile Family=v8 Task=Pose`、两个 output tensor、`Poses=`、binding metadata 和 `YoloVision Passed=True`。具体枚举文本以实际日志为准，evidence pack 中的 expected line 必须与采集结果一致。
+真实日志至少应包含 `Profile Family=YoloV8 Task=Pose Layout=ChannelsFirst`、`output0:[1,56,8400]`、`ReferenceOutputValidation ... Passed=True`、`Poses=4` 和 `YoloVision Passed=True`。具体数量以实际资产为准，evidence pack 中的 expected line 必须与采集结果一致。
+
+本次 TensorRT 正例比较了全部 `470400` 个输出值，mismatch 为 `0`。通用 comparator 同时覆盖坐标与置信度通道，因此使用 `abs=1.25/rel=0.05` 容纳 TensorRT/ONNX Runtime 的坐标 kernel 差异；不能仅凭这组统一阈值判断后处理正确性。独立 Ultralytics/PyTorch CPU 对照另外约束了结果：4 个 person pose 的最小 box IoU 为 `0.998815`，可见关键点最大原图坐标误差为 `3.920` 像素，最大目标分数误差小于 `0.000272`。
+
+`eng/New-YoloVisionReferenceMutation.py` 将 reference 第 0 个值增加 `10000` 后，运行必须非零退出。本次负例得到 `Mismatches=1`、`FirstMismatch=0`、`YoloVision Passed=False`，证明 reference 门禁不是只记录不阻断。
 
 ## JSON 与 SVG 语义
 
@@ -185,7 +234,8 @@ validator 会检查 task、输入、engine、runtime、output summaries、pose b
 | --- | --- |
 | `Poses=0` | confidence、class count、objectness、detection layout |
 | box 正确但点属于另一个人 | `SourceIndex` 是否保留、keypoint row 是否与候选行同序 |
-| 点呈转置或规律跳跃 | `--aux-layout` 与 `[N,C]`/`[C,N]` 是否一致 |
+| 点呈转置或规律跳跃 | `--layout`、`--aux-layout` 与 `[N,C]`/`[C,N]` 是否一致 |
+| 报告 auxiliary range 无法解释 | `4 + objectness + classCount + K*stride` 是否等于总通道数 |
 | 每个点 score 都为 1 | stride 是否配置为 2，exporter 是否真的没有 score |
 | 点整体偏移 | letterbox padding、坐标空间和 resize-back 是否记录 |
 | 输出 role 缺失 | tensor 名与 `--output-role-map`/`--pose-keypoints-output` 是否一致 |
@@ -200,7 +250,8 @@ validator 会检查 task、输入、engine、runtime、output summaries、pose b
 ## 代码入口
 
 - `samples/YoloVision/YoloRuntimeOutputRoleResolver.cs`：role map、keypoint count/stride 和 layout 参数。
-- `samples/YoloVision/YoloSampleRunner.cs`：detection decode、`SourceIndex` 绑定与 keypoint row 路由。
+- `samples/YoloVision/YoloSampleRunner.cs`：`DecodeEmbeddedPoseOutput`、独立 tensor 兼容路径、`SourceIndex` 绑定与 keypoint row 路由。
+- `eng/Invoke-YoloVisionPoseReference.py`：ONNX Runtime 原始 reference、Ultralytics/PyTorch CPU 参考与结果比较。
 - `samples/YoloVision/YoloPoseDecoder.cs`：`x/y/score` 的纯托管解析。
 - `samples/YoloVision/YoloVisionOutputReport.cs`：pose JSON prediction。
 - `samples/YoloVision/YoloVisionVisualizationWriter.cs`：box 与关键点 SVG。
@@ -209,8 +260,9 @@ validator 会检查 task、输入、engine、runtime、output summaries、pose b
 ## 收尾清单
 
 - [ ] 权重、labels、图片来源和许可证已审核，资产仅位于 E 盘 case workspace。
-- [ ] detection/keypoint tensor 名、shape、dtype、layout 已确认。
+- [ ] 单输出或双输出合同、tensor 名、shape、dtype、layout 已确认。
 - [ ] K、stride、索引含义、坐标空间、score/visibility 语义已记录。
+- [ ] 内嵌输出的 detection 前缀、`--aux-channel-start` 与总通道数可以精确闭合。
 - [ ] NMS 后通过 `SourceIndex` 绑定原始 keypoint row。
 - [ ] build report 使用 `--exportReport`，preflight 与 runtime 命令已归档。
 - [ ] output JSON、SVG、最终原图 overlay、run log 和全部 hash 已归档。

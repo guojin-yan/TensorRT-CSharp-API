@@ -36,6 +36,19 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Acquire-YoloV10OfficialAsset
 
 This acquisition is not runtime proof, package-consumer-runtime proof, or redistribution approval. AGPL-3.0-only assets require owner review before any public redistribution decision.
 
+## Official YOLOv8n Pose acquisition
+
+`yolovision-yolov8n-pose-official-assets.json` pins the Ultralytics `v8.3.0` release weight, source-commit license, human-containing `bus.jpg`, and deterministic P6 RGB PPM derivative. The acquisition script rejects C-drive output, verifies all lengths/SHA256 values, and never exports, runs, or publishes assets:
+
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Acquire-YoloV8PoseOfficialAssets.ps1 `
+  -PythonPath C:\path\to\python.exe
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Acquire-YoloV8PoseOfficialAssets.ps1 `
+  -PythonPath C:\path\to\python.exe -Offline
+```
+
+The source-tree runtime record is `yolovision-yolov8n-pose-real-model-runtime-evidence.json`. Models, ONNX files, images, references, tensors, SVGs, and logs stay in the outer E-drive download workspace. The record is not package-consumer proof or public redistribution approval.
+
 ## Local Asset Layout
 
 Keep large or license-sensitive files in a local `models\` folder at the repository root, or in another owner-controlled path. Do not commit model weights, downloaded images, `.plan` engines, private build reports, or run logs unless their license and size have been explicitly approved.

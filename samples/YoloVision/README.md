@@ -98,7 +98,7 @@ The matrix currently covers `custom`, YOLOv5/v6/v7/v8/v9/v10/v11/v26, detection-
 | Classification | `cls` | Single-output logits/top-k classification decoder | none | managed-smoke-ready |
 | Segmentation | `seg` | Detection rows plus mask prototype composition | mask coefficient count, prototype tensor role, optional auxiliary channel start/layout | managed-metadata-ready |
 | Oriented bounding box | `obb` | Detection rows plus angle tensor conversion | angle tensor role, degrees/radians flag, optional auxiliary layout | managed-metadata-ready |
-| Pose | `pose` | Detection rows plus keypoint tensor mapping | keypoint count, keypoint stride, optional auxiliary layout | managed-metadata-ready |
+| Pose | `pose` | Embedded keypoint channels or a separate keypoint tensor | keypoint count/stride, exact auxiliary start/layout for embedded output | source-tree-real-model-runtime |
 | Semantic segmentation | `sem` | Single-output semantic map decoder | class count and semantic tensor role | managed-smoke-ready |
 
 This is a support matrix and smoke surface, not proof that a specific external model has passed real image validation. Real model promotion still requires a model/license manifest, TensorRtExec build sidecar, `YoloVision Passed=True` run log, stdout/stderr summaries, SHA256 values, and owner-reviewed evidence.
@@ -150,6 +150,8 @@ For instance segmentation, see `docs/articles/zh-cn/yolovision-segmentation-tuto
 
 The repository now carries one audited source-tree real-model case for the official Ultralytics `v8.3.0` `yolov8n-seg.pt` asset. `samples/assets/yolovision-yolov8n-seg-official-assets.json` pins the upstream release/commit/license and local asset hashes; `samples/assets/yolovision-yolov8n-seg-real-model-runtime-evidence.json` records the actual TensorRT 10.11/CUDA 12.9 run without committing the model, engine, reference tensors, masks, or logs. The exported ONNX contract is `images:[1,3,640,640]`, `output0:[1,116,8400]`, and `output1:[1,32,160,160]`. Both raw outputs matched independent ONNX Runtime CPU references under the recorded tolerances, and four source-image masks independently matched Ultralytics/PyTorch CPU postprocessing with box IoU at least `0.998471` and mask IoU at least `0.991140`.
 
+The official Ultralytics `v8.3.0` `yolov8n-pose.pt` case is also audited as source-tree `real-model-runtime`. Its ONNX contract is `images:[1,3,640,640] -> output0:[1,56,8400]`: 4 box channels, 1 person class channel, and 17 keypoints with stride 3 starting at channel 5. `DecodeEmbeddedPoseOutput` decodes the detection prefix, preserves `SourceIndex` through NMS, and selects keypoints from the same original candidate. All 470,400 TensorRT values matched the ONNX Runtime CPU reference under the recorded coordinate-aware uniform tolerance; four source-image poses independently matched Ultralytics/PyTorch with minimum box IoU `0.998815` and maximum visible-keypoint error `3.920` pixels. See `samples/assets/yolovision-yolov8n-pose-real-model-runtime-evidence.json` and `docs/articles/zh-cn/yolovision-pose-tutorial.md`. This remains false for asset redistribution, package-consumer, public-package, post-publish, and release proof.
+
 The same pinned case now also passes a repository-external, local-file-feed `PackageReference` consumer using the managed API, YoloVision, and the TRT10/CUDA12.9 bridge-only package. That second record is deliberately separate from the source-tree result and remains false for public-package, post-publish, redistribution, Owner acceptance, and release proof.
 
 Use `--segmentation-mask-output-directory <path>` together with `--mask-spatial-transform` to write deterministic binary mask artifacts plus `segmentation-mask-artifacts.manifest.json`. Each prediction includes hashed prototype-grid float32 probabilities, source-image float32 probabilities, source-image thresholded bytes, class/source index, shapes, counts, box metadata, and proof boundaries. These binaries are comparison inputs, not standalone runtime proof, and are intentionally excluded from Git and packages.
@@ -181,7 +183,7 @@ When an owner is ready to backfill real evidence, run `eng/Export-YoloVisionReal
 - NMS location: graph, plugin, or application-side postprocessing.
 - NMS mode: class-aware or class-agnostic.
 - For segmentation: mask coefficient count, prototype count, prototype width/height, and mask scale/crop rule.
-- For pose: keypoint count and keypoint stride.
+- For pose: keypoint count/stride and whether keypoints are embedded after the detection prefix or returned as a separate tensor.
 - For OBB: angle channel index and unit, degrees or radians.
 - YOLO family/task declaration and any model-specific decode notes.
 
@@ -191,6 +193,7 @@ The command-line runner captures every float output in engine order. For models 
 
 - `YoloSampleRunner.DecodeSegmentationOutputs(...)`: detection rows plus mask coefficients and `[P,H,W]` or `[1,P,H,W]` prototype tensor.
 - `YoloSampleRunner.DecodePoseOutputs(...)`: detection rows plus `[1,N,K*stride]` or `[1,K*stride,N]` keypoint tensor.
+- `YoloSampleRunner.DecodeEmbeddedPoseOutput(...)`: one `[1,C,N]` or `[1,N,C]` tensor whose detection prefix is followed exactly by `K*stride` keypoint channels; unexplained channels fail closed.
 - `YoloSampleRunner.DecodeObbOutputs(...)`: detection rows plus `[1,N,1]` or `[1,1,N]` angle tensor.
 - `YoloMultiOutputMetadata`: declares mask coefficient count, keypoint count/stride, angle unit, optional auxiliary channel start, and auxiliary tensor layout.
 
@@ -269,7 +272,7 @@ dotnet run --project .\samples\YoloVision -- --model .\models\yolo-seg.onnx --la
 dotnet run --project .\samples\YoloVision -- --model .\models\yolo-obb.onnx --labels .\models\labels.txt --input-data .\models\obb-fp32.bin --input-shape 1x3x1024x1024 --family v8 --task obb --output-role-map boxes:det,angles:obb-angle --obb-angle-output angles
 
 # Pose
-dotnet run --project .\samples\YoloVision -- --model .\models\yolo-pose.onnx --labels .\models\labels.txt --input-data .\models\pose-fp32.bin --input-shape 1x3x640x640 --family v8 --task pose --output-role-map boxes:det,keypoints:pose-keypoints --pose-keypoint-count 17
+dotnet run --project .\samples\YoloVision -- --model .\models\yolov8n-pose.onnx --labels .\models\coco.names --image .\models\person.ppm --preprocessed-output .\models\pose-fp32.bin --input-shape 1x3x640x640 --family v8 --task pose --class-count 1 --layout channels-first --has-objectness auto --keypoint-count 17 --keypoint-stride 3 --aux-channel-start 5 --aux-layout channels-first
 
 # Semantic segmentation
 dotnet run --project .\samples\YoloVision -- --model .\models\yolo-sem.onnx --labels .\models\labels.txt --input-data .\models\sem-fp32.bin --input-shape 1x3x512x512 --family custom --task sem --semantic-output semantic --class-count 21
