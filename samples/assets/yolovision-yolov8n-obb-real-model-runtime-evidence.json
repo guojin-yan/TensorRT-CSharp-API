@@ -1,0 +1,144 @@
+{
+  "schemaVersion": 1,
+  "recordKind": "sample-run-evidence-record",
+  "recordName": "yolovision-yolov8n-obb-ultralytics-v8.3.0-trt10.11",
+  "generatedAtUtc": "2026-08-02T10:30:00Z",
+  "templateOnly": false,
+  "sampleName": "YoloVision",
+  "manifestPath": "samples/assets/yolovision-yolov8n-obb-official-assets.json",
+  "proofClassification": "real-model-runtime",
+  "modelPath": "E:\\GitSpace\\TensorRT-CSharp-API-4.0\\downloads\\yolov8n-obb-ultralytics-v8.3.0\\source\\yolov8n-obb.onnx",
+  "modelSha256": "5f2701ef5326fb5a691999438cfc55a69656323c21ffddebaff8968ab6de2e92",
+  "modelLicense": "AGPL-3.0-only; Ultralytics v8.3.0 source commit 6e43d1e1e5db72afbf686dee6745669bcb124b0a reviewed for this local runtime case; public redistribution remains unapproved",
+  "labelsPath": "E:\\GitSpace\\TensorRT-CSharp-API-4.0\\downloads\\yolov8n-obb-ultralytics-v8.3.0\\derived\\dota.names",
+  "labelsSha256": "4b1932ade5050f71f3a8ff9031993d8bb2891b2c31291e29cbe2331820221272",
+  "labelsLicense": "DOTA class-name ordering from the official Ultralytics model metadata; locally derived UTF-8 label list; public redistribution remains unapproved",
+  "inputAssetPath": "E:\\GitSpace\\TensorRT-CSharp-API-4.0\\downloads\\yolov8n-obb-ultralytics-v8.3.0\\derived\\boats.ppm",
+  "inputAssetSha256": "9156edd731c3dcc7baaa59d93d0753c5098003c6bffc5eecaca1087713d07c76",
+  "inputAssetLicense": "Ultralytics assets repository commit 428939c3e501f70ab2a0ded889663efcf5bfbe6c boats.jpg locally derived to PPM; public redistribution remains unapproved",
+  "preprocessedInputTensorPath": "E:\\GitSpace\\TensorRT-CSharp-API-4.0\\downloads\\yolov8n-obb-ultralytics-v8.3.0\\runtime\\boats-1x3x1024x1024-rgb-letterbox.fp32.bin",
+  "preprocessedInputTensorSha256": "c56c027619088bce94f9160a3f602b4ad81fe323001867b1ee456100040fec6e",
+  "preprocessedInputTensorElementCount": 3145728,
+  "engineMaterialization": "in-memory-from-onnx",
+  "sampleRunCommand": "dotnet .\\samples\\YoloVision\\bin\\Release\\net8.0\\YoloVision.dll --model E:\\GitSpace\\TensorRT-CSharp-API-4.0\\downloads\\yolov8n-obb-ultralytics-v8.3.0\\source\\yolov8n-obb.onnx --labels E:\\GitSpace\\TensorRT-CSharp-API-4.0\\downloads\\yolov8n-obb-ultralytics-v8.3.0\\derived\\dota.names --image E:\\GitSpace\\TensorRT-CSharp-API-4.0\\downloads\\yolov8n-obb-ultralytics-v8.3.0\\derived\\boats.ppm --preprocessed-output E:\\GitSpace\\TensorRT-CSharp-API-4.0\\downloads\\yolov8n-obb-ultralytics-v8.3.0\\runtime\\boats-1x3x1024x1024-rgb-letterbox.fp32.bin --input-shape 1x3x1024x1024 --tensor-rt-line 10 --family v8 --task obb --class-count 15 --layout channels-first --has-objectness auto --confidence 0.25 --iou-threshold 0.45 --top-k 40 --aux-channel-start 19 --aux-layout channels-first --angle-radians --reference-outputs output0:E:\\GitSpace\\TensorRT-CSharp-API-4.0\\downloads\\yolov8n-obb-ultralytics-v8.3.0\\reference\\output0.reference.json --reference-abs-tolerance 4.25 --reference-rel-tolerance 0.05 --output-json E:\\GitSpace\\TensorRT-CSharp-API-4.0\\downloads\\yolov8n-obb-ultralytics-v8.3.0\\runtime\\yolovision-yolov8n-obb-output.json --visualization E:\\GitSpace\\TensorRT-CSharp-API-4.0\\downloads\\yolov8n-obb-ultralytics-v8.3.0\\runtime\\yolovision-yolov8n-obb-output.svg",
+  "sampleRunLogPath": "E:\\GitSpace\\TensorRT-CSharp-API-4.0\\downloads\\yolov8n-obb-ultralytics-v8.3.0\\runtime\\yolovision-yolov8n-obb-runtime.log",
+  "sampleRunLogSha256": "f00773f13577baa433318017efc32859d954f82d89bb9f318c7c0f68dcccfb9c",
+  "outputJsonSha256": "cd58ca61950861f43d143b8d191d2871f45227cd4ad124b378c144ea1efff910",
+  "visualizationSha256": "fe3a9fc7ea60e6b4e75f82b2dec61858bb85cbe43d7d3e8414141cd05be4b5b0",
+  "stdoutSummary": "YoloVision loaded the official YOLOv8n-obb ONNX with TensorRT 10.11, bound images/output0, validated all 430080 raw values against an ONNX Runtime CPU reference, decoded forty ship OBBs from the embedded angle channel with probabilistic-IoU rotated NMS, wrote JSON/SVG, and ended with YoloVision Passed=True.",
+  "stderrSummary": "",
+  "expectedEvidenceLines": [
+    "YoloVision TensorRtLine=10",
+    "Profile Family=YoloV8 Task=OrientedBoundingBox Layout=ChannelsFirst",
+    "BindingMetadata Index=1 Name=output0 Mode=Output DataType=Float Shape=[1, 20, 21504]",
+    "ReferenceOutputValidation Requested=True Completed=True Passed=True Tensors=1",
+    "Postprocess Task=OrientedBoundingBox;Detections=40",
+    "OrientedBoxes=40",
+    "Obb Class=ship",
+    "OutputValidated=True",
+    "YoloVision Passed=True"
+  ],
+  "isSmokePassed": true,
+  "canPromoteRealModelRuntime": true,
+  "validatorState": "real-model-runtime",
+  "failureReasons": [],
+  "runtimeEnvironment": {
+    "os": "Windows",
+    "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+    "driverVersion": "576.02",
+    "cudaToolkitVersion": "12.9",
+    "tensorRtVersion": "10.11.0.33",
+    "precision": "fp32",
+    "nativeBridgeSha256": "74d89fd7e1cb414751ca943298e003ecf48cadcda3e4c1952e5a2d5ba0b0cfc9"
+  },
+  "modelContract": {
+    "input": {
+      "name": "images",
+      "shape": [1, 3, 1024, 1024],
+      "dataType": "float32"
+    },
+    "outputs": [
+      {
+        "name": "output0",
+        "shape": [1, 20, 21504],
+        "role": "detection-rows-with-embedded-obb-angle",
+        "boxChannels": 4,
+        "classCount": 15,
+        "hasObjectness": false,
+        "auxiliaryChannelStart": 19,
+        "angleChannelCount": 1,
+        "angleUnit": "radians",
+        "angleRange": "[-pi/4,3pi/4]",
+        "nms": "class-aware-fast-nms-with-probabilistic-iou"
+      }
+    ]
+  },
+  "runtimeReferenceValidation": {
+    "sourceClassification": "independent-onnxruntime-cpu-execution-provider",
+    "absoluteTolerance": 4.25,
+    "relativeTolerance": 0.05,
+    "coordinateToleranceRationale": "The uniform comparator covers box coordinates, scores, and angles together. The observed TensorRT/ORT coordinate maximum was 3.874451 model pixels; 4.25 closes that backend margin while the independent geometric comparison separately constrains rotated IoU, coordinates, angles, and scores.",
+    "passed": true,
+    "tensors": [
+      {
+        "name": "output0",
+        "referenceSha256": "53f00a488c44227a3e5fbc86b530355acfd0c17cf9fdfc771a6d1f99f72fd65d",
+        "comparedValueCount": 430080,
+        "mismatchCount": 0,
+        "firstMismatchIndex": -1,
+        "maximumAbsoluteError": 3.8744507,
+        "maximumRelativeError": 1.6184211,
+        "passed": true
+      }
+    ]
+  },
+  "obbPostprocessValidation": {
+    "sourceClassification": "independent-ultralytics-pytorch-cpu-reference-and-opencv-geometric-rotated-iou",
+    "referenceSha256": "97e777e1bcecec7fdb3b15e8d4d1e34468505947522c8881c435b484afc10045",
+    "comparisonSha256": "4d784710ea6b4bc8e740b58cecd90ef0031361050a261475c315a54fcf5b2e34",
+    "thresholds": {
+      "minimumRotatedIoU": 0.98,
+      "maximumCoordinateError": 5.0,
+      "maximumAngleErrorRadians": 0.02,
+      "maximumScoreError": 0.03
+    },
+    "predictionCount": 40,
+    "minimumObservedRotatedIoU": 0.997781079208794,
+    "maximumObservedCoordinateError": 0.125662863532682,
+    "maximumObservedAngleErrorRadians": 0.000431748028640766,
+    "maximumObservedScoreError": 0.000523005303192159,
+    "passed": true
+  },
+  "controlledNegativeValidation": {
+    "kind": "single-reference-value-mutation",
+    "mutatedReferenceSha256": "2c54da31a083a8d96a3abd10681db3802bcc58689b9a7ff9565c5f5b4a0a2ff0",
+    "runLogSha256": "74e62bfee16aea68f45ae1cbd3c9378d1f593e8ddfed8c9772a08dd3155d19c2",
+    "mutatedIndex": 0,
+    "delta": 10000.0,
+    "exitCode": 1,
+    "comparedValueCount": 430080,
+    "mismatchCount": 1,
+    "firstMismatchIndex": 0,
+    "completed": true,
+    "passed": false,
+    "failClosed": true
+  },
+  "outputReportValidation": {
+    "state": "yolovision-output-report-ready",
+    "failedBlockers": 0,
+    "reportSha256": "f9548cc7c72b1923b5b2dfbdca8f29455d80ed794a3620c88f4c74058aa4756b",
+    "passed": true
+  },
+  "proofBoundary": {
+    "sourceTreeRealModelRuntime": true,
+    "publicRedistributionApproved": false,
+    "packageConsumerRuntimeProof": false,
+    "publicPackageProof": false,
+    "postPublishProof": false,
+    "ownerReleaseAcceptance": false,
+    "releaseProof": false,
+    "performsPublish": false,
+    "uploadsAssets": false,
+    "notes": "This record proves one source-tree TensorRT OBB run and independent references only. It does not redistribute assets or approve publication/release."
+  }
+}

@@ -103,7 +103,8 @@ public static class YoloRuntimeOutputRoleResolver
             return YoloMultiOutputMetadata.ForPose(keypointCount, keypointStride, auxiliaryChannelStart, auxiliaryLayout);
         }
 
-        if (taskType == YoloTaskType.OrientedBoundingBox && DeclaresAuxiliaryRole(args, YoloOutputTensorRole.ObbAngles))
+        if (taskType == YoloTaskType.OrientedBoundingBox &&
+            (DeclaresAuxiliaryRole(args, YoloOutputTensorRole.ObbAngles) || auxiliaryChannelStart.HasValue))
         {
             bool angleInDegrees = HasSwitch(args, "--angle-degrees") ||
                                   HasSwitch(args, "--obb-angle-degrees") ||

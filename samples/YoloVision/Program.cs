@@ -612,7 +612,8 @@ public static class YoloVisionCommand
         Console.WriteLine("  --segmentation-mask-output-directory <path>  Write hashed prototype/source probability masks, thresholded u8 masks, and a manifest.");
         Console.WriteLine("  --pose-keypoints-output <name>   Pose keypoint tensor name.");
         Console.WriteLine("  --keypoint-count <count>         Pose keypoint count; --keypoint-stride defaults to 3.");
-        Console.WriteLine("  --obb-angle-output <name>        OBB angle tensor name; --angle-degrees or --angle-radians controls units.");
+        Console.WriteLine("  --obb-angle-output <name>        Optional separate OBB angle tensor; embedded angle uses --aux-channel-start.");
+        Console.WriteLine("  --angle-degrees|--angle-radians  OBB angle unit; official YOLOv8 OBB exports use radians.");
         Console.WriteLine("  --aux-channel-start <index>      Optional channel start for auxiliary data embedded in detection rows.");
         Console.WriteLine("  --aux-layout auto|channels-first|boxes-first");
         Console.WriteLine("  --output <path>        Write a YoloVision output JSON report for owner/golden-output review.");

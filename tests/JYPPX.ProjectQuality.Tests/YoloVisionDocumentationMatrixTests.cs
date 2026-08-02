@@ -303,7 +303,7 @@ public sealed class YoloVisionDocumentationMatrixTests
     }
 
     [Fact]
-    public void ObbTutorialIsLongFormAndDoesNotOverclaimRotatedNms()
+    public void ObbTutorialIsLongFormAndDocumentsEmbeddedAnglesAndRotatedNmsEvidence()
     {
         string article = File.ReadAllText(Path.Combine(
             RepositoryPaths.Root,
@@ -325,9 +325,10 @@ public sealed class YoloVisionDocumentationMatrixTests
         foreach (string marker in new[]
         {
             "## 当前实现范围",
-            "没有实现 rotated-IoU NMS",
-            "轴对齐 NMS",
+            "probabilistic-IoU rotated NMS",
+            "Fast-NMS",
             "YoloDetection.SourceIndex",
+            "[1,C,N]",
             "[1,N,1]",
             "[1,1,N]",
             "--angle-degrees",
@@ -340,6 +341,10 @@ public sealed class YoloVisionDocumentationMatrixTests
             "--output-role-map boxes:det,angles:obb-angle",
             "--obb-angle-output angles",
             "--aux-layout boxes-first",
+            "--aux-channel-start 19",
+            "[1,20,21504]",
+            "0.997781",
+            "Mismatches=1",
             "--preflight --strict-preflight",
             "--output-json",
             "--visualization-svg",
@@ -356,7 +361,8 @@ public sealed class YoloVisionDocumentationMatrixTests
         }
 
         Assert.DoesNotContain("--exportProfile", article, StringComparison.Ordinal);
-        Assert.DoesNotContain("已实现 rotated-IoU NMS", article, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("没有实现 rotated-IoU NMS", article, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("当前是 axis-aligned NMS", article, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]

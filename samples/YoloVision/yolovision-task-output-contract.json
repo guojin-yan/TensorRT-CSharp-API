@@ -82,15 +82,16 @@
       "task": "obb",
       "displayName": "Oriented Bounding Box",
       "families": ["yolov8", "yolov11", "yolov26", "custom"],
-      "primaryOutputRoles": ["boxes", "scores", "classes", "angles"],
-      "requiredMetadata": ["inputShape", "outputRoleMap", "classCount", "angleOutput", "angleUnit", "boxFormat"],
-      "optionalMetadata": ["angleRange", "rotatedNmsMode", "clockwisePositive", "graphIncludesNms"],
-      "managedSurface": ["YoloObbDecoder", "YoloObbDetection", "YoloVisionResult.OrientedBoxes"],
+      "primaryOutputRoles": ["detectionWithEmbeddedAngle", "boxes", "angles"],
+      "requiredMetadata": ["inputShape", "classCount", "angleUnit", "boxFormat", "auxiliaryLayout"],
+      "optionalMetadata": ["outputRoleMap", "angleOutput", "auxiliaryChannelStart", "angleRange", "rotatedNmsMode", "clockwisePositive", "graphIncludesNms"],
+      "managedSurface": ["YoloSampleRunner.DecodeEmbeddedObbOutput", "YoloSampleRunner.DecodeObbOutputs", "YoloObbDecoder", "YoloObbDetection", "YoloVisionResult.OrientedBoxes"],
       "tensorRtExecProfileHint": "--minShapes images:1x3x1024x1024 --optShapes images:1x3x1024x1024 --maxShapes images:2x3x1024x1024",
       "articleEntrypoints": [
+        "docs/articles/zh-cn/yolovision-obb-tutorial.md",
         "docs/articles/zh-cn/yolovision-obb-angle-output-guide.md"
       ],
-      "evidenceBoundary": "OBB angle decode is not rotated-box correctness proof until angle metadata, output JSON, log hash, and owner review are provided.",
+      "evidenceBoundary": "The task contract is not runtime proof. One official YOLOv8n OBB source-tree case is separately recorded, while every other model still requires exact angle metadata, independent rotated geometry comparison, output/log hashes, and owner review.",
       "canPromoteRealModelRuntime": false,
       "canPromotePackageConsumerRuntime": false
     },

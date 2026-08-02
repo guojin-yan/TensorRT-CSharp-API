@@ -1,6 +1,6 @@
 # YoloVision
 
-This sample runs a user-provided float YOLO-family ONNX model through TensorRT, including strict named multi-input models, then decodes common output layouts and task profiles. The managed postprocess base now has a unified `YoloVisionResult` path for detection, classification, segmentation, OBB, pose, and semantic segmentation. Detection-style tasks share box decode, score filtering, and class-aware/class-agnostic NMS; classification and semantic segmentation have primary-output decoders; segmentation, OBB, and pose also have pure managed multi-output helpers for model-specific auxiliary tensors.
+This sample runs a user-provided float YOLO-family ONNX model through TensorRT, including strict named multi-input models, then decodes common output layouts and task profiles. The managed postprocess base now has a unified `YoloVisionResult` path for detection, classification, segmentation, OBB, pose, and semantic segmentation. Detection-style tasks share box decode and score filtering; ordinary boxes use axis-aligned NMS while OBB uses probabilistic-IoU rotated Fast-NMS. Classification and semantic segmentation have primary-output decoders; segmentation, OBB, and pose also have pure managed helpers for embedded or separate auxiliary tensors.
 
 - `[1, 84, 8400]` style channel-first output
 - `[1, 8400, 84]` style box-first output
@@ -97,7 +97,7 @@ The matrix currently covers `custom`, YOLOv5/v6/v7/v8/v9/v10/v11/v26, detection-
 | Detection | `det` | Single-output boxes with score filtering and class-aware/class-agnostic NMS | none | runtime-smoke-ready |
 | Classification | `cls` | Single-output logits/top-k classification decoder | none | managed-smoke-ready |
 | Segmentation | `seg` | Detection rows plus mask prototype composition | mask coefficient count, prototype tensor role, optional auxiliary channel start/layout | managed-metadata-ready |
-| Oriented bounding box | `obb` | Detection rows plus angle tensor conversion | angle tensor role, degrees/radians flag, optional auxiliary layout | managed-metadata-ready |
+| Oriented bounding box | `obb` | Embedded or separate angle channels plus probabilistic-IoU rotated Fast-NMS | angle unit and exact auxiliary start/layout, or a separate angle tensor role | source-tree-real-model-runtime |
 | Pose | `pose` | Embedded keypoint channels or a separate keypoint tensor | keypoint count/stride, exact auxiliary start/layout for embedded output | source-tree-real-model-runtime |
 | Semantic segmentation | `sem` | Single-output semantic map decoder | class count and semantic tensor role | managed-smoke-ready |
 
@@ -152,6 +152,8 @@ The repository now carries one audited source-tree real-model case for the offic
 
 The official Ultralytics `v8.3.0` `yolov8n-pose.pt` case is also audited as source-tree `real-model-runtime`. Its ONNX contract is `images:[1,3,640,640] -> output0:[1,56,8400]`: 4 box channels, 1 person class channel, and 17 keypoints with stride 3 starting at channel 5. `DecodeEmbeddedPoseOutput` decodes the detection prefix, preserves `SourceIndex` through NMS, and selects keypoints from the same original candidate. All 470,400 TensorRT values matched the ONNX Runtime CPU reference under the recorded coordinate-aware uniform tolerance; four source-image poses independently matched Ultralytics/PyTorch with minimum box IoU `0.998815` and maximum visible-keypoint error `3.920` pixels. See `samples/assets/yolovision-yolov8n-pose-real-model-runtime-evidence.json` and `docs/articles/zh-cn/yolovision-pose-tutorial.md`. This remains false for asset redistribution, package-consumer, public-package, post-publish, and release proof.
 
+The official Ultralytics `v8.3.0` `yolov8n-obb.pt` case is audited under the same source-tree boundary. Its ONNX contract is `images:[1,3,1024,1024] -> output0:[1,20,21504]`: 4 box channels, 15 DOTA class channels, and one radians angle channel starting at channel 19. `DecodeEmbeddedObbOutput` preserves the source angle and applies class-aware Fast-NMS with Ultralytics-compatible probabilistic IoU. All 430,080 TensorRT values matched an ONNX Runtime CPU reference; 40 source-image ship boxes independently matched Ultralytics/PyTorch with minimum OpenCV geometric rotated IoU `0.997781` and maximum periodic angle error `0.000432` radians. See `samples/assets/yolovision-yolov8n-obb-real-model-runtime-evidence.json` and `docs/articles/zh-cn/yolovision-obb-tutorial.md`. Models, images, tensors, references, and logs remain outside the repository, and public redistribution/package/release claims remain false.
+
 The same pinned case now also passes a repository-external, local-file-feed `PackageReference` consumer using the managed API, YoloVision, and the TRT10/CUDA12.9 bridge-only package. That second record is deliberately separate from the source-tree result and remains false for public-package, post-publish, redistribution, Owner acceptance, and release proof.
 
 Use `--segmentation-mask-output-directory <path>` together with `--mask-spatial-transform` to write deterministic binary mask artifacts plus `segmentation-mask-artifacts.manifest.json`. Each prediction includes hashed prototype-grid float32 probabilities, source-image float32 probabilities, source-image thresholded bytes, class/source index, shapes, counts, box metadata, and proof boundaries. These binaries are comparison inputs, not standalone runtime proof, and are intentionally excluded from Git and packages.
@@ -195,6 +197,7 @@ The command-line runner captures every float output in engine order. For models 
 - `YoloSampleRunner.DecodePoseOutputs(...)`: detection rows plus `[1,N,K*stride]` or `[1,K*stride,N]` keypoint tensor.
 - `YoloSampleRunner.DecodeEmbeddedPoseOutput(...)`: one `[1,C,N]` or `[1,N,C]` tensor whose detection prefix is followed exactly by `K*stride` keypoint channels; unexplained channels fail closed.
 - `YoloSampleRunner.DecodeObbOutputs(...)`: detection rows plus `[1,N,1]` or `[1,1,N]` angle tensor.
+- `YoloSampleRunner.DecodeEmbeddedObbOutput(...)`: one `[1,C,N]` or `[1,N,C]` tensor whose detection prefix is followed by exactly one angle channel; candidates use probabilistic-IoU rotated Fast-NMS.
 - `YoloMultiOutputMetadata`: declares mask coefficient count, keypoint count/stride, angle unit, optional auxiliary channel start, and auxiliary tensor layout.
 
 These helpers keep model-specific ownership outside TensorRT and are covered by managed tests. A real asset manifest must still record the exact output tensor names, shapes, layout, crop/scale rules, and evidence log before the sample is treated as a real demo pass.
@@ -268,8 +271,8 @@ dotnet run --project .\samples\YoloVision -- --model .\models\yolo-cls.onnx --la
 # Segmentation with explicit source-image mask mapping
 dotnet run --project .\samples\YoloVision -- --model .\models\yolo-seg.onnx --labels .\models\coco.names --image .\models\seg.ppm --preprocessed-output .\models\seg-fp32.bin --input-shape 1x3x640x640 --family v8 --task seg --output-role-map output0:det,output1:mask-prototypes --mask-coefficient-count 32 --mask-threshold 0.5 --mask-spatial-transform --mask-coordinate-space model-input --mask-crop-to-box true --segmentation-mask-output-directory .\artifacts\yolovision\segmentation-masks
 
-# Oriented bounding box
-dotnet run --project .\samples\YoloVision -- --model .\models\yolo-obb.onnx --labels .\models\labels.txt --input-data .\models\obb-fp32.bin --input-shape 1x3x1024x1024 --family v8 --task obb --output-role-map boxes:det,angles:obb-angle --obb-angle-output angles
+# Official YOLOv8n OBB single output: 4 box + 15 class + 1 angle channels
+dotnet run --project .\samples\YoloVision -- --model .\models\yolov8n-obb.onnx --labels .\models\dota.names --image .\models\boats.ppm --preprocessed-output .\models\obb-fp32.bin --input-shape 1x3x1024x1024 --family v8 --task obb --class-count 15 --layout channels-first --has-objectness auto --aux-channel-start 19 --aux-layout channels-first --angle-radians --nms-mode class-aware
 
 # Pose
 dotnet run --project .\samples\YoloVision -- --model .\models\yolov8n-pose.onnx --labels .\models\coco.names --image .\models\person.ppm --preprocessed-output .\models\pose-fp32.bin --input-shape 1x3x640x640 --family v8 --task pose --class-count 1 --layout channels-first --has-objectness auto --keypoint-count 17 --keypoint-stride 3 --aux-channel-start 5 --aux-layout channels-first

@@ -968,6 +968,22 @@ public sealed class YoloVisionManagedPipelineTests
     }
 
     [Fact]
+    public void RuntimeOutputRoleResolverCreatesEmbeddedObbMetadataFromAuxiliaryStart()
+    {
+        YoloMultiOutputMetadata? metadata = YoloRuntimeOutputRoleResolver.CreateMetadata(new[]
+        {
+            "--aux-channel-start", "19",
+            "--aux-layout", "channels-first",
+            "--angle-radians"
+        }, YoloTaskType.OrientedBoundingBox);
+
+        Assert.NotNull(metadata);
+        Assert.Equal(19, metadata!.AuxiliaryChannelStart);
+        Assert.Equal(YoloOutputLayout.ChannelsFirst, metadata.AuxiliaryLayout);
+        Assert.False(metadata.ObbAngleInDegrees);
+    }
+
+    [Fact]
     public void ClassAgnosticNmsSuppressesOverlappingBoxesAcrossClasses()
     {
         YoloDetection first = new YoloDetection(0, 0.9f, 10, 10, 4, 4);
@@ -1512,6 +1528,160 @@ public sealed class YoloVisionManagedPipelineTests
         Assert.Equal(2, result.OrientedBoxes.Count);
         Assert.Equal(MathF.PI / 2.0f, result.OrientedBoxes[0].AngleRadians, precision: 5);
         Assert.Equal(MathF.PI / 4.0f, result.OrientedBoxes[1].AngleRadians, precision: 5);
+    }
+
+    [Fact]
+    public void EmbeddedObbChannelsFirstUsesRotatedNmsAndPreservesSourceAngles()
+    {
+        YoloModelProfile profile = YoloModelProfile.FromArgs(new[]
+        {
+            "--family", "v8",
+            "--task", "obb",
+            "--layout", "channels-first",
+            "--class-count", "1",
+            "--has-objectness", "false",
+            "--confidence", "0.25",
+            "--iou-threshold", "0.45",
+            "--top-k", "4"
+        }, labelCount: 0);
+        float[] values =
+        {
+            10, 10, 10,
+            10, 10, 10,
+            10, 10, 10,
+            2, 2, 2,
+            0.9f, 0.8f, 0.7f,
+            0.0f, MathF.PI / 2.0f, 0.0f
+        };
+
+        IReadOnlyList<YoloDetection> axisAligned = YoloSampleRunner.DecodeDetections(values, new[] { 1, 6, 3 }, profile);
+        YoloVisionResult result = YoloSampleRunner.DecodeEmbeddedObbOutput(
+            values,
+            new[] { 1, 6, 3 },
+            profile,
+            YoloMultiOutputMetadata.ForObb(
+                angleInDegrees: false,
+                auxiliaryChannelStart: 5,
+                auxiliaryLayout: YoloOutputLayout.ChannelsFirst));
+
+        Assert.Single(axisAligned);
+        Assert.Equal(2, result.OrientedBoxes.Count);
+        Assert.Equal(new[] { 0, 1 }, result.OrientedBoxes.Select(static item => item.Box.SourceIndex).ToArray());
+        Assert.Equal(0.0f, result.OrientedBoxes[0].AngleRadians, precision: 5);
+        Assert.Equal(MathF.PI / 2.0f, result.OrientedBoxes[1].AngleRadians, precision: 5);
+    }
+
+    [Fact]
+    public void RuntimeOutputSetFallsBackToEmbeddedBoxesFirstObbAngle()
+    {
+        YoloModelProfile profile = YoloModelProfile.FromArgs(new[]
+        {
+            "--family", "v8",
+            "--task", "obb",
+            "--layout", "boxes-first",
+            "--class-count", "1",
+            "--has-objectness", "false",
+            "--confidence", "0.25",
+            "--top-k", "4",
+            "--no-nms"
+        }, labelCount: 0);
+        YoloRuntimeOutputSet outputs = new YoloRuntimeOutputSet(new[]
+        {
+            new YoloRuntimeOutputTensor(
+                "output0",
+                YoloOutputTensorRole.Detection,
+                new[] { 10, 10, 4, 2, 0.6f, 0.25f, 20, 20, 6, 3, 0.95f, 0.75f },
+                new[] { 1, 2, 6 })
+        });
+
+        YoloVisionResult result = YoloSampleRunner.DecodeRuntimeOutputs(
+            outputs,
+            profile,
+            YoloMultiOutputMetadata.ForObb(
+                angleInDegrees: false,
+                auxiliaryChannelStart: 5,
+                auxiliaryLayout: YoloOutputLayout.BoxesFirst));
+
+        Assert.Equal(2, result.OrientedBoxes.Count);
+        Assert.Equal(1, result.OrientedBoxes[0].Box.SourceIndex);
+        Assert.Equal(0.75f, result.OrientedBoxes[0].AngleRadians, precision: 5);
+        Assert.Equal(0, result.OrientedBoxes[1].Box.SourceIndex);
+        Assert.Equal(0.25f, result.OrientedBoxes[1].AngleRadians, precision: 5);
+    }
+
+    [Fact]
+    public void ObbProbabilisticIouMatchesUltralyticsFixture()
+    {
+        YoloObbDetection horizontal = YoloObbDecoder.Decode(new YoloDetection(0, 0.9f, 0, 0, 10, 2), 0.0f, angleInDegrees: false);
+        YoloObbDetection vertical = YoloObbDecoder.Decode(new YoloDetection(0, 0.8f, 0, 0, 10, 2), MathF.PI / 2.0f, angleInDegrees: false);
+        YoloObbDetection offset = YoloObbDecoder.Decode(new YoloDetection(0, 0.7f, 3, 4, 6, 8), 0.3f, angleInDegrees: false);
+        YoloObbDetection comparison = YoloObbDecoder.Decode(new YoloDetection(0, 0.6f, 4, 6, 7, 3), -0.2f, angleInDegrees: false);
+
+        Assert.Equal(0.9995318f, YoloObbDecoder.ProbabilisticIntersectionOverUnion(horizontal, horizontal), precision: 5);
+        Assert.Equal(0.2155354f, YoloObbDecoder.ProbabilisticIntersectionOverUnion(horizontal, vertical), precision: 5);
+        Assert.Equal(0.4057279f, YoloObbDecoder.ProbabilisticIntersectionOverUnion(offset, comparison), precision: 5);
+        Assert.Throws<InvalidOperationException>(() => YoloObbDecoder.Decode(horizontal.Box, float.NaN, angleInDegrees: false));
+    }
+
+    [Fact]
+    public void ObbRotatedNmsPreservesOrSuppressesOverlapsAccordingToClassMode()
+    {
+        YoloObbDetection first = YoloObbDecoder.Decode(new YoloDetection(0, 0.9f, 10, 10, 8, 2), 0.25f, angleInDegrees: false);
+        YoloObbDetection otherClass = YoloObbDecoder.Decode(new YoloDetection(1, 0.8f, 10, 10, 8, 2), 0.25f, angleInDegrees: false);
+
+        IReadOnlyList<YoloObbDetection> classAware = YoloObbDecoder.ApplyFastNms(new[] { first, otherClass }, 0.45f, classAware: true);
+        IReadOnlyList<YoloObbDetection> classAgnostic = YoloObbDecoder.ApplyFastNms(new[] { first, otherClass }, 0.45f, classAware: false);
+
+        Assert.Equal(2, classAware.Count);
+        Assert.Single(classAgnostic);
+        Assert.Equal(0, classAgnostic[0].Box.ClassIndex);
+    }
+
+    [Fact]
+    public void EmbeddedObbRejectsAmbiguousAuxiliaryContracts()
+    {
+        YoloModelProfile profile = YoloModelProfile.FromArgs(new[]
+        {
+            "--family", "v8",
+            "--task", "obb",
+            "--layout", "channels-first",
+            "--class-count", "1",
+            "--has-objectness", "false",
+            "--confidence", "0.25",
+            "--no-nms"
+        }, labelCount: 0);
+        float[] values = new float[12];
+
+        Assert.Throws<NotSupportedException>(() => YoloSampleRunner.DecodeEmbeddedObbOutput(
+            values,
+            new[] { 1, 6, 2 },
+            profile,
+            YoloMultiOutputMetadata.ForObb(false, auxiliaryChannelStart: 4, auxiliaryLayout: YoloOutputLayout.ChannelsFirst)));
+        Assert.Throws<NotSupportedException>(() => YoloSampleRunner.DecodeEmbeddedObbOutput(
+            values,
+            new[] { 1, 6, 2 },
+            profile,
+            YoloMultiOutputMetadata.ForObb(false, auxiliaryChannelStart: 5, auxiliaryLayout: YoloOutputLayout.BoxesFirst)));
+        Assert.Throws<NotSupportedException>(() => YoloSampleRunner.DecodeEmbeddedObbOutput(
+            new float[14],
+            new[] { 1, 7, 2 },
+            profile,
+            YoloMultiOutputMetadata.ForObb(false, auxiliaryChannelStart: 5, auxiliaryLayout: YoloOutputLayout.ChannelsFirst)));
+
+        YoloModelProfile unknownClassCount = YoloModelProfile.FromArgs(new[]
+        {
+            "--family", "v8",
+            "--task", "obb",
+            "--layout", "channels-first",
+            "--class-count", "0",
+            "--has-objectness", "false",
+            "--no-nms"
+        }, labelCount: 0);
+        Assert.Throws<NotSupportedException>(() => YoloSampleRunner.DecodeEmbeddedObbOutput(
+            values,
+            new[] { 1, 6, 2 },
+            unknownClassCount,
+            YoloMultiOutputMetadata.ForObb(false, auxiliaryChannelStart: 5, auxiliaryLayout: YoloOutputLayout.ChannelsFirst)));
     }
 
     [Fact]

@@ -230,7 +230,7 @@ public static class YoloSampleRunner
             throw new ArgumentNullException(nameof(metadata));
         }
 
-        YoloModelProfile detectionProfile = CreateDetectionProfile(profile);
+        YoloModelProfile detectionProfile = CreateObbCandidateProfile(CreateDetectionProfile(profile));
         IReadOnlyList<YoloDetection> detections = DecodeDetections(boxValues, boxShape, detectionProfile);
         float[][] angleRows = ReadAuxiliaryRows(angleValues, angleShape, 1, metadata.AuxiliaryLayout);
 
@@ -245,7 +245,57 @@ public static class YoloSampleRunner
             orientedBoxes.Add(YoloObbDecoder.Decode(detection, angleRows[detection.SourceIndex][0], metadata.ObbAngleInDegrees));
         }
 
-        return YoloVisionResult.FromOrientedBoxes(orientedBoxes, "Decoded oriented boxes from detection rows and angle tensor.");
+        return YoloVisionResult.FromOrientedBoxes(
+            ApplyObbPostprocess(orientedBoxes, profile.Postprocess),
+            "Decoded oriented boxes from detection rows and angle tensor using probabilistic-IoU rotated NMS.");
+    }
+
+    public static YoloVisionResult DecodeEmbeddedObbOutput(
+        float[] values,
+        int[] outputShape,
+        YoloModelProfile profile,
+        YoloMultiOutputMetadata metadata)
+    {
+        if (metadata == null)
+        {
+            throw new ArgumentNullException(nameof(metadata));
+        }
+
+        const int angleWidth = 1;
+        YoloModelProfile detectionProfile = CreateObbCandidateProfile(
+            CreateDetectionProfileForAuxiliary(profile, outputShape, angleWidth));
+        int channelStart = ValidateEmbeddedAuxiliaryContract(
+            outputShape,
+            detectionProfile.Postprocess,
+            metadata,
+            angleWidth,
+            "OBB angle");
+        IReadOnlyList<YoloDetection> detections = DecodeDetections(values, outputShape, detectionProfile);
+        float[][] angleRows = ReadPerBoxAuxiliaryRows(
+            values,
+            outputShape,
+            detectionProfile.Postprocess,
+            channelStart,
+            angleWidth,
+            metadata.AuxiliaryLayout);
+
+        List<YoloObbDetection> orientedBoxes = new List<YoloObbDetection>();
+        foreach (YoloDetection detection in detections)
+        {
+            if (detection.SourceIndex < 0 || detection.SourceIndex >= angleRows.Length)
+            {
+                continue;
+            }
+
+            orientedBoxes.Add(YoloObbDecoder.Decode(
+                detection,
+                angleRows[detection.SourceIndex][0],
+                metadata.ObbAngleInDegrees));
+        }
+
+        return YoloVisionResult.FromOrientedBoxes(
+            ApplyObbPostprocess(orientedBoxes, profile.Postprocess),
+            "Decoded oriented boxes from angle channels embedded in the detection tensor using probabilistic-IoU rotated NMS.");
     }
 
     private static YoloVisionResult DecodeSingleRoleOutput(YoloRuntimeOutputSet outputs, YoloModelProfile profile, YoloOutputTensorRole role)
@@ -288,8 +338,10 @@ public static class YoloSampleRunner
         }
 
         YoloRuntimeOutputTensor detection = outputs.GetRequired(YoloOutputTensorRole.Detection);
-        YoloRuntimeOutputTensor angles = outputs.GetRequired(YoloOutputTensorRole.ObbAngles);
-        return DecodeObbOutputs(detection.Values, detection.Shape, angles.Values, angles.Shape, profile, metadata);
+        YoloRuntimeOutputTensor? angles = outputs.TryGet(YoloOutputTensorRole.ObbAngles);
+        return angles == null
+            ? DecodeEmbeddedObbOutput(detection.Values, detection.Shape, profile, metadata)
+            : DecodeObbOutputs(detection.Values, detection.Shape, angles.Values, angles.Shape, profile, metadata);
     }
 
     public static IReadOnlyList<YoloClassificationPrediction> DecodeClassifications(
@@ -440,6 +492,49 @@ public static class YoloSampleRunner
             postprocess);
     }
 
+    private static YoloModelProfile CreateObbCandidateProfile(YoloModelProfile profile)
+    {
+        YoloPostprocessOptions source = profile.Postprocess;
+        YoloPostprocessOptions candidatePostprocess = new YoloPostprocessOptions(
+            source.Layout,
+            source.HasObjectness,
+            source.ClassCount,
+            source.ConfidenceThreshold,
+            source.IouThreshold,
+            int.MaxValue,
+            applyNms: false,
+            nmsMode: YoloNmsMode.None);
+        return new YoloModelProfile(
+            profile.Family,
+            YoloTaskType.Detection,
+            profile.InputName,
+            profile.OutputName,
+            profile.InputShape,
+            profile.Preprocess,
+            candidatePostprocess);
+    }
+
+    private static IReadOnlyList<YoloObbDetection> ApplyObbPostprocess(
+        IEnumerable<YoloObbDetection> detections,
+        YoloPostprocessOptions postprocess)
+    {
+        IReadOnlyList<YoloObbDetection> ranked = detections
+            .OrderByDescending(static item => item.Box.Score)
+            .ToArray();
+        if (postprocess.ApplyNms && postprocess.NmsMode != YoloNmsMode.None)
+        {
+            ranked = YoloObbDecoder.ApplyFastNms(
+                ranked,
+                postprocess.IouThreshold,
+                classAware: postprocess.NmsMode != YoloNmsMode.ClassAgnostic);
+        }
+
+        return ranked
+            .OrderByDescending(static item => item.Box.Score)
+            .Take(postprocess.TopK)
+            .ToArray();
+    }
+
     private static bool InferHasObjectnessForAuxiliary(int[] outputShape, YoloPostprocessOptions postprocess, int auxiliaryWidth)
     {
         if (postprocess.ClassCount <= 0)
@@ -507,11 +602,12 @@ public static class YoloSampleRunner
         int[] outputShape,
         YoloPostprocessOptions postprocess,
         YoloMultiOutputMetadata metadata,
-        int auxiliaryWidth)
+        int auxiliaryWidth,
+        string auxiliaryName = "pose keypoint")
     {
         if (postprocess.ClassCount <= 0)
         {
-            throw new NotSupportedException("Embedded pose output requires a known class count so detection and keypoint channels cannot be confused.");
+            throw new NotSupportedException($"Embedded {auxiliaryName} output requires a known class count so detection and auxiliary channels cannot be confused.");
         }
 
         YoloOutputLayout detectionLayout = YoloOutputLayoutInference.InferRank3(outputShape, postprocess.Layout);
@@ -521,7 +617,7 @@ public static class YoloSampleRunner
         YoloOutputLayout auxiliaryLayout = YoloOutputLayoutInference.InferRank3(outputShape, requestedAuxiliaryLayout);
         if (auxiliaryLayout != detectionLayout)
         {
-            throw new NotSupportedException("Embedded pose keypoints must use the same tensor layout as the detection channels.");
+            throw new NotSupportedException($"Embedded {auxiliaryName} channels must use the same tensor layout as the detection channels.");
         }
 
         int channelCount = detectionLayout == YoloOutputLayout.ChannelsFirst ? outputShape[1] : outputShape[2];
@@ -530,12 +626,12 @@ public static class YoloSampleRunner
         int channelStart = metadata.AuxiliaryChannelStart ?? expectedChannelStart;
         if (channelStart != expectedChannelStart)
         {
-            throw new NotSupportedException($"Embedded pose auxiliary channel start {channelStart} does not match the detection prefix width {expectedChannelStart}.");
+            throw new NotSupportedException($"Embedded {auxiliaryName} channel start {channelStart} does not match the detection prefix width {expectedChannelStart}.");
         }
 
         if (channelStart + auxiliaryWidth != channelCount)
         {
-            throw new NotSupportedException($"Embedded pose output has {channelCount} channels, but detection prefix {channelStart} and keypoint width {auxiliaryWidth} require exactly {channelStart + auxiliaryWidth}.");
+            throw new NotSupportedException($"Embedded {auxiliaryName} output has {channelCount} channels, but detection prefix {channelStart} and auxiliary width {auxiliaryWidth} require exactly {channelStart + auxiliaryWidth}.");
         }
 
         return channelStart;

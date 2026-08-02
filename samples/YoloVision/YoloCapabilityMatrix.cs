@@ -69,7 +69,7 @@ public static class YoloCapabilityMatrix
         (YoloTaskType.Detection, "det", "single-output boxes with score filtering and class-aware/class-agnostic NMS", "none", "runtime-smoke-ready"),
         (YoloTaskType.Classification, "cls", "single-output logits/top-k classification decoder", "none", "managed-smoke-ready"),
         (YoloTaskType.Segmentation, "seg", "detection rows plus mask prototype composition", "mask coefficient count, prototype tensor role, optional auxiliary channel start/layout", "managed-metadata-ready"),
-        (YoloTaskType.OrientedBoundingBox, "obb", "detection rows plus angle tensor conversion", "angle tensor role, degrees/radians flag, optional auxiliary layout", "managed-metadata-ready"),
+        (YoloTaskType.OrientedBoundingBox, "obb", "embedded or separate angle channels plus probabilistic-IoU rotated Fast-NMS", "angle unit and exact auxiliary start/layout for embedded output, or a separate angle tensor role", "source-tree-real-model-runtime"),
         (YoloTaskType.Pose, "pose", "detection rows plus keypoint tensor mapping", "keypoint count, keypoint stride, optional auxiliary layout", "managed-metadata-ready"),
         (YoloTaskType.SemanticSegmentation, "sem", "single-output semantic map decoder", "class count and semantic tensor role", "managed-smoke-ready")
     };
