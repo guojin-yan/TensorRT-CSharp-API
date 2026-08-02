@@ -437,6 +437,12 @@ public static class YoloSampleRunner
         if (outputShape.Length == 3)
         {
             int classes = outputShape[0];
+            if (configuredClassCount > 0 && classes != configuredClassCount)
+            {
+                throw new ArgumentException(
+                    $"Semantic output class dimension {classes} does not match configured class count {configuredClassCount}.",
+                    nameof(outputShape));
+            }
             int height = outputShape[1];
             int width = outputShape[2];
             return new YoloSemanticMap(classes, width, height, (float[])values.Clone());
@@ -447,15 +453,31 @@ public static class YoloSampleRunner
             throw new NotSupportedException("Semantic segmentation output is expected to be [1,C,H,W], [1,H,W,C], or [C,H,W].");
         }
 
-        if (configuredClassCount > 0 && outputShape[3] == configuredClassCount && outputShape[1] != configuredClassCount)
+        if (configuredClassCount <= 0)
+        {
+            throw new ArgumentException(
+                "Semantic rank-4 output requires an explicit positive class count to distinguish NCHW from NHWC.",
+                nameof(profile));
+        }
+
+        bool matchesNchw = outputShape[1] == configuredClassCount;
+        bool matchesNhwc = outputShape[3] == configuredClassCount;
+        if (matchesNchw == matchesNhwc)
+        {
+            string reason = matchesNchw ? "is ambiguous" : "does not match either class dimension";
+            throw new ArgumentException(
+                $"Semantic output shape {string.Join('x', outputShape)} {reason} for configured class count {configuredClassCount}.",
+                nameof(outputShape));
+        }
+
+        if (matchesNhwc)
         {
             return DecodeNhwcSemanticMap(values, outputShape);
         }
 
-        int classCount = outputShape[1];
         int heightNchw = outputShape[2];
         int widthNchw = outputShape[3];
-        return new YoloSemanticMap(classCount, widthNchw, heightNchw, (float[])values.Clone());
+        return new YoloSemanticMap(configuredClassCount, widthNchw, heightNchw, (float[])values.Clone());
     }
 
     private static int GetClassificationClassCount(float[] values, int[] outputShape, YoloModelProfile profile)

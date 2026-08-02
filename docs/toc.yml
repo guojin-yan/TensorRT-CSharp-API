@@ -234,8 +234,10 @@
     href: articles/zh-cn/yolovision-yolov8-seg-local-package-consumer-tutorial.md
   - name: YoloVision Managed Extension Publication Dry-Run
     href: articles/zh-cn/yolovision-managed-package-publication-dry-run.md
-  - name: YoloVision YOLOv8n Semantic Segmentation Map Guide
+  - name: YoloVision LRASPP Semantic Segmentation Map Guide
     href: articles/zh-cn/yolovision-semantic-segmentation-map-guide.md
+  - name: Demo Model Acquisition And ONNX Conversion
+    href: articles/zh-cn/demo-model-acquisition-and-onnx-conversion.md
   - name: Sample Asset Manifest Guide
     href: articles/zh-cn/sample-asset-manifest-guide.md
   - name: Sample Asset Acquisition Plan

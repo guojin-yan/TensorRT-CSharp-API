@@ -1,0 +1,286 @@
+{
+  "schemaVersion": 1,
+  "recordKind": "demo-model-acquisition-and-onnx-inventory",
+  "workspaceModelRoot": "E:/GitSpace/TensorRT-CSharp-API-4.0/models",
+  "materializationScript": "eng/Sync-DemoOnnxModels.ps1",
+  "policy": {
+    "modelRootOutsideGitRepository": true,
+    "onnxFilesTrackedByGit": false,
+    "uploadsModelFiles": false,
+    "publishesModelFiles": false,
+    "futureDestination": "separate-model-zoo",
+    "cudaCudnnTensorRtNvrtcBundled": false
+  },
+  "models": [
+    {
+      "id": "classification-resnet18-imagenet1k-v1",
+      "sampleNames": ["Classification"],
+      "task": "image-classification",
+      "license": "BSD-3-Clause source; pretrained-weight redistribution remains owner-review-required",
+      "acquisition": {
+        "kind": "official-weights",
+        "sourceUrl": "https://download.pytorch.org/models/resnet18-f37072fd.pth",
+        "pinnedRevision": "torchvision-v0.25.0@8ac84ee75afb1c327902156b5336f56ad63b7e2f",
+        "script": "eng/Acquire-TorchVisionResNet18OfficialAssets.ps1"
+      },
+      "conversion": {
+        "kind": "local-weight-export",
+        "command": "python eng/Export-ClassificationResNet18Onnx.py --weights <downloads>/resnet18-f37072fd.pth --onnx <models>/resnet18-imagenet1k-v1.onnx --labels <models>/imagenet1k.names --report <models>/resnet18-onnx-export.json",
+        "toolchain": "PyTorch 2.10.0+cpu; torchvision 0.25.0+cpu; opset 17"
+      },
+      "onnx": {
+        "workspaceRelativePath": "models/Classification/resnet18-torchvision-v0.25.0/resnet18-imagenet1k-v1.onnx",
+        "expectedLength": 46748553,
+        "sha256": "ead3558569edd88aa73a4eb46acbe6c38dee113933234547f04a0f6e48169903",
+        "trackedByGit": false
+      },
+      "articles": [
+        "docs/articles/zh-cn/demo-model-acquisition-and-onnx-conversion.md",
+        "docs/articles/zh-cn/classification-real-asset-walkthrough.md"
+      ]
+    },
+    {
+      "id": "onnxtoengine-nvidia-mnist-opset8",
+      "sampleNames": ["OnnxToEngine", "Mnist.OnnxRuntimeReference", "TensorRtExec"],
+      "task": "digit-classification",
+      "license": "NVIDIA TensorRT sample-data terms; source README attributes the ONNX to ONNX Model Zoo",
+      "acquisition": {
+        "kind": "user-installed-tensorrt-sample-data",
+        "sourceUrl": "https://github.com/onnx/models/tree/main/validated/vision/classification/mnist",
+        "pinnedRevision": "TensorRT-10.11.0.33-sample-data",
+        "script": "eng/Test-TensorRtExecMnistOnnxRuntimeReference.ps1"
+      },
+      "conversion": {
+        "kind": "upstream-onnx-no-local-conversion",
+        "command": "Copy mnist.onnx from the user-installed TensorRT data/mnist directory; no local framework-to-ONNX conversion is performed.",
+        "toolchain": "upstream ONNX opset 8"
+      },
+      "onnx": {
+        "workspaceRelativePath": "models/OnnxToEngine/MNIST/nvidia-tensorrt-10.11/mnist.onnx",
+        "expectedLength": 26454,
+        "sha256": "2f06e72de813a8635c9bc0397ac447a601bdbfa7df4bebc278723b958831c9bf",
+        "trackedByGit": false
+      },
+      "articles": [
+        "docs/articles/zh-cn/demo-model-acquisition-and-onnx-conversion.md",
+        "docs/articles/zh-cn/tensorrtexec-onnx-stripped-plan-refit-lifecycle.md"
+      ]
+    },
+    {
+      "id": "yolovision-yolov8n-detection-v8.3.0",
+      "sampleNames": ["YoloVision"],
+      "task": "object-detection",
+      "license": "AGPL-3.0-only; public redistribution owner approval is false",
+      "acquisition": {
+        "kind": "official-weights",
+        "sourceUrl": "https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8n.pt",
+        "pinnedRevision": "ultralytics-v8.3.0@6e43d1e1e5db72afbf686dee6745669bcb124b0a",
+        "script": "eng/Acquire-YoloV8DetectionOfficialAssets.ps1"
+      },
+      "conversion": {
+        "kind": "local-weight-export",
+        "command": "yolo export model=yolov8n.pt format=onnx imgsz=640 opset=17 simplify=True dynamic=False batch=1 device=cpu",
+        "toolchain": "Ultralytics 8.4.21; opset 17"
+      },
+      "onnx": {
+        "workspaceRelativePath": "models/YoloVision/Detection/yolov8n-ultralytics-v8.3.0/yolov8n.onnx",
+        "expectedLength": 12851047,
+        "sha256": "db28a49ffbb0425f39ae56252e7e0b43d06b357416c7da58872e285560b4221e",
+        "trackedByGit": false
+      },
+      "articles": [
+        "docs/articles/zh-cn/demo-model-acquisition-and-onnx-conversion.md",
+        "docs/articles/zh-cn/yolovision-detection-yolov8n-download-export-run.md"
+      ]
+    },
+    {
+      "id": "yolovision-yolov10n-detection-v1.1",
+      "sampleNames": ["YoloVision"],
+      "task": "end-to-end-object-detection",
+      "license": "AGPL-3.0-only; public redistribution owner approval is false",
+      "acquisition": {
+        "kind": "official-onnx-release",
+        "sourceUrl": "https://github.com/THU-MIG/yolov10/releases/download/v1.1/yolov10n.onnx",
+        "pinnedRevision": "v1.1@799ff3be47d21173bcf29b351820d4b8e955e0fe",
+        "script": "eng/Acquire-YoloV10OfficialAssets.ps1"
+      },
+      "conversion": {
+        "kind": "upstream-onnx-no-local-conversion",
+        "command": "Use the hash-pinned official v1.1 ONNX release asset; no local conversion is required.",
+        "toolchain": "upstream release ONNX"
+      },
+      "onnx": {
+        "workspaceRelativePath": "models/YoloVision/Detection/yolov10n-thu-mig-v1.1/yolov10n.onnx",
+        "expectedLength": 9386466,
+        "sha256": "7025ea1913f9a259cf8a8465ed608e10610d1bb376db2e0348b13e3bd286e0d3",
+        "trackedByGit": false
+      },
+      "articles": [
+        "docs/articles/zh-cn/demo-model-acquisition-and-onnx-conversion.md",
+        "docs/articles/zh-cn/yolovision-yolov10-end-to-end-output-guide.md"
+      ]
+    },
+    {
+      "id": "yolovision-yolox-s-detection-0.1.1rc0",
+      "sampleNames": ["YoloVision"],
+      "task": "object-detection",
+      "license": "Apache-2.0; public redistribution owner approval is false",
+      "acquisition": {
+        "kind": "official-onnx-release",
+        "sourceUrl": "https://github.com/Megvii-BaseDetection/YOLOX/releases/download/0.1.1rc0/yolox_s.onnx",
+        "pinnedRevision": "0.1.1rc0@e1052df71842031413f6030723c3607b839c80ce",
+        "script": "eng/Acquire-YoloXOfficialAssets.ps1"
+      },
+      "conversion": {
+        "kind": "upstream-onnx-no-local-conversion",
+        "command": "Use the official ONNX release asset; upstream reproduction command: python3 tools/export_onnx.py --output-name yolox_s.onnx -n yolox-s -c yolox_s.pth",
+        "toolchain": "upstream YOLOX exporter; opset 11 release graph"
+      },
+      "onnx": {
+        "workspaceRelativePath": "models/YoloVision/Detection/yolox-s-megvii-v0.1.1rc0/yolox_s.onnx",
+        "expectedLength": 35858002,
+        "sha256": "c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063",
+        "trackedByGit": false
+      },
+      "articles": [
+        "docs/articles/zh-cn/demo-model-acquisition-and-onnx-conversion.md",
+        "docs/articles/zh-cn/yolovision-yolox-official-runtime-tutorial.md"
+      ]
+    },
+    {
+      "id": "yolovision-yolov8n-classification-v8.3.0",
+      "sampleNames": ["YoloVision"],
+      "task": "image-classification",
+      "license": "AGPL-3.0-only; public redistribution owner approval is false",
+      "acquisition": {
+        "kind": "official-weights",
+        "sourceUrl": "https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8n-cls.pt",
+        "pinnedRevision": "ultralytics-v8.3.0@6e43d1e1e5db72afbf686dee6745669bcb124b0a",
+        "script": "eng/Acquire-YoloV8ClassificationOfficialAssets.ps1"
+      },
+      "conversion": {
+        "kind": "local-weight-export",
+        "command": "yolo export model=yolov8n-cls.pt format=onnx imgsz=224 opset=17 simplify=True dynamic=False batch=1 device=cpu",
+        "toolchain": "Ultralytics 8.4.21; opset 17"
+      },
+      "onnx": {
+        "workspaceRelativePath": "models/YoloVision/Classification/yolov8n-cls-ultralytics-v8.3.0/yolov8n-cls.onnx",
+        "expectedLength": 10911331,
+        "sha256": "630c022a99885d59f633ab5a614738f8a49be7f361e340fd3ff89b8c19b0768f",
+        "trackedByGit": false
+      },
+      "articles": [
+        "docs/articles/zh-cn/demo-model-acquisition-and-onnx-conversion.md",
+        "docs/articles/zh-cn/yolovision-classification-yolov8n-labels-topk-guide.md"
+      ]
+    },
+    {
+      "id": "yolovision-yolov8n-instance-segmentation-v8.3.0",
+      "sampleNames": ["YoloVision"],
+      "task": "instance-segmentation",
+      "license": "AGPL-3.0-only; public redistribution owner approval is false",
+      "acquisition": {
+        "kind": "official-weights",
+        "sourceUrl": "https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8n-seg.pt",
+        "pinnedRevision": "ultralytics-v8.3.0@6e43d1e1e5db72afbf686dee6745669bcb124b0a",
+        "script": "eng/Acquire-YoloV8SegOfficialAssets.ps1"
+      },
+      "conversion": {
+        "kind": "local-weight-export",
+        "command": "yolo export model=yolov8n-seg.pt format=onnx imgsz=640 opset=17 simplify=True dynamic=False batch=1 device=cpu",
+        "toolchain": "Ultralytics 8.4.21; opset 17"
+      },
+      "onnx": {
+        "workspaceRelativePath": "models/YoloVision/InstanceSegmentation/yolov8n-seg-ultralytics-v8.3.0/yolov8n-seg.onnx",
+        "expectedLength": 13873432,
+        "sha256": "08b5c61368d4ddec5e647522fc55a93c42a9e0c581770aae48b87bba65a9b21d",
+        "trackedByGit": false
+      },
+      "articles": [
+        "docs/articles/zh-cn/demo-model-acquisition-and-onnx-conversion.md",
+        "docs/articles/zh-cn/yolovision-yolov8-seg-real-asset-tutorial.md"
+      ]
+    },
+    {
+      "id": "yolovision-yolov8n-pose-v8.3.0",
+      "sampleNames": ["YoloVision"],
+      "task": "pose-estimation",
+      "license": "AGPL-3.0-only; public redistribution owner approval is false",
+      "acquisition": {
+        "kind": "official-weights",
+        "sourceUrl": "https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8n-pose.pt",
+        "pinnedRevision": "ultralytics-v8.3.0@6e43d1e1e5db72afbf686dee6745669bcb124b0a",
+        "script": "eng/Acquire-YoloV8PoseOfficialAssets.ps1"
+      },
+      "conversion": {
+        "kind": "local-weight-export",
+        "command": "yolo export model=yolov8n-pose.pt format=onnx imgsz=640 opset=17 simplify=True dynamic=False batch=1 device=cpu",
+        "toolchain": "Ultralytics 8.4.21; opset 17"
+      },
+      "onnx": {
+        "workspaceRelativePath": "models/YoloVision/Pose/yolov8n-pose-ultralytics-v8.3.0/yolov8n-pose.onnx",
+        "expectedLength": 13514570,
+        "sha256": "ed1e8d2d2aeb8a2c66e642a16295a72a2990393e3a3843325537da7e11c8a899",
+        "trackedByGit": false
+      },
+      "articles": [
+        "docs/articles/zh-cn/demo-model-acquisition-and-onnx-conversion.md",
+        "docs/articles/zh-cn/yolovision-pose-tutorial.md"
+      ]
+    },
+    {
+      "id": "yolovision-yolov8n-obb-v8.3.0",
+      "sampleNames": ["YoloVision"],
+      "task": "oriented-object-detection",
+      "license": "AGPL-3.0-only; public redistribution owner approval is false",
+      "acquisition": {
+        "kind": "official-weights",
+        "sourceUrl": "https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8n-obb.pt",
+        "pinnedRevision": "ultralytics-v8.3.0@6e43d1e1e5db72afbf686dee6745669bcb124b0a",
+        "script": "eng/Acquire-YoloV8ObbOfficialAssets.ps1"
+      },
+      "conversion": {
+        "kind": "local-weight-export",
+        "command": "yolo export model=yolov8n-obb.pt format=onnx imgsz=1024 opset=17 simplify=True dynamic=False batch=1 device=cpu",
+        "toolchain": "Ultralytics 8.4.21; opset 17"
+      },
+      "onnx": {
+        "workspaceRelativePath": "models/YoloVision/OrientedBoundingBox/yolov8n-obb-ultralytics-v8.3.0/yolov8n-obb.onnx",
+        "expectedLength": 12664838,
+        "sha256": "5f2701ef5326fb5a691999438cfc55a69656323c21ffddebaff8968ab6de2e92",
+        "trackedByGit": false
+      },
+      "articles": [
+        "docs/articles/zh-cn/demo-model-acquisition-and-onnx-conversion.md",
+        "docs/articles/zh-cn/yolovision-obb-tutorial.md"
+      ]
+    },
+    {
+      "id": "yolovision-lraspp-mobilenet-v3-large-v0.25.0",
+      "sampleNames": ["YoloVision"],
+      "task": "semantic-segmentation",
+      "license": "BSD-3-Clause source; public redistribution owner approval is false",
+      "acquisition": {
+        "kind": "official-weights",
+        "sourceUrl": "https://download.pytorch.org/models/lraspp_mobilenet_v3_large-d234d4ea.pth",
+        "pinnedRevision": "torchvision-v0.25.0@8ac84ee75afb1c327902156b5336f56ad63b7e2f",
+        "script": "eng/Acquire-TorchVisionLrasppOfficialAssets.ps1"
+      },
+      "conversion": {
+        "kind": "local-weight-export",
+        "command": "python eng/Invoke-YoloVisionSemanticReference.py --weights <models>/lraspp_mobilenet_v3_large-d234d4ea.pth --image <downloads>/dog.jpg --onnx <models>/lraspp-mobilenet-v3-large-320.onnx --output-directory <artifacts> --export-onnx",
+        "toolchain": "PyTorch 2.10.0+cpu; torchvision 0.25.0+cpu; opset 17"
+      },
+      "onnx": {
+        "workspaceRelativePath": "models/YoloVision/SemanticSegmentation/lraspp-mobilenet-v3-large-torchvision-v0.25.0/lraspp-mobilenet-v3-large-320.onnx",
+        "expectedLength": 12879801,
+        "sha256": "3cb94e561bdefe606ed7d1a2c4d0296409bec066f3a39a9fe9dabd72b23728f8",
+        "trackedByGit": false
+      },
+      "articles": [
+        "docs/articles/zh-cn/demo-model-acquisition-and-onnx-conversion.md",
+        "docs/articles/zh-cn/yolovision-semantic-segmentation-map-guide.md"
+      ]
+    }
+  ]
+}

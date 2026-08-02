@@ -1,4 +1,4 @@
-# Classification 真实资产接入教程：从 ResNet18 候选到可审计运行证据
+# Classification 真实资产接入教程：从 ResNet18 获取和 ONNX 转换到可审计运行证据
 
 `samples/Classification` 是一个真实可运行的分类样例，但仓库不会内置模型、labels 或图片。原因很直接：权重、ImageNet labels、测试图片各自有许可证和体积边界。本文给出 owner 侧完整接入路径，让你把一个分类模型从“候选资产”推进到“可审计的真实模型 runtime 证据”，同时不把未实跑内容写成 smoke passed。
 
@@ -11,17 +11,47 @@
 - 什么时候可以把 manifest 改成 `real-model-runtime`。
 - 如何让 release evidence bundle 看到 Classification 仍是 owner action required，或者看到它已经有真实 runner 证据。
 
-## 候选模型
+## 模型获取与 ONNX 转换
 
-模板默认使用 TorchVision ResNet18 作为候选：
+第一版固定基线是 TorchVision ResNet18 `IMAGENET1K_V1`：torchvision `v0.25.0`、源码 commit
+`8ac84ee75afb1c327902156b5336f56ad63b7e2f`、权重
+`https://download.pytorch.org/models/resnet18-f37072fd.pth`。权重长度 `46,830,571` bytes，SHA256
+`f37072fd47e89c5e827621c5baffa7500819f7896bbacec160b1a16c560e07ec`。
 
-```json
-"name": "TorchVision ResNet18 candidate"
+从仓库根目录执行：
+
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Acquire-TorchVisionResNet18OfficialAssets.ps1 `
+  -AllowDownload `
+  -ExportOnnx `
+  -PythonPath C:\Users\guoji\.conda\envs\ultralytics\python.exe
 ```
 
-TorchVision 代码本身是 BSD-3-Clause，但 pretrained weights、labels 和测试图片仍要由 owner 复核。不要因为模型名常见，就把权重和图片直接提交进仓库。
+脚本通过 `eng/Export-ClassificationResNet18Onnx.py` 使用 PyTorch `2.10.0+cpu`、torchvision `0.25.0+cpu` 和 opset 17
+导出 `images:[1,3,224,224] -> logits:[1,1000]`，并生成 1000 行 ImageNet labels。当前 ONNX 长度
+`46,748,553` bytes，SHA256 `ead3558569edd88aa73a4eb46acbe6c38dee113933234547f04a0f6e48169903`。
 
-建议本地文件名：
+默认文件放在 Git 仓库外：
+
+```text
+E:\GitSpace\TensorRT-CSharp-API-4.0\models\Classification\resnet18-torchvision-v0.25.0\
+```
+
+TorchVision 源码许可证是 BSD-3-Clause，但 pretrained weights、labels 和测试图片仍要由 owner 复核。模型、权重、labels
+和图片都不能提交到 GitHub。固定记录见 `samples/assets/classification-resnet18-official-assets.json`；全部演示模型总表见
+`docs/articles/zh-cn/demo-model-acquisition-and-onnx-conversion.md`。
+
+### 当前源树实跑结果
+
+2026-08-02 使用 TensorRT 10.11、关闭 TF32、内置 `shorter-side-center-crop` 与 ImageNet mean/std 对 PyTorch Hub dog 图片完成
+了一次源树运行。日志结束于 `Classification Passed=True`，Top-1 是 `Samoyed`，score `0.879987`；输入 tensor SHA256 是
+`18a5b601971e67521f895f9b0b89c3c0ba7820a9d0ff09d1981943947a692fa9`。
+
+这次运行确认模型获取、ONNX parser、engine build、图片预处理、enqueue、readback、Softmax 与 Top-K 主路径可以工作。但没有
+附加独立 ONNX Runtime golden，因此 JSON 正确记录 `proofClassification=real-input-reference-candidate-runtime` 和
+`outputValidated=false`。它不能替代后续独立 reference、package consumer 或发布后验证。
+
+运行证据建议在同一外层用例目录保存为：
 
 ```text
 models/

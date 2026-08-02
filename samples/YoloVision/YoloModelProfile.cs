@@ -97,7 +97,9 @@ public sealed class YoloModelProfile
             normalize,
             preserveAspectRatio: !HasSwitch(args, "--stretch"),
             GetStringArgument(args, "--letterbox-alignment", yoloX ? "top-left" : "center"),
-            resizeShorterSide);
+            resizeShorterSide,
+            GetFloatTripletArgument(args, "--mean", new float[3]),
+            GetFloatTripletArgument(args, "--std", new[] { 1.0f, 1.0f, 1.0f }));
 
         YoloPostprocessOptions postprocess = new YoloPostprocessOptions(
             layout,
@@ -268,5 +270,32 @@ public sealed class YoloModelProfile
     {
         string value = GetStringArgument(args, name, defaultValue.ToString(CultureInfo.InvariantCulture));
         return float.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out float parsed) ? parsed : defaultValue;
+    }
+
+    private static float[] GetFloatTripletArgument(string[] args, string name, float[] defaultValue)
+    {
+        string value = GetStringArgument(args, name, string.Empty);
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return (float[])defaultValue.Clone();
+        }
+
+        string[] tokens = value.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries);
+        if (tokens.Length != 3)
+        {
+            throw new ArgumentException($"{name} must contain exactly three comma-separated finite values.");
+        }
+
+        float[] values = new float[3];
+        for (int index = 0; index < values.Length; index++)
+        {
+            if (!float.TryParse(tokens[index].Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out values[index]) ||
+                !float.IsFinite(values[index]))
+            {
+                throw new ArgumentException($"{name} must contain exactly three comma-separated finite values.");
+            }
+        }
+
+        return values;
     }
 }

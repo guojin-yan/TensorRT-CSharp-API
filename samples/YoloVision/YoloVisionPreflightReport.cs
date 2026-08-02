@@ -226,6 +226,9 @@ public static class YoloVisionPreflightReport
                     resize = profile.Preprocess.ResizeMode,
                     scale = profile.Preprocess.Scale,
                     normalize = profile.Preprocess.Normalize,
+                    mean = profile.Preprocess.Mean,
+                    standardDeviation = profile.Preprocess.StandardDeviation,
+                    contractSha256 = profile.Preprocess.ContractSha256,
                     preserveAspectRatio = profile.Preprocess.PreserveAspectRatio,
                     letterboxAlignment = profile.Preprocess.LetterboxAlignment,
                     resizeShorterSide = profile.Preprocess.ResizeShorterSide

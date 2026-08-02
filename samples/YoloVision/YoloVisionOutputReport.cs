@@ -419,6 +419,11 @@ public static class YoloVisionOutputReport
         writer.WriteString("colorOrder", imagePreprocess.ColorOrder);
         writer.WriteBoolean("normalized", imagePreprocess.Normalized);
         writer.WriteNumber("scale", imagePreprocess.Scale);
+        writer.WritePropertyName("mean");
+        WriteFloatArray(writer, imagePreprocess.Mean);
+        writer.WritePropertyName("standardDeviation");
+        WriteFloatArray(writer, imagePreprocess.StandardDeviation);
+        writer.WriteString("preprocessContractSha256", imagePreprocess.PreprocessContractSha256);
         writer.WriteEndObject();
 
         writer.WritePropertyName("letterbox");
@@ -728,12 +733,26 @@ public static class YoloVisionOutputReport
 
         if (result.SemanticMap != null)
         {
+            int[] histogram = result.SemanticMap.GetClassHistogram();
+            int dominantClassId = 0;
+            for (int classId = 1; classId < histogram.Length; classId++)
+            {
+                if (histogram[classId] > histogram[dominantClassId])
+                {
+                    dominantClassId = classId;
+                }
+            }
             writer.WriteStartObject();
             writer.WriteString("task", "sem");
             writer.WriteNumber("classCount", result.SemanticMap.ClassCount);
             writer.WriteNumber("width", result.SemanticMap.Width);
             writer.WriteNumber("height", result.SemanticMap.Height);
             writer.WriteNumber("valueCount", result.SemanticMap.Values.Length);
+            writer.WriteNumber("classIndexValueCount", checked(result.SemanticMap.Width * result.SemanticMap.Height));
+            writer.WriteNumber("dominantClassId", dominantClassId);
+            writer.WriteString("dominantClassName", LabelOrIndex(labels, dominantClassId));
+            writer.WritePropertyName("classHistogram");
+            YoloSemanticMapArtifactWriter.WriteHistogram(writer, histogram, labels);
             writer.WriteEndObject();
         }
 
@@ -830,6 +849,16 @@ public static class YoloVisionOutputReport
             writer.WriteNumberValue(value);
         }
 
+        writer.WriteEndArray();
+    }
+
+    private static void WriteFloatArray(Utf8JsonWriter writer, IReadOnlyList<float> values)
+    {
+        writer.WriteStartArray();
+        foreach (float value in values)
+        {
+            writer.WriteNumberValue(value);
+        }
         writer.WriteEndArray();
     }
 

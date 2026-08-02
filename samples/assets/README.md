@@ -86,7 +86,30 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Acquire-YoloV8Classification
 
 ## Local Asset Layout
 
-Keep large or license-sensitive files in a local `models\` folder at the repository root, or in another owner-controlled path. Do not commit model weights, downloaded images, `.plan` engines, private build reports, or run logs unless their license and size have been explicitly approved.
+The current workspace convention is `E:\GitSpace\TensorRT-CSharp-API-4.0\models`, one level above the `TensorRtSharp4.0` Git repository. Every demo article must name the upstream acquisition method and ONNX conversion method. Converted ONNX files are staged under this outer directory until a separate Model Zoo exists; they are never committed to this repository.
+
+`demo-model-inventory.json` is the complete first-release inventory for actual deep-learning demo models. It maps Classification,
+OnnxToEngine/MNIST, YOLOv8 det/cls/seg/pose/OBB, YOLOv10n, YOLOX-S, and LRASPP semantic segmentation to acquisition sources,
+conversion commands, outer `models` paths, lengths, SHA256 values, and articles. Placeholder paths for user-defined models and
+code-generated identity networks are deliberately excluded. See
+`docs/articles/zh-cn/demo-model-acquisition-and-onnx-conversion.md`.
+
+Run `eng/Sync-DemoOnnxModels.ps1` after acquisition/export to materialize and hash-check every inventory entry under the outer
+`models` directory. `-VerifyOnly` performs the same checks without copying. The script never uploads or publishes assets.
+
+`classification-resnet18-official-assets.json` pins TorchVision `v0.25.0` ResNet18 `IMAGENET1K_V1`. Run
+`eng/Acquire-TorchVisionResNet18OfficialAssets.ps1 -AllowDownload -ExportOnnx` to write its ONNX, ImageNet labels, and export report
+under the outer `models\Classification` directory. None of those files is a repository or package asset.
+
+## Official torchvision LRASPP semantic acquisition
+
+`yolovision-torchvision-lraspp-official-assets.json` pins torchvision `v0.25.0`, LRASPP MobileNetV3 Large weights, VOC labels metadata, the BSD-3-Clause license, and the PyTorch Hub dog image. Run:
+
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Acquire-TorchVisionLrasppOfficialAssets.ps1 -AllowDownload
+```
+
+`eng/Invoke-YoloVisionSemanticReference.py --export-onnx` exports the fixed `images:[1,3,320,320] -> semantic:[1,21,320,320]` graph directly into the outer `models` directory. The runtime evidence compares 2,150,400 logits and 102,400 argmax pixels, and checks a controlled negative. Models, source images, references, and logs are not uploaded.
 
 Recommended local names:
 

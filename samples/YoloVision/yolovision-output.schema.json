@@ -156,6 +156,22 @@
             },
             "scale": {
               "type": "number"
+            },
+            "mean": {
+              "type": "array",
+              "minItems": 3,
+              "maxItems": 3,
+              "items": { "type": "number" }
+            },
+            "standardDeviation": {
+              "type": "array",
+              "minItems": 3,
+              "maxItems": 3,
+              "items": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "preprocessContractSha256": {
+              "type": "string",
+              "pattern": "^$|^[a-fA-F0-9]{64}$"
             }
           }
         },
@@ -1050,6 +1066,30 @@
         "valueCount": {
           "type": "integer",
           "minimum": 1
+        },
+        "classIndexValueCount": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "dominantClassId": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "dominantClassName": {
+          "type": "string"
+        },
+        "classHistogram": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["classId", "className", "pixelCount"],
+            "additionalProperties": false,
+            "properties": {
+              "classId": { "type": "integer", "minimum": 0 },
+              "className": { "type": "string" },
+              "pixelCount": { "type": "integer", "minimum": 0 }
+            }
+          }
         }
       }
     }

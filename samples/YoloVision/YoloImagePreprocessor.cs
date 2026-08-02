@@ -58,7 +58,10 @@ public sealed class YoloImagePreprocessResult
             centerCropEnabled: false,
             resizeShorterSide: 0,
             cropX: 0,
-            cropY: 0)
+            cropY: 0,
+            mean: new float[3],
+            standardDeviation: new[] { 1.0f, 1.0f, 1.0f },
+            preprocessContractSha256: string.Empty)
     {
     }
 
@@ -90,6 +93,71 @@ public sealed class YoloImagePreprocessResult
         int resizeShorterSide,
         int cropX,
         int cropY)
+        : this(
+            sourcePath,
+            sourceSha256,
+            sourceWidth,
+            sourceHeight,
+            tensorPath,
+            tensorSha256,
+            tensorElementCount,
+            targetWidth,
+            targetHeight,
+            tensorLayout,
+            colorOrder,
+            resizeMode,
+            normalized,
+            scale,
+            letterboxEnabled,
+            letterboxAlignment,
+            resizedWidth,
+            resizedHeight,
+            padX,
+            padY,
+            resizeScaleX,
+            resizeScaleY,
+            fillValue,
+            centerCropEnabled,
+            resizeShorterSide,
+            cropX,
+            cropY,
+            mean: new float[3],
+            standardDeviation: new[] { 1.0f, 1.0f, 1.0f },
+            preprocessContractSha256: string.Empty)
+    {
+    }
+
+    public YoloImagePreprocessResult(
+        string sourcePath,
+        string sourceSha256,
+        int sourceWidth,
+        int sourceHeight,
+        string tensorPath,
+        string tensorSha256,
+        int tensorElementCount,
+        int targetWidth,
+        int targetHeight,
+        string tensorLayout,
+        string colorOrder,
+        string resizeMode,
+        bool normalized,
+        float scale,
+        bool letterboxEnabled,
+        string letterboxAlignment,
+        int resizedWidth,
+        int resizedHeight,
+        int padX,
+        int padY,
+        float resizeScaleX,
+        float resizeScaleY,
+        byte fillValue,
+        bool centerCropEnabled,
+        int resizeShorterSide,
+        int cropX,
+        int cropY,
+        float[] mean,
+        float[] standardDeviation,
+        string preprocessContractSha256)
     {
         SourcePath = sourcePath ?? string.Empty;
         SourceSha256 = sourceSha256 ?? string.Empty;
@@ -118,6 +186,11 @@ public sealed class YoloImagePreprocessResult
         ResizeShorterSide = resizeShorterSide;
         CropX = cropX;
         CropY = cropY;
+        Mean = mean == null ? throw new ArgumentNullException(nameof(mean)) : (float[])mean.Clone();
+        StandardDeviation = standardDeviation == null
+            ? throw new ArgumentNullException(nameof(standardDeviation))
+            : (float[])standardDeviation.Clone();
+        PreprocessContractSha256 = preprocessContractSha256 ?? string.Empty;
     }
 
     public string SourcePath { get; }
@@ -173,6 +246,12 @@ public sealed class YoloImagePreprocessResult
     public int CropX { get; }
 
     public int CropY { get; }
+
+    public float[] Mean { get; }
+
+    public float[] StandardDeviation { get; }
+
+    public string PreprocessContractSha256 { get; }
 }
 
 public static class YoloImagePreprocessor
@@ -250,7 +329,7 @@ public static class YoloImagePreprocessor
             plan = CreateResizePlan(image.Width, image.Height, targetWidth, targetHeight, letterbox, letterboxAlignment);
             targetPixels = ResizeToTarget(image, plan, fillValue);
         }
-        float[] tensor = ToTensor(targetPixels, targetWidth, targetHeight, layout, colorOrder, options.Normalize, options.Scale);
+        float[] tensor = ToTensor(targetPixels, targetWidth, targetHeight, layout, colorOrder, options);
 
         string fullTensorPath = Path.GetFullPath(tensorPath);
         string? directory = Path.GetDirectoryName(fullTensorPath);
@@ -287,7 +366,10 @@ public static class YoloImagePreprocessor
             centerCrop,
             resizeShorterSide,
             cropX,
-            cropY);
+            cropY,
+            options.Mean,
+            options.StandardDeviation,
+            options.ContractSha256);
     }
 
     private static ResizePlan CreateCenterCropResizePlan(
@@ -470,7 +552,13 @@ public static class YoloImagePreprocessor
         return Math.Clamp((targetIndex + 0.5f) * sourceLength / targetLength - 0.5f, 0.0f, sourceLength - 1.0f);
     }
 
-    private static float[] ToTensor(byte[] rgbPixels, int width, int height, string layout, string colorOrder, bool normalize, float scale)
+    private static float[] ToTensor(
+        byte[] rgbPixels,
+        int width,
+        int height,
+        string layout,
+        string colorOrder,
+        YoloPreprocessOptions options)
     {
         float[] tensor = new float[width * height * 3];
         bool bgr = string.Equals(colorOrder, "BGR", StringComparison.Ordinal);
@@ -487,16 +575,16 @@ public static class YoloImagePreprocessor
                 if (nchw)
                 {
                     int planeOffset = y * width + x;
-                    tensor[planeOffset] = ToFloat(first, normalize, scale);
-                    tensor[width * height + planeOffset] = ToFloat(second, normalize, scale);
-                    tensor[width * height * 2 + planeOffset] = ToFloat(third, normalize, scale);
+                    tensor[planeOffset] = ToFloat(first, 0, options);
+                    tensor[width * height + planeOffset] = ToFloat(second, 1, options);
+                    tensor[width * height * 2 + planeOffset] = ToFloat(third, 2, options);
                 }
                 else
                 {
                     int targetIndex = (y * width + x) * 3;
-                    tensor[targetIndex] = ToFloat(first, normalize, scale);
-                    tensor[targetIndex + 1] = ToFloat(second, normalize, scale);
-                    tensor[targetIndex + 2] = ToFloat(third, normalize, scale);
+                    tensor[targetIndex] = ToFloat(first, 0, options);
+                    tensor[targetIndex + 1] = ToFloat(second, 1, options);
+                    tensor[targetIndex + 2] = ToFloat(third, 2, options);
                 }
             }
         }
@@ -504,9 +592,11 @@ public static class YoloImagePreprocessor
         return tensor;
     }
 
-    private static float ToFloat(byte value, bool normalize, float scale)
+    private static float ToFloat(byte value, int channel, YoloPreprocessOptions options)
     {
-        return normalize ? value * scale : value;
+        return options.Normalize
+            ? (value * options.Scale - options.Mean[channel]) / options.StandardDeviation[channel]
+            : value;
     }
 
     private static void WriteFloat32Tensor(string path, float[] values)

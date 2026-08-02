@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "recordKind": "classification-torchvision-resnet18-official-asset-acquisition-manifest",
+  "assetSetId": "torchvision-resnet18-imagenet1k-v1-v0.25.0",
+  "sampleName": "Classification",
+  "upstreamSourceRepository": "https://github.com/pytorch/vision",
+  "upstreamSourceTag": "v0.25.0",
+  "upstreamSourceCommit": "8ac84ee75afb1c327902156b5336f56ad63b7e2f",
+  "license": {
+    "sourceSpdxId": "BSD-3-Clause",
+    "publicWeightRedistributionOwnerApproval": false
+  },
+  "weights": {
+    "name": "ResNet18 IMAGENET1K_V1",
+    "url": "https://download.pytorch.org/models/resnet18-f37072fd.pth",
+    "expectedLength": 46830571,
+    "expectedSha256": "f37072fd47e89c5e827621c5baffa7500819f7896bbacec160b1a16c560e07ec"
+  },
+  "modelContract": {
+    "input": {
+      "name": "images",
+      "shape": [1, 3, 224, 224],
+      "dataType": "float32",
+      "layout": "NCHW"
+    },
+    "output": {
+      "name": "logits",
+      "shape": [1, 1000],
+      "dataType": "float32"
+    },
+    "preprocess": {
+      "resize": "shorter-side-256",
+      "crop": "center-224x224",
+      "colorOrder": "RGB",
+      "scale": 0.00392156862745098,
+      "mean": [0.485, 0.456, 0.406],
+      "standardDeviation": [0.229, 0.224, 0.225]
+    }
+  },
+  "exportContract": {
+    "script": "eng/Export-ClassificationResNet18Onnx.py",
+    "pythonVersion": "3.10.20",
+    "torchVersion": "2.10.0+cpu",
+    "torchvisionVersion": "0.25.0+cpu",
+    "opset": 17,
+    "onnxLength": 46748553,
+    "onnxSha256": "ead3558569edd88aa73a4eb46acbe6c38dee113933234547f04a0f6e48169903",
+    "labelsSha256": "ee4fa67b1dd46919ef87529b70e25bdd1ec9ebd350de3ad426e6640eb70320a1"
+  },
+  "acquisition": {
+    "script": "eng/Acquire-TorchVisionResNet18OfficialAssets.ps1",
+    "defaultAssetRoot": "E:/GitSpace/TensorRT-CSharp-API-4.0/downloads/resnet18-torchvision-v0.25.0/source",
+    "defaultModelRoot": "E:/GitSpace/TensorRT-CSharp-API-4.0/models/Classification/resnet18-torchvision-v0.25.0",
+    "modelRootOutsideGitRepository": true
+  },
+  "proofBoundary": {
+    "assetAcquisitionAndExportOnly": true,
+    "canPublishPublicly": false,
+    "canPromoteRealModelRuntime": false,
+    "canPromotePackageConsumerRuntime": false,
+    "uploadsAssets": false,
+    "performsPublish": false
+  }
+}

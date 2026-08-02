@@ -5,6 +5,22 @@ single-input, while custom classifiers may bind multiple float inputs explicitly
 
 The repository does not bundle model, label, or image assets because those files have separate licensing and size constraints. The sample uses a synthetic input tensor by default, so it validates the deployment pipeline only.
 
+The reproducible baseline is TorchVision ResNet18 `IMAGENET1K_V1`. Acquire the pinned weights and export the fixed opset 17
+`images:[1,3,224,224] -> logits:[1,1000]` graph into the workspace-level model cache with:
+
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Acquire-TorchVisionResNet18OfficialAssets.ps1 `
+  -AllowDownload `
+  -ExportOnnx `
+  -PythonPath C:\Users\guoji\.conda\envs\ultralytics\python.exe
+```
+
+The default ONNX path is
+`E:\GitSpace\TensorRT-CSharp-API-4.0\models\Classification\resnet18-torchvision-v0.25.0\resnet18-imagenet1k-v1.onnx`.
+The model, labels, weights, and export report remain outside Git. Source, conversion, preprocessing, length, and SHA256 are recorded
+in `samples/assets/classification-resnet18-official-assets.json` and
+`docs/articles/zh-cn/demo-model-acquisition-and-onnx-conversion.md`.
+
 ```powershell
 dotnet run --project .\samples\Classification -- `
   --model .\models\classifier.onnx `

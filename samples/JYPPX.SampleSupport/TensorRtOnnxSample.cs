@@ -20,6 +20,7 @@ internal sealed class OnnxSampleOptions
         TensorRtDims optShape,
         TensorRtDims maxShape,
         bool hasProfileOverride,
+        bool disableTf32,
         string inputPattern,
         string inputPath,
         string inputDataPath,
@@ -35,6 +36,7 @@ internal sealed class OnnxSampleOptions
         OptShape = optShape;
         MaxShape = maxShape;
         HasProfileOverride = hasProfileOverride;
+        DisableTf32 = disableTf32;
         InputPattern = inputPattern;
         InputPath = inputPath;
         InputDataPath = inputDataPath;
@@ -59,6 +61,8 @@ internal sealed class OnnxSampleOptions
     public TensorRtDims MaxShape { get; }
 
     public bool HasProfileOverride { get; }
+
+    public bool DisableTf32 { get; }
 
     public string InputPattern { get; }
 
@@ -127,6 +131,7 @@ internal sealed class OnnxSampleOptions
             optShape,
             maxShape,
             hasProfileOverride,
+            SampleCommandLine.HasSwitch(args, "--noTF32") || SampleCommandLine.HasSwitch(args, "--no-tf32"),
             inputPattern,
             inputPath,
             inputDataPath,
@@ -408,6 +413,14 @@ internal static partial class TensorRtOnnxSample
         config.SetOptimizationLevel(3);
         config.SetMaxAuxStreams(0);
         config.SetProfileStream(stream);
+        if (options.DisableTf32)
+        {
+            config.SetFlag(TensorRtBuilderFlag.Tf32, false);
+            if (config.GetFlag(TensorRtBuilderFlag.Tf32))
+            {
+                throw new InvalidOperationException("TensorRT TF32 remained enabled after --noTF32 was applied.");
+            }
+        }
 
         using TensorRtHostMemory hostMemory = builder.BuildSerializedNetwork(network, config);
         using TensorRtEngine engine = runtime.Deserialize(hostMemory);

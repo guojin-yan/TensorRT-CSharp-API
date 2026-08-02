@@ -1,0 +1,206 @@
+{
+  "schemaVersion": 1,
+  "recordKind": "sample-run-evidence-record",
+  "recordId": "yolovision-torchvision-lraspp-win-x64-trt10.11-cuda12.9-20260802",
+  "sampleName": "YoloVision",
+  "family": "torchvision-lraspp-mobilenet-v3-large",
+  "task": "sem",
+  "proofClassification": "real-model-runtime",
+  "validatorState": "real-model-runtime",
+  "templateOnly": false,
+  "isSmokePassed": true,
+  "canPromoteRealModelRuntime": true,
+  "canPromotePackageConsumerRuntime": false,
+  "executedUtcDate": "2026-08-02",
+  "sourceBaseCommit": "d0bc06598e637c67703a0747430ce8f21b4affb8",
+  "implementationNote": "Mean/std preprocessing, strict semantic decode, full-resolution artifacts, acquisition/reference scripts, evidence, tests, and documentation are committed together after this working-tree execution.",
+  "license": {
+    "name": "BSD 3-Clause License",
+    "spdxId": "BSD-3-Clause",
+    "manifest": "samples/assets/yolovision-torchvision-lraspp-official-assets.json",
+    "publicRedistributionOwnerApproval": false
+  },
+  "host": {
+    "os": "Microsoft Windows 11 Home Chinese, NT 10.0.26200.0",
+    "rid": "win-x64",
+    "cpu": "AMD Ryzen 7 5800H with Radeon Graphics",
+    "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+    "gpuMemoryMiB": 6144,
+    "driverVersion": "576.02",
+    "cudaVersion": "12.9",
+    "tensorRtVersion": "10.11.0.33",
+    "dotnetSdkVersion": "10.0.301",
+    "bridgeSha256": "74d89fd7e1cb414751ca943298e003ecf48cadcda3e4c1952e5a2d5ba0b0cfc9"
+  },
+  "assets": {
+    "weights": {
+      "fileName": "lraspp_mobilenet_v3_large-d234d4ea.pth",
+      "length": 13097061,
+      "sha256": "d234d4eae9d55d5f76de18b77cf0dc62c66fe5c5482758209d00f950c92bb280"
+    },
+    "onnx": {
+      "fileName": "lraspp-mobilenet-v3-large-320.onnx",
+      "length": 12879801,
+      "sha256": "3cb94e561bdefe606ed7d1a2c4d0296409bec066f3a39a9fe9dabd72b23728f8",
+      "storedUnderWorkspaceModelsDirectory": true,
+      "trackedByGit": false
+    },
+    "image": {
+      "fileName": "dog.jpg",
+      "length": 661378,
+      "sha256": "f3f87bb8ab3c26c7ecfd3ac60421d7f32b0503d1d6c5baf8bac42ed93d86351a"
+    },
+    "ppm": {
+      "fileName": "dog.ppm",
+      "length": 5625911,
+      "sha256": "58d4301e1ccf0d60b890b73980e4a00b0316840d618b7c741484e7514e71ff4b"
+    },
+    "labels": {
+      "fileName": "voc-semantic.names",
+      "classCount": 21,
+      "length": 150,
+      "sha256": "82b3b65943e7865cf31b8c5e9a720edd5eddff176d2b146ae09795a734595781"
+    },
+    "runtimeInputTensor": {
+      "shape": [1, 3, 320, 320],
+      "elementCount": 307200,
+      "length": 1228800,
+      "sha256": "d8f631d10bcc75645455f313e3b888acd68ba138a87b3ca380993062e507115a"
+    }
+  },
+  "modelContract": {
+    "input": {
+      "name": "images",
+      "shape": [1, 3, 320, 320],
+      "dataType": "float32",
+      "preprocess": "stretch-320x320; RGB; NCHW; scale=1/255; mean=0.485,0.456,0.406; std=0.229,0.224,0.225",
+      "preprocessContractSha256": "9f2dc5f182e1db1ea124cfcf8cf11c685dcb836b7695a67b14405851d6910a39"
+    },
+    "outputs": [
+      {
+        "name": "semantic",
+        "shape": [1, 21, 320, 320],
+        "elementCount": 2150400,
+        "role": "semantic-class-logits",
+        "layout": "NCHW",
+        "classCount": 21
+      }
+    ],
+    "postprocess": {
+      "operation": "argmax-over-class-dimension",
+      "tieRule": "lowest class index wins",
+      "classIndexShape": [320, 320],
+      "classIndexElementCount": 102400,
+      "classIndexDataType": "int32-little-endian"
+    }
+  },
+  "independentReferenceValidation": {
+    "script": "eng/Invoke-YoloVisionSemanticReference.py",
+    "providers": ["CPUExecutionProvider", "PyTorch CPU"],
+    "pythonVersion": "3.10.20",
+    "torchVersion": "2.10.0+cpu",
+    "torchvisionVersion": "0.25.0+cpu",
+    "onnxVersion": "1.15.0",
+    "onnxRuntimeVersion": "1.15.0",
+    "pytorchOnnxRuntimeMaximumAbsoluteError": 0.0000095367431640625,
+    "referenceInput": "the exact C# stretch/ImageNet-normalized tensor",
+    "rawOutputSha256": "0fd7a12f6d1e34d85aec60899b337dc58255ef2b65139ff06e231880c18d058f",
+    "rawReferenceSha256": "09a27bfe1ee7cd48413806f057bcface6c3c8ed224ed4766e1618d9766b14dff",
+    "classIndexSha256": "fdd15b95222eadf137fc6880e56990aa507ee7d2429f471deaae9eab31268414",
+    "reportSha256": "7b9236bb5b8836847d88f06d5c00fcb1bf3805200735b91e24469ca6631e8b1d",
+    "passed": true
+  },
+  "csharpPreprocessValidation": {
+    "sourceSize": [1546, 1213],
+    "targetSize": [320, 320],
+    "pythonReferenceInputSha256": "458ba599093915964e438c2f3507c79d5aaed0414bd7ff12d8a7ae6132b32407",
+    "csharpRuntimeInputSha256": "d8f631d10bcc75645455f313e3b888acd68ba138a87b3ca380993062e507115a",
+    "mismatchCountAgainstPillowResize": 283283,
+    "maximumAbsoluteErrorAgainstPillowResize": 1.5754776000976562,
+    "meanAbsoluteErrorAgainstPillowResize": 0.06431448459625244,
+    "passed": true,
+    "interpretation": "The interpolation difference is isolated by generating the strict raw runtime reference from the exact C# tensor."
+  },
+  "runtimeReferenceValidation": {
+    "requested": true,
+    "completed": true,
+    "passed": true,
+    "tf32Disabled": true,
+    "absoluteTolerance": 0.0001,
+    "relativeTolerance": 0.0001,
+    "nanPolicy": "reject",
+    "infinityPolicy": "exact",
+    "tensors": [
+      {
+        "name": "semantic",
+        "shape": [1, 21, 320, 320],
+        "comparedValueCount": 2150400,
+        "mismatchCount": 0,
+        "firstMismatchIndex": -1,
+        "maximumAbsoluteError": 0.00002670288,
+        "maximumRelativeError": 0.61922175,
+        "referenceSha256": "09a27bfe1ee7cd48413806f057bcface6c3c8ed224ed4766e1618d9766b14dff"
+      }
+    ]
+  },
+  "semanticPostprocessValidation": {
+    "referenceFramework": "ONNX Runtime CPU argmax over the exact C# input tensor",
+    "referenceClassIndexSha256": "fdd15b95222eadf137fc6880e56990aa507ee7d2429f471deaae9eab31268414",
+    "tensorRtClassIndexSha256": "fdd15b95222eadf137fc6880e56990aa507ee7d2429f471deaae9eab31268414",
+    "comparisonSha256": "96fb68f6c06d199bab02fe856f6d6b5ecf61dbced83e86005b49a49d28f084fa",
+    "pixelCount": 102400,
+    "mismatchCount": 0,
+    "firstMismatchIndex": -1,
+    "histogram": [
+      { "classId": 0, "className": "__background__", "pixelCount": 65193 },
+      { "classId": 12, "className": "dog", "pixelCount": 37207 }
+    ],
+    "passed": true
+  },
+  "controlledNegativeValidation": {
+    "mutation": "reference semantic logit index 0 += 10",
+    "referenceSha256": "cd3eb9cf91d88cbcaf4b199bc6d0def5d414d5deb9936918b4b57dd55eb1890e",
+    "absoluteTolerance": 0.0001,
+    "relativeTolerance": 0.0001,
+    "exitCode": 1,
+    "mismatchCount": 1,
+    "firstMismatchIndex": 0,
+    "firstActual": 9.178857,
+    "firstExpected": 19.178864,
+    "maximumAbsoluteError": 10.000007,
+    "passed": false,
+    "failClosed": true
+  },
+  "artifacts": {
+    "outputJsonSha256": "d826e4496304e583913752ec53fcfd95d22aa6492ebb3183f0ad9fdad7fdd0ce",
+    "semanticArtifactManifestSha256": "1e70d6cb6669d4fc0fc2e4aa66a64c3830558217b5749cc70b7907dde2cbe5f2",
+    "classIndexArtifactSha256": "fdd15b95222eadf137fc6880e56990aa507ee7d2429f471deaae9eab31268414",
+    "visualizationSvgSha256": "0f5f53b89d9dd1f545bf87549e8890bc84edf97bccb64218e141ba62ba651e23",
+    "positiveRunLogSha256": "f6ce3e8981935b35eda6393f8167a3dea3a2ae544e5a65265e5c8088f1a07030",
+    "controlledNegativeOutputJsonSha256": "87e81608a9f89869f4a58a20c8a05136570b5e84d4ab8bc1099a0acee0cae45f",
+    "controlledNegativeRunLogSha256": "5267e04c8dab15f3a56f9243a0b282a90d38d75b3ea95063804af56bb7abc8c3",
+    "referenceReportSha256": "7b9236bb5b8836847d88f06d5c00fcb1bf3805200735b91e24469ca6631e8b1d",
+    "classIndexComparisonSha256": "96fb68f6c06d199bab02fe856f6d6b5ecf61dbced83e86005b49a49d28f084fa"
+  },
+  "commands": {
+    "acquisition": "pwsh -NoProfile -ExecutionPolicy Bypass -File ./eng/Acquire-TorchVisionLrasppOfficialAssets.ps1 -AllowDownload -PythonPath <python>",
+    "export": "python ./eng/Invoke-YoloVisionSemanticReference.py --weights <models-root>/lraspp_mobilenet_v3_large-d234d4ea.pth --image <asset-root>/dog.jpg --onnx <models-root>/lraspp-mobilenet-v3-large-320.onnx --output-directory <reference-dir> --export-onnx",
+    "runtime": "dotnet ./samples/YoloVision/bin/Release/net8.0/YoloVision.dll --model <models-root>/lraspp-mobilenet-v3-large-320.onnx --labels <labels> --image <dog.ppm> --preprocessed-output <tensor> --input-shape 1x3x320x320 --input-name images --output-name semantic --tensor-rt-line 10 --noTF32 --family custom --task sem --class-count 21 --tensor-layout NCHW --color-order RGB --resize stretch --scale 0.003921568627451 --mean 0.485,0.456,0.406 --std 0.229,0.224,0.225 --reference-outputs semantic:<reference> --reference-abs-tolerance 0.0001 --reference-rel-tolerance 0.0001 --output <json> --semantic-artifact-output-directory <directory> --visualization <svg>"
+  },
+  "proofBoundary": {
+    "sourceTreeRealModelRuntime": true,
+    "publicRedistributionApproved": false,
+    "packageConsumerRuntimeProof": false,
+    "publicPackageProof": false,
+    "postPublishProof": false,
+    "ownerReleaseAcceptance": false,
+    "releaseProof": false,
+    "performsPublish": false,
+    "uploadsAssets": false
+  },
+  "notes": [
+    "Only this small record is committed; weights, ONNX, image, tensor, raw references, class-index binary, SVG, and logs remain on E drive outside Git.",
+    "NVIDIA CUDA, cuDNN, TensorRT, and NVRTC remain user-installed dependencies and are not redistributed by this project.",
+    "Source-tree real-model-runtime does not replace clean package-consumer, public-package, post-publish, Owner authorization, or release evidence."
+  ]
+}

@@ -1,0 +1,134 @@
+{
+  "schemaVersion": 1,
+  "recordKind": "yolovision-torchvision-lraspp-official-asset-acquisition-manifest",
+  "assetSetId": "torchvision-lraspp-mobilenet-v3-large-v0.25.0-bsd-3-clause",
+  "sampleName": "YoloVision",
+  "upstreamSourceRepository": "https://github.com/pytorch/vision",
+  "upstreamSourceTag": "v0.25.0",
+  "upstreamSourceCommit": "8ac84ee75afb1c327902156b5336f56ad63b7e2f",
+  "inputRepository": "https://github.com/pytorch/hub",
+  "inputCommit": "c7895df70c7767403e36f82786d6b611b7984557",
+  "license": {
+    "name": "BSD 3-Clause License",
+    "spdxId": "BSD-3-Clause",
+    "sourceAssetId": "torchvision-license",
+    "provenanceState": "source-tag-commit-and-license-hash-pinned",
+    "publicRedistributionOwnerApproval": false
+  },
+  "assets": [
+    {
+      "id": "torchvision-lraspp-mobilenet-v3-large-weights",
+      "role": "model-weights",
+      "fileName": "lraspp_mobilenet_v3_large-d234d4ea.pth",
+      "url": "https://download.pytorch.org/models/lraspp_mobilenet_v3_large-d234d4ea.pth",
+      "expectedLength": 13097061,
+      "expectedSha256": "d234d4eae9d55d5f76de18b77cf0dc62c66fe5c5482758209d00f950c92bb280",
+      "hashProvenance": "official download URL filename digest and repository-pinned verification"
+    },
+    {
+      "id": "torchvision-voc-category-metadata",
+      "role": "label-map-source",
+      "fileName": "_meta.py",
+      "url": "https://raw.githubusercontent.com/pytorch/vision/8ac84ee75afb1c327902156b5336f56ad63b7e2f/torchvision/models/_meta.py",
+      "expectedLength": 28875,
+      "expectedSha256": "7eaa5e401b1ff441186e602943c4342cac8cf7f505c238ab7882399b00dbc096",
+      "hashProvenance": "source-commit-content-hash-pinned"
+    },
+    {
+      "id": "torchvision-license",
+      "role": "license",
+      "fileName": "LICENSE.torchvision.txt",
+      "url": "https://raw.githubusercontent.com/pytorch/vision/8ac84ee75afb1c327902156b5336f56ad63b7e2f/LICENSE",
+      "expectedLength": 1517,
+      "expectedSha256": "6502f676851cfe25f8af75531dfb32375b7325b73c37e7b43741fa422893e71d",
+      "hashProvenance": "source-commit-content-hash-pinned"
+    },
+    {
+      "id": "pytorch-hub-dog-input",
+      "role": "input-image",
+      "fileName": "dog.jpg",
+      "url": "https://raw.githubusercontent.com/pytorch/hub/c7895df70c7767403e36f82786d6b611b7984557/images/dog.jpg",
+      "expectedLength": 661378,
+      "expectedSha256": "f3f87bb8ab3c26c7ecfd3ac60421d7f32b0503d1d6c5baf8bac42ed93d86351a",
+      "hashProvenance": "source-commit-content-hash-pinned"
+    }
+  ],
+  "derivedInput": {
+    "sourceAssetId": "pytorch-hub-dog-input",
+    "fileName": "dog.ppm",
+    "format": "P6 RGB PPM",
+    "width": 1546,
+    "height": 1213,
+    "expectedLength": 5625911,
+    "expectedSha256": "58d4301e1ccf0d60b890b73980e4a00b0316840d618b7c741484e7514e71ff4b",
+    "derivation": "Pillow Image.open(source).convert('RGB').save(destination, format='PPM')"
+  },
+  "derivedLabels": {
+    "sourceAssetId": "torchvision-voc-category-metadata",
+    "fileName": "voc-semantic.names",
+    "classCount": 21,
+    "expectedLength": 150,
+    "expectedSha256": "82b3b65943e7865cf31b8c5e9a720edd5eddff176d2b146ae09795a734595781",
+    "derivation": "VOC_CATEGORIES in class-index order joined with LF and one final LF"
+  },
+  "modelContract": {
+    "family": "torchvision-lraspp-mobilenet-v3-large",
+    "task": "sem",
+    "input": {
+      "name": "images",
+      "shape": [1, 3, 320, 320],
+      "dataType": "float32",
+      "layout": "NCHW",
+      "colorOrder": "RGB",
+      "resize": "stretch-320x320",
+      "scale": 0.00392156862745098,
+      "mean": [0.485, 0.456, 0.406],
+      "standardDeviation": [0.229, 0.224, 0.225]
+    },
+    "outputs": [
+      {
+        "name": "semantic",
+        "role": "semantic-class-logits",
+        "shape": [1, 21, 320, 320],
+        "classCount": 21,
+        "layout": "NCHW"
+      }
+    ],
+    "postprocess": {
+      "operation": "argmax-over-class-dimension",
+      "classIndexDataType": "int32-little-endian",
+      "classIndexLayout": "row-major-hw"
+    }
+  },
+  "exportContract": {
+    "pythonVersion": "3.10.20",
+    "torchVersion": "2.10.0+cpu",
+    "torchvisionVersion": "0.25.0+cpu",
+    "opsetVersion": 17,
+    "command": "python ./eng/Invoke-YoloVisionSemanticReference.py --weights <models-root>/lraspp_mobilenet_v3_large-d234d4ea.pth --image <asset-root>/dog.jpg --onnx <models-root>/lraspp-mobilenet-v3-large-320.onnx --output-directory <artifact-root> --export-onnx",
+    "onnxLength": 12879801,
+    "onnxSha256": "3cb94e561bdefe606ed7d1a2c4d0296409bec066f3a39a9fe9dabd72b23728f8",
+    "boundary": "The ONNX file is a local derived artifact under the workspace-level models directory; exporter upgrades can change its hash."
+  },
+  "acquisition": {
+    "script": "eng/Acquire-TorchVisionLrasppOfficialAssets.ps1",
+    "referenceScript": "eng/Invoke-YoloVisionSemanticReference.py",
+    "defaultAssetRoot": "E:/GitSpace/TensorRT-CSharp-API-4.0/downloads/lraspp-mobilenet-v3-large-torchvision-v0.25.0/source",
+    "defaultModelRoot": "E:/GitSpace/TensorRT-CSharp-API-4.0/models/YoloVision/SemanticSegmentation/lraspp-mobilenet-v3-large-torchvision-v0.25.0",
+    "modelRootOutsideGitRepository": true
+  },
+  "proofBoundary": {
+    "assetAcquisitionOnly": true,
+    "canProceedToSourceTreeRuntime": true,
+    "canPublishPublicly": false,
+    "canPromotePackageConsumerRuntime": false,
+    "performsRuntime": false,
+    "performsPublish": false,
+    "uploadsAssets": false,
+    "notes": [
+      "The repository records provenance and hashes only; weights, ONNX, image, tensor, references, SVG, and logs remain outside Git on E drive.",
+      "Public redistribution of the model and input image remains disabled until separate Owner approval.",
+      "CUDA, cuDNN, TensorRT, and NVRTC remain user-installed dependencies and are never included in project packages."
+    ]
+  }
+}

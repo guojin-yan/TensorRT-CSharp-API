@@ -2,6 +2,12 @@
 
 This directory is now reserved for user-facing examples and common adoption scenarios.
 
+Deep-learning model binaries are staged outside this Git repository under
+`E:\GitSpace\TensorRT-CSharp-API-4.0\models`. The complete model/source/export/hash map is
+`samples/assets/demo-model-inventory.json`, with the reproducible acquisition and ONNX conversion guide at
+`docs/articles/zh-cn/demo-model-acquisition-and-onnx-conversion.md`. No ONNX or weight file from that workspace-level directory is
+uploaded with the source repository or included in project packages.
+
 Smoke-oriented validation projects have been moved out to:
 
 - `smoke/`

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -200,6 +201,19 @@ public static class YoloVisionCommand
                     imagePreprocess,
                     segmentationSpatialTransform);
                 Console.WriteLine($"SegmentationMaskArtifacts={manifestPath}");
+            }
+
+            string semanticArtifactOutputDirectory = SampleCommandLine.GetStringArgument(
+                args,
+                "--semantic-artifact-output-directory",
+                string.Empty);
+            if (!string.IsNullOrWhiteSpace(semanticArtifactOutputDirectory))
+            {
+                string manifestPath = YoloSemanticMapArtifactWriter.Write(
+                    semanticArtifactOutputDirectory,
+                    visionResult,
+                    labels);
+                Console.WriteLine($"SemanticMapArtifacts={manifestPath}");
             }
 
             string visualizationPath = SampleCommandLine.GetStringArgument(
@@ -487,6 +501,9 @@ public static class YoloVisionCommand
             $"Pad={result.PadX},{result.PadY} Crop={result.CropX},{result.CropY} ShorterSide={result.ResizeShorterSide} " +
             $"Alignment={result.LetterboxAlignment} Scale={result.ResizeScaleX:0.######},{result.ResizeScaleY:0.######} " +
             $"Normalize={result.Normalized} ValueScale={result.Scale:0.########} Fill={result.FillValue}");
+        Console.WriteLine(
+            $"ImagePreprocessNormalization Mean={FormatFloatTriplet(result.Mean)} Std={FormatFloatTriplet(result.StandardDeviation)} " +
+            $"ContractSha256={result.PreprocessContractSha256}");
     }
 
     private static YoloImagePreprocessResult? TryPreprocessImageInput(string[] args, YoloModelProfile profile)
@@ -580,6 +597,11 @@ public static class YoloVisionCommand
         return expanded;
     }
 
+    private static string FormatFloatTriplet(float[] values)
+    {
+        return string.Join(",", values.Select(value => value.ToString("R", CultureInfo.InvariantCulture)));
+    }
+
     private static void PrintUsage()
     {
         Console.WriteLine("YoloVision sample");
@@ -613,6 +635,7 @@ public static class YoloVisionCommand
         Console.WriteLine("  --mask-coordinate-space model-input|normalized  Required with --mask-spatial-transform.");
         Console.WriteLine("  --mask-crop-to-box true|false   Crop the transformed mask to its detection box. Default: true.");
         Console.WriteLine("  --segmentation-mask-output-directory <path>  Write hashed prototype/source probability masks, thresholded u8 masks, and a manifest.");
+        Console.WriteLine("  --semantic-artifact-output-directory <path>  Write the full-resolution int32 class-index map, SHA256, histogram, and manifest.");
         Console.WriteLine("  --pose-keypoints-output <name>   Pose keypoint tensor name.");
         Console.WriteLine("  --keypoint-count <count>         Pose keypoint count; --keypoint-stride defaults to 3.");
         Console.WriteLine("  --obb-angle-output <name>        Optional separate OBB angle tensor; embedded angle uses --aux-channel-start.");
@@ -634,9 +657,11 @@ public static class YoloVisionCommand
         Console.WriteLine("  --reference-outputs <map>  Structured schemaVersion=1 output references using tensor:path mappings.");
         Console.WriteLine("  --reference-abs-tolerance/--reference-rel-tolerance <n>  Finite non-negative comparison tolerances.");
         Console.WriteLine("  --reference-nan-policy <reject|equal> --reference-infinity-policy <exact|reject>");
+        Console.WriteLine("  --noTF32                  Disable TensorRT TF32 tactics when strict FP32 parity is required.");
         Console.WriteLine("  --image <path>           Decode .bmp/.ppm image, preprocess to fp32, and feed it as --input-data.");
         Console.WriteLine("  --input-image <path>     Alias for --image.");
         Console.WriteLine("  --preprocessed-output <path>  Optional fp32 tensor path written by --image preprocessing.");
+        Console.WriteLine("  --mean <r,g,b> --std <r,g,b>  Per-channel normalization after --scale; defaults to 0,0,0 and 1,1,1.");
         Console.WriteLine("  --preprocess-only        Write the preprocessed tensor and hashes without requiring an ONNX model or TensorRT runtime.");
         Console.WriteLine("  --preflight|--dryRun|--previewOnly  Validate profile, asset paths/hashes, and output metadata without TensorRT or ONNX execution.");
         Console.WriteLine("  --preflight-report <path>  Write a yolovision-preflight.v1 JSON report; --strict-preflight returns exit code 2 for missing owner assets.");

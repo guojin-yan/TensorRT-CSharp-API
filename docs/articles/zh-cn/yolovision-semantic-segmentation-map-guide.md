@@ -1,4 +1,4 @@
-# YoloVision YOLOv8n Semantic Segmentation Map 输出指南
+# YoloVision LRASPP Semantic Segmentation 获取、转换与运行指南
 
 ## 适用读者
 
@@ -29,6 +29,164 @@
 4. 使用 TensorRtExec 构建 engine 并保存 build-only report。
 5. 使用 YoloVision 的 `--semantic-output` 和 `--class-count` 运行，保存 output JSON、SVG 和日志。
 6. 由 owner 回填 argmax、resize-back、palette、void class 和 map shape 证据，再执行 validator。
+
+## 已验证模型与本地目录
+
+本项目首个完成真实 TensorRT 闭环的 semantic 模型不是不存在的 `yolov8n-sem.pt`，而是 torchvision 官方 `LRASPP MobileNetV3 Large`。固定来源如下：
+
+| 项目 | 固定值 |
+| --- | --- |
+| torchvision tag | `v0.25.0` |
+| torchvision commit | `8ac84ee75afb1c327902156b5336f56ad63b7e2f` |
+| 权重 URL | `https://download.pytorch.org/models/lraspp_mobilenet_v3_large-d234d4ea.pth` |
+| 权重 SHA256 | `d234d4eae9d55d5f76de18b77cf0dc62c66fe5c5482758209d00f950c92bb280` |
+| 模型许可证 | `BSD-3-Clause` |
+| 输入图片 | PyTorch Hub commit `c7895df70c7767403e36f82786d6b611b7984557` 的 `images/dog.jpg` |
+| ONNX SHA256 | `3cb94e561bdefe606ed7d1a2c4d0296409bec066f3a39a9fe9dabd72b23728f8` |
+
+转换后的模型统一暂存到工作区外层目录，不放进 Git 仓库：
+
+```text
+E:\GitSpace\TensorRT-CSharp-API-4.0\models\YoloVision\SemanticSegmentation\lraspp-mobilenet-v3-large-torchvision-v0.25.0\
+  lraspp_mobilenet_v3_large-d234d4ea.pth
+  lraspp-mobilenet-v3-large-320.onnx
+```
+
+这里的“工作区外层”很重要：Git 仓库是 `E:\GitSpace\TensorRT-CSharp-API-4.0\TensorRtSharp4.0`，`models` 与它同级，因此权重和 ONNX 不会进入源码提交。后续 Model Zoo 建立前，其他演示模型也遵守同一规则。仓库只保存获取/转换脚本、来源 URL、版本、长度、SHA256、输入输出契约和小型验证记录。
+
+## 获取官方资产
+
+在仓库根目录执行：
+
+```powershell
+$python = "C:\Users\guoji\.conda\envs\ultralytics\python.exe"
+
+pwsh -NoProfile -ExecutionPolicy Bypass `
+  -File .\eng\Acquire-TorchVisionLrasppOfficialAssets.ps1 `
+  -AllowDownload `
+  -PythonPath $python
+```
+
+脚本固定校验权重、torchvision `_meta.py`、torchvision LICENSE 和 `dog.jpg` 的长度与 SHA256。已有文件会直接复核；缺少文件时只有显式传入 `-AllowDownload` 才会联网。脚本不会上传资产、创建 Release 或发布 package。
+
+对应的可审计清单是：
+
+- `samples/assets/yolovision-torchvision-lraspp-official-assets.json`
+- `eng/Acquire-TorchVisionLrasppOfficialAssets.ps1`
+
+模型与图片目前都没有获得本项目公开再分发批准，因此不能把本地 `models` 或 `downloads` 内容提交到 GitHub。
+
+## 转换为 ONNX
+
+环境需要 PyTorch、torchvision、ONNX 和 ONNX Runtime。已验证版本为 Python `3.10.20`、PyTorch `2.10.0+cpu`、torchvision `0.25.0+cpu`、ONNX/ONNX Runtime `1.15.0`。
+
+使用仓库脚本导出：
+
+```powershell
+$workspace = "E:\GitSpace\TensorRT-CSharp-API-4.0"
+$modelRoot = "$workspace\models\YoloVision\SemanticSegmentation\lraspp-mobilenet-v3-large-torchvision-v0.25.0"
+$assetRoot = "$workspace\downloads\lraspp-mobilenet-v3-large-torchvision-v0.25.0\source"
+$referenceRoot = ".\artifacts\yolovision\semantic-lraspp-reference"
+
+& $python .\eng\Invoke-YoloVisionSemanticReference.py `
+  --weights "$modelRoot\lraspp_mobilenet_v3_large-d234d4ea.pth" `
+  --image "$assetRoot\dog.jpg" `
+  --onnx "$modelRoot\lraspp-mobilenet-v3-large-320.onnx" `
+  --output-directory $referenceRoot `
+  --export-onnx
+```
+
+脚本使用 `torchvision.models.segmentation.lraspp_mobilenet_v3_large` 创建 21 类模型，加载固定权重，通过只返回 `model(images)["out"]` 的 wrapper 导出 opset 17 静态图。导出后必须满足：
+
+```text
+images:[1,3,320,320] -> semantic:[1,21,320,320]
+```
+
+它同时执行 ONNX checker、PyTorch/ONNX Runtime 对比并生成正例 reference 与单点篡改负例。当前 PyTorch/ORT 最大绝对误差为 `9.5367431640625e-06`。
+
+## C# 图像预处理
+
+LRASPP 路径显式使用：
+
+- stretch 到 `320x320`；
+- RGB、NCHW、float32；
+- `scale=1/255`；
+- `mean=0.485,0.456,0.406`；
+- `std=0.229,0.224,0.225`；
+- 公式 `(pixel * scale - mean[channel]) / std[channel]`。
+
+先把参考脚本生成的 `dog.ppm` 交给内置预处理器：
+
+```powershell
+dotnet run --project .\samples\YoloVision -c Release -- `
+  --task sem `
+  --class-count 21 `
+  --input-shape 1x3x320x320 `
+  --tensor-layout NCHW `
+  --color-order RGB `
+  --resize stretch `
+  --scale 0.003921568627451 `
+  --mean 0.485,0.456,0.406 `
+  --std 0.229,0.224,0.225 `
+  --image "$referenceRoot\dog.ppm" `
+  --preprocessed-output "$referenceRoot\input-csharp-imagenet-1x3x320x320.fp32.bin" `
+  --preprocess-only
+```
+
+当前 C# tensor SHA256 是 `d8f631d10bcc75645455f313e3b888acd68ba138a87b3ca380993062e507115a`，preprocess contract SHA256 是 `9f2dc5f182e1db1ea124cfcf8cf11c685dcb836b7695a67b14405851d6910a39`。C# 与 Pillow 的 resize 数值不完全相同，因此严格 TensorRT reference 必须由“同一个 C# tensor 经 ONNX Runtime”生成，不能拿另一套 resize 的 tensor 冒充。
+
+## TensorRT 运行与完整产物
+
+设置本机 TensorRT 与 bridge 后执行：
+
+```powershell
+$env:TENSORRT_PATH = "D:\Program Files\TensorRT-10.11.0.33-cu12"
+$env:JYPPX_TENSORRT_ROOT = $env:TENSORRT_PATH
+$env:JYPPX_NATIVE_BRIDGE_PATH = ".\build-out\win-x64-trt10-cuda12-release\bin\Release\jyppxtrtbridge.dll"
+$env:JYPPX_ENABLE_DEVELOPMENT_PROBING = "true"
+
+dotnet run --project .\samples\YoloVision -c Release -- `
+  --model "$modelRoot\lraspp-mobilenet-v3-large-320.onnx" `
+  --labels "$referenceRoot\voc-semantic.names" `
+  --image "$referenceRoot\dog.ppm" `
+  --preprocessed-output "$referenceRoot\input-csharp-imagenet-1x3x320x320.fp32.bin" `
+  --input-shape 1x3x320x320 `
+  --input-name images `
+  --output-name semantic `
+  --tensor-rt-line 10 `
+  --noTF32 `
+  --family custom `
+  --task sem `
+  --class-count 21 `
+  --tensor-layout NCHW `
+  --color-order RGB `
+  --resize stretch `
+  --scale 0.003921568627451 `
+  --mean 0.485,0.456,0.406 `
+  --std 0.229,0.224,0.225 `
+  --reference-outputs "semantic:$referenceRoot\semantic.reference.json" `
+  --reference-abs-tolerance 0.0001 `
+  --reference-rel-tolerance 0.0001 `
+  --output "$referenceRoot\yolovision-semantic-output.json" `
+  --semantic-artifact-output-directory "$referenceRoot\tensorrt-semantic-artifacts" `
+  --visualization "$referenceRoot\yolovision-semantic.svg"
+```
+
+`--noTF32` 只在用户显式请求严格 FP32 parity 时关闭 TensorRT TF32；默认构建行为保持不变。本次 TensorRT 10.11 实测结果：
+
+| 检查项 | 结果 |
+| --- | ---: |
+| 比较 logits | `2,150,400` |
+| raw mismatch | `0` |
+| raw 最大绝对误差 | `2.670288E-05` |
+| class-index 像素 | `102,400` |
+| argmax mismatch | `0` |
+| background | `65,193` |
+| dog（class 12） | `37,207` |
+
+`--semantic-artifact-output-directory` 写出完整的 `semantic-class-index.i32.bin` 和 `semantic-map-artifacts.manifest.json`。二进制格式是 `int32 little-endian`、row-major `[H,W]`；manifest 记录 shape、长度、SHA256、完整 class histogram 和 proof boundary。它不是降采样 SVG，也不是只记录一个 `valueCount` 的摘要。
+
+受控负例把 reference 的第 0 个 logit 增加 `10`，结果必须为退出码 `1`、mismatch `1`、first mismatch `0`。轻量真实运行记录位于 `samples/assets/yolovision-torchvision-lraspp-real-model-runtime-evidence.json`。
 
 ## 场景
 
@@ -147,7 +305,7 @@ dotnet run --project .\samples\YoloVision -- --preprocess-only --image E:\Tensor
 dotnet run --project .\samples\YoloVision -- --model E:\TensorRtSharpAssets\cases\yolov8n-sem\models\yolov8n-sem.onnx --labels E:\TensorRtSharpAssets\cases\yolov8n-sem\labels\semantic-classes.names --input-data E:\TensorRtSharpAssets\cases\yolov8n-sem\tensors\street-fp32.bin --input-shape 1x3x512x512 --family custom --task sem --semantic-output semantic --class-count 21 --output-json E:\TensorRtSharpAssets\cases\yolov8n-sem\reports\yolov8n-sem-output.json --visualization-svg E:\TensorRtSharpAssets\cases\yolov8n-sem\reports\yolov8n-sem-output.svg
 ```
 
-当前 `yolovision-output.v1` 的 semantic prediction 至少包含 `task=sem`、`classCount`、`width`、`height` 和 `valueCount`；output tensor summary 还应保存实际 shape 与 value hash。`YoloVision` 不会把 `valueCount` 解释成已经正确的像素标签，也不会自动应用 owner palette。output JSON 必须关联 `modelSha256`、`labelsSha256`、`paletteSha256`、`imageSha256`、`preprocessedTensorSha256`、run log hash、`classMapLayout` 和 `argmaxRule`。
+当前 `yolovision-output.v1` 的 semantic prediction 包含 `task=sem`、`classCount`、`width`、`height`、`valueCount`、`classIndexValueCount`、dominant class 和完整 `classHistogram`；output tensor summary 还保存实际 shape 与 value hash。`YoloVision` 不会自动应用 owner palette 或猜测 resize-back。需要完整逐像素复核时必须同时保存 `semantic-class-index.i32.bin` 和 manifest，并关联 `modelSha256`、`labelsSha256`、`paletteSha256`、`imageSha256`、`preprocessedTensorSha256`、run log hash、`classMapLayout` 和 `argmaxRule`。
 
 建议按以下顺序验证：
 
@@ -164,6 +322,10 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-SampleRunEvidenceRecord
 - `samples/YoloVision/YoloSampleRunner.cs`：`DecodeSemanticMap` 与 `[C,H,W]`/`[1,C,H,W]`/按 class count 识别的 NHWC map 路由。
 - `samples/YoloVision/YoloVisionOutputReport.cs`：semantic prediction 的 classCount、width、height 和 valueCount 输出。
 - `samples/YoloVision/YoloVisionVisualizationWriter.cs`：按像素 argmax 的语义 SVG 网格。
+- `samples/YoloVision/YoloSemanticMapArtifactWriter.cs`：完整 class-index 二进制、SHA256、histogram 与 manifest。
+- `samples/YoloVision/yolovision-semantic-map-artifacts.schema.json`：完整语义图产物 schema。
+- `eng/Acquire-TorchVisionLrasppOfficialAssets.ps1`：官方资产获取与固定 hash 校验。
+- `eng/Invoke-YoloVisionSemanticReference.py`：ONNX 导出、ORT reference、argmax 与负例比较。
 - `samples/YoloVision/yolovision-task-output-contract.json`：semantic output role 与必填 metadata。
 - `samples/YoloVision/Program.cs`：`--task sem`、`--semantic-output`、`--class-count`、输出参数入口。
 - `eng/Test-YoloVisionRealAssetCandidate.ps1`：semantic map、palette 和 owner 证据字段验证。

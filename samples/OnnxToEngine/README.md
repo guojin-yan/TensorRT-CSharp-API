@@ -75,11 +75,17 @@ For arbitrary external ONNX models, this stage treats the sample as build-only o
 
 The explicit `--mnist` path is a model-specific runner. It reads TensorRT's P5 PGM assets, applies the official sample preprocessing formula `1 - pixel / 255`, builds and deserializes the external MNIST ONNX model, binds the discovered input/output tensor names, enqueues inference, applies stable softmax, and verifies both the expected digit and a minimum confidence.
 
+TensorRT's `data/mnist/README.md` attributes this opset 8 graph to ONNX Model Zoo. It is already an ONNX release artifact, so there
+is no framework-to-ONNX conversion step. Copy it from the user-installed TensorRT sample-data directory to
+`E:\GitSpace\TensorRT-CSharp-API-4.0\models\OnnxToEngine\MNIST\nvidia-tensorrt-10.11\mnist.onnx` and verify SHA256
+`2f06e72de813a8635c9bc0397ac447a601bdbfa7df4bebc278723b958831c9bf`. The full acquisition boundary is documented in
+`docs/articles/zh-cn/demo-model-acquisition-and-onnx-conversion.md`; the ONNX is not committed or published.
+
 ```powershell
 dotnet .\samples\OnnxToEngine\bin\Debug\net8.0\OnnxToEngine.dll `
   --mnist `
   --tensor-rt-line 10 `
-  --onnx ".\third_party\nvidia\TensorRT-10.11.0.33-cuda 12.9\data\mnist\mnist.onnx" `
+  --onnx "..\models\OnnxToEngine\MNIST\nvidia-tensorrt-10.11\mnist.onnx" `
   --mnistInput ".\third_party\nvidia\TensorRT-10.11.0.33-cuda 12.9\data\mnist\7.pgm" `
   --expectedDigit 7 `
   --minimumConfidence 0.9 `
