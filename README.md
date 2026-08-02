@@ -537,7 +537,7 @@ dotnet docfx .\docs\docfx.json
 
 - NVIDIA binaries are intentionally not committed.
 - `third_party/` is only a local drop location.
-- Runtime packages are intended to ship the bridge together with matching TensorRT, CUDA, cuDNN, and optional full-runtime NVRTC/builtins components only after redistribution, platform-asset, and package-size review.
+- Runtime packages contain only the project-owned bridge. Install matching TensorRT, CUDA, cuDNN, and optional NVRTC components from NVIDIA on the consumer machine.
 - Public hand-written C# wrappers should include useful XML documentation; generated APIs may use generated comments.
 
 - Public release owner execution package: `artifacts/final-release/public-release-owner-execution-package.json`

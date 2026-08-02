@@ -39,16 +39,16 @@
 - 必跑命令：`eng/Generate-Bindings.ps1`、`eng/Test-BindingGeneratorOutputs.ps1`、`eng/Export-InterfaceCoverageMatrix.ps1`、`cmake --preset ...`、`cmake --build --preset ... --parallel`、`dotnet build`、定向 `dotnet test`。
 - 排障：覆盖 CUDA driver/runtime mismatch、TensorRT/cuDNN DLL 未找到、CMake preset roots 不匹配、bridge load failure、blocked-by-cuda-driver 的真实含义。
 
-## 双发布路线
+## 双发布渠道
 
-包发布策略按两条路线并行维护，不能混淆：
+包发布策略按两个公开渠道并行维护；两个渠道都禁止捆绑 NVIDIA 原厂运行库：
 
 | 路线 | 分发位置 | 包内容 | 用户前置条件 | 用途 |
 | --- | --- | --- | --- | --- |
-| GitHub 全依赖包 | GitHub Packages / GitHub Releases | managed API、C++ bridge、匹配 TensorRT/CUDA/cuDNN runtime assets、collection/package metadata | 用户按对应 runtime key 选择包；需要确认 NVIDIA 再分发许可与包体积 | 低摩擦试用、完整 runtime 矩阵、企业内部分发 |
-| NuGet 小包 | nuget.org + GitHub Packages mirror | C# 核心 API 与中间 C++ bridge 小包，不内置 TensorRT/CUDA/cuDNN 大依赖 | 用户自行安装 CUDA / TensorRT / cuDNN，并配置本机 native library 搜索路径 | 公开生态采用、项目宣传、常规 .NET 消费 |
+| GitHub Release | GitHub Releases | managed API、YoloVision、按版本编译的项目自有 C++ bridge、源码与文档 | 用户按 runtime key 自行安装 CUDA / TensorRT / cuDNN，并配置 native library 搜索路径 | 固定版本资产、SHA256 校验、源码归档 |
+| NuGet | nuget.org | C# 核心 API、YoloVision 与按版本拆分的项目自有 C++ bridge | 用户自行安装 CUDA / TensorRT / cuDNN，并配置本机 native library 搜索路径 | 标准 `PackageReference` 消费、公开生态采用 |
 
-NuGet 小包路线必须明确：`JYPPX.TensorRT.CSharp.API` 与 bridge 包可以发布到 NuGet，但 TensorRT、CUDA、cuDNN 由于体积和授权原因不进入 NuGet 主包。GitHub 全依赖包路线可以承载完整依赖，但仍需要真实 clean consumer / runtime proof 和 post-publish verification 才能关闭发布门禁。
+两个渠道都只发布项目源码编译得到的 managed/bridge 包；TensorRT、CUDA、cuDNN、NVRTC、parser、plugin 和 builder-resource 均不进入发布包。发布关闭仍需真实 clean consumer、runtime proof 和 post-publish verification。
 
 ## 样例与应用发布化路线
 

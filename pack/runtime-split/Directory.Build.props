@@ -10,7 +10,7 @@
     <PackageProjectUrl>$(RepositoryUrl)</PackageProjectUrl>
     <RepositoryUrl>$(RepositoryUrl)</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <Description>Retired split runtime project. Only projects that explicitly opt in as bridge packages are packable.</Description>
+    <Description>Project-owned native bridge package for TensorRtSharp4.0. Requires user-installed matching CUDA, cuDNN, and TensorRT runtime libraries.</Description>
     <!-- Bridge projects explicitly override IsPackable. Vendor and meta projects remain disabled. -->
     <NoWarn>$(NoWarn);NU5123;NU5128</NoWarn>
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>

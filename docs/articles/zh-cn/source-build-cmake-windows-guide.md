@@ -6,7 +6,7 @@
 
 - 想从源码编译 `JYPPX.TensorRT.CSharp.API` 的 .NET 开发者。
 - 需要自定义 TensorRT、CUDA、cuDNN 组合的部署工程师。
-- 需要验证 GitHub 全依赖包和 NuGet 小包路线差异的发布负责人。
+- 需要验证 GitHub Release 与 NuGet 两个 bridge-only 发布渠道的发布负责人。
 - 需要调试 native bridge、P/Invoke、DLL 加载或 CUDA driver 兼容问题的维护者。
 
 ## 编译产物
@@ -15,12 +15,14 @@
 
 1. managed C# assemblies：`JYPPX.TensorRtSharp`、`JYPPX.CudaSharp`、`JYPPX.Shared`。
 2. native C ABI bridge：项目 C++ 层生成的 TensorRT/CUDA bridge DLL。
-3. runtime/package 验证资产：按 TensorRT/CUDA/cuDNN 组合收集、拆分或打包的依赖文件。
+3. runtime/package 验证资产：按 TensorRT/CUDA/cuDNN 组合编译和验证的项目自有 bridge；厂商依赖保留在用户安装目录，不进入包。
 
-当前项目采用双发布路线：
+当前项目采用两个 bridge-only 发布渠道：
 
-- GitHub 全依赖包：包含 managed API、C++ bridge、TensorRT/CUDA/cuDNN runtime assets，适合开箱部署和完整示例。
-- NuGet 小包：只发布 C# 核心 API 与中间 C++ bridge 小包，用户自行安装 CUDA、TensorRT、cuDNN，适合长期维护和公开分发。
+- GitHub Release：发布 managed API、YoloVision、按版本编译的 C++ bridge、源码和文档，并提供固定资产 URL 与 SHA256。
+- NuGet：发布 managed API、YoloVision 和按版本拆分的 C++ bridge，提供标准 `PackageReference` 消费。
+
+两个渠道都不打包 TensorRT、CUDA、cuDNN、NVRTC、parser、plugin 或 builder-resource；用户必须按 runtime key 自行安装匹配版本。
 
 ## 推荐环境
 
@@ -221,7 +223,7 @@ dumpbin /dependents path\to\your\bridge.dll
 - TensorRT DLL 不在 PATH。
 - cuDNN DLL 不在 PATH。
 - x86/x64 架构不一致。
-- NuGet 小包路线下用户没有本机安装 CUDA/TensorRT/cuDNN。
+- NuGet 消费端没有按 runtime key 安装 CUDA/TensorRT/cuDNN。
 
 ### CUDA error 35
 
@@ -263,7 +265,7 @@ CUDA error 35 通常表示 driver/runtime 不兼容。处理顺序：
 - managed build 通过。
 - project-quality tests 通过或有明确 owner 输入项。
 - native bridge 使用目标 preset 成功 configure/build。
-- GitHub 全依赖包与 NuGet 小包路线都能解释清楚。
+- GitHub Release 与 NuGet 两个 bridge-only 渠道都能解释清楚。
 - `samples/YoloVision`、`samples/OnnxToEngine`、`applications/TensorRtExec` 的文档不再回流旧命名。
 - 技术文章不是碎片式 API 文档，而是有背景、环境、步骤、代码、验证和排障的完整文章。
 

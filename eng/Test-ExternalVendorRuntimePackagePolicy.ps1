@@ -45,6 +45,9 @@ if ([int]$policy.schemaVersion -ne 1) {
 if (@($policy.allowedPackageKinds).Count -ne 2 -or @($policy.allowedPackageKinds) -notcontains "managed" -or @($policy.allowedPackageKinds) -notcontains "bridge") {
   Add-Failure "allowedPackageKinds must contain only managed and bridge."
 }
+if (@($policy.forbiddenPublicClaims).Count -eq 0) {
+  Add-Failure "forbiddenPublicClaims must define retired vendor-package claims."
+}
 
 $fullRuntimeProps = Join-Path $RepositoryRoot "pack\runtime\Directory.Build.props"
 if (-not (Test-TextContains -Path $fullRuntimeProps -Text "<IsPackable>false</IsPackable>")) {
@@ -173,23 +176,20 @@ foreach ($retiredBlocker in @(
 
 foreach ($surface in @(
     "README.md",
+    "README.zh-CN.md",
     "docs\articles\en\runtime-packages.md",
     "docs\articles\en\runtime-distribution-strategy.md",
     "docs\articles\zh-cn\runtime-distribution-strategy.md",
     "docs\articles\zh-cn\nuget-github-dual-package-strategy.md",
+    "docs\articles\zh-cn\project-roadmap-to-public-release.md",
+    "docs\articles\zh-cn\source-build-cmake-windows-guide.md",
     "docs\articles\zh-cn\publishing\package-strategy-public-article.md",
     "docs\articles\zh-cn\publishing\project-overview-public-article.md",
     "docs\articles\zh-cn\publishing\native-bridge-build-public-article.md"
   )) {
   $surfacePath = Join-Path $RepositoryRoot $surface
   $surfaceText = Get-Content -LiteralPath $surfacePath -Raw -Encoding utf8
-  foreach ($retiredClaim in @(
-      "GitHub full runtime package",
-      "GitHub Packages full runtime",
-      "full dependency package route",
-      "publish CudaCudnn",
-      "republish CudaCudnn"
-    )) {
+  foreach ($retiredClaim in @($policy.forbiddenPublicClaims)) {
     if ($surfaceText.IndexOf($retiredClaim, [StringComparison]::OrdinalIgnoreCase) -ge 0) {
       Add-Failure "Current public policy surface '$surface' still advertises retired vendor package delivery: $retiredClaim"
     }

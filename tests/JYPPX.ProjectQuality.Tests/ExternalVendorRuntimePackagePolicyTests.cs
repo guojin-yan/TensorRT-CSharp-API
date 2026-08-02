@@ -26,6 +26,9 @@ public sealed class ExternalVendorRuntimePackagePolicyTests
         Assert.Equal(
             new[] { "JYPPX.TensorRT.CSharp.API", "JYPPX.TensorRT.CSharp.API.YoloVision" },
             root.GetProperty("managedPackageIds").EnumerateArray().Select(static value => value.GetString()).ToArray());
+        Assert.Contains(
+            root.GetProperty("forbiddenPublicClaims").EnumerateArray(),
+            static value => value.GetString() == "GitHub 全依赖包");
         Assert.True(root.GetProperty("sourceArchivePolicy").GetProperty("mustUseGitTrackedFiles").GetBoolean());
         Assert.True(root.GetProperty("sourceArchivePolicy").GetProperty("mustExcludeThirdPartyBinaries").GetBoolean());
 
@@ -33,6 +36,8 @@ public sealed class ExternalVendorRuntimePackagePolicyTests
         string splitProps = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "pack", "runtime-split", "Directory.Build.props"));
         Assert.Contains("<IsPackable>false</IsPackable>", runtimeProps, StringComparison.Ordinal);
         Assert.Contains("<IsPackable>false</IsPackable>", splitProps, StringComparison.Ordinal);
+        Assert.Contains("Requires user-installed matching CUDA, cuDNN, and TensorRT", splitProps, StringComparison.Ordinal);
+        Assert.DoesNotContain("Retired split runtime project", splitProps, StringComparison.Ordinal);
 
         string[] splitProjects = Directory.GetFiles(Path.Combine(RepositoryPaths.Root, "pack", "runtime-split"), "*.csproj", SearchOption.AllDirectories);
         foreach (string projectPath in splitProjects)

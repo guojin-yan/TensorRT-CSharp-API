@@ -607,7 +607,7 @@ dotnet docfx .\docs\docfx.json
 
 - NVIDIA 二进制文件不提交到仓库。
 - `third_party/` 仅作为本地依赖投放目录。
-- runtime 包计划在完成再分发许可和包体积复核后，才随匹配 TensorRT、CUDA、cuDNN 动态库一起交付。
+- runtime 包只包含项目自有 bridge；用户需要在消费端按版本自行安装 TensorRT、CUDA、cuDNN 和可选 NVRTC。
 - 手写 public C# wrapper 应包含有用的 XML documentation；生成 API 可以使用生成注释。
 
 `public-release-owner-execution-package`、`external-clean-consumer-proof-kit`、`runtime-proof-compatible-host-kit`、`post-publish-owner-verification-kit` 和 `owner-public-release-execution-readiness-pack` 继续补上真实公开发布 Owner 执行包层。它们只提供命令模板、Owner 字段、外部 proof 采集路径和 readiness blocker；默认保持 blocked/non-proof，不是 runtime proof、post-publish proof、publish approval、release close approval 或 package push。

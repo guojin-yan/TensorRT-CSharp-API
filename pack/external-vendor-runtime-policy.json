@@ -43,6 +43,17 @@
     "^nvrtc.*\\.(dll|so(?:\\..*)?)$",
     "^libnvrtc.*\\.so(?:\\..*)?$"
   ],
+  "forbiddenPublicClaims": [
+    "GitHub full runtime package",
+    "GitHub Packages full runtime",
+    "full dependency package route",
+    "publish CudaCudnn",
+    "republish CudaCudnn",
+    "GitHub 全依赖包",
+    "runtime 包计划在完成再分发许可",
+    "Runtime packages are intended to ship the bridge together with matching",
+    "TensorRT/CUDA/cuDNN runtime assets"
+  ],
   "sourceArchivePolicy": {
     "allowed": true,
     "mustUseGitTrackedFiles": true,
