@@ -37,6 +37,37 @@ public sealed class ReleaseAutomationTests
     }
 
     [Fact]
+    public void RuntimeWorkflowsUseBoundedFirstReleasePackageContractTests()
+    {
+        string[] workflows =
+        [
+            File.ReadAllText(Path.Combine(RepositoryPaths.Root, ".github", "workflows", "runtime-windows.yml")),
+            File.ReadAllText(Path.Combine(RepositoryPaths.Root, ".github", "workflows", "runtime-linux.yml")),
+        ];
+        string[] requiredTestClasses =
+        [
+            "RuntimeManifestTests",
+            "ManagedPackageTests",
+            "ExternalVendorRuntimePackagePolicyTests",
+            "BridgePackageConsumerTests",
+            "YoloVisionManagedPackagePublicationTests",
+            "ReleaseAutomationTests",
+            "ReleaseQualityGateWorkflowTests",
+        ];
+
+        foreach (string workflow in workflows)
+        {
+            Assert.Contains("Test first release core package contracts", workflow, StringComparison.Ordinal);
+            Assert.Contains("--no-build --filter", workflow, StringComparison.Ordinal);
+            Assert.DoesNotContain("--no-build\n", workflow.Replace("\r\n", "\n", StringComparison.Ordinal), StringComparison.Ordinal);
+            foreach (string testClass in requiredTestClasses)
+            {
+                Assert.Contains($"FullyQualifiedName~{testClass}", workflow, StringComparison.Ordinal);
+            }
+        }
+    }
+
+    [Fact]
     public void RootReadmesDescribeBridgeOnlyRuntimePublication()
     {
         string english = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "README.md"));

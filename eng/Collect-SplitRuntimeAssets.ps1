@@ -194,7 +194,10 @@ if (-not $sourcePackage) {
 
 if ([string]::IsNullOrWhiteSpace($SourceAssetsRoot)) {
   $SourceAssetsRoot = Join-Path $RepositoryRoot "pack\runtime\$($splitPackage.sourceRuntimeKey)\assets\runtimes\$($sourcePackage.rid)\native"
-  if (-not (Test-Path -LiteralPath $SourceAssetsRoot -PathType Container) -and [string]$splitPackage.role -eq "bridge") {
+  $bridgeFile = [string]($splitPackage.assets | Select-Object -First 1)
+  $stagedBridgePath = if ([string]::IsNullOrWhiteSpace($bridgeFile)) { "" } else { Join-Path $SourceAssetsRoot $bridgeFile }
+  if ([string]$splitPackage.role -eq "bridge" -and
+      ([string]::IsNullOrWhiteSpace($stagedBridgePath) -or -not (Test-Path -LiteralPath $stagedBridgePath -PathType Leaf))) {
     $configuration = if (-not [string]::IsNullOrWhiteSpace($BridgeConfiguration)) {
       $BridgeConfiguration
     }
@@ -213,7 +216,6 @@ if ([string]::IsNullOrWhiteSpace($SourceAssetsRoot)) {
     }
 
     $bridgeSourceRoot = Join-Path $RepositoryRoot "build-out\$buildPreset\bin\$configuration"
-    $bridgeFile = [string]($splitPackage.assets | Select-Object -First 1)
     if (-not [string]::IsNullOrWhiteSpace([string]$bridgeFile) -and (Test-Path -LiteralPath (Join-Path $bridgeSourceRoot ([string]$bridgeFile)) -PathType Leaf)) {
       $SourceAssetsRoot = $bridgeSourceRoot
       Write-Host "Using bridge build output as split source assets root: $SourceAssetsRoot"

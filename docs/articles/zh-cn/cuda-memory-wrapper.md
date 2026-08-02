@@ -413,7 +413,7 @@ Memory wrapper ready 不等于 allocator callback proof ready。`CudaMemory` own
 
 - [CUDA Memory Range APIs](cuda-memory-range-apis.md)
 - [CUDA Stream/Event 多流教程](cuda-stream-event-multistream-tutorial.md)
-- [MultiStream 样例](../../../samples/MultiStream/README.md)
+- [MultiStream 样例](https://github.com/guojin-yan/TensorRT-CSharp-API/blob/TensorRtSharp4.0/samples/MultiStream/README.md)
 - [TensorRT Inference Bindings](inference-bindings-tutorial.md)
 
 ## 第二批正文门禁

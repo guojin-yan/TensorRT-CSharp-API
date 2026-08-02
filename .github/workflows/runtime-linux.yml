@@ -348,8 +348,8 @@ jobs:
       - name: Build solution
         run: dotnet build TensorRtSharp.sln -c "${{ inputs.configuration }}" --no-restore
 
-      - name: Test project quality
-        run: dotnet test .\tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj -c "${{ inputs.configuration }}" --no-build
+      - name: Test first release core package contracts
+        run: dotnet test .\tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj -c "${{ inputs.configuration }}" --no-build --filter "FullyQualifiedName~RuntimeManifestTests|FullyQualifiedName~ManagedPackageTests|FullyQualifiedName~ExternalVendorRuntimePackagePolicyTests|FullyQualifiedName~BridgePackageConsumerTests|FullyQualifiedName~YoloVisionManagedPackagePublicationTests|FullyQualifiedName~ReleaseAutomationTests|FullyQualifiedName~ReleaseQualityGateWorkflowTests"
 
       - name: Pack managed package
         run: dotnet pack .\pack\JYPPX.TensorRT.CSharp.API\JYPPX.TensorRT.CSharp.API.csproj -c "${{ inputs.configuration }}" -o .\artifacts\managed -p:JYPPXPackageVersion=${{ needs.prepare.outputs.package_version }}

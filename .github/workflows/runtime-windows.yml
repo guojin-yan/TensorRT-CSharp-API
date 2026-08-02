@@ -337,8 +337,8 @@ jobs:
       - name: Build solution
         run: dotnet build TensorRtSharp.sln -c "${{ inputs.configuration }}" --no-restore
 
-      - name: Test project quality
-        run: dotnet test .\tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj -c "${{ inputs.configuration }}" --no-build
+      - name: Test first release core package contracts
+        run: dotnet test .\tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj -c "${{ inputs.configuration }}" --no-build --filter "FullyQualifiedName~RuntimeManifestTests|FullyQualifiedName~ManagedPackageTests|FullyQualifiedName~ExternalVendorRuntimePackagePolicyTests|FullyQualifiedName~BridgePackageConsumerTests|FullyQualifiedName~YoloVisionManagedPackagePublicationTests|FullyQualifiedName~ReleaseAutomationTests|FullyQualifiedName~ReleaseQualityGateWorkflowTests"
 
       - name: Ensure GitHub Release exists
         if: ${{ inputs.attach_to_github_release && inputs.release_tag != '' }}

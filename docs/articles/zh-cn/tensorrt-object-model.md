@@ -398,7 +398,7 @@ consumer 或 post-publish proof。engine inspector/readiness/capability query �
 
 ## 下一步
 
-- [Inference Bindings 样例](../../../samples/InferenceBindings/README.md)
+- [Inference Bindings 样例](https://github.com/guojin-yan/TensorRT-CSharp-API/blob/TensorRtSharp4.0/samples/InferenceBindings/README.md)
 - [Dynamic Shape 教程](dynamic-shape-optimization-profile-tutorial.md)
 - [Engine Inspector 只读边界](publishing/engine-inspector-public-article.md)
 - [C# Wrapper 生命周期设计](csharp-wrapper-lifetime-design.md)

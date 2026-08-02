@@ -351,6 +351,7 @@ public sealed class BridgePackageConsumerTests
         Assert.Contains("Using bridge build output as split source assets root", collectScript);
         Assert.Contains("build-out\\$buildPreset\\bin\\$configuration", collectScript);
         Assert.Contains("[string]$BridgeConfiguration", collectScript);
+        Assert.Contains("Test-Path -LiteralPath $stagedBridgePath -PathType Leaf", collectScript);
         Assert.Contains("[switch]$RunBridgeRuntimeSmoke", script);
         Assert.Contains("eng\\Test-BridgePackageRuntimeConsumer.ps1", script);
         Assert.Contains("-TensorRtRoot", script);
