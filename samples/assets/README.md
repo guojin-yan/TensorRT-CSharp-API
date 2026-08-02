@@ -2,6 +2,16 @@
 
 This folder contains audit templates for asset-dependent samples. It does not contain model weights, labels, images, generated TensorRT engines, or private run logs.
 
+## Demo model inventory
+
+`demo-model-inventory.json` is the authoritative 10-model acquisition, conversion, outer `models` path, length, SHA256, article, and
+source-tree runtime-evidence catalog. Every entry has a `runtimeEvidence` path to a tracked small JSON record; none of those links
+permit model upload or public redistribution. `onnxtoengine-mnist-real-model-runtime-evidence.json` records the MNIST digit-7
+TensorRT/ONNX Runtime match and the wrong-expected-digit controlled negative.
+
+Run `eng/Sync-DemoOnnxModels.ps1 -VerifyOnly` to require all 10 ONNX files under
+`E:\GitSpace\TensorRT-CSharp-API-4.0\models` and verify their pinned lengths and hashes without copying or publishing anything.
+
 ## YoloVision reference acquisition
 
 `yolovision-reference-assets.json` records the exact TensorRT 10.11 local-installation files used by the current YOLOv8s detection runtime candidate. Run:

@@ -79,6 +79,12 @@ Get-FileHash -Algorithm SHA256 -LiteralPath $target
 
 项目当前固定副本为 `26,454` bytes，SHA256 `2f06e72de813a8635c9bc0397ac447a601bdbfa7df4bebc278723b958831c9bf`。若用户安装包不包含 `data`，可以从 NVIDIA TensorRT sample data 或 ONNX Model Zoo 获取，但必须先核对同一 hash，不能把名字相同但图契约不同的文件混用。
 
+当前 `OnnxToEngine --mnist` 已用外层 `models` 中的同一 ONNX 和 TensorRT `7.pgm` 完成 TensorRT 10.11 源树实跑：
+预测 digit 7、置信度 `0.99999285`，10 个 logits 对独立 ONNX Runtime 1.23.2 CPU reference 为 mismatch 0，最大绝对
+误差 `0.000006`。只把 `expectedDigit` 改为 6 的受控负例完成 enqueue 后返回 exit code 2、
+`State=mnist-output-mismatch`、`OutputMatch=False`。小型证据见
+`samples/assets/onnxtoengine-mnist-real-model-runtime-evidence.json`；模型、engine 和运行日志均不上传。
+
 ## YOLOv8n Detection
 
 清单 ID：`yolovision-yolov8n-detection-v8.3.0`。
@@ -172,6 +178,24 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Acquire-TorchVisionLrasppOff
 ```
 
 权重来自 TorchVision LRASPP MobileNetV3 Large，固定到 torchvision `v0.25.0`。转换脚本 `eng/Invoke-YoloVisionSemanticReference.py` 导出 opset 17、`images:[1,3,320,320] -> semantic:[1,21,320,320]`。ONNX 为 `12,879,801` bytes，SHA256 `3cb94e561bdefe606ed7d1a2c4d0296409bec066f3a39a9fe9dabd72b23728f8`。
+
+## 真实运行证据索引
+
+机器清单的 10 个模型均显式链接到已经存在的小型 source-tree runtime 证据；这些记录不包含模型文件，也不等同于
+package consumer、公开包、post-publish 或再分发授权。
+
+| 清单 ID | 真实运行证据 |
+| --- | --- |
+| `classification-resnet18-imagenet1k-v1` | `samples/assets/classification-resnet18-real-model-runtime-evidence.json` |
+| `onnxtoengine-nvidia-mnist-opset8` | `samples/assets/onnxtoengine-mnist-real-model-runtime-evidence.json` |
+| `yolovision-yolov8n-detection-v8.3.0` | `samples/assets/yolovision-yolov8n-det-real-model-runtime-evidence.json` |
+| `yolovision-yolov10n-detection-v1.1` | `artifacts/interface-coverage/yolov10-official-runtime-proof-closure.json` |
+| `yolovision-yolox-s-detection-0.1.1rc0` | `artifacts/interface-coverage/yolox-official-runtime-proof-closure.json` |
+| `yolovision-yolov8n-classification-v8.3.0` | `samples/assets/yolovision-yolov8n-cls-real-model-runtime-evidence.json` |
+| `yolovision-yolov8n-instance-segmentation-v8.3.0` | `samples/assets/yolovision-yolov8n-seg-real-model-runtime-evidence.json` |
+| `yolovision-yolov8n-pose-v8.3.0` | `samples/assets/yolovision-yolov8n-pose-real-model-runtime-evidence.json` |
+| `yolovision-yolov8n-obb-v8.3.0` | `samples/assets/yolovision-yolov8n-obb-real-model-runtime-evidence.json` |
+| `yolovision-lraspp-mobilenet-v3-large-v0.25.0` | `samples/assets/yolovision-torchvision-lraspp-real-model-runtime-evidence.json` |
 
 ## 不需要外部深度学习模型的样例
 

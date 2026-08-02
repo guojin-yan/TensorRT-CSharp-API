@@ -82,10 +82,12 @@ is no framework-to-ONNX conversion step. Copy it from the user-installed TensorR
 `docs/articles/zh-cn/demo-model-acquisition-and-onnx-conversion.md`; the ONNX is not committed or published.
 
 ```powershell
-dotnet .\samples\OnnxToEngine\bin\Debug\net8.0\OnnxToEngine.dll `
+$model = 'E:\GitSpace\TensorRT-CSharp-API-4.0\models\OnnxToEngine\MNIST\nvidia-tensorrt-10.11\mnist.onnx'
+
+dotnet .\samples\OnnxToEngine\bin\Release\net8.0\OnnxToEngine.dll `
   --mnist `
   --tensor-rt-line 10 `
-  --onnx "..\models\OnnxToEngine\MNIST\nvidia-tensorrt-10.11\mnist.onnx" `
+  --onnx $model `
   --mnistInput ".\third_party\nvidia\TensorRT-10.11.0.33-cuda 12.9\data\mnist\7.pgm" `
   --expectedDigit 7 `
   --minimumConfidence 0.9 `
@@ -94,6 +96,12 @@ dotnet .\samples\OnnxToEngine\bin\Debug\net8.0\OnnxToEngine.dll `
   --exportOutput ".\artifacts\real-case\onnx-to-engine-mnist-trt10-runtime\mnist-trt10-output.json" `
   --exportPreprocessedInput ".\artifacts\real-case\onnx-to-engine-mnist-trt10-runtime\mnist-trt10-input-f32.bin"
 ```
+
+The pinned source-tree evidence is
+`samples/assets/onnxtoengine-mnist-real-model-runtime-evidence.json`. TensorRT 10.11 predicts digit 7 at confidence
+`0.99999285`; all 10 logits match the independent ONNX Runtime CPU reference within `1e-4`. A controlled run that changes only
+`--expectedDigit` to 6 exits 2 with `State=mnist-output-mismatch` and `OutputMatch=False`. The model, engine, and logs remain outside
+Git, and this is not package-consumer, public-package, post-publish, redistribution, or release proof.
 
 Only a completed external-model enqueue with matching digit and confidence can be classified as `real-model-runtime`. This remains a source-tree sample execution, not `package-consumer-runtime`, post-publish proof, or release authorization. Generic external ONNX execution remains build-only unless another explicit model runner defines its input and output semantics.
 

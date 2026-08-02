@@ -65,7 +65,8 @@
       "articles": [
         "docs/articles/zh-cn/demo-model-acquisition-and-onnx-conversion.md",
         "docs/articles/zh-cn/tensorrtexec-onnx-stripped-plan-refit-lifecycle.md"
-      ]
+      ],
+      "runtimeEvidence": "samples/assets/onnxtoengine-mnist-real-model-runtime-evidence.json"
     },
     {
       "id": "yolovision-yolov8n-detection-v8.3.0",
@@ -92,7 +93,8 @@
       "articles": [
         "docs/articles/zh-cn/demo-model-acquisition-and-onnx-conversion.md",
         "docs/articles/zh-cn/yolovision-detection-yolov8n-download-export-run.md"
-      ]
+      ],
+      "runtimeEvidence": "samples/assets/yolovision-yolov8n-det-real-model-runtime-evidence.json"
     },
     {
       "id": "yolovision-yolov10n-detection-v1.1",
@@ -119,7 +121,8 @@
       "articles": [
         "docs/articles/zh-cn/demo-model-acquisition-and-onnx-conversion.md",
         "docs/articles/zh-cn/yolovision-yolov10-end-to-end-output-guide.md"
-      ]
+      ],
+      "runtimeEvidence": "artifacts/interface-coverage/yolov10-official-runtime-proof-closure.json"
     },
     {
       "id": "yolovision-yolox-s-detection-0.1.1rc0",
@@ -146,7 +149,8 @@
       "articles": [
         "docs/articles/zh-cn/demo-model-acquisition-and-onnx-conversion.md",
         "docs/articles/zh-cn/yolovision-yolox-official-runtime-tutorial.md"
-      ]
+      ],
+      "runtimeEvidence": "artifacts/interface-coverage/yolox-official-runtime-proof-closure.json"
     },
     {
       "id": "yolovision-yolov8n-classification-v8.3.0",
@@ -173,7 +177,8 @@
       "articles": [
         "docs/articles/zh-cn/demo-model-acquisition-and-onnx-conversion.md",
         "docs/articles/zh-cn/yolovision-classification-yolov8n-labels-topk-guide.md"
-      ]
+      ],
+      "runtimeEvidence": "samples/assets/yolovision-yolov8n-cls-real-model-runtime-evidence.json"
     },
     {
       "id": "yolovision-yolov8n-instance-segmentation-v8.3.0",
@@ -200,7 +205,8 @@
       "articles": [
         "docs/articles/zh-cn/demo-model-acquisition-and-onnx-conversion.md",
         "docs/articles/zh-cn/yolovision-yolov8-seg-real-asset-tutorial.md"
-      ]
+      ],
+      "runtimeEvidence": "samples/assets/yolovision-yolov8n-seg-real-model-runtime-evidence.json"
     },
     {
       "id": "yolovision-yolov8n-pose-v8.3.0",
@@ -227,7 +233,8 @@
       "articles": [
         "docs/articles/zh-cn/demo-model-acquisition-and-onnx-conversion.md",
         "docs/articles/zh-cn/yolovision-pose-tutorial.md"
-      ]
+      ],
+      "runtimeEvidence": "samples/assets/yolovision-yolov8n-pose-real-model-runtime-evidence.json"
     },
     {
       "id": "yolovision-yolov8n-obb-v8.3.0",
@@ -254,7 +261,8 @@
       "articles": [
         "docs/articles/zh-cn/demo-model-acquisition-and-onnx-conversion.md",
         "docs/articles/zh-cn/yolovision-obb-tutorial.md"
-      ]
+      ],
+      "runtimeEvidence": "samples/assets/yolovision-yolov8n-obb-real-model-runtime-evidence.json"
     },
     {
       "id": "yolovision-lraspp-mobilenet-v3-large-v0.25.0",
@@ -281,7 +289,8 @@
       "articles": [
         "docs/articles/zh-cn/demo-model-acquisition-and-onnx-conversion.md",
         "docs/articles/zh-cn/yolovision-semantic-segmentation-map-guide.md"
-      ]
+      ],
+      "runtimeEvidence": "samples/assets/yolovision-torchvision-lraspp-real-model-runtime-evidence.json"
     }
   ]
 }

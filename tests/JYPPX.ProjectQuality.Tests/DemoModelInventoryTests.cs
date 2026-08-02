@@ -72,6 +72,7 @@ public sealed class DemoModelInventoryTests
     public void EveryInventoryEntryLinksToArticlesThatExistAndCatalogNamesEveryModel()
     {
         using JsonDocument document = LoadInventory();
+        JsonElement models = document.RootElement.GetProperty("models");
         string catalogPath = Path.Combine(
             RepositoryPaths.Root,
             "docs",
@@ -79,8 +80,9 @@ public sealed class DemoModelInventoryTests
             "zh-cn",
             "demo-model-acquisition-and-onnx-conversion.md");
         string catalog = File.ReadAllText(catalogPath);
+        var runtimeEvidencePaths = new HashSet<string>(StringComparer.Ordinal);
 
-        foreach (JsonElement model in document.RootElement.GetProperty("models").EnumerateArray())
+        foreach (JsonElement model in models.EnumerateArray())
         {
             string id = Assert.IsType<string>(model.GetProperty("id").GetString());
             Assert.Contains($"`{id}`", catalog, StringComparison.Ordinal);
@@ -91,9 +93,20 @@ public sealed class DemoModelInventoryTests
                     RepositoryPaths.Root,
                     relativePath.Replace('/', Path.DirectorySeparatorChar))), relativePath);
             }
+
+            string runtimeEvidence = Assert.IsType<string>(model.GetProperty("runtimeEvidence").GetString());
+            string runtimeEvidencePath = Path.Combine(
+                RepositoryPaths.Root,
+                runtimeEvidence.Replace('/', Path.DirectorySeparatorChar));
+            Assert.True(File.Exists(runtimeEvidencePath), runtimeEvidence);
+            Assert.Contains("real-model-runtime", File.ReadAllText(runtimeEvidencePath), StringComparison.Ordinal);
+            Assert.True(runtimeEvidencePaths.Add(runtimeEvidence), runtimeEvidence);
         }
 
+        Assert.Equal(models.GetArrayLength(), runtimeEvidencePaths.Count);
+
         Assert.Contains("不得把模型塞进 managed/native NuGet 包", catalog, StringComparison.Ordinal);
+        Assert.Contains("真实运行证据索引", catalog, StringComparison.Ordinal);
         Assert.Contains("CUDA、cuDNN、TensorRT 与 NVRTC 始终由用户自行安装", catalog, StringComparison.Ordinal);
 
         string syncScript = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "eng", "Sync-DemoOnnxModels.ps1"));

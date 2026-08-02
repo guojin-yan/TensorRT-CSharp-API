@@ -1,0 +1,113 @@
+{
+  "schemaVersion": 1,
+  "recordKind": "onnxtoengine-mnist-real-model-runtime-evidence",
+  "recordId": "onnxtoengine-mnist-opset8-win-x64-trt10.11-cuda12.9-20260802",
+  "sampleName": "OnnxToEngine",
+  "task": "digit-classification",
+  "proofClassification": "real-model-runtime",
+  "executedUtcDate": "2026-08-02",
+  "sourceBaseCommit": "60ed89cb493aca086779564e8ea47e324e692813",
+  "model": {
+    "path": "E:\\GitSpace\\TensorRT-CSharp-API-4.0\\models\\OnnxToEngine\\MNIST\\nvidia-tensorrt-10.11\\mnist.onnx",
+    "length": 26454,
+    "sha256": "2f06e72de813a8635c9bc0397ac447a601bdbfa7df4bebc278723b958831c9bf",
+    "opset": 8,
+    "source": "TensorRT 10.11 sample data README attribution to the ONNX Model Zoo",
+    "conversion": "upstream ONNX release; no local framework-to-ONNX conversion"
+  },
+  "input": {
+    "path": "third_party/nvidia/TensorRT-10.11.0.33-cuda 12.9/data/mnist/7.pgm",
+    "length": 797,
+    "sha256": "880e75f93fe00ab6f5c4e8ab00ff695c61e7e30bdf0d967ff8b34de1f5a94634",
+    "preprocess": "P5 PGM 28x28; float32 1-pixel/255",
+    "tensorName": "Input3",
+    "shape": [1, 1, 28, 28],
+    "elementCount": 784,
+    "tensorSha256": "81f2cd7784dca5c8f02a9887ae89a6a3582880a27d2eba95a53f845c63187564"
+  },
+  "outputContract": {
+    "tensorName": "Plus214_Output_0",
+    "shape": [1, 10],
+    "dataType": "float32",
+    "postprocess": "stable softmax",
+    "acceptance": "predicted digit equals expected digit and confidence is at least 0.9"
+  },
+  "independentReferenceValidation": {
+    "runtime": "ONNX Runtime 1.23.2 CPUExecutionProvider",
+    "referencePath": "artifacts/real-case/onnx-to-engine-mnist-trt10-runtime/digit-7/mnist-trt10-7.onnxruntime-cpu.reference.json",
+    "referenceSha256": "1babfa81c0d277a3d483fdc6288285b26008ba5b382868272f1e2187338bd571",
+    "evidencePath": "artifacts/interface-coverage/tensorrtexec-mnist-onnxruntime-reference-evidence.json",
+    "evidenceSha256": "3de54437688df1e2d04995f4bbe86a2d3b69dfd834a6b5022a4cf4a40f9e3d5d",
+    "sourceClassification": "onnxruntime-cpu-1.23.2-derived-unreviewed",
+    "comparedLogitCount": 10,
+    "mismatchCount": 0,
+    "firstMismatchIndex": -1,
+    "maximumAbsoluteError": 0.000006,
+    "maximumRelativeError": 7.89396732869189e-7,
+    "absoluteTolerance": 0.0001,
+    "relativeTolerance": 0.0001,
+    "sameArgmax": true,
+    "passed": true
+  },
+  "runtimeValidation": {
+    "tensorRtVersion": "10.11.0.33",
+    "cudaVersion": "12.9",
+    "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+    "driverVersion": "576.02",
+    "bridgeSha256": "74d89fd7e1cb414751ca943298e003ecf48cadcda3e4c1952e5a2d5ba0b0cfc9",
+    "exitCode": 0,
+    "state": "mnist-real-model-runtime",
+    "inferenceRan": true,
+    "expectedDigit": 7,
+    "predictedDigit": 7,
+    "confidence": 0.99999285,
+    "minimumConfidence": 0.9,
+    "outputMatch": true,
+    "isRealModelRuntimeProof": true,
+    "positiveOutputSha256": "870213891c6cacf66bcce6922a0e642fadada86bfce33901e46bd8be1368de54",
+    "positiveReportSha256": "1bcfd77e613eaea4ec2d05072fc6006d2faea96a62212d82b691387d0999a64a",
+    "positiveRunLogSha256": "fe894a5f44386a0c6b5d5ed80cb7fffb93f8ec0056ab5093c2abdfcc8d5082f6",
+    "serializedEngineSha256": "dc84cd6fe8c411bbf22543d23518a8e9f9178b783faafed05d3487865fcd4724",
+    "passed": true
+  },
+  "controlledNegativeValidation": {
+    "mutation": "expectedDigit changed from 7 to 6 while model, PGM input, preprocessing, and minimum confidence remain unchanged",
+    "exitCode": 2,
+    "state": "mnist-output-mismatch",
+    "inferenceRan": true,
+    "expectedDigit": 6,
+    "predictedDigit": 7,
+    "confidence": 0.99999285,
+    "outputMatch": false,
+    "isRealModelRuntimeProof": false,
+    "negativeOutputSha256": "09bc048c86c58777720fa7db2d9842d5ec922aba13b06aa520956989f2046fd4",
+    "negativeReportSha256": "e78a5784754097756ab5b9ea3352d1d09bf53806c1ec97e5a794ca817495c1d7",
+    "negativeRunLogSha256": "7a1eeab61aa40fa527f2a5ac7c8b8bbf8792f131c3d02b25ec0cf83193869afb",
+    "failClosed": true
+  },
+  "additionalReferenceNegativeEvidence": {
+    "path": "artifacts/interface-coverage/tensorrtexec-mnist-reference-negative-runtime-evidence.json",
+    "sha256": "8873305ce7d22cbf5560dbf8fbe15a72e766ef28c44e902dd73e0d22cea50f00",
+    "caseCount": 5,
+    "sourceTreeFailClosedCount": 5
+  },
+  "commands": {
+    "positive": "dotnet ./samples/OnnxToEngine/bin/Release/net8.0/OnnxToEngine.dll --mnist --tensor-rt-line 10 --onnx <models>/OnnxToEngine/MNIST/nvidia-tensorrt-10.11/mnist.onnx --mnistInput <TensorRT>/data/mnist/7.pgm --expectedDigit 7 --minimumConfidence 0.9 --saveEngine <artifacts>/mnist-positive.plan --exportReport <artifacts>/mnist-positive-report.json --exportOutput <artifacts>/mnist-positive-output.json --exportPreprocessedInput <artifacts>/mnist-input-f32.bin",
+    "negative": "repeat the positive command with --expectedDigit 6 and separate output paths"
+  },
+  "proofBoundary": {
+    "sourceTreeRealModelRuntime": true,
+    "independentReferenceCandidate": true,
+    "ownerReviewedGolden": false,
+    "modelRedistributionApproved": false,
+    "inputAssetRedistributionApproved": false,
+    "packageConsumerRuntimeProof": false,
+    "publicPackageProof": false,
+    "postPublishProof": false,
+    "ownerReleaseAcceptance": false,
+    "canPublishPublicly": false,
+    "releaseProof": false,
+    "uploadsAssets": false,
+    "performsPublish": false
+  }
+}
