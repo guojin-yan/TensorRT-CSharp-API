@@ -132,6 +132,7 @@ SHA256。命令里的 `<downloads>`、`<models>` 和 `<artifacts>` 是本机目�
 - 工具链：`Ultralytics 8.4.21; opset 17`
 - ONNX 暂存：`models/YoloVision/Pose/yolov8n-pose-ultralytics-v8.3.0/yolov8n-pose.onnx`
 - SHA256：`ed1e8d2d2aeb8a2c66e642a16295a72a2990393e3a3843325537da7e11c8a899`
+- 本地包消费：[YoloVision YOLOv8n Pose 本地包消费教程](yolovision-yolov8n-pose-local-package-consumer-tutorial.md)
 
 ### `yolovision-yolov8n-obb-v8.3.0`
 

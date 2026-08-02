@@ -22,7 +22,11 @@ the full raw tensor and 102,400-pixel class-index map, and requires raw-referenc
 integrity mutations to fail closed.
 `eng/Test-YoloVisionClassificationLocalPackageConsumer.ps1` selects official YOLOv8n-cls,
 compares all 1,000 probabilities and the independent Top-5 order, and requires a single-value
-reference mutation to fail closed. Every scenario restores from isolated one-package feeds and
+reference mutation to fail closed.
+`eng/Test-YoloVisionPoseLocalPackageConsumer.ps1` selects official YOLOv8n-pose, verifies the
+authoritative C# letterbox tensor, compares all 470,400 raw values and four 17-keypoint poses
+against independent references, and requires a single-value reference mutation to fail closed.
+Every scenario restores from isolated one-package feeds and
 checks the restored nupkg SHA256 against the selected package.
 
 Passing this sample is `local-package-consumer-runtime` engineering evidence. It is not proof that

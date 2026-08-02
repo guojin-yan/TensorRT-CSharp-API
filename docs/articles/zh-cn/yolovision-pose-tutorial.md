@@ -69,6 +69,8 @@ pwsh -NoProfile -ExecutionPolicy Bypass `
 
 manifest 位于 `samples/assets/yolovision-yolov8n-pose-official-assets.json`，轻量运行记录位于 `samples/assets/yolovision-yolov8n-pose-real-model-runtime-evidence.json`。`.pt`、ONNX、图片、engine、reference、tensor、SVG 和日志都不进入仓库。
 
+转换后的 ONNX 统一暂存在仓库外 `E:\GitSpace\TensorRT-CSharp-API-4.0\models\YoloVision\Pose\yolov8n-pose-ultralytics-v8.3.0\yolov8n-pose.onnx`，不上传 GitHub。仓库外三包 `PackageReference` 的完整运行、独立关键点对照与负例见 [YoloVision YOLOv8n Pose 本地包消费教程](yolovision-yolov8n-pose-local-package-consumer-tutorial.md)。
+
 ## E 盘资产目录
 
 建议使用独立 case workspace，避免模型、engine 和临时 tensor 进入 C 盘：

@@ -242,6 +242,8 @@
     href: articles/zh-cn/yolovision-lraspp-semantic-local-package-consumer-tutorial.md
   - name: YoloVision YOLOv8n Classification Local Package Consumer Tutorial
     href: articles/zh-cn/yolovision-yolov8n-cls-local-package-consumer-tutorial.md
+  - name: YoloVision YOLOv8n Pose Local Package Consumer Tutorial
+    href: articles/zh-cn/yolovision-yolov8n-pose-local-package-consumer-tutorial.md
   - name: Demo Model Acquisition And ONNX Conversion
     href: articles/zh-cn/demo-model-acquisition-and-onnx-conversion.md
   - name: Sample Asset Manifest Guide
