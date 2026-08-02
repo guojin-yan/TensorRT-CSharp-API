@@ -115,10 +115,10 @@ artifacts/interface-coverage/interface-coverage-summary.md
 
 当前扫描记录：
 
-- manifest API count：3976；
-- TensorRT 8.6：880 scanned / 880 matched / 880 source present / 761 implemented / 119 deferred-only；
-- TensorRT 10.11：879 / 879 / 879 / 761 / 118；
-- TensorRT 11.0：901 / 901 / 901 / 814 / 87；
+- manifest API count：4009；
+- TensorRT 8.6：880 scanned / 880 matched / 880 source present / 760 implemented / 120 deferred-only；
+- TensorRT 10.11：879 scanned / 879 matched / 879 source present / 761 implemented / 118 deferred-only；
+- TensorRT 11.0：901 scanned / 901 matched / 901 source present / 814 implemented / 87 deferred-only；
 - CUDA 11.6 到 13.2 均有独立扫描与 version line 数据。
 
 这些数字说明 header、manifest 和 native source checklist 已高度闭合。
@@ -244,7 +244,7 @@ TensorRtExec 提供：
 dotnet run --project .\applications\TensorRtExec -- --help-json
 ```
 
-当前 GUI/CLI field map 有 85 个字段；release candidate gap list 有 20 个 item。
+当前 GUI/CLI field map 有 90 个字段；release candidate gap list 有 20 个 item。
 
 字段状态会区分：
 
@@ -275,7 +275,7 @@ YoloVision 统一：
 
 现实模型规划矩阵是 10 个 family entries，不能和 60 行托管配置能力混为一谈。
 
-当前官方 source-tree 真实模型正例包括 YOLOX-S 与 YOLOv10n detection；其他 family/task 仍按 owner asset/evidence 独立晋级。
+当前 `demo-model-inventory.json` 的 10 个 demo model entries 均绑定唯一且存在的 runtime evidence；每项证明仍只覆盖指定模型、任务、输入和运行环境，不能替代 package consumer 或公开发布证明。
 
 ## Samples 与 Smoke
 

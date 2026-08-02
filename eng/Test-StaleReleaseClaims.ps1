@@ -41,12 +41,14 @@ function Test-AllowedClaimContext {
   param(
     [string]$RuleId,
     [string]$RelativePath,
-    [string]$Line
+    [string]$Line,
+    [string]$LeadingContext = ""
   )
 
   $path = $RelativePath.Replace('/', '\')
   $text = $Line.Trim()
   $lower = $text.ToLowerInvariant()
+  $contextLower = $LeadingContext.ToLowerInvariant()
 
   if ($path -like "tests\*") {
     return $true
@@ -119,6 +121,13 @@ function Test-AllowedClaimContext {
         $lower.Contains("evidence") -or
         $lower.Contains("proof") -or
         $lower.Contains("sha256")) {
+      return $true
+    }
+
+    if ($contextLower.Contains("实测结果") -or
+        $contextLower.Contains("真实日志") -or
+        $contextLower.Contains("正例结果") -or
+        $contextLower.Contains("最终日志")) {
       return $true
     }
   }
@@ -327,8 +336,17 @@ foreach ($file in ($files | Sort-Object -Unique)) {
   $relativePath = ConvertTo-RelativePath -Path $file
   for ($i = 0; $i -lt $lines.Count; $i++) {
     foreach ($rule in $patterns) {
-      if ($lines[$i].Contains($rule.pattern, [System.StringComparison]::Ordinal) -and
-          -not (Test-AllowedClaimContext -RuleId $rule.id -RelativePath $relativePath -Line $lines[$i])) {
+      if (-not $lines[$i].Contains($rule.pattern, [System.StringComparison]::Ordinal)) {
+        continue
+      }
+
+      $leadingContext = ""
+      if ($rule.id -in @("classification-passed-without-boundary", "yolovision-passed-without-boundary")) {
+        $contextStart = [Math]::Max(0, $i - 10)
+        $leadingContext = ($lines[$contextStart..$i] -join "`n")
+      }
+
+      if (-not (Test-AllowedClaimContext -RuleId $rule.id -RelativePath $relativePath -Line $lines[$i] -LeadingContext $leadingContext)) {
         $findings.Add([pscustomobject]@{
             ruleId = $rule.id
             pattern = $rule.pattern

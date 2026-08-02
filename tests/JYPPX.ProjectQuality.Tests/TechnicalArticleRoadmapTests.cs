@@ -583,27 +583,60 @@ public sealed class TechnicalArticleRoadmapTests
             "artifacts",
             "interface-coverage",
             "interface-coverage-summary.md"));
-        foreach (string marker in new[]
+        Match manifestCount = Regex.Match(
+            coverage,
+            @"Manifest API count:\s*(?<count>\d+)",
+            RegexOptions.CultureInvariant);
+        Assert.True(manifestCount.Success, "The generated coverage summary must expose its manifest API count.");
+        Assert.Contains(
+            $"manifest API count：{manifestCount.Groups["count"].Value}",
+            article,
+            StringComparison.Ordinal);
+
+        MatchCollection tensorRtSummaries = Regex.Matches(
+            coverage,
+            @"(?m)^- `TensorRT-(?<version>8\.6|10\.11|11\.0)[^`]*`: official interfaces scanned=(?<official>\d+), manifest matched=(?<matched>\d+), native source present=(?<source>\d+), implemented=(?<implemented>\d+), deferred-only=(?<deferred>\d+)\s*$",
+            RegexOptions.CultureInvariant);
+        foreach (string version in new[] { "8.6", "10.11", "11.0" })
         {
-            "Manifest API count: 3976",
-            "implemented=761, deferred-only=119",
-            "implemented=761, deferred-only=118",
-            "implemented=814, deferred-only=87"
-        })
-        {
-            Assert.Contains(marker, coverage, StringComparison.Ordinal);
+            Match[] versionSummaries = tensorRtSummaries
+                .Cast<Match>()
+                .Where(match => match.Groups["version"].Value == version)
+                .ToArray();
+            Assert.NotEmpty(versionSummaries);
+
+            string[] distinctFacts = versionSummaries
+                .Select(static match => string.Join(
+                    '/',
+                    match.Groups["official"].Value,
+                    match.Groups["matched"].Value,
+                    match.Groups["source"].Value,
+                    match.Groups["implemented"].Value,
+                    match.Groups["deferred"].Value))
+                .Distinct(StringComparer.Ordinal)
+                .ToArray();
+            Assert.Single(distinctFacts);
+
+            Match summary = versionSummaries[0];
+            Assert.Contains(
+                $"TensorRT {version}：{summary.Groups["official"].Value} scanned / " +
+                $"{summary.Groups["matched"].Value} matched / " +
+                $"{summary.Groups["source"].Value} source present / " +
+                $"{summary.Groups["implemented"].Value} implemented / " +
+                $"{summary.Groups["deferred"].Value} deferred-only",
+                article,
+                StringComparison.Ordinal);
         }
+
         foreach (string marker in new[]
         {
-            "manifest API count：3976",
-            "761 implemented / 119 deferred-only",
-            "761 / 118",
-            "814 / 87",
             "manifest/source 匹配不等于 100% 可用",
             "TrtexecAlignmentStatus=parse-only",
             "60 行：55 supported、5 个 YOLOX",
-            "GitHub Release managed + bridge assets",
-            "NuGet managed + bridge package route",
+            "GitHub Release 与 NuGet-compatible source 是两种获取通道",
+            "managed core API",
+            "项目自有 C++ bridge",
+            "用户自行安装匹配的 TensorRT、CUDA、cuDNN",
             "New-Item -ItemType Directory -Force",
             "blocked-real-proof-required"
         })

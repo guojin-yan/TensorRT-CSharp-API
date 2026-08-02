@@ -43,12 +43,12 @@ flowchart LR
 - `artifacts/interface-coverage/tensorrt-interface-comparison.csv`
 - `artifacts/interface-coverage/cuda-runtime-interface-comparison.csv`
 
-当前 summary 记录 3976 条 manifest API。本地可用的六个 TensorRT package 组合中，官方接口均能
+当前 summary 记录 4009 条 manifest API。本地可用的六个 TensorRT package 组合中，官方接口均能
 匹配 manifest 和 native source：
 
 | API line | 官方接口 | implemented | deferred-only |
 | --- | ---: | ---: | ---: |
-| TensorRT 8.6 | 880 | 761 | 119 |
+| TensorRT 8.6 | 880 | 760 | 120 |
 | TensorRT 10.11 | 879 | 761 | 118 |
 | TensorRT 11.0 | 901 | 814 | 87 |
 
