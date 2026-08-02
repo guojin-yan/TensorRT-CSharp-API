@@ -9,13 +9,14 @@ param(
   [string]$RuntimePackageKey = "win-x64-trt10.11-cuda12.9-cudnn9.22",
   [string]$BridgePackageId,
   [ValidateSet("8", "10", "11")][string]$TensorRtLine,
-  [ValidateSet("yolox-detection", "yolov8-segmentation")][string]$Scenario = "yolox-detection",
+  [ValidateSet("yolox-detection", "yolov8-segmentation", "torchvision-lraspp-semantic")][string]$Scenario = "yolox-detection",
   [string]$ModelPath,
   [string]$ModelWeightsPath,
   [string]$LabelsPath,
   [string]$ImagePath,
   [string]$ReferenceOutput0Path,
   [string]$ReferenceOutput1Path,
+  [string]$ReferenceClassIndexPath,
   [string]$PythonPath,
   [string]$TensorRtRoot,
   [string]$TensorRtRuntimeRoot,
@@ -385,7 +386,8 @@ if (-not [string]::IsNullOrWhiteSpace($TensorRtLine) -and
 $BridgePackageId = $expectedBridgePackageId
 $TensorRtLine = $expectedTensorRtLine
 $isSegmentationScenario = [string]::Equals($Scenario, "yolov8-segmentation", [StringComparison]::Ordinal)
-$scenarioSlug = if ($isSegmentationScenario) { "yolov8n-seg" } else { "yolox" }
+$isSemanticScenario = [string]::Equals($Scenario, "torchvision-lraspp-semantic", [StringComparison]::Ordinal)
+$scenarioSlug = if ($isSegmentationScenario) { "yolov8n-seg" } elseif ($isSemanticScenario) { "lraspp-semantic" } else { "yolox" }
 
 $resolvedRuntimeRoots = $null
 if ([string]::IsNullOrWhiteSpace($TensorRtRoot) -or
@@ -408,6 +410,9 @@ $defaultCudnnRoot = if ($null -eq $resolvedRuntimeRoots) { "" } else { [string]$
 $defaultConsumerOutputRoot = if ($isSegmentationScenario) {
   Join-Path $outerRoot "consumer-workspaces\yolovision-yolov8n-seg-local-package-trt$TensorRtLine"
 }
+elseif ($isSemanticScenario) {
+  Join-Path $outerRoot "consumer-workspaces\yolovision-lraspp-semantic-local-package-trt$TensorRtLine"
+}
 else {
   Join-Path $outerRoot "consumer-workspaces\yolovision-yolox-local-package-trt$TensorRtLine"
 }
@@ -419,16 +424,30 @@ $BridgePackageDirectory = Resolve-PathValue -Value $BridgePackageDirectory -Defa
 $defaultModelPath = if ($isSegmentationScenario) {
   Join-Path $outerRoot "downloads\yolov8n-seg-ultralytics-v8.3.0\source\yolov8n-seg.onnx"
 }
+elseif ($isSemanticScenario) {
+  Join-Path $outerRoot "models\YoloVision\SemanticSegmentation\lraspp-mobilenet-v3-large-torchvision-v0.25.0\lraspp-mobilenet-v3-large-320.onnx"
+}
 else {
   Join-Path $outerRoot "downloads\yolox-apache\source\yolox_s.onnx"
 }
 $ModelPath = Resolve-PathValue -Value $ModelPath -DefaultValue $defaultModelPath -RelativeRoot $outerRoot
-$LabelsPath = Resolve-PathValue -Value $LabelsPath -DefaultValue (Join-Path $outerRoot "downloads\yolox-apache\derived\coco.names") -RelativeRoot $outerRoot
-$ImagePath = Resolve-PathValue -Value $ImagePath -DefaultValue (Join-Path $outerRoot "downloads\yolox-apache\derived\dog.ppm") -RelativeRoot $outerRoot
+$defaultLabelsPath = if ($isSemanticScenario) { Join-Path $RepositoryRoot "artifacts\yolovision\semantic-lraspp-reference\voc-semantic.names" } else { Join-Path $outerRoot "downloads\yolox-apache\derived\coco.names" }
+$defaultImagePath = if ($isSemanticScenario) { Join-Path $RepositoryRoot "artifacts\yolovision\semantic-lraspp-reference\dog.ppm" } else { Join-Path $outerRoot "downloads\yolox-apache\derived\dog.ppm" }
+$LabelsPath = Resolve-PathValue -Value $LabelsPath -DefaultValue $defaultLabelsPath -RelativeRoot $outerRoot
+$ImagePath = Resolve-PathValue -Value $ImagePath -DefaultValue $defaultImagePath -RelativeRoot $outerRoot
 if ($isSegmentationScenario) {
   $ModelWeightsPath = Resolve-PathValue -Value $ModelWeightsPath -DefaultValue (Join-Path $outerRoot "downloads\yolov8n-seg-ultralytics-v8.3.0\source\yolov8n-seg.pt") -RelativeRoot $outerRoot
   $ReferenceOutput0Path = Resolve-PathValue -Value $ReferenceOutput0Path -DefaultValue (Join-Path $outerRoot "downloads\yolov8n-seg-ultralytics-v8.3.0\reference\output0.reference.json") -RelativeRoot $outerRoot
   $ReferenceOutput1Path = Resolve-PathValue -Value $ReferenceOutput1Path -DefaultValue (Join-Path $outerRoot "downloads\yolov8n-seg-ultralytics-v8.3.0\reference\output1.reference.json") -RelativeRoot $outerRoot
+  $defaultPythonPath = Join-Path $env:USERPROFILE ".conda\envs\ultralytics\python.exe"
+  $PythonPath = Resolve-PathValue -Value $PythonPath -DefaultValue $defaultPythonPath -RelativeRoot $outerRoot
+}
+elseif ($isSemanticScenario) {
+  $semanticAssetRoot = Join-Path $RepositoryRoot "artifacts\yolovision\semantic-lraspp-reference"
+  $semanticModelRoot = Join-Path $outerRoot "models\YoloVision\SemanticSegmentation\lraspp-mobilenet-v3-large-torchvision-v0.25.0"
+  $ModelWeightsPath = Resolve-PathValue -Value $ModelWeightsPath -DefaultValue (Join-Path $semanticModelRoot "lraspp_mobilenet_v3_large-d234d4ea.pth") -RelativeRoot $outerRoot
+  $ReferenceOutput0Path = Resolve-PathValue -Value $ReferenceOutput0Path -DefaultValue (Join-Path $semanticAssetRoot "semantic.reference.json") -RelativeRoot $outerRoot
+  $ReferenceClassIndexPath = Resolve-PathValue -Value $ReferenceClassIndexPath -DefaultValue (Join-Path $semanticAssetRoot "semantic-class-index-onnxruntime.i32.bin") -RelativeRoot $outerRoot
   $defaultPythonPath = Join-Path $env:USERPROFILE ".conda\envs\ultralytics\python.exe"
   $PythonPath = Resolve-PathValue -Value $PythonPath -DefaultValue $defaultPythonPath -RelativeRoot $outerRoot
 }
@@ -445,9 +464,9 @@ foreach ($item in @(
   @{ Path = $ManagedPackageDirectory; Description = "Managed package feed" },
   @{ Path = $YoloVisionPackageDirectory; Description = "YoloVision package feed" },
   @{ Path = $BridgePackageDirectory; Description = "Bridge package feed" },
-  @{ Path = $ModelPath; Description = "YOLOX model" },
-  @{ Path = $LabelsPath; Description = "YOLOX labels" },
-  @{ Path = $ImagePath; Description = "YOLOX image" }
+  @{ Path = $ModelPath; Description = "YoloVision model" },
+  @{ Path = $LabelsPath; Description = "YoloVision labels" },
+  @{ Path = $ImagePath; Description = "YoloVision image" }
 )) {
   Assert-NonCDrivePath -Path $item.Path -Description $item.Description
 }
@@ -461,10 +480,22 @@ if ($isSegmentationScenario) {
     Assert-NonCDrivePath -Path $item.Path -Description $item.Description
   }
 }
+elseif ($isSemanticScenario) {
+  foreach ($item in @(
+    @{ Path = $ModelWeightsPath; Description = "LRASPP source weights" },
+    @{ Path = $ReferenceOutput0Path; Description = "LRASPP semantic raw reference" },
+    @{ Path = $ReferenceClassIndexPath; Description = "LRASPP semantic class-index reference" }
+  )) {
+    Assert-NonCDrivePath -Path $item.Path -Description $item.Description
+  }
+}
 
 $requiredPaths = @($ModelPath, $LabelsPath, $ImagePath, $TensorRtRoot, $TensorRtRuntimeRoot, $CudaRoot, $CudnnRoot)
 if ($isSegmentationScenario) {
   $requiredPaths += @($ModelWeightsPath, $ReferenceOutput0Path, $ReferenceOutput1Path, $PythonPath)
+}
+elseif ($isSemanticScenario) {
+  $requiredPaths += @($ModelWeightsPath, $ReferenceOutput0Path, $ReferenceClassIndexPath, $PythonPath)
 }
 foreach ($requiredPath in $requiredPaths) {
   if (-not (Test-Path -LiteralPath $requiredPath)) {
@@ -479,6 +510,14 @@ if ($isSegmentationScenario) {
   Assert-FileSha256 -Path $ReferenceOutput1Path -ExpectedSha256 "3cc8387483187bc5d86ef8e82943e215caadefbbf41a8523d9ffc4c6b040f8d5" -Description "YOLOv8n-seg output1 reference"
   Assert-FileSha256 -Path $LabelsPath -ExpectedSha256 "4d4aaea7bee6be2f675d9b53a9195ca36dfe6429f7479f29155da522a6c85930" -Description "COCO labels"
   Assert-FileSha256 -Path $ImagePath -ExpectedSha256 "6cb94c9cd0781412598fe179246b09041af4303d388a5ba3c55f760dff11ec2c" -Description "YOLOX dog image"
+}
+elseif ($isSemanticScenario) {
+  Assert-FileSha256 -Path $ModelPath -ExpectedSha256 "3cb94e561bdefe606ed7d1a2c4d0296409bec066f3a39a9fe9dabd72b23728f8" -Description "LRASPP ONNX"
+  Assert-FileSha256 -Path $ModelWeightsPath -ExpectedSha256 "d234d4eae9d55d5f76de18b77cf0dc62c66fe5c5482758209d00f950c92bb280" -Description "LRASPP source weights"
+  Assert-FileSha256 -Path $ReferenceOutput0Path -ExpectedSha256 "09a27bfe1ee7cd48413806f057bcface6c3c8ed224ed4766e1618d9766b14dff" -Description "LRASPP semantic raw reference"
+  Assert-FileSha256 -Path $ReferenceClassIndexPath -ExpectedSha256 "fdd15b95222eadf137fc6880e56990aa507ee7d2429f471deaae9eab31268414" -Description "LRASPP semantic class-index reference"
+  Assert-FileSha256 -Path $LabelsPath -ExpectedSha256 "82b3b65943e7865cf31b8c5e9a720edd5eddff176d2b146ae09795a734595781" -Description "VOC semantic labels"
+  Assert-FileSha256 -Path $ImagePath -ExpectedSha256 "58d4301e1ccf0d60b890b73980e4a00b0316840d618b7c741484e7514e71ff4b" -Description "LRASPP dog PPM image"
 }
 
 $managedPackage = Find-Package -Directory $ManagedPackageDirectory -PackageId "JYPPX.TensorRT.CSharp.API" -ExpectedVersion $PackageVersion
@@ -576,12 +615,42 @@ if ($nativeBridgePaths.Count -ne 1) {
   throw "Expected one copied native bridge in consumer output, found $($nativeBridgePaths.Count)."
 }
 
-$tensorFileName = if ($isSegmentationScenario) { "dog-yolov8n-seg.fp32.bin" } else { "dog-yolox-s.fp32.bin" }
+$tensorFileName = if ($isSegmentationScenario) { "dog-yolov8n-seg.fp32.bin" } elseif ($isSemanticScenario) { "dog-lraspp-semantic.fp32.bin" } else { "dog-yolox-s.fp32.bin" }
 $tensorPath = Join-Path $runOutput $tensorFileName
 $outputJsonPath = Join-Path $runOutput "yolovision-output.json"
 $visualizationPath = Join-Path $runOutput "yolovision-output.svg"
 $segmentationMaskDirectory = Join-Path $runOutput "segmentation-masks"
-if ($isSegmentationScenario) {
+$semanticArtifactDirectory = Join-Path $runOutput "semantic-map-artifacts"
+if ($isSemanticScenario) {
+  $runArguments = @(
+    $consumerAssemblyPath,
+    "--model", $ModelPath,
+    "--labels", $LabelsPath,
+    "--image", $ImagePath,
+    "--preprocessed-output", $tensorPath,
+    "--output-json", $outputJsonPath,
+    "--semantic-artifact-output-directory", $semanticArtifactDirectory,
+    "--visualization", $visualizationPath,
+    "--input-shape", "1x3x320x320",
+    "--input-name", "images",
+    "--output-name", "semantic",
+    "--tensor-rt-line", $TensorRtLine,
+    "--noTF32",
+    "--family", "custom",
+    "--task", "sem",
+    "--class-count", "21",
+    "--tensor-layout", "NCHW",
+    "--color-order", "RGB",
+    "--resize", "stretch",
+    "--scale", "0.003921568627451",
+    "--mean", "0.485,0.456,0.406",
+    "--std", "0.229,0.224,0.225",
+    "--reference-outputs", "semantic:$ReferenceOutput0Path",
+    "--reference-abs-tolerance", "0.0001",
+    "--reference-rel-tolerance", "0.0001"
+  )
+}
+elseif ($isSegmentationScenario) {
   $runArguments = @(
     $consumerAssemblyPath,
     "--model", $ModelPath,
@@ -674,23 +743,45 @@ if ($bridgeTensorRtVersion -notmatch '^(?<major>[0-9]+)' -or
   throw "Bridge TensorRT build version '$bridgeTensorRtVersion' does not match requested TensorRT line '$TensorRtLine'."
 }
 
-$predictionPrefix = if ($isSegmentationScenario) { "Segmentation Class=" } else { "Detection Class=" }
-$predictionKind = if ($isSegmentationScenario) { "segmentation" } else { "detection" }
-$predictionLines = @($runResult.Stdout -split "`r?`n" | Where-Object { $_.StartsWith($predictionPrefix, [StringComparison]::Ordinal) })
-$predictions = @(
-  foreach ($line in $predictionLines) {
-    if ($line -match '^(?:Detection|Segmentation) Class=(?<class>.+?) Score=(?<score>[0-9.]+) ') {
-      [pscustomobject]@{
-        kind = $predictionKind
-        className = $Matches.class
-        score = [double]::Parse($Matches.score, [Globalization.CultureInfo]::InvariantCulture)
-        line = $line
+$predictions = @()
+if ($isSemanticScenario) {
+  if ($runResult.Stdout -notmatch 'SemanticMap Classes=(?<classes>[0-9]+) Width=(?<width>[0-9]+) Height=(?<height>[0-9]+) Values=(?<values>[0-9]+)') {
+    throw "YoloVision semantic package consumer did not emit the SemanticMap summary."
+  }
+  $predictions = @(
+    [pscustomobject]@{
+      kind = "semantic"
+      classCount = [int]$Matches.classes
+      width = [int]$Matches.width
+      height = [int]$Matches.height
+      valueCount = [long]$Matches.values
+      line = $Matches[0]
+    }
+  )
+  if ($predictions[0].classCount -ne 21 -or $predictions[0].width -ne 320 -or
+      $predictions[0].height -ne 320 -or $predictions[0].valueCount -ne 2150400) {
+    throw "LRASPP semantic package consumer summary does not match [1,21,320,320]."
+  }
+}
+else {
+  $predictionPrefix = if ($isSegmentationScenario) { "Segmentation Class=" } else { "Detection Class=" }
+  $predictionKind = if ($isSegmentationScenario) { "segmentation" } else { "detection" }
+  $predictionLines = @($runResult.Stdout -split "`r?`n" | Where-Object { $_.StartsWith($predictionPrefix, [StringComparison]::Ordinal) })
+  $predictions = @(
+    foreach ($line in $predictionLines) {
+      if ($line -match '^(?:Detection|Segmentation) Class=(?<class>.+?) Score=(?<score>[0-9.]+) ') {
+        [pscustomobject]@{
+          kind = $predictionKind
+          className = $Matches.class
+          score = [double]::Parse($Matches.score, [Globalization.CultureInfo]::InvariantCulture)
+          line = $line
+        }
       }
     }
-  }
-)
+  )
+}
 if ($predictions.Count -eq 0) {
-  throw "YoloVision package consumer did not produce $predictionKind predictions."
+  throw "YoloVision package consumer did not produce a task result."
 }
 if ($isSegmentationScenario) {
   $expectedClasses = @("dog", "bicycle", "truck", "car")
@@ -709,6 +800,10 @@ if ($isSegmentationScenario) {
   $segmentationMaskManifestPath = Join-Path $segmentationMaskDirectory "segmentation-mask-artifacts.manifest.json"
   $expectedRuntimeFiles += $segmentationMaskManifestPath
 }
+elseif ($isSemanticScenario) {
+  $semanticArtifactManifestPath = Join-Path $semanticArtifactDirectory "semantic-map-artifacts.manifest.json"
+  $expectedRuntimeFiles += $semanticArtifactManifestPath
+}
 foreach ($file in $expectedRuntimeFiles) {
   if (-not (Test-Path -LiteralPath $file -PathType Leaf)) {
     throw "Expected runtime output was not created: $file"
@@ -719,7 +814,30 @@ if ([int]$yoloOutputReport.runtime.tensorRtLine -ne [int]$TensorRtLine) {
   throw "YoloVision output report TensorRT line '$($yoloOutputReport.runtime.tensorRtLine)' does not match requested line '$TensorRtLine'."
 }
 $referenceComparisons = @()
-if ($isSegmentationScenario) {
+if ($isSemanticScenario) {
+  $actualOutputs = @($yoloOutputReport.outputs)
+  if ($actualOutputs.Count -ne 1 -or [string]$actualOutputs[0].name -ne "semantic" -or
+      (@($actualOutputs[0].shape) -join 'x') -ne "1x21x320x320") {
+    throw "LRASPP semantic output report must contain semantic:[1,21,320,320]."
+  }
+  if (-not $yoloOutputReport.referenceValidation.requested -or
+      -not $yoloOutputReport.referenceValidation.completed -or
+      -not $yoloOutputReport.referenceValidation.passed) {
+    throw "LRASPP semantic raw tensor reference validation did not pass."
+  }
+  $referenceComparisons = @($yoloOutputReport.referenceValidation.tensorComparisons)
+  if ($referenceComparisons.Count -ne 1 -or
+      [long]$referenceComparisons[0].comparedElementCount -ne 2150400 -or
+      [long]$referenceComparisons[0].mismatchCount -ne 0) {
+    throw "LRASPP semantic raw tensor reference validation must compare 2,150,400 values with zero mismatches."
+  }
+  $semanticPredictions = @($yoloOutputReport.predictions | Where-Object { [string]$_.task -eq "sem" })
+  if ($semanticPredictions.Count -ne 1 -or [int]$semanticPredictions[0].classCount -ne 21 -or
+      [long]$semanticPredictions[0].classIndexValueCount -ne 102400) {
+    throw "LRASPP semantic output report must contain one 21-class, 102,400-pixel summary."
+  }
+}
+elseif ($isSegmentationScenario) {
   $expectedOutputShapes = @{
     output0 = "1x116x8400"
     output1 = "1x32x160x160"
@@ -768,6 +886,17 @@ $controlledMaskResult = $null
 $controlledMaskOriginalSha256 = $null
 $controlledMaskMutatedSha256 = $null
 $controlledMaskExpectedSha256 = $null
+$semanticArtifactValidation = $null
+$semanticArtifactValidationResult = $null
+$semanticArtifactValidationPath = $null
+$archivedSemanticArtifactDirectory = $null
+$archivedSemanticManifestPath = $null
+$semanticArtifactManifestSha256 = $null
+$semanticClassIndexSha256 = $null
+$controlledSemanticArtifactResult = $null
+$controlledSemanticArtifactValidation = $null
+$controlledSemanticOriginalSha256 = $null
+$controlledSemanticMutatedSha256 = $null
 
 if ($isSegmentationScenario) {
   $runtimeMaskManifestSha256 = (Get-FileHash -LiteralPath $segmentationMaskManifestPath -Algorithm SHA256).Hash.ToLowerInvariant()
@@ -916,6 +1045,123 @@ if ($isSegmentationScenario) {
     throw "Controlled mask mutation did not fail closed on the manifest SHA256 mismatch."
   }
 }
+elseif ($isSemanticScenario) {
+  $archivedSemanticArtifactDirectory = Join-Path $ReportDirectory "semantic-map-artifacts"
+  if (Test-Path -LiteralPath $archivedSemanticArtifactDirectory) {
+    Remove-Item -LiteralPath $archivedSemanticArtifactDirectory -Recurse -Force
+  }
+  Copy-Item -LiteralPath $semanticArtifactDirectory -Destination $archivedSemanticArtifactDirectory -Recurse -Force
+  $archivedSemanticManifestPath = Join-Path $archivedSemanticArtifactDirectory "semantic-map-artifacts.manifest.json"
+  $archivedSemanticManifest = Get-Content -LiteralPath $archivedSemanticManifestPath -Raw -Encoding utf8 | ConvertFrom-Json
+  $archivedSemanticClassIndexPath = Join-Path $archivedSemanticArtifactDirectory ([string]$archivedSemanticManifest.classIndexArtifact.fileName)
+  $archivedSemanticManifest.classIndexArtifact.path = $archivedSemanticClassIndexPath
+  [IO.File]::WriteAllText($archivedSemanticManifestPath, ($archivedSemanticManifest | ConvertTo-Json -Depth 12) + "`n", $utf8)
+
+  $semanticArtifactManifestSha256 = (Get-FileHash -LiteralPath $archivedSemanticManifestPath -Algorithm SHA256).Hash.ToLowerInvariant()
+  $semanticClassIndexSha256 = (Get-FileHash -LiteralPath $archivedSemanticClassIndexPath -Algorithm SHA256).Hash.ToLowerInvariant()
+  $semanticArtifactValidationPath = Join-Path $ReportDirectory "semantic-map-artifact-validation.json"
+  $validatorShell = Get-Command pwsh -ErrorAction SilentlyContinue
+  if ($null -eq $validatorShell) {
+    $validatorShell = Get-Command powershell.exe -ErrorAction Stop
+  }
+  $semanticArtifactValidationResult = Invoke-CapturedProcess -FileName $validatorShell.Source -Arguments @(
+    "-NoProfile", "-ExecutionPolicy", "Bypass",
+    "-File", (Join-Path $RepositoryRoot "eng\Test-YoloVisionSemanticMapArtifact.ps1"),
+    "-ManifestPath", $archivedSemanticManifestPath,
+    "-ExpectedClassIndexPath", $ReferenceClassIndexPath,
+    "-OutputPath", $semanticArtifactValidationPath
+  ) -WorkingDirectory $RepositoryRoot
+  if ($semanticArtifactValidationResult.ExitCode -ne 0 -or -not (Test-Path -LiteralPath $semanticArtifactValidationPath -PathType Leaf)) {
+    throw "LRASPP semantic class-index artifact validation failed: $($semanticArtifactValidationResult.Stdout)$($semanticArtifactValidationResult.Stderr)"
+  }
+  $semanticArtifactValidation = Get-Content -LiteralPath $semanticArtifactValidationPath -Raw -Encoding utf8 | ConvertFrom-Json
+  if (-not $semanticArtifactValidation.passed -or -not $semanticArtifactValidation.classIndexMatches -or
+      -not $semanticArtifactValidation.histogramMatches) {
+    throw "LRASPP semantic class-index artifact validation did not pass all checks."
+  }
+
+  $semanticHistogram = @($archivedSemanticManifest.classHistogram)
+  $backgroundRow = @($semanticHistogram | Where-Object { [int]$_.classId -eq 0 })
+  $dogRow = @($semanticHistogram | Where-Object { [int]$_.classId -eq 12 })
+  $unexpectedRows = @($semanticHistogram | Where-Object { [int]$_.classId -notin @(0, 12) -and [long]$_.pixelCount -ne 0 })
+  if ($semanticHistogram.Count -ne 21 -or $backgroundRow.Count -ne 1 -or $dogRow.Count -ne 1 -or
+      [long]$backgroundRow[0].pixelCount -ne 65193 -or [long]$dogRow[0].pixelCount -ne 37207 -or
+      $unexpectedRows.Count -ne 0) {
+    throw "LRASPP semantic histogram must contain 65,193 background and 37,207 dog pixels only."
+  }
+
+  $controlledReferenceDirectory = Join-Path $runOutput "controlled-reference-negative"
+  New-Item -ItemType Directory -Path $controlledReferenceDirectory -Force | Out-Null
+  $controlledReferencePath = Join-Path $controlledReferenceDirectory "semantic.single-value-mutated.reference.json"
+  $mutationResult = Invoke-CapturedProcess -FileName $PythonPath -Arguments @(
+    (Join-Path $RepositoryRoot "eng\New-YoloVisionReferenceMutation.py"),
+    "--input", $ReferenceOutput0Path,
+    "--output", $controlledReferencePath,
+    "--index", "0",
+    "--delta", "10"
+  ) -WorkingDirectory $RepositoryRoot
+  $mutationLogPath = Join-Path $ReportDirectory "controlled-reference-mutation.log"
+  [IO.File]::WriteAllText($mutationLogPath, ($mutationResult.Stdout + $mutationResult.Stderr), $utf8)
+  if ($mutationResult.ExitCode -ne 0 -or -not (Test-Path -LiteralPath $controlledReferencePath -PathType Leaf)) {
+    throw "Failed to create the controlled semantic raw-reference mutation. See $mutationLogPath"
+  }
+  $controlledReferenceMutationSha256 = (Get-FileHash -LiteralPath $controlledReferencePath -Algorithm SHA256).Hash.ToLowerInvariant()
+
+  $controlledReferenceArguments = Set-NamedArgumentValue -Arguments $runArguments -Name "--reference-outputs" -Value "semantic:$controlledReferencePath"
+  $controlledReferenceArguments = Set-NamedArgumentValue -Arguments $controlledReferenceArguments -Name "--output-json" -Value (Join-Path $controlledReferenceDirectory "yolovision-output.json")
+  $controlledReferenceArguments = Set-NamedArgumentValue -Arguments $controlledReferenceArguments -Name "--visualization" -Value (Join-Path $controlledReferenceDirectory "yolovision-output.svg")
+  $controlledReferenceArguments = Set-NamedArgumentValue -Arguments $controlledReferenceArguments -Name "--semantic-artifact-output-directory" -Value (Join-Path $controlledReferenceDirectory "semantic-map-artifacts")
+  $controlledReferenceResult = Invoke-CapturedProcess -FileName "dotnet" -Arguments $controlledReferenceArguments -WorkingDirectory $workspace -Environment $runEnvironment -EnvironmentVariablesToRemove @("JYPPX_NATIVE_BRIDGE_PATH")
+  $controlledReferenceStdoutPath = Join-Path $ReportDirectory "controlled-reference.stdout.log"
+  $controlledReferenceStderrPath = Join-Path $ReportDirectory "controlled-reference.stderr.log"
+  [IO.File]::WriteAllText($controlledReferenceStdoutPath, $controlledReferenceResult.Stdout, $utf8)
+  [IO.File]::WriteAllText($controlledReferenceStderrPath, $controlledReferenceResult.Stderr, $utf8)
+  $controlledReferenceOutputPath = Join-Path $controlledReferenceDirectory "yolovision-output.json"
+  if ($controlledReferenceResult.ExitCode -ne 1 -or
+      $controlledReferenceResult.Stdout.IndexOf("YoloVision Passed=False", [StringComparison]::Ordinal) -lt 0 -or
+      -not (Test-Path -LiteralPath $controlledReferenceOutputPath -PathType Leaf)) {
+    throw "Controlled semantic raw-reference mutation must fail closed and emit its diagnostic report."
+  }
+  $controlledReferenceReport = Get-Content -LiteralPath $controlledReferenceOutputPath -Raw -Encoding utf8 | ConvertFrom-Json
+  $controlledReferenceComparisons = @($controlledReferenceReport.referenceValidation.tensorComparisons)
+  if ($controlledReferenceComparisons.Count -ne 1 -or [long]$controlledReferenceComparisons[0].mismatchCount -ne 1 -or
+      [long]$controlledReferenceComparisons[0].firstMismatchIndex -ne 0 -or $controlledReferenceReport.referenceValidation.passed) {
+    throw "Controlled semantic raw-reference mutation did not produce one mismatch at index zero."
+  }
+  Copy-Item -LiteralPath $controlledReferenceOutputPath -Destination (Join-Path $ReportDirectory "controlled-reference-output.json") -Force
+
+  $controlledSemanticDirectory = Join-Path $ReportDirectory "controlled-semantic-artifact-tamper"
+  if (Test-Path -LiteralPath $controlledSemanticDirectory) {
+    Remove-Item -LiteralPath $controlledSemanticDirectory -Recurse -Force
+  }
+  Copy-Item -LiteralPath $archivedSemanticArtifactDirectory -Destination $controlledSemanticDirectory -Recurse -Force
+  $controlledSemanticManifestPath = Join-Path $controlledSemanticDirectory "semantic-map-artifacts.manifest.json"
+  $controlledSemanticManifest = Get-Content -LiteralPath $controlledSemanticManifestPath -Raw -Encoding utf8 | ConvertFrom-Json
+  $controlledSemanticClassIndexPath = Join-Path $controlledSemanticDirectory ([string]$controlledSemanticManifest.classIndexArtifact.fileName)
+  $controlledSemanticManifest.classIndexArtifact.path = $controlledSemanticClassIndexPath
+  [IO.File]::WriteAllText($controlledSemanticManifestPath, ($controlledSemanticManifest | ConvertTo-Json -Depth 12) + "`n", $utf8)
+  $controlledSemanticOriginalSha256 = (Get-FileHash -LiteralPath $controlledSemanticClassIndexPath -Algorithm SHA256).Hash.ToLowerInvariant()
+  $controlledSemanticBytes = [IO.File]::ReadAllBytes($controlledSemanticClassIndexPath)
+  $controlledSemanticBytes[0] = $controlledSemanticBytes[0] -bxor 1
+  [IO.File]::WriteAllBytes($controlledSemanticClassIndexPath, $controlledSemanticBytes)
+  $controlledSemanticMutatedSha256 = (Get-FileHash -LiteralPath $controlledSemanticClassIndexPath -Algorithm SHA256).Hash.ToLowerInvariant()
+  $controlledSemanticValidationPath = Join-Path $controlledSemanticDirectory "semantic-map-artifact-validation.json"
+  $controlledSemanticArtifactResult = Invoke-CapturedProcess -FileName $validatorShell.Source -Arguments @(
+    "-NoProfile", "-ExecutionPolicy", "Bypass",
+    "-File", (Join-Path $RepositoryRoot "eng\Test-YoloVisionSemanticMapArtifact.ps1"),
+    "-ManifestPath", $controlledSemanticManifestPath,
+    "-ExpectedClassIndexPath", $ReferenceClassIndexPath,
+    "-OutputPath", $controlledSemanticValidationPath
+  ) -WorkingDirectory $RepositoryRoot
+  if ($controlledSemanticArtifactResult.ExitCode -ne 1 -or -not (Test-Path -LiteralPath $controlledSemanticValidationPath -PathType Leaf)) {
+    throw "Controlled semantic class-index mutation must fail closed."
+  }
+  $controlledSemanticArtifactValidation = Get-Content -LiteralPath $controlledSemanticValidationPath -Raw -Encoding utf8 | ConvertFrom-Json
+  if ($controlledSemanticArtifactValidation.passed -or
+      @($controlledSemanticArtifactValidation.findings | Where-Object { $_ -eq "artifact-sha256" }).Count -ne 1) {
+    throw "Controlled semantic class-index mutation did not report the manifest SHA256 mismatch."
+  }
+}
 
 $gpuName = ""
 $driverVersion = ""
@@ -1046,13 +1292,96 @@ if ($isSegmentationScenario) {
   }
 }
 
-$reportRecordKind = if ($isSegmentationScenario) { "yolovision-yolov8n-seg-local-package-consumer-runtime" } else { "yolovision-yolox-local-package-consumer-runtime" }
-$reportFileName = if ($isSegmentationScenario) { "yolov8n-seg-local-package-consumer-runtime.json" } else { "yolox-local-package-consumer-runtime.json" }
-$reportTitle = if ($isSegmentationScenario) { "YOLOv8n-seg Local Package Consumer Runtime" } else { "YOLOX Local Package Consumer Runtime" }
+$semanticEvidence = $null
+if ($isSemanticScenario) {
+  $rawTensorComparison = $referenceComparisons[0]
+  $semanticEvidence = [pscustomobject][ordered]@{
+    modelContract = [pscustomobject][ordered]@{
+      input = [pscustomobject][ordered]@{
+        name = "images"
+        shape = @(1, 3, 320, 320)
+        dataType = "float32"
+        preprocess = "stretch-320x320; RGB; NCHW; scale=1/255; mean=0.485,0.456,0.406; std=0.229,0.224,0.225"
+      }
+      outputs = @(
+        [pscustomobject][ordered]@{
+          name = "semantic"
+          shape = @(1, 21, 320, 320)
+          role = "semantic-class-logits"
+          layout = "NCHW"
+          classCount = 21
+        }
+      )
+      postprocess = [pscustomobject][ordered]@{
+        operation = "argmax-over-class-dimension"
+        tieRule = "lowest class index wins"
+        classIndexShape = @(320, 320)
+        classIndexElementCount = 102400
+        classIndexDataType = "int32-little-endian"
+      }
+    }
+    rawTensorReferenceValidation = [pscustomobject][ordered]@{
+      sourceClassification = [string]$rawTensorComparison.sourceClassification
+      absoluteTolerance = 0.0001
+      relativeTolerance = 0.0001
+      tensorCount = 1
+      comparedElementCount = [long]$rawTensorComparison.comparedElementCount
+      mismatchCount = [long]$rawTensorComparison.mismatchCount
+      tensor = [pscustomobject][ordered]@{
+        tensorName = [string]$rawTensorComparison.tensorName
+        actualShape = @($rawTensorComparison.actualShape)
+        referenceShape = @($rawTensorComparison.referenceShape)
+        maximumAbsoluteError = [double]$rawTensorComparison.maximumAbsoluteError
+        maximumRelativeError = [double]$rawTensorComparison.maximumRelativeError
+        referenceSha256 = [string]$rawTensorComparison.referenceSha256
+      }
+      completed = $true
+      passed = $true
+    }
+    classIndexArtifactValidation = [pscustomobject][ordered]@{
+      manifestSha256 = $semanticArtifactManifestSha256
+      classIndexSha256 = $semanticClassIndexSha256
+      expectedClassIndexSha256 = [string]$semanticArtifactValidation.expectedClassIndexSha256
+      pixelCount = 102400
+      mismatchCount = 0
+      firstMismatchIndex = -1
+      classIndexMatches = [bool]$semanticArtifactValidation.classIndexMatches
+      histogramMatches = [bool]$semanticArtifactValidation.histogramMatches
+      histogram = @($archivedSemanticManifest.classHistogram)
+      validationReportSha256 = (Get-FileHash -LiteralPath $semanticArtifactValidationPath -Algorithm SHA256).Hash.ToLowerInvariant()
+      passed = [bool]$semanticArtifactValidation.passed
+    }
+    controlledRawReferenceValidation = [pscustomobject][ordered]@{
+      kind = "single-reference-value-mutation"
+      mutationIndex = 0
+      mutationDelta = 10.0
+      mutatedReferenceSha256 = $controlledReferenceMutationSha256
+      exitCode = $controlledReferenceResult.ExitCode
+      tensorName = [string]$controlledReferenceComparisons[0].tensorName
+      comparedElementCount = [long]$controlledReferenceComparisons[0].comparedElementCount
+      mismatchCount = [long]$controlledReferenceComparisons[0].mismatchCount
+      firstMismatchIndex = [long]$controlledReferenceComparisons[0].firstMismatchIndex
+      validationPassed = [bool]$controlledReferenceReport.referenceValidation.passed
+      failClosed = $true
+    }
+    controlledClassIndexIntegrityValidation = [pscustomobject][ordered]@{
+      kind = "semantic-class-index-single-byte-mutation-with-unchanged-manifest-sha256"
+      originalSha256 = $controlledSemanticOriginalSha256
+      mutatedSha256 = $controlledSemanticMutatedSha256
+      exitCode = $controlledSemanticArtifactResult.ExitCode
+      findings = @($controlledSemanticArtifactValidation.findings)
+      failClosed = $true
+    }
+  }
+}
+
+$reportRecordKind = if ($isSegmentationScenario) { "yolovision-yolov8n-seg-local-package-consumer-runtime" } elseif ($isSemanticScenario) { "yolovision-lraspp-semantic-local-package-consumer-runtime" } else { "yolovision-yolox-local-package-consumer-runtime" }
+$reportFileName = if ($isSegmentationScenario) { "yolov8n-seg-local-package-consumer-runtime.json" } elseif ($isSemanticScenario) { "lraspp-semantic-local-package-consumer-runtime.json" } else { "yolox-local-package-consumer-runtime.json" }
+$reportTitle = if ($isSegmentationScenario) { "YOLOv8n-seg Local Package Consumer Runtime" } elseif ($isSemanticScenario) { "TorchVision LRASPP Semantic Local Package Consumer Runtime" } else { "YOLOX Local Package Consumer Runtime" }
 $sourceCommit = (& git -C $RepositoryRoot rev-parse HEAD).Trim()
 
 $report = [pscustomobject][ordered]@{
-  schemaVersion = if ($isSegmentationScenario) { 3 } else { 2 }
+  schemaVersion = if ($isSemanticScenario) { 4 } elseif ($isSegmentationScenario) { 3 } else { 2 }
   recordKind = $reportRecordKind
   generatedAtUtc = [DateTime]::UtcNow.ToString("O")
   validationState = "passed-local-package-consumer-runtime"
@@ -1110,9 +1439,10 @@ $report = [pscustomobject][ordered]@{
     modelSha256 = (Get-FileHash -LiteralPath $ModelPath -Algorithm SHA256).Hash.ToLowerInvariant()
     labelsSha256 = (Get-FileHash -LiteralPath $LabelsPath -Algorithm SHA256).Hash.ToLowerInvariant()
     imageSha256 = (Get-FileHash -LiteralPath $ImagePath -Algorithm SHA256).Hash.ToLowerInvariant()
-    modelWeightsSha256 = if ($isSegmentationScenario) { (Get-FileHash -LiteralPath $ModelWeightsPath -Algorithm SHA256).Hash.ToLowerInvariant() } else { $null }
-    referenceOutput0Sha256 = if ($isSegmentationScenario) { (Get-FileHash -LiteralPath $ReferenceOutput0Path -Algorithm SHA256).Hash.ToLowerInvariant() } else { $null }
+    modelWeightsSha256 = if ($isSegmentationScenario -or $isSemanticScenario) { (Get-FileHash -LiteralPath $ModelWeightsPath -Algorithm SHA256).Hash.ToLowerInvariant() } else { $null }
+    referenceOutput0Sha256 = if ($isSegmentationScenario -or $isSemanticScenario) { (Get-FileHash -LiteralPath $ReferenceOutput0Path -Algorithm SHA256).Hash.ToLowerInvariant() } else { $null }
     referenceOutput1Sha256 = if ($isSegmentationScenario) { (Get-FileHash -LiteralPath $ReferenceOutput1Path -Algorithm SHA256).Hash.ToLowerInvariant() } else { $null }
+    referenceClassIndexSha256 = if ($isSemanticScenario) { (Get-FileHash -LiteralPath $ReferenceClassIndexPath -Algorithm SHA256).Hash.ToLowerInvariant() } else { $null }
     tensorLength = $tensorLength
     tensorSha256 = $tensorSha256
     assetsRemainOnEDrive = $true
@@ -1130,6 +1460,7 @@ $report = [pscustomobject][ordered]@{
     visualizationSha256 = (Get-FileHash -LiteralPath $copiedVisualization -Algorithm SHA256).Hash.ToLowerInvariant()
   }
   segmentation = $segmentationEvidence
+  semantic = $semanticEvidence
   host = [pscustomobject][ordered]@{
     os = [Runtime.InteropServices.RuntimeInformation]::OSDescription
     processArchitecture = [Runtime.InteropServices.RuntimeInformation]::ProcessArchitecture.ToString()
@@ -1176,13 +1507,16 @@ $markdown = @(
   "- package-consumer runtime proof: ``False``",
   "- can publish publicly: ``False``",
   "",
-  $(if ($isSegmentationScenario) { "- raw tensor values compared: ``$($segmentationEvidence.rawTensorReferenceValidation.comparedElementCount)``" } else { $null }),
-  $(if ($isSegmentationScenario) { "- raw tensor mismatches: ``0``" } else { $null }),
+  $(if ($isSegmentationScenario) { "- raw tensor values compared: ``$($segmentationEvidence.rawTensorReferenceValidation.comparedElementCount)``" } elseif ($isSemanticScenario) { "- raw tensor values compared: ``$($semanticEvidence.rawTensorReferenceValidation.comparedElementCount)``" } else { $null }),
+  $(if ($isSegmentationScenario -or $isSemanticScenario) { "- raw tensor mismatches: ``0``" } else { $null }),
   $(if ($isSegmentationScenario) { "- independent mask comparison passed: ``True``" } else { $null }),
-  $(if ($isSegmentationScenario) { "- raw-reference negative exit: ``$($controlledReferenceResult.ExitCode)``" } else { $null }),
+  $(if ($isSemanticScenario) { "- semantic class-index pixels compared: ``102400``" } else { $null }),
+  $(if ($isSemanticScenario) { "- semantic class-index SHA256: ``$semanticClassIndexSha256``" } else { $null }),
+  $(if ($isSegmentationScenario -or $isSemanticScenario) { "- raw-reference negative exit: ``$($controlledReferenceResult.ExitCode)``" } else { $null }),
   $(if ($isSegmentationScenario) { "- mask-integrity negative exit: ``$($controlledMaskResult.ExitCode)``" } else { $null }),
+  $(if ($isSemanticScenario) { "- class-index-integrity negative exit: ``$($controlledSemanticArtifactResult.ExitCode)``" } else { $null }),
   "",
-  $(if ($isSegmentationScenario) { "This record proves a clean local-feed PackageReference restore/build/run with the pinned YOLOv8n-seg assets, two raw tensor references, source-image mask artifacts, an independent PyTorch comparison, and two fail-closed negatives." } else { "This record proves a clean local-feed PackageReference restore/build/run with the official YOLOX assets." }),
+  $(if ($isSegmentationScenario) { "This record proves a clean local-feed PackageReference restore/build/run with the pinned YOLOv8n-seg assets, two raw tensor references, source-image mask artifacts, an independent PyTorch comparison, and two fail-closed negatives." } elseif ($isSemanticScenario) { "This record proves a clean local-feed PackageReference restore/build/run with the official torchvision LRASPP assets, one raw tensor reference, a full-resolution semantic class-index artifact, and two fail-closed negatives." } else { "This record proves a clean local-feed PackageReference restore/build/run with the official YOLOX assets." }),
   "It does not prove public-feed download, redistribution approval, post-publish verification, Owner release acceptance, or release closure."
 )
 $markdown | Set-Content -LiteralPath $markdownPath -Encoding utf8

@@ -288,9 +288,11 @@
       },
       "articles": [
         "docs/articles/zh-cn/demo-model-acquisition-and-onnx-conversion.md",
-        "docs/articles/zh-cn/yolovision-semantic-segmentation-map-guide.md"
+        "docs/articles/zh-cn/yolovision-semantic-segmentation-map-guide.md",
+        "docs/articles/zh-cn/yolovision-lraspp-semantic-local-package-consumer-tutorial.md"
       ],
-      "runtimeEvidence": "samples/assets/yolovision-torchvision-lraspp-real-model-runtime-evidence.json"
+      "runtimeEvidence": "samples/assets/yolovision-torchvision-lraspp-real-model-runtime-evidence.json",
+      "localPackageConsumerEvidence": "samples/assets/yolovision-lraspp-semantic-local-package-consumer-runtime-evidence.json"
     }
   ]
 }

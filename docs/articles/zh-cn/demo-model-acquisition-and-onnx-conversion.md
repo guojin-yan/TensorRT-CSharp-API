@@ -152,6 +152,7 @@ SHA256。命令里的 `<downloads>`、`<models>` 和 `<artifacts>` 是本机目�
 - 转换命令：`python eng/Invoke-YoloVisionSemanticReference.py --weights <models>/lraspp_mobilenet_v3_large-d234d4ea.pth --image <downloads>/dog.jpg --onnx <models>/lraspp-mobilenet-v3-large-320.onnx --output-directory <artifacts> --export-onnx`
 - 工具链：`PyTorch 2.10.0+cpu; torchvision 0.25.0+cpu; opset 17`
 - ONNX 暂存：`models/YoloVision/SemanticSegmentation/lraspp-mobilenet-v3-large-torchvision-v0.25.0/lraspp-mobilenet-v3-large-320.onnx`
+- 本地包消费：[YoloVision LRASPP 语义分割本地包消费教程](yolovision-lraspp-semantic-local-package-consumer-tutorial.md)
 - SHA256：`3cb94e561bdefe606ed7d1a2c4d0296409bec066f3a39a9fe9dabd72b23728f8`
 
 ## Classification：TorchVision ResNet18

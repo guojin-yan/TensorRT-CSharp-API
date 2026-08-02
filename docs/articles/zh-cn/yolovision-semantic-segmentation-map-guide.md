@@ -326,6 +326,9 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-SampleRunEvidenceRecord
 - `samples/YoloVision/yolovision-semantic-map-artifacts.schema.json`：完整语义图产物 schema。
 - `eng/Acquire-TorchVisionLrasppOfficialAssets.ps1`：官方资产获取与固定 hash 校验。
 - `eng/Invoke-YoloVisionSemanticReference.py`：ONNX 导出、ORT reference、argmax 与负例比较。
+- `eng/Test-YoloVisionSemanticLocalPackageConsumer.ps1`：仓库外三包 `PackageReference` 语义运行、完整类别图与受控负例。
+- `eng/Test-YoloVisionSemanticMapArtifact.ps1`：类别索引二进制、manifest SHA256、范围和直方图严格校验。
+- [YoloVision LRASPP 语义分割本地包消费教程](yolovision-lraspp-semantic-local-package-consumer-tutorial.md)：从获取、转换到本地包运行的完整命令。
 - `samples/YoloVision/yolovision-task-output-contract.json`：semantic output role 与必填 metadata。
 - `samples/YoloVision/Program.cs`：`--task sem`、`--semantic-output`、`--class-count`、输出参数入口。
 - `eng/Test-YoloVisionRealAssetCandidate.ps1`：semantic map、palette 和 owner 证据字段验证。
