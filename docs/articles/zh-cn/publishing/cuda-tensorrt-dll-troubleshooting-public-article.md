@@ -194,6 +194,8 @@ Visual C++ runtime 缺失或版本过旧
 
 建议启动一个干净 shell，只保留目标 runtime key 需要的路径，再复测 dependency probe。若干净 shell 通过、日常 shell 失败，结论应写成 `path-contamination`，不是 package bug，也不是 runtime proof。
 
+`NativeBridgePathResolver` 会按显式 vendor root、应用目录、开发期自动发现目录的顺序重排当前进程 PATH。即使 `JYPPX_CUDA_ROOT` 或 `CUDA_PATH` 对应的 `bin` 已经出现在 PATH 后部，也会先按规范化路径去重，再提升到其他自动发现的 CUDA 版本之前。排障时仍应记录进程实际加载的 `cudart64_*.dll` 绝对路径；环境变量指向正确版本不能替代已加载模块证据。
+
 第六步：跑最小 probe，再跑模型。
 
 先跑 help、environment probe、dependency probe 或最小 smoke，确认 native load 能完成，再进入 OnnxToEngine、TensorRtExec 或 YoloVision。复杂模型失败可能是 shape、plugin、engine serialization 或 postprocess 问题，不一定是 DLL load 问题。

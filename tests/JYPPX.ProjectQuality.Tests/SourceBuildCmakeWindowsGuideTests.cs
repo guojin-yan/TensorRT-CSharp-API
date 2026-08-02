@@ -11,8 +11,10 @@ public sealed class SourceBuildCmakeWindowsGuideTests
 
         Assert.Contains("Windows 源码编译教程", article);
         Assert.Contains("C++ bridge", article);
-        Assert.Contains("GitHub 全依赖包", article);
-        Assert.Contains("NuGet 小包", article);
+        Assert.Contains("两个 bridge-only 发布渠道", article);
+        Assert.Contains("厂商依赖保留在用户安装目录，不进入包", article);
+        Assert.Contains("两个渠道都不打包 TensorRT、CUDA、cuDNN、NVRTC", article);
+        Assert.Contains("用户必须按 runtime key 自行安装匹配版本", article);
         Assert.Contains("Visual Studio 2022", article);
         Assert.Contains("CMake 3.27", article);
         Assert.Contains("CUDA Toolkit", article);

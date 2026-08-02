@@ -49,6 +49,8 @@ Managed runtime loading is production-first:
 - explicit vendor roots use `JYPPX_TENSORRT_ROOT` and `JYPPX_CUDA_ROOT`
 - local development scanning of `build-out` and `third_party` requires `JYPPX_ENABLE_DEVELOPMENT_PROBING=1`
 
+The resolver normalizes and moves preferred dependency directories ahead of automatically discovered development candidates, even when a selected directory already appeared later in `PATH`. On hosts with multiple CUDA installations, verify the absolute path of the `cudart64_*` module loaded by the process; a correct environment-variable value alone is not loaded-module evidence.
+
 CMake presets now refresh selected CUDA toolkit cache variables when a CUDA root is resolved, so stale `CUDAToolkit_NVCC_EXECUTABLE` values from another CUDA line should not survive reconfiguration.
 
 ## Validated combinations

@@ -22,32 +22,55 @@ public static class NativeBridgePathResolver
     {
         List<string> preferredEntries = EnumerateDependencyDirectories(assembly)
             .Where(Directory.Exists)
-            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .GroupBy(GetDirectoryIdentity, StringComparer.OrdinalIgnoreCase)
+            .Select(group => group.First())
             .ToList();
 
-        HashSet<string> currentEntries = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        HashSet<string> preferredEntryKeys = new HashSet<string>(
+            preferredEntries.Select(GetDirectoryIdentity),
+            StringComparer.OrdinalIgnoreCase);
+        HashSet<string> currentEntryKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         List<string> existingEntries = new List<string>();
         string currentPath = Environment.GetEnvironmentVariable("PATH") ?? string.Empty;
         foreach (string entry in currentPath.Split(new[] { Path.PathSeparator }, StringSplitOptions.RemoveEmptyEntries))
         {
-            if (currentEntries.Add(entry))
+            string entryKey = GetDirectoryIdentity(entry);
+            if (!preferredEntryKeys.Contains(entryKey) && currentEntryKeys.Add(entryKey))
             {
                 existingEntries.Add(entry);
             }
         }
 
-        List<string> updatedEntries = new List<string>();
-        foreach (string candidate in preferredEntries)
-        {
-            if (currentEntries.Add(candidate))
-            {
-                updatedEntries.Add(candidate);
-            }
-        }
-
+        List<string> updatedEntries = new List<string>(preferredEntries);
         updatedEntries.AddRange(existingEntries);
         string updatedPath = string.Join(Path.PathSeparator.ToString(), updatedEntries);
         Environment.SetEnvironmentVariable("PATH", updatedPath);
+    }
+
+    private static string GetDirectoryIdentity(string path)
+    {
+        try
+        {
+            return TrimEndingDirectorySeparators(Path.GetFullPath(path));
+        }
+        catch (Exception exception) when (
+            exception is ArgumentException or NotSupportedException or PathTooLongException)
+        {
+            return TrimEndingDirectorySeparators(path);
+        }
+    }
+
+    private static string TrimEndingDirectorySeparators(string path)
+    {
+        string root = Path.GetPathRoot(path) ?? string.Empty;
+        int length = path.Length;
+        while (length > root.Length &&
+            (path[length - 1] == Path.DirectorySeparatorChar || path[length - 1] == Path.AltDirectorySeparatorChar))
+        {
+            length--;
+        }
+
+        return length == path.Length ? path : path.Substring(0, length);
     }
 
     /// <summary>

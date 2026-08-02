@@ -7,6 +7,53 @@ namespace JYPPX.ProjectQuality.Tests;
 public sealed class NativeBridgePathResolverTests
 {
     [Fact]
+    public void ExistingPreferredDependencyIsMovedAheadOfNewFallbackCandidates()
+    {
+        string? previousPath = Environment.GetEnvironmentVariable("PATH");
+        string? previousCudaRoot = Environment.GetEnvironmentVariable("JYPPX_CUDA_ROOT");
+        string? previousCudnnRoot = Environment.GetEnvironmentVariable("JYPPX_CUDNN_ROOT");
+        string? previousDevelopmentProbing = Environment.GetEnvironmentVariable("JYPPX_ENABLE_DEVELOPMENT_PROBING");
+        string testRoot = Path.Combine(RepositoryPaths.Root, "build-out", "path-resolver-test", Guid.NewGuid().ToString("N"));
+        string selectedCudaRoot = Path.Combine(testRoot, "cuda-selected");
+        string selectedCudaBin = Path.Combine(selectedCudaRoot, "bin");
+        string fallbackCudnnRoot = Path.Combine(testRoot, "cudnn-fallback");
+        string fallbackCudnnBin = Path.Combine(fallbackCudnnRoot, "bin");
+        string unrelatedDirectory = Path.Combine(testRoot, "unrelated");
+
+        try
+        {
+            Directory.CreateDirectory(selectedCudaBin);
+            Directory.CreateDirectory(fallbackCudnnBin);
+            Directory.CreateDirectory(unrelatedDirectory);
+            Environment.SetEnvironmentVariable(
+                "PATH",
+                string.Join(Path.PathSeparator, selectedCudaBin + Path.DirectorySeparatorChar, unrelatedDirectory));
+            Environment.SetEnvironmentVariable("JYPPX_CUDA_ROOT", selectedCudaRoot);
+            Environment.SetEnvironmentVariable("JYPPX_CUDNN_ROOT", fallbackCudnnRoot);
+            Environment.SetEnvironmentVariable("JYPPX_ENABLE_DEVELOPMENT_PROBING", null);
+
+            NativeBridgePathResolver.EnsureProcessSearchPath(Assembly.GetExecutingAssembly());
+
+            string[] entries = (Environment.GetEnvironmentVariable("PATH") ?? string.Empty)
+                .Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries);
+            int selectedIndex = Array.FindIndex(entries, entry => string.Equals(entry, selectedCudaBin, StringComparison.OrdinalIgnoreCase));
+            int fallbackIndex = Array.FindIndex(entries, entry => string.Equals(entry, fallbackCudnnBin, StringComparison.OrdinalIgnoreCase));
+
+            Assert.True(selectedIndex >= 0);
+            Assert.True(fallbackIndex >= 0);
+            Assert.True(selectedIndex < fallbackIndex, $"Selected CUDA directory index {selectedIndex} must precede fallback index {fallbackIndex}.");
+            Assert.Equal(1, entries.Count(entry => string.Equals(entry, selectedCudaBin, StringComparison.OrdinalIgnoreCase)));
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("PATH", previousPath);
+            Environment.SetEnvironmentVariable("JYPPX_CUDA_ROOT", previousCudaRoot);
+            Environment.SetEnvironmentVariable("JYPPX_CUDNN_ROOT", previousCudnnRoot);
+            Environment.SetEnvironmentVariable("JYPPX_ENABLE_DEVELOPMENT_PROBING", previousDevelopmentProbing);
+        }
+    }
+
+    [Fact]
     public void ExplicitBridgeDirectoryIsUsedAsDependencyDirectory()
     {
         string previous = Environment.GetEnvironmentVariable("JYPPX_NATIVE_BRIDGE_PATH") ?? string.Empty;
