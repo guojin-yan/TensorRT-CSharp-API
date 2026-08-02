@@ -8415,3 +8415,19 @@ engine 均未打包或发布，8 份 publishing 用户修改未触碰、未暂�
 - TRT11 smoke-only 真实结果为 `InvocationCount=1`、`FailureCount=0`、`InFlightCallbackCount=0`、shape `[1,4]`、
   `BorrowedPointerExposed=False`、`DetachCount=1`、`IsRealCallbackRuntimeProof=True`。这补齐 TRT11 source-tree local
   callback runtime，但仍不是 package consumer、Linux、公开包或 post-publish proof。
+
+## 2026-08-02 First Release Package Dry Run And Promotion Closure
+
+- runtime Windows/Linux workflow 已从无筛选完整 ProjectQuality 收敛为 7 类第一版核心发布契约，回归测试禁止恢复无筛选执行。
+- bridge-only 收集器现在检查 staging bridge 文件而不是只检查目录；TRT8/CUDA11.8、TRT10/CUDA12.9、
+  TRT11/CUDA13.2 都从当前 `build-out` 成功 pack，并通过 bridge package consumer。
+- `JYPPX.TensorRT.CSharp.API` 与 YoloVision `4.0.0` 通过内容、pointer-free surface、vendor policy 和仓库外
+  PackageReference-only consumer；YoloVision 为 45 types / 424 members / 0 finding。
+- 当前 HEAD 候选五包 repository commit 均为 `102089c769656ef843e4e5d3a318cd13351d4991`；两个 managed 包没有
+  native entry，三个 bridge 包各只有一个项目自有 `jyppxtrtbridge.dll`，五包 exact allowlist passed。
+- 完整 solution Release build 0 warning / 0 error；7 个 sample、TensorRtExec、smoke runners 和工具均编译；DocFX
+  构建 496 个 conceptual inputs 与 470 个 managed reference inputs，0 warning / 0 error。
+- grape/origin push CI 与 release gate 均双绿；grape managed Action package dry run `30731316496` 通过，所有
+  NuGet/GitHub Packages/GitHub Release 发布 job skipped。
+- 本批没有 Linux bridge runtime proof、公开 package、post-publish 或 Owner acceptance；CUDA、cuDNN、TensorRT、
+  NVRTC 继续由用户安装，8 份 publishing 用户修改继续隔离。
