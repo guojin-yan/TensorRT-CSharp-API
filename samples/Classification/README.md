@@ -21,6 +21,13 @@ The model, labels, weights, and export report remain outside Git. Source, conver
 in `samples/assets/classification-resnet18-official-assets.json` and
 `docs/articles/zh-cn/demo-model-acquisition-and-onnx-conversion.md`.
 
+The pinned source-tree runtime case is recorded in
+`samples/assets/classification-resnet18-real-model-runtime-evidence.json`. Its independent generator
+`eng/Invoke-ClassificationResNet18Reference.py` consumes the exact C# float32 input tensor, cross-checks PyTorch with ONNX Runtime,
+and writes both raw-logit and task-probability references plus a one-value controlled negative. TensorRT 10.11 compared 1000 raw
+logits and 1000 probabilities with zero mismatches; the negative exited 1 at first mismatch index 0. This remains source-tree
+real-model evidence, not package-consumer, public-package, redistribution, or post-publish proof.
+
 ```powershell
 dotnet run --project .\samples\Classification -- `
   --model .\models\classifier.onnx `

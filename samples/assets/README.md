@@ -101,6 +101,12 @@ Run `eng/Sync-DemoOnnxModels.ps1` after acquisition/export to materialize and ha
 `eng/Acquire-TorchVisionResNet18OfficialAssets.ps1 -AllowDownload -ExportOnnx` to write its ONNX, ImageNet labels, and export report
 under the outer `models\Classification` directory. None of those files is a repository or package asset.
 
+`eng/Invoke-ClassificationResNet18Reference.py` consumes the exact C# image-preprocessing tensor and writes independent ONNX
+Runtime raw logits, task probabilities, and a controlled-negative task reference. `classification-resnet18-real-model-runtime-evidence.json`
+records the TensorRT 10.11 result: 1000/1000 raw logits and 1000/1000 probabilities matched, Top-5 order matched PyTorch/ORT, and
+the one-value negative failed closed with exit code 1. The record does not approve weights/image redistribution or promote
+package-consumer, public-package, post-publish, Owner release, or publication proof.
+
 ## Official torchvision LRASPP semantic acquisition
 
 `yolovision-torchvision-lraspp-official-assets.json` pins torchvision `v0.25.0`, LRASPP MobileNetV3 Large weights, VOC labels metadata, the BSD-3-Clause license, and the PyTorch Hub dog image. Run:

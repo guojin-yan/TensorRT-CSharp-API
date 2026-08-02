@@ -21,6 +21,20 @@
 
 推荐先选择小体积、许可清晰、输入稳定的 ImageNet 分类模型，例如 MobileNet 系列或 ResNet 小模型。仓库文档只记录选择标准，不把任何未实际跑通的外部模型写成项目自带能力。
 
+第一版已经固定并实跑 TorchVision `v0.25.0` ResNet18 `IMAGENET1K_V1`。获取和 opset 17 导出合同在
+`samples/assets/classification-resnet18-official-assets.json`，实际模型位于 Git 仓库外的
+`E:\GitSpace\TensorRT-CSharp-API-4.0\models\Classification\resnet18-torchvision-v0.25.0`。运行：
+
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Acquire-TorchVisionResNet18OfficialAssets.ps1 `
+  -AllowDownload -ExportOnnx -PythonPath C:\Users\guoji\.conda\envs\ultralytics\python.exe
+```
+
+`eng/Invoke-ClassificationResNet18Reference.py` 从精确 C# 输入 tensor 生成独立 ONNX Runtime raw/task references。TensorRT
+10.11 的 raw logits 与 Softmax probabilities 各比较 1000 个值，mismatch 均为 0；单值负例以 exit code 1 fail closed。
+小型记录是 `samples/assets/classification-resnet18-real-model-runtime-evidence.json`。模型、图片、tensor、reference 和日志
+不进入 Git，也不进入 NuGet 或 GitHub Release。
+
 ## 运行命令
 
 ```powershell
@@ -72,4 +86,5 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Export-CrossTaskReferencePro
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-CrossTaskReferenceProvenanceMatrix.ps1 -Strict
 ```
 
-矩阵为 `owner-action-required` 不是 validator 失败；它表示模板结构成立，但尚无可晋级 reference。
+通用模板矩阵仍可显示 `owner-action-required`，因为它面向任意用户模型；这不是 validator 失败。官方 ResNet18 用例已经有独立
+reference 和 source-tree real-model-runtime 记录，但仍不具备 owner-reviewed golden、公开再分发或 package consumer 证明。

@@ -57,9 +57,11 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Acquire-TorchVisionResNet18O
 
 脚本调用 `eng/Export-ClassificationResNet18Onnx.py`，同时生成 `imagenet1k.names` 和导出报告。当前 ONNX 长度是 `46,748,553` bytes，SHA256 是 `ead3558569edd88aa73a4eb46acbe6c38dee113933234547f04a0f6e48169903`。
 
-本机 TensorRT 10.11 已用真实图片跑通该 ONNX，日志结束于 `Classification Passed=True`，Top-1 为 `Samoyed`
-（`0.879987`）。由于尚未挂接独立 golden，这一结果只是 `real-input-reference-candidate-runtime`，不能晋级为完整
-`real-model-runtime` 或 package consumer 证明。
+`eng/Invoke-ClassificationResNet18Reference.py` 使用精确 C# 预处理 tensor 生成 ONNX Runtime raw logits 与任务级 Softmax
+reference，并与 PyTorch CPU 交叉比较。本机 TensorRT 10.11 已同时完成 1000 个 raw logits 和 1000 个 probabilities 的
+全量比较，两层 mismatch 均为 0，`outputValidated=true`，Top-1 为 `Samoyed`（`0.8799871`）。单值篡改负例得到 exit code
+1、mismatch 1、first mismatch 0。证据见 `samples/assets/classification-resnet18-real-model-runtime-evidence.json`；它是
+source-tree `real-model-runtime`，不是 package consumer、公开包、再分发授权或发布后证明。
 
 ## OnnxToEngine：NVIDIA MNIST
 

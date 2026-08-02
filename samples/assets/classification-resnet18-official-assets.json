@@ -49,9 +49,21 @@
   },
   "acquisition": {
     "script": "eng/Acquire-TorchVisionResNet18OfficialAssets.ps1",
+    "referenceScript": "eng/Invoke-ClassificationResNet18Reference.py",
     "defaultAssetRoot": "E:/GitSpace/TensorRT-CSharp-API-4.0/downloads/resnet18-torchvision-v0.25.0/source",
     "defaultModelRoot": "E:/GitSpace/TensorRT-CSharp-API-4.0/models/Classification/resnet18-torchvision-v0.25.0",
     "modelRootOutsideGitRepository": true
+  },
+  "referenceContract": {
+    "script": "eng/Invoke-ClassificationResNet18Reference.py",
+    "exactCSharpInputTensorSha256": "18a5b601971e67521f895f9b0b89c3c0ba7820a9d0ff09d1981943947a692fa9",
+    "rawTensorName": "logits",
+    "rawTensorShape": [1, 1000],
+    "taskValueKind": "probabilities",
+    "preprocessContractSha256": "53eef287ae5ce0516d224b918009406d06bb4c99e1aefbb0c1b0de229afad5a1",
+    "outputTensorContractSha256": "ca1fbc5f24ccdfc9be7e705674b1ec2c197fc8d9f30c25363b57d0c211a4275e",
+    "taskSemanticsSha256": "c08e46eb1241cb093b033675595a8d9299f7434f15a2b775618a87c0e25773b7",
+    "runtimeEvidence": "samples/assets/classification-resnet18-real-model-runtime-evidence.json"
   },
   "proofBoundary": {
     "assetAcquisitionAndExportOnly": true,

@@ -41,15 +41,34 @@ TorchVision 源码许可证是 BSD-3-Clause，但 pretrained weights、labels �
 和图片都不能提交到 GitHub。固定记录见 `samples/assets/classification-resnet18-official-assets.json`；全部演示模型总表见
 `docs/articles/zh-cn/demo-model-acquisition-and-onnx-conversion.md`。
 
-### 当前源树实跑结果
+### 独立 reference 与当前源树实跑结果
 
-2026-08-02 使用 TensorRT 10.11、关闭 TF32、内置 `shorter-side-center-crop` 与 ImageNet mean/std 对 PyTorch Hub dog 图片完成
-了一次源树运行。日志结束于 `Classification Passed=True`，Top-1 是 `Samoyed`，score `0.879987`；输入 tensor SHA256 是
-`18a5b601971e67521f895f9b0b89c3c0ba7820a9d0ff09d1981943947a692fa9`。
+先对 C# 内置预处理生成的固定 float32 tensor 运行独立 PyTorch/ONNX Runtime CPU reference：
 
-这次运行确认模型获取、ONNX parser、engine build、图片预处理、enqueue、readback、Softmax 与 Top-K 主路径可以工作。但没有
-附加独立 ONNX Runtime golden，因此 JSON 正确记录 `proofClassification=real-input-reference-candidate-runtime` 和
-`outputValidated=false`。它不能替代后续独立 reference、package consumer 或发布后验证。
+```powershell
+$root = 'E:\GitSpace\TensorRT-CSharp-API-4.0'
+$case = '.\artifacts\classification\resnet18-torchvision-v0.25.0'
+& C:\Users\guoji\.conda\envs\ultralytics\python.exe .\eng\Invoke-ClassificationResNet18Reference.py `
+  --weights "$root\downloads\resnet18-torchvision-v0.25.0\source\resnet18-f37072fd.pth" `
+  --onnx "$root\models\Classification\resnet18-torchvision-v0.25.0\resnet18-imagenet1k-v1.onnx" `
+  --labels "$root\models\Classification\resnet18-torchvision-v0.25.0\imagenet1k.names" `
+  --input-tensor "$case\dog-input.fp32.bin" `
+  --output-directory "$case\reference"
+```
+
+脚本重算 model、input、preprocess、output contract、labels 和 task semantics 六个 SHA256 指纹，生成 raw logits reference、
+Softmax probabilities 任务 reference 和只把 index 0 加 `0.125` 的受控负例。PyTorch/ONNX Runtime 的 1000 个 logits 最大
+绝对误差为 `7.62939453125e-6`，argmax 相同，概率和为 `0.9999999947211421`。
+
+2026-08-03（Asia/Shanghai）使用 TensorRT 10.11、关闭 TF32、内置 `shorter-side-center-crop` 与 ImageNet mean/std 完成
+源树实跑。raw logits 与任务 probabilities 各比较 1000 个值，均为 mismatch 0：raw 最大绝对误差 `9.536743e-6`，任务
+概率最大绝对误差 `2.9802322e-7`。JSON 记录 `outputValidated=true`，日志结束于 `Classification Passed=True`；Top-1 是
+`Samoyed`，score `0.8799871`。
+
+受控负例保持 raw reference 正确，只篡改任务 probability index 0，得到 mismatch 1、first mismatch 0、最大绝对误差
+`0.125`、exit code 1 和 `Classification Passed=False`。小型证据记录是
+`samples/assets/classification-resnet18-real-model-runtime-evidence.json`。这证明源树真实模型主路径与 fail-closed 比较，仍不
+替代 owner-reviewed golden、package consumer、公开包、再分发授权或发布后验证。
 
 运行证据建议在同一外层用例目录保存为：
 
@@ -154,16 +173,39 @@ sidecar 不能把 build-only report 晋级成 `package-consumer-runtime`。它�
 
 ## Classification 真实运行
 
-运行样例并保存日志：
+下面的命令与仓库内 ResNet18 证据记录使用同一模型、图片预处理和独立 reference，并保存完整日志：
 
 ```powershell
-dotnet run --project .\samples\Classification -- `
-  --model .\models\classifier.onnx `
-  --labels .\models\classifier.labels.txt `
-  --input .\models\classifier.input.png `
+$root = 'E:\GitSpace\TensorRT-CSharp-API-4.0'
+$modelRoot = "$root\models\Classification\resnet18-torchvision-v0.25.0"
+$case = '.\artifacts\classification\resnet18-torchvision-v0.25.0'
+$image = '.\artifacts\yolovision\semantic-lraspp-reference\dog.ppm'
+
+dotnet .\samples\Classification\bin\Release\net8.0\Classification.dll `
+  --model "$modelRoot\resnet18-imagenet1k-v1.onnx" `
+  --labels "$modelRoot\imagenet1k.names" `
+  --image $image `
+  --preprocessed-output "$case\dog-input.fp32.bin" `
   --input-shape 1x3x224x224 `
   --tensor-rt-line 10 `
-  --top-k 5 *> .\models\classifier-run.log
+  --image-resize shorter-side-center-crop `
+  --resize-shorter-side 256 `
+  --tensor-layout NCHW `
+  --color-order RGB `
+  --scale 0.00392156862745098 `
+  --mean 0.485,0.456,0.406 `
+  --std 0.229,0.224,0.225 `
+  --score-transform softmax `
+  --top-k 5 `
+  --noTF32 `
+  --reference-output "$case\reference\classification.onnxruntime.reference.json" `
+  --reference-abs 0.00001 `
+  --reference-rel 0.0001 `
+  --reference-outputs "logits:$case\reference\logits.onnxruntime.reference.json" `
+  --reference-abs-tolerance 0.0001 `
+  --reference-rel-tolerance 0.0001 `
+  --output-json "$case\classification-positive-output.json" `
+  *> "$case\classification-positive-run.log"
 ```
 
 日志里至少应能看到：
@@ -196,11 +238,13 @@ models/classifier-sample-run-evidence.json
 - `templateOnly=false`
 - `sampleName=Classification`
 - `proofClassification=real-model-runtime`
-- `modelSha256`
-- `labelsSha256`
-- `inputAssetSha256`
-- `sampleRunLogPath`
-- `sampleRunLogSha256`
+- `modelPath/modelSha256/modelLicense`
+- `labelsPath/labelsSha256/labelsLicense`
+- `inputAssetPath/inputAssetSha256/inputAssetLicense`
+- `preprocessedInputTensorPath/preprocessedInputTensorSha256/preprocessedInputTensorElementCount`
+- `evidenceSidecarPath` 和 `buildReportPath`
+- `sampleRunCommand` 和 `expectedEvidenceLines`
+- `sampleRunLogPath/sampleRunLogSha256`
 - `stdoutSummary` 或 `stderrSummary`
 - `isSmokePassed=true`
 - `canPromoteRealModelRuntime=true`
@@ -208,10 +252,15 @@ models/classifier-sample-run-evidence.json
 然后校验：
 
 ```powershell
-pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-SampleRunEvidenceRecord.ps1 -InputPath .\models\classifier-sample-run-evidence.json -RequireExistingLog
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-SampleRunEvidenceRecord.ps1 `
+  -InputPath .\models\classifier-sample-run-evidence.json `
+  -RequireExistingLog `
+  -FailOnNotProof
 ```
 
 sample run evidence record 不允许写 `package-consumer-runtime`。NuGet/runtime package consumer proof 是 release proof record 的职责。
+仓库内固定 ResNet18 记录执行同一严格命令后得到 `ValidationState=real-model-runtime`、`ErrorCount=0`、
+`OwnerActionRequiredCount=0`。
 
 ## Manifest 与 Catalog
 

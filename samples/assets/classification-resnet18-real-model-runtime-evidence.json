@@ -1,0 +1,222 @@
+{
+  "schemaVersion": 1,
+  "recordKind": "sample-run-evidence-record",
+  "recordId": "classification-resnet18-win-x64-trt10.11-cuda12.9-20260802",
+  "sampleName": "Classification",
+  "manifestPath": "samples/assets/classification-resnet18-official-assets.json",
+  "family": "torchvision-resnet18",
+  "task": "classification",
+  "proofClassification": "real-model-runtime",
+  "validatorState": "real-model-runtime",
+  "templateOnly": false,
+  "isSmokePassed": true,
+  "canPromoteRealModelRuntime": true,
+  "canPromotePackageConsumerRuntime": false,
+  "modelPath": "E:\\GitSpace\\TensorRT-CSharp-API-4.0\\models\\Classification\\resnet18-torchvision-v0.25.0\\resnet18-imagenet1k-v1.onnx",
+  "modelSha256": "ead3558569edd88aa73a4eb46acbe6c38dee113933234547f04a0f6e48169903",
+  "modelLicense": "BSD-3-Clause TorchVision v0.25.0 source baseline; pretrained weight is approved only for this local runtime case and public redistribution remains unapproved",
+  "labelsPath": "E:\\GitSpace\\TensorRT-CSharp-API-4.0\\models\\Classification\\resnet18-torchvision-v0.25.0\\imagenet1k.names",
+  "labelsSha256": "ee4fa67b1dd46919ef87529b70e25bdd1ec9ebd350de3ad426e6640eb70320a1",
+  "labelsLicense": "BSD-3-Clause; generated from the hash-pinned TorchVision v0.25.0 ImageNet-1K category metadata for this local runtime case",
+  "inputAssetPath": "E:\\GitSpace\\TensorRT-CSharp-API-4.0\\TensorRtSharp4.0\\artifacts\\yolovision\\semantic-lraspp-reference\\dog.ppm",
+  "inputAssetSha256": "58d4301e1ccf0d60b890b73980e4a00b0316840d618b7c741484e7514e71ff4b",
+  "inputAssetLicense": "PyTorch Hub dog.jpg at commit c7895df70c7767403e36f82786d6b611b7984557 converted locally to P6 RGB PPM; public redistribution remains unapproved",
+  "preprocessedInputTensorPath": "E:\\GitSpace\\TensorRT-CSharp-API-4.0\\TensorRtSharp4.0\\artifacts\\classification\\resnet18-torchvision-v0.25.0\\dog-input.fp32.bin",
+  "preprocessedInputTensorSha256": "18a5b601971e67521f895f9b0b89c3c0ba7820a9d0ff09d1981943947a692fa9",
+  "preprocessedInputTensorElementCount": 150528,
+  "evidenceSidecarPath": "E:\\GitSpace\\TensorRT-CSharp-API-4.0\\TensorRtSharp4.0\\artifacts\\classification\\resnet18-torchvision-v0.25.0\\classification-build-evidence-sidecar.json",
+  "buildReportPath": "E:\\GitSpace\\TensorRT-CSharp-API-4.0\\TensorRtSharp4.0\\artifacts\\classification\\resnet18-torchvision-v0.25.0\\classification-build-report.json",
+  "sampleRunCommand": "dotnet .\\samples\\Classification\\bin\\Release\\net8.0\\Classification.dll --model E:\\GitSpace\\TensorRT-CSharp-API-4.0\\models\\Classification\\resnet18-torchvision-v0.25.0\\resnet18-imagenet1k-v1.onnx --labels E:\\GitSpace\\TensorRT-CSharp-API-4.0\\models\\Classification\\resnet18-torchvision-v0.25.0\\imagenet1k.names --image E:\\GitSpace\\TensorRT-CSharp-API-4.0\\TensorRtSharp4.0\\artifacts\\yolovision\\semantic-lraspp-reference\\dog.ppm --preprocessed-output E:\\GitSpace\\TensorRT-CSharp-API-4.0\\TensorRtSharp4.0\\artifacts\\classification\\resnet18-torchvision-v0.25.0\\dog-input.fp32.bin --input-shape 1x3x224x224 --tensor-rt-line 10 --image-resize shorter-side-center-crop --resize-shorter-side 256 --tensor-layout NCHW --color-order RGB --scale 0.00392156862745098 --mean 0.485,0.456,0.406 --std 0.229,0.224,0.225 --score-transform softmax --top-k 5 --noTF32 --reference-output E:\\GitSpace\\TensorRT-CSharp-API-4.0\\TensorRtSharp4.0\\artifacts\\classification\\resnet18-torchvision-v0.25.0\\reference\\classification.onnxruntime.reference.json --reference-abs 0.00001 --reference-rel 0.0001 --reference-outputs logits:E:\\GitSpace\\TensorRT-CSharp-API-4.0\\TensorRtSharp4.0\\artifacts\\classification\\resnet18-torchvision-v0.25.0\\reference\\logits.onnxruntime.reference.json --reference-abs-tolerance 0.0001 --reference-rel-tolerance 0.0001 --output-json E:\\GitSpace\\TensorRT-CSharp-API-4.0\\TensorRtSharp4.0\\artifacts\\classification\\resnet18-torchvision-v0.25.0\\classification-positive-output.json",
+  "sampleRunLogPath": "E:\\GitSpace\\TensorRT-CSharp-API-4.0\\TensorRtSharp4.0\\artifacts\\classification\\resnet18-torchvision-v0.25.0\\classification-positive-run.log",
+  "sampleRunLogSha256": "5f371b770aa18014e1504efbc0375cf5057b6e851f51726600f8e55e007297fe",
+  "stdoutSummary": "Classification loaded the pinned TorchVision ResNet18 ONNX with TensorRT 10.11 and TF32 disabled, reproduced the exact C# image tensor, matched all 1000 raw logits and all 1000 softmax probabilities against independent ONNX Runtime CPU references, returned Samoyed as Top-1, and ended with Classification Passed=True.",
+  "stderrSummary": "",
+  "expectedEvidenceLines": [
+    "Classification TensorRtLine=10",
+    "Input=images:[1, 3, 224, 224] Inputs=1 Output=logits:[1, 1000]",
+    "InputSource=image TensorSha256=18a5b601971e67521f895f9b0b89c3c0ba7820a9d0ff09d1981943947a692fa9",
+    "ImagePreprocessConfig Mode=shorter-side-center-crop",
+    "TopK Index=258 Label=Samoyed",
+    "ClassificationReference Requested=True Completed=True Passed=True Compared=1000 Mismatches=0",
+    "ReferenceOutputValidation Requested=True Completed=True Passed=True Tensors=1",
+    "OutputValidated=True",
+    "Classification Passed=True"
+  ],
+  "failureReasons": [],
+  "executedUtcDate": "2026-08-02",
+  "sourceBaseCommit": "a4426048da63cb4f6a84de45c76e2a1e716b78cd",
+  "implementationNote": "The pinned acquisition/export manifest was committed first; the independent reference generator, full-output positive/negative evidence, tests, and documentation are committed after this source-tree execution.",
+  "license": {
+    "sourceCodeSpdxId": "BSD-3-Clause",
+    "manifest": "samples/assets/classification-resnet18-official-assets.json",
+    "publicWeightRedistributionOwnerApproval": false,
+    "publicInputImageRedistributionOwnerApproval": false
+  },
+  "host": {
+    "os": "Microsoft Windows 11 Home Chinese, NT 10.0.26200.0",
+    "rid": "win-x64",
+    "cpu": "AMD Ryzen 7 5800H with Radeon Graphics",
+    "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+    "gpuMemoryMiB": 6144,
+    "driverVersion": "576.02",
+    "cudaVersion": "12.9",
+    "tensorRtVersion": "10.11.0.33",
+    "dotnetSdkVersion": "10.0.301",
+    "bridgeSha256": "74d89fd7e1cb414751ca943298e003ecf48cadcda3e4c1952e5a2d5ba0b0cfc9"
+  },
+  "assets": {
+    "weights": {
+      "fileName": "resnet18-f37072fd.pth",
+      "length": 46830571,
+      "sha256": "f37072fd47e89c5e827621c5baffa7500819f7896bbacec160b1a16c560e07ec"
+    },
+    "onnx": {
+      "fileName": "resnet18-imagenet1k-v1.onnx",
+      "length": 46748553,
+      "sha256": "ead3558569edd88aa73a4eb46acbe6c38dee113933234547f04a0f6e48169903"
+    },
+    "labels": {
+      "fileName": "imagenet1k.names",
+      "classCount": 1000,
+      "length": 10488,
+      "sha256": "ee4fa67b1dd46919ef87529b70e25bdd1ec9ebd350de3ad426e6640eb70320a1"
+    },
+    "image": {
+      "fileName": "dog.ppm",
+      "source": "PyTorch Hub dog.jpg at commit c7895df70c7767403e36f82786d6b611b7984557 converted to P6 RGB PPM",
+      "length": 5625911,
+      "sha256": "58d4301e1ccf0d60b890b73980e4a00b0316840d618b7c741484e7514e71ff4b"
+    },
+    "authoritativeInputTensor": {
+      "shape": [1, 3, 224, 224],
+      "elementCount": 150528,
+      "length": 602112,
+      "sha256": "18a5b601971e67521f895f9b0b89c3c0ba7820a9d0ff09d1981943947a692fa9"
+    }
+  },
+  "modelContract": {
+    "input": {
+      "name": "images",
+      "shape": [1, 3, 224, 224],
+      "dataType": "float32",
+      "preprocess": "shorter-side-256; center-crop-224x224; RGB; NCHW; scale=1/255; mean=0.485,0.456,0.406; std=0.229,0.224,0.225; bilinear-half-pixel"
+    },
+    "output": {
+      "name": "logits",
+      "shape": [1, 1000],
+      "elementCount": 1000,
+      "role": "raw-logits"
+    },
+    "postprocess": {
+      "scoreTransform": "softmax",
+      "valueKind": "probabilities",
+      "topK": 5,
+      "argmaxRule": "maximum score, then lowest class index"
+    },
+    "fingerprints": {
+      "preprocessContractSha256": "53eef287ae5ce0516d224b918009406d06bb4c99e1aefbb0c1b0de229afad5a1",
+      "outputTensorContractSha256": "ca1fbc5f24ccdfc9be7e705674b1ec2c197fc8d9f30c25363b57d0c211a4275e",
+      "taskSemanticsSha256": "c08e46eb1241cb093b033675595a8d9299f7434f15a2b775618a87c0e25773b7"
+    }
+  },
+  "independentReferenceValidation": {
+    "script": "eng/Invoke-ClassificationResNet18Reference.py",
+    "providers": ["CPUExecutionProvider", "PyTorch CPU"],
+    "torchVersion": "2.10.0+cpu",
+    "torchvisionVersion": "0.25.0+cpu",
+    "onnxVersion": "1.15.0",
+    "onnxRuntimeVersion": "1.15.0",
+    "comparedLogitCount": 1000,
+    "pytorchOnnxRuntimeMaximumAbsoluteError": 7.62939453125e-6,
+    "pytorchOnnxRuntimeMeanAbsoluteError": 1.4309808875623276e-6,
+    "sameArgmax": true,
+    "probabilitySum": 0.9999999947211421,
+    "rawLogitsSha256": "7ccac8fe0f1bbd00c204759e71b9c1c5428d302265d86d93808ce250d378af50",
+    "probabilitiesSha256": "19d9fefd2356f9b8d7e5be39d3163631b9992657ef753ba68e2e0ba2b27d1e65",
+    "rawReferenceSha256": "f77fe5f4c7414e545a34c08e5954f861f1e168ea103b42e17cb75829d7d9b9a2",
+    "taskReferenceSha256": "31a07b21eef2e1e2d1be4cc8aff7e0c7107d45b0bbf78fc3864ee2ba3adfbc37",
+    "passed": true
+  },
+  "runtimeValidation": {
+    "tf32Disabled": true,
+    "outputValidated": true,
+    "rawLogits": {
+      "requested": true,
+      "completed": true,
+      "passed": true,
+      "absoluteTolerance": 0.0001,
+      "relativeTolerance": 0.0001,
+      "comparedValueCount": 1000,
+      "mismatchCount": 0,
+      "firstMismatchIndex": -1,
+      "maximumAbsoluteError": 9.536743e-6,
+      "maximumRelativeError": 0.001051351,
+      "actualValueSha256": "573fe5dfe5a8a2c35918f4f5cf029805516fae8edeb4285cd6bddf30a53521ee"
+    },
+    "taskProbabilities": {
+      "requested": true,
+      "completed": true,
+      "passed": true,
+      "absoluteTolerance": 0.00001,
+      "relativeTolerance": 0.0001,
+      "comparedValueCount": 1000,
+      "mismatchCount": 0,
+      "firstMismatchIndex": -1,
+      "maximumAbsoluteError": 2.9802322e-7,
+      "maximumRelativeError": 9.2522905e-6,
+      "actualValueSha256": "0a8928e6a15180c49d1b3a5e8f1cedf55a0267783cbcefe3c7a197b102ad8987"
+    }
+  },
+  "top5Validation": {
+    "passed": true,
+    "sameIndicesAndOrderAsPyTorchAndOnnxRuntime": true,
+    "predictions": [
+      { "rank": 1, "classIndex": 258, "className": "Samoyed", "tensorRtScore": 0.8799871 },
+      { "rank": 2, "classIndex": 270, "className": "white wolf", "tensorRtScore": 0.0816456 },
+      { "rank": 3, "classIndex": 279, "className": "Arctic fox", "tensorRtScore": 0.0215282 },
+      { "rank": 4, "classIndex": 257, "className": "Great Pyrenees", "tensorRtScore": 0.0054112 },
+      { "rank": 5, "classIndex": 248, "className": "Eskimo dog", "tensorRtScore": 0.0027484 }
+    ]
+  },
+  "controlledNegativeValidation": {
+    "mutation": "task probability reference index 0 += 0.125; raw logits reference remains unchanged",
+    "referenceSha256": "17af5a98902f739def52c9df949fd6e5fbbfd1077fd1a211ba70b7e07393ecc9",
+    "absoluteTolerance": 0.00001,
+    "relativeTolerance": 0.0001,
+    "exitCode": 1,
+    "taskMismatchCount": 1,
+    "taskFirstMismatchIndex": 0,
+    "taskMaximumAbsoluteError": 0.125,
+    "rawReferenceStillPassed": true,
+    "outputValidated": false,
+    "failClosed": true
+  },
+  "artifacts": {
+    "buildEvidenceSidecarSha256": "19d920884abe46f3ed77070caa24732a5aeb8084cb60dfea5b07676d387f73bc",
+    "buildReportSha256": "832da158700c7268b43e1ec2e405e799d46040eba35c5ad87ce8cd678b742ada",
+    "buildRunLogSha256": "8a70f078f1142dae6b0fdc376c378f15ab6ce9ba44bdd0caedcdf01677626190",
+    "serializedEngineSha256": "6d04d543eedf3c450ca1d063e3630494ba4ed3825247b6b23c3c98c645df5687",
+    "positiveOutputJsonSha256": "b512f3bfc50426a28956b13bd156972bab8130c321e57db8fa88dfe5ac0a2d8f",
+    "positiveRunLogSha256": "5f371b770aa18014e1504efbc0375cf5057b6e851f51726600f8e55e007297fe",
+    "negativeOutputJsonSha256": "46200774b4e87825ad7a33db8c9b6def0d75a2d4c9e089504a802683eced47e3",
+    "negativeRunLogSha256": "c0915f5269da08780dbe477916525af37127df56c1e4d0d9fbc5b4e2635fe150",
+    "referenceReportSha256": "3b4534a6b1cceb96fd29456f7b54a63de0d2d437e8afd106db0e25dcc337e5f4"
+  },
+  "commands": {
+    "acquisitionAndExport": "pwsh -NoProfile -ExecutionPolicy Bypass -File ./eng/Acquire-TorchVisionResNet18OfficialAssets.ps1 -AllowDownload -ExportOnnx -PythonPath <python>",
+    "reference": "python ./eng/Invoke-ClassificationResNet18Reference.py --weights <pth> --onnx <onnx> --labels <labels> --input-tensor <csharp-fp32> --output-directory <reference-dir>",
+    "runtime": "dotnet ./samples/Classification/bin/Release/net8.0/Classification.dll --model <onnx> --labels <labels> --image <dog.ppm> --preprocessed-output <csharp-fp32> --input-shape 1x3x224x224 --tensor-rt-line 10 --image-resize shorter-side-center-crop --resize-shorter-side 256 --tensor-layout NCHW --color-order RGB --scale 0.00392156862745098 --mean 0.485,0.456,0.406 --std 0.229,0.224,0.225 --score-transform softmax --top-k 5 --noTF32 --reference-output <task-reference> --reference-abs 0.00001 --reference-rel 0.0001 --reference-outputs logits:<raw-reference> --reference-abs-tolerance 0.0001 --reference-rel-tolerance 0.0001 --output-json <output>"
+  },
+  "proofBoundary": {
+    "sourceTreeRealModelRuntime": true,
+    "publicWeightRedistributionApproved": false,
+    "publicInputImageRedistributionApproved": false,
+    "packageConsumerRuntimeProof": false,
+    "publicPackageProof": false,
+    "postPublishProof": false,
+    "ownerReleaseAcceptance": false,
+    "releaseProof": false,
+    "performsPublish": false,
+    "uploadsAssets": false
+  }
+}
