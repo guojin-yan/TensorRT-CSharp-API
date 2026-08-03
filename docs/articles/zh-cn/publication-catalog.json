@@ -45,8 +45,8 @@
       "resultImages": [
         {
           "role": "annotated-inference-result",
-          "path": "docs/images/yolovision-yolov8n-det-annotated-cc0.png",
-          "sha256": "79bdda279d13b7ffd1493455f38d42596fb5e8805f116be48fcc71d067de5e64",
+          "path": "docs/images/yolovision-yolov8n-det-annotated-cc0.webp",
+          "sha256": "d70698ccde4741a197fbe5a7190e6d55bfe1f7fd522f977530c3557088204fb2",
           "source": "Rendered from the SVG written by the real TensorRT run; predictions are mapped back onto a CC0 source image."
         },
         {
@@ -79,8 +79,8 @@
       "resultImages": [
         {
           "role": "annotated-inference-result",
-          "path": "docs/images/yolovision-lraspp-semantic-annotated-cc0.png",
-          "sha256": "6939a6749b236081196a334784d0f32f3c1cc410e5cd21bdc2d52f8f6d187612",
+          "path": "docs/images/yolovision-lraspp-semantic-annotated-cc0.webp",
+          "sha256": "eba205a93627c48a0d3257c98908757ca45d5af3320eb54b3c16c28d1b07b473",
           "source": "Rendered from the SVG written by the real external local-package TensorRT run; semantic classes are overlaid on the CC0 source image."
         },
         {
@@ -113,8 +113,8 @@
       "resultImages": [
         {
           "role": "annotated-inference-result",
-          "path": "docs/images/yolovision-yolov8n-pose-annotated-cc0.png",
-          "sha256": "874a4c659410739400fd00fcd4cb14defd2dfdca9bec5641199afd5b495c9703",
+          "path": "docs/images/yolovision-yolov8n-pose-annotated-cc0.webp",
+          "sha256": "0acef2af693373785a40eaa8dea2119dc7360e47b469af1eee4a022769999c86",
           "source": "Rendered from the SVG written by the real TensorRT run; boxes, visible COCO keypoints, and skeleton edges are mapped onto a CC0 source image."
         },
         {
@@ -147,8 +147,8 @@
       "resultImages": [
         {
           "role": "annotated-inference-result",
-          "path": "docs/images/yolovision-yolov8n-cls-annotated-cc0.png",
-          "sha256": "3836c4e4c4963f0804de383f67a9f93c79135dc280a44648529443583ba53d8b",
+          "path": "docs/images/yolovision-yolov8n-cls-annotated-cc0.webp",
+          "sha256": "39257ec54bab3f0b060d309789004342dcc3128a8fb88a6b46c25137843cd22d",
           "source": "Rendered from the SVG written by the real external local-package TensorRT run; Top-5 classifications are overlaid on the CC0 source image."
         },
         {
@@ -181,8 +181,8 @@
       "resultImages": [
         {
           "role": "annotated-inference-result",
-          "path": "docs/images/yolovision-yolov8n-obb-annotated-owner.png",
-          "sha256": "227b791a1442c1ae1421bcfe9e650be85bcf99f5b8a44f6aa1e606cc0dcfc8ab",
+          "path": "docs/images/yolovision-yolov8n-obb-annotated-owner.webp",
+          "sha256": "6beb171f98496e448093fadc366faf99070804cf4928e2d8bbdd1a7326138600",
           "source": "Rendered from the SVG written by the real TensorRT run; twelve rotated plane boxes are mapped back to an owner-provided image authorized for this article."
         },
         {
@@ -215,8 +215,8 @@
       "resultImages": [
         {
           "role": "annotated-inference-result",
-          "path": "docs/images/yolovision-yolov8n-seg-annotated-owner.png",
-          "sha256": "e722ae751d7a1cdbd864368899f3e748758bbfc3e02fbf2a8639bdf658c1438c",
+          "path": "docs/images/yolovision-yolov8n-seg-annotated-owner.webp",
+          "sha256": "3843f6ad29ab3a34d5d321fb1eeb58637467da08381101dab7d61db107aeff38",
           "source": "Rendered from the SVG written by the real TensorRT run; person, dog, and bowl masks are mapped back to an owner-provided image authorized for this article."
         },
         {

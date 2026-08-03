@@ -61,7 +61,7 @@
     "outputJsonSha256": "bde5edf31af82eb063738f021654773b9585fa01ff160e69b38523ae08b01601",
     "runtimeLogSha256": "c4f604d3af84d0860abea1a2b9b02aa80eb1b04852311108debf0095efd64b3a",
     "visualizationSvgSha256": "71eaa7407f82df8d9db6320813da85c7bf34c06ec9e8b77a566c1621d700d08f",
-    "annotatedResultSha256": "227b791a1442c1ae1421bcfe9e650be85bcf99f5b8a44f6aa1e606cc0dcfc8ab",
+    "annotatedResultSha256": "6beb171f98496e448093fadc366faf99070804cf4928e2d8bbdd1a7326138600",
     "runtimeScreenshotSha256": "5517bae2aa7cf428558f8bad95a397746b160e2fb3f25b4d3073e74172cb4b00"
   },
   "modelContract": {

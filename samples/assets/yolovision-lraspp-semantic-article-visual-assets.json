@@ -22,8 +22,8 @@
   "resultImages": [
     {
       "role": "annotated-inference-result",
-      "path": "docs/images/yolovision-lraspp-semantic-annotated-cc0.png",
-      "sha256": "6939a6749b236081196a334784d0f32f3c1cc410e5cd21bdc2d52f8f6d187612",
+      "path": "docs/images/yolovision-lraspp-semantic-annotated-cc0.webp",
+      "sha256": "eba205a93627c48a0d3257c98908757ca45d5af3320eb54b3c16c28d1b07b473",
       "source": "Rendered from the SVG written by the real external local-package TensorRT run; the CC0 source image is embedded and the semantic classes are mapped back to source-image pixels."
     },
     {

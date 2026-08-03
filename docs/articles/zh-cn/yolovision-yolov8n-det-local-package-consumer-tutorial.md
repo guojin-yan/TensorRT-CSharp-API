@@ -276,7 +276,7 @@ dotnet run -c Release --no-build -- `
 
 程序生成的 SVG 已渲染为 PNG。下图直接嵌入 CC0 输入图，并在原图上绘制编号框；左上角图例给出类别和置信度。
 
-![YoloVision YOLOv8n Detection 原图叠加识别结果](../../images/yolovision-yolov8n-det-annotated-cc0.png)
+![YoloVision YOLOv8n Detection 原图叠加识别结果](../../images/yolovision-yolov8n-det-annotated-cc0.webp)
 
 本次图片共得到 8 个目标：
 

@@ -205,7 +205,7 @@ TensorRT 完成后，把 mask manifest 交给同一参考脚本完成独立后�
 
 实例框与半透明 mask 已经恢复到 `800x534` 原图坐标：
 
-![YOLOv8n 实例分割原图叠加结果](../../images/yolovision-yolov8n-seg-annotated-owner.png)
+![YOLOv8n 实例分割原图叠加结果](../../images/yolovision-yolov8n-seg-annotated-owner.webp)
 
 程序运行页面如下。终端截图来自本次真实运行的 stdout，仅用变量替换了工作区路径，所有 tensor 数量、误差和预测分数保持原样：
 

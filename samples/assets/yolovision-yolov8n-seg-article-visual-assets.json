@@ -21,8 +21,8 @@
   "resultImages": [
     {
       "role": "annotated-inference-result",
-      "path": "docs/images/yolovision-yolov8n-seg-annotated-owner.png",
-      "sha256": "e722ae751d7a1cdbd864368899f3e748758bbfc3e02fbf2a8639bdf658c1438c",
+      "path": "docs/images/yolovision-yolov8n-seg-annotated-owner.webp",
+      "sha256": "3843f6ad29ab3a34d5d321fb1eeb58637467da08381101dab7d61db107aeff38",
       "source": "Rendered from the SVG written by the real external local-package TensorRT run; person, dog, and bowl masks are mapped back to the owner-provided source image."
     },
     {

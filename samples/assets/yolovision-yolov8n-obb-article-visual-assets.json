@@ -21,8 +21,8 @@
   "resultImages": [
     {
       "role": "annotated-inference-result",
-      "path": "docs/images/yolovision-yolov8n-obb-annotated-owner.png",
-      "sha256": "227b791a1442c1ae1421bcfe9e650be85bcf99f5b8a44f6aa1e606cc0dcfc8ab",
+      "path": "docs/images/yolovision-yolov8n-obb-annotated-owner.webp",
+      "sha256": "6beb171f98496e448093fadc366faf99070804cf4928e2d8bbdd1a7326138600",
       "source": "Rendered from the SVG written by the real external local-package TensorRT run; twelve rotated plane boxes are mapped back to the owner-provided source image."
     },
     {

@@ -191,7 +191,7 @@ dotnet run -c Release --no-build -- `
 
 12 个 `plane` 目标已经按原图坐标绘制为旋转框：
 
-![YOLOv8n OBB 航拍飞机旋转框结果](../../images/yolovision-yolov8n-obb-annotated-owner.png)
+![YOLOv8n OBB 航拍飞机旋转框结果](../../images/yolovision-yolov8n-obb-annotated-owner.webp)
 
 程序运行页面如下。终端截图来自本次真实运行的 stdout，只把工作区路径替换成变量；模型合同、耗时、预测值和验证结论没有改动：
 

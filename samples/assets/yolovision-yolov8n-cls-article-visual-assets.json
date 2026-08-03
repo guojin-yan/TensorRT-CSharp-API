@@ -22,8 +22,8 @@
   "resultImages": [
     {
       "role": "annotated-inference-result",
-      "path": "docs/images/yolovision-yolov8n-cls-annotated-cc0.png",
-      "sha256": "3836c4e4c4963f0804de383f67a9f93c79135dc280a44648529443583ba53d8b",
+      "path": "docs/images/yolovision-yolov8n-cls-annotated-cc0.webp",
+      "sha256": "39257ec54bab3f0b060d309789004342dcc3128a8fb88a6b46c25137843cd22d",
       "source": "Rendered from the SVG written by the real external local-package TensorRT run; Top-5 classification labels and probabilities are overlaid on the CC0 source image."
     },
     {

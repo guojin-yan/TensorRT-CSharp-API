@@ -22,8 +22,8 @@
   "resultImages": [
     {
       "role": "annotated-inference-result",
-      "path": "docs/images/yolovision-yolov8n-det-annotated-cc0.png",
-      "sha256": "79bdda279d13b7ffd1493455f38d42596fb5e8805f116be48fcc71d067de5e64",
+      "path": "docs/images/yolovision-yolov8n-det-annotated-cc0.webp",
+      "sha256": "d70698ccde4741a197fbe5a7190e6d55bfe1f7fd522f977530c3557088204fb2",
       "source": "Rendered from the SVG written by the real TensorRT YoloVision run; the CC0 source image is embedded and predictions are mapped back to source coordinates."
     },
     {

@@ -330,7 +330,7 @@ dotnet run -c Release --no-build -- `
 
 分类任务没有目标框。正确的结果展示方式是在原图上叠加整张图片的 Top-5 类别和概率：
 
-![YoloVision YOLOv8n 分类 Top-5 原图结果](../../images/yolovision-yolov8n-cls-annotated-cc0.png)
+![YoloVision YOLOv8n 分类 Top-5 原图结果](../../images/yolovision-yolov8n-cls-annotated-cc0.webp)
 
 图中结果来自程序生成的 SVG，不是后期手工添加文字。Top-5 为：
 

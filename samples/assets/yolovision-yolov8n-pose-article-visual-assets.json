@@ -22,8 +22,8 @@
   "resultImages": [
     {
       "role": "annotated-inference-result",
-      "path": "docs/images/yolovision-yolov8n-pose-annotated-cc0.png",
-      "sha256": "874a4c659410739400fd00fcd4cb14defd2dfdca9bec5641199afd5b495c9703",
+      "path": "docs/images/yolovision-yolov8n-pose-annotated-cc0.webp",
+      "sha256": "0acef2af693373785a40eaa8dea2119dc7360e47b469af1eee4a022769999c86",
       "source": "Rendered from the SVG written by the real external local-package TensorRT run; boxes, visible COCO keypoints, and skeleton edges are mapped onto the CC0 source image."
     },
     {

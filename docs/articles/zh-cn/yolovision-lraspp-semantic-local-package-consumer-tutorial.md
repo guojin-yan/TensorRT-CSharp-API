@@ -290,7 +290,7 @@ dotnet run -c Release --no-build -- @runArgs `
 
 程序生成的 SVG 已渲染成 PNG。橙色表示 `dog`，紫色表示 `person`，背景只保留低透明度覆盖；右上角图例给出每类像素数与占比：
 
-![YoloVision LRASPP 语义分割原图叠加结果](../../images/yolovision-lraspp-semantic-annotated-cc0.png)
+![YoloVision LRASPP 语义分割原图叠加结果](../../images/yolovision-lraspp-semantic-annotated-cc0.webp)
 
 本次真实结果：
 

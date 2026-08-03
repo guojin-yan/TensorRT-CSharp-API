@@ -179,7 +179,7 @@ dotnet run -c Release --no-build -- `
 
 这次运行生成的原图叠加结果如下。两个 `person` 都绘制了检测框、可见关键点和 COCO 骨架：
 
-![YOLOv8n Pose 原图姿态结果](../../images/yolovision-yolov8n-pose-annotated-cc0.png)
+![YOLOv8n Pose 原图姿态结果](../../images/yolovision-yolov8n-pose-annotated-cc0.webp)
 
 程序运行页面如下。终端截图来自本次真实运行的 stdout，只对工作区路径进行了脱敏排版，数值、tensor 合同和验证结论保持原样：
 
