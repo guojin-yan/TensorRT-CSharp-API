@@ -32,7 +32,7 @@ public sealed class ToolCapabilityJsonSurfaceTests
             "1 blocked",
             "90 fields",
             "20 items",
-            "E:\\TensorRtSharpAssets\\cases\\tensorrtexec-option-audit",
+            "..\\downloads\\cases\\tensorrtexec-option-audit",
             "TrtexecLikeParser",
             "TensorRtExecOptions",
             "ToArgumentLine",

@@ -53,11 +53,11 @@ C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.2
 TensorRT/cuDNN 可以放到稳定工具目录，例如：
 
 ```text
-E:\NVIDIA\TensorRT-8.6
-E:\NVIDIA\TensorRT-10.11
-E:\NVIDIA\TensorRT-11.x
-E:\NVIDIA\cuDNN-8.9
-E:\NVIDIA\cuDNN-9.x
+<NVIDIA-install-root>\TensorRT-8.6
+<NVIDIA-install-root>\TensorRT-10.11
+<NVIDIA-install-root>\TensorRT-11.x
+<NVIDIA-install-root>\cuDNN-8.9
+<NVIDIA-install-root>\cuDNN-9.x
 ```
 
 实际探测规则以 `CMakePresets.json`、`native/CMakeLists.txt` 和相关 CMake/PowerShell 脚本为准。不要用临时复制 DLL 到系统目录的方式掩盖路径问题；那会让本机能跑、外部 consumer 失败。
@@ -110,7 +110,7 @@ CMake preset 中的 `JYPPX_CUDA_VERSION` 才是该构建想要的版本，Tensor
 在源码目录运行生成和质量检查：
 
 ```powershell
-Set-Location E:\GitSpace\TensorRT-CSharp-API-4.0\TensorRtSharp4.0
+Set-Location .
 dotnet restore .\TensorRtSharp.sln
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Generate-Bindings.ps1
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-BindingGeneratorOutputs.ps1
@@ -174,7 +174,7 @@ cmake --build --preset win-x64-trt11-cuda13-release --parallel
 
 ```powershell
 $preset = "win-x64-trt11-cuda13-release"
-Set-Location E:\GitSpace\TensorRT-CSharp-API-4.0\TensorRtSharp4.0
+Set-Location .
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Generate-Bindings.ps1
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-BindingGeneratorOutputs.ps1
 cmake --preset $preset

@@ -45,10 +45,14 @@ Windows local roots are intentionally not stored in the public manifest. Use `pa
 
 `eng/Invoke-LocalRuntimePackage.ps1` is retired and fails closed. Use the runtime manifest only to resolve compatible local headers, import libraries, and runtime smoke prerequisites; it is not a vendor-package publication manifest.
 
-To sync repository-relative TensorRT/cuDNN roots from the active workstation into the user profile override file used by self-hosted runs, use:
+To record user-installed TensorRT/CUDA/cuDNN roots in the profile override used by self-hosted runs, use:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\eng\Sync-LocalRuntimeRoots.ps1
+powershell -ExecutionPolicy Bypass -File .\eng\Sync-LocalRuntimeRoots.ps1 `
+  -RuntimePackageKey <runtime-key> `
+  -TensorRtRoot $env:JYPPX_TENSORRT_ROOT `
+  -CudaRoot $env:JYPPX_CUDA_ROOT `
+  -CudnnRoot $env:JYPPX_CUDNN_ROOT
 ```
 
 Before compiling a Windows bridge package, validate all explicit inputs:

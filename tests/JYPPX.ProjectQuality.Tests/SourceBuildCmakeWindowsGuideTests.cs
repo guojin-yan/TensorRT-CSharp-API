@@ -75,7 +75,7 @@ public sealed class SourceBuildCmakeWindowsGuideTests
             "## 构建全景图",
             "```mermaid",
             "flowchart LR",
-            "E:\\TensorRtSharpAssets",
+            "..\\downloads",
             "build-logs",
             "proof-inputs",
             "dotnet --info",

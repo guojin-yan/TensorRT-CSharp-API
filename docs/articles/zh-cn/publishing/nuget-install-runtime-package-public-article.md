@@ -153,7 +153,7 @@ GitHub Release asset 不是 NuGet feed。使用 Release 通道时，必须先校
 如果 C 盘空间紧张，可以调整缓存：
 
 ```powershell
-$env:NUGET_PACKAGES = "E:\\NuGetPackages"
+$env:NUGET_PACKAGES = Join-Path (Split-Path -Parent $PWD) 'nuget-packages'
 dotnet restore --force-evaluate
 ```
 

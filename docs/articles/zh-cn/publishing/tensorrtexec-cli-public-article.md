@@ -73,61 +73,61 @@ parity matrix 的意义是说明“哪些官方 trtexec 能力已经映射，哪
 
 ```powershell
 dotnet run --project .\applications\TensorRtExec\TensorRtExec.csproj -- `
-  --onnx E:\TensorRtSharpAssets\models\model.onnx `
-  --saveEngine E:\TensorRtSharpAssets\engines\model.plan `
+  --onnx ..\downloads\models\model.onnx `
+  --saveEngine ..\downloads\engines\model.plan `
   --buildOnly `
-  --exportReport E:\TensorRtSharpAssets\reports\model-build-report.json
+  --exportReport ..\downloads\reports\model-build-report.json
 ```
 
 动态 shape、FP16、workspace、memory pool、timing cache 和 layer info：
 
 ```powershell
 dotnet run --project .\applications\TensorRtExec\TensorRtExec.csproj -- `
-  --onnx E:\TensorRtSharpAssets\models\yolov8-det.onnx `
-  --save-engine E:\TensorRtSharpAssets\engines\yolov8-det.plan `
+  --onnx ..\downloads\models\yolov8-det.onnx `
+  --save-engine ..\downloads\engines\yolov8-det.plan `
   --minShapes images:1x3x640x640 `
   --optShapes images:1x3x640x640 `
   --maxShapes images:4x3x640x640 `
   --fp16 `
   --workspace 1GiB `
   --memPoolSize workspace:512MiB,tacticDram:1GiB `
-  --timingCacheFile E:\TensorRtSharpAssets\cache\yolov8-det.cache `
-  --exportTimingCache E:\TensorRtSharpAssets\cache\yolov8-det-export.cache `
+  --timingCacheFile ..\downloads\cache\yolov8-det.cache `
+  --exportTimingCache ..\downloads\cache\yolov8-det-export.cache `
   --profilingVerbosity detailed `
   --dumpLayerInfo `
-  --exportLayerInfo E:\TensorRtSharpAssets\reports\yolov8-det-layer-info.txt `
+  --exportLayerInfo ..\downloads\reports\yolov8-det-layer-info.txt `
   --buildOnly `
-  --exportReport E:\TensorRtSharpAssets\reports\yolov8-det-build-report.json
+  --exportReport ..\downloads\reports\yolov8-det-build-report.json
 ```
 
 dry-run / previewOnly 只做参数解析和命令归一化，不读取 ONNX、不构建 engine、不探测 TensorRT runtime：
 
 ```powershell
 dotnet run --project .\applications\TensorRtExec\TensorRtExec.csproj -- `
-  --onnx E:\TensorRtSharpAssets\models\model.onnx `
-  --saveEngine E:\TensorRtSharpAssets\engines\model.plan `
+  --onnx ..\downloads\models\model.onnx `
+  --saveEngine ..\downloads\engines\model.plan `
   --minShapes images:1x3x640x640 `
   --optShapes images:1x3x640x640 `
   --maxShapes images:4x3x640x640 `
   --dryRun `
-  --exportReport E:\TensorRtSharpAssets\reports\model-precheck-report.md
+  --exportReport ..\downloads\reports\model-precheck-report.md
 ```
 
 加载已有 engine 做 readonly diagnostics 和 bounded runtime output：
 
 ```powershell
 dotnet run --project .\applications\TensorRtExec\TensorRtExec.csproj -- `
-  --loadEngine E:\TensorRtSharpAssets\engines\identity.plan `
+  --loadEngine ..\downloads\engines\identity.plan `
   --optShapes input:1x1x1x1 `
   --iterations 10 `
   --warmUp 50 `
   --duration 1 `
   --streams 1 `
   --useCudaGraph `
-  --exportTimes E:\TensorRtSharpAssets\reports\identity-times.json `
-  --exportOutput E:\TensorRtSharpAssets\reports\identity-output.json `
-  --dumpRawBindingsToFile E:\TensorRtSharpAssets\reports\identity-bindings `
-  --exportReport E:\TensorRtSharpAssets\reports\identity-load-report.json
+  --exportTimes ..\downloads\reports\identity-times.json `
+  --exportOutput ..\downloads\reports\identity-output.json `
+  --dumpRawBindingsToFile ..\downloads\reports\identity-bindings `
+  --exportReport ..\downloads\reports\identity-load-report.json
 ```
 
 启动 WinForms：
@@ -309,8 +309,8 @@ ReportBoundary.CopiedDiagnosticsBoundary
 
 ```powershell
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-TensorRtExecReport.ps1 `
-  -InputPath E:\TensorRtSharpAssets\reports\model-build-report.json `
-  -OutputPath E:\TensorRtSharpAssets\reports\model-build-report-validation.json `
+  -InputPath ..\downloads\reports\model-build-report.json `
+  -OutputPath ..\downloads\reports\model-build-report-validation.json `
   -Strict
 ```
 

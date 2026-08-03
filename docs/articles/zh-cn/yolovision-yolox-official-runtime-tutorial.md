@@ -20,7 +20,7 @@
 从仓库根目录执行：
 
 ```powershell
-cd E:\GitSpace\TensorRT-CSharp-API-4.0\TensorRtSharp4.0
+cd .
 dotnet --version
 cmake --version
 nvidia-smi
@@ -30,14 +30,14 @@ nvidia-smi
 
 - .NET 8 SDK。
 - Visual Studio 2022 C++ 工具链和 CMake。
-- TensorRT 10.x，本次路径为 `D:\Program Files\TensorRT-10.11.0.33-cu12`。
+- TensorRT 10.x，通过 `JYPPX_TENSORRT_ROOT` 指向用户安装目录。
 - CUDA 12.x，本次 bridge 使用 `win-x64-trt10-cuda12-release` preset。
 - NVIDIA driver 能运行 TensorRT 10.11。
 
 模型、图片、engine 和 tensor 较大，获取脚本会拒绝 C 盘输出。本仓库默认把它们放到外层 E 盘目录：
 
 ```text
-E:\GitSpace\TensorRT-CSharp-API-4.0\downloads\yolox-apache
+..\downloads\yolox-apache
 ```
 
 ## 2. 资产来源与固定版本
@@ -163,7 +163,7 @@ score   = objectness * bestClassScore
 已有 bridge 时可跳过。否则设置本机 TensorRT 路径后构建：
 
 ```powershell
-$env:TENSORRT_PATH = 'D:\Program Files\TensorRT-10.11.0.33-cu12'
+$env:TENSORRT_PATH = $env:JYPPX_TENSORRT_ROOT
 cmake --preset win-x64-trt10-cuda12-release
 cmake --build --preset win-x64-trt10-cuda12-release
 ```
@@ -179,9 +179,9 @@ build-out/win-x64-trt10-cuda12-release/bin/Release/jyppxtrtbridge.dll
 engine 继续留在 E 盘 downloads：
 
 ```powershell
-$trtexec = 'D:\Program Files\TensorRT-10.11.0.33-cu12\bin\trtexec.exe'
-$onnx = 'E:\GitSpace\TensorRT-CSharp-API-4.0\downloads\yolox-apache\source\yolox_s.onnx'
-$engine = 'E:\GitSpace\TensorRT-CSharp-API-4.0\downloads\yolox-apache\derived\yolox_s-trt10.11-fp32.engine'
+$trtexec = Join-Path $env:JYPPX_TENSORRT_ROOT 'bin\trtexec.exe'
+$onnx = '..\downloads\yolox-apache\source\yolox_s.onnx'
+$engine = '..\downloads\yolox-apache\derived\yolox_s-trt10.11-fp32.engine'
 
 & $trtexec `
   "--onnx=$onnx" `
@@ -207,7 +207,7 @@ engine 与 GPU、TensorRT 版本、builder 配置相关，不应把上述 engine
 
 ```powershell
 $bridge = (Resolve-Path '.\build-out\win-x64-trt10-cuda12-release\bin\Release').Path
-$trt = 'D:\Program Files\TensorRT-10.11.0.33-cu12'
+$trt = $env:JYPPX_TENSORRT_ROOT
 $cuda = 'C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.9'
 $env:PATH = "$bridge;$trt\bin;$trt\lib;$cuda\bin;$env:PATH"
 ```
@@ -296,7 +296,7 @@ OwnerActionRequiredCount=0
 本地清理只删除外层 E 盘下载目录，不要删除 CUDA、TensorRT 或 Codex 自身依赖：
 
 ```powershell
-Remove-Item -LiteralPath 'E:\GitSpace\TensorRT-CSharp-API-4.0\downloads\yolox-apache' -Recurse -Force
+Remove-Item -LiteralPath '..\downloads\yolox-apache' -Recurse -Force
 ```
 
 再次运行 acquisition 脚本即可恢复全部外部资产。

@@ -47,19 +47,19 @@
 转换后的模型统一暂存到工作区外层目录，不放进 Git 仓库：
 
 ```text
-E:\GitSpace\TensorRT-CSharp-API-4.0\models\YoloVision\SemanticSegmentation\lraspp-mobilenet-v3-large-torchvision-v0.25.0\
+..\models\YoloVision\SemanticSegmentation\lraspp-mobilenet-v3-large-torchvision-v0.25.0\
   lraspp_mobilenet_v3_large-d234d4ea.pth
   lraspp-mobilenet-v3-large-320.onnx
 ```
 
-这里的“工作区外层”很重要：Git 仓库是 `E:\GitSpace\TensorRT-CSharp-API-4.0\TensorRtSharp4.0`，`models` 与它同级，因此权重和 ONNX 不会进入源码提交。后续 Model Zoo 建立前，其他演示模型也遵守同一规则。仓库只保存获取/转换脚本、来源 URL、版本、长度、SHA256、输入输出契约和小型验证记录。
+这里的“工作区外层”很重要：Git 仓库是 `.`，`models` 与它同级，因此权重和 ONNX 不会进入源码提交。后续 Model Zoo 建立前，其他演示模型也遵守同一规则。仓库只保存获取/转换脚本、来源 URL、版本、长度、SHA256、输入输出契约和小型验证记录。
 
 ## 获取官方资产
 
 在仓库根目录执行：
 
 ```powershell
-$python = "C:\Users\guoji\.conda\envs\ultralytics\python.exe"
+$python = "python"
 
 pwsh -NoProfile -ExecutionPolicy Bypass `
   -File .\eng\Acquire-TorchVisionLrasppOfficialAssets.ps1 `
@@ -83,7 +83,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass `
 使用仓库脚本导出：
 
 ```powershell
-$workspace = "E:\GitSpace\TensorRT-CSharp-API-4.0"
+$workspace = ".."
 $modelRoot = "$workspace\models\YoloVision\SemanticSegmentation\lraspp-mobilenet-v3-large-torchvision-v0.25.0"
 $assetRoot = "$workspace\downloads\lraspp-mobilenet-v3-large-torchvision-v0.25.0\source"
 $referenceRoot = ".\artifacts\yolovision\semantic-lraspp-reference"
@@ -140,7 +140,7 @@ dotnet run --project .\samples\YoloVision -c Release -- `
 设置本机 TensorRT 与 bridge 后执行：
 
 ```powershell
-$env:TENSORRT_PATH = "D:\Program Files\TensorRT-10.11.0.33-cu12"
+$env:TENSORRT_PATH = $env:JYPPX_TENSORRT_ROOT
 $env:JYPPX_TENSORRT_ROOT = $env:TENSORRT_PATH
 $env:JYPPX_NATIVE_BRIDGE_PATH = ".\build-out\win-x64-trt10-cuda12-release\bin\Release\jyppxtrtbridge.dll"
 $env:JYPPX_ENABLE_DEVELOPMENT_PROBING = "true"
@@ -273,36 +273,36 @@ owner 必须确认：
 
 建议为语义分割 case 建立独立的 E 盘 workspace，模型、labels、palette、输入图、预处理 tensor、engine、报告和日志互相隔离，避免把大文件和临时包落到系统盘：
 
-E:\TensorRtSharpAssets\cases\yolov8n-sem\models
-E:\TensorRtSharpAssets\cases\yolov8n-sem\labels
-E:\TensorRtSharpAssets\cases\yolov8n-sem\images
-E:\TensorRtSharpAssets\cases\yolov8n-sem\tensors
-E:\TensorRtSharpAssets\cases\yolov8n-sem\engines
-E:\TensorRtSharpAssets\cases\yolov8n-sem\reports
-E:\TensorRtSharpAssets\cases\yolov8n-sem\logs
+..\downloads\cases\yolov8n-sem\models
+..\downloads\cases\yolov8n-sem\labels
+..\downloads\cases\yolov8n-sem\images
+..\downloads\cases\yolov8n-sem\tensors
+..\downloads\cases\yolov8n-sem\engines
+..\downloads\cases\yolov8n-sem\reports
+..\downloads\cases\yolov8n-sem\logs
 
 从 `samples/assets/yolovision-yolov8-sem-candidate.template.json` 开始回填 `model.sourceUrl`、`model.downloadUrl`、`model.license`、`model.sha256`、`labels.sourceUrl`、`labels.sha256`、`labels.palettePath`、`labels.classCount`、`input.imageSha256`、`input.preprocessedTensorSha256`，以及 `outputMetadata.semanticOutput`、`outputMetadata.semanticOutputRole`、`outputMetadata.classCount`、`outputMetadata.mapWidth`、`outputMetadata.mapHeight`、`outputMetadata.semanticMapShape`、`outputMetadata.classMapLayout`、`outputMetadata.argmaxRule`、`outputMetadata.postprocessMetadata.resizeBackRule` 和 `outputMetadata.postprocessMetadata.ignoreIndex`。palette 文件也要单独记录 `paletteSha256`，不能只把颜色写进截图。
 
 模型、labels、palette、原图、预处理 tensor、engine、build report、preflight report、output JSON、overlay SVG 和 run log 分别计算 SHA256：
 
 ```powershell
-Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-sem\models\yolov8n-sem.onnx
-Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-sem\labels\semantic-classes.names
-Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-sem\labels\semantic-palette.json
-Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-sem\images\street.ppm
-Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-sem\tensors\street-fp32.bin
+Get-FileHash -Algorithm SHA256 ..\downloads\cases\yolov8n-sem\models\yolov8n-sem.onnx
+Get-FileHash -Algorithm SHA256 ..\downloads\cases\yolov8n-sem\labels\semantic-classes.names
+Get-FileHash -Algorithm SHA256 ..\downloads\cases\yolov8n-sem\labels\semantic-palette.json
+Get-FileHash -Algorithm SHA256 ..\downloads\cases\yolov8n-sem\images\street.ppm
+Get-FileHash -Algorithm SHA256 ..\downloads\cases\yolov8n-sem\tensors\street-fp32.bin
 ```
 
 先只做预处理，确认输入 shape、颜色顺序和 tensor hash：
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- --preprocess-only --image E:\TensorRtSharpAssets\cases\yolov8n-sem\images\street.ppm --preprocessed-output E:\TensorRtSharpAssets\cases\yolov8n-sem\tensors\street-fp32.bin --input-shape 1x3x512x512 --tensor-layout NCHW --color-order RGB --resize letterbox
+dotnet run --project .\samples\YoloVision -- --preprocess-only --image ..\downloads\cases\yolov8n-sem\images\street.ppm --preprocessed-output ..\downloads\cases\yolov8n-sem\tensors\street-fp32.bin --input-shape 1x3x512x512 --tensor-layout NCHW --color-order RGB --resize letterbox
 ```
 
 运行时保留显式 semantic output role、class count、JSON 和 SVG：
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- --model E:\TensorRtSharpAssets\cases\yolov8n-sem\models\yolov8n-sem.onnx --labels E:\TensorRtSharpAssets\cases\yolov8n-sem\labels\semantic-classes.names --input-data E:\TensorRtSharpAssets\cases\yolov8n-sem\tensors\street-fp32.bin --input-shape 1x3x512x512 --family custom --task sem --semantic-output semantic --class-count 21 --output-json E:\TensorRtSharpAssets\cases\yolov8n-sem\reports\yolov8n-sem-output.json --visualization-svg E:\TensorRtSharpAssets\cases\yolov8n-sem\reports\yolov8n-sem-output.svg
+dotnet run --project .\samples\YoloVision -- --model ..\downloads\cases\yolov8n-sem\models\yolov8n-sem.onnx --labels ..\downloads\cases\yolov8n-sem\labels\semantic-classes.names --input-data ..\downloads\cases\yolov8n-sem\tensors\street-fp32.bin --input-shape 1x3x512x512 --family custom --task sem --semantic-output semantic --class-count 21 --output-json ..\downloads\cases\yolov8n-sem\reports\yolov8n-sem-output.json --visualization-svg ..\downloads\cases\yolov8n-sem\reports\yolov8n-sem-output.svg
 ```
 
 当前 `yolovision-output.v1` 的 semantic prediction 包含 `task=sem`、`classCount`、`width`、`height`、`valueCount`、`classIndexValueCount`、dominant class 和完整 `classHistogram`；output tensor summary 还保存实际 shape 与 value hash。`YoloVision` 不会自动应用 owner palette 或猜测 resize-back。需要完整逐像素复核时必须同时保存 `semantic-class-index.i32.bin` 和 manifest，并关联 `modelSha256`、`labelsSha256`、`paletteSha256`、`imageSha256`、`preprocessedTensorSha256`、run log hash、`classMapLayout` 和 `argmaxRule`。

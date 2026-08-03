@@ -112,8 +112,8 @@ license、preprocess 和后处理变量。parser 仍会经过 `TensorRtOnnxParse
 ## E 盘 round-trip 命令
 
 ```powershell
-$repo = "E:\GitSpace\TensorRT-CSharp-API-4.0\TensorRtSharp4.0"
-$case = "E:\TensorRtSharpAssets\cases\onnx-identity-roundtrip"
+$repo = "."
+$case = "..\downloads\cases\onnx-identity-roundtrip"
 New-Item -ItemType Directory -Force -Path "$case\engines","$case\reports","$case\logs" | Out-Null
 Set-Location $repo
 
@@ -134,13 +134,13 @@ engine SHA256、runtime line、build info 和输入 shape。
 ```powershell
 dotnet .\samples\OnnxToEngine\bin\Debug\net8.0\OnnxToEngine.dll `
   --tensor-rt-line 10 `
-  --onnx "E:\TensorRtSharpAssets\cases\external-model\models\model.onnx" `
-  --saveEngine "E:\TensorRtSharpAssets\cases\external-model\engines\model.plan" `
+  --onnx "..\downloads\cases\external-model\models\model.onnx" `
+  --saveEngine "..\downloads\cases\external-model\engines\model.plan" `
   --minShapes input:1x3x640x640 `
   --optShapes input:1x3x640x640 `
   --maxShapes input:4x3x640x640 `
   --fp16 --workspace 512 --buildOnly `
-  --exportReport "E:\TensorRtSharpAssets\cases\external-model\reports\build.json"
+  --exportReport "..\downloads\cases\external-model\reports\build.json"
 ```
 
 这里的 `input`、shape、precision 和 workspace 都必须由模型契约确认。build-only 成功只说明 parser/builder 能产出

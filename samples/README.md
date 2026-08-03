@@ -63,7 +63,7 @@ Classification and YoloVision are intentionally runnable with user-provided asse
 
 ## Environment
 
-Run examples from the repository root and let the existing C# path resolver probe `build-out`, `third_party/nvidia`, and standard CUDA install locations:
+Run examples from the repository root. Development probing may discover `build-out` and standard CUDA installations; select user-installed TensorRT and cuDNN with explicit `JYPPX_*_ROOT` variables:
 
 ```powershell
 $env:JYPPX_ENABLE_DEVELOPMENT_PROBING = "1"

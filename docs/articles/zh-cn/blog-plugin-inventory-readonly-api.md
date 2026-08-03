@@ -152,8 +152,8 @@ lookup 参数必须来自模型/plugin contract。将 namespace 默认为空可�
 ## 完整运行与日志隔离
 
 ```powershell
-$repo = "E:\GitSpace\TensorRT-CSharp-API-4.0\TensorRtSharp4.0"
-$case = "E:\TensorRtSharpAssets\cases\plugin-inventory"
+$repo = "."
+$case = "..\downloads\cases\plugin-inventory"
 New-Item -ItemType Directory -Force -Path "$case\logs" | Out-Null
 Set-Location $repo
 

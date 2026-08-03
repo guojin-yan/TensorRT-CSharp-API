@@ -70,11 +70,11 @@ C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8
 TensorRT 和 cuDNN 可以放在固定工具目录，例如：
 
 ```powershell
-E:\NVIDIA\TensorRT-11.x
-E:\NVIDIA\TensorRT-10.11
-E:\NVIDIA\TensorRT-8.6
-E:\NVIDIA\cuDNN-9.x
-E:\NVIDIA\cuDNN-8.9
+<NVIDIA-install-root>\TensorRT-11.x
+<NVIDIA-install-root>\TensorRT-10.11
+<NVIDIA-install-root>\TensorRT-8.6
+<NVIDIA-install-root>\cuDNN-9.x
+<NVIDIA-install-root>\cuDNN-8.9
 ```
 
 如果你的目录不同，请优先检查项目 `build/`、`cmake/` 和 `eng/` 下的依赖探测脚本，或在 CMake configure 时显式传入对应根目录变量。
@@ -84,7 +84,7 @@ E:\NVIDIA\cuDNN-8.9
 在仓库源码目录执行：
 
 ```powershell
-cd E:\GitSpace\TensorRT-CSharp-API-4.0\TensorRtSharp4.0
+cd .
 dotnet restore .\TensorRtSharp.sln
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Generate-Bindings.ps1
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-BindingGeneratorOutputs.ps1

@@ -59,7 +59,7 @@ TensorRT/CUDA C# 绑定项目进入发布收口阶段后，测试不再只是“
 先构建测试项目：
 
 ```powershell
-Set-Location E:\GitSpace\TensorRT-CSharp-API-4.0\TensorRtSharp4.0
+Set-Location .
 
 dotnet build .\tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj -c Debug --no-restore
 ```

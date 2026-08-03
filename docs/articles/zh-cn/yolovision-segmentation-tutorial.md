@@ -56,7 +56,7 @@ flowchart LR
 ## E 盘案例目录
 
 ```text
-E:\TensorRtSharpAssets\cases\yolov8n-seg
+..\downloads\cases\yolov8n-seg
   models
   labels
   images
@@ -85,7 +85,7 @@ E:\TensorRtSharpAssets\cases\yolov8n-seg
 
 ```powershell
 yolo export `
-  model=E:\TensorRtSharpAssets\cases\yolov8n-seg\models\yolov8n-seg.pt `
+  model=..\downloads\cases\yolov8n-seg\models\yolov8n-seg.pt `
   format=onnx `
   opset=17 `
   simplify=True `
@@ -96,10 +96,10 @@ yolo export `
 本文不固定权重下载 URL，因为来源和许可证可能变化。导出后用 Netron、ONNX 工具或 TensorRtExec binding report 确认真实 tensor 名；命令里的 `images`、`boxes`、`proto` 只是示例，不能覆盖模型事实。
 
 ```powershell
-Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-seg\models\yolov8n-seg.pt
-Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-seg\models\yolov8n-seg.onnx
-Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-seg\labels\coco.names
-Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-seg\images\input.ppm
+Get-FileHash -Algorithm SHA256 ..\downloads\cases\yolov8n-seg\models\yolov8n-seg.pt
+Get-FileHash -Algorithm SHA256 ..\downloads\cases\yolov8n-seg\models\yolov8n-seg.onnx
+Get-FileHash -Algorithm SHA256 ..\downloads\cases\yolov8n-seg\labels\coco.names
+Get-FileHash -Algorithm SHA256 ..\downloads\cases\yolov8n-seg\images\input.ppm
 ```
 
 ## 输出 Role 合同
@@ -174,8 +174,8 @@ sigmoid 对正负输入使用分支计算，避免大幅值指数溢出。`--mas
 ```powershell
 dotnet run --project .\samples\YoloVision -- `
   --preprocess-only `
-  --image E:\TensorRtSharpAssets\cases\yolov8n-seg\images\input.ppm `
-  --preprocessed-output E:\TensorRtSharpAssets\cases\yolov8n-seg\tensors\input-fp32.bin `
+  --image ..\downloads\cases\yolov8n-seg\images\input.ppm `
+  --preprocessed-output ..\downloads\cases\yolov8n-seg\tensors\input-fp32.bin `
   --input-shape 1x3x640x640 `
   --tensor-layout NCHW `
   --color-order RGB `
@@ -188,15 +188,15 @@ dotnet run --project .\samples\YoloVision -- `
 
 ```powershell
 dotnet run --project .\applications\TensorRtExec -- `
-  --onnx E:\TensorRtSharpAssets\cases\yolov8n-seg\models\yolov8n-seg.onnx `
-  --saveEngine E:\TensorRtSharpAssets\cases\yolov8n-seg\engines\yolov8n-seg.plan `
+  --onnx ..\downloads\cases\yolov8n-seg\models\yolov8n-seg.onnx `
+  --saveEngine ..\downloads\cases\yolov8n-seg\engines\yolov8n-seg.plan `
   --minShapes images:1x3x640x640 `
   --optShapes images:1x3x640x640 `
   --maxShapes images:4x3x640x640 `
   --fp16 `
   --workspace 1GiB `
   --buildOnly `
-  --exportReport E:\TensorRtSharpAssets\cases\yolov8n-seg\reports\build-report.json
+  --exportReport ..\downloads\cases\yolov8n-seg\reports\build-report.json
 ```
 
 `--exportReport` 才是 build report 参数；旧文中的 `--exportProfile` 属于 profile artifact，不应用来替代 build report。build-only 证明 parser/builder/serialization 路径，不证明多输出运行或 mask 正确。
@@ -206,9 +206,9 @@ dotnet run --project .\applications\TensorRtExec -- `
 ```powershell
 dotnet run --project .\samples\YoloVision -- `
   --preflight `
-  --model E:\TensorRtSharpAssets\cases\yolov8n-seg\models\yolov8n-seg.onnx `
-  --labels E:\TensorRtSharpAssets\cases\yolov8n-seg\labels\coco.names `
-  --image E:\TensorRtSharpAssets\cases\yolov8n-seg\images\input.ppm `
+  --model ..\downloads\cases\yolov8n-seg\models\yolov8n-seg.onnx `
+  --labels ..\downloads\cases\yolov8n-seg\labels\coco.names `
+  --image ..\downloads\cases\yolov8n-seg\images\input.ppm `
   --input-shape 1x3x640x640 `
   --family v8 --task seg `
   --class-count 80 `
@@ -219,7 +219,7 @@ dotnet run --project .\samples\YoloVision -- `
   --mask-coordinate-space model-input `
   --mask-crop-to-box true `
   --aux-layout boxes-first `
-  --preflight-report E:\TensorRtSharpAssets\cases\yolov8n-seg\reports\preflight.json
+  --preflight-report ..\downloads\cases\yolov8n-seg\reports\preflight.json
 ```
 
 检查 `yolovision-preflight.v1`、`proofClassification=precheck`、`metadata.maskCoefficientCount=32`、`metadata.maskThreshold=0.5`、`spatialTransform.requested=true`、coordinate space 和 `requiresImagePreprocessMetadata=true`，并确认所有 runtime execution/promotion flag 为 false。preflight 只记录 intent，不生成最终 mask。
@@ -228,10 +228,10 @@ dotnet run --project .\samples\YoloVision -- `
 
 ```powershell
 dotnet run --project .\samples\YoloVision -- `
-  --model E:\TensorRtSharpAssets\cases\yolov8n-seg\models\yolov8n-seg.onnx `
-  --labels E:\TensorRtSharpAssets\cases\yolov8n-seg\labels\coco.names `
-  --image E:\TensorRtSharpAssets\cases\yolov8n-seg\images\input.ppm `
-  --preprocessed-output E:\TensorRtSharpAssets\cases\yolov8n-seg\tensors\input-fp32.bin `
+  --model ..\downloads\cases\yolov8n-seg\models\yolov8n-seg.onnx `
+  --labels ..\downloads\cases\yolov8n-seg\labels\coco.names `
+  --image ..\downloads\cases\yolov8n-seg\images\input.ppm `
+  --preprocessed-output ..\downloads\cases\yolov8n-seg\tensors\input-fp32.bin `
   --input-shape 1x3x640x640 `
   --family v8 --task seg `
   --class-count 80 `
@@ -243,8 +243,8 @@ dotnet run --project .\samples\YoloVision -- `
   --mask-coordinate-space model-input `
   --mask-crop-to-box true `
   --aux-layout boxes-first `
-  --output-json E:\TensorRtSharpAssets\cases\yolov8n-seg\reports\output.json `
-  --visualization-svg E:\TensorRtSharpAssets\cases\yolov8n-seg\overlays\mask-preview.svg
+  --output-json ..\downloads\cases\yolov8n-seg\reports\output.json `
+  --visualization-svg ..\downloads\cases\yolov8n-seg\overlays\mask-preview.svg
 ```
 
 待采集的真实日志应包含 `Profile Family=v8 Task=seg`、external input、两个 output tensor、`Segmentations=...`、postprocess summary 和 expected real-log success marker。单输出 diagnostic、synthetic tensor 或缺少 prototype 时不能写成 mask runtime 通过。
@@ -275,8 +275,8 @@ dotnet run --project .\samples\YoloVision -- `
 
 ```powershell
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-YoloVisionOutputReport.ps1 `
-  -InputPath E:\TensorRtSharpAssets\cases\yolov8n-seg\reports\output.json `
-  -OutputPath E:\TensorRtSharpAssets\cases\yolov8n-seg\reports\output-validation.json `
+  -InputPath ..\downloads\cases\yolov8n-seg\reports\output.json `
+  -OutputPath ..\downloads\cases\yolov8n-seg\reports\output-validation.json `
   -Strict
 ```
 

@@ -174,27 +174,27 @@ source image 元数据；不同 exporter 的坐标约定仍必须用独立 refer
 
 建议为 YOLOv8n-seg 建立独立的 E 盘 case workspace，避免把模型、图片、engine 和临时包落到系统盘：
 
-E:\TensorRtSharpAssets\cases\yolov8n-seg\models
-E:\TensorRtSharpAssets\cases\yolov8n-seg\labels
-E:\TensorRtSharpAssets\cases\yolov8n-seg\images
-E:\TensorRtSharpAssets\cases\yolov8n-seg\tensors
-E:\TensorRtSharpAssets\cases\yolov8n-seg\engines
-E:\TensorRtSharpAssets\cases\yolov8n-seg\reports
-E:\TensorRtSharpAssets\cases\yolov8n-seg\logs
+..\downloads\cases\yolov8n-seg\models
+..\downloads\cases\yolov8n-seg\labels
+..\downloads\cases\yolov8n-seg\images
+..\downloads\cases\yolov8n-seg\tensors
+..\downloads\cases\yolov8n-seg\engines
+..\downloads\cases\yolov8n-seg\reports
+..\downloads\cases\yolov8n-seg\logs
 
 从 samples/assets/yolovision-yolov8-seg-candidate.template.json 开始回填 model.sourceUrl、model.downloadUrl、model.license、model.sha256、labels.sha256、input.imageSha256、input.preprocessedTensorSha256、outputMetadata.outputRoleMap、outputMetadata.prototypeShape、outputMetadata.maskCoefficientCount 和 outputMetadata.maskResizePolicy。不能只记录 ONNX hash，因为 prototype 和预处理规则同样决定最终 mask。
 
 下载、导出和预处理完成后，分别计算模型、labels、原图、预处理 tensor、engine、build report、output JSON、overlay SVG 和 run log 的 SHA256：
 
-Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-seg\models\yolov8n-seg.onnx
-Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-seg\labels\coco.names
-Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-seg\images\dog.ppm
-Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-seg\tensors\dog-fp32.bin
+Get-FileHash -Algorithm SHA256 ..\downloads\cases\yolov8n-seg\models\yolov8n-seg.onnx
+Get-FileHash -Algorithm SHA256 ..\downloads\cases\yolov8n-seg\labels\coco.names
+Get-FileHash -Algorithm SHA256 ..\downloads\cases\yolov8n-seg\images\dog.ppm
+Get-FileHash -Algorithm SHA256 ..\downloads\cases\yolov8n-seg\tensors\dog-fp32.bin
 
 预处理和运行命令应保留显式 layout、颜色顺序和 role map：
 
-dotnet run --project .\samples\YoloVision -- --preprocess-only --image E:\TensorRtSharpAssets\cases\yolov8n-seg\images\dog.ppm --preprocessed-output E:\TensorRtSharpAssets\cases\yolov8n-seg\tensors\dog-fp32.bin --input-shape 1x3x640x640 --tensor-layout NCHW --color-order RGB --resize letterbox
-dotnet run --project .\samples\YoloVision -- --model E:\TensorRtSharpAssets\cases\yolov8n-seg\models\yolov8n-seg.onnx --labels E:\TensorRtSharpAssets\cases\yolov8n-seg\labels\coco.names --image E:\TensorRtSharpAssets\cases\yolov8n-seg\images\dog.ppm --preprocessed-output E:\TensorRtSharpAssets\cases\yolov8n-seg\tensors\dog-fp32.bin --input-shape 1x3x640x640 --family v8 --task seg --output-role-map output0:det,output1:mask-prototypes --mask-coefficient-count 32 --mask-spatial-transform --mask-coordinate-space model-input --mask-crop-to-box true --segmentation-mask-output-directory E:\TensorRtSharpAssets\cases\yolov8n-seg\reports\segmentation-masks --output-json E:\TensorRtSharpAssets\cases\yolov8n-seg\reports\yolov8n-seg-output.json --visualization-svg E:\TensorRtSharpAssets\cases\yolov8n-seg\reports\yolov8n-seg-output.svg
+dotnet run --project .\samples\YoloVision -- --preprocess-only --image ..\downloads\cases\yolov8n-seg\images\dog.ppm --preprocessed-output ..\downloads\cases\yolov8n-seg\tensors\dog-fp32.bin --input-shape 1x3x640x640 --tensor-layout NCHW --color-order RGB --resize letterbox
+dotnet run --project .\samples\YoloVision -- --model ..\downloads\cases\yolov8n-seg\models\yolov8n-seg.onnx --labels ..\downloads\cases\yolov8n-seg\labels\coco.names --image ..\downloads\cases\yolov8n-seg\images\dog.ppm --preprocessed-output ..\downloads\cases\yolov8n-seg\tensors\dog-fp32.bin --input-shape 1x3x640x640 --family v8 --task seg --output-role-map output0:det,output1:mask-prototypes --mask-coefficient-count 32 --mask-spatial-transform --mask-coordinate-space model-input --mask-crop-to-box true --segmentation-mask-output-directory ..\downloads\cases\yolov8n-seg\reports\segmentation-masks --output-json ..\downloads\cases\yolov8n-seg\reports\yolov8n-seg-output.json --visualization-svg ..\downloads\cases\yolov8n-seg\reports\yolov8n-seg-output.svg
 
 通用输出 JSON 直接保留 detection output shape、prototype shape、maskThreshold、maskPixelCount、maskTotalPixelCount、maskValueKind、`maskPixelCountScope=prototype-grid-before-crop-resize`、className、score、modelSha256、imageSha256 和 preprocessedTensorSha256。owner 最终 overlay 记录还应补 letterboxScale、letterboxPadX、letterboxPadY、boxBeforeCrop、boxAfterResize 和 adapter hash。SVG 是派生证据，必须能追溯到同一份 JSON、输入图和 run log。
 

@@ -134,8 +134,8 @@ TensorRtExecutionContextReadiness readiness =
 ## E 盘复现与边界输入
 
 ```powershell
-$repo = "E:\GitSpace\TensorRT-CSharp-API-4.0\TensorRtSharp4.0"
-$case = "E:\TensorRtSharpAssets\cases\dynamic-shape-identity"
+$repo = "."
+$case = "..\downloads\cases\dynamic-shape-identity"
 New-Item -ItemType Directory -Force -Path "$case\logs" | Out-Null
 Set-Location $repo
 

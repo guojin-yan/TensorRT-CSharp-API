@@ -493,7 +493,7 @@ public sealed class TechnicalArticleRoadmapTests
             "Acquisition Report",
             "Build Report / Sidecar",
             "Sample Run Evidence",
-            "E:\\TensorRtSharpAssets\\cases\\<case-id>",
+            "..\\downloads\\cases\\<case-id>",
             "New-Item -ItemType Directory -Force",
             "Acquire-YoloXOfficialAssets.ps1 -Offline",
             "Acquire-YoloV10OfficialAssets.ps1 -Offline",

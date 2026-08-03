@@ -33,7 +33,7 @@ ONNX 到 TensorRT engine 的转换是 TensorRtSharp4.0 最容易被用户感知�
 推荐把模型、engine、report 和 sidecar 都放在 E 盘固定 workspace，例如：
 
 ```powershell
-$assetRoot = "E:\TensorRtSharpAssets\onnx-to-engine"
+$assetRoot = "..\downloads\onnx-to-engine"
 
 dotnet run --project .\samples\OnnxToEngine\OnnxToEngine.csproj -- `
   --onnx "$assetRoot\models\model.onnx" `
@@ -194,7 +194,7 @@ ONNX 转换成功是必要条件，但不是 package-consumer-runtime proof。bu
 一篇面向微信公众号或博客的完整案例，不能只给出一条 dotnet run 命令。建议按下面顺序准备资产和证据：
 
 1. **确认模型来源与许可**：记录模型项目主页、版本、下载地址、许可证、导出工具版本和原始文件名；不要把未经许可的模型或权重提交进仓库。
-2. **把大文件放到固定外部 workspace**：例如 E:\TensorRtSharpAssets\cases\<case-id>，分成 models、inputs、engines、reports、logs 和 packages，不要把 ONNX、engine、模型权重或临时 nupkg 放到 C:\Users\guoji\Downloads 或 Temp。
+2. **把大文件放到固定外部 workspace**：例如 ..\downloads\cases\<case-id>，分成 models、inputs、engines、reports、logs 和 packages，不要把 ONNX、engine、模型权重或临时 nupkg 放到 %USERPROFILE%\Downloads 或 Temp。
 3. **计算来源 hash**：对原始 ONNX、输入样例和必要的模型配置执行 Get-FileHash -Algorithm SHA256，把 modelSourceUrl、license、onnxSha256、inputSha256 和 downloadedAtUtc 写入案例记录。
 4. **先做 parser dry-run**：使用 --previewOnly --exportReport 检查 alias、shape profile、precision、输出路径和 NormalizedCommandSha256；此阶段不能创建 engine，也不能写成 build proof。
 5. **再做 build-only**：使用 --buildOnly --saveEngine --exportReport --evidenceSidecar，核对 Parsed、EngineSaved、EngineFileRoundTrip、BuilderConfigDeploymentSnapshot、ReadbackMatch 和 engine SHA256。

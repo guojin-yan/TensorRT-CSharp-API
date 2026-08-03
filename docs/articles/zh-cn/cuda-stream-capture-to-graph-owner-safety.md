@@ -172,8 +172,8 @@ guard 解决“能否编译/调用”，不解决“当前 driver 能否执行�
 ## 可复现 smoke
 
 ```powershell
-$repo = "E:\GitSpace\TensorRT-CSharp-API-4.0\TensorRtSharp4.0"
-$case = "E:\TensorRtSharpAssets\cases\cuda-capture-to-graph"
+$repo = "."
+$case = "..\downloads\cases\cuda-capture-to-graph"
 New-Item -ItemType Directory -Force -Path "$case\logs" | Out-Null
 Set-Location $repo
 

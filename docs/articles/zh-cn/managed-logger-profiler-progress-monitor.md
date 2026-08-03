@@ -133,8 +133,8 @@ total steps、return value 与 invocation count，并说明用户取消是否导
 ## 可复核运行命令
 
 ```powershell
-$repo = "E:\GitSpace\TensorRT-CSharp-API-4.0\TensorRtSharp4.0"
-$case = "E:\TensorRtSharpAssets\cases\managed-callbacks"
+$repo = "."
+$case = "..\downloads\cases\managed-callbacks"
 New-Item -ItemType Directory -Force -Path "$case\logs" | Out-Null
 Set-Location $repo
 

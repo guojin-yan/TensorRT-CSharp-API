@@ -28,7 +28,6 @@ test_cuda_root() {
 
 tensor_rt_candidates=(
   "${TENSORRT_ROOT_INPUT}"
-  "${PWD}/third_party/nvidia/tensorrt"
   "/usr/local/TensorRT"
   "/opt/tensorrt"
   "/usr"
@@ -36,7 +35,6 @@ tensor_rt_candidates=(
 
 cuda_candidates=(
   "${CUDA_ROOT_INPUT}"
-  "${PWD}/third_party/nvidia/cuda"
   "/usr/local/cuda"
   "/opt/cuda"
 )
@@ -71,4 +69,3 @@ else
   echo "CUDA         : MISSING"
   echo "  Root       : <not found>"
 fi
-

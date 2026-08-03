@@ -3,7 +3,7 @@
 The validation-oriented runner projects described in this article now live under `smoke/`, while user-facing common examples live under `samples/`.
 ## Shared Local Setup
 
-Run sample commands from the repository root and let the existing C# `NativeBridgePathResolver` discover `build-out`, `third_party/nvidia`, and standard CUDA install locations:
+Run sample commands from the repository root. Development probing may discover `build-out` and standard CUDA installations; select TensorRT and cuDNN with explicit `JYPPX_*_ROOT` variables:
 
 ```powershell
 $env:JYPPX_ENABLE_DEVELOPMENT_PROBING = "1"

@@ -10,16 +10,16 @@
     {
       "tensorRtVersion": "8.6.1.6",
       "cudaToolkitVersion": "11.8",
-      "importLibrary": "third_party/nvidia/TensorRT-8.6.1.6-cuda 11.8/lib/nvparsers.lib",
-      "runtimeLibrary": "third_party/nvidia/TensorRT-8.6.1.6-cuda 11.8/lib/nvparsers.dll",
+      "importLibrary": "<user-tensorrt-8-cuda11-root>/lib/nvparsers.lib",
+      "runtimeLibrary": "<user-tensorrt-8-cuda11-root>/lib/nvparsers.dll",
       "factorySymbolsPresent": true,
       "runtimeDependencies": ["nvinfer.dll", "KERNEL32.dll"]
     },
     {
       "tensorRtVersion": "8.6.1.6",
       "cudaToolkitVersion": "12.1",
-      "importLibrary": "third_party/nvidia/TensorRT-8.6.1.6-cuda 12.1/lib/nvparsers.lib",
-      "runtimeLibrary": "third_party/nvidia/TensorRT-8.6.1.6-cuda 12.1/lib/nvparsers.dll",
+      "importLibrary": "<user-tensorrt-8-cuda12-root>/lib/nvparsers.lib",
+      "runtimeLibrary": "<user-tensorrt-8-cuda12-root>/lib/nvparsers.dll",
       "factorySymbolsPresent": true,
       "runtimeDependencies": ["nvinfer.dll", "KERNEL32.dll"]
     }

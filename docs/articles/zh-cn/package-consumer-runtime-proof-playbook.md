@@ -123,7 +123,7 @@ flowchart TD
 真实包、展开目录和日志不要放在系统盘临时目录。
 
 ```text
-E:\TensorRtSharpProof\package-consumer\<runtime-key>\
+..\proof\package-consumer\<runtime-key>\
   packages\
     managed\
     runtime\
@@ -138,7 +138,7 @@ E:\TensorRtSharpProof\package-consumer\<runtime-key>\
 
 ```powershell
 $runtimeKey = "win-x64-trt11.0-cuda13.2-cudnn9.22"
-$caseRoot = Join-Path "E:\TensorRtSharpProof\package-consumer" $runtimeKey
+$caseRoot = Join-Path "..\proof\package-consumer" $runtimeKey
 @("packages\managed", "packages\runtime", "consumer", "output", "reports", "logs", "evidence") |
   ForEach-Object {
     New-Item -ItemType Directory -Force -Path (Join-Path $caseRoot $_) | Out-Null

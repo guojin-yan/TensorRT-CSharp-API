@@ -85,13 +85,13 @@ std = 1,1,1
 大文件全部放在 E 盘，不提交到源码仓库：
 
 ```text
-E:\TensorRtSharpAssets\cases\yolov8n-cls\models
-E:\TensorRtSharpAssets\cases\yolov8n-cls\labels
-E:\TensorRtSharpAssets\cases\yolov8n-cls\images
-E:\TensorRtSharpAssets\cases\yolov8n-cls\tensors
-E:\TensorRtSharpAssets\cases\yolov8n-cls\engines
-E:\TensorRtSharpAssets\cases\yolov8n-cls\reports
-E:\TensorRtSharpAssets\cases\yolov8n-cls\logs
+..\downloads\cases\yolov8n-cls\models
+..\downloads\cases\yolov8n-cls\labels
+..\downloads\cases\yolov8n-cls\images
+..\downloads\cases\yolov8n-cls\tensors
+..\downloads\cases\yolov8n-cls\engines
+..\downloads\cases\yolov8n-cls\reports
+..\downloads\cases\yolov8n-cls\logs
 ```
 
 本仓库默认使用外层 `downloads/yolov8n-cls-ultralytics-v8.3.0`，脚本会拒绝 C 盘路径。
@@ -100,7 +100,7 @@ E:\TensorRtSharpAssets\cases\yolov8n-cls\logs
 
 ```powershell
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Acquire-YoloV8ClassificationOfficialAssets.ps1 `
-  -AssetRoot E:\TensorRtSharpAssets\cases\yolov8n-cls `
+  -AssetRoot ..\downloads\cases\yolov8n-cls `
   -PythonPath C:\path\to\python.exe
 ```
 
@@ -110,11 +110,11 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Acquire-YoloV8Classification
 
 ```powershell
 python .\eng\Invoke-YoloVisionClassificationReference.py `
-  --weights E:\TensorRtSharpAssets\cases\yolov8n-cls\source\yolov8n-cls.pt `
-  --imagenet-yaml E:\TensorRtSharpAssets\cases\yolov8n-cls\source\ImageNet.yaml `
-  --image E:\TensorRtSharpAssets\cases\yolov8n-cls\source\bus.jpg `
-  --onnx E:\TensorRtSharpAssets\cases\yolov8n-cls\source\yolov8n-cls.onnx `
-  --output-directory E:\TensorRtSharpAssets\cases\yolov8n-cls\reports\independent-reference `
+  --weights ..\downloads\cases\yolov8n-cls\source\yolov8n-cls.pt `
+  --imagenet-yaml ..\downloads\cases\yolov8n-cls\source\ImageNet.yaml `
+  --image ..\downloads\cases\yolov8n-cls\source\bus.jpg `
+  --onnx ..\downloads\cases\yolov8n-cls\source\yolov8n-cls.onnx `
+  --output-directory ..\downloads\cases\yolov8n-cls\reports\independent-reference `
   --export-onnx
 ```
 
@@ -125,8 +125,8 @@ python .\eng\Invoke-YoloVisionClassificationReference.py `
 ```powershell
 dotnet run --project .\samples\YoloVision -c Release -- `
   --preprocess-only `
-  --image E:\TensorRtSharpAssets\cases\yolov8n-cls\derived\bus.ppm `
-  --preprocessed-output E:\TensorRtSharpAssets\cases\yolov8n-cls\tensors\bus-csharp.fp32.bin `
+  --image ..\downloads\cases\yolov8n-cls\derived\bus.ppm `
+  --preprocessed-output ..\downloads\cases\yolov8n-cls\tensors\bus-csharp.fp32.bin `
   --family v8 --task cls `
   --tensor-layout NCHW --color-order RGB `
   --resize shorter-side-center-crop --resize-shorter-side 224
@@ -136,15 +136,15 @@ dotnet run --project .\samples\YoloVision -c Release -- `
 
 ```powershell
 dotnet run --project .\samples\YoloVision -c Release -- `
-  --model E:\TensorRtSharpAssets\cases\yolov8n-cls\source\yolov8n-cls.onnx `
-  --labels E:\TensorRtSharpAssets\cases\yolov8n-cls\reports\independent-reference\imagenet-yolov8n-cls.names `
-  --input-data E:\TensorRtSharpAssets\cases\yolov8n-cls\reports\independent-reference\input-ultralytics-1x3x224x224.fp32.bin `
+  --model ..\downloads\cases\yolov8n-cls\source\yolov8n-cls.onnx `
+  --labels ..\downloads\cases\yolov8n-cls\reports\independent-reference\imagenet-yolov8n-cls.names `
+  --input-data ..\downloads\cases\yolov8n-cls\reports\independent-reference\input-ultralytics-1x3x224x224.fp32.bin `
   --family v8 --task cls --classification-output output0 `
   --classification-score-mode probabilities --confidence 0 --top-k 5 `
-  --reference-outputs output0:E:\TensorRtSharpAssets\cases\yolov8n-cls\reports\independent-reference\output0.reference.json `
+  --reference-outputs output0:..\downloads\cases\yolov8n-cls\reports\independent-reference\output0.reference.json `
   --reference-abs-tolerance 0.001 --reference-rel-tolerance 0.001 `
-  --output-json E:\TensorRtSharpAssets\cases\yolov8n-cls\reports\yolovision-output.json `
-  --visualization-svg E:\TensorRtSharpAssets\cases\yolov8n-cls\reports\yolovision-output.svg
+  --output-json ..\downloads\cases\yolov8n-cls\reports\yolovision-output.json `
+  --visualization-svg ..\downloads\cases\yolov8n-cls\reports\yolovision-output.svg
 ```
 
 ## 实测结果
@@ -190,8 +190,8 @@ YoloVision Passed=False
 哈希用标准命令复核：
 
 ```powershell
-Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-cls\source\yolov8n-cls.onnx
-Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-cls\reports\independent-reference\imagenet-yolov8n-cls.names
+Get-FileHash -Algorithm SHA256 ..\downloads\cases\yolov8n-cls\source\yolov8n-cls.onnx
+Get-FileHash -Algorithm SHA256 ..\downloads\cases\yolov8n-cls\reports\independent-reference\imagenet-yolov8n-cls.names
 ```
 
 ## 代码与文件入口

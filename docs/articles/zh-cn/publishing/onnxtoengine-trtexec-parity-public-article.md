@@ -47,22 +47,22 @@ OnnxToEngine 教程入口：
 
 ```powershell
 dotnet run --project .\samples\OnnxToEngine\OnnxToEngine.csproj -- `
-  --onnx E:\TensorRtSharpAssets\models\model.onnx `
-  --saveEngine E:\TensorRtSharpAssets\engines\model.plan `
+  --onnx ..\downloads\models\model.onnx `
+  --saveEngine ..\downloads\engines\model.plan `
   --minShapes images:1x3x640x640 `
   --optShapes images:1x3x640x640 `
   --maxShapes images:4x3x640x640 `
   --fp16 `
   --buildOnly `
-  --exportReport E:\TensorRtSharpAssets\reports\model-build-report.json
+  --exportReport ..\downloads\reports\model-build-report.json
 ```
 
 TensorRtExec 的 trtexec-like 形态：
 
 ```powershell
 dotnet run --project .\applications\TensorRtExec\TensorRtExec.csproj -- `
-  --onnx E:\TensorRtSharpAssets\models\model.onnx `
-  --saveEngine E:\TensorRtSharpAssets\engines\model.plan `
+  --onnx ..\downloads\models\model.onnx `
+  --saveEngine ..\downloads\engines\model.plan `
   --minShapes images:1x3x640x640 `
   --optShapes images:1x3x640x640 `
   --maxShapes images:4x3x640x640 `
@@ -70,8 +70,8 @@ dotnet run --project .\applications\TensorRtExec\TensorRtExec.csproj -- `
   --workspace 1024 `
   --buildOnly `
   --dumpLayerInfo `
-  --exportLayerInfo E:\TensorRtSharpAssets\reports\model.layers.json `
-  --exportReport E:\TensorRtSharpAssets\reports\model-tensorrtexec-report.json
+  --exportLayerInfo ..\downloads\reports\model.layers.json `
+  --exportReport ..\downloads\reports\model-tensorrtexec-report.json
 ```
 
 WinForms 入口：

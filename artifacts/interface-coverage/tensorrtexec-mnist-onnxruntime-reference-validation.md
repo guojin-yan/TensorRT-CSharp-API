@@ -44,9 +44,9 @@
 | reference-file-hash | True | artifacts/real-case/onnx-to-engine-mnist-trt10-runtime/digit-7/mnist-trt10-7.onnxruntime-cpu.reference.json/1babfa81c0d277a3d483fdc6288285b26008ba5b382868272f1e2187338bd571 |
 | sidecar-file-hash | True | artifacts/real-case/onnx-to-engine-mnist-trt10-runtime/digit-7/mnist-trt10-7.onnxruntime-cpu.reference.sidecar.json/9d624fa545260fd80e01573071159264506c3981f8b015553b59a4647b06fdb0 |
 | prior-mnist-cross-check | True | 2f06e72de813a8635c9bc0397ac447a601bdbfa7df4bebc278723b958831c9bf/81f2cd7784dca5c8f02a9887ae89a6a3582880a27d2eba95a53f845c63187564/07969a96f76f9dc69a777770ca581df64ad9cb2d1ea320f97bdfbb7cc697beef |
-| model-file-hash | True | third_party/nvidia/TensorRT-10.11.0.33-cuda 12.9/data/mnist/mnist.onnx/2f06e72de813a8635c9bc0397ac447a601bdbfa7df4bebc278723b958831c9bf |
-| model-source-readme-hash | True | third_party/nvidia/TensorRT-10.11.0.33-cuda 12.9/data/mnist/README.md/b80c70931e11b2edc517bcd081cfdbafa222f2c860819ee0806f4eaed472a475 |
-| model-license-readme-hash | True | third_party/nvidia/TensorRT-10.11.0.33-cuda 12.9/samples/sampleOnnxMNIST/README.md/696b89fdf1046390156bd3eea37b75c7bfee320a699cb6cbb78b754d7b3f7057 |
+| model-file-hash | True | ../models/OnnxToEngine/MNIST/nvidia-tensorrt-10.11/mnist.onnx/2f06e72de813a8635c9bc0397ac447a601bdbfa7df4bebc278723b958831c9bf |
+| model-source-readme-hash | True | &lt;user-tensorrt-root&gt;/data/mnist/README.md/b80c70931e11b2edc517bcd081cfdbafa222f2c860819ee0806f4eaed472a475 |
+| model-license-readme-hash | True | &lt;user-tensorrt-root&gt;/samples/sampleOnnxMNIST/README.md/696b89fdf1046390156bd3eea37b75c7bfee320a699cb6cbb78b754d7b3f7057 |
 | input-file-hash | True | artifacts/real-case/onnx-to-engine-mnist-trt10-runtime/digit-7/mnist-trt10-7-input-f32.bin/81f2cd7784dca5c8f02a9887ae89a6a3582880a27d2eba95a53f845c63187564 |
 | tensorrt-reference-file-hash | True | artifacts/real-case/onnx-to-engine-mnist-trt10-runtime/digit-7/mnist-trt10-7.reference.json/07969a96f76f9dc69a777770ca581df64ad9cb2d1ea320f97bdfbb7cc697beef |
 | raw-output-file-hash | True | artifacts/real-case/onnx-to-engine-mnist-trt10-runtime/digit-7/onnxruntime-cpu-reference/mnist-onnxruntime-cpu-output.raw/a20932857fb2d51f5f0b79daa211140fce631b3f67787b69e0a23f33c8817d75 |

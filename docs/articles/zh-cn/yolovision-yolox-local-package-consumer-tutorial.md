@@ -61,7 +61,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass `
 默认目录：
 
 ```text
-E:\GitSpace\TensorRT-CSharp-API-4.0\downloads\yolox-apache
+..\downloads\yolox-apache
 ```
 
 本次固定资产：
@@ -157,7 +157,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass `
 默认 clean workspace：
 
 ```text
-E:\GitSpace\TensorRT-CSharp-API-4.0\consumer-workspaces\yolovision-yolox-local-package-trt10
+..\consumer-workspaces\yolovision-yolox-local-package-trt10
 ```
 
 脚本会：
@@ -179,9 +179,9 @@ E:\GitSpace\TensorRT-CSharp-API-4.0\consumer-workspaces\yolovision-yolox-local-p
 ```powershell
 pwsh -NoProfile -ExecutionPolicy Bypass `
   -File .\eng\Test-YoloVisionLocalPackageConsumer.ps1 `
-  -TensorRtRoot 'D:\Program Files\TensorRT-10.11.0.33-cu12' `
-  -TensorRtRuntimeRoot 'D:\Program Files\TensorRT-10.11.0.33-cu12' `
-  -CudnnRoot 'D:\Program Files\NVIDIA\CUDNN\v9.22' `
+  -TensorRtRoot $env:JYPPX_TENSORRT_ROOT `
+  -TensorRtRuntimeRoot $env:JYPPX_TENSORRT_ROOT `
+  -CudnnRoot $env:JYPPX_CUDNN_ROOT `
   -CudaRoot 'C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.9'
 ```
 

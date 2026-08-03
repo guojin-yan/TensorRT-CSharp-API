@@ -35,12 +35,12 @@ samples/assets/yolovision-yolov8n-seg-official-assets.json
 本地默认路径为：
 
 ```text
-E:\GitSpace\TensorRT-CSharp-API-4.0\downloads\yolov8n-seg-ultralytics-v8.3.0\source\yolov8n-seg.onnx
-E:\GitSpace\TensorRT-CSharp-API-4.0\downloads\yolov8n-seg-ultralytics-v8.3.0\source\yolov8n-seg.pt
-E:\GitSpace\TensorRT-CSharp-API-4.0\downloads\yolov8n-seg-ultralytics-v8.3.0\reference\output0.reference.json
-E:\GitSpace\TensorRT-CSharp-API-4.0\downloads\yolov8n-seg-ultralytics-v8.3.0\reference\output1.reference.json
-E:\GitSpace\TensorRT-CSharp-API-4.0\downloads\yolox-apache\derived\coco.names
-E:\GitSpace\TensorRT-CSharp-API-4.0\downloads\yolox-apache\derived\dog.ppm
+..\downloads\yolov8n-seg-ultralytics-v8.3.0\source\yolov8n-seg.onnx
+..\downloads\yolov8n-seg-ultralytics-v8.3.0\source\yolov8n-seg.pt
+..\downloads\yolov8n-seg-ultralytics-v8.3.0\reference\output0.reference.json
+..\downloads\yolov8n-seg-ultralytics-v8.3.0\reference\output1.reference.json
+..\downloads\yolox-apache\derived\coco.names
+..\downloads\yolox-apache\derived\dog.ppm
 ```
 
 runner 在 restore 前验证这些资产的固定 SHA256。`yolov8n-seg.pt` 来自 Ultralytics `v8.3.0`，许可证为 `AGPL-3.0-only`；当前只允许本地验证，公开再分发仍需 Owner 单独批准。
@@ -97,7 +97,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass `
 runner 会复制 `samples/YoloVision.PackageConsumer` 到：
 
 ```text
-E:\GitSpace\TensorRT-CSharp-API-4.0\consumer-workspaces\yolovision-yolov8n-seg-local-package-trt10
+..\consumer-workspaces\yolovision-yolov8n-seg-local-package-trt10
 ```
 
 通过后整个临时工作区会被删除。NuGet 长包名可能超过 Windows PowerShell 的旧 `MAX_PATH` 边界，因此清理函数在 `Remove-Item` 失败时使用经过根目录检查的 `\\?\` 扩展路径删除；它不会调用全局 `dotnet build-server shutdown`，避免干扰其他工作区。

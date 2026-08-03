@@ -1,5 +1,10 @@
 [CmdletBinding()]
 param(
+  [Parameter(Mandatory = $true)]
+  [string]$RuntimePackageKey,
+  [string]$TensorRtRoot = $env:JYPPX_TENSORRT_ROOT,
+  [string]$CudaRoot = $env:JYPPX_CUDA_ROOT,
+  [string]$CudnnRoot = $env:JYPPX_CUDNN_ROOT,
   [switch]$WriteRepositoryLocalFile,
   [switch]$WriteUserProfileFile = $true,
   [string]$RepositoryRoot
@@ -10,64 +15,35 @@ if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
   $RepositoryRoot = (Resolve-Path (Join-Path $scriptRoot "..")).Path
 }
 
-$thirdPartyRoot = Join-Path $RepositoryRoot "third_party\nvidia"
 $userProfileConfigPath = Join-Path $env:USERPROFILE ".jyppx\runtime-packages.local.json"
 $repositoryLocalConfigPath = Join-Path $RepositoryRoot "pack\runtime\runtime-packages.local.json"
 
-if (-not (Test-Path -LiteralPath $thirdPartyRoot -PathType Container)) {
-  throw "NVIDIA third-party directory was not found: $thirdPartyRoot"
+foreach ($requiredRoot in @(
+  @{ Name = "TensorRT"; Path = $TensorRtRoot; Marker = "include\NvInfer.h" },
+  @{ Name = "CUDA"; Path = $CudaRoot; Marker = "include\cuda_runtime.h" }
+)) {
+  if ([string]::IsNullOrWhiteSpace($requiredRoot.Path) -or
+      -not (Test-Path -LiteralPath (Join-Path $requiredRoot.Path $requiredRoot.Marker) -PathType Leaf)) {
+    throw "$($requiredRoot.Name) root is missing or invalid. Pass the installed SDK root explicitly."
+  }
 }
 
-$packages = @(
-  @{
-    key = "win-x64-trt8.6-cuda11.8-cudnn8.9"
-    tensorRtRoot = Join-Path $thirdPartyRoot "TensorRT-8.6.1.6-cuda 11.8"
-    cudaRoot = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8"
-    cudnnRoot = Join-Path $thirdPartyRoot "cudnn-windows-x86_64-8.9.7.29_cuda11-archive"
+$TensorRtRoot = (Resolve-Path -LiteralPath $TensorRtRoot).Path
+$CudaRoot = (Resolve-Path -LiteralPath $CudaRoot).Path
+if (-not [string]::IsNullOrWhiteSpace($CudnnRoot)) {
+  if (-not (Test-Path -LiteralPath $CudnnRoot -PathType Container)) {
+    throw "cuDNN root is invalid: $CudnnRoot"
   }
-  @{
-    key = "win-x64-trt8.6-cuda12.1-cudnn8.9"
-    tensorRtRoot = Join-Path $thirdPartyRoot "TensorRT-8.6.1.6-cuda 12.1"
-    cudaRoot = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.1"
-    cudnnRoot = Join-Path $thirdPartyRoot "cudnn-windows-x86_64-8.9.7.29_cuda12-archive"
-  }
-  @{
-    key = "win-x64-trt10.11-cuda11.8-cudnn8.9"
-    tensorRtRoot = Join-Path $thirdPartyRoot "TensorRT-10.11.0.33-cuda 11.8"
-    cudaRoot = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8"
-    cudnnRoot = Join-Path $thirdPartyRoot "cudnn-windows-x86_64-8.9.7.29_cuda11-archive"
-  }
-  @{
-    key = "win-x64-trt10.11-cuda12.9-cudnn9.22"
-    tensorRtRoot = Join-Path $thirdPartyRoot "TensorRT-10.11.0.33-cuda 12.9"
-    cudaRoot = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.9"
-    cudnnRoot = Join-Path $thirdPartyRoot "cudnn_windows_x86_64_9.22.0_cuda12\v9.22"
-  }
-  @{
-    key = "win-x64-trt11.0-cuda12.9-cudnn9.22"
-    tensorRtRoot = Join-Path $thirdPartyRoot "TensorRT-11.0.0.114-cuda 12.9"
-    cudaRoot = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.9"
-    cudnnRoot = Join-Path $thirdPartyRoot "cudnn_windows_x86_64_9.22.0_cuda12\v9.22"
-  }
-  @{
-    key = "win-x64-trt11.0-cuda13.2-cudnn9.22"
-    tensorRtRoot = Join-Path $thirdPartyRoot "TensorRT-11.0.0.114-cuda 13.2"
-    cudaRoot = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.2"
-    cudnnRoot = Join-Path $thirdPartyRoot "cudnn_windows_x86_64_9.22.0_cuda13"
-  }
-)
+  $CudnnRoot = (Resolve-Path -LiteralPath $CudnnRoot).Path
+}
 
 $document = @{
-  packages = @(
-    foreach ($package in $packages) {
-      @{
-        key = $package.key
-        defaultTensorRtRoot = $package.tensorRtRoot
-        defaultCudaRoot = $package.cudaRoot
-        defaultCudnnRoot = $package.cudnnRoot
-      }
-    }
-  )
+  packages = @(@{
+    key = $RuntimePackageKey
+    defaultTensorRtRoot = $TensorRtRoot
+    defaultCudaRoot = $CudaRoot
+    defaultCudnnRoot = $CudnnRoot
+  })
 }
 
 function Write-ConfigFile {

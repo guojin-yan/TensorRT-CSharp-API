@@ -16,7 +16,7 @@
     "conversion": "upstream ONNX release; no local framework-to-ONNX conversion"
   },
   "input": {
-    "path": "third_party/nvidia/TensorRT-10.11.0.33-cuda 12.9/data/mnist/7.pgm",
+    "path": "<user-tensorrt-root>/data/mnist/7.pgm",
     "length": 797,
     "sha256": "880e75f93fe00ab6f5c4e8ab00ff695c61e7e30bdf0d967ff8b34de1f5a94634",
     "preprocess": "P5 PGM 28x28; float32 1-pixel/255",

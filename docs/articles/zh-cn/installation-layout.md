@@ -14,9 +14,11 @@ CUDA 根目录：
 - `v12.9`
 - `v13.2`
 
-TensorRT / cuDNN 本地依赖目录：
+TensorRT / cuDNN 本地依赖：
 
-- `<repo-root>\third_party\nvidia`
+- 由用户安装在仓库外，并分别通过 `JYPPX_TENSORRT_ROOT`、`JYPPX_CUDNN_ROOT` 选择
+
+不得把 CUDA、cuDNN、TensorRT 或 NVRTC 复制到仓库目录，也不得放入发布包。
 
 本仓库已验证过的重点组合：
 

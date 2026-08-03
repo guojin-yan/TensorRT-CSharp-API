@@ -14,7 +14,7 @@ TensorRtSharp4.0 currently has two verified local validation baselines:
 Windows local development currently assumes:
 
 - CUDA is installed in a standard NVIDIA Toolkit location and is discoverable through `CUDA_PATH*` or `%ProgramFiles%\NVIDIA GPU Computing Toolkit\CUDA`
-- TensorRT Windows C++ packages are unpacked under `<repo-root>\third_party\nvidia`
+- TensorRT and cuDNN are installed outside the repository and selected with `JYPPX_TENSORRT_ROOT` and `JYPPX_CUDNN_ROOT`
 
 ## First commands
 

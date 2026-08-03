@@ -91,7 +91,7 @@ sample-run-evidence record 指向真实 sample command、真实日志、日志 S
 大模型、engine、tensor 和原始日志不要落在 C 盘，也不要默认提交到 Git。
 
 ```text
-E:\TensorRtSharpAssets\cases\<case-id>\
+..\downloads\cases\<case-id>\
   source\
   models\
   labels\
@@ -180,8 +180,8 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Acquire-YoloXOfficialAssets.
 ### Source-Tree Run
 
 ```powershell
-$assetRoot = "E:\GitSpace\TensorRT-CSharp-API-4.0\downloads\yolox-apache"
-$caseRoot = "E:\TensorRtSharpAssets\cases\yolox-s"
+$assetRoot = "..\downloads\yolox-apache"
+$caseRoot = "..\downloads\cases\yolox-s"
 @("tensors", "engines", "reports", "logs", "evidence") | ForEach-Object {
   New-Item -ItemType Directory -Force -Path (Join-Path $caseRoot $_) | Out-Null
 }
@@ -268,8 +268,8 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Acquire-YoloV10OfficialAsset
 ### Build-Only
 
 ```powershell
-$assetRoot = "E:\GitSpace\TensorRT-CSharp-API-4.0\downloads\yolov10-agpl"
-$caseRoot = "E:\TensorRtSharpAssets\cases\yolov10n"
+$assetRoot = "..\downloads\yolov10-agpl"
+$caseRoot = "..\downloads\cases\yolov10n"
 @("tensors", "engines", "reports", "logs", "evidence") | ForEach-Object {
   New-Item -ItemType Directory -Force -Path (Join-Path $caseRoot $_) | Out-Null
 }
@@ -333,7 +333,7 @@ owner 需要记录：
 推荐 E 盘目录：
 
 ```text
-E:\TensorRtSharpAssets\cases\classification\
+..\downloads\cases\classification\
   models\classifier.onnx
   labels\labels.txt
   images\input.ppm
@@ -404,7 +404,7 @@ output report 是 owner/golden-output review artifact，不会自行晋级 runti
 
 ```powershell
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-SampleRunEvidenceRecord.ps1 `
-  -InputPath E:\TensorRtSharpAssets\cases\my-case\evidence\sample-run-evidence.json `
+  -InputPath ..\downloads\cases\my-case\evidence\sample-run-evidence.json `
   -RequireExistingLog `
   -FailOnNotProof
 ```

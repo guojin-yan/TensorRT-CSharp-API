@@ -109,12 +109,12 @@ OutputValidationPerformed
 
 ```powershell
 dotnet run --project .\applications\TensorRtExec\TensorRtExec.csproj -- `
-  --onnx E:\TensorRtSharpAssets\models\model.onnx `
-  --saveEngine E:\TensorRtSharpAssets\engines\model.plan `
+  --onnx ..\downloads\models\model.onnx `
+  --saveEngine ..\downloads\engines\model.plan `
   --profilingVerbosity detailed `
   --dumpLayerInfo `
-  --exportLayerInfo E:\TensorRtSharpAssets\reports\model.layers.json `
-  --exportReport E:\TensorRtSharpAssets\reports\model-build-report.json `
+  --exportLayerInfo ..\downloads\reports\model.layers.json `
+  --exportReport ..\downloads\reports\model-build-report.json `
   --buildOnly
 ```
 
@@ -122,9 +122,9 @@ dotnet run --project .\applications\TensorRtExec\TensorRtExec.csproj -- `
 
 ```powershell
 dotnet run --project .\applications\TensorRtExec\TensorRtExec.csproj -- `
-  --loadEngine E:\TensorRtSharpAssets\engines\model.plan `
+  --loadEngine ..\downloads\engines\model.plan `
   --profilingVerbosity layer_names_only `
-  --exportProfile E:\TensorRtSharpAssets\reports\model-profile.json `
+  --exportProfile ..\downloads\reports\model-profile.json `
   --dumpLayerInfo `
   --buildOnly
 ```

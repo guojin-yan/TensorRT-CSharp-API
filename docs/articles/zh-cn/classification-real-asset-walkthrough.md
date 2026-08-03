@@ -24,7 +24,7 @@
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Acquire-TorchVisionResNet18OfficialAssets.ps1 `
   -AllowDownload `
   -ExportOnnx `
-  -PythonPath C:\Users\guoji\.conda\envs\ultralytics\python.exe
+  -PythonPath python
 ```
 
 脚本通过 `eng/Export-ClassificationResNet18Onnx.py` 使用 PyTorch `2.10.0+cpu`、torchvision `0.25.0+cpu` 和 opset 17
@@ -34,7 +34,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Acquire-TorchVisionResNet18O
 默认文件放在 Git 仓库外：
 
 ```text
-E:\GitSpace\TensorRT-CSharp-API-4.0\models\Classification\resnet18-torchvision-v0.25.0\
+..\models\Classification\resnet18-torchvision-v0.25.0\
 ```
 
 TorchVision 源码许可证是 BSD-3-Clause，但 pretrained weights、labels 和测试图片仍要由 owner 复核。模型、权重、labels
@@ -46,9 +46,9 @@ TorchVision 源码许可证是 BSD-3-Clause，但 pretrained weights、labels �
 先对 C# 内置预处理生成的固定 float32 tensor 运行独立 PyTorch/ONNX Runtime CPU reference：
 
 ```powershell
-$root = 'E:\GitSpace\TensorRT-CSharp-API-4.0'
+$root = '..'
 $case = '.\artifacts\classification\resnet18-torchvision-v0.25.0'
-& C:\Users\guoji\.conda\envs\ultralytics\python.exe .\eng\Invoke-ClassificationResNet18Reference.py `
+& python .\eng\Invoke-ClassificationResNet18Reference.py `
   --weights "$root\downloads\resnet18-torchvision-v0.25.0\source\resnet18-f37072fd.pth" `
   --onnx "$root\models\Classification\resnet18-torchvision-v0.25.0\resnet18-imagenet1k-v1.onnx" `
   --labels "$root\models\Classification\resnet18-torchvision-v0.25.0\imagenet1k.names" `
@@ -176,7 +176,7 @@ sidecar 不能把 build-only report 晋级成 `package-consumer-runtime`。它�
 下面的命令与仓库内 ResNet18 证据记录使用同一模型、图片预处理和独立 reference，并保存完整日志：
 
 ```powershell
-$root = 'E:\GitSpace\TensorRT-CSharp-API-4.0'
+$root = '..'
 $modelRoot = "$root\models\Classification\resnet18-torchvision-v0.25.0"
 $case = '.\artifacts\classification\resnet18-torchvision-v0.25.0'
 $image = '.\artifacts\yolovision\semantic-lraspp-reference\dog.ppm'

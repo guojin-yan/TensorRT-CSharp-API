@@ -167,8 +167,8 @@ plugin-owned weights 都可能使选择更复杂；应把完整 entry 列表保�
 源码和日志都留在 E 盘，避免把运行资产散落到系统盘：
 
 ```powershell
-$repo = "E:\GitSpace\TensorRT-CSharp-API-4.0\TensorRtSharp4.0"
-$case = "E:\TensorRtSharpAssets\cases\refit-scale-smoke"
+$repo = "."
+$case = "..\downloads\cases\refit-scale-smoke"
 New-Item -ItemType Directory -Force -Path "$case\logs" | Out-Null
 Set-Location $repo
 

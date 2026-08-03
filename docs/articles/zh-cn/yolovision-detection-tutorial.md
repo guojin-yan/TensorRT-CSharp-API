@@ -61,7 +61,7 @@ flowchart TD
 建议每个检测模型使用独立目录：
 
 ```text
-E:\TensorRtSharpAssets\cases\yolo-det\
+..\downloads\cases\yolo-det\
   source\
   models\
   labels\
@@ -76,8 +76,8 @@ E:\TensorRtSharpAssets\cases\yolo-det\
 下文用 `$case` 减少命令长度：
 
 ```powershell
-$repo = "E:\GitSpace\TensorRT-CSharp-API-4.0\TensorRtSharp4.0"
-$case = "E:\TensorRtSharpAssets\cases\yolo-det"
+$repo = "."
+$case = "..\downloads\cases\yolo-det"
 Set-Location $repo
 ```
 

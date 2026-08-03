@@ -121,14 +121,14 @@ BuilderConfigCanPromoteReleaseProof = false
 
 ```powershell
 dotnet run --project .\samples\OnnxToEngine\OnnxToEngine.csproj -- `
-  --onnx E:\TensorRtSharpAssets\models\model.onnx `
-  --saveEngine E:\TensorRtSharpAssets\engines\model.plan `
+  --onnx ..\downloads\models\model.onnx `
+  --saveEngine ..\downloads\engines\model.plan `
   --workspace 2048 `
   --memPoolSize workspace:2048,tacticDRAM:1024 `
   --avgTiming 8 `
   --tacticSources +cublas,+cudnn `
   --profilingVerbosity detailed `
-  --exportReport E:\TensorRtSharpAssets\reports\model-build-report.json `
+  --exportReport ..\downloads\reports\model-build-report.json `
   --buildOnly
 ```
 

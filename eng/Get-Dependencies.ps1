@@ -151,8 +151,6 @@ $tensorRtCandidates = @(
   $env:JYPPX_TENSORRT_ROOT,
   $env:TENSORRT_ROOT,
   $env:TensorRT_ROOT,
-  (Join-Path $repoRoot "third_party\nvidia\tensorrt"),
-  (Join-Path $repoRoot "third_party\nvidia"),
   "C:\TensorRT",
   "C:\Program Files\TensorRT",
   "C:\Program Files\NVIDIA GPU Computing Toolkit\TensorRT"
@@ -163,7 +161,6 @@ $cudaCandidates = @(
   $env:JYPPX_CUDA_ROOT,
   $env:CUDA_PATH,
   $env:CUDAToolkit_ROOT,
-  (Join-Path $repoRoot "third_party\nvidia\cuda"),
   "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA",
   "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.9",
   "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.1",

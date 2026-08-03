@@ -129,8 +129,8 @@ device.CopyTo(output);
 async H2D、async D2H、stream synchronize 和逐字节比较。只创建 pinned memory 或排队 copy 不足以得到该 marker。
 
 ```powershell
-$repo = "E:\GitSpace\TensorRT-CSharp-API-4.0\TensorRtSharp4.0"
-$case = "E:\TensorRtSharpAssets\cases\cuda-memory-smoke"
+$repo = "."
+$case = "..\downloads\cases\cuda-memory-smoke"
 New-Item -ItemType Directory -Force -Path "$case\logs" | Out-Null
 Set-Location $repo
 

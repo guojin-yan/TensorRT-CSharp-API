@@ -117,8 +117,8 @@ using var config = builder.CreateBuilderConfig();
 
 string[] pluginPaths =
 {
-    @"E:\TensorRtSharpAssets\plugins\custom-preprocess.dll",
-    @"E:\TensorRtSharpAssets\plugins\custom-postprocess.dll"
+    @"..\downloads\plugins\custom-preprocess.dll",
+    @"..\downloads\plugins\custom-postprocess.dll"
 };
 
 bool accepted = config.SetPluginsToSerialize(pluginPaths);

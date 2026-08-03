@@ -16,7 +16,7 @@ TensorRtSharp4.0 的可用性不等于 manifest/source 数量匹配。一个接�
 ## 推荐命令顺序
 
 ```powershell
-Set-Location E:\GitSpace\TensorRT-CSharp-API-4.0\TensorRtSharp4.0
+Set-Location .
 
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Generate-Bindings.ps1
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-BindingGeneratorOutputs.ps1

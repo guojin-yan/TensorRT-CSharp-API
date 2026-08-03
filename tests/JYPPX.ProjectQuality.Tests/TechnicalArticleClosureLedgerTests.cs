@@ -194,7 +194,7 @@ public sealed class TechnicalArticleClosureLedgerTests
 
         foreach (string marker in new[]
         {
-            "E:\\TensorRtSharpProof\\package-consumer",
+            "..\\proof\\package-consumer",
             "New-PackageConsumerExternalSmokeScaffold.ps1",
             "RuntimeProofPreflight",
             "Test-PackageConsumerRuntimeProofOwnerInput.ps1",
@@ -208,7 +208,7 @@ public sealed class TechnicalArticleClosureLedgerTests
 
         foreach (string marker in new[]
         {
-            "E:\\TensorRtSharpProof\\post-publish",
+            "..\\proof\\post-publish",
             "Test-PostPublishCleanConsumerProject.ps1",
             "-ProjectPath $consumerProject",
             "Export-PostPublishVerificationRecordFromOwnerInput.ps1",

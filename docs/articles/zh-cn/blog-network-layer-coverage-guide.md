@@ -123,8 +123,8 @@ flowchart TB
 ## 一次有边界的验证流程
 
 ```powershell
-$repo = "E:\GitSpace\TensorRT-CSharp-API-4.0\TensorRtSharp4.0"
-$case = "E:\TensorRtSharpAssets\cases\network-layer-coverage"
+$repo = "."
+$case = "..\downloads\cases\network-layer-coverage"
 New-Item -ItemType Directory -Force -Path "$case\logs" | Out-Null
 Set-Location $repo
 

@@ -29,7 +29,7 @@ flowchart TD
 建议在 E 盘准备专用目录：
 
 ```text
-E:\TensorRtSharpAssets\
+..\downloads\
   nvidia\
     TensorRT-8.6.1.6-cuda11.8\
     TensorRT-10.11.0.33-cuda12.9\
@@ -66,7 +66,7 @@ Downloads/Temp 变成不可审计的依赖来源。
 在 Developer PowerShell 或已初始化 MSVC 的 PowerShell 中运行：
 
 ```powershell
-Set-Location E:\GitSpace\TensorRT-CSharp-API-4.0\TensorRtSharp4.0
+Set-Location .
 
 git status --short
 dotnet --info
@@ -82,7 +82,7 @@ where.exe cmake
 保存环境快照：
 
 ```powershell
-$logRoot = 'E:\TensorRtSharpAssets\build-logs'
+$logRoot = '..\downloads\build-logs'
 New-Item -ItemType Directory -Force $logRoot | Out-Null
 dotnet --info | Out-File (Join-Path $logRoot 'dotnet-info.txt')
 cmake --version | Out-File (Join-Path $logRoot 'cmake-version.txt')
@@ -170,8 +170,8 @@ pwsh -NoProfile -File .\eng\Test-BindingGeneratorOutputs.ps1
 
 ```powershell
 $preset = 'win-x64-trt10-cuda12-release'
-$configureLog = 'E:\TensorRtSharpAssets\build-logs\trt10-cuda12-configure.log'
-$buildLog = 'E:\TensorRtSharpAssets\build-logs\trt10-cuda12-build.log'
+$configureLog = '..\downloads\build-logs\trt10-cuda12-configure.log'
+$buildLog = '..\downloads\build-logs\trt10-cuda12-build.log'
 
 cmake --preset $preset *>&1 | Tee-Object $configureLog
 if ($LASTEXITCODE -ne 0) { throw "CMake configure failed: $LASTEXITCODE" }
@@ -234,7 +234,7 @@ dotnet test .\tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj
 托管包项目位于 `pack/JYPPX.TensorRT.CSharp.API`。本地 pack 输出放到 E 盘：
 
 ```powershell
-$feed = 'E:\TensorRtSharpAssets\package-feed'
+$feed = '..\downloads\package-feed'
 New-Item -ItemType Directory -Force $feed | Out-Null
 
 dotnet pack .\pack\JYPPX.TensorRT.CSharp.API\JYPPX.TensorRT.CSharp.API.csproj `

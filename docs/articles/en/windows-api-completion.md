@@ -130,7 +130,7 @@ TensorRT 10.11 parser support is enabled in the current Windows builds.
 
 TensorRT 8.6 parser support on Windows requires cuDNN 8. The TensorRT 8 `nvonnxparser.dll` depends on `nvinfer_plugin.dll`, which in turn requires the cuDNN 8 split runtime DLL set.
 
-Current local cuDNN 8 packages are installed under `third_party/nvidia`. The Windows runtime asset collection now packages the full `cudnn*_8.dll` split runtime set with the TensorRT 8 runtime packages, together with the matching cuBLAS runtime libraries.
+cuDNN 8 must be installed by the user and selected with `JYPPX_CUDNN_ROOT`. Bridge-only packages never collect or redistribute cuDNN or cuBLAS runtime libraries.
 
 If the required cuDNN 8 runtime DLLs are not present for a selected combination, the bridge keeps the ONNX parser ABI but returns a dependency-missing status when parser creation is requested. This prevents an optional parser dependency from making the entire bridge unloadable.
 
@@ -138,7 +138,7 @@ After dependency collection, the validated Windows TensorRT 8.6 package still ra
 
 Windows native builds delay-load CUDA and TensorRT DLLs. This keeps common bridge queries and CUDA-only paths loadable even when an optional TensorRT parser dependency is missing or blocked by Windows application control.
 
-When running TensorRT 8 parser/build smoke tests directly from `build-out`, set `JYPPX_CUDNN_ROOT` to the matching cuDNN 8 archive root. Runtime-package based smoke paths already collect the required split cuDNN DLLs.
+When running TensorRT 8 parser/build smoke tests directly from `build-out`, set `JYPPX_CUDNN_ROOT` to the matching cuDNN 8 installation root.
 
 ## Deferred TensorRT Areas
 

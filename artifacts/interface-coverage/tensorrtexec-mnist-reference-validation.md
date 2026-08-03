@@ -37,10 +37,10 @@
 | `reference-file-contract` | `True` | `1/Plus214_Output_0/1,10/10/repository-mnist-runtime-output-derived-unreviewed` |
 | `sidecar-owner-boundary` | `True` | `real-model-reference-candidate-owner-review-required/not-provided/False/False` |
 | `package-evidence-cross-check` | `True` | `local-package-consumer-refitted-plan-runtime-passed/True/True/07969a96f76f9dc69a777770ca581df64ad9cb2d1ea320f97bdfbb7cc697beef/6f5771d6c5b056406c190a59e725cf9bb13c1f148c1ef06f99ed8acfb11b9041` |
-| `model-file-hash` | `True` | `third_party/nvidia/TensorRT-10.11.0.33-cuda 12.9/data/mnist/mnist.onnx/2f06e72de813a8635c9bc0397ac447a601bdbfa7df4bebc278723b958831c9bf` |
-| `model-source-readme-hash` | `True` | `third_party/nvidia/TensorRT-10.11.0.33-cuda 12.9/data/mnist/README.md/b80c70931e11b2edc517bcd081cfdbafa222f2c860819ee0806f4eaed472a475` |
-| `model-license-readme-hash` | `True` | `third_party/nvidia/TensorRT-10.11.0.33-cuda 12.9/samples/sampleOnnxMNIST/README.md/696b89fdf1046390156bd3eea37b75c7bfee320a699cb6cbb78b754d7b3f7057` |
-| `source-input-file-hash` | `True` | `third_party/nvidia/TensorRT-10.11.0.33-cuda 12.9/data/mnist/7.pgm/880e75f93fe00ab6f5c4e8ab00ff695c61e7e30bdf0d967ff8b34de1f5a94634` |
+| `model-file-hash` | `True` | `../models/OnnxToEngine/MNIST/nvidia-tensorrt-10.11/mnist.onnx/2f06e72de813a8635c9bc0397ac447a601bdbfa7df4bebc278723b958831c9bf` |
+| `model-source-readme-hash` | `True` | `<user-tensorrt-root>/data/mnist/README.md/b80c70931e11b2edc517bcd081cfdbafa222f2c860819ee0806f4eaed472a475` |
+| `model-license-readme-hash` | `True` | `<user-tensorrt-root>/samples/sampleOnnxMNIST/README.md/696b89fdf1046390156bd3eea37b75c7bfee320a699cb6cbb78b754d7b3f7057` |
+| `source-input-file-hash` | `True` | `<user-tensorrt-root>/data/mnist/7.pgm/880e75f93fe00ab6f5c4e8ab00ff695c61e7e30bdf0d967ff8b34de1f5a94634` |
 | `input-tensor-file-hash` | `True` | `artifacts/real-case/onnx-to-engine-mnist-trt10-runtime/digit-7/mnist-trt10-7-input-f32.bin/81f2cd7784dca5c8f02a9887ae89a6a3582880a27d2eba95a53f845c63187564` |
 | `source-output-file-hash` | `True` | `artifacts/real-case/onnx-to-engine-mnist-trt10-runtime/digit-7/mnist-trt10-7-output.json/37b234e2f4cd8583699238822e8ebdc419c6dd43bcd71a87e8590e9e5e1d9f3e` |
 | `build-engine-file-hash` | `True` | `artifacts/real-case/onnx-to-engine-mnist-trt10-runtime/digit-7/reference-validation/mnist-build-reference.plan/14044b5d345a68bebe7b01c3a48ce10c1665bde40088fbbfd61ae236f1221a89` |

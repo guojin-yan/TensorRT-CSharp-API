@@ -27,9 +27,9 @@ crosses the ABI.
 
 | Version line | Header evidence | Import-library evidence | DLL evidence | Native implementation |
 | --- | --- | --- | --- | --- |
-| TRT8 | `third_party/nvidia/TensorRT-8.6.1.6-cuda 11.8/include/NvInfer.h` and the CUDA 12.1 sibling | `.../lib/nvinfer.lib` | `.../lib/nvinfer.dll` | `native/src/tensorrt/v8/modules/builder/builder_config.inc` |
-| TRT10 | `third_party/nvidia/TensorRT-10.11.0.33-cuda 11.8/include/NvInfer.h` and the CUDA 12.9 sibling | `.../lib/nvinfer_10.lib` | `.../lib/nvinfer_10.dll` | `native/src/tensorrt/v10/modules/builder/builder_config.inc` |
-| TRT11 | `third_party/nvidia/TensorRT-11.0.0.114-cuda 12.9/include/NvInfer.h` and the CUDA 13.2 sibling | `.../lib/nvinfer_11.lib` | `TensorRT-11.0.0.114-cuda 13.2/bin/nvinfer_11.dll` | `native/src/tensorrt/v11/api.cpp` |
+| TRT8 | `<user-tensorrt-8-root>/include/NvInfer.h` | `<user-tensorrt-8-root>/lib/nvinfer.lib` | `<user-tensorrt-8-root>/lib/nvinfer.dll` | `native/src/tensorrt/v8/modules/builder/builder_config.inc` |
+| TRT10 | `<user-tensorrt-10-root>/include/NvInfer.h` | `<user-tensorrt-10-root>/lib/nvinfer_10.lib` | `<user-tensorrt-10-root>/lib/nvinfer_10.dll` | `native/src/tensorrt/v10/modules/builder/builder_config.inc` |
+| TRT11 | `<user-tensorrt-11-root>/include/NvInfer.h` | `<user-tensorrt-11-root>/lib/nvinfer_11.lib` | `<user-tensorrt-11-root>/bin/nvinfer_11.dll` | `native/src/tensorrt/v11/api.cpp` |
 
 The TRT11 CUDA 12.9 vendor folder contains the import library and headers but
 does not contain a runtime DLL in this checkout; that is a package-material

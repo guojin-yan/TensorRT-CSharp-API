@@ -337,7 +337,7 @@ flowchart LR
 ```
 
 ```powershell
-$caseRoot = "E:\TensorRtSharpAssets"
+$caseRoot = "..\downloads"
 @("engines", "reports") | ForEach-Object {
   New-Item -ItemType Directory -Force -Path (Join-Path $caseRoot $_) | Out-Null
 }

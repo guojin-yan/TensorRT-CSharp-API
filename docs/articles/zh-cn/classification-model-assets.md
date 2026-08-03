@@ -23,11 +23,11 @@
 
 第一版已经固定并实跑 TorchVision `v0.25.0` ResNet18 `IMAGENET1K_V1`。获取和 opset 17 导出合同在
 `samples/assets/classification-resnet18-official-assets.json`，实际模型位于 Git 仓库外的
-`E:\GitSpace\TensorRT-CSharp-API-4.0\models\Classification\resnet18-torchvision-v0.25.0`。运行：
+`..\models\Classification\resnet18-torchvision-v0.25.0`。运行：
 
 ```powershell
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Acquire-TorchVisionResNet18OfficialAssets.ps1 `
-  -AllowDownload -ExportOnnx -PythonPath C:\Users\guoji\.conda\envs\ultralytics\python.exe
+  -AllowDownload -ExportOnnx -PythonPath python
 ```
 
 `eng/Invoke-ClassificationResNet18Reference.py` 从精确 C# 输入 tensor 生成独立 ONNX Runtime raw/task references。TensorRT

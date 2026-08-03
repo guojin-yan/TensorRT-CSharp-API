@@ -164,30 +164,30 @@ Detection 输出建议按如下字段记录：
 
 为了让文章命令可以重复执行，建议为 YOLOv8n detection 建立独立的 E 盘 case workspace：
 
-E:\TensorRtSharpAssets\cases\yolov8n-det\models
-E:\TensorRtSharpAssets\cases\yolov8n-det\labels
-E:\TensorRtSharpAssets\cases\yolov8n-det\images
-E:\TensorRtSharpAssets\cases\yolov8n-det\tensors
-E:\TensorRtSharpAssets\cases\yolov8n-det\engines
-E:\TensorRtSharpAssets\cases\yolov8n-det\reports
-E:\TensorRtSharpAssets\cases\yolov8n-det\logs
+..\downloads\cases\yolov8n-det\models
+..\downloads\cases\yolov8n-det\labels
+..\downloads\cases\yolov8n-det\images
+..\downloads\cases\yolov8n-det\tensors
+..\downloads\cases\yolov8n-det\engines
+..\downloads\cases\yolov8n-det\reports
+..\downloads\cases\yolov8n-det\logs
 
 从 samples/assets/yolovision-yolov8-det-candidate.template.json 复制候选记录后，先回填 model.sourceUrl、model.downloadUrl、model.license、model.licenseEvidence、model.sha256、model.opset 和 model.onnxExportCommand。labels 和 input 也必须分别记录来源、许可证、路径和 SHA256，不能只记录 ONNX。
 
 下载和导出后至少计算这些 hash：
 
-Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-det\models\yolov8n.pt
-Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-det\models\yolov8n.onnx
-Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-det\labels\coco.names
-Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-det\images\dog.ppm
+Get-FileHash -Algorithm SHA256 ..\downloads\cases\yolov8n-det\models\yolov8n.pt
+Get-FileHash -Algorithm SHA256 ..\downloads\cases\yolov8n-det\models\yolov8n.onnx
+Get-FileHash -Algorithm SHA256 ..\downloads\cases\yolov8n-det\labels\coco.names
+Get-FileHash -Algorithm SHA256 ..\downloads\cases\yolov8n-det\images\dog.ppm
 
 使用真实图片时，先把预处理步骤独立保存：
 
-dotnet run --project .\samples\YoloVision -- --preprocess-only --image E:\TensorRtSharpAssets\cases\yolov8n-det\images\dog.ppm --preprocessed-output E:\TensorRtSharpAssets\cases\yolov8n-det\tensors\dog-fp32.bin --input-shape 1x3x640x640 --tensor-layout NCHW --color-order RGB --resize letterbox
+dotnet run --project .\samples\YoloVision -- --preprocess-only --image ..\downloads\cases\yolov8n-det\images\dog.ppm --preprocessed-output ..\downloads\cases\yolov8n-det\tensors\dog-fp32.bin --input-shape 1x3x640x640 --tensor-layout NCHW --color-order RGB --resize letterbox
 
 运行 YoloVision 时同时导出结构化结果和可视化：
 
-dotnet run --project .\samples\YoloVision -- --model E:\TensorRtSharpAssets\cases\yolov8n-det\models\yolov8n.onnx --labels E:\TensorRtSharpAssets\cases\yolov8n-det\labels\coco.names --input-data E:\TensorRtSharpAssets\cases\yolov8n-det\tensors\dog-fp32.bin --input-shape 1x3x640x640 --family v8 --task det --layout auto --has-objectness auto --nms-mode class-aware --confidence 0.25 --iou-threshold 0.45 --output-json E:\TensorRtSharpAssets\cases\yolov8n-det\reports\yolov8n-det-output.json --visualization-svg E:\TensorRtSharpAssets\cases\yolov8n-det\reports\yolov8n-det-output.svg
+dotnet run --project .\samples\YoloVision -- --model ..\downloads\cases\yolov8n-det\models\yolov8n.onnx --labels ..\downloads\cases\yolov8n-det\labels\coco.names --input-data ..\downloads\cases\yolov8n-det\tensors\dog-fp32.bin --input-shape 1x3x640x640 --family v8 --task det --layout auto --has-objectness auto --nms-mode class-aware --confidence 0.25 --iou-threshold 0.45 --output-json ..\downloads\cases\yolov8n-det\reports\yolov8n-det-output.json --visualization-svg ..\downloads\cases\yolov8n-det\reports\yolov8n-det-output.svg
 
 运行结束后，应对 preprocessed tensor、engine、build report、output JSON、SVG 和 stdout/stderr log 计算 SHA256。output JSON 至少要能回答 classCount、outputLayout、hasObjectness、scoreThreshold、iouThreshold、nmsMode、modelSha256、labelsSha256、imageSha256 和 preprocessedTensorSha256。
 

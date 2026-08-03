@@ -79,10 +79,10 @@ dotnet run --project .\samples\YoloVision -- `
 
 ## 从模型获取开始
 
-不要把模型直接放在仓库或 `C:\Users\<you>\Downloads`。为每个案例建立独立的 E 盘目录：
+不要把模型直接放在仓库或 `%USERPROFILE%\Downloads`。为每个案例建立独立的 E 盘目录：
 
 ```text
-E:\TensorRtSharpAssets\yolo-cases\<case-id>\
+..\downloads\yolo-cases\<case-id>\
   source\
     model.onnx
     labels.txt
@@ -103,7 +103,7 @@ E:\TensorRtSharpAssets\yolo-cases\<case-id>\
 建议先记录来源，再下载或复制已有资产：
 
 ```powershell
-$case = "E:\TensorRtSharpAssets\yolo-cases\yolov8n-det"
+$case = "..\downloads\yolo-cases\yolov8n-det"
 New-Item -ItemType Directory -Force -Path "$case\source","$case\derived","$case\reports","$case\evidence" | Out-Null
 Get-Date -Format o | Tee-Object -FilePath "$case\source\acquired-at.txt"
 Get-FileHash "$case\source\model.onnx" -Algorithm SHA256
@@ -143,7 +143,7 @@ samples/assets/yolovision-article-case-pack.json
 模型路径和输出路径都放在 E 盘 case workspace：
 
 ```powershell
-$case = "E:\TensorRtSharpAssets\yolo-cases\yolov8n-det"
+$case = "..\downloads\yolo-cases\yolov8n-det"
 
 dotnet run --project .\applications\TensorRtExec -- `
   --onnx "$case\source\model.onnx" `

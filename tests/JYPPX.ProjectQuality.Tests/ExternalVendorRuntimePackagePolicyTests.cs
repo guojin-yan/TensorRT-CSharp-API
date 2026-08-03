@@ -57,6 +57,34 @@ public sealed class ExternalVendorRuntimePackagePolicyTests
     }
 
     [Fact]
+    public void BuildAndDependencyDiscoveryDoNotProbeRepositoryVendorDrops()
+    {
+        string[] files =
+        [
+            "CMakeLists.txt",
+            Path.Combine("eng", "Get-Dependencies.ps1"),
+            Path.Combine("eng", "get-dependencies.sh"),
+            Path.Combine("eng", "Resolve-RuntimeRoots.ps1"),
+            Path.Combine("eng", "Sync-LocalRuntimeRoots.ps1"),
+            Path.Combine("eng", "Export-InterfaceCoverageMatrix.ps1"),
+            Path.Combine("pack", "runtime", "runtime-packages.local.example.json"),
+            Path.Combine("third_party", "README.md"),
+        ];
+
+        foreach (string relativePath in files)
+        {
+            string content = File.ReadAllText(Path.Combine(RepositoryPaths.Root, relativePath))
+                .Replace('\\', '/');
+            Assert.DoesNotContain("third_party/nvidia", content, StringComparison.OrdinalIgnoreCase);
+        }
+
+        string roots = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "eng", "Resolve-RuntimeRoots.ps1"));
+        Assert.Contains("$env:JYPPX_TENSORRT_ROOT", roots, StringComparison.Ordinal);
+        Assert.Contains("$env:JYPPX_CUDA_ROOT", roots, StringComparison.Ordinal);
+        Assert.Contains("$env:JYPPX_CUDNN_ROOT", roots, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void StaticPolicyGateAndCleanupPlanPassWithoutRemoteSideEffects()
     {
         string gate = Path.Combine(RepositoryPaths.Root, "eng", "Test-ExternalVendorRuntimePackagePolicy.ps1");

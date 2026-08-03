@@ -112,8 +112,8 @@ MoE 与 distributed collective 还依赖更具体的 TensorRT/GPU 或多设备�
 ## 构建与运行
 
 ```powershell
-$repo = "E:\GitSpace\TensorRT-CSharp-API-4.0\TensorRtSharp4.0"
-$case = "E:\TensorRtSharpAssets\cases\trt11-modern-layers"
+$repo = "."
+$case = "..\downloads\cases\trt11-modern-layers"
 New-Item -ItemType Directory -Force -Path "$case\logs" | Out-Null
 Set-Location $repo
 

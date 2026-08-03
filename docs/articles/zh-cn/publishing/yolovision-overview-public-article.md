@@ -113,13 +113,13 @@ dotnet run --project .\samples\YoloVision\YoloVision.csproj -- `
   --preflight `
   --family v8 `
   --task seg `
-  --model E:\TensorRtSharpAssets\models\yolov8n-seg.onnx `
-  --labels E:\TensorRtSharpAssets\models\coco.names `
-  --input-data E:\TensorRtSharpAssets\tensors\yolov8n-seg-fp32.bin `
+  --model ..\downloads\models\yolov8n-seg.onnx `
+  --labels ..\downloads\models\coco.names `
+  --input-data ..\downloads\tensors\yolov8n-seg-fp32.bin `
   --input-shape 1x3x640x640 `
   --output-role-map boxes:det,proto:mask-prototypes `
   --mask-coefficient-count 32 `
-  --preflight-report E:\TensorRtSharpAssets\reports\yolov8n-seg-preflight.json
+  --preflight-report ..\downloads\reports\yolov8n-seg-preflight.json
 ```
 
 `state=ready-for-runtime-precheck` 表示输入和 metadata 具备预检查条件；`owner-action-required` 表示还需要 owner 补真实模型、labels、输入图、tensor 或任务 metadata；`invalid` 用于 strict preflight blocker。`--dryRun` 和 `--previewOnly` 只是 alias，报告边界仍是 `proofClassification=precheck`、`isRuntimeProof=false`、`canPromoteRealModelRuntime=false`。
@@ -131,8 +131,8 @@ dotnet run --project .\samples\YoloVision\YoloVision.csproj -- `
 ```powershell
 dotnet run --project .\samples\YoloVision\YoloVision.csproj -- `
   --preprocess-only `
-  --image E:\TensorRtSharpAssets\images\dog.ppm `
-  --preprocessed-output E:\TensorRtSharpAssets\tensors\dog-yolo-fp32.bin `
+  --image ..\downloads\images\dog.ppm `
+  --preprocessed-output ..\downloads\tensors\dog-yolo-fp32.bin `
   --input-shape 1x3x640x640 `
   --tensor-layout NCHW `
   --color-order RGB `
@@ -148,43 +148,43 @@ dotnet run --project .\samples\YoloVision\YoloVision.csproj -- `
 Detection：
 
 ```powershell
-dotnet run --project .\samples\YoloVision\YoloVision.csproj -- --model E:\TensorRtSharpAssets\models\yolo-det.onnx --labels E:\TensorRtSharpAssets\models\coco.names --image E:\TensorRtSharpAssets\images\det.ppm --preprocessed-output E:\TensorRtSharpAssets\tensors\det-fp32.bin --input-shape 1x3x640x640 --family v8 --task det --layout auto --has-objectness auto --nms-mode class-aware --confidence 0.25 --iou-threshold 0.45 --output E:\TensorRtSharpAssets\reports\yolo-det-output.json
+dotnet run --project .\samples\YoloVision\YoloVision.csproj -- --model ..\downloads\models\yolo-det.onnx --labels ..\downloads\models\coco.names --image ..\downloads\images\det.ppm --preprocessed-output ..\downloads\tensors\det-fp32.bin --input-shape 1x3x640x640 --family v8 --task det --layout auto --has-objectness auto --nms-mode class-aware --confidence 0.25 --iou-threshold 0.45 --output ..\downloads\reports\yolo-det-output.json
 ```
 
 YOLOv10 end-to-end detection：
 
 ```powershell
-dotnet run --project .\samples\YoloVision\YoloVision.csproj -- --model E:\TensorRtSharpAssets\models\yolov10n.onnx --labels E:\TensorRtSharpAssets\models\coco.names --image E:\TensorRtSharpAssets\images\det.ppm --preprocessed-output E:\TensorRtSharpAssets\tensors\yolov10n-fp32.bin --input-shape 1x3x640x640 --family v10 --task det --layout end2end --class-count 80 --confidence 0.25 --output E:\TensorRtSharpAssets\reports\yolov10n-output.json
+dotnet run --project .\samples\YoloVision\YoloVision.csproj -- --model ..\downloads\models\yolov10n.onnx --labels ..\downloads\models\coco.names --image ..\downloads\images\det.ppm --preprocessed-output ..\downloads\tensors\yolov10n-fp32.bin --input-shape 1x3x640x640 --family v10 --task det --layout end2end --class-count 80 --confidence 0.25 --output ..\downloads\reports\yolov10n-output.json
 ```
 
 Classification：
 
 ```powershell
-dotnet run --project .\samples\YoloVision\YoloVision.csproj -- --model E:\TensorRtSharpAssets\models\yolo-cls.onnx --labels E:\TensorRtSharpAssets\models\labels.txt --input-data E:\TensorRtSharpAssets\tensors\cls-fp32.bin --input-shape 1x3x224x224 --family custom --task cls --classification-output output0 --classification-score-mode probabilities --confidence 0 --top-k 5 --output E:\TensorRtSharpAssets\reports\yolo-cls-output.json
+dotnet run --project .\samples\YoloVision\YoloVision.csproj -- --model ..\downloads\models\yolo-cls.onnx --labels ..\downloads\models\labels.txt --input-data ..\downloads\tensors\cls-fp32.bin --input-shape 1x3x224x224 --family custom --task cls --classification-output output0 --classification-score-mode probabilities --confidence 0 --top-k 5 --output ..\downloads\reports\yolo-cls-output.json
 ```
 
 Segmentation：
 
 ```powershell
-dotnet run --project .\samples\YoloVision\YoloVision.csproj -- --model E:\TensorRtSharpAssets\models\yolo-seg.onnx --labels E:\TensorRtSharpAssets\models\coco.names --input-data E:\TensorRtSharpAssets\tensors\seg-fp32.bin --input-shape 1x3x640x640 --family v8 --task seg --output-role-map boxes:det,proto:mask-prototypes --mask-coefficient-count 32 --output E:\TensorRtSharpAssets\reports\yolo-seg-output.json
+dotnet run --project .\samples\YoloVision\YoloVision.csproj -- --model ..\downloads\models\yolo-seg.onnx --labels ..\downloads\models\coco.names --input-data ..\downloads\tensors\seg-fp32.bin --input-shape 1x3x640x640 --family v8 --task seg --output-role-map boxes:det,proto:mask-prototypes --mask-coefficient-count 32 --output ..\downloads\reports\yolo-seg-output.json
 ```
 
 Oriented bounding box：
 
 ```powershell
-dotnet run --project .\samples\YoloVision\YoloVision.csproj -- --model E:\TensorRtSharpAssets\models\yolo-obb.onnx --labels E:\TensorRtSharpAssets\models\labels.txt --input-data E:\TensorRtSharpAssets\tensors\obb-fp32.bin --input-shape 1x3x1024x1024 --family v8 --task obb --output-role-map boxes:det,angles:obb-angle --obb-angle-output angles --output E:\TensorRtSharpAssets\reports\yolo-obb-output.json
+dotnet run --project .\samples\YoloVision\YoloVision.csproj -- --model ..\downloads\models\yolo-obb.onnx --labels ..\downloads\models\labels.txt --input-data ..\downloads\tensors\obb-fp32.bin --input-shape 1x3x1024x1024 --family v8 --task obb --output-role-map boxes:det,angles:obb-angle --obb-angle-output angles --output ..\downloads\reports\yolo-obb-output.json
 ```
 
 Pose：
 
 ```powershell
-dotnet run --project .\samples\YoloVision\YoloVision.csproj -- --model E:\TensorRtSharpAssets\models\yolo-pose.onnx --labels E:\TensorRtSharpAssets\models\labels.txt --input-data E:\TensorRtSharpAssets\tensors\pose-fp32.bin --input-shape 1x3x640x640 --family v8 --task pose --output-role-map boxes:det,keypoints:pose-keypoints --pose-keypoint-count 17 --output E:\TensorRtSharpAssets\reports\yolo-pose-output.json
+dotnet run --project .\samples\YoloVision\YoloVision.csproj -- --model ..\downloads\models\yolo-pose.onnx --labels ..\downloads\models\labels.txt --input-data ..\downloads\tensors\pose-fp32.bin --input-shape 1x3x640x640 --family v8 --task pose --output-role-map boxes:det,keypoints:pose-keypoints --pose-keypoint-count 17 --output ..\downloads\reports\yolo-pose-output.json
 ```
 
 Semantic segmentation：
 
 ```powershell
-dotnet run --project .\samples\YoloVision\YoloVision.csproj -- --model E:\TensorRtSharpAssets\models\yolo-sem.onnx --labels E:\TensorRtSharpAssets\models\labels.txt --input-data E:\TensorRtSharpAssets\tensors\sem-fp32.bin --input-shape 1x3x512x512 --family custom --task sem --semantic-output semantic --class-count 21 --output E:\TensorRtSharpAssets\reports\yolo-sem-output.json
+dotnet run --project .\samples\YoloVision\YoloVision.csproj -- --model ..\downloads\models\yolo-sem.onnx --labels ..\downloads\models\labels.txt --input-data ..\downloads\tensors\sem-fp32.bin --input-shape 1x3x512x512 --family custom --task sem --semantic-output semantic --class-count 21 --output ..\downloads\reports\yolo-sem-output.json
 ```
 
 Dedicated role options 也可直接使用：`--detection-output`、`--classification-output`、`--semantic-output`、`--mask-prototypes-output`、`--pose-keypoints-output`、`--obb-angle-output`。如果没有显式 role，runner 会使用保守 tensor-name heuristics，例如 `proto`、`keypoint`、`angle`、`semantic`、`logits`、`box`、`detect`。

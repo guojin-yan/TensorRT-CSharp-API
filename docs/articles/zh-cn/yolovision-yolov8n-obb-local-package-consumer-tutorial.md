@@ -20,8 +20,8 @@
 ```powershell
 pwsh -NoProfile -ExecutionPolicy Bypass `
   -File .\eng\Acquire-YoloV8ObbOfficialAssets.ps1 `
-  -OutputRoot E:\GitSpace\TensorRT-CSharp-API-4.0\downloads\yolov8n-obb-ultralytics-v8.3.0 `
-  -PythonPath C:\Users\<user>\.conda\envs\ultralytics\python.exe
+  -OutputRoot ..\downloads\yolov8n-obb-ultralytics-v8.3.0 `
+  -PythonPath python
 ```
 
 已有资产可增加 `-Offline`，只做固定长度与 SHA256 复核。轻量来源合同位于 `samples/assets/yolovision-yolov8n-obb-official-assets.json`。权重与图片没有获得本项目公开再分发批准。
@@ -32,14 +32,14 @@ pwsh -NoProfile -ExecutionPolicy Bypass `
 
 ```powershell
 yolo export `
-  model=E:\GitSpace\TensorRT-CSharp-API-4.0\downloads\yolov8n-obb-ultralytics-v8.3.0\source\yolov8n-obb.pt `
+  model=..\downloads\yolov8n-obb-ultralytics-v8.3.0\source\yolov8n-obb.pt `
   format=onnx imgsz=1024 opset=17 simplify=True dynamic=False batch=1 device=cpu
 ```
 
 转换后的 ONNX 必须暂存在 Git 仓库外：
 
 ```text
-E:\GitSpace\TensorRT-CSharp-API-4.0\models\YoloVision\OrientedBoundingBox\yolov8n-obb-ultralytics-v8.3.0\yolov8n-obb.onnx
+..\models\YoloVision\OrientedBoundingBox\yolov8n-obb-ultralytics-v8.3.0\yolov8n-obb.onnx
 ```
 
 固定长度为 `12,664,838`，SHA256 为 `5f2701ef5326fb5a691999438cfc55a69656323c21ffddebaff8968ab6de2e92`。该目录只用于当前开发暂存，后续迁移到单独治理的 Model Zoo，不上传当前 GitHub 仓库。
@@ -51,13 +51,13 @@ E:\GitSpace\TensorRT-CSharp-API-4.0\models\YoloVision\OrientedBoundingBox\yolov8
 先由 YoloVision 的 center-letterbox 预处理生成固定输入 tensor，再执行：
 
 ```powershell
-& C:\Users\<user>\.conda\envs\ultralytics\python.exe `
+& python `
   .\eng\Invoke-YoloVisionObbReference.py `
-  --onnx-model E:\GitSpace\TensorRT-CSharp-API-4.0\models\YoloVision\OrientedBoundingBox\yolov8n-obb-ultralytics-v8.3.0\yolov8n-obb.onnx `
-  --weights E:\GitSpace\TensorRT-CSharp-API-4.0\downloads\yolov8n-obb-ultralytics-v8.3.0\source\yolov8n-obb.pt `
-  --image E:\GitSpace\TensorRT-CSharp-API-4.0\downloads\yolov8n-obb-ultralytics-v8.3.0\source\boats.jpg `
-  --input-tensor E:\GitSpace\TensorRT-CSharp-API-4.0\downloads\yolov8n-obb-ultralytics-v8.3.0\runtime\boats-1x3x1024x1024-rgb-letterbox.fp32.bin `
-  --output-directory E:\GitSpace\TensorRT-CSharp-API-4.0\downloads\yolov8n-obb-ultralytics-v8.3.0\reference `
+  --onnx-model ..\models\YoloVision\OrientedBoundingBox\yolov8n-obb-ultralytics-v8.3.0\yolov8n-obb.onnx `
+  --weights ..\downloads\yolov8n-obb-ultralytics-v8.3.0\source\yolov8n-obb.pt `
+  --image ..\downloads\yolov8n-obb-ultralytics-v8.3.0\source\boats.jpg `
+  --input-tensor ..\downloads\yolov8n-obb-ultralytics-v8.3.0\runtime\boats-1x3x1024x1024-rgb-letterbox.fp32.bin `
+  --output-directory ..\downloads\yolov8n-obb-ultralytics-v8.3.0\reference `
   --input-shape 1 3 1024 1024 `
   --output-shape 1 20 21504 `
   --max-detections 40

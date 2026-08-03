@@ -144,35 +144,35 @@ dotnet run --project .\samples\YoloVision -- `
 
 建议为 YOLOv8n-obb 建立独立的 E 盘 case workspace，把遥感/工业图片、DOTA 或自定义 labels、预处理 tensor、engine、报告和日志分开保存，避免模型和临时包落到系统盘：
 
-E:\TensorRtSharpAssets\cases\yolov8n-obb\models
-E:\TensorRtSharpAssets\cases\yolov8n-obb\labels
-E:\TensorRtSharpAssets\cases\yolov8n-obb\images
-E:\TensorRtSharpAssets\cases\yolov8n-obb\tensors
-E:\TensorRtSharpAssets\cases\yolov8n-obb\engines
-E:\TensorRtSharpAssets\cases\yolov8n-obb\reports
-E:\TensorRtSharpAssets\cases\yolov8n-obb\logs
+..\downloads\cases\yolov8n-obb\models
+..\downloads\cases\yolov8n-obb\labels
+..\downloads\cases\yolov8n-obb\images
+..\downloads\cases\yolov8n-obb\tensors
+..\downloads\cases\yolov8n-obb\engines
+..\downloads\cases\yolov8n-obb\reports
+..\downloads\cases\yolov8n-obb\logs
 
 从 `samples/assets/yolovision-yolov8-obb-candidate.template.json` 开始回填 `model.sourceUrl`、`model.downloadUrl`、`model.license`、`model.sha256`、`labels.sha256`、`input.imageSha256`、`input.preprocessedTensorSha256`，以及 `outputMetadata.outputRoleMap`、`outputMetadata.boxFormat`、`outputMetadata.rotatedBoxLayout`、`outputMetadata.angleUnit`、`outputMetadata.coordinateSpace` 和 `outputMetadata.postprocessMetadata.angleRange`。`rotatedNmsMode`、顺逆时针方向、宽高交换规则和四点 corner 顺序也要和导出说明、运行日志一起记录。
 
 模型、labels、原图、预处理 tensor、engine、build report、preflight report、output JSON、overlay SVG 和 run log 分别计算 SHA256：
 
 ```powershell
-Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-obb\models\yolov8n-obb.onnx
-Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-obb\labels\dota.names
-Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-obb\images\airplane.ppm
-Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-obb\tensors\airplane-fp32.bin
+Get-FileHash -Algorithm SHA256 ..\downloads\cases\yolov8n-obb\models\yolov8n-obb.onnx
+Get-FileHash -Algorithm SHA256 ..\downloads\cases\yolov8n-obb\labels\dota.names
+Get-FileHash -Algorithm SHA256 ..\downloads\cases\yolov8n-obb\images\airplane.ppm
+Get-FileHash -Algorithm SHA256 ..\downloads\cases\yolov8n-obb\tensors\airplane-fp32.bin
 ```
 
 先只做预处理，确认 1024 输入、RGB、NCHW 和 letterbox 记录一致：
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- --preprocess-only --image E:\TensorRtSharpAssets\cases\yolov8n-obb\images\airplane.ppm --preprocessed-output E:\TensorRtSharpAssets\cases\yolov8n-obb\tensors\airplane-fp32.bin --input-shape 1x3x1024x1024 --tensor-layout NCHW --color-order RGB --resize letterbox
+dotnet run --project .\samples\YoloVision -- --preprocess-only --image ..\downloads\cases\yolov8n-obb\images\airplane.ppm --preprocessed-output ..\downloads\cases\yolov8n-obb\tensors\airplane-fp32.bin --input-shape 1x3x1024x1024 --tensor-layout NCHW --color-order RGB --resize letterbox
 ```
 
 运行时保留显式 OBB angle role、单位和输出产物：
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- --model E:\TensorRtSharpAssets\cases\yolov8n-obb\models\yolov8n-obb.onnx --labels E:\TensorRtSharpAssets\cases\yolov8n-obb\labels\dota.names --input-data E:\TensorRtSharpAssets\cases\yolov8n-obb\tensors\airplane-fp32.bin --input-shape 1x3x1024x1024 --family v8 --task obb --class-count 15 --layout channels-first --aux-channel-start 19 --aux-layout channels-first --angle-radians --nms-mode class-aware --output-json E:\TensorRtSharpAssets\cases\yolov8n-obb\reports\yolov8n-obb-output.json --visualization-svg E:\TensorRtSharpAssets\cases\yolov8n-obb\reports\yolov8n-obb-output.svg
+dotnet run --project .\samples\YoloVision -- --model ..\downloads\cases\yolov8n-obb\models\yolov8n-obb.onnx --labels ..\downloads\cases\yolov8n-obb\labels\dota.names --input-data ..\downloads\cases\yolov8n-obb\tensors\airplane-fp32.bin --input-shape 1x3x1024x1024 --family v8 --task obb --class-count 15 --layout channels-first --aux-channel-start 19 --aux-layout channels-first --angle-radians --nms-mode class-aware --output-json ..\downloads\cases\yolov8n-obb\reports\yolov8n-obb-output.json --visualization-svg ..\downloads\cases\yolov8n-obb\reports\yolov8n-obb-output.svg
 ```
 
 当前 `yolovision-output.v1` 的 OBB prediction 至少记录 `center.x`、`center.y`、`size.width`、`size.height`、`angle`、`angleUnit`、`angleRange`、`classId`、`className` 和 `score`。程序输出的 `angleUnit` 是 `radian`，`angleRange` 仍是 `owner-record-required`；`corners`、旋转方向和 source-image 坐标反变换仍需 owner 依据模型文档或 golden output 复核。rotated NMS 已由 probabilistic IoU 测试与官方案例覆盖，但不能从一张 SVG 截图推断其他模型也兼容。输出 JSON 还应关联 model/image/tensor/run log hash。

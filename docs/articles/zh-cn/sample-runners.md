@@ -5,13 +5,13 @@
 当前样例优先面向 Windows x64，用于验证 TensorRT / CUDA 托管高层对象、原生 bridge 加载、内存传输、stream/event、模型构建、tensor binding 和 enqueue 关键链路。
 ## 统一本地启动方式
 
-请在仓库根目录执行样例命令，并让现有 C# `NativeBridgePathResolver` 自动探测 `build-out`、`third_party/nvidia` 和标准 CUDA 安装目录：
+请在仓库根目录执行样例命令。开发探测可发现 `build-out` 和标准 CUDA 安装目录；TensorRT 与 cuDNN 使用显式安装根：
 
 ```powershell
 $env:JYPPX_ENABLE_DEVELOPMENT_PROBING = "1"
 ```
 
-只有在你明确要覆盖默认解析行为时，才需要设置 `JYPPX_NATIVE_BRIDGE_PATH`、`JYPPX_TENSORRT_ROOT`、`JYPPX_CUDA_ROOT` 或 `JYPPX_CUDNN_ROOT`。
+运行 vendor bridge 时设置 `JYPPX_TENSORRT_ROOT`；需要 cuDNN 的路径设置 `JYPPX_CUDNN_ROOT`。`JYPPX_NATIVE_BRIDGE_PATH` 和 `JYPPX_CUDA_ROOT` 用于覆盖默认 bridge/CUDA 解析行为。
 ## 推荐顺序
 
 1. `CudaSmokeRunner`

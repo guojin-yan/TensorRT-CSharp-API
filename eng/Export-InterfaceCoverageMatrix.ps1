@@ -14,10 +14,7 @@ if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
 }
 
 if ([string]::IsNullOrWhiteSpace($TensorRtPackageRoot)) {
-  $candidate = Join-Path $RepositoryRoot "third_party\nvidia"
-  if (Test-Path -LiteralPath $candidate -PathType Container) {
-    $TensorRtPackageRoot = $candidate
-  }
+  $TensorRtPackageRoot = $env:JYPPX_TENSORRT_ROOT
 }
 
 if ([string]::IsNullOrWhiteSpace($OutputDirectory)) {

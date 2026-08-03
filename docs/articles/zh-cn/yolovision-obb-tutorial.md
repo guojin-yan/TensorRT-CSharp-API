@@ -49,7 +49,7 @@ kept detection -> detection.SourceIndex -> angleRows[SourceIndex][0]
 ## E 盘资产目录
 
 ```text
-E:\TensorRtSharpAssets\cases\yolov8n-obb
+..\downloads\cases\yolov8n-obb
   models
   labels
   images
@@ -95,17 +95,17 @@ angleRange=[-pi/4,3pi/4]
 
 ```powershell
 yolo export `
-  model=E:\TensorRtSharpAssets\cases\yolov8n-obb\models\yolov8n-obb.pt `
+  model=..\downloads\cases\yolov8n-obb\models\yolov8n-obb.pt `
   format=onnx `
   opset=17 `
   simplify=True `
   dynamic=False `
   imgsz=1024
 
-Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-obb\models\yolov8n-obb.pt
-Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-obb\models\yolov8n-obb.onnx
-Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-obb\labels\dota.names
-Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-obb\images\input.ppm
+Get-FileHash -Algorithm SHA256 ..\downloads\cases\yolov8n-obb\models\yolov8n-obb.pt
+Get-FileHash -Algorithm SHA256 ..\downloads\cases\yolov8n-obb\models\yolov8n-obb.onnx
+Get-FileHash -Algorithm SHA256 ..\downloads\cases\yolov8n-obb\labels\dota.names
+Get-FileHash -Algorithm SHA256 ..\downloads\cases\yolov8n-obb\images\input.ppm
 ```
 
 命令只是 owner 已审核模型的骨架。导出后应使用 Netron、ONNX metadata 或 TensorRtExec binding report 核对真实输入名和输出 shape，不能从 `yolov8n-obb` 文件名推断 angle 合同。
@@ -114,14 +114,14 @@ Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-obb\images\i
 
 ```powershell
 dotnet run --project .\applications\TensorRtExec -- `
-  --onnx E:\TensorRtSharpAssets\cases\yolov8n-obb\models\yolov8n-obb.onnx `
-  --saveEngine E:\TensorRtSharpAssets\cases\yolov8n-obb\engines\yolov8n-obb.plan `
+  --onnx ..\downloads\cases\yolov8n-obb\models\yolov8n-obb.onnx `
+  --saveEngine ..\downloads\cases\yolov8n-obb\engines\yolov8n-obb.plan `
   --minShapes images:1x3x1024x1024 `
   --optShapes images:1x3x1024x1024 `
   --maxShapes images:2x3x1024x1024 `
   --fp16 `
   --buildOnly `
-  --exportReport E:\TensorRtSharpAssets\cases\yolov8n-obb\reports\build-report.json
+  --exportReport ..\downloads\cases\yolov8n-obb\reports\build-report.json
 ```
 
 `--exportReport` 是当前真实参数。该报告证明构建流程和配置被执行，但不证明 angle 单位、范围、旋转方向或 rotated NMS 正确。
@@ -159,16 +159,16 @@ dotnet run --project .\applications\TensorRtExec -- `
 
 ```powershell
 dotnet run --project .\samples\YoloVision -- `
-  --model E:\TensorRtSharpAssets\cases\yolov8n-obb\models\yolov8n-obb.onnx `
-  --labels E:\TensorRtSharpAssets\cases\yolov8n-obb\labels\dota.names `
-  --image E:\TensorRtSharpAssets\cases\yolov8n-obb\images\input.ppm `
+  --model ..\downloads\cases\yolov8n-obb\models\yolov8n-obb.onnx `
+  --labels ..\downloads\cases\yolov8n-obb\labels\dota.names `
+  --image ..\downloads\cases\yolov8n-obb\images\input.ppm `
   --input-shape 1x3x1024x1024 `
   --family v8 --task obb `
   --layout channels-first --has-objectness auto --class-count 15 `
   --nms-mode class-aware `
   --aux-channel-start 19 --aux-layout channels-first --angle-radians `
   --preflight --strict-preflight `
-  --preflight-report E:\TensorRtSharpAssets\cases\yolov8n-obb\reports\preflight.json
+  --preflight-report ..\downloads\cases\yolov8n-obb\reports\preflight.json
 ```
 
 检查 `yolovision-preflight.v1`、`proofClassification=precheck`、`obbAngleInDegrees=false`、input source exclusivity、资产 hash 和 owner action。preflight 不打开 TensorRT，不执行 enqueue，也不会验证 rotated geometry。
@@ -177,18 +177,18 @@ dotnet run --project .\samples\YoloVision -- `
 
 ```powershell
 dotnet run --project .\samples\YoloVision -- `
-  --model E:\TensorRtSharpAssets\cases\yolov8n-obb\models\yolov8n-obb.onnx `
-  --labels E:\TensorRtSharpAssets\cases\yolov8n-obb\labels\dota.names `
-  --image E:\TensorRtSharpAssets\cases\yolov8n-obb\images\input.ppm `
-  --preprocessed-output E:\TensorRtSharpAssets\cases\yolov8n-obb\tensors\input-fp32.bin `
+  --model ..\downloads\cases\yolov8n-obb\models\yolov8n-obb.onnx `
+  --labels ..\downloads\cases\yolov8n-obb\labels\dota.names `
+  --image ..\downloads\cases\yolov8n-obb\images\input.ppm `
+  --preprocessed-output ..\downloads\cases\yolov8n-obb\tensors\input-fp32.bin `
   --input-shape 1x3x1024x1024 `
   --family v8 --task obb `
   --layout channels-first --has-objectness auto --class-count 15 `
   --nms-mode class-aware --confidence 0.25 --iou-threshold 0.45 `
   --top-k 40 --aux-channel-start 19 --aux-layout channels-first --angle-radians `
-  --output-json E:\TensorRtSharpAssets\cases\yolov8n-obb\reports\output.json `
-  --visualization-svg E:\TensorRtSharpAssets\cases\yolov8n-obb\overlays\obb-preview.svg `
-  *> E:\TensorRtSharpAssets\cases\yolov8n-obb\logs\run.log
+  --output-json ..\downloads\cases\yolov8n-obb\reports\output.json `
+  --visualization-svg ..\downloads\cases\yolov8n-obb\overlays\obb-preview.svg `
+  *> ..\downloads\cases\yolov8n-obb\logs\run.log
 ```
 
 若实际 tensor 使用 degrees，运行命令、preflight 和 owner manifest 必须同时改为 `--angle-degrees`，不能只在文章文字中改单位。
@@ -211,8 +211,8 @@ SVG 使用 `AngleRadians * 180 / PI` 旋转矩形，适合快速发现 90 度偏
 
 ```powershell
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-YoloVisionOutputReport.ps1 `
-  -InputPath E:\TensorRtSharpAssets\cases\yolov8n-obb\reports\output.json `
-  -OutputPath E:\TensorRtSharpAssets\cases\yolov8n-obb\reports\output-validation.json `
+  -InputPath ..\downloads\cases\yolov8n-obb\reports\output.json `
+  -OutputPath ..\downloads\cases\yolov8n-obb\reports\output-validation.json `
   -Strict
 ```
 
@@ -249,7 +249,7 @@ validator 会检查 task、center、size、angle、angleUnit、angleRange、输�
 
 owner 审核通过后最多形成 `real-model-runtime` 候选。它不是 `package-consumer-runtime`；后者要求仓库外 clean consumer 从目标 package source restore/build/run。`blocked-by-cuda-driver`、template、build-only、sidecar-only、synthetic input、ProjectReference 和本地 `.nupkg` 都不能替代真实 OBB runtime proof。
 
-当前官方 YOLOv8n-obb 已完成仓库外三包 `PackageReference` 运行、430,080 值 raw 对照、40 个旋转框独立几何对照和受控负例，详见 [YoloVision YOLOv8n OBB 本地包消费教程](yolovision-yolov8n-obb-local-package-consumer-tutorial.md)。该记录分类为 `local-package-consumer-runtime`，仍不是公共 feed 下载、post-publish、Owner 发布批准或 release proof。转换后的 ONNX 暂存在外层 `E:\GitSpace\TensorRT-CSharp-API-4.0\models`，不上传当前仓库。
+当前官方 YOLOv8n-obb 已完成仓库外三包 `PackageReference` 运行、430,080 值 raw 对照、40 个旋转框独立几何对照和受控负例，详见 [YoloVision YOLOv8n OBB 本地包消费教程](yolovision-yolov8n-obb-local-package-consumer-tutorial.md)。该记录分类为 `local-package-consumer-runtime`，仍不是公共 feed 下载、post-publish、Owner 发布批准或 release proof。转换后的 ONNX 暂存在外层 `..\models`，不上传当前仓库。
 
 ## 代码入口
 

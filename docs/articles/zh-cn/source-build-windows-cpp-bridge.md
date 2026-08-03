@@ -23,19 +23,19 @@
 
 ## 环境变量
 
-优先让项目自己的 probing 逻辑寻找 `build-out`、`third_party/nvidia` 和标准安装路径：
+开发探测只负责仓库内 `build-out` 和标准 CUDA 安装位置：
 
 ```powershell
 $env:JYPPX_ENABLE_DEVELOPMENT_PROBING = "1"
 ```
 
-只有当你要固定到某套 SDK 时再显式覆盖：
+TensorRT 与 cuDNN 必须由用户安装，并显式指定：
 
 ```powershell
-$env:JYPPX_TENSORRT_ROOT = "C:\nvidia\TensorRT-10.x"
-$env:JYPPX_CUDA_ROOT = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.x"
-$env:JYPPX_CUDNN_ROOT = "C:\nvidia\cudnn"
-$env:JYPPX_NATIVE_BRIDGE_PATH = "E:\GitSpace\TensorRT-CSharp-API-4.0\TensorRtSharp4.0\build-out\..."
+$env:JYPPX_TENSORRT_ROOT = "<TensorRT 安装目录>"
+$env:JYPPX_CUDA_ROOT = "<CUDA 安装目录>"
+$env:JYPPX_CUDNN_ROOT = "<cuDNN 安装目录>"
+$env:JYPPX_NATIVE_BRIDGE_PATH = Join-Path $PWD 'build-out\<preset>\bin\Release\jyppxtrtbridge.dll'
 ```
 
 不要把不同 TensorRT major 的 include/lib/bin 混在同一个 shell 会话里。TRT8、TRT10、TRT11 的 manifests、native 实现和托管路由必须保持 version guard 一致。
@@ -45,7 +45,7 @@ $env:JYPPX_NATIVE_BRIDGE_PATH = "E:\GitSpace\TensorRT-CSharp-API-4.0\TensorRtSha
 从仓库根目录执行：
 
 ```powershell
-Set-Location E:\GitSpace\TensorRT-CSharp-API-4.0\TensorRtSharp4.0
+Set-Location .
 
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Generate-Bindings.ps1
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-BindingGeneratorOutputs.ps1

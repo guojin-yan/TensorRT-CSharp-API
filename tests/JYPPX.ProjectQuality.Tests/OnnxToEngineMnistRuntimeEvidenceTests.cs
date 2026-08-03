@@ -62,7 +62,9 @@ public sealed class OnnxToEngineMnistRuntimeEvidenceTests
             "OnnxToEngine",
             "README.md"));
 
-        Assert.Contains("E:\\GitSpace\\TensorRT-CSharp-API-4.0\\models\\OnnxToEngine\\MNIST", readme, StringComparison.Ordinal);
+        Assert.Contains("<workspace>\\models\\OnnxToEngine\\MNIST", readme, StringComparison.Ordinal);
+        Assert.DoesNotContain("E:\\GitSpace", readme, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("third_party", readme, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("onnxtoengine-mnist-real-model-runtime-evidence.json", readme, StringComparison.Ordinal);
         Assert.Contains("--expectedDigit", readme, StringComparison.Ordinal);
         Assert.Contains("State=mnist-output-mismatch", readme, StringComparison.Ordinal);

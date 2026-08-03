@@ -154,22 +154,22 @@
     {
       "id": "model-file-hash",
       "passed": true,
-      "actual": "third_party/nvidia/TensorRT-10.11.0.33-cuda 12.9/data/mnist/mnist.onnx/2f06e72de813a8635c9bc0397ac447a601bdbfa7df4bebc278723b958831c9bf"
+      "actual": "../models/OnnxToEngine/MNIST/nvidia-tensorrt-10.11/mnist.onnx/2f06e72de813a8635c9bc0397ac447a601bdbfa7df4bebc278723b958831c9bf"
     },
     {
       "id": "model-source-readme-hash",
       "passed": true,
-      "actual": "third_party/nvidia/TensorRT-10.11.0.33-cuda 12.9/data/mnist/README.md/b80c70931e11b2edc517bcd081cfdbafa222f2c860819ee0806f4eaed472a475"
+      "actual": "<user-tensorrt-root>/data/mnist/README.md/b80c70931e11b2edc517bcd081cfdbafa222f2c860819ee0806f4eaed472a475"
     },
     {
       "id": "model-license-readme-hash",
       "passed": true,
-      "actual": "third_party/nvidia/TensorRT-10.11.0.33-cuda 12.9/samples/sampleOnnxMNIST/README.md/696b89fdf1046390156bd3eea37b75c7bfee320a699cb6cbb78b754d7b3f7057"
+      "actual": "<user-tensorrt-root>/samples/sampleOnnxMNIST/README.md/696b89fdf1046390156bd3eea37b75c7bfee320a699cb6cbb78b754d7b3f7057"
     },
     {
       "id": "source-input-file-hash",
       "passed": true,
-      "actual": "third_party/nvidia/TensorRT-10.11.0.33-cuda 12.9/data/mnist/7.pgm/880e75f93fe00ab6f5c4e8ab00ff695c61e7e30bdf0d967ff8b34de1f5a94634"
+      "actual": "<user-tensorrt-root>/data/mnist/7.pgm/880e75f93fe00ab6f5c4e8ab00ff695c61e7e30bdf0d967ff8b34de1f5a94634"
     },
     {
       "id": "input-tensor-file-hash",

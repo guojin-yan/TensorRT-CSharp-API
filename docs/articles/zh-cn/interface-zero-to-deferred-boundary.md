@@ -173,7 +173,7 @@ consumer。测试范围应随 blast radius 增长。
 
 ```powershell
 pwsh -NoProfile -File .\eng\Export-InterfaceCoverageMatrix.ps1 `
-  -TensorRtPackageRoot .\third_party\nvidia
+  -TensorRtPackageRoot $env:JYPPX_TENSORRT_ROOT
 ```
 
 然后检查 summary 和 CSV：

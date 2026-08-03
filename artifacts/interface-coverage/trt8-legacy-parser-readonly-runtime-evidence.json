@@ -56,7 +56,7 @@
     "pointerFreeUffMetadata": true,
     "retainsUffParser": false,
     "binaryProto": {
-      "sourceRelativePath": "third_party/nvidia/TensorRT-8.6.1.6-cuda 12.1/data/mnist/mnist_mean.binaryproto",
+      "sourceRelativePath": "<user-tensorrt-8-cuda12-root>/data/mnist/mnist_mean.binaryproto",
       "sourceLengthBytes": 3147,
       "sourceSha256": "337CF38DD3A69F25BA7E732D25CA3176576CA8F208B0A916FA3AC2A669A894BE",
       "shape": [1, 1, 28, 28],

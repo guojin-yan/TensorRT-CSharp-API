@@ -25,7 +25,7 @@
     "native/src/tensorrt/v10/modules/builder/builder_config.inc",
     "native/src/tensorrt/v11/api.cpp"
   ],
-  "header": "third_party/nvidia/*/include/NvInfer.h",
+  "header": "<user-tensorrt-root>/include/NvInfer.h",
   "importLibraries": ["nvinfer.lib", "nvinfer_10.lib", "nvinfer_11.lib"],
   "runtimeDllEvidence": ["nvinfer.dll", "nvinfer_10.dll", "nvinfer_11.dll"],
   "ownership": {

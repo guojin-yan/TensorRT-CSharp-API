@@ -199,32 +199,32 @@ dotnet run --project .\samples\YoloVision\YoloVision.csproj -- --help
 
 ```powershell
 dotnet run --project .\applications\TensorRtExec\TensorRtExec.csproj -- `
-  --onnx E:\TensorRtSharpAssets\models\model.onnx `
-  --saveEngine E:\TensorRtSharpAssets\engines\model.plan `
+  --onnx ..\downloads\models\model.onnx `
+  --saveEngine ..\downloads\engines\model.plan `
   --minShapes images:1x3x640x640 `
   --optShapes images:1x3x640x640 `
   --maxShapes images:4x3x640x640 `
   --fp16 `
   --buildOnly `
-  --exportReport E:\TensorRtSharpAssets\reports\model-build-report.json
+  --exportReport ..\downloads\reports\model-build-report.json
 ```
 
 第三步，用 YoloVision 或自己的程序加载模型/engine：
 
 ```powershell
 dotnet run --project .\samples\YoloVision\YoloVision.csproj -- `
-  --model E:\TensorRtSharpAssets\models\yolov8-det.onnx `
-  --labels E:\TensorRtSharpAssets\models\coco.names `
-  --image E:\TensorRtSharpAssets\images\dog.ppm `
-  --preprocessed-output E:\TensorRtSharpAssets\tensors\dog-yolov8-fp32.bin `
+  --model ..\downloads\models\yolov8-det.onnx `
+  --labels ..\downloads\models\coco.names `
+  --image ..\downloads\images\dog.ppm `
+  --preprocessed-output ..\downloads\tensors\dog-yolov8-fp32.bin `
   --input-shape 1x3x640x640 `
   --family v8 `
   --task det `
   --layout auto `
   --has-objectness auto `
   --nms-mode class-aware `
-  --output E:\TensorRtSharpAssets\reports\yolov8-det-output.json `
-  --visualization E:\TensorRtSharpAssets\reports\yolov8-det-output.svg
+  --output ..\downloads\reports\yolov8-det-output.json `
+  --visualization ..\downloads\reports\yolov8-det-output.svg
 ```
 
 第四步，如果要作为 release proof，使用 owner validator 或外部 consumer validator 记录证据：

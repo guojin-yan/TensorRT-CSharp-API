@@ -21,8 +21,6 @@ if (-not $package) {
   throw "Runtime package key '$RuntimePackageKey' was not found."
 }
 
-$thirdPartyRoot = Join-Path $RepositoryRoot "third_party\nvidia"
-
 function Expand-RuntimeRootPath {
   param(
     [string]$Path
@@ -100,22 +98,18 @@ foreach ($localManifestPath in $localManifestCandidates) {
   }
 }
 
-$cudnnMinorVersion = $null
-if (-not [string]::IsNullOrWhiteSpace([string]$package.cudnnVersion)) {
-  $parts = ([string]$package.cudnnVersion).Split('.')
-  if ($parts.Count -ge 2) {
-    $cudnnMinorVersion = "v{0}.{1}" -f $parts[0], $parts[1]
-  }
-}
-
 $tensorRtRoot = Resolve-ExistingPath -Candidates @(
   $overrides.defaultTensorRtRoot,
-  $package.defaultTensorRtRoot,
-  (Join-Path $thirdPartyRoot $package.tensorRtPackageName)
+  $env:JYPPX_TENSORRT_ROOT,
+  $env:TENSORRT_ROOT,
+  $package.defaultTensorRtRoot
 )
 
 $cudaRootCandidates = [System.Collections.Generic.List[string]]::new()
 $cudaRootCandidates.Add($overrides.defaultCudaRoot)
+$cudaRootCandidates.Add($env:JYPPX_CUDA_ROOT)
+$cudaRootCandidates.Add($env:CUDA_PATH)
+$cudaRootCandidates.Add($env:CUDAToolkit_ROOT)
 $cudaRootCandidates.Add($package.defaultCudaRoot)
 if ($package.platform -eq "windows" -and -not [string]::IsNullOrWhiteSpace(${env:ProgramFiles})) {
   $cudaRootCandidates.Add((Join-Path ${env:ProgramFiles} "NVIDIA GPU Computing Toolkit\CUDA\v$($package.cudaVersion)"))
@@ -125,9 +119,9 @@ $cudaRoot = Resolve-ExistingPath -Candidates $cudaRootCandidates.ToArray()
 
 $cudnnRoot = Resolve-ExistingPath -Candidates @(
   $overrides.defaultCudnnRoot,
-  $package.defaultCudnnRoot,
-  (Join-Path (Join-Path $thirdPartyRoot $package.cudnnPackageName) $cudnnMinorVersion),
-  (Join-Path $thirdPartyRoot $package.cudnnPackageName)
+  $env:JYPPX_CUDNN_ROOT,
+  $env:CUDNN_ROOT,
+  $package.defaultCudnnRoot
 )
 
 $result = [ordered]@{

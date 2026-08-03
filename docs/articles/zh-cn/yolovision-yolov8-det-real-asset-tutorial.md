@@ -49,8 +49,8 @@ samples/assets/yolovision-yolov8n-det-official-assets.json
 ## 获取资产
 
 ```powershell
-$python = 'C:\Users\<user>\.conda\envs\ultralytics\python.exe'
-$root = 'E:\GitSpace\TensorRT-CSharp-API-4.0\downloads\yolov8n-det-ultralytics-v8.3.0'
+$python = 'python'
+$root = '..\downloads\yolov8n-det-ultralytics-v8.3.0'
 
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Acquire-YoloV8DetectionOfficialAssets.ps1 `
   -AssetRoot $root `

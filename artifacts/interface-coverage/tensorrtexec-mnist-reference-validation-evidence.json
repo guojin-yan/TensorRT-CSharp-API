@@ -12,18 +12,18 @@
     "driverVersion": "576.02"
   },
   "model": {
-    "path": "third_party/nvidia/TensorRT-10.11.0.33-cuda 12.9/data/mnist/mnist.onnx",
+    "path": "../models/OnnxToEngine/MNIST/nvidia-tensorrt-10.11/mnist.onnx",
     "sha256": "2f06e72de813a8635c9bc0397ac447a601bdbfa7df4bebc278723b958831c9bf",
     "statedSource": "ONNX Model Zoo vision/classification/mnist, as recorded by the TensorRT data/mnist README",
-    "sourceReadmePath": "third_party/nvidia/TensorRT-10.11.0.33-cuda 12.9/data/mnist/README.md",
+    "sourceReadmePath": "<user-tensorrt-root>/data/mnist/README.md",
     "sourceReadmeSha256": "b80c70931e11b2edc517bcd081cfdbafa222f2c860819ee0806f4eaed472a475",
-    "licenseReadmePath": "third_party/nvidia/TensorRT-10.11.0.33-cuda 12.9/samples/sampleOnnxMNIST/README.md",
+    "licenseReadmePath": "<user-tensorrt-root>/samples/sampleOnnxMNIST/README.md",
     "licenseReadmeSha256": "696b89fdf1046390156bd3eea37b75c7bfee320a699cb6cbb78b754d7b3f7057",
     "licenseReviewState": "owner-review-required",
     "redistributionApproved": false
   },
   "input": {
-    "sourceAsset": "third_party/nvidia/TensorRT-10.11.0.33-cuda 12.9/data/mnist/7.pgm",
+    "sourceAsset": "<user-tensorrt-root>/data/mnist/7.pgm",
     "sourceAssetSha256": "880e75f93fe00ab6f5c4e8ab00ff695c61e7e30bdf0d967ff8b34de1f5a94634",
     "preprocessing": "float32 1-pixel/255",
     "tensorPath": "artifacts/real-case/onnx-to-engine-mnist-trt10-runtime/digit-7/mnist-trt10-7-input-f32.bin",

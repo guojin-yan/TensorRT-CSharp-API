@@ -49,7 +49,7 @@ TensorRtSharp4.0 的运行时由三层组成：
 建议把本地工作目录分成四块，避免把大依赖和临时包散落到 C 盘：
 
 ```text
-E:\TensorRtSharpAssets\
+..\downloads\
   nvidia\
     TensorRT-10.11\
     cuda-12.9\
@@ -59,7 +59,7 @@ E:\TensorRtSharpAssets\
   proof-inputs\
 ```
 
-仓库仍放在 `E:\GitSpace\TensorRT-CSharp-API-4.0\TensorRtSharp4.0`。模型、ONNX、engine、plan、nupkg、CUDA/TensorRT/cuDNN archive 和大日志不要放进 `C:\Users\<you>\Downloads` 或系统 Temp；这样后续 C 盘审计会很干净。
+以下命令均从仓库根目录执行。模型、ONNX、engine、plan、nupkg、CUDA/TensorRT/cuDNN archive 和大日志应放在仓库外层工作目录，不要写入源码树或系统临时目录。
 
 ## 环境需求
 
@@ -77,20 +77,22 @@ Windows x64 开发机建议准备：
 常见本机路径示例：
 
 ```powershell
-$env:JYPPX_TENSORRT_ROOT = "E:\TensorRtSharpAssets\nvidia\TensorRT-10.11"
-$env:JYPPX_CUDA_ROOT = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.x"
-$env:JYPPX_CUDNN_ROOT = "E:\TensorRtSharpAssets\nvidia\cudnn-windows-x86_64-9.x"
+$env:JYPPX_TENSORRT_ROOT = "<TensorRT 安装目录>"
+$env:JYPPX_CUDA_ROOT = "<CUDA 安装目录>"
+$env:JYPPX_CUDNN_ROOT = "<cuDNN 安装目录>"
 $env:JYPPX_ENABLE_DEVELOPMENT_PROBING = "1"
 ```
 
-如果使用仓库内 `third_party\nvidia` 或 runtime manifest 解析路径，可以先不设置 override 变量，让脚本按默认规则探测。只有当你明确要指定某一套本机 SDK 时，再设置这些变量。
+TensorRT 和 cuDNN 不再从仓库目录探测。构建 vendor bridge 前必须设置对应安装根；CUDA 仍可从标准系统安装位置发现。
 
 执行前先保存环境快照，后面写文章、发博客或提交 issue 时会用到：
 
 ```powershell
-dotnet --info | Tee-Object -FilePath E:\TensorRtSharpAssets\build-logs\dotnet-info.txt
-cmake --version | Tee-Object -FilePath E:\TensorRtSharpAssets\build-logs\cmake-version.txt
-$PSVersionTable | Out-File E:\TensorRtSharpAssets\build-logs\powershell-version.txt
+$logsRoot = Join-Path $env:TEMP 'TensorRtSharp-build-logs'
+New-Item -ItemType Directory -Force $logsRoot | Out-Null
+dotnet --info | Tee-Object -FilePath (Join-Path $logsRoot 'dotnet-info.txt')
+cmake --version | Tee-Object -FilePath (Join-Path $logsRoot 'cmake-version.txt')
+$PSVersionTable | Out-File (Join-Path $logsRoot 'powershell-version.txt')
 ```
 
 ## 先确认 runtime key
@@ -174,10 +176,10 @@ build-out/<preset>/lib/<Configuration>/
 
 ```powershell
 cmake --preset win-x64-trt11-cuda13-release `
-  *> E:\TensorRtSharpAssets\build-logs\cmake-configure-trt11-cuda13.log
+  *> ..\downloads\build-logs\cmake-configure-trt11-cuda13.log
 
 cmake --build --preset win-x64-trt11-cuda13-release --parallel `
-  *> E:\TensorRtSharpAssets\build-logs\cmake-build-trt11-cuda13.log
+  *> ..\downloads\build-logs\cmake-build-trt11-cuda13.log
 ```
 
 构建结束后至少检查这些文件或等价 Linux `.so`：

@@ -84,7 +84,7 @@ canPromoteRuntimeProof=false
 ## E 盘工作区
 
 ```text
-E:\TensorRtSharpAssets\cases\tensorrtexec-option-audit
+..\downloads\cases\tensorrtexec-option-audit
   models
   inputs
   engines
@@ -101,14 +101,14 @@ E:\TensorRtSharpAssets\cases\tensorrtexec-option-audit
 
 ```powershell
 dotnet run --project .\applications\TensorRtExec -- `
-  --onnx E:\TensorRtSharpAssets\cases\tensorrtexec-option-audit\models\model.onnx `
-  --saveEngine E:\TensorRtSharpAssets\cases\tensorrtexec-option-audit\engines\model.plan `
+  --onnx ..\downloads\cases\tensorrtexec-option-audit\models\model.onnx `
+  --saveEngine ..\downloads\cases\tensorrtexec-option-audit\engines\model.plan `
   --minShapes images:1x3x640x640 `
   --optShapes images:1x3x640x640 `
   --maxShapes images:4x3x640x640 `
   --fp16 --workspace 1GiB `
   --dryRun `
-  --exportReport E:\TensorRtSharpAssets\cases\tensorrtexec-option-audit\reports\precheck.json
+  --exportReport ..\downloads\cases\tensorrtexec-option-audit\reports\precheck.json
 ```
 
 dry run 证明参数能解析、归一化和写报告，不读取 ONNX、不创建 builder、不构建 engine。检查 `DryRun=true`、`ProofClassification=precheck`、normalized command/hash 和 `BuildEvidenceOnly` 边界。
@@ -117,8 +117,8 @@ dry run 证明参数能解析、归一化和写报告，不读取 ONNX、不创�
 
 ```powershell
 dotnet run --project .\applications\TensorRtExec -- `
-  --onnx E:\TensorRtSharpAssets\cases\tensorrtexec-option-audit\models\model.onnx `
-  --saveEngine E:\TensorRtSharpAssets\cases\tensorrtexec-option-audit\engines\model.plan `
+  --onnx ..\downloads\cases\tensorrtexec-option-audit\models\model.onnx `
+  --saveEngine ..\downloads\cases\tensorrtexec-option-audit\engines\model.plan `
   --minShapes images:1x3x640x640 `
   --optShapes images:1x3x640x640 `
   --maxShapes images:4x3x640x640 `
@@ -127,10 +127,10 @@ dotnet run --project .\applications\TensorRtExec -- `
   --memPoolSize workspace:512MiB,tacticDram:1GiB `
   --builderOptimizationLevel 4 `
   --maxAuxStreams 2 `
-  --timingCacheFile E:\TensorRtSharpAssets\cases\tensorrtexec-option-audit\caches\input.cache `
-  --exportTimingCache E:\TensorRtSharpAssets\cases\tensorrtexec-option-audit\caches\output.cache `
+  --timingCacheFile ..\downloads\cases\tensorrtexec-option-audit\caches\input.cache `
+  --exportTimingCache ..\downloads\cases\tensorrtexec-option-audit\caches\output.cache `
   --buildOnly `
-  --exportReport E:\TensorRtSharpAssets\cases\tensorrtexec-option-audit\reports\build.json
+  --exportReport ..\downloads\cases\tensorrtexec-option-audit\reports\build.json
 ```
 
 build-only 可以形成 parser snapshot、builder config readback、timing cache artifact 和 serialized engine hash。它不运行用户输入，也不验证输出准确性。
@@ -139,10 +139,10 @@ build-only 可以形成 parser snapshot、builder config readback、timing cache
 
 ```powershell
 dotnet run --project .\applications\TensorRtExec -- `
-  --loadEngine E:\TensorRtSharpAssets\cases\tensorrtexec-option-audit\engines\model.plan `
+  --loadEngine ..\downloads\cases\tensorrtexec-option-audit\engines\model.plan `
   --dumpLayerInfo `
-  --exportLayerInfo E:\TensorRtSharpAssets\cases\tensorrtexec-option-audit\reports\layers.txt `
-  --exportReport E:\TensorRtSharpAssets\cases\tensorrtexec-option-audit\reports\engine-readback.json
+  --exportLayerInfo ..\downloads\cases\tensorrtexec-option-audit\reports\layers.txt `
+  --exportReport ..\downloads\cases\tensorrtexec-option-audit\reports\engine-readback.json
 ```
 
 当 runtime 可用时，报告复制 engine/tensor/profile/inspector metadata、`ReadbackFingerprint` 和 `ReadbackSha256`。这是 pointer-free readonly diagnostics；没有 enqueue/output validation 时不是 runtime execution proof。
@@ -151,15 +151,15 @@ dotnet run --project .\applications\TensorRtExec -- `
 
 ```powershell
 dotnet run --project .\applications\TensorRtExec -- `
-  --loadEngine E:\TensorRtSharpAssets\cases\tensorrtexec-option-audit\engines\model.plan `
-  --loadInputs images:E:\TensorRtSharpAssets\cases\tensorrtexec-option-audit\inputs\input.bin `
+  --loadEngine ..\downloads\cases\tensorrtexec-option-audit\engines\model.plan `
+  --loadInputs images:..\downloads\cases\tensorrtexec-option-audit\inputs\input.bin `
   --iterations 10 --warmUp 200 --duration 3 `
   --streams 1 --avgRuns 10 --percentile 95 `
   --dumpOutput `
-  --exportOutput E:\TensorRtSharpAssets\cases\tensorrtexec-option-audit\outputs\output.json `
-  --exportTimes E:\TensorRtSharpAssets\cases\tensorrtexec-option-audit\outputs\times.json `
-  --dumpRawBindingsToFile E:\TensorRtSharpAssets\cases\tensorrtexec-option-audit\outputs\bindings.bin `
-  --exportReport E:\TensorRtSharpAssets\cases\tensorrtexec-option-audit\reports\runtime.json
+  --exportOutput ..\downloads\cases\tensorrtexec-option-audit\outputs\output.json `
+  --exportTimes ..\downloads\cases\tensorrtexec-option-audit\outputs\times.json `
+  --dumpRawBindingsToFile ..\downloads\cases\tensorrtexec-option-audit\outputs\bindings.bin `
+  --exportReport ..\downloads\cases\tensorrtexec-option-audit\reports\runtime.json
 ```
 
 bounded runtime 只在 engine/input/output 类型和 concrete shape 满足受控条件时执行。外部模型没有 expected output 时必须保留 `runtime-output-captured-unverified`。`--noDataTransfers`、CUDA graph fallback 或缺失 output readback 也会降低证据强度。
@@ -229,8 +229,8 @@ ReportBoundary
 
 ```powershell
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-TensorRtExecReport.ps1 `
-  -InputPath E:\TensorRtSharpAssets\cases\tensorrtexec-option-audit\reports\build.json `
-  -OutputPath E:\TensorRtSharpAssets\cases\tensorrtexec-option-audit\reports\build-validation.json `
+  -InputPath ..\downloads\cases\tensorrtexec-option-audit\reports\build.json `
+  -OutputPath ..\downloads\cases\tensorrtexec-option-audit\reports\build-validation.json `
   -Strict
 ```
 

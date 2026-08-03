@@ -34,7 +34,7 @@ cuDNN include/lib/bin
 PATH includes CUDA/TensorRT/cuDNN runtime DLL directories
 ```
 
-不要把 TensorRT、CUDA、cuDNN、ONNX、engine、runtime package 或 NuGet 临时包下载到 C 盘临时目录。大型资产建议放在 E 盘固定目录，例如 `E:\TensorRtSharpAssets` 或外层仓库的 `downloads` / `runtime-packages` 工作区。
+不要把 TensorRT、CUDA、cuDNN、ONNX、engine、runtime package 或 NuGet 临时包下载到 C 盘临时目录。大型资产建议放在 E 盘固定目录，例如 `..\downloads` 或外层仓库的 `downloads` / `runtime-packages` 工作区。
 
 ## 构建链路
 

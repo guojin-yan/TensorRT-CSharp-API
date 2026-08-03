@@ -143,8 +143,8 @@ dispose 前同步或等待 event。
 ## 可复现命令与负向输入
 
 ```powershell
-$repo = "E:\GitSpace\TensorRT-CSharp-API-4.0\TensorRtSharp4.0"
-$case = "E:\TensorRtSharpAssets\cases\inference-bindings-identity"
+$repo = "."
+$case = "..\downloads\cases\inference-bindings-identity"
 New-Item -ItemType Directory -Force -Path "$case\logs" | Out-Null
 Set-Location $repo
 

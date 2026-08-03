@@ -38,7 +38,7 @@ public sealed class YoloVisionDocumentationMatrixTests
         {
             "## Seg 与 Sem 不同",
             "## 当前实现边界",
-            "E:\\TensorRtSharpAssets\\cases\\yolov8n-seg",
+            "..\\downloads\\cases\\yolov8n-seg",
             "YoloDetection.SourceIndex",
             "[P,H,W]",
             "[1,P,H,W]",
@@ -167,7 +167,7 @@ public sealed class YoloVisionDocumentationMatrixTests
             "obb",
             "pose",
             "sem",
-            "E:\\TensorRtSharpAssets\\cases",
+            "..\\downloads\\cases",
             "--list-capabilities --json",
             "--exportReport",
             "--image",
@@ -276,7 +276,7 @@ public sealed class YoloVisionDocumentationMatrixTests
             "stride 为 2",
             "score 设为 `1.0`",
             "COCO 17 点骨架",
-            "E:\\TensorRtSharpAssets\\cases\\yolov8n-pose",
+            "..\\downloads\\cases\\yolov8n-pose",
             "--exportReport",
             "--output-role-map boxes:det,keypoints:pose-keypoints",
             "--pose-keypoint-count 17",
@@ -336,7 +336,7 @@ public sealed class YoloVisionDocumentationMatrixTests
             "AngleRadians",
             "angleUnit=radian",
             "angleRange=owner-record-required",
-            "E:\\TensorRtSharpAssets\\cases\\yolov8n-obb",
+            "..\\downloads\\cases\\yolov8n-obb",
             "--exportReport",
             "--output-role-map boxes:det,angles:obb-angle",
             "--obb-angle-output angles",
@@ -387,7 +387,7 @@ public sealed class YoloVisionDocumentationMatrixTests
         {
             "## 先判断任务",
             "## 全链路",
-            "E:\\TensorRtSharpAssets\\cases\\cls-sem",
+            "..\\downloads\\cases\\cls-sem",
             "## Classification 输出契约",
             "[C,1]",
             "classification-score-mode logits",
@@ -441,7 +441,7 @@ public sealed class YoloVisionDocumentationMatrixTests
         foreach (string marker in new[]
         {
             "## 全链路",
-            "E:\\TensorRtSharpAssets\\yolo-cases",
+            "..\\downloads\\yolo-cases",
             "## 六任务接入矩阵",
             "## 每个任务的命令骨架",
             "TensorRtExec build-only",

@@ -77,18 +77,19 @@ The explicit `--mnist` path is a model-specific runner. It reads TensorRT's P5 P
 
 TensorRT's `data/mnist/README.md` attributes this opset 8 graph to ONNX Model Zoo. It is already an ONNX release artifact, so there
 is no framework-to-ONNX conversion step. Copy it from the user-installed TensorRT sample-data directory to
-`E:\GitSpace\TensorRT-CSharp-API-4.0\models\OnnxToEngine\MNIST\nvidia-tensorrt-10.11\mnist.onnx` and verify SHA256
+`<workspace>\models\OnnxToEngine\MNIST\nvidia-tensorrt-10.11\mnist.onnx` and verify SHA256
 `2f06e72de813a8635c9bc0397ac447a601bdbfa7df4bebc278723b958831c9bf`. The full acquisition boundary is documented in
 `docs/articles/zh-cn/demo-model-acquisition-and-onnx-conversion.md`; the ONNX is not committed or published.
 
 ```powershell
-$model = 'E:\GitSpace\TensorRT-CSharp-API-4.0\models\OnnxToEngine\MNIST\nvidia-tensorrt-10.11\mnist.onnx'
+$workspaceRoot = Split-Path -Parent $PWD
+$model = Join-Path $workspaceRoot 'models\OnnxToEngine\MNIST\nvidia-tensorrt-10.11\mnist.onnx'
 
 dotnet .\samples\OnnxToEngine\bin\Release\net8.0\OnnxToEngine.dll `
   --mnist `
   --tensor-rt-line 10 `
   --onnx $model `
-  --mnistInput ".\third_party\nvidia\TensorRT-10.11.0.33-cuda 12.9\data\mnist\7.pgm" `
+  --mnistInput (Join-Path $env:JYPPX_TENSORRT_ROOT 'data\mnist\7.pgm') `
   --expectedDigit 7 `
   --minimumConfidence 0.9 `
   --saveEngine ".\artifacts\real-case\onnx-to-engine-mnist-trt10-runtime\mnist-trt10.plan" `

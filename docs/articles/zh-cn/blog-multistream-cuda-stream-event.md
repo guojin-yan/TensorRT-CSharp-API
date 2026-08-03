@@ -131,8 +131,8 @@ streamB.Synchronize();
 ## E 盘日志与重复运行
 
 ```powershell
-$repo = "E:\GitSpace\TensorRT-CSharp-API-4.0\TensorRtSharp4.0"
-$case = "E:\TensorRtSharpAssets\cases\cuda-multistream"
+$repo = "."
+$case = "..\downloads\cases\cuda-multistream"
 New-Item -ItemType Directory -Force -Path "$case\logs" | Out-Null
 Set-Location $repo
 

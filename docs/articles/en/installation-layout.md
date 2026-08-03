@@ -16,7 +16,7 @@ Example CUDA folders validated in this repository:
 
 TensorRT root:
 
-- `<repo-root>\third_party\nvidia`
+- a user-managed installation outside the repository, selected with `JYPPX_TENSORRT_ROOT`
 
 Example TensorRT package folders:
 
@@ -24,6 +24,9 @@ Example TensorRT package folders:
 - `TensorRT-10.11.0.33-cuda 12.9`
 - `TensorRT-8.6.1.6-cuda 11.8`
 - `TensorRT-8.6.1.6-cuda 12.0`
+
+cuDNN is also user-installed and selected with `JYPPX_CUDNN_ROOT`. Do not copy
+CUDA, cuDNN, TensorRT, or NVRTC into the repository.
 
 ## Matching rules
 

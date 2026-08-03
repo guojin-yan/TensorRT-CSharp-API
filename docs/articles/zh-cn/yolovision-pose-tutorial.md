@@ -70,14 +70,14 @@ pwsh -NoProfile -ExecutionPolicy Bypass `
 
 manifest 位于 `samples/assets/yolovision-yolov8n-pose-official-assets.json`，轻量运行记录位于 `samples/assets/yolovision-yolov8n-pose-real-model-runtime-evidence.json`。`.pt`、ONNX、图片、engine、reference、tensor、SVG 和日志都不进入仓库。
 
-转换后的 ONNX 统一暂存在仓库外 `E:\GitSpace\TensorRT-CSharp-API-4.0\models\YoloVision\Pose\yolov8n-pose-ultralytics-v8.3.0\yolov8n-pose.onnx`，不上传 GitHub。仓库外三包 `PackageReference` 的完整运行、独立关键点对照与负例见 [YoloVision YOLOv8n Pose 本地包消费教程](yolovision-yolov8n-pose-local-package-consumer-tutorial.md)。
+转换后的 ONNX 统一暂存在仓库外 `..\models\YoloVision\Pose\yolov8n-pose-ultralytics-v8.3.0\yolov8n-pose.onnx`，不上传 GitHub。仓库外三包 `PackageReference` 的完整运行、独立关键点对照与负例见 [YoloVision YOLOv8n Pose 本地包消费教程](yolovision-yolov8n-pose-local-package-consumer-tutorial.md)。
 
 ## E 盘资产目录
 
 建议使用独立 case workspace，避免模型、engine 和临时 tensor 进入 C 盘：
 
 ```text
-E:\TensorRtSharpAssets\cases\yolov8n-pose
+..\downloads\cases\yolov8n-pose
   models
   labels
   images
@@ -104,17 +104,17 @@ E:\TensorRtSharpAssets\cases\yolov8n-pose
 
 ```powershell
 yolo export `
-  model=E:\TensorRtSharpAssets\cases\yolov8n-pose\models\yolov8n-pose.pt `
+  model=..\downloads\cases\yolov8n-pose\models\yolov8n-pose.pt `
   format=onnx `
   opset=17 `
   simplify=True `
   dynamic=False `
   imgsz=640
 
-Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-pose\models\yolov8n-pose.pt
-Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-pose\models\yolov8n-pose.onnx
-Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-pose\labels\coco.names
-Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-pose\images\input.ppm
+Get-FileHash -Algorithm SHA256 ..\downloads\cases\yolov8n-pose\models\yolov8n-pose.pt
+Get-FileHash -Algorithm SHA256 ..\downloads\cases\yolov8n-pose\models\yolov8n-pose.onnx
+Get-FileHash -Algorithm SHA256 ..\downloads\cases\yolov8n-pose\labels\coco.names
+Get-FileHash -Algorithm SHA256 ..\downloads\cases\yolov8n-pose\images\input.ppm
 ```
 
 不要从模型名称推断输出合同。应先用 ONNX checker、Netron 或 TensorRtExec binding report 确认实际 tensor 名与 shape。官方案例经 ONNX checker 确认为单个 `output0:[1,56,8400]`，不是 `boxes + keypoints` 两个输出。
@@ -123,14 +123,14 @@ Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\yolov8n-pose\images\
 
 ```powershell
 dotnet run --project .\applications\TensorRtExec -- `
-  --onnx E:\TensorRtSharpAssets\cases\yolov8n-pose\models\yolov8n-pose.onnx `
-  --saveEngine E:\TensorRtSharpAssets\cases\yolov8n-pose\engines\yolov8n-pose.plan `
+  --onnx ..\downloads\cases\yolov8n-pose\models\yolov8n-pose.onnx `
+  --saveEngine ..\downloads\cases\yolov8n-pose\engines\yolov8n-pose.plan `
   --minShapes images:1x3x640x640 `
   --optShapes images:1x3x640x640 `
   --maxShapes images:4x3x640x640 `
   --fp16 `
   --buildOnly `
-  --exportReport E:\TensorRtSharpAssets\cases\yolov8n-pose\reports\build-report.json
+  --exportReport ..\downloads\cases\yolov8n-pose\reports\build-report.json
 ```
 
 `--exportReport` 是当前真实参数。build-only report 只能证明构建路径和配置被执行，不能证明 keypoint 行与 box 对齐，更不能替代 `real-model-runtime`。
@@ -171,9 +171,9 @@ dotnet run --project .\applications\TensorRtExec -- `
 
 ```powershell
 dotnet run --project .\samples\YoloVision -- `
-  --model E:\TensorRtSharpAssets\cases\yolov8n-pose\models\yolov8n-pose.onnx `
-  --labels E:\TensorRtSharpAssets\cases\yolov8n-pose\labels\coco.names `
-  --image E:\TensorRtSharpAssets\cases\yolov8n-pose\images\input.ppm `
+  --model ..\downloads\cases\yolov8n-pose\models\yolov8n-pose.onnx `
+  --labels ..\downloads\cases\yolov8n-pose\labels\coco.names `
+  --image ..\downloads\cases\yolov8n-pose\images\input.ppm `
   --input-shape 1x3x640x640 `
   --family v8 --task pose `
   --class-count 1 `
@@ -181,7 +181,7 @@ dotnet run --project .\samples\YoloVision -- `
   --keypoint-count 17 --keypoint-stride 3 `
   --aux-channel-start 5 --aux-layout channels-first `
   --preflight --strict-preflight `
-  --preflight-report E:\TensorRtSharpAssets\cases\yolov8n-pose\reports\preflight.json
+  --preflight-report ..\downloads\cases\yolov8n-pose\reports\preflight.json
 ```
 
 检查报告中的 `schemaVersion=yolovision-preflight.v1`、`proofClassification=precheck`、`poseKeypointCount=17`、`poseKeypointStride=3`、input source exclusivity 和资产 hash。preflight 不打开 TensorRT，不执行 enqueue，所有 runtime/promotion flag 必须保持 false。
@@ -190,10 +190,10 @@ dotnet run --project .\samples\YoloVision -- `
 
 ```powershell
 dotnet run --project .\samples\YoloVision -- `
-  --model E:\TensorRtSharpAssets\cases\yolov8n-pose\models\yolov8n-pose.onnx `
-  --labels E:\TensorRtSharpAssets\cases\yolov8n-pose\labels\coco.names `
-  --image E:\TensorRtSharpAssets\cases\yolov8n-pose\images\input.ppm `
-  --preprocessed-output E:\TensorRtSharpAssets\cases\yolov8n-pose\tensors\input-fp32.bin `
+  --model ..\downloads\cases\yolov8n-pose\models\yolov8n-pose.onnx `
+  --labels ..\downloads\cases\yolov8n-pose\labels\coco.names `
+  --image ..\downloads\cases\yolov8n-pose\images\input.ppm `
+  --preprocessed-output ..\downloads\cases\yolov8n-pose\tensors\input-fp32.bin `
   --input-shape 1x3x640x640 `
   --family v8 --task pose `
   --class-count 1 `
@@ -201,11 +201,11 @@ dotnet run --project .\samples\YoloVision -- `
   --nms-mode class-aware --confidence 0.25 --iou-threshold 0.45 `
   --keypoint-count 17 --keypoint-stride 3 `
   --aux-channel-start 5 --aux-layout channels-first `
-  --reference-outputs output0:E:\TensorRtSharpAssets\cases\yolov8n-pose\references\output0.reference.json `
+  --reference-outputs output0:..\downloads\cases\yolov8n-pose\references\output0.reference.json `
   --reference-abs-tolerance 1.25 --reference-rel-tolerance 0.05 `
-  --output-json E:\TensorRtSharpAssets\cases\yolov8n-pose\reports\output.json `
-  --visualization-svg E:\TensorRtSharpAssets\cases\yolov8n-pose\overlays\pose-preview.svg `
-  *> E:\TensorRtSharpAssets\cases\yolov8n-pose\logs\run.log
+  --output-json ..\downloads\cases\yolov8n-pose\reports\output.json `
+  --visualization-svg ..\downloads\cases\yolov8n-pose\overlays\pose-preview.svg `
+  *> ..\downloads\cases\yolov8n-pose\logs\run.log
 ```
 
 真实日志至少应包含 `Profile Family=YoloV8 Task=Pose Layout=ChannelsFirst`、`output0:[1,56,8400]`、`ReferenceOutputValidation ... Passed=True`、`Poses=2` 和 `YoloVision Passed=True`。具体数量以实际资产为准，证据记录中的 expected line 必须与采集结果一致。
@@ -224,8 +224,8 @@ SVG 会绘制 box、可见 keypoint 圆点和 COCO 人体骨架边。它最多�
 
 ```powershell
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-YoloVisionOutputReport.ps1 `
-  -InputPath E:\TensorRtSharpAssets\cases\yolov8n-pose\reports\output.json `
-  -OutputPath E:\TensorRtSharpAssets\cases\yolov8n-pose\reports\output-validation.json `
+  -InputPath ..\downloads\cases\yolov8n-pose\reports\output.json `
+  -OutputPath ..\downloads\cases\yolov8n-pose\reports\output-validation.json `
   -Strict
 ```
 

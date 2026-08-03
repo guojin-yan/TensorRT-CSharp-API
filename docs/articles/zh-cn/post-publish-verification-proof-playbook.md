@@ -141,7 +141,7 @@ private feed 可作为 owner 指定真实渠道，但凭据不得进入文档、
 每次发布版本使用全新目录，避免旧 global package cache 或旧输出混入。
 
 ```text
-E:\TensorRtSharpProof\post-publish\<version>\<runtime-key>\
+..\proof\post-publish\<version>\<runtime-key>\
   downloads\
   consumer\
   nuget-config\
@@ -156,7 +156,7 @@ E:\TensorRtSharpProof\post-publish\<version>\<runtime-key>\
 ```powershell
 $version = "<owner-published-version>"
 $runtimeKey = "win-x64-trt11.0-cuda13.2-cudnn9.22"
-$caseRoot = "E:\TensorRtSharpProof\post-publish\$version\$runtimeKey"
+$caseRoot = "..\proof\post-publish\$version\$runtimeKey"
 
 @("downloads", "consumer", "nuget-config", "output", "logs", "reports", "evidence") |
   ForEach-Object {

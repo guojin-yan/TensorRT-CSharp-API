@@ -60,11 +60,11 @@ flowchart LR
 
 ## 2. 环境与目录
 
-建议把模型、Python 环境和构建产物放在空间充足的数据盘。以下示例使用 E 盘：
+建议把模型、Python 环境和构建产物放在仓库外层工作目录：
 
 ```powershell
-$repo = "E:\GitSpace\TensorRT-CSharp-API-4.0\TensorRtSharp4.0"
-$work = "E:\Models\YOLOv10"
+$repo = "."
+$work = Join-Path (Split-Path -Parent $PWD) 'downloads\yolov10-v1.1'
 New-Item -ItemType Directory -Force -Path $work | Out-Null
 ```
 
@@ -73,7 +73,7 @@ New-Item -ItemType Directory -Force -Path $work | Out-Null
 - Windows x64、.NET 8 SDK、Git、Python 3.9 或官方仓库当前支持版本。
 - 与目标 TensorRT line 匹配的 CUDA、cuDNN、TensorRT 和本仓库 native bridge。
 - NVIDIA 驱动与目标 CUDA runtime 兼容。
-- 足够的 E 盘空间；不要把大型 checkpoint、ONNX 和 engine 放进源码仓库。
+- 足够的工作区空间；不要把大型 checkpoint、ONNX 和 engine 放进源码仓库。
 
 本教程不触发 GitHub Actions，也不发布 NuGet、GitHub Packages 或 GitHub Release。
 
@@ -126,15 +126,20 @@ python -m venv "$work\.venv"
 创建 `$work\export_onnx.py`：
 
 ```python
+import os
+from pathlib import Path
+
 from ultralytics import YOLOv10
 
-model = YOLOv10(r"E:\Models\YOLOv10\yolov10n.pt")
+work = Path(os.environ["YOLOV10_WORK"])
+model = YOLOv10(str(work / "yolov10n.pt"))
 model.export(format="onnx", imgsz=640, opset=13, simplify=True)
 ```
 
 执行并记录 stdout/stderr：
 
 ```powershell
+$env:YOLOV10_WORK = $work
 & "$work\.venv\Scripts\python.exe" "$work\export_onnx.py" *>&1 |
   Tee-Object -FilePath "$work\export-onnx.log"
 
@@ -151,9 +156,10 @@ opset、imgsz、dynamic/static 和 simplify 设置。
 
 ```powershell
 @'
+import os
 import onnx
 
-path = r"E:\Models\YOLOv10\yolov10n.onnx"
+path = os.path.join(os.environ["YOLOV10_WORK"], "yolov10n.onnx")
 model = onnx.load(path)
 
 def dims(value_info):

@@ -26,11 +26,11 @@ samples/assets/yolovision-yolov8n-seg-real-model-runtime-evidence.json
 
 旧 GitHub Release API 没有为该模型返回服务端 digest，因此 acquisition manifest 明确记录“官方 asset ID +
 首次下载后仓库 pin”，没有把本地 SHA256 伪称为上游 checksum。模型、图片、engine、reference 和 mask 二进制
-都保留在 E 盘工作区，不提交、不打包、不发布。
+都保留在仓库外层工作区，不提交、不打包、不发布。
 
 ```powershell
 .\eng\Acquire-YoloV8SegOfficialAssets.ps1 `
-  -DestinationRoot E:\GitSpace\TensorRT-CSharp-API-4.0\downloads\yolov8n-seg-ultralytics-v8.3.0
+  -DestinationRoot ..\downloads\yolov8n-seg-ultralytics-v8.3.0
 ```
 
 `-Offline` 可在已有资产上只做长度、SHA256、许可证和来源复核。脚本不导出 ONNX、不运行 TensorRT，也不发布资产。
@@ -40,7 +40,7 @@ samples/assets/yolovision-yolov8n-seg-real-model-runtime-evidence.json
 本次使用 Ultralytics `8.4.21` 和 Torch `2.10` CPU 导出静态 FP32 ONNX：
 
 ```powershell
-yolo export model=E:\GitSpace\TensorRT-CSharp-API-4.0\downloads\yolov8n-seg-ultralytics-v8.3.0\source\yolov8n-seg.pt format=onnx imgsz=640 opset=17 simplify=True dynamic=False
+yolo export model=..\downloads\yolov8n-seg-ultralytics-v8.3.0\source\yolov8n-seg.pt format=onnx imgsz=640 opset=17 simplify=True dynamic=False
 ```
 
 导出文件 SHA256：
@@ -93,14 +93,17 @@ load-engine 运行中，两份 reference 均通过。reference 来源是独立 O
 
 ## YoloVision 运行
 
-以下命令展示本次路径的关键参数；路径可替换为自己的 E 盘 case 目录：
+以下命令从仓库根目录执行，并复用前文的外层资产目录：
 
 ```powershell
+$caseRoot = '..\downloads\yolov8n-seg-ultralytics-v8.3.0'
+$sharedAssets = '..\downloads\yolox-apache\derived'
+
 dotnet .\samples\YoloVision\bin\Release\net8.0\YoloVision.dll `
-  --model E:\...\source\yolov8n-seg.onnx `
-  --labels E:\...\yolox-apache\derived\coco.names `
-  --image E:\...\yolox-apache\derived\dog.ppm `
-  --preprocessed-output E:\...\runtime\dog-1x3x640x640-rgb-letterbox.fp32.bin `
+  --model "$caseRoot\source\yolov8n-seg.onnx" `
+  --labels "$sharedAssets\coco.names" `
+  --image "$sharedAssets\dog.ppm" `
+  --preprocessed-output "$caseRoot\runtime\dog-1x3x640x640-rgb-letterbox.fp32.bin" `
   --input-shape 1x3x640x640 `
   --tensor-rt-line 10 `
   --family v8 --task seg `
@@ -108,11 +111,11 @@ dotnet .\samples\YoloVision\bin\Release\net8.0\YoloVision.dll `
   --mask-coefficient-count 32 `
   --confidence 0.25 --iou-threshold 0.45 --mask-threshold 0.5 `
   --mask-spatial-transform --mask-coordinate-space model-input --mask-crop-to-box true `
-  --reference-outputs output0:E:\...\reference\output0.reference.json,output1:E:\...\reference\output1.reference.json `
+  --reference-outputs "output0:$caseRoot\reference\output0.reference.json,output1:$caseRoot\reference\output1.reference.json" `
   --reference-abs-tolerance 0.02 --reference-rel-tolerance 0.03 `
-  --output-json E:\...\runtime\yolovision-yolov8n-seg-output.json `
-  --segmentation-mask-output-directory E:\...\runtime\segmentation-masks `
-  --visualization E:\...\runtime\yolovision-yolov8n-seg-output.svg
+  --output-json "$caseRoot\runtime\yolovision-yolov8n-seg-output.json" `
+  --segmentation-mask-output-directory "$caseRoot\runtime\segmentation-masks" `
+  --visualization "$caseRoot\runtime\yolovision-yolov8n-seg-output.svg"
 ```
 
 最终日志同时满足：
@@ -152,12 +155,12 @@ class、score、source index、box 和 proof boundary。manifest 自身 SHA256 �
 source-image mask reference：
 
 ```powershell
-C:\Users\guoji\.conda\envs\ultralytics\python.exe `
+python `
   .\eng\Invoke-YoloVisionSegmentationReference.py `
-  --model E:\...\source\yolov8n-seg.pt `
-  --image E:\...\yolox-apache\derived\dog.ppm `
-  --output-directory E:\...\independent-postprocess `
-  --actual-manifest E:\...\runtime\segmentation-masks\segmentation-mask-artifacts.manifest.json
+  --model "$caseRoot\source\yolov8n-seg.pt" `
+  --image "$sharedAssets\dog.ppm" `
+  --output-directory "$caseRoot\independent-postprocess" `
+  --actual-manifest "$caseRoot\runtime\segmentation-masks\segmentation-mask-artifacts.manifest.json"
 ```
 
 比较门槛为 box coordinate error `<=1.0`、score error `<=0.01`、box IoU `>=0.995`、mask IoU `>=0.99`。

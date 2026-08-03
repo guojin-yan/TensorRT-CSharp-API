@@ -129,7 +129,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass `
 默认输出位于 E 盘：
 
 ```text
-E:\GitSpace\TensorRT-CSharp-API-4.0\downloads\yolox-apache
+..\downloads\yolox-apache
 ```
 
 本次固定资产：

@@ -42,7 +42,7 @@ flowchart LR
 模型、tensor、engine 和隔离 NuGet 缓存都放在 E 盘。本文不要求下载任何资产到 C 盘，也不建议删除系统 Temp 或用户 Downloads 中无法确认归属的文件。
 
 ```text
-E:\TensorRtSharpAssets\cases\cls-sem
+..\downloads\cases\cls-sem
   cls\models
   cls\labels
   cls\images
@@ -72,10 +72,10 @@ E:\TensorRtSharpAssets\cases\cls-sem
 用 PowerShell 计算 hash：
 
 ```powershell
-Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\cls-sem\cls\models\model.onnx
-Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\cls-sem\cls\labels\labels.txt
-Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\cls-sem\sem\models\model.onnx
-Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\cls-sem\sem\labels\palette.json
+Get-FileHash -Algorithm SHA256 ..\downloads\cases\cls-sem\cls\models\model.onnx
+Get-FileHash -Algorithm SHA256 ..\downloads\cases\cls-sem\cls\labels\labels.txt
+Get-FileHash -Algorithm SHA256 ..\downloads\cases\cls-sem\sem\models\model.onnx
+Get-FileHash -Algorithm SHA256 ..\downloads\cases\cls-sem\sem\labels\palette.json
 ```
 
 ## 预处理输入
@@ -85,8 +85,8 @@ YoloVision 内置 `.bmp`/`.ppm` 路径支持 stretch、letterbox 或抗锯齿短
 ```powershell
 dotnet run --project .\samples\YoloVision -- `
   --preprocess-only `
-  --image E:\TensorRtSharpAssets\cases\cls-sem\cls\images\input.ppm `
-  --preprocessed-output E:\TensorRtSharpAssets\cases\cls-sem\cls\tensors\input-fp32.bin `
+  --image ..\downloads\cases\cls-sem\cls\images\input.ppm `
+  --preprocessed-output ..\downloads\cases\cls-sem\cls\tensors\input-fp32.bin `
   --input-shape 1x3x224x224 `
   --tensor-layout NCHW `
   --color-order RGB `
@@ -127,14 +127,14 @@ labels 行数应与 class count 一致，且行序就是 class id。labels 内�
 
 ```powershell
 dotnet run --project .\applications\TensorRtExec -- `
-  --onnx E:\TensorRtSharpAssets\cases\cls-sem\cls\models\model.onnx `
-  --saveEngine E:\TensorRtSharpAssets\cases\cls-sem\cls\engines\model.plan `
+  --onnx ..\downloads\cases\cls-sem\cls\models\model.onnx `
+  --saveEngine ..\downloads\cases\cls-sem\cls\engines\model.plan `
   --minShapes images:1x3x224x224 `
   --optShapes images:1x3x224x224 `
   --maxShapes images:8x3x224x224 `
   --fp16 `
   --buildOnly `
-  --exportReport E:\TensorRtSharpAssets\cases\cls-sem\cls\reports\build-report.json
+  --exportReport ..\downloads\cases\cls-sem\cls\reports\build-report.json
 ```
 
 真实 input tensor name 不一定是 `images`。应以 ONNX/engine binding 为准修改 profile；不要为了让命令成功而保留错误名称。
@@ -143,14 +143,14 @@ dotnet run --project .\applications\TensorRtExec -- `
 
 ```powershell
 dotnet run --project .\applications\TensorRtExec -- `
-  --onnx E:\TensorRtSharpAssets\cases\cls-sem\sem\models\model.onnx `
-  --saveEngine E:\TensorRtSharpAssets\cases\cls-sem\sem\engines\model.plan `
+  --onnx ..\downloads\cases\cls-sem\sem\models\model.onnx `
+  --saveEngine ..\downloads\cases\cls-sem\sem\engines\model.plan `
   --minShapes images:1x3x512x512 `
   --optShapes images:1x3x512x512 `
   --maxShapes images:2x3x512x512 `
   --fp16 `
   --buildOnly `
-  --exportReport E:\TensorRtSharpAssets\cases\cls-sem\sem\reports\build-report.json
+  --exportReport ..\downloads\cases\cls-sem\sem\reports\build-report.json
 ```
 
 build report 证明 parser/build/serialization 路径，不证明 Top-K 正确，也不证明 class map、argmax 或 resize-back 正确。
@@ -163,13 +163,13 @@ Classification：
 dotnet run --project .\samples\YoloVision -- `
   --preflight `
   --family v8 --task cls `
-  --model E:\TensorRtSharpAssets\cases\cls-sem\cls\models\model.onnx `
-  --labels E:\TensorRtSharpAssets\cases\cls-sem\cls\labels\labels.txt `
-  --input-data E:\TensorRtSharpAssets\cases\cls-sem\cls\tensors\input-fp32.bin `
+  --model ..\downloads\cases\cls-sem\cls\models\model.onnx `
+  --labels ..\downloads\cases\cls-sem\cls\labels\labels.txt `
+  --input-data ..\downloads\cases\cls-sem\cls\tensors\input-fp32.bin `
   --input-shape 1x3x224x224 `
   --classification-output output0 --classification-score-mode probabilities `
   --class-count 1000 --top-k 5 `
-  --preflight-report E:\TensorRtSharpAssets\cases\cls-sem\cls\reports\preflight.json
+  --preflight-report ..\downloads\cases\cls-sem\cls\reports\preflight.json
 ```
 
 Semantic Segmentation：
@@ -178,13 +178,13 @@ Semantic Segmentation：
 dotnet run --project .\samples\YoloVision -- `
   --preflight `
   --family custom --task sem `
-  --model E:\TensorRtSharpAssets\cases\cls-sem\sem\models\model.onnx `
-  --labels E:\TensorRtSharpAssets\cases\cls-sem\sem\labels\labels.txt `
-  --input-data E:\TensorRtSharpAssets\cases\cls-sem\sem\tensors\input-fp32.bin `
+  --model ..\downloads\cases\cls-sem\sem\models\model.onnx `
+  --labels ..\downloads\cases\cls-sem\sem\labels\labels.txt `
+  --input-data ..\downloads\cases\cls-sem\sem\tensors\input-fp32.bin `
   --input-shape 1x3x512x512 `
   --semantic-output semantic `
   --class-count 21 `
-  --preflight-report E:\TensorRtSharpAssets\cases\cls-sem\sem\reports\preflight.json
+  --preflight-report ..\downloads\cases\cls-sem\sem\reports\preflight.json
 ```
 
 preflight schema 必须为 `yolovision-preflight.v1`，`proofClassification=precheck`，所有 execution/promotion flag 保持 false。`ready-for-runtime-precheck` 只表示资产和配置足以进入下一步。
@@ -194,14 +194,14 @@ preflight schema 必须为 `yolovision-preflight.v1`，`proofClassification=prec
 ```powershell
 dotnet run --project .\samples\YoloVision -- `
   --family v8 --task cls `
-  --model E:\TensorRtSharpAssets\cases\cls-sem\cls\models\model.onnx `
-  --labels E:\TensorRtSharpAssets\cases\cls-sem\cls\labels\labels.txt `
-  --input-data E:\TensorRtSharpAssets\cases\cls-sem\cls\tensors\input-fp32.bin `
+  --model ..\downloads\cases\cls-sem\cls\models\model.onnx `
+  --labels ..\downloads\cases\cls-sem\cls\labels\labels.txt `
+  --input-data ..\downloads\cases\cls-sem\cls\tensors\input-fp32.bin `
   --input-shape 1x3x224x224 `
   --classification-output output0 --classification-score-mode probabilities `
   --class-count 1000 --confidence 0 --top-k 5 `
-  --output-json E:\TensorRtSharpAssets\cases\cls-sem\cls\reports\output.json `
-  --visualization-svg E:\TensorRtSharpAssets\cases\cls-sem\cls\reports\topk.svg
+  --output-json ..\downloads\cases\cls-sem\cls\reports\output.json `
+  --visualization-svg ..\downloads\cases\cls-sem\cls\reports\topk.svg
 ```
 
 分类日志至少核对：
@@ -221,14 +221,14 @@ Expected real-log marker: YoloVision Passed=True
 ```powershell
 dotnet run --project .\samples\YoloVision -- `
   --family custom --task sem `
-  --model E:\TensorRtSharpAssets\cases\cls-sem\sem\models\model.onnx `
-  --labels E:\TensorRtSharpAssets\cases\cls-sem\sem\labels\labels.txt `
-  --input-data E:\TensorRtSharpAssets\cases\cls-sem\sem\tensors\input-fp32.bin `
+  --model ..\downloads\cases\cls-sem\sem\models\model.onnx `
+  --labels ..\downloads\cases\cls-sem\sem\labels\labels.txt `
+  --input-data ..\downloads\cases\cls-sem\sem\tensors\input-fp32.bin `
   --input-shape 1x3x512x512 `
   --semantic-output semantic `
   --class-count 21 `
-  --output-json E:\TensorRtSharpAssets\cases\cls-sem\sem\reports\output.json `
-  --visualization-svg E:\TensorRtSharpAssets\cases\cls-sem\sem\reports\class-map.svg
+  --output-json ..\downloads\cases\cls-sem\sem\reports\output.json `
+  --visualization-svg ..\downloads\cases\cls-sem\sem\reports\class-map.svg
 ```
 
 语义分割日志至少核对：
@@ -265,10 +265,10 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-YoloVisionOutputReport.
 
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-YoloVisionOutputReport.ps1 `
   -InputPath @(
-    'E:\TensorRtSharpAssets\cases\cls-sem\cls\reports\output.json',
-    'E:\TensorRtSharpAssets\cases\cls-sem\sem\reports\output.json'
+    '..\downloads\cases\cls-sem\cls\reports\output.json',
+    '..\downloads\cases\cls-sem\sem\reports\output.json'
   ) `
-  -OutputPath E:\TensorRtSharpAssets\cases\cls-sem\validation.json `
+  -OutputPath ..\downloads\cases\cls-sem\validation.json `
   -Strict
 ```
 

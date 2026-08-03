@@ -1767,7 +1767,7 @@ TRT10.11.0/CUDA12.9 compatible host 的真实 build-only 证据位于 `artifacts
 
 本次审查基于项目开发总方案、本地源码 manifest、已生成的 interop 文件，以及以下本地 NVIDIA 头文件目录：
 
-- `third_party/nvidia`
+- `<user-installed-vendor-roots>`
 - `C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA`
 
 详细的机器可读检查清单位于：

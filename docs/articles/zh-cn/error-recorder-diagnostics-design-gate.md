@@ -137,8 +137,8 @@ managed API 不声称拥有 native recorder 的生命周期。
 ## 运行 design-gate smoke
 
 ```powershell
-$repo = "E:\GitSpace\TensorRT-CSharp-API-4.0\TensorRtSharp4.0"
-$case = "E:\TensorRtSharpAssets\cases\error-recorder-design-gate"
+$repo = "."
+$case = "..\downloads\cases\error-recorder-design-gate"
 New-Item -ItemType Directory -Force -Path "$case\logs" | Out-Null
 Set-Location $repo
 

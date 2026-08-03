@@ -46,11 +46,11 @@
     "nativeLibrarySha256": "dec964ab1ee36cc9b0ae247d13b376627992fc57dec0454354017ab8fd84f1ea"
   },
   "model": {
-    "path": "third_party/nvidia/TensorRT-10.11.0.33-cuda 12.9/data/mnist/mnist.onnx",
+    "path": "../models/OnnxToEngine/MNIST/nvidia-tensorrt-10.11/mnist.onnx",
     "sha256": "2f06e72de813a8635c9bc0397ac447a601bdbfa7df4bebc278723b958831c9bf",
-    "sourceReadmePath": "third_party/nvidia/TensorRT-10.11.0.33-cuda 12.9/data/mnist/README.md",
+    "sourceReadmePath": "<user-tensorrt-root>/data/mnist/README.md",
     "sourceReadmeSha256": "b80c70931e11b2edc517bcd081cfdbafa222f2c860819ee0806f4eaed472a475",
-    "licenseReadmePath": "third_party/nvidia/TensorRT-10.11.0.33-cuda 12.9/samples/sampleOnnxMNIST/README.md",
+    "licenseReadmePath": "<user-tensorrt-root>/samples/sampleOnnxMNIST/README.md",
     "licenseReadmeSha256": "696b89fdf1046390156bd3eea37b75c7bfee320a699cb6cbb78b754d7b3f7057",
     "ownerRedistributionApproved": false
   },

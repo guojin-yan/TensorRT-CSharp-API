@@ -17,7 +17,7 @@
 建议从仓库根目录运行命令：
 
 ```powershell
-cd E:\GitSpace\TensorRT-CSharp-API-4.0\TensorRtSharp4.0
+cd .
 $env:JYPPX_ENABLE_DEVELOPMENT_PROBING = "1"
 ```
 

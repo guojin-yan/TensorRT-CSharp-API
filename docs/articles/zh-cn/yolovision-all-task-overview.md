@@ -150,7 +150,7 @@ family 只选择默认 profile，不会替你识别任意 exporter 的私有输�
 真实模型、图片、engine、tensor 和日志通常较大，建议全部放在独立 E 盘目录：
 
 ```text
-E:\TensorRtSharpAssets\cases\<case-id>\
+..\downloads\cases\<case-id>\
   source\
   models\
   labels\
@@ -180,9 +180,9 @@ E:\TensorRtSharpAssets\cases\<case-id>\
 计算 hash：
 
 ```powershell
-Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\my-yolo\models\model.onnx
-Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\my-yolo\labels\labels.txt
-Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\my-yolo\images\input.ppm
+Get-FileHash -Algorithm SHA256 ..\downloads\cases\my-yolo\models\model.onnx
+Get-FileHash -Algorithm SHA256 ..\downloads\cases\my-yolo\labels\labels.txt
+Get-FileHash -Algorithm SHA256 ..\downloads\cases\my-yolo\images\input.ppm
 ```
 
 “公开可下载”不等于“允许随仓库再分发”。
@@ -195,14 +195,14 @@ Get-FileHash -Algorithm SHA256 E:\TensorRtSharpAssets\cases\my-yolo\images\input
 
 ```powershell
 dotnet run --project .\applications\TensorRtExec -- `
-  --onnx E:\TensorRtSharpAssets\cases\my-yolo\models\model.onnx `
-  --saveEngine E:\TensorRtSharpAssets\cases\my-yolo\engines\model.plan `
+  --onnx ..\downloads\cases\my-yolo\models\model.onnx `
+  --saveEngine ..\downloads\cases\my-yolo\engines\model.plan `
   --minShapes images:1x3x640x640 `
   --optShapes images:1x3x640x640 `
   --maxShapes images:4x3x640x640 `
   --fp16 `
   --buildOnly `
-  --exportReport E:\TensorRtSharpAssets\cases\my-yolo\reports\build-report.json
+  --exportReport ..\downloads\cases\my-yolo\reports\build-report.json
 ```
 
 `--exportReport` 是当前规范参数。
@@ -217,17 +217,17 @@ preflight 不加载 TensorRT，不解析 ONNX，也不执行 inference。
 
 ```powershell
 dotnet run --project .\samples\YoloVision -- `
-  --model E:\TensorRtSharpAssets\cases\my-yolo\models\model.onnx `
-  --labels E:\TensorRtSharpAssets\cases\my-yolo\labels\labels.txt `
-  --image E:\TensorRtSharpAssets\cases\my-yolo\images\input.ppm `
-  --preprocessed-output E:\TensorRtSharpAssets\cases\my-yolo\tensors\input.fp32.bin `
+  --model ..\downloads\cases\my-yolo\models\model.onnx `
+  --labels ..\downloads\cases\my-yolo\labels\labels.txt `
+  --image ..\downloads\cases\my-yolo\images\input.ppm `
+  --preprocessed-output ..\downloads\cases\my-yolo\tensors\input.fp32.bin `
   --input-shape 1x3x640x640 `
   --family custom `
   --task det `
   --layout auto `
   --preflight `
   --strict-preflight `
-  --preflight-report E:\TensorRtSharpAssets\cases\my-yolo\reports\preflight.json
+  --preflight-report ..\downloads\cases\my-yolo\reports\preflight.json
 ```
 
 preflight 报告的分类是 `precheck`，不是 runtime proof。
@@ -256,37 +256,37 @@ JPG/PNG 需要先由外部工具按模型约定解码并生成 float32 tensor，
 ### Detection
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- --model E:\TensorRtSharpAssets\cases\det\models\model.onnx --labels E:\TensorRtSharpAssets\cases\det\labels\labels.txt --image E:\TensorRtSharpAssets\cases\det\images\input.ppm --preprocessed-output E:\TensorRtSharpAssets\cases\det\tensors\input.fp32.bin --input-shape 1x3x640x640 --family v8 --task det --layout auto --has-objectness auto --nms-mode class-aware --confidence 0.25 --iou-threshold 0.45 --output-json E:\TensorRtSharpAssets\cases\det\reports\output.json --visualization-svg E:\TensorRtSharpAssets\cases\det\reports\output.svg
+dotnet run --project .\samples\YoloVision -- --model ..\downloads\cases\det\models\model.onnx --labels ..\downloads\cases\det\labels\labels.txt --image ..\downloads\cases\det\images\input.ppm --preprocessed-output ..\downloads\cases\det\tensors\input.fp32.bin --input-shape 1x3x640x640 --family v8 --task det --layout auto --has-objectness auto --nms-mode class-aware --confidence 0.25 --iou-threshold 0.45 --output-json ..\downloads\cases\det\reports\output.json --visualization-svg ..\downloads\cases\det\reports\output.svg
 ```
 
 ### Classification
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- --model E:\TensorRtSharpAssets\cases\cls\models\model.onnx --labels E:\TensorRtSharpAssets\cases\cls\labels\labels.txt --input-data E:\TensorRtSharpAssets\cases\cls\tensors\input.fp32.bin --input-shape 1x3x224x224 --family v8 --task cls --classification-output output0 --classification-score-mode probabilities --confidence 0 --class-count 1000 --top-k 5 --output-json E:\TensorRtSharpAssets\cases\cls\reports\output.json --visualization-svg E:\TensorRtSharpAssets\cases\cls\reports\output.svg
+dotnet run --project .\samples\YoloVision -- --model ..\downloads\cases\cls\models\model.onnx --labels ..\downloads\cases\cls\labels\labels.txt --input-data ..\downloads\cases\cls\tensors\input.fp32.bin --input-shape 1x3x224x224 --family v8 --task cls --classification-output output0 --classification-score-mode probabilities --confidence 0 --class-count 1000 --top-k 5 --output-json ..\downloads\cases\cls\reports\output.json --visualization-svg ..\downloads\cases\cls\reports\output.svg
 ```
 
 ### Instance Segmentation
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- --model E:\TensorRtSharpAssets\cases\seg\models\model.onnx --labels E:\TensorRtSharpAssets\cases\seg\labels\labels.txt --image E:\TensorRtSharpAssets\cases\seg\images\input.ppm --preprocessed-output E:\TensorRtSharpAssets\cases\seg\tensors\input.fp32.bin --input-shape 1x3x640x640 --family v8 --task seg --output-role-map boxes:det,proto:mask-prototypes --mask-coefficient-count 32 --mask-threshold 0.5 --mask-spatial-transform --mask-coordinate-space model-input --mask-crop-to-box true --output-json E:\TensorRtSharpAssets\cases\seg\reports\output.json --visualization-svg E:\TensorRtSharpAssets\cases\seg\reports\output.svg
+dotnet run --project .\samples\YoloVision -- --model ..\downloads\cases\seg\models\model.onnx --labels ..\downloads\cases\seg\labels\labels.txt --image ..\downloads\cases\seg\images\input.ppm --preprocessed-output ..\downloads\cases\seg\tensors\input.fp32.bin --input-shape 1x3x640x640 --family v8 --task seg --output-role-map boxes:det,proto:mask-prototypes --mask-coefficient-count 32 --mask-threshold 0.5 --mask-spatial-transform --mask-coordinate-space model-input --mask-crop-to-box true --output-json ..\downloads\cases\seg\reports\output.json --visualization-svg ..\downloads\cases\seg\reports\output.svg
 ```
 
 ### Oriented Bounding Box
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- --model E:\TensorRtSharpAssets\cases\obb\models\model.onnx --labels E:\TensorRtSharpAssets\cases\obb\labels\labels.txt --input-data E:\TensorRtSharpAssets\cases\obb\tensors\input.fp32.bin --input-shape 1x3x1024x1024 --family v8 --task obb --output-role-map boxes:det,angles:obb-angle --obb-angle-output angles --angle-radians --output-json E:\TensorRtSharpAssets\cases\obb\reports\output.json --visualization-svg E:\TensorRtSharpAssets\cases\obb\reports\output.svg
+dotnet run --project .\samples\YoloVision -- --model ..\downloads\cases\obb\models\model.onnx --labels ..\downloads\cases\obb\labels\labels.txt --input-data ..\downloads\cases\obb\tensors\input.fp32.bin --input-shape 1x3x1024x1024 --family v8 --task obb --output-role-map boxes:det,angles:obb-angle --obb-angle-output angles --angle-radians --output-json ..\downloads\cases\obb\reports\output.json --visualization-svg ..\downloads\cases\obb\reports\output.svg
 ```
 
 ### Pose
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- --model E:\TensorRtSharpAssets\cases\pose\models\model.onnx --labels E:\TensorRtSharpAssets\cases\pose\labels\labels.txt --input-data E:\TensorRtSharpAssets\cases\pose\tensors\input.fp32.bin --input-shape 1x3x640x640 --family v8 --task pose --output-role-map boxes:det,keypoints:pose-keypoints --pose-keypoints-output keypoints --keypoint-count 17 --keypoint-stride 3 --output-json E:\TensorRtSharpAssets\cases\pose\reports\output.json --visualization-svg E:\TensorRtSharpAssets\cases\pose\reports\output.svg
+dotnet run --project .\samples\YoloVision -- --model ..\downloads\cases\pose\models\model.onnx --labels ..\downloads\cases\pose\labels\labels.txt --input-data ..\downloads\cases\pose\tensors\input.fp32.bin --input-shape 1x3x640x640 --family v8 --task pose --output-role-map boxes:det,keypoints:pose-keypoints --pose-keypoints-output keypoints --keypoint-count 17 --keypoint-stride 3 --output-json ..\downloads\cases\pose\reports\output.json --visualization-svg ..\downloads\cases\pose\reports\output.svg
 ```
 
 ### Semantic Segmentation
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- --model E:\TensorRtSharpAssets\cases\sem\models\model.onnx --labels E:\TensorRtSharpAssets\cases\sem\labels\labels.txt --input-data E:\TensorRtSharpAssets\cases\sem\tensors\input.fp32.bin --input-shape 1x3x512x512 --family custom --task sem --semantic-output semantic --class-count 21 --output-json E:\TensorRtSharpAssets\cases\sem\reports\output.json --visualization-svg E:\TensorRtSharpAssets\cases\sem\reports\output.svg
+dotnet run --project .\samples\YoloVision -- --model ..\downloads\cases\sem\models\model.onnx --labels ..\downloads\cases\sem\labels\labels.txt --input-data ..\downloads\cases\sem\tensors\input.fp32.bin --input-shape 1x3x512x512 --family custom --task sem --semantic-output semantic --class-count 21 --output-json ..\downloads\cases\sem\reports\output.json --visualization-svg ..\downloads\cases\sem\reports\output.svg
 ```
 
 ## 输出 JSON、SVG 与日志

@@ -4,6 +4,7 @@ param(
   [string]$GlobalPackageRoot,
   [string]$ModelPath,
   [string]$InputPath,
+  [string]$TensorRtRoot = $env:JYPPX_TENSORRT_ROOT,
   [string]$TensorRtReferencePath,
   [string]$OutputRoot,
   [string]$ReportDirectory,
@@ -60,9 +61,23 @@ if ([string]::IsNullOrWhiteSpace($GlobalPackageRoot)) {
 else { $GlobalPackageRoot = [IO.Path]::GetFullPath($GlobalPackageRoot) }
 
 if ([string]::IsNullOrWhiteSpace($ModelPath)) {
-  $ModelPath = Join-Path $RepositoryRoot "third_party\nvidia\TensorRT-10.11.0.33-cuda 12.9\data\mnist\mnist.onnx"
+  $ModelPath = Join-Path (Split-Path -Parent $RepositoryRoot) "models\OnnxToEngine\MNIST\nvidia-tensorrt-10.11\mnist.onnx"
 }
 else { $ModelPath = [IO.Path]::GetFullPath($ModelPath) }
+
+if ([string]::IsNullOrWhiteSpace($TensorRtRoot)) {
+  $TensorRtRoot = if (-not [string]::IsNullOrWhiteSpace($env:TENSORRT_ROOT)) {
+    $env:TENSORRT_ROOT
+  }
+  else {
+    $env:TENSORRT_PATH
+  }
+}
+if ([string]::IsNullOrWhiteSpace($TensorRtRoot) -or
+    -not (Test-Path -LiteralPath (Join-Path $TensorRtRoot "data\mnist\README.md") -PathType Leaf)) {
+  throw "TensorRT sample data was not found. Set -TensorRtRoot or JYPPX_TENSORRT_ROOT."
+}
+$TensorRtRoot = (Resolve-Path -LiteralPath $TensorRtRoot).Path
 
 if ([string]::IsNullOrWhiteSpace($InputPath)) {
   $InputPath = Join-Path $RepositoryRoot "artifacts\real-case\onnx-to-engine-mnist-trt10-runtime\digit-7\mnist-trt10-7-input-f32.bin"
@@ -311,10 +326,10 @@ $evidence = [ordered]@{
   model = [ordered]@{
     path = Get-RelativePath -Root $RepositoryRoot -Path $ModelPath
     sha256 = [string]$runReport.model.sha256
-    sourceReadmePath = "third_party/nvidia/TensorRT-10.11.0.33-cuda 12.9/data/mnist/README.md"
-    sourceReadmeSha256 = Get-Sha256 -Path (Join-Path $RepositoryRoot "third_party\nvidia\TensorRT-10.11.0.33-cuda 12.9\data\mnist\README.md")
-    licenseReadmePath = "third_party/nvidia/TensorRT-10.11.0.33-cuda 12.9/samples/sampleOnnxMNIST/README.md"
-    licenseReadmeSha256 = Get-Sha256 -Path (Join-Path $RepositoryRoot "third_party\nvidia\TensorRT-10.11.0.33-cuda 12.9\samples\sampleOnnxMNIST\README.md")
+    sourceReadmePath = "<user-tensorrt-root>/data/mnist/README.md"
+    sourceReadmeSha256 = Get-Sha256 -Path (Join-Path $TensorRtRoot "data\mnist\README.md")
+    licenseReadmePath = "<user-tensorrt-root>/samples/sampleOnnxMNIST/README.md"
+    licenseReadmeSha256 = Get-Sha256 -Path (Join-Path $TensorRtRoot "samples\sampleOnnxMNIST\README.md")
     ownerRedistributionApproved = $false
   }
   input = [ordered]@{
