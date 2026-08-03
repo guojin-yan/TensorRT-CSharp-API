@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "recordKind": "technical-article-visual-assets",
+  "articleId": "yolovision-lraspp-semantic-local-package-consumer",
+  "sourceImage": {
+    "title": "Dog at Norre Vorupor Strand",
+    "artist": "W.carter",
+    "descriptionUrl": "https://commons.wikimedia.org/wiki/File:Dog_at_N%C3%B8rre_Vorup%C3%B8r_Strand.jpg",
+    "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/0/0d/Dog_at_N%C3%B8rre_Vorup%C3%B8r_Strand.jpg",
+    "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Dog_at_N%C3%B8rre_Vorup%C3%B8r_Strand.jpg/1280px-Dog_at_N%C3%B8rre_Vorup%C3%B8r_Strand.jpg",
+    "originalMediaWikiSha1": "15636426634b8ab942ee9b2fbfef1819ae8d1018",
+    "downloadedWidth": 1280,
+    "downloadedHeight": 1091,
+    "downloadedLength": 264368,
+    "downloadedSha256": "e678ecf8dab63da112812ada0553d72d46033e4e9ea3b568bf0e53d92e1d6910",
+    "ppmSha256": "2b719e7967d6094bdd2f05d2a3b30a0b8e3cd63ffa2ca473f4c1373a1e09e728",
+    "license": "CC0 1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "attributionRequired": false,
+    "publicRedistributionPermittedByLicense": true
+  },
+  "resultImages": [
+    {
+      "role": "annotated-inference-result",
+      "path": "docs/images/yolovision-lraspp-semantic-annotated-cc0.png",
+      "sha256": "6939a6749b236081196a334784d0f32f3c1cc410e5cd21bdc2d52f8f6d187612",
+      "source": "Rendered from the SVG written by the real external local-package TensorRT run; the CC0 source image is embedded and the semantic classes are mapped back to source-image pixels."
+    },
+    {
+      "role": "program-runtime-screenshot",
+      "path": "docs/images/yolovision-lraspp-semantic-runtime-terminal.png",
+      "sha256": "d793f103e1f9880b92563aa53f8f1a4a83d034aca251880d552a5f7c56990e70",
+      "source": "Captured from a Windows Terminal window displaying path-free selected stdout from the same real external local-package TensorRT execution."
+    }
+  ],
+  "modelFilesTrackedByGit": false,
+  "uploadsModelFiles": false,
+  "performsPublish": false
+}

@@ -240,7 +240,7 @@
     href: articles/zh-cn/yolovision-managed-package-publication-dry-run.md
   - name: YoloVision LRASPP Semantic Segmentation Map Guide
     href: articles/zh-cn/yolovision-semantic-segmentation-map-guide.md
-  - name: YoloVision LRASPP Semantic Local Package Consumer Tutorial
+  - name: C# 使用 TensorRtSharp4.0 运行 LRASPP 语义分割
     href: articles/zh-cn/yolovision-lraspp-semantic-local-package-consumer-tutorial.md
   - name: YoloVision YOLOv8n Classification Local Package Consumer Tutorial
     href: articles/zh-cn/yolovision-yolov8n-cls-local-package-consumer-tutorial.md

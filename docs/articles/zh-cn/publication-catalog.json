@@ -58,6 +58,40 @@
       ],
       "proofBoundary": "Content-complete local-package-consumer article with a real runtime screenshot and source-image annotation; not public-package, post-publish, Owner acceptance, model upload authorization, or release proof.",
       "publicationAuthorized": false
+    },
+    {
+      "id": "yolovision-lraspp-semantic-local-package-consumer",
+      "path": "docs/articles/zh-cn/yolovision-lraspp-semantic-local-package-consumer-tutorial.md",
+      "classification": "complete-technical-article",
+      "status": "complete-with-runtime-screenshot-and-annotated-result",
+      "realExecutionEvidence": "samples/assets/yolovision-lraspp-semantic-article-runtime-evidence.json",
+      "visualAssetEvidence": "samples/assets/yolovision-lraspp-semantic-article-visual-assets.json",
+      "model": {
+        "sourceUrl": "https://download.pytorch.org/models/lraspp_mobilenet_v3_large-d234d4ea.pth",
+        "pinnedRevision": "torchvision-v0.25.0@8ac84ee75afb1c327902156b5336f56ad63b7e2f",
+        "license": "BSD-3-Clause; model files remain outside Git",
+        "conversionCommand": "python eng/Invoke-YoloVisionSemanticReference.py --weights <models-root>/lraspp_mobilenet_v3_large-d234d4ea.pth --image <asset-root>/dog.jpg --onnx <models-root>/lraspp-mobilenet-v3-large-320.onnx --output-directory <artifact-root> --export-onnx",
+        "onnxWorkspacePath": "models/YoloVision/SemanticSegmentation/lraspp-mobilenet-v3-large-torchvision-v0.25.0/lraspp-mobilenet-v3-large-320.onnx",
+        "onnxSha256": "3cb94e561bdefe606ed7d1a2c4d0296409bec066f3a39a9fe9dabd72b23728f8",
+        "trackedByGit": false,
+        "uploadsModelFiles": false
+      },
+      "resultImages": [
+        {
+          "role": "annotated-inference-result",
+          "path": "docs/images/yolovision-lraspp-semantic-annotated-cc0.png",
+          "sha256": "6939a6749b236081196a334784d0f32f3c1cc410e5cd21bdc2d52f8f6d187612",
+          "source": "Rendered from the SVG written by the real external local-package TensorRT run; semantic classes are overlaid on the CC0 source image."
+        },
+        {
+          "role": "program-runtime-screenshot",
+          "path": "docs/images/yolovision-lraspp-semantic-runtime-terminal.png",
+          "sha256": "d793f103e1f9880b92563aa53f8f1a4a83d034aca251880d552a5f7c56990e70",
+          "source": "Direct Windows Terminal capture showing path-free selected stdout from the same external local-package TensorRT execution."
+        }
+      ],
+      "proofBoundary": "Content-complete local-package-consumer article with a real runtime screenshot and source-image semantic overlay; not public-package, post-publish, Owner acceptance, model upload authorization, or release proof.",
+      "publicationAuthorized": false
     }
   ]
 }

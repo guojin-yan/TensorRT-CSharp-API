@@ -110,7 +110,7 @@ Chinese articles:
 - [YoloVision YOLOv8 Segmentation Local Package Consumer Tutorial](articles/zh-cn/yolovision-yolov8-seg-local-package-consumer-tutorial.md)
 - [YoloVision Managed Extension Publication Dry-Run](articles/zh-cn/yolovision-managed-package-publication-dry-run.md)
 - [YoloVision LRASPP Semantic Segmentation Map Guide](articles/zh-cn/yolovision-semantic-segmentation-map-guide.md)
-- [YoloVision LRASPP Semantic Local Package Consumer Tutorial](articles/zh-cn/yolovision-lraspp-semantic-local-package-consumer-tutorial.md)
+- [C# 使用 TensorRtSharp4.0 运行 LRASPP 语义分割](articles/zh-cn/yolovision-lraspp-semantic-local-package-consumer-tutorial.md)
 - [YoloVision YOLOv8n Classification Local Package Consumer Tutorial](articles/zh-cn/yolovision-yolov8n-cls-local-package-consumer-tutorial.md)
 - [YoloVision YOLOv8n Pose Local Package Consumer Tutorial](articles/zh-cn/yolovision-yolov8n-pose-local-package-consumer-tutorial.md)
 - [YoloVision YOLOv8n OBB Local Package Consumer Tutorial](articles/zh-cn/yolovision-yolov8n-obb-local-package-consumer-tutorial.md)

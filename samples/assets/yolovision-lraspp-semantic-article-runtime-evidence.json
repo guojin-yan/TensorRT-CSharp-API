@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 1,
+  "recordKind": "sample-run-evidence-record",
+  "recordId": "yolovision-lraspp-semantic-article-local-package-win-x64-trt10.11-20260803",
+  "sampleName": "YoloVision",
+  "family": "torchvision-lraspp-mobilenet-v3-large",
+  "task": "sem",
+  "proofClassification": "local-package-consumer-runtime",
+  "validatorState": "local-package-consumer-runtime",
+  "templateOnly": false,
+  "isSmokePassed": true,
+  "canPromoteRealModelRuntime": true,
+  "canPromotePackageConsumerRuntime": false,
+  "executedUtcDate": "2026-08-03",
+  "sourceBaseCommit": "8d9d5711ea35d45ab5d15c01bff544d3e61193eb",
+  "packageConsumer": {
+    "projectOutsideRepository": true,
+    "packageCount": 3,
+    "projectReferenceCount": 0,
+    "assemblyReferenceCount": 0,
+    "runtimeExitCode": 0,
+    "nativeBridgePathEnvironmentVariableSet": false,
+    "packages": [
+      {
+        "id": "JYPPX.TensorRT.CSharp.API",
+        "version": "4.0.0",
+        "length": 15230339,
+        "sha256": "91f90c49a6bd30b7ad9a456facc5c88326eeff386ca177b424006f08120575c4"
+      },
+      {
+        "id": "JYPPX.TensorRT.CSharp.API.YoloVision",
+        "version": "4.0.0",
+        "length": 119259,
+        "sha256": "463a210a367e4008a5d5cac2c441734a4b884b74c2b23460ed1892263c1779a8"
+      },
+      {
+        "id": "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge",
+        "version": "4.0.0",
+        "length": 376972,
+        "sha256": "b0531fbe271583b0f7808a0a9907f72b3ac8f99199dcc5e3b83bdb85157a821b"
+      }
+    ]
+  },
+  "runtimeEnvironment": {
+    "os": "Microsoft Windows 10.0.26200",
+    "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+    "driverVersion": "576.02",
+    "dotnetVersion": "10.0.301",
+    "tensorRtVersion": "10.11.0",
+    "cudaToolkitVersion": "12.9",
+    "nativeBridgeSha256": "0da3f8751d10f3f221fa7c4145ba8dd2927b7d98a8afdce4645531792b3b42e8"
+  },
+  "assets": {
+    "modelSha256": "3cb94e561bdefe606ed7d1a2c4d0296409bec066f3a39a9fe9dabd72b23728f8",
+    "sourceImageSha256": "e678ecf8dab63da112812ada0553d72d46033e4e9ea3b568bf0e53d92e1d6910",
+    "ppmImageSha256": "2b719e7967d6094bdd2f05d2a3b30a0b8e3cd63ffa2ca473f4c1373a1e09e728",
+    "inputTensorSha256": "8b6c3d0dd3fbf3cd42dde02371bedc950f9101ab63bc322b958f2f8dc6d7e923",
+    "referenceOutputSha256": "7df41553e45756028b14cc51fc4be3c335d54b66504436f893d835baa1b61c6a",
+    "actualOutputValueSha256": "f3ec66142d63677b5cbdb6a52e4e1d550b09b87d6a0abc1e0de824c35ae980dc",
+    "classIndexSha256": "58c269efe59582562940d16a20e0fcede3f0e6f36122a55cba73dcf3d818a25f",
+    "outputJsonSha256": "4595242f9cea953c308271efaa4284f2cb926413212fad4a8ff3062855736435",
+    "runtimeLogSha256": "b6415ad3366f2ac77ce8132960f88bbff924d7f8601e5eef101bde1def25889f",
+    "visualizationSvgSha256": "c6c83147af66d9944d45d37b0b35c3744c33b919e478cc8aab49401083c62dcb",
+    "annotatedResultSha256": "6939a6749b236081196a334784d0f32f3c1cc410e5cd21bdc2d52f8f6d187612",
+    "runtimeScreenshotSha256": "d793f103e1f9880b92563aa53f8f1a4a83d034aca251880d552a5f7c56990e70"
+  },
+  "modelContract": {
+    "input": "images:float32[1,3,320,320]",
+    "preprocess": "stretch-320x320; RGB; NCHW; scale=1/255; mean=0.485,0.456,0.406; std=0.229,0.224,0.225",
+    "output": "semantic:float32[1,21,320,320]",
+    "postprocess": "argmax-over-class-dimension; lowest-class-index-wins"
+  },
+  "rawTensorReferenceValidation": {
+    "sourceClassification": "official-torchvision-lraspp-onnxruntime-cpu-csharp-imagenet-input",
+    "absoluteTolerance": 0.0001,
+    "relativeTolerance": 0.0001,
+    "comparedElementCount": 2150400,
+    "mismatchCount": 0,
+    "firstMismatchIndex": -1,
+    "maximumAbsoluteError": 0.0000104904175,
+    "maximumRelativeError": 0.26712328,
+    "passed": true
+  },
+  "classIndexArtifactValidation": {
+    "pixelCount": 102400,
+    "mismatchCount": 0,
+    "classIndexMatches": true,
+    "histogramMatches": true,
+    "histogram": [
+      { "classId": 0, "className": "__background__", "pixelCount": 58253 },
+      { "classId": 12, "className": "dog", "pixelCount": 35453 },
+      { "classId": 15, "className": "person", "pixelCount": 8694 }
+    ],
+    "passed": true
+  },
+  "proofBoundary": {
+    "localPackageConsumerRuntimeEvidence": true,
+    "packagesDownloadedFromPublicFeed": false,
+    "publicPackageProof": false,
+    "postPublishProof": false,
+    "publicRedistributionOwnerApprovalForModel": false,
+    "publicRedistributionPermittedForSourceImage": true,
+    "ownerReleaseAcceptance": false,
+    "releaseProof": false,
+    "performsPublish": false,
+    "uploadsAssets": false
+  }
+}
