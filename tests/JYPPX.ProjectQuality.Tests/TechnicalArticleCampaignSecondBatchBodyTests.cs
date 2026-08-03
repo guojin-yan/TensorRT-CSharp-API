@@ -54,6 +54,20 @@ public sealed class TechnicalArticleCampaignSecondBatchBodyTests
                 Assert.DoesNotContain(@"E:\", article, StringComparison.OrdinalIgnoreCase);
                 Assert.DoesNotContain(@"C:\Users\", article, StringComparison.OrdinalIgnoreCase);
             }
+            else if (articleFile == "cuda-stream-event-multistream-tutorial.md")
+            {
+                Assert.Contains("本文使用的项目与库", article, StringComparison.Ordinal);
+                Assert.Contains("没有使用深度学习模型，也不需要 ONNX 文件", article, StringComparison.Ordinal);
+                Assert.Contains("../../images/cuda-multistream-runtime-terminal.png", article, StringComparison.Ordinal);
+                Assert.Contains("终端截图来自本次真实运行的 stdout", article, StringComparison.Ordinal);
+                Assert.Contains("IndependentStreams=True A=True B=True Bytes=4096", article, StringComparison.Ordinal);
+                Assert.Contains("CrossStreamWait=True", article, StringComparison.Ordinal);
+                Assert.Contains("ProcessExitCode=0", article, StringComparison.Ordinal);
+                Assert.Contains("samples/assets/cuda-multistream-article-runtime-evidence.json", article, StringComparison.Ordinal);
+                Assert.DoesNotContain("第二批正文门禁", article, StringComparison.Ordinal);
+                Assert.DoesNotContain(@"E:\", article, StringComparison.OrdinalIgnoreCase);
+                Assert.DoesNotContain(@"C:\Users\", article, StringComparison.OrdinalIgnoreCase);
+            }
             else
             {
                 Assert.Contains("适用读者", article, StringComparison.Ordinal);

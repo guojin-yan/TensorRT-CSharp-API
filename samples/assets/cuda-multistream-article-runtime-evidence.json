@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "recordKind": "cuda-multistream-technical-article-runtime-evidence",
+  "recordId": "cuda-multistream-source-tree-win-x64-cuda12.9-20260803",
+  "proofClassification": "source-tree-cuda-stream-runtime-readback",
+  "executedUtcDate": "2026-08-03",
+  "sourceBaseCommit": "4a9f238c915643bc2fd9becc10561f8921ac0068",
+  "runtimeEnvironment": {
+    "os": "Microsoft Windows 11 Home Chinese, NT 10.0.26200.0",
+    "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+    "driverVersion": "576.02",
+    "cudaToolkitVersion": "12.9",
+    "dotnetSdkVersion": "10.0.301"
+  },
+  "assets": {
+    "sampleSourcePath": "samples/MultiStream/Program.cs",
+    "sampleSourceSha256": "49d61b66f29227116d2421a130961b178ba8e0e0844006b940b484064d830d80",
+    "sampleAssemblySha256": "d3c8cdaa41a7e2806ceaa1a93bc9c88c94878d768e1bc95a53fb450853045957",
+    "nativeBridgeSha256": "0576f191617dcdad46fd40e238f61cf22b9fb04826b70c1c47993b7944bd26a0",
+    "runtimeLogSha256": "0ecddf967f3dea8f954919edf60a46a43287f9250e4040f0727ef4487c8e9758",
+    "runtimeScreenshotPath": "docs/images/cuda-multistream-runtime-terminal.png",
+    "runtimeScreenshotSha256": "242f36cefa4ea39567661b463830de7d4613066a39a6e6847f9f81502c7eca94"
+  },
+  "workload": {
+    "modelOrOnnxRequired": false,
+    "tensorRtEngineRequired": false,
+    "byteCount": 4096,
+    "streamAFlags": "NonBlocking",
+    "streamBFlags": "NonBlocking",
+    "streamAId": 13,
+    "streamBId": 14,
+    "streamAFillValue": "0x11",
+    "streamBFillValue": "0x22",
+    "crossStreamFillValue": "0x33"
+  },
+  "runtimeValidation": {
+    "deviceCount": 1,
+    "streamAReadbackPassed": true,
+    "streamBReadbackPassed": true,
+    "independentStreamsPassed": true,
+    "crossStreamWaitPassed": true,
+    "processExitCode": 0,
+    "passed": true
+  },
+  "proofBoundary": {
+    "sourceTreeRuntime": true,
+    "realCudaRuntimeExecution": true,
+    "gpuReadbackValidated": true,
+    "tensorRtInferenceProof": false,
+    "realModelAccuracyProof": false,
+    "packageConsumerRuntimeProof": false,
+    "publicPackageProof": false,
+    "linuxRuntimeProof": false,
+    "postPublishProof": false,
+    "ownerReleaseAcceptance": false,
+    "performsPublish": false,
+    "uploadsVendorRuntime": false
+  }
+}

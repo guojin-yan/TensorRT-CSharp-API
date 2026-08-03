@@ -51,6 +51,7 @@
 - [在 C# 中使用 TensorRtSharp4.0 动态编译并运行 CUDA Kernel](cuda-runtime-compilation-technical-article.md)。
 - [使用 TensorRtSharp4.0 完成 Dynamic Shape 推理](dynamic-shape-optimization-profile-tutorial.md)。
 - [使用 TensorRtSharp4.0 管理推理输入、显存绑定与 GPU 输出读回](inference-bindings-tutorial.md)。
+- [使用 TensorRtSharp4.0 在 C# 中实现 CUDA 多流与 Event 同步](cuda-stream-event-multistream-tutorial.md)。
 
 其余模型教程即使已有真实 TensorRT 证据，在补齐原图叠加结果和真实程序窗口截图前，也不会标记为完整技术文章。
 
