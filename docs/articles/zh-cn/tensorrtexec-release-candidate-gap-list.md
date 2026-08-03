@@ -32,7 +32,7 @@ applications/TensorRtExec/tensor-rt-exec-release-candidate-gap-list.md
 
 第二类是 builder config readback。`--workspace`、已知 `--memPoolSize` pool 和 `--avgTiming` 现在会在真实 build 中调用 typed setter 并用 getter read back；TRT8 的 `--minTiming` 使用 legacy compatibility setter，TRT10/11 保持 parse-only；dynamic profile 等仍需要报告和真实模型证据。readback 只说明 TensorRT 接收了 builder 配置，不是 runtime 输出或 package-consumer proof。
 
-第三类是 benchmark scheduler 完整度。`--iterations`、`--warmUp`、`--duration`、effective `--streams/--infStreams`、`--idleTime`、`--avgRuns`、`--percentile`、布尔 `--threads`、`--useSpinWait`、`--useCudaGraph` 和 `--noDataTransfers` 已按官方语义接入 bounded runtime，并完成 TRT10/CUDA12.9 smoke。CUDA graph 捕获失败的单次 run 仍保持 parse-only 并记录 fallback；no-transfer run 不读回输出、不声明模型正确性。`--sleepTime` 仍必须保持 parse-only，直到存在忠实的 device-side launch-to-compute gap 实现。
+第三类是 benchmark scheduler 完整度。`--iterations`、`--warmUp`、`--duration`、effective `--streams/--infStreams`、`--sleepTime`、`--idleTime`、`--avgRuns`、`--percentile`、布尔 `--threads`、`--useSpinWait`、`--useCudaGraph` 和 `--noDataTransfers` 已按官方语义接入 bounded runtime，并完成 TRT10/CUDA12.9 smoke。sleepTime 使用 bridge-owned `cudaLaunchHostFunc` state，记录 event 后一次性扇出到全部推理 stream；CUDA graph 捕获失败的单次 run 仍保持 parse-only 并记录 fallback；no-transfer run 不读回输出、不声明模型正确性。
 
 第四类是 deployment policy 的执行证明。`--device`、DLA/GPU fallback、tactic sources、DirectIO、sparsity enable/disable 和 strongly typed 已接入 typed set/readback 或 version-aware network creation：TRT10 使用 raw bit，TRT11 依赖 always-strongly-typed 契约。TRT10.11 identity smoke 只证明主机配置和 synthetic runtime；TRT8 strongly typed、sparsity force 保持 parse-only，DLA layer 真执行还需要 DLA 主机和真实模型。
 

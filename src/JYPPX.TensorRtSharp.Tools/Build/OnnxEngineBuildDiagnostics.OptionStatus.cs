@@ -15,7 +15,7 @@ public static partial class OnnxEngineBuildDiagnostics
             BuildParsedOptions(result),
             BuildAppliedOptions(result),
             BuildParseOnlyOptions(result),
-            "build reports distinguish parsed, applied, parse-only, and capability-probe-only evidence; bounded benchmark execution can apply iterations/warmUp/duration/streams/infStreams/idleTime without promoting tensor correctness or package-consumer proof; parse-only/build-only/capability-probe-only evidence cannot promote real-model-runtime or package-consumer-runtime proof.");
+            "build reports distinguish parsed, applied, parse-only, and capability-probe-only evidence; bounded benchmark execution can apply iterations/warmUp/duration/streams/infStreams/sleepTime/idleTime without promoting tensor correctness or package-consumer proof; parse-only/build-only/capability-probe-only evidence cannot promote real-model-runtime or package-consumer-runtime proof.");
     }
 
     private static string[] BuildParsedOptions(OnnxEngineBuildResult result)
@@ -188,6 +188,7 @@ public static partial class OnnxEngineBuildDiagnostics
         AddIf(options, "--threads", benchmarkExecuted && runtimeOptions.UseThreads && result.BenchmarkSummary.ThreadsExecuted == result.BenchmarkSummary.ExecutionContextsCreated);
         AddIf(options, "--useSpinWait", benchmarkExecuted && runtimeOptions.UseSpinWait && result.BenchmarkSummary.UseSpinWaitApplied);
         AddIf(options, "--noDataTransfers", benchmarkExecuted && runtimeOptions.NoDataTransfers && result.BenchmarkSummary.NoDataTransfersApplied);
+        AddIf(options, "--sleepTime", benchmarkExecuted && runtimeOptions.SleepTimeMilliseconds.HasValue && result.BenchmarkSummary.SleepTimeMillisecondsApplied == runtimeOptions.SleepTimeMilliseconds.Value);
         AddIf(options, "--useCudaGraph", benchmarkExecuted && result.BenchmarkSummary.UseCudaGraphRequested && result.BenchmarkSummary.UseCudaGraphApplied);
 
         return options.Distinct(StringComparer.Ordinal).ToArray();
@@ -259,7 +260,7 @@ public static partial class OnnxEngineBuildDiagnostics
         AddIf(options, "--threads", runtimeOptions.UseThreads && (!benchmarkExecuted || result.BenchmarkSummary.ThreadsExecuted != result.BenchmarkSummary.ExecutionContextsCreated));
         AddIf(options, "--avgRuns", runtimeOptions.AvgRuns.HasValue && !benchmarkExecuted);
         AddIf(options, "--percentile", runtimeOptions.Percentile.HasValue && !benchmarkExecuted);
-        AddIf(options, "--sleepTime", runtimeOptions.SleepTimeMilliseconds.HasValue);
+        AddIf(options, "--sleepTime", runtimeOptions.SleepTimeMilliseconds.HasValue && (!benchmarkExecuted || result.BenchmarkSummary.SleepTimeMillisecondsApplied != runtimeOptions.SleepTimeMilliseconds.Value));
         AddIf(options, "--idleTime", runtimeOptions.IdleTimeMilliseconds.HasValue && !benchmarkExecuted);
         AddIf(options, "--useCudaGraph", result.NormalizedCommandLine.Contains("--useCudaGraph", StringComparison.Ordinal) && !result.BenchmarkSummary.UseCudaGraphApplied);
         AddIf(options, "--loadInputs", !string.IsNullOrWhiteSpace(runtimeOptions.LoadInputs) && !result.InferenceRan);

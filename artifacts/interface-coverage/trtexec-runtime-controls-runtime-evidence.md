@@ -16,8 +16,12 @@ direct enqueue 初始化，再捕获 TensorRT enqueue、实例化 graph 并执�
 失败都会释放已建 graph 并统一回退 direct enqueue，报告 fallback reason，该次 option 不标 applied。
 
 `--noDataTransfers` 只分配并绑定 device buffers，不执行 input host copy，也不读取 output；times
-artifact 可证明 scheduler/enqueue 行为，但不能证明 tensor correctness。`--sleepTime` 继续 parse-only，
-因为普通 CPU sleep 不是官方 device-side launch-to-compute gap。
+artifact 可证明 scheduler/enqueue 行为，但不能证明 tensor correctness。
+
+`--sleepTime 250` 的独立 smoke 使用两个 execution contexts。桥接层在专用 CUDA stream 中排入
+`cudaLaunchHostFunc`，随后记录一个 event 并扇出到两个推理 stream；回调状态由 native bridge 自行
+分配和释放，不暴露 managed callback，也不借用调用方状态。报告记录 requested/applied 均为 250，
+并把 `--sleepTime` 放入 `AppliedOptions`。这仍是 synthetic identity 的本地行为证据。
 
 本证据仍是 ProjectReference synthetic/local runtime：`isRealModelRuntimeProof=false`、
 `isPackageConsumerRuntimeProof=false`、`canPublishPublicly=false`，不授权任何公开发布操作。

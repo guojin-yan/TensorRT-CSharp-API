@@ -1601,6 +1601,9 @@ internal static partial class NativeMethodsCuda
     internal static extern BridgeStatusCode jyppx_cuda_stream_end_capture_into_graph_safe(SafeCudaStreamHandle stream, SafeCudaGraphHandle graph);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_cuda_stream_enqueue_delay_safe(SafeCudaStreamHandle stream, uint milliseconds);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_cuda_stream_get_attribute(SafeCudaStreamHandle stream, int attribute, IntPtr value);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]

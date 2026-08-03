@@ -137,14 +137,14 @@
     },
     {
       "id": "bounded-benchmark-scheduler",
-      "officialTrtexecParity": "--iterations --warmUp --duration --streams --infStreams --idleTime --avgRuns --percentile --threads --useSpinWait --useCudaGraph --noDataTransfers",
+      "officialTrtexecParity": "--iterations --warmUp --duration --streams --infStreams --sleepTime --idleTime --avgRuns --percentile --threads --useSpinWait --useCudaGraph --noDataTransfers",
       "currentStatus": "implemented-bounded-runtime",
       "isRuntimeProof": false,
       "isPackageConsumerRuntimeProof": false,
       "cliSupported": true,
       "winFormsSupported": true,
-      "nextImplementationPaths": ["src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildService.cs", "applications/TensorRtExec", "samples/OnnxToEngine"],
-      "nextStep": "Retain scheduler runtime evidence separately from model correctness; keep --sleepTime parse-only until a faithful device-side launch-gap primitive exists."
+      "nextImplementationPaths": ["src/JYPPX.CudaSharp/Streams/CudaStream.Synchronization.cs", "native/src/cuda/api.cpp", "src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildService.Benchmarking.cs", "applications/TensorRtExec", "samples/OnnxToEngine"],
+      "nextStep": "Retain scheduler and stream-delay runtime evidence separately from model correctness; carry requested/applied sleepTime fields into future real-model and package-consumer records."
     },
     {
       "id": "timing-cache",

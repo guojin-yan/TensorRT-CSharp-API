@@ -547,6 +547,7 @@ internal static class GeneratedEntryPointNames
     public const string CudaStreamDestroy = "jyppx_cuda_stream_destroy";
     public const string CudaStreamEndCapture = "jyppx_cuda_stream_end_capture";
     public const string CudaStreamEndCaptureIntoExistingGraphOwnerSafe = "jyppx_cuda_stream_end_capture_into_graph_safe";
+    public const string CudaStreamEnqueueDelayOwnerSafe = "jyppx_cuda_stream_enqueue_delay_safe";
     public const string CudaStreamGetAttribute = "jyppx_cuda_stream_get_attribute";
     public const string CudaStreamGetCaptureInfo = "jyppx_cuda_stream_get_capture_info";
     public const string CudaStreamGetCaptureInfoCopiedSummarySafe = "jyppx_cuda_stream_get_capture_summary_safe";

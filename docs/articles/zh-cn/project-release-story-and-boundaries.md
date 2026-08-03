@@ -115,7 +115,7 @@ artifacts/interface-coverage/interface-coverage-summary.md
 
 当前扫描记录：
 
-- manifest API count：4012；
+- manifest API count：4013；
 - TensorRT 8.6：880 scanned / 880 matched / 880 source present / 760 implemented / 120 deferred-only；
 - TensorRT 10.11：879 scanned / 879 matched / 879 source present / 762 implemented / 117 deferred-only；
 - TensorRT 11.0：901 scanned / 901 matched / 901 source present / 815 implemented / 86 deferred-only；

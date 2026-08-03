@@ -347,8 +347,9 @@ public sealed class ReleaseCandidateSmokeScaffoldTests
         });
 
         JsonElement sleepTime = fields.EnumerateArray().Single(static field => field.GetProperty("cliOption").GetString() == "--sleepTime");
-        Assert.Equal("parse-report-only", sleepTime.GetProperty("status").GetString());
-        Assert.Contains("CPU sleep is not an allowed substitute", sleepTime.GetProperty("proofBoundary").GetString(), StringComparison.Ordinal);
+        Assert.Equal("implemented-bounded-runtime", sleepTime.GetProperty("status").GetString());
+        Assert.Equal("bridge-owned-stream-delay-event-fanout", sleepTime.GetProperty("implementationClass").GetString());
+        Assert.Contains("not model correctness", sleepTime.GetProperty("proofBoundary").GetString(), StringComparison.Ordinal);
 
         JsonElement idleTime = fields.EnumerateArray().Single(static field => field.GetProperty("cliOption").GetString() == "--idleTime");
         Assert.Equal("implemented-bounded-runtime", idleTime.GetProperty("status").GetString());

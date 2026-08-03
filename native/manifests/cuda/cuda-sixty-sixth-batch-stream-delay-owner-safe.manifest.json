@@ -1,0 +1,30 @@
+{
+  "$schema": "../bridge-api.schema.json",
+  "module": "cuda",
+  "versionLine": "common",
+  "apis": [
+    {
+      "id": "cuda-stream-enqueue-delay-owner-safe",
+      "entryPoint": "jyppx_cuda_stream_enqueue_delay_safe",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        {
+          "name": "stream",
+          "type": "JYPPX_CudaStream*",
+          "direction": "in",
+          "ownership": "borrowed-call-only"
+        },
+        {
+          "name": "milliseconds",
+          "type": "uint32_t",
+          "direction": "in",
+          "managedType": "uint",
+          "moduleManagedType": "uint"
+        }
+      ]
+    }
+  ]
+}

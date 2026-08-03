@@ -22,9 +22,13 @@ public sealed partial class OnnxEngineBuildService
         OnnxEngineBuildOptions options)
     {
         bool useCudaGraphApplied = TryEnableCudaGraphs(workers, options.UseCudaGraph, out string cudaGraphFallbackReason);
+        int sleepTimeMillisecondsApplied = options.RuntimeOptions.SleepTimeMilliseconds.GetValueOrDefault();
+        using BenchmarkStartDelayGate? startDelayGate = BenchmarkStartDelayGate.Create(
+            workers,
+            sleepTimeMillisecondsApplied);
         return options.RuntimeOptions.UseThreads
-            ? RunThreadedBoundedBenchmark(workers, options, useCudaGraphApplied, cudaGraphFallbackReason)
-            : RunSingleThreadBoundedBenchmark(workers, options, useCudaGraphApplied, cudaGraphFallbackReason);
+            ? RunThreadedBoundedBenchmark(workers, options, sleepTimeMillisecondsApplied, useCudaGraphApplied, cudaGraphFallbackReason)
+            : RunSingleThreadBoundedBenchmark(workers, options, sleepTimeMillisecondsApplied, useCudaGraphApplied, cudaGraphFallbackReason);
     }
 
     private static bool TryEnableCudaGraphs(
@@ -60,6 +64,7 @@ public sealed partial class OnnxEngineBuildService
     private static OnnxEngineBenchmarkRun RunSingleThreadBoundedBenchmark(
         IReadOnlyList<OnnxEngineBenchmarkWorker> workers,
         OnnxEngineBuildOptions options,
+        int sleepTimeMillisecondsApplied,
         bool useCudaGraphApplied,
         string cudaGraphFallbackReason)
     {
@@ -126,6 +131,7 @@ public sealed partial class OnnxEngineBuildService
             warmUpIterations,
             warmUpStopwatch.Elapsed.TotalMilliseconds,
             measurementStopwatch.Elapsed.TotalMilliseconds,
+            sleepTimeMillisecondsApplied,
             measurementRounds > 1 ? options.RuntimeOptions.IdleTimeMilliseconds.GetValueOrDefault() : 0,
             threadsExecuted: 1,
             useSpinWaitApplied: options.RuntimeOptions.UseSpinWait,
@@ -137,6 +143,7 @@ public sealed partial class OnnxEngineBuildService
     private static OnnxEngineBenchmarkRun RunThreadedBoundedBenchmark(
         IReadOnlyList<OnnxEngineBenchmarkWorker> workers,
         OnnxEngineBuildOptions options,
+        int sleepTimeMillisecondsApplied,
         bool useCudaGraphApplied,
         string cudaGraphFallbackReason)
     {
@@ -222,6 +229,7 @@ public sealed partial class OnnxEngineBuildService
             completedRuns.Sum(static item => item.WarmUpIterationsExecuted),
             completedRuns.Max(static item => item.WarmUpElapsedMilliseconds),
             completedRuns.Max(static item => item.MeasurementElapsedMilliseconds),
+            sleepTimeMillisecondsApplied,
             completedRuns.Any(static item => item.IdleTimeMillisecondsApplied > 0)
                 ? options.RuntimeOptions.IdleTimeMilliseconds.GetValueOrDefault()
                 : 0,
@@ -509,6 +517,70 @@ public sealed partial class OnnxEngineBuildService
         }
     }
 
+    private sealed class BenchmarkStartDelayGate : IDisposable
+    {
+        private readonly CudaStream _delayStream;
+        private readonly CudaEvent _readyEvent;
+
+        private BenchmarkStartDelayGate(
+            IReadOnlyList<OnnxEngineBenchmarkWorker> workers,
+            int milliseconds)
+        {
+            CudaStream? delayStream = null;
+            CudaEvent? readyEvent = null;
+            try
+            {
+                delayStream = new CudaStream(CudaStreamCreationFlags.NonBlocking);
+                readyEvent = new CudaEvent(CudaEventCreationFlags.DisableTiming);
+                delayStream.EnqueueDelay(milliseconds);
+                readyEvent.Record(delayStream);
+                foreach (OnnxEngineBenchmarkWorker worker in workers)
+                {
+                    worker.Stream.WaitFor(readyEvent);
+                }
+
+                _delayStream = delayStream;
+                _readyEvent = readyEvent;
+            }
+            catch
+            {
+                try
+                {
+                    delayStream?.Synchronize();
+                }
+                catch (CudaException)
+                {
+                }
+
+                readyEvent?.Dispose();
+                delayStream?.Dispose();
+                throw;
+            }
+        }
+
+        public static BenchmarkStartDelayGate? Create(
+            IReadOnlyList<OnnxEngineBenchmarkWorker> workers,
+            int milliseconds)
+        {
+            return milliseconds > 0
+                ? new BenchmarkStartDelayGate(workers, milliseconds)
+                : null;
+        }
+
+        public void Dispose()
+        {
+            try
+            {
+                _delayStream.Synchronize();
+            }
+            finally
+            {
+                _readyEvent.Dispose();
+                _delayStream.Dispose();
+            }
+        }
+    }
+
     private sealed class OnnxEngineBenchmarkRun
     {
         public OnnxEngineBenchmarkRun(
@@ -518,6 +590,7 @@ public sealed partial class OnnxEngineBuildService
             int warmUpIterationsExecuted,
             double warmUpElapsedMilliseconds,
             double measurementElapsedMilliseconds,
+            int sleepTimeMillisecondsApplied,
             int idleTimeMillisecondsApplied,
             int threadsExecuted,
             bool useSpinWaitApplied,
@@ -531,6 +604,7 @@ public sealed partial class OnnxEngineBuildService
             WarmUpIterationsExecuted = warmUpIterationsExecuted;
             WarmUpElapsedMilliseconds = warmUpElapsedMilliseconds;
             MeasurementElapsedMilliseconds = measurementElapsedMilliseconds;
+            SleepTimeMillisecondsApplied = sleepTimeMillisecondsApplied;
             IdleTimeMillisecondsApplied = idleTimeMillisecondsApplied;
             ThreadsExecuted = threadsExecuted;
             UseSpinWaitApplied = useSpinWaitApplied;
@@ -550,6 +624,8 @@ public sealed partial class OnnxEngineBuildService
         public double WarmUpElapsedMilliseconds { get; }
 
         public double MeasurementElapsedMilliseconds { get; }
+
+        public int SleepTimeMillisecondsApplied { get; }
 
         public int IdleTimeMillisecondsApplied { get; }
 

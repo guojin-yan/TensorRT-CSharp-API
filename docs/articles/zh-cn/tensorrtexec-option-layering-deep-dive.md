@@ -13,7 +13,7 @@
 | `tensor-rt-exec-trtexec-parity-matrix.json` | 分组 parity rows | 官方功能与当前 implementation/evidence gap | full trtexec parity 已完成 |
 | `tensor-rt-exec-release-candidate-gap-list.json` | 20 items | 剩余实现/owner proof 动作 | release 已批准 |
 
-当前 capability JSON 汇总为 33 entries、28 implemented/bounded、4 parse-or-diagnostic-only、1 blocked。数字描述 source-quality capability surface，不是 28 项 runtime proof。GUI/CLI field map 为 90 fields；gap list 同样记录 0 runtime proof items、0 package-consumer runtime proof items。
+当前 capability JSON 汇总为 33 entries、29 implemented/bounded、3 parse-or-diagnostic-only、1 blocked。数字描述 source-quality capability surface，不是 29 项 runtime proof。GUI/CLI field map 为 90 fields；gap list 同样记录 0 runtime proof items、0 package-consumer runtime proof items。
 
 ## 数据流
 
@@ -70,8 +70,8 @@ dotnet run --project .\applications\TensorRtExec -- --capabilities-json
 ```text
 matrixState=source-quality-capability-surface
 entryCount=33
-implementedCount=28
-parseOrDiagnosticOnlyCount=4
+implementedCount=29
+parseOrDiagnosticOnlyCount=3
 blockedCount=1
 releaseFrozen=true
 canPromoteRuntimeProof=false
@@ -178,7 +178,7 @@ bounded runtime 只在 engine/input/output 类型和 concrete shape 满足受控
 | plugins | `--plugins --dynamicPlugins` | diagnostic-only | 不声明 load/register/execute |
 | timing cache | `--timingCacheFile --exportTimingCache` | cache lifecycle | hash 是 build cache evidence |
 | scheduler | `--iterations --warmUp --streams --infStreams` | bounded runtime control | 不等于模型正确性或性能结论 |
-| wait controls | `--idleTime --sleepTime` | idle applied / sleep parse-only | 不用 CPU sleep 冒充 device launch gap |
+| wait controls | `--idleTime --sleepTime` | bounded-runtime applied | idle 使用轮次间 host sleep；sleepTime 使用 bridge-owned host function + event fan-out |
 | packaging/refit | `--stripWeights --refitFromOnnx --saveRefittedEngine` | version-guarded local lifecycle | local persist/reload 不是 public package proof |
 | reports | `--exportReport --report` | structured report | alias 归一化，不提高 proof 等级 |
 
@@ -291,7 +291,7 @@ TRT11 已移除的 layer precision setter、TRT8 不支持的现代 packaging/re
 | bounded output 已捕获，所以 real model passed | 没有 expected output/owner review 时仍 unverified |
 | GUI 有控件，所以 CLI/GUI/full parity 完成 | 控件只证明 surface；field map 也不证明 native behavior |
 | `--plugins` 已接受，所以 plugin 已加载 | 当前是 diagnostic path normalization |
-| `--sleepTime` 可解析，所以 device delay 已实现 | 当前明确 parse-only |
+| `--sleepTime` applied，所以模型结果已正确 | applied 只证明一次性 stream-ordered delay 与 event fan-out，模型仍需独立 expected-output 证据 |
 | build report/sidecar 能关闭发布 issue | 必须由真实 release proof records 决定 |
 | `blocked-by-cuda-driver` 等于 API 缺失 | 它是 compatible host owner action |
 

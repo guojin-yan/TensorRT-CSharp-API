@@ -223,7 +223,7 @@ public sealed partial class OnnxEngineBuildService
                 $"StreamsRequested={options.Streams} InfStreamsRequested={options.RuntimeOptions.InfStreams?.ToString() ?? ""} " +
                 $"ThreadsApplied={benchmark.ThreadsExecuted} SpinWaitApplied={benchmark.UseSpinWaitApplied} " +
                 $"NoDataTransfersApplied={options.RuntimeOptions.NoDataTransfers} CudaGraphApplied={benchmark.UseCudaGraphApplied} " +
-                $"IdleTimeApplied={benchmark.IdleTimeMillisecondsApplied} SleepTimeApplied=0");
+                $"IdleTimeApplied={benchmark.IdleTimeMillisecondsApplied} SleepTimeApplied={benchmark.SleepTimeMillisecondsApplied}");
             if (!string.IsNullOrWhiteSpace(benchmark.UseCudaGraphFallbackReason))
             {
                 log.Add($"RuntimeBenchmark CudaGraphFallbackReason={benchmark.UseCudaGraphFallbackReason}");
@@ -255,6 +255,7 @@ public sealed partial class OnnxEngineBuildService
                     benchmark.WarmUpIterationsExecuted,
                     benchmark.WarmUpElapsedMilliseconds,
                     benchmark.MeasurementElapsedMilliseconds,
+                    benchmark.SleepTimeMillisecondsApplied,
                     workers.Count,
                     benchmark.ThreadsExecuted,
                     benchmark.UseSpinWaitApplied,

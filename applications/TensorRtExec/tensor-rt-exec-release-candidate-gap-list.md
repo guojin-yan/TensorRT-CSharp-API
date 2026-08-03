@@ -23,7 +23,7 @@
 | timing-iterations | implemented-builder-config-readback | 是 | 是 | `--avgTiming` 跨 TRT8/10/11 设置并 read back；TRT8 `--minTiming` 使用 legacy setter，TRT10/11 保持 parse-only |
 | engine-packaging-refit-weight-streaming | implemented-build-refit-persist-reload-with-version-guards | 是 | 是 | 官方参数保持 versioned readback；managed extensions 已完成 TRT10 parser load、engine commit、独立 persisted reload、enqueue、baseline match 与本地包 consumer runtime |
 | io-layer-precision-policies | implemented-build-readback-with-version-guards | 是 | 是 | TRT8/10 已完成 I/O 与 layer policy typed set/readback；TRT11 仅应用 type 已匹配的 allowed formats，移除的 precision setters 保持 guard |
-| bounded-benchmark-scheduler | implemented-bounded-runtime | 是 | 是 | 独立 context/stream、预热、次数+时长双下限、idle、平均窗口和 percentile 已执行；其余 runtime mechanics 保持 parse-only |
+| bounded-benchmark-scheduler | implemented-bounded-runtime | 是 | 是 | 独立 context/stream、预热、次数+时长双下限、stream-ordered sleepTime event fan-out、idle、平均窗口和 percentile 已执行；模型与 package proof 仍独立 |
 | timing-cache | implemented-build-cache-lifecycle | 是 | 是 | 成功构建会导入/导出 cache 并记录 `TimingCacheArtifact` 大小与 SHA256；仍需 owner 将 cache 文件与真实模型 build 记录一起归档 |
 | plugin-library-boundary | diagnostic-gui-cli | 是 | 是 | GUI/CLI 已共享 plugin path 字段，保持 register/load-library deferred |
 | profiling | implemented-report | 是 | 是 | 真实 enqueue log 后才能晋级 |
@@ -35,4 +35,4 @@
 
 ## 下一步
 
-`load-engine` 已推进到 compatible-float bounded runtime：可反序列化 engine、复制 metadata、创建 typed bindings 并 enqueue/readback；bounded benchmark scheduler 同时执行独立 execution context/stream、预热、次数+时长双下限、idle gap、平均窗口和 percentile。`samples/RefittedPlan.PackageConsumer` 已从两个声明的本地 feed restore managed/bridge 包，复制 persisted plan/input，在仓库外完成 enqueue、raw output SHA 对照和 owner cleanup；该结果只分类为 local package-consumer engineering evidence。YoloVision 的 task/output role 仍以 `samples/YoloVision/yolovision-task-output-contract.json` 为机器契约。下一步继续补 `--sleepTime` 等尚未实现的 runtime mechanics、WinForms parity checklist、owner proof schema 和真实公开 feed 外部 consumer proof；所有公开 proof 晋级仍必须由外部 proof validator 决定。
+`load-engine` 已推进到 compatible-float bounded runtime：可反序列化 engine、复制 metadata、创建 typed bindings 并 enqueue/readback；bounded benchmark scheduler 同时执行独立 execution context/stream、预热、次数+时长双下限、一次性 stream-ordered sleepTime event fan-out、idle gap、平均窗口和 percentile。`samples/RefittedPlan.PackageConsumer` 已从两个声明的本地 feed restore managed/bridge 包，复制 persisted plan/input，在仓库外完成 enqueue、raw output SHA 对照和 owner cleanup；该结果只分类为 local package-consumer engineering evidence。YoloVision 的 task/output role 仍以 `samples/YoloVision/yolovision-task-output-contract.json` 为机器契约。下一步继续补 WinForms parity checklist、owner proof schema 和真实公开 feed 外部 consumer proof；所有公开 proof 晋级仍必须由外部 proof validator 决定。

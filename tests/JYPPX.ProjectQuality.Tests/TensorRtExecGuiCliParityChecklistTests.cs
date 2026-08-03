@@ -79,10 +79,10 @@ public sealed class TensorRtExecGuiCliParityChecklistTests
             item.GetProperty("status").GetString()!.Contains("parse", StringComparison.OrdinalIgnoreCase));
         Assert.Contains(items, item =>
             item.GetProperty("optionId").GetString() == "wait-idle-controls" &&
-            item.GetProperty("status").GetString() == "partial-idle-applied-sleep-parse-only" &&
+            item.GetProperty("status").GetString() == "implemented-bounded-runtime" &&
             item.GetProperty("officialTrtexecOption").GetString()!.Contains("--sleepTime", StringComparison.Ordinal) &&
             item.GetProperty("officialTrtexecOption").GetString()!.Contains("--idleTime", StringComparison.Ordinal) &&
-            item.GetProperty("proofBoundary").GetString()!.Contains("CPU sleep cannot substitute", StringComparison.Ordinal));
+            item.GetProperty("proofBoundary").GetString()!.Contains("bridge-owned native host-function delay", StringComparison.Ordinal));
         Assert.All(items, item =>
         {
             Assert.False(item.GetProperty("isRuntimeProof").GetBoolean());

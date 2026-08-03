@@ -75,6 +75,7 @@ JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_stream_update_capture_dependencies_ptsz
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_stream_update_capture_dependencies_v2_deferred(void);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_stream_query(JYPPX_CudaStream* stream);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_stream_wait_event(JYPPX_CudaStream* stream, JYPPX_CudaEvent* event_handle, uint32_t flags);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_stream_enqueue_delay_safe(JYPPX_CudaStream* stream, uint32_t milliseconds);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_stream_synchronize(JYPPX_CudaStream* stream);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_stream_destroy(JYPPX_CudaStream* stream);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_cuda_stream_begin_capture(JYPPX_CudaStream* stream, int32_t mode);

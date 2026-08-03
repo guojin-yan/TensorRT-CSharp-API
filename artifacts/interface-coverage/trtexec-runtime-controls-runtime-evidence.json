@@ -1,8 +1,8 @@
 {
   "schemaVersion": "trtexec-runtime-controls-runtime-evidence.v1",
   "evidenceKind": "local-project-reference-synthetic-runtime-controls-smoke",
-  "generatedAt": "2026-07-21",
-  "sourceState": "working-tree-candidate-after-8b2bfa0a209d6e9d741dbbbafcc8d4e8553302f6",
+  "generatedAt": "2026-08-03",
+  "sourceState": "working-tree-candidate-after-1a734b11aea86dfa94b4b8a7bb20e63d7c68d7a9",
   "host": {
     "os": "Microsoft Windows NT 10.0.26200.0",
     "architecture": "X64",
@@ -17,13 +17,13 @@
     "trtexecSha256": "8FD805448DA2264E6388B81DDC7F9FF5605081EB65F9D2DB168BC055CF492CBD",
     "tensorRtSourceTag": "v10.11",
     "tensorRtSourceCommit": "9255eb39e6642787828a4c1f7fc1d09fe004e7a2",
-    "sourceFiles": ["samples/common/sampleInference.cpp", "samples/common/sampleOptions.cpp"],
+    "sourceFiles": ["samples/common/sampleInference.cpp", "samples/common/sampleOptions.cpp", "samples/common/sampleDevice.h"],
     "semanticsChecked": [
       "threads is a boolean option and gives each effective inference stream an independent host driver thread",
       "useSpinWait actively queries CUDA event readiness",
       "useCudaGraph captures and instantiates enqueue work before graph launch",
       "noDataTransfers suppresses input H2D and output D2H/readback",
-      "sleepTime is a device-side launch-to-compute delay and is not equivalent to CPU Thread.Sleep"
+      "sleepTime queues a host function in a synchronization stream, records an event, and fans that event out to inference streams; caller-thread sleep is not equivalent"
     ]
   },
   "threadsSpinCudaGraphRun": {
@@ -96,12 +96,46 @@
       "sha256": "C359EBF87FD47A2AFF4ACD8A40DFB72D82D635C1E9CAF8029C446028FC726C09"
     }
   },
+  "sleepTimeRun": {
+    "exitCode": 0,
+    "state": "identity-roundtrip",
+    "proofClassification": "synthetic-input-runtime",
+    "outputMatch": true,
+    "sleepTimeMillisecondsRequested": 250,
+    "sleepTimeMillisecondsApplied": 250,
+    "executionContextsCreated": 2,
+    "threadsExecuted": 2,
+    "measurementRoundsExecuted": 2,
+    "measurementRoundsPerContext": [2, 2],
+    "inferenceIterationsExecuted": 4,
+    "timingSampleCount": 4,
+    "warmUpMillisecondsRequested": 5,
+    "warmUpElapsedMilliseconds": 249.1136,
+    "measurementElapsedMilliseconds": 2.473,
+    "bridgeEntryPoint": "jyppx_cuda_stream_enqueue_delay_safe",
+    "managedEntryPoint": "CudaStream.EnqueueDelay(Int32)",
+    "nativeMechanism": "bridge-owned cudaLaunchHostFunc state followed by one CUDA event fanned out to all inference streams",
+    "managedCallbackExposed": false,
+    "borrowedCallbackState": false,
+    "appliedOptionsContainsSleepTime": true,
+    "parseOnlyOptionsContainsSleepTime": false,
+    "report": {
+      "localPath": "build-out/stream-delay-smoke/sleep-time-report.json",
+      "lengthBytes": 23424,
+      "sha256": "1738D816222521498D6A8FAD0802A6AA9EA8DDF23F0828884EB82CB92427A34C"
+    },
+    "timesArtifact": {
+      "localPath": "build-out/stream-delay-smoke/sleep-time-times.json",
+      "lengthBytes": 4286,
+      "sha256": "395BD79DE5AB92BA793AE3BFAC09D98DD45714BFF63BB04EA48DE982EEFEF928"
+    }
+  },
   "binaryHashes": [
-    {"component": "TRT10/CUDA12.9 bridge", "lengthBytes": 1064960, "sha256": "42F69F3D639E032FA3836FC7F552E4B665FFD073D52DC83CE630A4F04C87CC83"},
-    {"component": "JYPPX.TensorRtSharp.Tools Debug assembly", "lengthBytes": 299008, "sha256": "27378C5098BAC01299F85EC69B120252E7CD2A2FD6313555E9E81EC412B0D816"},
-    {"component": "OnnxToEngine Debug assembly", "lengthBytes": 17920, "sha256": "E8F491A94094F5A7B48AE96D52BD28EBB2D15274FF4B9E3655D24F66C266D939"}
+    {"component": "TRT10/CUDA12.9 bridge", "lengthBytes": 1145344, "sha256": "0576F191617DCDAD46FD40E238F61CF22B9FB04826B70C1C47993B7944BD26A0"},
+    {"component": "JYPPX.TensorRtSharp.Tools Release assembly", "lengthBytes": 413184, "sha256": "869D34E72CDDA32F2BE0B60AFC48ABED1AAA9066CAA47D062771E481CBEBE45E"},
+    {"component": "OnnxToEngine Release assembly", "lengthBytes": 19456, "sha256": "A5933FAC1D84DC5E99AA22BA3C5B786707A9462FDA5159C5C6D76D3C67BCDA4C"}
   ],
-  "unappliedControls": ["sleepTime"],
+  "unappliedControls": [],
   "proofBoundary": {
     "isBoundedSchedulerRuntimeProof": true,
     "isRuntimeControlsBehaviorProof": true,

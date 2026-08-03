@@ -1,7 +1,7 @@
 # TensorRtExec 线程、Spin Wait、CUDA Graph 与零传输实战
 
 `TensorRtExec` 与 `OnnxToEngine` 的 bounded benchmark 不再只解析高级 runtime 参数。本篇说明
-`--threads`、`--useSpinWait`、`--useCudaGraph` 和 `--noDataTransfers` 的真实执行语义、使用方式、
+`--threads`、`--useSpinWait`、`--useCudaGraph`、`--sleepTime` 和 `--noDataTransfers` 的真实执行语义、使用方式、
 报告判读与证据边界。实现对照 TensorRT 10.11 官方 `trtexec` 帮助以及 v10.11 源码中的
 `samples/common/sampleOptions.cpp`、`sampleInference.cpp`。
 
@@ -77,18 +77,44 @@ dotnet run --project .\samples\OnnxToEngine -- `
 `HasBenchmarkExecutionEvidence=true` 只说明 enqueue/timing 已执行；它不改变 tensor correctness、
 real-model 或 package-consumer proof 的门槛。
 
-## 为什么 sleepTime 仍未实现
+## sleepTime 的流序实现
 
-官方 `--sleepTime` 是 device-side stream sleep，用来形成 launch-to-compute gap。把它替换成
-`Thread.Sleep` 只会暂停 host submission，无法重现相同 GPU timeline，因此当前仍是明确的
-parse-only control。`--idleTime` 则本来就是 measurement rounds 之间的 host idle gap，继续使用
-CPU sleep 是符合语义的。
+TensorRT 10.11 的官方 sample 在一个同步 stream 中排入 host function，随后记录 CUDA event，所有
+推理 stream 等待该 event 后才开始 warmup/measurement。项目现在采用相同的调度结构：
+
+```powershell
+dotnet run --project .\samples\OnnxToEngine -- `
+  --tensor-rt-line 10 `
+  --iterations 2 --warmUp 5 --duration 0 `
+  --streams 1 --infStreams 2 --threads `
+  --sleepTime 250 `
+  --exportReport .\run\sleep-time-report.json `
+  --exportTimes .\run\sleep-time-times.json
+```
+
+`CudaStream.EnqueueDelay` 调用专用 bridge 入口；native 层持有 delay state，并在
+`cudaLaunchHostFunc` 完成后释放。托管层既不注册 callback，也不传递跨调用借用指针。调度器只创建
+一个 delay stream/event，并把同一个 event 扇出到所有 worker stream，因此 `250 ms` 只应用一次，
+不会变成每个 worker 各暂停 250 ms。报告必须满足：
+
+```json
+{
+  "SleepTimeMillisecondsRequested": 250,
+  "SleepTimeMillisecondsApplied": 250,
+  "ExecutionContextsCreated": 2,
+  "ThreadsExecuted": 2,
+  "MeasurementRoundsPerContext": [2, 2]
+}
+```
+
+`Thread.Sleep` 仍只用于 `--idleTime`，因为 idleTime 本来就是连续 measurement rounds 之间的 host
+idle gap。它没有被拿来冒充 `--sleepTime`。
 
 ## 证据与边界
 
 本仓库的 TRT10.11/CUDA12.9 smoke 记录在
 `artifacts/interface-coverage/trtexec-runtime-controls-runtime-evidence.json`。它证明两个 driver
-threads、event polling、CUDA graph capture/launch 和 no-transfer enqueue 行为，但仍使用 embedded
+threads、event polling、CUDA graph capture/launch、stream-ordered sleepTime 和 no-transfer enqueue 行为，但仍使用 embedded
 identity 与 ProjectReference：
 
 - 不是外部真实模型正确性证明；

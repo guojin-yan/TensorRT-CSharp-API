@@ -216,6 +216,7 @@ public sealed class OnnxEngineBenchmarkSummary
         int warmUpIterationsExecuted,
         double warmUpElapsedMilliseconds,
         double measurementElapsedMilliseconds,
+        int sleepTimeMillisecondsApplied,
         int executionContextsCreated,
         int threadsExecuted,
         bool useSpinWaitApplied,
@@ -234,9 +235,9 @@ public sealed class OnnxEngineBenchmarkSummary
                 : $"CUDA graph capture fell back to direct enqueue ({useCudaGraphFallbackReason}).")
             : "CUDA graph was not requested.";
         string boundary =
-            "benchmark-executed-bounded-runtime; iterations, warmUp, duration, streams/infStreams, avgRuns statistics, percentile, idleTime, requested host threads, spin-wait completion, and noDataTransfers are backed by actual scheduler behavior; " +
+            "benchmark-executed-bounded-runtime; iterations, warmUp, duration, streams/infStreams, avgRuns statistics, percentile, stream-ordered sleepTime, idleTime, requested host threads, spin-wait completion, and noDataTransfers are backed by actual scheduler behavior; " +
             graphBoundary +
-            " sleepTime remains unapplied; noDataTransfers suppresses tensor readback and therefore cannot establish output correctness; tensor correctness and package-consumer proof require separate model-specific evidence.";
+            " sleepTime uses one bridge-owned CUDA host function followed by an event fan-out to every inference stream; noDataTransfers suppresses tensor readback and therefore cannot establish output correctness; tensor correctness and package-consumer proof require separate model-specific evidence.";
 
         return new OnnxEngineBenchmarkSummary(
             samples,
@@ -250,7 +251,7 @@ public sealed class OnnxEngineBenchmarkSummary
             noDataTransfersApplied: runtimeOptions.NoDataTransfers,
             runtimeOptions.UseSpinWait,
             runtimeOptions.SleepTimeMilliseconds,
-            sleepTimeMillisecondsApplied: 0,
+            sleepTimeMillisecondsApplied,
             runtimeOptions.IdleTimeMilliseconds,
             idleTimeMillisecondsApplied: idleApplied,
             boundary,

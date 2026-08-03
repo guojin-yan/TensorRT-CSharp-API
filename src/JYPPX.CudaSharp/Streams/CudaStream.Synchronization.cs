@@ -23,6 +23,25 @@ public sealed partial class CudaStream
     }
 
     /// <summary>
+    /// Enqueues a bridge-owned delay in this CUDA stream.
+    /// 在当前 CUDA stream 中排入由桥接层持有的延迟。
+    /// </summary>
+    /// <remarks>
+    /// The delay is ordered with other stream work and does not expose a managed callback or borrowed callback state.
+    /// 延迟与其他 stream 工作保持顺序，且不会暴露托管回调或借用的回调状态。
+    /// </remarks>
+    /// <param name="milliseconds">The non-negative delay in milliseconds. 非负延迟毫秒数。</param>
+    public void EnqueueDelay(int milliseconds)
+    {
+        if (milliseconds < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(milliseconds), "Delay must be non-negative.");
+        }
+
+        NativeCudaApi.EnqueueStreamDelay(_handle, checked((uint)milliseconds));
+    }
+
+    /// <summary>
     /// Copies stream attributes from another CUDA stream into this stream.
     /// 将另一个 CUDA stream 的属性复制到当前 stream。
     /// </summary>

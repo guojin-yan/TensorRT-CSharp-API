@@ -27,8 +27,8 @@ public sealed class ToolCapabilityJsonSurfaceTests
         {
             "## 先读四种事实来源",
             "33 entries",
-            "28 implemented/bounded",
-            "4 parse-or-diagnostic-only",
+            "29 implemented/bounded",
+            "3 parse-or-diagnostic-only",
             "1 blocked",
             "90 fields",
             "20 items",
@@ -67,8 +67,8 @@ public sealed class ToolCapabilityJsonSurfaceTests
 
         using JsonDocument capabilities = JsonDocument.Parse(TrtexecLikeOptionCapabilities.FormatJson("TensorRtExec"));
         Assert.Equal(33, capabilities.RootElement.GetProperty("entryCount").GetInt32());
-        Assert.Equal(28, capabilities.RootElement.GetProperty("implementedCount").GetInt32());
-        Assert.Equal(4, capabilities.RootElement.GetProperty("parseOrDiagnosticOnlyCount").GetInt32());
+        Assert.Equal(29, capabilities.RootElement.GetProperty("implementedCount").GetInt32());
+        Assert.Equal(3, capabilities.RootElement.GetProperty("parseOrDiagnosticOnlyCount").GetInt32());
         Assert.Equal(1, capabilities.RootElement.GetProperty("blockedCount").GetInt32());
 
         using JsonDocument fieldMap = JsonDocument.Parse(File.ReadAllText(Path.Combine(
@@ -110,7 +110,8 @@ public sealed class ToolCapabilityJsonSurfaceTests
         Assert.Contains(entries, entry => entry.GetProperty("option").GetString() == "--int8/--calib" &&
                                           entry.GetProperty("status").GetString() == "blocked-calibrator-lifecycle");
         Assert.Contains(entries, entry => entry.GetProperty("option").GetString() == "--sleepTime" &&
-                                          entry.GetProperty("status").GetString() == "parse-report-only");
+                                          entry.GetProperty("status").GetString() == "implemented-bounded-runtime" &&
+                                          entry.GetProperty("implementationClass").GetString() == "runtime-applied-when-benchmark-executes");
         Assert.All(entries, entry =>
         {
             Assert.False(entry.GetProperty("canPromoteRuntimeProof").GetBoolean());

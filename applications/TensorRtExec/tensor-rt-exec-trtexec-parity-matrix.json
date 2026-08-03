@@ -208,13 +208,13 @@
     },
     {
       "id": "bounded-benchmark-scheduler",
-      "trtexecOption": "--iterations --warmUp --duration --streams --infStreams --idleTime --avgRuns --percentile --threads --useSpinWait --useCudaGraph --noDataTransfers",
+      "trtexecOption": "--iterations --warmUp --duration --streams --infStreams --sleepTime --idleTime --avgRuns --percentile --threads --useSpinWait --useCudaGraph --noDataTransfers",
       "tensorRtExecStatus": "implemented-bounded-runtime",
       "entryPoints": ["OnnxEngineBuildService.RunBoundedBenchmark", "OnnxEngineBenchmarkSummary", "OnnxEngineRuntimeArtifactWriter", "TensorRtExecOptions", "WinForms Runtime Flags"],
-      "proofBoundary": "Independent execution contexts, bindings, CUDA streams, host driver threads, event spin/blocking waits, graph capture/launch, transfer suppression, warmup, iteration/duration minima, idle gaps, averaging windows, and percentile statistics prove bounded scheduler execution only. noDataTransfers deliberately has no output correctness claim; none of these mechanics proves external model correctness or package-consumer runtime.",
+      "proofBoundary": "Independent execution contexts, bindings, CUDA streams, host driver threads, event spin/blocking waits, graph capture/launch, one bridge-owned start delay with event fan-out, transfer suppression, warmup, iteration/duration minima, idle gaps, averaging windows, and percentile statistics prove bounded scheduler execution only. noDataTransfers deliberately has no output correctness claim; none of these mechanics proves external model correctness or package-consumer runtime.",
       "isRuntimeProof": false,
-      "gap": "--sleepTime remains parse-only because the repository has no faithful device-side launch-to-compute delay primitive. CUDA graph capture can fall back to direct enqueue and remains parse-only for that run; model-specific correctness still requires expected outputs and owner evidence.",
-      "nextStep": "Keep --sleepTime parse-only until a faithful GPU scheduling primitive exists; keep model/release proof external."
+      "gap": "CUDA graph capture can fall back to direct enqueue and remains parse-only for that run; model-specific correctness still requires expected outputs and owner evidence.",
+      "nextStep": "Retain the stream-delay TRT10/CUDA12.9 smoke and keep model/release proof external."
     },
     {
       "id": "profiling",
@@ -229,12 +229,12 @@
     {
       "id": "wait-idle-controls",
       "trtexecOption": "--sleepTime --idleTime",
-      "tensorRtExecStatus": "partial-idle-applied-sleep-parse-only",
-      "entryPoints": ["TrtexecLikeRuntimeOptions.SleepTimeMilliseconds", "TrtexecLikeRuntimeOptions.IdleTimeMilliseconds", "OnnxEngineBuildService.RunBoundedBenchmark", "OnnxEngineBuildDiagnostics.OptionImplementationStatus"],
-      "proofBoundary": "--idleTime is applied between measured rounds and records requested/applied values. --sleepTime launch-to-compute delay remains parse-only. Neither promotes model correctness or package-consumer proof.",
+      "tensorRtExecStatus": "implemented-bounded-runtime",
+      "entryPoints": ["CudaStream.EnqueueDelay", "jyppx_cuda_stream_enqueue_delay_safe", "TrtexecLikeRuntimeOptions.SleepTimeMilliseconds", "TrtexecLikeRuntimeOptions.IdleTimeMilliseconds", "OnnxEngineBuildService.RunBoundedBenchmark", "OnnxEngineBuildDiagnostics.OptionImplementationStatus"],
+      "proofBoundary": "--sleepTime queues one bridge-owned native stream delay and fans its event out to all inference streams before warmup. --idleTime is applied between measured rounds. Requested/applied values are recorded, but neither control promotes model correctness or package-consumer proof.",
       "isRuntimeProof": false,
-      "gap": "--sleepTime still needs an owner-safe launch-to-compute delay mechanism and compatible-host timing evidence.",
-      "nextStep": "Keep --sleepTime parse-only until its official GPU scheduling semantics can be implemented without fabricating a CPU delay substitute."
+      "gap": "Current runtime proof is a local TRT10.11/CUDA12.9 synthetic identity smoke, not a public-package or real-model proof.",
+      "nextStep": "Retain native callback ownership guards and include the applied fields in future real-model and clean-consumer evidence."
     },
     {
       "id": "layer-dump",

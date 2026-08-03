@@ -1,10 +1,12 @@
 #include "jyppx/cuda/runtime.h"
 
+#include <chrono>
 #include <cstring>
 #include <limits>
 #include <string>
 #include <string_view>
 #include <new>
+#include <thread>
 #include <vector>
 
 #include "object.hpp"
@@ -34,6 +36,25 @@ constexpr JYPPX_Boolean to_jyppx_bool(const bool value)
 }
 
 #if JYPPX_HAS_CUDA_TOOLKIT
+struct StreamDelayState
+{
+    uint32_t milliseconds;
+};
+
+void CUDART_CB execute_stream_delay(void* user_data) noexcept
+{
+    auto* state = static_cast<StreamDelayState*>(user_data);
+    try
+    {
+        std::this_thread::sleep_for(std::chrono::milliseconds(state->milliseconds));
+    }
+    catch (...)
+    {
+    }
+
+    delete state;
+}
+
 cudaPitchedPtr make_pitched_ptr(void* pointer, const size_t pitch_bytes, const size_t width_bytes, const size_t height)
 {
     cudaPitchedPtr value{};
@@ -1449,6 +1470,42 @@ JYPPX_StatusCode jyppx_cuda_stream_wait_event(JYPPX_CudaStream* stream, JYPPX_Cu
 #else
     (void)flags;
     return jyppx::cuda::report_cuda_dependency_missing("CUDA stream wait event");
+#endif
+}
+
+JYPPX_StatusCode jyppx_cuda_stream_enqueue_delay_safe(JYPPX_CudaStream* stream, uint32_t milliseconds)
+{
+    auto status = jyppx::cuda::validate_stream(stream, "stream");
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
+
+#if JYPPX_HAS_CUDA_TOOLKIT
+    auto* state = new (std::nothrow) StreamDelayState{milliseconds};
+    if (state == nullptr)
+    {
+        jyppx::cuda::set_cuda_error(
+            "cudaLaunchHostFunc",
+            0,
+            "out-of-memory",
+            "The bridge could not allocate the stream delay state.");
+        return JYPPX_STATUS_OUT_OF_MEMORY;
+    }
+
+    auto* stream_object = reinterpret_cast<StreamObject*>(stream);
+    status = jyppx::cuda::map_cuda_status(
+        cudaLaunchHostFunc(stream_object->handle, execute_stream_delay, state),
+        "cudaLaunchHostFunc(stream-delay)");
+    if (status != JYPPX_STATUS_OK)
+    {
+        delete state;
+    }
+
+    return status;
+#else
+    (void)milliseconds;
+    return jyppx::cuda::report_cuda_dependency_missing("CUDA stream-ordered delay");
 #endif
 }
 

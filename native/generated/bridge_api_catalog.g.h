@@ -542,6 +542,7 @@
 #define JYPPX_API_CUDA_STREAM_DESTROY "jyppx_cuda_stream_destroy" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_STREAM_END_CAPTURE "jyppx_cuda_stream_end_capture" // module=cuda; line=common; ownership=caller-destroys; manualOverride=false
 #define JYPPX_API_CUDA_STREAM_END_CAPTURE_INTO_EXISTING_GRAPH_OWNER_SAFE "jyppx_cuda_stream_end_capture_into_graph_safe" // module=cuda; line=common; ownership=owner-scoped-session; manualOverride=false
+#define JYPPX_API_CUDA_STREAM_ENQUEUE_DELAY_OWNER_SAFE "jyppx_cuda_stream_enqueue_delay_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_STREAM_GET_ATTRIBUTE "jyppx_cuda_stream_get_attribute" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_STREAM_GET_CAPTURE_INFO "jyppx_cuda_stream_get_capture_info" // module=cuda; line=common; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_CUDA_STREAM_GET_CAPTURE_INFO_COPIED_SUMMARY_SAFE "jyppx_cuda_stream_get_capture_summary_safe" // module=cuda; line=common; ownership=caller-owned; manualOverride=false

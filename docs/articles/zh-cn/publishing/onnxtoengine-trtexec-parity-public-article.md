@@ -177,7 +177,7 @@ trtexec parity 不是“参数名字能解析”就结束。建议每个新增�
 - `--int8 --calib`：当前是 parse-report-only-calibration-boundary；calibrator ownership、校准数据来源、cache hash 和 INT8 精度仍需要独立设计与 owner evidence。
 - `--fp8 --best --dumpRefit --markDebug --dumpDebugTensors`：属于 parse-report-only 或 capability probe，不证明 precision support、debug tensor runtime output 或 refit 生命周期。
 - `--plugins/--plugin/--dynamicPlugins/--setPluginsToSerialize`：当前只记录 plugin path 和 copied inventory metadata；register/deregister/load library 仍是 ownership 风险边界。
-- `--sleepTime`：保持 parse-only，因为仓库没有忠实的 device-side launch-gap primitive。
+- `--sleepTime`：compatible bounded runtime 会使用 bridge-owned `cudaLaunchHostFunc` state 和 CUDA event fan-out 在 warmup 前应用一次；requested/applied 一致只证明 scheduler 行为，不证明真实模型或 package consumer。
 - `--loadEngine`：可以记录 `PreflightMetadata`、`LoadedEngineDiagnostics`，并在兼容 one-float-input 场景下做 bounded enqueue/readback；没有 reference output 时只是 `runtime-output-captured-unverified`。
 - WinForms：`tensor-rt-exec-gui-cli-field-map.json` 和 `tensor-rt-exec-gui-cli-field-map.md` 证明 GUI/CLI field parity，不证明 runtime output。
 

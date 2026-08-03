@@ -14,6 +14,8 @@ TRT10/CUDA12.9、RTX 3060 Laptop、driver 576.02 上完成两条真实本地 smo
 `iterations` 与 `duration` 使用双下限；`warmUp` 在测量前执行；`idleTime` 只放在连续测量轮次间；
 `avgRuns` 生成连续窗口平均值；percentile 使用 raw GPU event samples。
 
-`sleepTime`、`useSpinWait`、`threads`、`useCudaGraph`、`noDataTransfers` 仍是 unapplied/parse-only。
+本次旧 scheduler run 没有请求 `sleepTime`；该控制已由后续
+`trtexec-runtime-controls-runtime-evidence.json` 的独立双流 smoke 验证。`useSpinWait`、`threads`、
+`useCudaGraph`、`noDataTransfers` 在本记录中仍是 unapplied/parse-only。
 本证据是 ProjectReference synthetic identity scheduler runtime，不是 real-model-runtime、公开包
 consumer 或发布许可；`canPromotePublicProof=false`、`canPublishPublicly=false`。

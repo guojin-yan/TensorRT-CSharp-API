@@ -1,5 +1,7 @@
+using JYPPX.CudaSharp;
 using JYPPX.Shared.Interop;
 using JYPPX.TensorRtSharp.Tools;
+using System.Reflection;
 using System.Text.Json;
 using Xunit;
 
@@ -7,6 +9,37 @@ namespace JYPPX.ProjectQuality.Tests;
 
 public sealed class TensorRtExecBoundedBenchmarkSchedulerTests
 {
+    [Fact]
+    public void StreamDelayApiOwnsCallbackStateInsideNativeBridge()
+    {
+        MethodInfo method = typeof(CudaStream).GetMethod(
+            nameof(CudaStream.EnqueueDelay),
+            BindingFlags.Instance | BindingFlags.Public,
+            binder: null,
+            types: new[] { typeof(int) },
+            modifiers: null) ?? throw new InvalidOperationException("CudaStream.EnqueueDelay(Int32) is missing.");
+        Assert.Equal(typeof(void), method.ReturnType);
+
+        string nativeSource = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "native", "src", "cuda", "api.cpp"));
+        string nativeHeader = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "native", "include", "jyppx", "cuda", "runtime.h"));
+        using JsonDocument manifest = JsonDocument.Parse(File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "native", "manifests", "cuda", "cuda-sixty-sixth-batch-stream-delay-owner-safe.manifest.json")));
+        JsonElement api = manifest.RootElement.GetProperty("apis")[0];
+
+        Assert.Contains("jyppx_cuda_stream_enqueue_delay_safe", nativeHeader, StringComparison.Ordinal);
+        Assert.Contains("cudaLaunchHostFunc(stream_object->handle, execute_stream_delay, state)", nativeSource, StringComparison.Ordinal);
+        Assert.Contains("new (std::nothrow) StreamDelayState{milliseconds}", nativeSource, StringComparison.Ordinal);
+        Assert.Contains("delete state", nativeSource, StringComparison.Ordinal);
+        Assert.Contains("catch (...)\n    {\n    }", nativeSource.Replace("\r\n", "\n"), StringComparison.Ordinal);
+        Assert.Equal("jyppx_cuda_stream_enqueue_delay_safe", api.GetProperty("entryPoint").GetString());
+        Assert.Equal("borrowed-call-only", api.GetProperty("parameters")[0].GetProperty("ownership").GetString());
+    }
+
     [Fact]
     public void RuntimeEvidenceKeepsSyntheticAndPackageProofBoundaries()
     {
@@ -30,7 +63,7 @@ public sealed class TensorRtExecBoundedBenchmarkSchedulerTests
         Assert.False(boundary.GetProperty("isRealModelRuntimeProof").GetBoolean());
         Assert.False(boundary.GetProperty("isPackageConsumerRuntimeProof").GetBoolean());
         Assert.False(boundary.GetProperty("canPublishPublicly").GetBoolean());
-        Assert.Contains(root.GetProperty("unappliedControls").EnumerateArray(), static item => item.GetString() == "sleepTime");
+        Assert.DoesNotContain(root.GetProperty("unappliedControls").EnumerateArray(), static item => item.GetString() == "sleepTime");
         Assert.All(root.GetProperty("binaryHashes").EnumerateArray(), static item => Assert.Matches("^[A-F0-9]{64}$", item.GetProperty("sha256").GetString()));
     }
 
@@ -46,6 +79,7 @@ public sealed class TensorRtExecBoundedBenchmarkSchedulerTests
         JsonElement root = document.RootElement;
         JsonElement graphRun = root.GetProperty("threadsSpinCudaGraphRun");
         JsonElement noTransferRun = root.GetProperty("noDataTransfersRun");
+        JsonElement sleepTimeRun = root.GetProperty("sleepTimeRun");
         JsonElement boundary = root.GetProperty("proofBoundary");
 
         Assert.Equal(2, graphRun.GetProperty("threadsExecuted").GetInt32());
@@ -60,7 +94,15 @@ public sealed class TensorRtExecBoundedBenchmarkSchedulerTests
         Assert.Equal(0, noTransferRun.GetProperty("outputDeviceToHostCopies").GetInt32());
         Assert.False(noTransferRun.GetProperty("outputMatch").GetBoolean());
         Assert.False(noTransferRun.GetProperty("hasRawBindingProof").GetBoolean());
-        Assert.Contains(root.GetProperty("unappliedControls").EnumerateArray(), static item => item.GetString() == "sleepTime");
+        Assert.Equal(250, sleepTimeRun.GetProperty("sleepTimeMillisecondsRequested").GetInt32());
+        Assert.Equal(250, sleepTimeRun.GetProperty("sleepTimeMillisecondsApplied").GetInt32());
+        Assert.Equal(2, sleepTimeRun.GetProperty("executionContextsCreated").GetInt32());
+        Assert.Equal(new[] { 2, 2 }, sleepTimeRun.GetProperty("measurementRoundsPerContext").EnumerateArray().Select(static item => item.GetInt32()).ToArray());
+        Assert.False(sleepTimeRun.GetProperty("managedCallbackExposed").GetBoolean());
+        Assert.False(sleepTimeRun.GetProperty("borrowedCallbackState").GetBoolean());
+        Assert.True(sleepTimeRun.GetProperty("appliedOptionsContainsSleepTime").GetBoolean());
+        Assert.False(sleepTimeRun.GetProperty("parseOnlyOptionsContainsSleepTime").GetBoolean());
+        Assert.DoesNotContain(root.GetProperty("unappliedControls").EnumerateArray(), static item => item.GetString() == "sleepTime");
         Assert.False(boundary.GetProperty("isRealModelRuntimeProof").GetBoolean());
         Assert.False(boundary.GetProperty("isPackageConsumerRuntimeProof").GetBoolean());
         Assert.False(boundary.GetProperty("canPublishPublicly").GetBoolean());
@@ -99,6 +141,9 @@ public sealed class TensorRtExecBoundedBenchmarkSchedulerTests
         Assert.Contains("while (measurementRounds < options.Iterations || stopwatch.Elapsed < minimumDuration)", service, StringComparison.Ordinal);
         Assert.Contains("while (warmUpStopwatch.ElapsedMilliseconds < options.WarmUpMilliseconds)", service, StringComparison.Ordinal);
         Assert.Contains("Thread.Sleep(options.RuntimeOptions.IdleTimeMilliseconds!.Value)", service, StringComparison.Ordinal);
+        Assert.Contains("delayStream.EnqueueDelay(milliseconds)", service, StringComparison.Ordinal);
+        Assert.Contains("readyEvent.Record(delayStream)", service, StringComparison.Ordinal);
+        Assert.Contains("worker.Stream.WaitFor(readyEvent)", service, StringComparison.Ordinal);
         Assert.Contains("worker.StartTiming()", service, StringComparison.Ordinal);
         Assert.Contains("worker.CompleteTiming(options.RuntimeOptions.UseSpinWait)", service, StringComparison.Ordinal);
         Assert.Contains("new Thread(() =>", service, StringComparison.Ordinal);
@@ -153,7 +198,7 @@ public sealed class TensorRtExecBoundedBenchmarkSchedulerTests
             noDataTransfersApplied: true,
             useSpinWaitRequested: true,
             sleepTimeMillisecondsRequested: 3,
-            sleepTimeMillisecondsApplied: 0,
+            sleepTimeMillisecondsApplied: 3,
             idleTimeMillisecondsRequested: 1,
             idleTimeMillisecondsApplied: 1,
             benchmarkBoundary: "benchmark-executed-bounded-runtime; test evidence boundary.",
@@ -219,8 +264,8 @@ public sealed class TensorRtExecBoundedBenchmarkSchedulerTests
         Assert.Contains("--threads", applied);
         Assert.Contains("--useSpinWait", applied);
         Assert.Contains("--noDataTransfers", applied);
+        Assert.Contains("--sleepTime", applied);
         Assert.Contains("--streams", parseOnly);
-        Assert.Contains("--sleepTime", parseOnly);
         Assert.Contains("--useCudaGraph", parseOnly);
         Assert.Contains("--dumpOutput", parseOnly);
         Assert.Contains("--exportOutput", parseOnly);
@@ -228,6 +273,7 @@ public sealed class TensorRtExecBoundedBenchmarkSchedulerTests
         Assert.DoesNotContain("--threads", parseOnly);
         Assert.DoesNotContain("--useSpinWait", parseOnly);
         Assert.DoesNotContain("--noDataTransfers", parseOnly);
+        Assert.DoesNotContain("--sleepTime", parseOnly);
         Assert.DoesNotContain("--dumpOutput", applied);
         Assert.DoesNotContain("--exportOutput", applied);
         Assert.DoesNotContain("--dumpRawBindingsToFile", applied);

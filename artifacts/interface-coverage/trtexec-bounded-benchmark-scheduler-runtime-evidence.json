@@ -85,7 +85,7 @@
     { "component": "JYPPX.TensorRtSharp.Tools Debug assembly", "lengthBytes": 282112, "sha256": "8DEDF456645FE750E346ED714C812E10C66FDB581BD4AF771AF398D78299BB22" },
     { "component": "OnnxToEngine Debug assembly", "lengthBytes": 17920, "sha256": "5717F17D763D2AA730C1B9BC021BC0C21227413338B549E7A3EA2CB6FCAFAE37" }
   ],
-  "unappliedControls": ["sleepTime", "useSpinWait", "threads", "useCudaGraph", "noDataTransfers"],
+  "unappliedControls": ["useSpinWait", "threads", "useCudaGraph", "noDataTransfers"],
   "proofBoundary": {
     "isBoundedSchedulerRuntimeProof": true,
     "isSyntheticIdentityOutputProof": true,

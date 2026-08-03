@@ -1627,6 +1627,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_cuda_stream_end_capture(JYPPX_CudaStream* st
 // generated from manifest id=cuda-stream-end-capture-into-existing-graph-owner-safe
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_stream_end_capture_into_graph_safe(JYPPX_CudaStream* stream, JYPPX_CudaGraph* graph);
 
+// generated from manifest id=cuda-stream-enqueue-delay-owner-safe
+JYPPX_C_API(BridgeStatusCode) jyppx_cuda_stream_enqueue_delay_safe(JYPPX_CudaStream* stream, uint32_t milliseconds);
+
 // generated from manifest id=cuda-stream-get-attribute
 JYPPX_C_API(BridgeStatusCode) jyppx_cuda_stream_get_attribute(JYPPX_CudaStream* stream, int32_t attribute, void* value);
 

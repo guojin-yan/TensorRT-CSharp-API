@@ -23,7 +23,7 @@
 | Packaging/Debug | `--versionCompatible`, `--stripWeights`, `--refit`, `--allowWeightStreaming`, `--dumpRefit`, `--markDebug` | applied options retain version guards; debug/refit dump intent stays parse-only |
 | Timing/Profile | `--timingCacheFile`, `--exportTimingCache`, `--minTiming`, `--avgTiming`, `--profilingVerbosity` | build-cache, versioned builder readback, or diagnostics evidence only |
 | Bounded Runtime | `--iterations`, `--streams`, `--infStreams`, `--threads`, `--useSpinWait`, `--useCudaGraph`, `--idleTime` | bounded scheduler behavior; not external model correctness or package proof |
-| Device-side Delay | `--sleepTime` | parse/report-only until a faithful launch-to-compute GPU mechanism exists; CPU sleep is not a substitute |
+| Stream-ordered Delay | `--sleepTime` | bounded runtime uses bridge-owned native host-function state and one CUDA event fan-out; requested/applied values are scheduler evidence only |
 | Safety/Cache Policy | `--safe`, `--consistency`, `--builderCache`, `--noBuilderCache` | parse/report-only intent |
 | Output Artifacts | `--loadInputs`, `--dumpOutput`, `--dumpRawBindingsToFile`, `--exportOutput`, `--exportTimes`, `--exportProfile`, `--saveProfile` | bounded multi-output preview/JSON/raw+manifest capture; capture is not validation |
 | Mode | `--buildOnly`, `--skipInference`, `--dryRun` | not runtime proof |
