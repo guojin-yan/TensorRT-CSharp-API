@@ -2,7 +2,7 @@
 
 `eng` 不是面向最终用户的命令集合。它同时承载构建编排、资产获取、CI 验证、证据导出、Owner 回填模板和发布前只读门禁，因此文件数量很大。不能因为脚本存在，就认为它是日常支持入口，也不能直接批量删除或移动，否则会破坏 workflow、测试、文章和脚本之间的调用关系。
 
-2026-08-03 三轮引用图审计后，目录保留 793 个 PowerShell 脚本、9 个 Python 辅助脚本和 1 个 Shell 脚本。已删除 14 个确认重复、失效或与当前交付边界冲突的入口；同时移除了 39 个退役 full-runtime/vendor 包项目。这里记录的是保留下来的工程资产，不是对外命令数量。
+2026-08-03 三轮引用图审计后，目录保留 794 个 PowerShell 脚本、9 个 Python 辅助脚本和 1 个 Shell 脚本。已删除 14 个确认重复、失效或与当前交付边界冲突的入口；同时移除了 39 个退役 full-runtime/vendor 包项目。这里记录的是保留下来的工程资产，不是对外命令数量。
 
 | PowerShell 类型 | 数量 | 定位 |
 | --- | ---: | --- |
@@ -10,7 +10,7 @@
 | `Export-*` | 361 | 生成机器可读报告、候选包和内部审计材料；多数不执行发布 |
 | `Acquire-*` | 10 | 固定来源和 SHA 的模型/资产获取入口 |
 | `Sync-*` | 2 | 本地资产同步和校验入口 |
-| `Invoke-*` | 12 | 组合编排或本机 smoke 入口 |
+| `Invoke-*` | 13 | 组合编排或本机 smoke 入口 |
 | `Import-*` | 25 | 导入 Owner 或外部运行证据 |
 | `New-*` / `Collect-*` | 4 | 脚手架、源码归档和收集器 |
 | 其他 | 29 | 公共函数、验证、签名、归档工具和人工入口等 |
@@ -24,6 +24,7 @@
 | 目标 | 入口 | 说明 |
 | --- | --- | --- |
 | 本地 release 质量编排 | `Invoke-LocalReleaseBundle.ps1` | 构建、测试、DocFX 和候选包检查；不等于授权发布 |
+| Windows bridge 包矩阵 | `Invoke-WindowsBridgePackageMatrix.ps1` | 构建并隔离验证六组 bridge-only 本地候选；不执行上传、tag 或 Release |
 | runtime 包就绪检查 | `Test-RuntimePackageReadiness.ps1` | 验证 managed + bridge-only 边界和 runtime matrix |
 | 演示 ONNX 暂存同步 | `Sync-DemoOnnxModels.ps1` | 把固定 ONNX 同步到外层 `models`；不上传模型 |
 | YOLOv8n Detection 资产 | `Acquire-YoloV8DetectionOfficialAssets.ps1` | 下载并校验固定权重、labels、许可证与图片 |
