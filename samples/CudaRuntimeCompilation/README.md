@@ -13,6 +13,10 @@ The bridge-only package does not bundle NVRTC. Install a compatible CUDA Toolkit
 `JYPPX_NVRTC_LIBRARY` to an exact library path. The NVRTC builtins library must remain next to the
 selected compiler library.
 
+When a Toolkit directory also contains `nvrtc64_*.alt.dll`, select the standard `nvrtc64_*.dll`.
+The `.alt.dll` variant searches for a separately named `.alt` builtins library and is not the default
+sample dependency. The repository smoke script excludes `.alt.dll` during automatic discovery.
+
 To exercise the packaged path from a repository-external, local-only NuGet consumer:
 
 ```powershell
@@ -36,3 +40,7 @@ The sample disposes the module/library, stream, and input-memory owners before s
 A Toolkit whose PTX version is newer than the current driver remains compile-only and is reported separately.
 
 This is local-toolkit kernel runtime proof, not package-consumer, public-package, Linux, or post-publish proof.
+
+The complete Chinese walkthrough, including dependency acquisition, kernel source, typed launch,
+controlled compile failure, real Windows Terminal output, hashes, and proof boundaries, is
+`docs/articles/zh-cn/cuda-runtime-compilation-technical-article.md`.

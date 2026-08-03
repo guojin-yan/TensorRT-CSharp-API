@@ -444,6 +444,8 @@
     href: articles/zh-cn/cuda-kernel-roadmap.md
   - name: CUDA Runtime Compilation Roadmap
     href: articles/zh-cn/cuda-runtime-compilation-roadmap.md
+  - name: CUDA Runtime Compilation Technical Article
+    href: articles/zh-cn/cuda-runtime-compilation-technical-article.md
   - name: Linux Runner Setup
     href: articles/zh-cn/linux-runner-setup.md
   - name: Local GitHub Actions Checks

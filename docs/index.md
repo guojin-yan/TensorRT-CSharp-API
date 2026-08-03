@@ -128,6 +128,7 @@ Chinese articles:
 - [Stale Claim Prepublish Audit](articles/zh-cn/stale-claim-prepublish-audit.md)
 - [Publish Final Mile Checklist](articles/zh-cn/publish-final-mile-checklist.md)
 - [CUDA Runtime Compilation（NVRTC）接入路线图](articles/zh-cn/cuda-runtime-compilation-roadmap.md)
+- [在 C# 中使用 TensorRtSharp4.0 动态编译并运行 CUDA Kernel](articles/zh-cn/cuda-runtime-compilation-technical-article.md)
 - [CUDA Stream Event MultiStream Tutorial](articles/zh-cn/cuda-stream-event-multistream-tutorial.md)
 - [Blog MultiStream CUDA Stream Event](articles/zh-cn/blog-multistream-cuda-stream-event.md)
 - [CUDA Graph Capabilities And Boundary](articles/zh-cn/cuda-graph-capabilities-boundary.md)

@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "recordKind": "cuda-rtc-technical-article-runtime-evidence",
+  "recordId": "cuda-rtc-source-tree-win-x64-cuda12.9-20260803",
+  "proofClassification": "local-toolkit-kernel-runtime-readback",
+  "executedUtcDate": "2026-08-03",
+  "sourceBaseCommit": "c34dbd96a081b69f9cb0db36156c945ba8742f6e",
+  "runtimeEnvironment": {
+    "os": "Microsoft Windows 11 Home Chinese, NT 10.0.26200.0",
+    "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+    "driverVersion": "576.02",
+    "cudaToolkitVersion": "12.9",
+    "tensorRtVersion": "10.11.0.33",
+    "dotnetSdkVersion": "10.0.301"
+  },
+  "assets": {
+    "sampleSourceSha256": "0a5bddbb13a12d0deddfcb5c85386312b63049a96697fba0d7bb88756ecd51bc",
+    "sampleAssemblySha256": "e4681c6e186d8c8bc0de649d0136f4893a53a75d950586bdd5f8309822469f49",
+    "nativeBridgeSha256": "0576f191617dcdad46fd40e238f61cf22b9fb04826b70c1c47993b7944bd26a0",
+    "nvrtcLibrarySha256": "69a3b8e00fdf6c64805bd369b037db91f1ac1fb25b3411676b434736df945249",
+    "runtimeLogSha256": "df11947880b40e472541c8dba1eed22b563da3c33e6cde17aae0390bc4281177",
+    "runtimeScreenshotPath": "docs/images/cuda-rtc-runtime-terminal.png",
+    "runtimeScreenshotSha256": "32f9ecea8107e181f3b67fe7b19e7438b29b3c6bbfd6efaee25be448df4b7ec0"
+  },
+  "compilation": {
+    "capabilityAvailable": true,
+    "compilerVersion": "12.9",
+    "ptxDeterministic": true,
+    "ptxSha256": "0d36eb88e25f1b41d1e17c376d36ddc91c160b5d025af8833c82a8c4104823c2",
+    "cubinLength": 4200,
+    "cubinSha256": "d5086e0cb9a09d59823c06aee4105ef5dcb2546c4164c0332e3f1329ced77a01",
+    "ltoIrLength": 3232,
+    "ltoIrSha256": "0ca5e99ba2444ffed7d6debe664ccd7c1d701e3f092bf9d05a24001e9052e907",
+    "loweredNameCaptured": true,
+    "controlledCompilationFailureCaptured": true,
+    "controlledFailureLogLength": 1299
+  },
+  "runtimeValidation": {
+    "elementCount": 257,
+    "runtimeLibraryLaunchPassed": true,
+    "driverModuleLaunchPassed": true,
+    "ownersDisposedBeforeSynchronize": true,
+    "gpuReadbackPassed": true,
+    "maximumAbsoluteError": 0,
+    "runtimeOutputSha256": "65dc411b0750ae9b6543bccb381f21537d69c11802db9bb45a427c2db16aa5d1",
+    "driverOutputSha256": "65dc411b0750ae9b6543bccb381f21537d69c11802db9bb45a427c2db16aa5d1",
+    "processExitCode": 0,
+    "passed": true
+  },
+  "proofBoundary": {
+    "sourceTreeLocalToolkitRuntime": true,
+    "modelOrOnnxRequired": false,
+    "packageConsumerRuntimeProof": false,
+    "publicPackageProof": false,
+    "linuxRuntimeProof": false,
+    "postPublishProof": false,
+    "ownerReleaseAcceptance": false,
+    "performsPublish": false,
+    "uploadsVendorRuntime": false
+  }
+}

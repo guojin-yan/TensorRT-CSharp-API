@@ -104,6 +104,7 @@ public sealed class CudaRuntimeCompilationOwnerTests
         Assert.Contains("CudaToolkitRoots", smokeRunner, StringComparison.Ordinal);
         Assert.Contains("JYPPX_CUDA_TOOLKIT_ROOTS", smokeRunner, StringComparison.Ordinal);
         Assert.Contains("JYPPX_TENSORRT_ROOT", smokeRunner, StringComparison.Ordinal);
+        Assert.Contains("-notlike '*.alt.dll'", smokeRunner, StringComparison.Ordinal);
         Assert.DoesNotContain("third_party\\nvidia", smokeRunner, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("C:\\Program Files\\NVIDIA", smokeRunner, StringComparison.OrdinalIgnoreCase);
 

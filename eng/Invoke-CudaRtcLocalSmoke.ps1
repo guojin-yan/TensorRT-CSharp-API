@@ -71,7 +71,7 @@ $toolkits = @(
     $library = @(
       Get-ChildItem -Path (Join-Path $root 'bin\nvrtc64_*.dll') -File -ErrorAction SilentlyContinue
       Get-ChildItem -Path (Join-Path $root 'bin\x64\nvrtc64_*.dll') -File -ErrorAction SilentlyContinue
-    ) | Sort-Object FullName -Unique | Select-Object -First 1
+    ) | Where-Object { $_.Name -notlike '*.alt.dll' } | Sort-Object FullName -Unique | Select-Object -First 1
     if ($null -eq $library) {
       throw "NVRTC library was not found under user-installed CUDA Toolkit root: $root"
     }
