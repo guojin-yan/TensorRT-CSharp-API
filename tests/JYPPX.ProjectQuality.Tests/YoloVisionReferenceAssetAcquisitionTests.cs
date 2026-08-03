@@ -264,6 +264,8 @@ public sealed class YoloVisionReferenceAssetAcquisitionTests
         Assert.Contains("CPUExecutionProvider", reference, StringComparison.Ordinal);
         Assert.Contains("lastOnnxNode", reference, StringComparison.Ordinal);
         Assert.Contains("output0.tampered.reference.json", reference, StringComparison.Ordinal);
+        Assert.Contains("output0-csharp-input.reference.json", reference, StringComparison.Ordinal);
+        Assert.Contains("official-yolov8n-cls-onnxruntime-cpu-csharp-input", reference, StringComparison.Ordinal);
         Assert.Contains("sameTop5IndicesAndOrder", reference, StringComparison.Ordinal);
     }
 

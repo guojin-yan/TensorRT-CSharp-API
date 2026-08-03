@@ -164,10 +164,21 @@ def main() -> int:
             raise ValueError("C# input tensor element count does not match the Ultralytics tensor.")
         csharp_input = csharp_input.reshape(input_tensor.shape)
         csharp_output = session.run(["output0"], {"images": csharp_input})[0].astype(np.float32)
+        csharp_output_path = output_directory / "output0-csharp-input-onnxruntime.fp32.bin"
+        csharp_output.tofile(csharp_output_path)
+        csharp_reference_path = output_directory / "output0-csharp-input.reference.json"
+        write_reference(
+            csharp_reference_path,
+            csharp_output,
+            "official-yolov8n-cls-onnxruntime-cpu-csharp-input",
+        )
         input_difference = np.abs(csharp_input - input_tensor)
         output_difference = np.abs(csharp_output - ort_output)
         csharp_comparison = {
             "tensorSha256": sha256(args.csharp_tensor.resolve()),
+            "outputTensorSha256": sha256(csharp_output_path),
+            "referenceSha256": sha256(csharp_reference_path),
+            "referenceFileName": csharp_reference_path.name,
             "inputMismatchCount": int(np.count_nonzero(input_difference)),
             "inputMaximumAbsoluteError": float(np.max(input_difference)),
             "inputMeanAbsoluteError": float(np.mean(input_difference)),
