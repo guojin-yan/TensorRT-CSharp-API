@@ -160,6 +160,74 @@
       ],
       "proofBoundary": "Content-complete local-package-consumer article with a real runtime screenshot and source-image Top-5 overlay; not model-accuracy, public-package, post-publish, Owner acceptance, model upload authorization, or release proof.",
       "publicationAuthorized": false
+    },
+    {
+      "id": "yolovision-yolov8n-obb-local-package-consumer",
+      "path": "docs/articles/zh-cn/yolovision-yolov8n-obb-local-package-consumer-tutorial.md",
+      "classification": "complete-technical-article",
+      "status": "complete-with-runtime-screenshot-and-annotated-result",
+      "realExecutionEvidence": "samples/assets/yolovision-yolov8n-obb-article-runtime-evidence.json",
+      "visualAssetEvidence": "samples/assets/yolovision-yolov8n-obb-article-visual-assets.json",
+      "model": {
+        "sourceUrl": "https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8n-obb.pt",
+        "pinnedRevision": "ultralytics-v8.3.0@6e43d1e1e5db72afbf686dee6745669bcb124b0a",
+        "license": "AGPL-3.0-only; model files remain outside Git",
+        "conversionCommand": "yolo export model=$Weights format=onnx imgsz=1024 opset=17 simplify=True dynamic=False batch=1 device=cpu",
+        "onnxWorkspacePath": "models/YoloVision/OrientedBoundingBox/yolov8n-obb-ultralytics-v8.3.0/yolov8n-obb.onnx",
+        "onnxSha256": "5f2701ef5326fb5a691999438cfc55a69656323c21ffddebaff8968ab6de2e92",
+        "trackedByGit": false,
+        "uploadsModelFiles": false
+      },
+      "resultImages": [
+        {
+          "role": "annotated-inference-result",
+          "path": "docs/images/yolovision-yolov8n-obb-annotated-owner.png",
+          "sha256": "227b791a1442c1ae1421bcfe9e650be85bcf99f5b8a44f6aa1e606cc0dcfc8ab",
+          "source": "Rendered from the SVG written by the real TensorRT run; twelve rotated plane boxes are mapped back to an owner-provided image authorized for this article."
+        },
+        {
+          "role": "program-runtime-screenshot",
+          "path": "docs/images/yolovision-yolov8n-obb-runtime-terminal.png",
+          "sha256": "5517bae2aa7cf428558f8bad95a397746b160e2fb3f25b4d3073e74172cb4b00",
+          "source": "Direct Windows Terminal capture showing path-sanitized selected stdout from the same real external local-package TensorRT execution."
+        }
+      ],
+      "proofBoundary": "Content-complete local-package-consumer article with a real runtime screenshot and source-image rotated-box overlay; not public-package, post-publish, Owner acceptance, model upload authorization, or release proof.",
+      "publicationAuthorized": false
+    },
+    {
+      "id": "yolovision-yolov8n-seg-local-package-consumer",
+      "path": "docs/articles/zh-cn/yolovision-yolov8-seg-local-package-consumer-tutorial.md",
+      "classification": "complete-technical-article",
+      "status": "complete-with-runtime-screenshot-and-annotated-result",
+      "realExecutionEvidence": "samples/assets/yolovision-yolov8n-seg-article-runtime-evidence.json",
+      "visualAssetEvidence": "samples/assets/yolovision-yolov8n-seg-article-visual-assets.json",
+      "model": {
+        "sourceUrl": "https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8n-seg.pt",
+        "pinnedRevision": "ultralytics-v8.3.0@6e43d1e1e5db72afbf686dee6745669bcb124b0a",
+        "license": "AGPL-3.0-only; model files remain outside Git",
+        "conversionCommand": "yolo export model=$Weights format=onnx imgsz=640 opset=17 simplify=True dynamic=False batch=1 device=cpu",
+        "onnxWorkspacePath": "models/YoloVision/InstanceSegmentation/yolov8n-seg-ultralytics-v8.3.0/yolov8n-seg.onnx",
+        "onnxSha256": "08b5c61368d4ddec5e647522fc55a93c42a9e0c581770aae48b87bba65a9b21d",
+        "trackedByGit": false,
+        "uploadsModelFiles": false
+      },
+      "resultImages": [
+        {
+          "role": "annotated-inference-result",
+          "path": "docs/images/yolovision-yolov8n-seg-annotated-owner.png",
+          "sha256": "e722ae751d7a1cdbd864368899f3e748758bbfc3e02fbf2a8639bdf658c1438c",
+          "source": "Rendered from the SVG written by the real TensorRT run; person, dog, and bowl masks are mapped back to an owner-provided image authorized for this article."
+        },
+        {
+          "role": "program-runtime-screenshot",
+          "path": "docs/images/yolovision-yolov8n-seg-runtime-terminal.png",
+          "sha256": "d123927713bf00b6beaacde8c0bbf1a35be002bb27d4eaf6fcfd66d60a99ed40",
+          "source": "Direct Windows Terminal capture showing path-sanitized selected stdout from the same real external local-package TensorRT execution."
+        }
+      ],
+      "proofBoundary": "Content-complete local-package-consumer article with a real runtime screenshot and source-image instance-mask overlay; not public-package, post-publish, Owner acceptance, model upload authorization, or release proof.",
+      "publicationAuthorized": false
     }
   ]
 }

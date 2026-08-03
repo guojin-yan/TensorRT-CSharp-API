@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "recordKind": "technical-article-visual-assets",
+  "articleId": "yolovision-yolov8n-seg-local-package-consumer",
+  "sourceImage": {
+    "title": "dog.jpg",
+    "artist": "Project owner",
+    "descriptionUrl": "owner-provided://project-article-input/dog.jpg",
+    "downloadUrl": "owner-provided://project-article-input/dog.jpg",
+    "downloadedWidth": 800,
+    "downloadedHeight": 534,
+    "downloadedLength": 99846,
+    "downloadedSha256": "bf76876b90e3ebd521f9882b9177ba8f33e80cb7ec09c630f179b122edd125e1",
+    "ppmSha256": "742446ec9f784f24f044195f9d45bfa4db5ee51025ef7ce4b022ec39ee1506c2",
+    "license": "Project-owner authorization for use in this repository's technical article; no broader license asserted",
+    "licenseUrl": "owner-authorization://project-thread/2026-08-03",
+    "attributionRequired": false,
+    "publicRedistributionPermittedByLicense": true,
+    "permissionScope": "Derived annotated article image in this repository"
+  },
+  "resultImages": [
+    {
+      "role": "annotated-inference-result",
+      "path": "docs/images/yolovision-yolov8n-seg-annotated-owner.png",
+      "sha256": "e722ae751d7a1cdbd864368899f3e748758bbfc3e02fbf2a8639bdf658c1438c",
+      "source": "Rendered from the SVG written by the real external local-package TensorRT run; person, dog, and bowl masks are mapped back to the owner-provided source image."
+    },
+    {
+      "role": "program-runtime-screenshot",
+      "path": "docs/images/yolovision-yolov8n-seg-runtime-terminal.png",
+      "sha256": "d123927713bf00b6beaacde8c0bbf1a35be002bb27d4eaf6fcfd66d60a99ed40",
+      "source": "Direct Windows Terminal capture showing path-sanitized selected stdout from the same real external local-package TensorRT execution."
+    }
+  ],
+  "modelFilesTrackedByGit": false,
+  "uploadsModelFiles": false,
+  "performsPublish": false
+}

@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "recordKind": "technical-article-visual-assets",
+  "articleId": "yolovision-yolov8n-obb-local-package-consumer",
+  "sourceImage": {
+    "title": "plane.png",
+    "artist": "Project owner",
+    "descriptionUrl": "owner-provided://project-article-input/plane.png",
+    "downloadUrl": "owner-provided://project-article-input/plane.png",
+    "downloadedWidth": 1597,
+    "downloadedHeight": 1208,
+    "downloadedLength": 3084846,
+    "downloadedSha256": "dde925501ff0f2bddb7e28198fdd0586620f7a7ef587412717f666b7ea6584c9",
+    "ppmSha256": "d1d9cfa0732cb801adfb2890a07f623f8b18bc234a455d5ea6f6acf3986b6d07",
+    "license": "Project-owner authorization for use in this repository's technical article; no broader license asserted",
+    "licenseUrl": "owner-authorization://project-thread/2026-08-03",
+    "attributionRequired": false,
+    "publicRedistributionPermittedByLicense": true,
+    "permissionScope": "Derived annotated article image in this repository"
+  },
+  "resultImages": [
+    {
+      "role": "annotated-inference-result",
+      "path": "docs/images/yolovision-yolov8n-obb-annotated-owner.png",
+      "sha256": "227b791a1442c1ae1421bcfe9e650be85bcf99f5b8a44f6aa1e606cc0dcfc8ab",
+      "source": "Rendered from the SVG written by the real external local-package TensorRT run; twelve rotated plane boxes are mapped back to the owner-provided source image."
+    },
+    {
+      "role": "program-runtime-screenshot",
+      "path": "docs/images/yolovision-yolov8n-obb-runtime-terminal.png",
+      "sha256": "5517bae2aa7cf428558f8bad95a397746b160e2fb3f25b4d3073e74172cb4b00",
+      "source": "Direct Windows Terminal capture showing path-sanitized selected stdout from the same real external local-package TensorRT execution."
+    }
+  ],
+  "modelFilesTrackedByGit": false,
+  "uploadsModelFiles": false,
+  "performsPublish": false
+}

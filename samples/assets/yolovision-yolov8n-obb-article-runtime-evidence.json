@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "recordKind": "sample-run-evidence-record",
+  "recordId": "yolovision-yolov8n-obb-owner-plane-local-package-win-x64-trt10.11-20260803",
+  "sampleName": "YoloVision",
+  "family": "yolov8",
+  "task": "obb",
+  "proofClassification": "local-package-consumer-runtime",
+  "validatorState": "local-package-consumer-runtime",
+  "templateOnly": false,
+  "isSmokePassed": true,
+  "executedUtcDate": "2026-08-03",
+  "sourceBaseCommit": "b2b9249d38565808bf555c94c61948123db6444d",
+  "packageConsumer": {
+    "projectOutsideRepository": true,
+    "packageCount": 3,
+    "projectReferenceCount": 0,
+    "assemblyReferenceCount": 0,
+    "runtimeExitCode": 0,
+    "nativeBridgeCopiedByNuGet": true,
+    "packages": [
+      {
+        "id": "JYPPX.TensorRT.CSharp.API",
+        "version": "4.0.0",
+        "length": 15229493,
+        "sha256": "139696bd79be6469d26747b7a3da7ba82e8279c69a9b42e2bf4f5a1ade607898"
+      },
+      {
+        "id": "JYPPX.TensorRT.CSharp.API.YoloVision",
+        "version": "4.0.0",
+        "length": 120201,
+        "sha256": "c563713e05b76764bcaf1a729f3338e807f940fa3ab81eb02570b9e056c0d3a7"
+      },
+      {
+        "id": "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge",
+        "version": "4.0.0",
+        "length": 376999,
+        "sha256": "296eac2d6376cf3c6eaeb9394c662d71b2d838ad7e339cd75587ef7040ebcb2c"
+      }
+    ]
+  },
+  "runtimeEnvironment": {
+    "os": "Microsoft Windows 10.0.26200",
+    "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+    "driverVersion": "576.02",
+    "dotnetVersion": "10.0.301",
+    "tensorRtVersion": "10.11.0",
+    "cudaToolkitVersion": "12.9",
+    "nativeBridgeLength": 1143808,
+    "nativeBridgeSha256": "0da3f8751d10f3f221fa7c4145ba8dd2927b7d98a8afdce4645531792b3b42e8"
+  },
+  "assets": {
+    "weightsSha256": "fa6e4cd2691f132875c143135affaa66b5d89394ebb1d07d19770a9b6382c1b8",
+    "modelSha256": "5f2701ef5326fb5a691999438cfc55a69656323c21ffddebaff8968ab6de2e92",
+    "sourceImageSha256": "dde925501ff0f2bddb7e28198fdd0586620f7a7ef587412717f666b7ea6584c9",
+    "ppmImageSha256": "d1d9cfa0732cb801adfb2890a07f623f8b18bc234a455d5ea6f6acf3986b6d07",
+    "inputTensorSha256": "ec8bdbb2ce8fb32bdf23dc9d515a18f9c973b2a970719ee1668322fe68e7739b",
+    "referenceOutputSha256": "3c3ccfa4c1b7a0cccac5ba64579a1ae0f22d9fe5da441a309839eb06e05c0d51",
+    "independentReferenceSha256": "838c76a01c12268fbb67f7e63325521d3a8aae38483deff003f0e67716c2caca",
+    "independentComparisonSha256": "9fcdb469af4ec8ac92cee9c998dd67dcc2bd4fe8f7155d3f602a35f0e0713eba",
+    "outputJsonSha256": "bde5edf31af82eb063738f021654773b9585fa01ff160e69b38523ae08b01601",
+    "runtimeLogSha256": "c4f604d3af84d0860abea1a2b9b02aa80eb1b04852311108debf0095efd64b3a",
+    "visualizationSvgSha256": "71eaa7407f82df8d9db6320813da85c7bf34c06ec9e8b77a566c1621d700d08f",
+    "annotatedResultSha256": "227b791a1442c1ae1421bcfe9e650be85bcf99f5b8a44f6aa1e606cc0dcfc8ab",
+    "runtimeScreenshotSha256": "5517bae2aa7cf428558f8bad95a397746b160e2fb3f25b4d3073e74172cb4b00"
+  },
+  "modelContract": {
+    "input": "images:float32[1,3,1024,1024]",
+    "preprocess": "center-letterbox-1024x1024; RGB; NCHW; scale=1/255; fill=114",
+    "output": "output0:float32[1,20,21504]",
+    "postprocess": "4 box channels; 15 DOTA classes; embedded radian angle at channel 19; class-aware probabilistic-IoU rotated NMS"
+  },
+  "rawTensorReferenceValidation": {
+    "sourceClassification": "independent-onnxruntime-cpu-csharp-input",
+    "absoluteTolerance": 4.25,
+    "relativeTolerance": 0.05,
+    "comparedElementCount": 430080,
+    "mismatchCount": 0,
+    "firstMismatchIndex": -1,
+    "maximumAbsoluteError": 0.0026550293,
+    "passed": true
+  },
+  "obbValidation": {
+    "predictionCount": 12,
+    "className": "plane",
+    "minimumRotatedIoU": 0.9262661484315047,
+    "maximumCoordinateErrorPixels": 1.5773653495465396,
+    "maximumAngleErrorRadians": 0.0036674608345032,
+    "maximumScoreError": 0.00036066290893554953,
+    "passed": true
+  },
+  "proofBoundary": {
+    "localPackageConsumerRuntimeEvidence": true,
+    "packagesDownloadedFromPublicFeed": false,
+    "publicPackageProof": false,
+    "postPublishProof": false,
+    "publicRedistributionOwnerApprovalForModel": false,
+    "publicRedistributionPermittedForSourceImage": true,
+    "ownerReleaseAcceptance": false,
+    "releaseProof": false,
+    "performsPublish": false,
+    "uploadsAssets": false
+  }
+}

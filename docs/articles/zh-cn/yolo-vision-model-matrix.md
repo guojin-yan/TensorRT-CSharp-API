@@ -26,11 +26,11 @@
 | 任务 | Alias | 当前代码路径 | 输入要求 | 输出 metadata | 后处理边界 | Runtime proof 状态 |
 |---|---|---|---|---|---|---|
 | Detection | `det` | `DecodeEndToEnd`、`YoloEndToEndOutput`、`YoloSampleRunner.DecodeOutput` | `NCHW` float32 tensor，典型 `1x3x640x640` | output shape、layout、class count、objectness/column rule、NMS mode | raw head 使用应用侧 NMS；end-to-end 六列输出禁止二次 NMS | 官方 YOLOv8n 已有 source-tree + local-package-consumer-runtime；YOLOv10n/YOLOX 有 source-tree 证据；均非 public-package proof |
-| Classification | `cls` | `YoloSampleRunner.DecodeClassifications` | 默认 224 短边缩放 + 中心裁剪，labels 必须与输出 1000 类严格匹配 | score mode、tensor name、class count、top-k | `raw` 保持兼容，`logits` 稳定 softmax，`probabilities` 严格校验 | 官方 YOLOv8n-cls source-tree real-model-runtime；非 package-consumer proof |
-| Segmentation | `seg` | `YoloMaskComposer`、`DecodeSegmentationOutputs` | detection 输入 + mask proto metadata | boxes tensor、mask coefficient count、prototype tensor shape/layout | mask coefficient/prototype compose；crop/resize 由 owner 记录 | managed metadata ready；real model not-proof |
+| Classification | `cls` | `YoloSampleRunner.DecodeClassifications` | 默认 224 短边缩放 + 中心裁剪，labels 必须与输出 1000 类严格匹配 | score mode、tensor name、class count、top-k | `raw` 保持兼容，`logits` 稳定 softmax，`probabilities` 严格校验 | 官方 YOLOv8n-cls source-tree + local-package-consumer-runtime；非 public-package proof |
+| Segmentation | `seg` | `YoloMaskComposer`、`DecodeSegmentationOutputs` | detection 输入 + mask proto metadata | boxes tensor、mask coefficient count、prototype tensor shape/layout | mask coefficient/prototype compose；crop/resize 由 owner 记录 | 官方 YOLOv8n-seg source-tree + local-package-consumer-runtime；非 public-package proof |
 | Oriented Bounding Box | `obb` | `YoloObbDecoder`、`DecodeEmbeddedObbOutput`、`DecodeObbOutputs` | 单 tensor 内嵌 angle 或 detection + angle 双 tensor | class count、angle 起点/独立 tensor role、degree/radian、layout | probabilistic-IoU rotated Fast-NMS，按 `SourceIndex` 对齐 angle | 官方 YOLOv8n-obb source-tree real-model-runtime + local-package-consumer-runtime；not public-package proof |
-| Pose | `pose` | `YoloPoseDecoder`、`DecodeEmbeddedPoseOutput`、`DecodePoseOutputs` | 单 tensor 内嵌通道或 detection + keypoint 双 tensor | keypoint count/stride、内嵌起点、tensor layout | NMS 后按 `SourceIndex` 对齐；无法精确解释的通道拒绝解码 | 官方 YOLOv8n-pose source-tree real-model-runtime；not package-consumer-runtime |
-| Semantic Segmentation | `sem` | `YoloSemanticMap` path | semantic model输入 tensor | semantic tensor name、class count、map width/height | 单输出 semantic map decoder | managed smoke ready；real model not-proof |
+| Pose | `pose` | `YoloPoseDecoder`、`DecodeEmbeddedPoseOutput`、`DecodePoseOutputs` | 单 tensor 内嵌通道或 detection + keypoint 双 tensor | keypoint count/stride、内嵌起点、tensor layout | NMS 后按 `SourceIndex` 对齐；无法精确解释的通道拒绝解码 | 官方 YOLOv8n-pose source-tree + local-package-consumer-runtime；非 public-package proof |
+| Semantic Segmentation | `sem` | `YoloSemanticMap` path | semantic model输入 tensor | semantic tensor name、class count、map width/height | 单输出 semantic map decoder | 官方 torchvision LRASPP source-tree + local-package-consumer-runtime；非 public-package proof |
 
 ## 模型获取与资产记录
 

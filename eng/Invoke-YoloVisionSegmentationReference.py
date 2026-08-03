@@ -23,15 +23,106 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
-def write_json(path: Path, value: Any) -> None:
+def write_json(path: Path, value: Any, compact: bool = False) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="\n") as stream:
-        json.dump(value, stream, indent=2, ensure_ascii=True, allow_nan=False)
+        if compact:
+            json.dump(value, stream, separators=(",", ":"), ensure_ascii=True, allow_nan=False)
+        else:
+            json.dump(value, stream, indent=2, ensure_ascii=True, allow_nan=False)
         stream.write("\n")
 
 
 def sanitize(value: str) -> str:
     normalized = re.sub(r"[^A-Za-z0-9._-]+", "-", value.strip()).strip("-.")
     return normalized or "class"
+
+
+def generate_raw_references(args: argparse.Namespace) -> tuple[dict[str, Any], Path]:
+    import numpy as np
+    import onnxruntime as ort
+
+    model_path = Path(args.onnx_model).resolve()
+    tensor_path = Path(args.input_tensor).resolve()
+    values = np.fromfile(tensor_path, dtype=np.float32)
+    if values.size != math.prod(args.input_shape):
+        raise ValueError("Input tensor element count does not match --input-shape.")
+
+    session = ort.InferenceSession(str(model_path), providers=["CPUExecutionProvider"])
+    if session.get_providers() != ["CPUExecutionProvider"]:
+        raise RuntimeError(f"ONNX Runtime providers are not CPU-only: {session.get_providers()}.")
+    if len(session.get_inputs()) != 1 or session.get_inputs()[0].name != args.input_name:
+        raise ValueError("ONNX input does not match the declared segmentation contract.")
+
+    expected_outputs = {
+        args.output0_name: args.output0_shape,
+        args.output1_name: args.output1_shape,
+    }
+    actual_output_names = [output.name for output in session.get_outputs()]
+    if actual_output_names != list(expected_outputs):
+        raise ValueError(
+            f"ONNX outputs {actual_output_names} do not match {list(expected_outputs)}."
+        )
+
+    outputs = session.run(
+        actual_output_names,
+        {args.input_name: values.reshape(tuple(args.input_shape))},
+    )
+    output_directory = Path(args.output_directory).resolve()
+    references: list[dict[str, Any]] = []
+    for name, output in zip(actual_output_names, outputs, strict=True):
+        output = output.astype(np.float32, copy=False)
+        if list(output.shape) != expected_outputs[name]:
+            raise ValueError(
+                f"ONNX output {name} shape {list(output.shape)} does not match {expected_outputs[name]}."
+            )
+        if not np.all(np.isfinite(output)):
+            raise ValueError(f"ONNX Runtime output {name} contains non-finite values.")
+        reference = {
+            "schemaVersion": 1,
+            "tensorName": name,
+            "sourceClassification": "independent-onnxruntime-cpu-execution-provider",
+            "shape": [int(value) for value in output.shape],
+            "values": output.reshape(-1).tolist(),
+        }
+        reference_path = output_directory / f"{name}.reference.json"
+        write_json(reference_path, reference, compact=True)
+        references.append(
+            {
+                "tensorName": name,
+                "shape": reference["shape"],
+                "elementCount": int(output.size),
+                "referencePath": str(reference_path),
+                "referenceSha256": sha256_file(reference_path),
+            }
+        )
+
+    metadata = {
+        "schemaVersion": 1,
+        "recordKind": "yolovision-segmentation-onnxruntime-reference-metadata",
+        "sourceClassification": "independent-onnxruntime-cpu-execution-provider",
+        "modelPath": str(model_path),
+        "modelSha256": sha256_file(model_path),
+        "inputTensorPath": str(tensor_path),
+        "inputTensorSha256": sha256_file(tensor_path),
+        "inputName": args.input_name,
+        "inputShape": args.input_shape,
+        "outputs": references,
+        "runtime": {
+            "framework": "ONNX Runtime",
+            "version": ort.__version__,
+            "providers": session.get_providers(),
+            "pythonVersion": platform.python_version(),
+            "platform": platform.platform(),
+        },
+        "boundary": (
+            "Independent CPU raw-output reference generated from the exact C# input tensor; "
+            "not redistribution, public-package, post-publish, or release proof."
+        ),
+    }
+    metadata_path = output_directory / "onnxruntime-reference-metadata.json"
+    write_json(metadata_path, metadata)
+    return metadata, metadata_path
 
 
 def box_iou(left: list[float], right: list[float]) -> float:
@@ -365,6 +456,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--model", required=True)
     parser.add_argument("--image", required=True)
     parser.add_argument("--output-directory", required=True)
+    parser.add_argument("--onnx-model")
+    parser.add_argument("--input-tensor")
+    parser.add_argument("--input-name", default="images")
+    parser.add_argument("--input-shape", type=int, nargs=4, default=[1, 3, 640, 640])
+    parser.add_argument("--output0-name", default="output0")
+    parser.add_argument("--output0-shape", type=int, nargs=3, default=[1, 116, 8400])
+    parser.add_argument("--output1-name", default="output1")
+    parser.add_argument("--output1-shape", type=int, nargs=4, default=[1, 32, 160, 160])
     parser.add_argument("--actual-manifest")
     parser.add_argument("--image-size", type=int, default=640)
     parser.add_argument("--confidence", type=float, default=0.25)
@@ -390,6 +489,13 @@ def parse_args() -> argparse.Namespace:
         parser.error("image size and maximum detections must be positive")
     if args.maximum_box_coordinate_error < 0.0 or args.maximum_score_error < 0.0:
         parser.error("maximum coordinate and score errors must be non-negative")
+    if bool(args.onnx_model) != bool(args.input_tensor):
+        parser.error("--onnx-model and --input-tensor must be provided together")
+    for name in ("input_shape", "output0_shape", "output1_shape"):
+        if any(value <= 0 for value in getattr(args, name)):
+            parser.error(f"--{name.replace('_', '-')} dimensions must be positive")
+    if args.output0_name == args.output1_name:
+        parser.error("segmentation output tensor names must be unique")
     return args
 
 
@@ -402,6 +508,14 @@ def main() -> int:
     print(f"Reference={reference_path}")
     print(f"ReferenceSha256={sha256_file(reference_path)}")
     print(f"Predictions={len(reference['predictions'])}")
+    if args.onnx_model:
+        raw_metadata, raw_metadata_path = generate_raw_references(args)
+        print(f"RawReferenceMetadata={raw_metadata_path}")
+        for output in raw_metadata["outputs"]:
+            print(
+                f"RawReference Tensor={output['tensorName']} Elements={output['elementCount']} "
+                f"Sha256={output['referenceSha256']}"
+            )
     if not args.actual_manifest:
         return 0
     comparison, comparison_path = compare_actual(args, reference, reference_path)

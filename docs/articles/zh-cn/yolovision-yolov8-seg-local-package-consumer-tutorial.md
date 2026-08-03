@@ -1,207 +1,225 @@
-# YoloVision YOLOv8n-seg 本地 Bridge-only 包消费者实战
+# C# 使用 TensorRtSharp4.0 运行 YOLOv8n 实例分割
 
-本文验证一个仓库外、只使用 `PackageReference` 的 YOLOv8n-seg 消费者。消费者只还原三个项目自有包：
+本文从空的 `.NET 8` 控制台项目开始，完整演示 YOLOv8n-seg 权重获取、ONNX 转换、本地三包引用、图像预处理、TensorRT 执行、mask 解码和原图叠加。最终程序在一张真实图片中识别出 `person`、`dog` 和 `bowl`，并输出逐实例 mask、JSON 报告、标注图和真实运行页面。
 
-- `JYPPX.TensorRT.CSharp.API`
-- `JYPPX.TensorRT.CSharp.API.YoloVision`
-- `JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge`
+本文仅执行本地开发验证。CUDA、cuDNN 和 TensorRT 由使用者安装；当前没有创建版本、Release 或发布包，模型也不进入 Git。
 
-CUDA、cuDNN 和 TensorRT 由宿主机安装，绝不进入 `.nupkg`。模型、权重、raw reference、mask 二进制和运行日志继续留在 E 盘，不进入 Git。
+## 本文使用的项目与库
 
-本次结果属于 `local-package-consumer-runtime`。它不是公开 feed 下载证明，不是 post-publish 证明，不是模型再分发授权，也不是 Owner release acceptance。
+本流程使用 TensorRtSharp4.0 的三个本地包：
 
-## 验证边界
+| 包 | 职责 |
+| --- | --- |
+| `JYPPX.TensorRT.CSharp.API` | TensorRT/CUDA 托管接口、ONNX 加载、binding、显存和执行。 |
+| `JYPPX.TensorRT.CSharp.API.YoloVision` | RGB letterbox、YOLOv8 detection 解码、prototype mask 合成、坐标还原和 SVG 输出。 |
+| `JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge` | 只包含项目自己的 native bridge，不包含 CUDA、cuDNN 或 TensorRT。 |
 
-clean consumer 必须同时满足：
+本次验证环境为 NVIDIA GeForce RTX 3060 Laptop GPU、驱动 `576.02`、TensorRT `10.11.0`、CUDA Toolkit `12.9` 和 .NET SDK `10.0.301`。消费者应根据自己安装的运行环境选择相同矩阵的 Bridge 包。
 
-1. 临时项目位于仓库外的 E 盘工作区。
-2. 项目中只有三个 `PackageReference`，没有 `ProjectReference`、`Reference` 或 `HintPath`。
-3. `NuGet.config` 先执行 `<clear />`，随后只加入三个本地文件源。
-4. 独立 NuGet cache 位于 E 盘，还原图中 `project` 类型依赖数为 0。
-5. 输出目录中只有一个由 Bridge 包复制的 `jyppxtrtbridge.dll`。
-6. 子进程删除继承的 `JYPPX_NATIVE_BRIDGE_PATH`，不以环境变量旁路 NuGet 资产选择。
-7. TensorRT、CUDA 和 cuDNN 从明确的宿主机目录加载。
-8. 正例必须比较两个 raw tensor，生成 source-image mask，并通过独立 PyTorch mask IoU。
-9. 单值 reference 篡改和单字节 mask 篡改都必须非零退出。
+## 模型获取与许可证
 
-## 固定资产
-
-官方资产清单位于：
+权重来自 Ultralytics 官方 Release：
 
 ```text
-samples/assets/yolovision-yolov8n-seg-official-assets.json
+https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8n-seg.pt
 ```
 
-本地默认路径为：
+来源固定到 `ultralytics v8.3.0` 和源码提交 `6e43d1e1e5db72afbf686dee6745669bcb124b0a`。权重长度为 `7,071,756` 字节，SHA256 为：
 
 ```text
-..\downloads\yolov8n-seg-ultralytics-v8.3.0\source\yolov8n-seg.onnx
-..\downloads\yolov8n-seg-ultralytics-v8.3.0\source\yolov8n-seg.pt
-..\downloads\yolov8n-seg-ultralytics-v8.3.0\reference\output0.reference.json
-..\downloads\yolov8n-seg-ultralytics-v8.3.0\reference\output1.reference.json
-..\downloads\yolox-apache\derived\coco.names
-..\downloads\yolox-apache\derived\dog.ppm
+a7cd8f929e1903d78a12a48efecab430209f18dc46cb96c3599a5980c63c423c
 ```
 
-runner 在 restore 前验证这些资产的固定 SHA256。`yolov8n-seg.pt` 来自 Ultralytics `v8.3.0`，许可证为 `AGPL-3.0-only`；当前只允许本地验证，公开再分发仍需 Owner 单独批准。
-
-## 构建三个本地包
-
-在仓库根目录执行：
+先用仓库脚本获取并校验固定资产：
 
 ```powershell
-dotnet pack .\pack\JYPPX.TensorRT.CSharp.API\JYPPX.TensorRT.CSharp.API.csproj `
-  -c Release `
-  -o .\artifacts\managed `
-  -p:JYPPXPackageVersion=4.0.0 `
-  -p:UseSharedCompilation=false
+$repoRoot = Resolve-Path .
+$workspaceRoot = Split-Path $repoRoot -Parent
+$assetRoot = Join-Path $workspaceRoot 'downloads/yolov8n-seg-ultralytics-v8.3.0'
 
-dotnet pack .\samples\YoloVision\YoloVision.csproj `
-  -c Release `
-  -o .\artifacts\yolovision-nupkg `
-  -p:JYPPXPackageVersion=4.0.0 `
-  -p:UseSharedCompilation=false
-
-powershell.exe -NoProfile -ExecutionPolicy Bypass `
-  -File .\eng\Invoke-LocalSplitRuntimePackage.ps1 `
-  -SourceRuntimeKey win-x64-trt10.11-cuda12.9-cudnn9.22 `
-  -Version 4.0.0 `
-  -SplitPackageRole bridge `
-  -SkipManagedPack `
-  -SkipConsumerValidation
+pwsh -NoProfile -ExecutionPolicy Bypass `
+  -File (Join-Path $repoRoot 'eng/Acquire-YoloV8SegOfficialAssets.ps1') `
+  -OutputRoot $assetRoot
 ```
 
-第三条命令只允许 `bridge` role。`cuda-cudnn`、`tensorrt`、`full-runtime`、meta 和 collection 均已退役，不能恢复为发布输入。
+权重许可证为 `AGPL-3.0-only`。模型分发需要使用者按实际业务自行复核，因此 `.pt` 和 ONNX 都留在仓库外。本文输入 `dog.jpg` 由项目所有者提供，并已明确授权用于本仓库技术文章；原图 SHA256 为 `bf76876b90e3ebd521f9882b9177ba8f33e80cb7ec09c630f179b122edd125e1`。
 
-## 执行 clean consumer
+## ONNX 转换与暂存
 
-Windows PowerShell 5.1 和 PowerShell 7 均可运行同一入口：
+在隔离的 Python 环境中安装固定版 Ultralytics、PyTorch、ONNX 和 ONNX Runtime，然后执行：
 
 ```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass `
-  -File .\eng\Test-YoloVisionSegmentationLocalPackageConsumer.ps1 `
-  -RepositoryRoot $PWD `
-  -PackageVersion 4.0.0
+$Weights = Join-Path $assetRoot 'source/yolov8n-seg.pt'
+$modelRoot = Join-Path $workspaceRoot 'models/YoloVision/InstanceSegmentation/yolov8n-seg-ultralytics-v8.3.0'
+New-Item -ItemType Directory -Force $modelRoot | Out-Null
+
+yolo export model=$Weights format=onnx imgsz=640 opset=17 simplify=True dynamic=False batch=1 device=cpu
+Move-Item (Join-Path (Split-Path $Weights) 'yolov8n-seg.onnx') $modelRoot -Force
 ```
 
-默认 runtime key 为 `win-x64-trt10.11-cuda12.9-cudnn9.22`。如本机目录不能由 `eng/Resolve-RuntimeRoots.ps1` 自动解析，可显式传入：
+转换模型暂存在 `models/YoloVision/InstanceSegmentation/yolov8n-seg-ultralytics-v8.3.0/yolov8n-seg.onnx`，不会上传当前 GitHub 仓库。文件长度为 `13,873,432` 字节，SHA256 为：
+
+```text
+08b5c61368d4ddec5e647522fc55a93c42a9e0c581770aae48b87bba65a9b21d
+```
+
+模型合同包含两路输出：
+
+```text
+images : float32[1,3,640,640]
+output0: float32[1,116,8400]   # 4 box + 80 class + 32 mask coefficients
+output1: float32[1,32,160,160] # mask prototypes
+```
+
+把已获准使用的原图转换为 P6 RGB PPM，原 JPEG 继续作为结果图背景：
 
 ```powershell
--TensorRtRoot <TensorRT-root> `
--TensorRtRuntimeRoot <TensorRT-runtime-root> `
--CudaRoot <CUDA-root> `
--CudnnRoot <cuDNN-root> `
--PythonPath <ultralytics-cpu-python.exe>
+$inputJpeg = Join-Path $assetRoot 'input/dog.jpg'
+$inputPpm = Join-Path $assetRoot 'derived/dog.ppm'
+& $env:JYPPX_YOLO_PYTHON -c "from PIL import Image; import sys; Image.open(sys.argv[1]).convert('RGB').save(sys.argv[2], format='PPM')" $inputJpeg $inputPpm
 ```
 
-runner 会复制 `samples/YoloVision.PackageConsumer` 到：
+YoloVision 首次运行只生成 C# 预处理 tensor。随后参考脚本读取这个完全相同的 tensor，用 ONNX Runtime CPU 生成两路 raw reference：
 
-```text
-..\consumer-workspaces\yolovision-yolov8n-seg-local-package-trt10
+```powershell
+$artifactRoot = Join-Path $workspaceRoot 'downloads/article-assets/yolovision-yolov8n-seg'
+$model = Join-Path $modelRoot 'yolov8n-seg.onnx'
+$tensor = Join-Path $artifactRoot 'seg-csharp-input.fp32.bin'
+
+& $env:JYPPX_YOLO_PYTHON `
+  (Join-Path $repoRoot 'eng/Invoke-YoloVisionSegmentationReference.py') `
+  --model $Weights --image $inputJpeg `
+  --onnx-model $model --input-tensor $tensor `
+  --output-directory (Join-Path $artifactRoot 'reference') `
+  --evidence-classification local-package-consumer-runtime
 ```
 
-通过后整个临时工作区会被删除。NuGet 长包名可能超过 Windows PowerShell 的旧 `MAX_PATH` 边界，因此清理函数在 `Remove-Item` 失败时使用经过根目录检查的 `\\?\` 扩展路径删除；它不会调用全局 `dotnet build-server shutdown`，避免干扰其他工作区。
+脚本会严格检查 CPU provider、tensor 名称、shape 和 finite 值，并写出 `output0.reference.json`、`output1.reference.json` 及独立 Ultralytics/PyTorch mask 参考。
 
-## 模型合同与正例
+## 创建本地包消费项目
 
-运行命令固定以下合同：
+仓库外项目用于证明接口不依赖源码引用：
 
-```text
-images  : [1,3,640,640]     float32
-output0 : [1,116,8400]      detection rows + 32 mask coefficients
-output1 : [1,32,160,160]    mask prototypes
+```powershell
+$consumerRoot = Join-Path $workspaceRoot 'consumer-workspaces/yolov8n-seg'
+New-Item -ItemType Directory -Force $consumerRoot | Out-Null
+Set-Location $consumerRoot
+dotnet new console --framework net8.0
 ```
 
-关键参数为：
+项目文件只有三个 `PackageReference`：
 
-```text
---family v8
---task seg
---output-role-map output0:det,output1:mask-prototypes
---mask-coefficient-count 32
---mask-threshold 0.5
---mask-spatial-transform
---mask-coordinate-space model-input
---mask-crop-to-box true
---reference-abs-tolerance 0.02
---reference-rel-tolerance 0.03
+```xml
+<ItemGroup>
+  <PackageReference Include="JYPPX.TensorRT.CSharp.API" Version="4.0.0" />
+  <PackageReference Include="JYPPX.TensorRT.CSharp.API.YoloVision" Version="4.0.0" />
+  <PackageReference Include="JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge" Version="4.0.0" />
+</ItemGroup>
 ```
 
-2026-07-31 的本地执行结果：
+它没有 `ProjectReference`、`Reference` 或 `HintPath`。三个包来自当前源码的隔离本地 feed，不代表已发布；包 SHA256 分别为 `139696bd79be6469d26747b7a3da7ba82e8279c69a9b42e2bf4f5a1ade607898`、`c563713e05b76764bcaf1a729f3338e807f940fa3ab81eb02570b9e056c0d3a7` 和 `296eac2d6376cf3c6eaeb9394c662d71b2d838ad7e339cd75587ef7040ebcb2c`。
 
-| 项目 | 结果 |
-|---|---:|
-| 本地包数 | 3 |
-| ProjectReference | 0 |
-| 直接 DLL 引用 | 0 |
-| restore graph 中的 project library | 0 |
-| raw tensor 数 | 2 |
-| raw 比较值 | 1,793,600 |
-| raw mismatch | 0 |
-| 实例 mask | 4 |
+## 编写程序入口
 
-四个实例的独立 Ultralytics/PyTorch CPU 比较如下：
+`Program.cs` 直接复用 YoloVision 的无指针入口：
+
+```csharp
+using YoloVisionSample;
+
+return YoloVisionCommand.Run(args);
+```
+
+两路输出的角色必须显式指定为 `output0:det,output1:mask-prototypes`。`mask-coefficient-count=32` 必须与 detection 行尾部系数数量一致，否则 prototype 合成没有确定含义。
+
+## 编译并运行
+
+先从隔离本地 feed 还原和构建：
+
+```powershell
+$feed = Join-Path $repoRoot 'artifacts/article-seg-packages'
+$packages = Join-Path $consumerRoot '.packages'
+dotnet restore --source $feed --packages $packages --force --no-cache
+dotnet build -c Release --no-restore
+```
+
+执行 TensorRT 推理、全量 raw 输出比较、mask 导出和可视化：
+
+```powershell
+$labels = Join-Path $assetRoot 'derived/coco.names'
+$reference0 = Join-Path $artifactRoot 'reference/output0.reference.json'
+$reference1 = Join-Path $artifactRoot 'reference/output1.reference.json'
+$maskRoot = Join-Path $artifactRoot 'segmentation-masks'
+$resultJson = Join-Path $artifactRoot 'seg-output.json'
+$resultSvg = Join-Path $artifactRoot 'seg-annotated.svg'
+$env:JYPPX_TENSORRT_ROOT = $env:TENSORRT_PATH
+
+dotnet run -c Release --no-build -- `
+  --model $model --labels $labels --image $inputPpm `
+  --preprocessed-output $tensor --input-shape 1x3x640x640 `
+  --tensor-rt-line 10 --family v8 --task seg `
+  --output-role-map output0:det,output1:mask-prototypes `
+  --mask-coefficient-count 32 --confidence 0.25 --iou-threshold 0.45 --top-k 10 `
+  --mask-threshold 0.5 --mask-spatial-transform `
+  --mask-coordinate-space model-input --mask-crop-to-box true `
+  --reference-outputs "output0:$reference0,output1:$reference1" `
+  --reference-abs-tolerance 0.02 --reference-rel-tolerance 0.03 `
+  --reference-nan-policy reject --reference-infinity-policy exact --noTF32 `
+  --segmentation-mask-output-directory $maskRoot `
+  --output-json $resultJson --visualization $resultSvg `
+  --visualization-background $inputJpeg
+```
+
+TensorRT 完成后，把 mask manifest 交给同一参考脚本完成独立后处理比较：
+
+```powershell
+& $env:JYPPX_YOLO_PYTHON `
+  (Join-Path $repoRoot 'eng/Invoke-YoloVisionSegmentationReference.py') `
+  --model $Weights --image $inputJpeg `
+  --output-directory (Join-Path $artifactRoot 'independent-postprocess') `
+  --actual-manifest (Join-Path $maskRoot 'segmentation-mask-artifacts.manifest.json') `
+  --minimum-box-iou 0.995 --minimum-mask-iou 0.96 `
+  --evidence-classification local-package-consumer-runtime
+```
+
+## 已验证结果
+
+实例框与半透明 mask 已经恢复到 `800x534` 原图坐标：
+
+![YOLOv8n 实例分割原图叠加结果](../../images/yolovision-yolov8n-seg-annotated-owner.png)
+
+程序运行页面如下。终端截图来自本次真实运行的 stdout，仅用变量替换了工作区路径，所有 tensor 数量、误差和预测分数保持原样：
+
+![YOLOv8n 实例分割 TensorRT 运行页面](../../images/yolovision-yolov8n-seg-runtime-terminal.png)
+
+两张图都来自同一次真实 TensorRT 执行：第一张由该次执行写出的 SVG 渲染，第二张是同一次执行的 Windows Terminal 页面。
+
+| 项目 | 实测值 |
+| --- | --- |
+| TensorRT 退出码 | `0` |
+| C# 输入 tensor | `1,228,800` 个 float32，SHA256 `4a2fb58684705e2029f4fae3620ebd3e12e99c73b825fe5d5c89185f1a08c600` |
+| letterbox | 原图 `800x534`，缩放 `640x427`，padding `0,106` |
+| raw 比较值 / mismatch | `1,793,600` / `0` |
+| output0 最大绝对误差 | `0.0011138916` |
+| output1 最大绝对误差 | `0.000008702278` |
+| TensorRT 推理耗时 | `9.393 ms` |
+| 实例 | `person 0.921502`、`dog 0.896453`、`bowl 0.728054` |
+
+独立后处理比较结果如下：
 
 | 类别 | box IoU | mask IoU |
-|---|---:|---:|
-| dog | 0.999667 | 0.995896 |
-| bicycle | 0.999364 | 0.995729 |
-| truck | 0.998436 | 0.996817 |
-| car | 0.998673 | 0.991141 |
+| --- | ---: | ---: |
+| person | `0.999471` | `0.968968` |
+| dog | `0.998638` | `0.983439` |
+| bowl | `0.998047` | `0.964434` |
 
-门槛为 box coordinate absolute error `<= 1.0`、score error `<= 0.01`、box IoU `>= 0.995`、mask IoU `>= 0.99`。独立脚本记录 Python、Ultralytics 和 PyTorch 版本，并把本次比较分类为 `local-package-consumer-runtime`。
+box 门槛为 `0.995`，mask 门槛为 `0.96`。mask 差异集中在阈值边缘，来源是 C# 抗锯齿缩放与 Ultralytics/OpenCV 插值的边界像素差异；三类均通过，并且两路 raw tensor 已先完成零 mismatch 对照。
 
-## 两个受控负例
+## 复查与边界
 
-`eng/New-YoloVisionReferenceMutation.py` 通过 JSON parser 读取 `output0.reference.json`，只给索引 0 加 `10000`，并把来源标记为 `controlled-single-value-mutation`。同一个 package consumer 再运行一次后必须得到：
+本文已经证明：官方 YOLOv8n-seg 权重可以固定获取并转换；ONNX 按要求暂存在外层 `models`；仓库外消费者只使用三个本地包；C# tensor 同时驱动 TensorRT 和 ONNX Runtime；两路 raw 输出、实例框、mask 二进制、原图叠加和独立 PyTorch 结果能够互相追溯。
 
-```text
-exitCode=1
-tensorName=output0
-mismatchCount=1
-firstMismatchIndex=0
-YoloVision Passed=False
-```
+证据清单位于 `samples/assets/yolovision-yolov8n-seg-article-runtime-evidence.json` 和 `samples/assets/yolovision-yolov8n-seg-article-visual-assets.json`。既有本地包 runner 还验证了单值 raw reference 篡改与 mask 单字节篡改都会非零退出。
 
-mask 完整性负例复制正例 mask 目录，只翻转第一份 `sourceThresholded` 文件中的一个字节，同时保持 manifest 中的 SHA256 不变。独立比较器必须在计算 IoU 前以以下诊断退出：
+本文不是 public-package、post-publish、Owner acceptance 或 Release 证明。模型、tensor、raw reference、mask、日志和中间 SVG 留在 Git 外部；Git 只保存文章、经所有者授权的两张派生 PNG 和哈希记录。本文没有发布或上传任何包，也没有把 NVIDIA 运行库打包。
 
-```text
-Thresholded mask SHA256 does not match the manifest.
-```
-
-这两个负例分别证明 raw reference 门和 mask artifact 完整性门不是“只记录、不拦截”。
-
-## 导出轻量证据
-
-完整日志、mask 和独立参考位于被 Git 忽略的 `artifacts/yolovision/yolov8n-seg-local-package-consumer`。用以下命令验证并导出轻量记录：
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass `
-  -File .\eng\Export-YoloVisionSegmentationLocalPackageConsumerEvidence.ps1 `
-  -RepositoryRoot $PWD
-```
-
-可提交记录为：
-
-```text
-samples/assets/yolovision-yolov8n-seg-local-package-consumer-runtime-evidence.json
-```
-
-导出器会拒绝 package 数、引用数、shape、比较值、IoU、负例或 proof boundary 的任何漂移。轻量记录只保存包和证据 SHA256，不提交 `.nupkg`、模型、engine、raw tensor、mask 或日志。
-
-## 尚未证明的事项
-
-本次验证没有访问 nuget.org 或 GitHub Packages，也没有执行任何 publish/upload。因此以下值必须保持 false：
-
-```text
-publicPackageProof
-packagesDownloadedFromPublicFeed
-postPublishProof
-publicRedistributionOwnerApproval
-ownerReleaseAcceptance
-releaseProof
-performsPublish
-uploadsAssets
-```
-
-只有 Owner 允许公开发布后，才能用公开 feed 的全新机器或全新容器重复下载、restore、运行和 hash 核对，再建立 post-publish 与 release 证据。
+对应机器可读边界保持 `publicPackageProof=false`、`postPublishProof=false`、`ownerReleaseAcceptance=false`、`releaseProof=false`、`performsPublish=false` 和 `uploadsAssets=false`。

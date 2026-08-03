@@ -113,6 +113,15 @@ public sealed class YoloVisionLocalPackageConsumerTests
         Assert.Contains("controlled-single-value-mutation", mutation, StringComparison.Ordinal);
         Assert.Contains("expectedRuntimeOutcome", mutation, StringComparison.Ordinal);
         Assert.Contains("local-package-consumer-runtime", independent, StringComparison.Ordinal);
+        foreach (string term in new[]
+        {
+            "--onnx-model", "--input-tensor", "CPUExecutionProvider",
+            "independent-onnxruntime-cpu-execution-provider", "args.output0_name",
+            "args.output1_name", "f\"{name}.reference.json\"", "np.all(np.isfinite(output))"
+        })
+        {
+            Assert.Contains(term, independent, StringComparison.Ordinal);
+        }
         Assert.Contains("PublicPackageProof=False", exporter, StringComparison.Ordinal);
         Assert.Contains("OwnerReleaseAcceptance=False", exporter, StringComparison.Ordinal);
         foreach (string script in new[] { runner, entrypoint, exporter })
