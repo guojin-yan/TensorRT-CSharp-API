@@ -92,6 +92,40 @@
       ],
       "proofBoundary": "Content-complete local-package-consumer article with a real runtime screenshot and source-image semantic overlay; not public-package, post-publish, Owner acceptance, model upload authorization, or release proof.",
       "publicationAuthorized": false
+    },
+    {
+      "id": "yolovision-yolov8n-cls-local-package-consumer",
+      "path": "docs/articles/zh-cn/yolovision-yolov8n-cls-local-package-consumer-tutorial.md",
+      "classification": "complete-technical-article",
+      "status": "complete-with-runtime-screenshot-and-annotated-result",
+      "realExecutionEvidence": "samples/assets/yolovision-yolov8n-cls-article-runtime-evidence.json",
+      "visualAssetEvidence": "samples/assets/yolovision-yolov8n-cls-article-visual-assets.json",
+      "model": {
+        "sourceUrl": "https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8n-cls.pt",
+        "pinnedRevision": "ultralytics-v8.3.0@6e43d1e1e5db72afbf686dee6745669bcb124b0a",
+        "license": "AGPL-3.0-only; model files remain outside Git",
+        "conversionCommand": "yolo export model=yolov8n-cls.pt format=onnx imgsz=224 opset=17 simplify=True dynamic=False batch=1 device=cpu",
+        "onnxWorkspacePath": "models/YoloVision/Classification/yolov8n-cls-ultralytics-v8.3.0/yolov8n-cls.onnx",
+        "onnxSha256": "630c022a99885d59f633ab5a614738f8a49be7f361e340fd3ff89b8c19b0768f",
+        "trackedByGit": false,
+        "uploadsModelFiles": false
+      },
+      "resultImages": [
+        {
+          "role": "annotated-inference-result",
+          "path": "docs/images/yolovision-yolov8n-cls-annotated-cc0.png",
+          "sha256": "3836c4e4c4963f0804de383f67a9f93c79135dc280a44648529443583ba53d8b",
+          "source": "Rendered from the SVG written by the real external local-package TensorRT run; Top-5 classifications are overlaid on the CC0 source image."
+        },
+        {
+          "role": "program-runtime-screenshot",
+          "path": "docs/images/yolovision-yolov8n-cls-runtime-terminal.png",
+          "sha256": "6e83c1f4cdf8ce16203e9fc7e3e19fb794dd8ffd7a2480438f94c13b956f7699",
+          "source": "Direct Windows Terminal capture showing path-free selected stdout from the same external local-package TensorRT execution."
+        }
+      ],
+      "proofBoundary": "Content-complete local-package-consumer article with a real runtime screenshot and source-image Top-5 overlay; not model-accuracy, public-package, post-publish, Owner acceptance, model upload authorization, or release proof.",
+      "publicationAuthorized": false
     }
   ]
 }

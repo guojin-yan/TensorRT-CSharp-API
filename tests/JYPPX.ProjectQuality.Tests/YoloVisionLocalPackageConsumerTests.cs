@@ -886,7 +886,7 @@ public sealed class YoloVisionLocalPackageConsumerTests
         Assert.Contains("OwnerReleaseAcceptance=False", exporter, StringComparison.Ordinal);
         Assert.Contains("https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8n.pt", tutorial, StringComparison.Ordinal);
         Assert.Contains("yolo export", tutorial, StringComparison.Ordinal);
-        Assert.Contains("models\\YoloVision\\Detection", tutorial, StringComparison.Ordinal);
+        Assert.Contains("models/YoloVision/Detection", tutorial, StringComparison.Ordinal);
         Assert.Contains("Model Zoo", tutorial, StringComparison.Ordinal);
         foreach (string script in new[] { runner, entrypoint, exporter })
         {
