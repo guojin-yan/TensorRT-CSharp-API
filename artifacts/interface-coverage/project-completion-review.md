@@ -1680,22 +1680,14 @@ build、enqueue、grid/stride decode、NMS、JSON/SVG 与清理。最终矩阵�
 `YoloVisionCommand.Run` 的双语 XML 契约已补齐。YoloVision 包为 77,963 bytes，SHA256
 `6823e236086dcaaee84f830a6272989a1601b96d1eae8c5e0a1d11370f0d47e0`。
 
-路径无关 compact proof 位于
-`artifacts/interface-coverage/yolox-multi-version-local-package-consumer-runtime-proof-closure.{json,md}`。
-raw matrix/log/report 继续位于 ignored `artifacts/yolovision/yolox-local-package-consumer-matrix`。
-proof 同时记录 5 个本地包 hash、逐行 stdout/stderr hash、bridge identity、runtime root 来源、
-TRT8 blocker、surface audit 与 C 盘审计；workspace 全部删除，C 盘测试目录/命名资产匹配均为
-0，已知 `C:\jyppx-pkgcache` / `C:\jyppx-split-packages` 不存在。
+当时生成的路径无关 compact proof 与 public-package owner handoff 只是阶段性快照，包含尚未
+最终冻结的候选包 hash。2026-08-03 的发布前清理已将这两组快照从仓库移除，避免被误认为
+当前可发布清单；raw matrix/log/report 仍只存在于 ignored 本地 `artifacts` 中。
 
-公开发布交接新增：
-
-- `yolovision-public-package-owner-handoff.{json,md}`：5 个精确 package ID/version/hash、预期
-  nuget.org URL、GitHub Packages source、TRT10/TRT11 clean command 与 TRT8 rebuild blocker。
-- `Test-YoloVisionPublicPackageConsumer.ps1`：未来发布后使用单一公开 NuGet source、E 盘隔离
-  cache、NuGet `.nupkg.metadata` source、下载 nupkg hash 和真实 YOLOX runtime 生成 proof。
-- `Test-YoloVisionPublicPackageProof.ps1`：要求下载文件 hash 同时匹配 proof 与冻结 handoff，
-  local feed、ProjectReference、缺字段、无 runtime marker 或 workspace 未清理均 fail closed。
-  使用 local handoff 冒充公开 proof 的自测得到 48 个 failure、退出码 1。
+`Test-YoloVisionPublicPackageConsumer.ps1` 与 `Test-YoloVisionPublicPackageProof.ps1` 仅保留为
+未来发布后的只读验证器。二者现在必须显式传入开发完成后重新生成并由 Owner 确认的 handoff，
+不会再默认读取旧快照；local feed、ProjectReference、缺字段、无 runtime marker 或 workspace
+未清理仍然 fail closed。
 
 最终验证：完整 `TensorRtSharp.sln` Release build 为 0 warning / 0 error；YoloVision consumer、
 pipeline、output/schema、asset 与文档核心集合 49/49，文章/发布材料 readiness 6/6。新增 consumer

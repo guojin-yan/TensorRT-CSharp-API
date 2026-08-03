@@ -3,6 +3,7 @@ param(
   [string]$RepositoryRoot,
   [string]$OutputRoot,
   [string]$ProofInputPath,
+  [Parameter(Mandatory = $true)][string]$ExpectedHandoffPath,
   [string]$RuntimePackageKey = "win-x64-trt10.11-cuda12.9-cudnn9.22",
   [string]$PackageVersion = "4.0.0",
   [string]$PublicFeedUrl = "https://api.nuget.org/v3/index.json",
@@ -311,5 +312,5 @@ $proof = [pscustomobject][ordered]@{
 $proof | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $ProofInputPath -Encoding utf8
 Write-Host "EvidenceClassification=public-package-consumer-runtime RuntimePackageKey=$RuntimePackageKey PredictionCount=$($predictions.Count) PerformsPublish=False"
 Write-Host "ProofInput=$ProofInputPath"
-& pwsh -NoProfile -ExecutionPolicy Bypass -File (Join-Path $RepositoryRoot "eng\Test-YoloVisionPublicPackageProof.ps1") -RepositoryRoot $RepositoryRoot -InputPath $ProofInputPath -ExpectedRuntimePackageKey $RuntimePackageKey -ExpectedPackageVersion $PackageVersion
+& pwsh -NoProfile -ExecutionPolicy Bypass -File (Join-Path $RepositoryRoot "eng\Test-YoloVisionPublicPackageProof.ps1") -RepositoryRoot $RepositoryRoot -InputPath $ProofInputPath -ExpectedRuntimePackageKey $RuntimePackageKey -ExpectedPackageVersion $PackageVersion -ExpectedHandoffPath $ExpectedHandoffPath
 if ($LASTEXITCODE -ne 0) { throw "Strict public package proof validation failed." }

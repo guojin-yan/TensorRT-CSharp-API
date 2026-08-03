@@ -4,7 +4,7 @@ param(
   [string]$RepositoryRoot,
   [string]$ExpectedRuntimePackageKey,
   [string]$ExpectedPackageVersion = "4.0.0",
-  [string]$ExpectedHandoffPath,
+  [Parameter(Mandatory = $true)][string]$ExpectedHandoffPath,
   [string]$OutputPath
 )
 
@@ -16,9 +16,6 @@ if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
   $RepositoryRoot = (Resolve-Path (Join-Path $scriptRoot "..")).Path
 }
 $RepositoryRoot = [IO.Path]::GetFullPath($RepositoryRoot)
-if ([string]::IsNullOrWhiteSpace($ExpectedHandoffPath)) {
-  $ExpectedHandoffPath = Join-Path $RepositoryRoot "artifacts\interface-coverage\yolovision-public-package-owner-handoff.json"
-}
 $ExpectedHandoffPath = [IO.Path]::GetFullPath($ExpectedHandoffPath)
 
 $InputPath = [IO.Path]::GetFullPath($InputPath)

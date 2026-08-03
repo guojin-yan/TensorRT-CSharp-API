@@ -248,7 +248,6 @@ artifacts/yolovision/yolox-local-package-consumer-matrix
 
 ```text
 artifacts/interface-coverage/yolox-local-package-consumer-runtime-proof-closure.json
-artifacts/interface-coverage/yolox-multi-version-local-package-consumer-runtime-proof-closure.json
 ```
 
 证据分层必须保持：
@@ -268,30 +267,9 @@ artifacts/interface-coverage/yolox-multi-version-local-package-consumer-runtime-
 中从真实公开 URL 恢复已发布包，固定公开包 hash、NuGet `.nupkg.metadata` source、host
 metadata、stdout/stderr，并由 owner 完成发布与证据审核。
 
-## 9. 公开包 owner handoff
-
-只读 handoff 位于：
-
-```text
-artifacts/interface-coverage/yolovision-public-package-owner-handoff.json
-```
-
-其中固定 5 个本地包的 ID、版本、SHA256、未来 nuget.org flat-container URL、GitHub Packages
-源，以及 TRT10/TRT11 clean public consumer 命令。TRT8 被排除在命令之外，直到 bridge 重建并
-重新冻结 hash。
-
-真实发布后，owner 才执行 `Test-YoloVisionPublicPackageConsumer.ps1`。该脚本只允许
-`https://api.nuget.org/v3/index.json`，使用 `<clear />` 和 E 盘隔离 cache，并复制 NuGet
-生成的 `.nupkg.metadata` 与下载 nupkg 作为 proof。随后
-`Test-YoloVisionPublicPackageProof.ps1` 会同时检查 public source、下载文件 SHA、handoff 冻结
-SHA、0 ProjectReference、0 restored project library、runtime marker 和清理状态。
-
-这两个脚本都不包含 package push、Release upload 或 issue close；当前没有执行它们，因为
-`4.0.0` 包尚未公开。
-
 ## 小结
 
 这条链证明 YoloVision 不再只能通过源码项目引用使用。相同的 YOLOX 预处理、raw decoder 和
-NMS 已经进入独立 NuGet 包，可被一个只有 PackageReference 的小型应用调用；bridge-only
-交付也能与系统 TensorRT/CUDA 组合完成真实推理。同时，本地 feed 与公开发布 proof 的边界
-仍然清晰，没有用一次本机成功替代尚未发生的公开包验证。
+NMS 已经进入独立本地包，可被一个只有 PackageReference 的小型应用调用；bridge-only
+交付也能与系统 TensorRT/CUDA 组合完成真实推理。项目开发完成前不保留公开包 handoff
+快照，也不执行 NuGet、GitHub Packages、Release 或版本发布。

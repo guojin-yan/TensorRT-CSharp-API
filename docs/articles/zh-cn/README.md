@@ -8,7 +8,7 @@
 - Owner 输入、候选 proof 和 post-publish 模板；
 - `publishing` 子目录中的文章规划与发布治理材料。
 
-2026-08-03 盘点到 486 个 Markdown 文件。当前只有 3 篇文章同时具备真实程序运行窗口截图和原图叠加识别结果；其余文件仍以项目文档、内部记录或待完善稿为主。数量代表项目过程材料多，不代表有 486 篇完整成稿。
+2026-08-03 盘点到 486 个 Markdown 文件。当前只有 4 篇文章同时具备真实程序运行窗口截图和原图叠加识别结果；其余文件仍以项目文档、内部记录或待完善稿为主。数量代表项目过程材料多，不代表有 486 篇完整成稿。
 
 ## 完整文章标准
 
@@ -41,6 +41,7 @@
 - [使用 TensorRtSharp4.0 在 C# 中运行 YOLOv8n 目标检测](yolovision-yolov8n-det-local-package-consumer-tutorial.md)。
 - [使用 TensorRtSharp4.0 在 C# 中运行 LRASPP 语义分割](yolovision-lraspp-semantic-local-package-consumer-tutorial.md)。
 - [使用 TensorRtSharp4.0 在 C# 中运行 YOLOv8n 图像分类](yolovision-yolov8n-cls-local-package-consumer-tutorial.md)。
+- [使用 TensorRtSharp4.0 在 C# 中运行 YOLOv8n 姿态估计](yolovision-yolov8n-pose-local-package-consumer-tutorial.md)。
 
 其余模型教程即使已有真实 TensorRT 证据，在补齐原图叠加结果和真实程序窗口截图前，也不会标记为完整技术文章。
 

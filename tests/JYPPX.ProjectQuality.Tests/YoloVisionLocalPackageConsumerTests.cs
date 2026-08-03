@@ -772,90 +772,6 @@ public sealed class YoloVisionLocalPackageConsumerTests
     }
 
     [Fact]
-    public void MultiVersionCompactProofKeepsTrt8BlockedAndPromotesOnlyLocalTrt10AndTrt11Rows()
-    {
-        string proofPath = Path.Combine(
-            RepositoryPaths.Root,
-            "artifacts",
-            "interface-coverage",
-            "yolox-multi-version-local-package-consumer-runtime-proof-closure.json");
-        using JsonDocument document = JsonDocument.Parse(File.ReadAllText(proofPath));
-        JsonElement root = document.RootElement;
-
-        Assert.Equal("passed-path-free-matrix-proof-closure", root.GetProperty("validationState").GetString());
-        Assert.Equal(3, root.GetProperty("requestedRuntimeCount").GetInt32());
-        Assert.Equal(2, root.GetProperty("passedRuntimeCount").GetInt32());
-        Assert.Equal(1, root.GetProperty("blockedRuntimeCount").GetInt32());
-        Assert.Equal(5, root.GetProperty("packages").GetArrayLength());
-
-        JsonElement[] rows = root.GetProperty("rows").EnumerateArray().ToArray();
-        JsonElement trt8 = rows.Single(static row => row.GetProperty("tensorRtLine").GetString() == "8");
-        JsonElement trt10 = rows.Single(static row => row.GetProperty("tensorRtLine").GetString() == "10");
-        JsonElement trt11 = rows.Single(static row => row.GetProperty("tensorRtLine").GetString() == "11");
-        Assert.False(trt8.GetProperty("runtimePassed").GetBoolean());
-        Assert.Equal("runtime-attempt-blocked", trt8.GetProperty("evidenceClassification").GetString());
-        Assert.Equal(0, trt8.GetProperty("cudnnRuntimeDllCount").GetInt32());
-        Assert.Contains("ONNX parser", trt8.GetProperty("diagnostic").GetString(), StringComparison.Ordinal);
-        Assert.True(trt10.GetProperty("runtimePassed").GetBoolean());
-        Assert.Equal(5, trt10.GetProperty("predictionCount").GetInt32());
-        Assert.True(trt11.GetProperty("runtimePassed").GetBoolean());
-        Assert.Equal(5, trt11.GetProperty("predictionCount").GetInt32());
-        Assert.Equal("existing-assembled-runtime", trt11.GetProperty("tensorRtRuntimeRootSource").GetString());
-        Assert.All(rows, static row => Assert.True(row.GetProperty("bridgeBuildTensorRtLineMatches").GetBoolean()));
-        Assert.All(rows, static row => Assert.True(row.GetProperty("workspaceRemovedAfterValidation").GetBoolean()));
-
-        JsonElement surface = root.GetProperty("packageSurfaceAudit");
-        Assert.True(surface.GetProperty("valid").GetBoolean());
-        Assert.Equal(0, surface.GetProperty("forbiddenPointerOrHandleFindingCount").GetInt32());
-        Assert.Equal(0, surface.GetProperty("sampleInternalTypeLeakFindingCount").GetInt32());
-        Assert.Equal(2, root.GetProperty("ownerHandoff").GetProperty("strictValidatorCommandCount").GetInt32());
-        Assert.Equal(0, root.GetProperty("cDriveAudit").GetProperty("testDirectoryMatchCount").GetInt32());
-        Assert.Equal(0, root.GetProperty("cDriveAudit").GetProperty("yoloXOrConsumerAssetMatchCount").GetInt32());
-
-        JsonElement boundary = root.GetProperty("boundary");
-        Assert.False(boundary.GetProperty("blockedRowsAreRuntimeExecutionProof").GetBoolean());
-        Assert.False(boundary.GetProperty("isPackageConsumerRuntimeProof").GetBoolean());
-        Assert.False(boundary.GetProperty("packagesDownloadedFromPublicFeed").GetBoolean());
-        Assert.False(boundary.GetProperty("canPublishPublicly").GetBoolean());
-        Assert.False(boundary.GetProperty("performsPublish").GetBoolean());
-    }
-
-    [Fact]
-    public void PublicPackageOwnerHandoffListsExactHashesAndExcludesBlockedTrt8FromRuntimeCommands()
-    {
-        string handoffPath = Path.Combine(
-            RepositoryPaths.Root,
-            "artifacts",
-            "interface-coverage",
-            "yolovision-public-package-owner-handoff.json");
-        using JsonDocument document = JsonDocument.Parse(File.ReadAllText(handoffPath));
-        JsonElement root = document.RootElement;
-
-        Assert.Equal("owner-action-required-public-feed-not-executed", root.GetProperty("state").GetString());
-        Assert.Equal(5, root.GetProperty("packages").GetArrayLength());
-        Assert.Equal(2, root.GetProperty("publicConsumerCandidateRuntimeKeys").GetArrayLength());
-        Assert.Equal(1, root.GetProperty("blockedRuntimeKeys").GetArrayLength());
-        Assert.Equal("win-x64-trt8.6-cuda12.1-cudnn8.9", root.GetProperty("blockedRuntimeKeys")[0].GetString());
-        Assert.Equal(2, root.GetProperty("cleanExternalCommands").GetArrayLength());
-        Assert.Equal(2, root.GetProperty("strictValidatorCommands").GetArrayLength());
-        Assert.All(root.GetProperty("cleanExternalCommands").EnumerateArray(), static command =>
-            Assert.DoesNotContain("trt8.6", command.GetString(), StringComparison.Ordinal));
-
-        JsonElement[] packages = root.GetProperty("packages").EnumerateArray().ToArray();
-        Assert.All(packages, static package =>
-        {
-            Assert.Matches("^[0-9a-f]{64}$", package.GetProperty("localSha256").GetString()!);
-            Assert.StartsWith("https://api.nuget.org/v3-flatcontainer/", package.GetProperty("expectedNuGetFlatContainerUrl").GetString(), StringComparison.Ordinal);
-        });
-        JsonElement trt8 = packages.Single(static package => package.GetProperty("id").GetString()!.Contains("trt8.6", StringComparison.Ordinal));
-        Assert.False(trt8.GetProperty("eligibleForYoloVisionPublicRuntimeHandoff").GetBoolean());
-        Assert.True(trt8.GetProperty("ownerMustRebuildAndRefreezeBeforeYoloVisionPublish").GetBoolean());
-        Assert.False(root.GetProperty("performsPublish").GetBoolean());
-        Assert.False(root.GetProperty("canPublishPublicly").GetBoolean());
-        Assert.False(root.GetProperty("canCloseReleaseIssue").GetBoolean());
-    }
-
-    [Fact]
     public void DetectionConsumerUsesOnlySelectedLocalPackagesAndRequiresIndependentBoxEvidence()
     {
         string runner = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "eng", "Test-YoloVisionLocalPackageConsumer.ps1"));
@@ -990,7 +906,9 @@ public sealed class YoloVisionLocalPackageConsumerTests
         Assert.Contains("downloadedFromPublicFeed = $true", publicConsumer, StringComparison.Ordinal);
         Assert.Contains("isPackageConsumerRuntimeProof = $true", publicConsumer, StringComparison.Ordinal);
         Assert.Contains("Test-YoloVisionPublicPackageProof.ps1", publicConsumer, StringComparison.Ordinal);
-        Assert.Contains("ExpectedHandoffPath", validator, StringComparison.Ordinal);
+        Assert.Contains("[Parameter(Mandatory = $true)][string]$ExpectedHandoffPath", publicConsumer, StringComparison.Ordinal);
+        Assert.Contains("[Parameter(Mandatory = $true)][string]$ExpectedHandoffPath", validator, StringComparison.Ordinal);
+        Assert.Contains("-ExpectedHandoffPath $ExpectedHandoffPath", publicConsumer, StringComparison.Ordinal);
         Assert.Contains("localSha256", validator, StringComparison.Ordinal);
         Assert.Contains("package-metadata-source", validator, StringComparison.Ordinal);
         Assert.Contains("performsPublish = $false", validator, StringComparison.Ordinal);
