@@ -2,6 +2,9 @@
 param(
   [string]$RepositoryRoot,
   [string]$BridgePath,
+  [string]$CudaRuntimeRoot,
+  [string]$TensorRtRoot,
+  [string[]]$CudaToolkitRoots = @(),
   [string]$OutputPath
 )
 
@@ -20,13 +23,61 @@ if ([string]::IsNullOrWhiteSpace($OutputPath)) {
 $BridgePath = (Resolve-Path -LiteralPath $BridgePath).Path
 $sampleProject = Join-Path $RepositoryRoot 'samples\CudaRuntimeCompilation\CudaRuntimeCompilation.csproj'
 $sampleDll = Join-Path $RepositoryRoot 'samples\CudaRuntimeCompilation\bin\Debug\net8.0\CudaRuntimeCompilation.dll'
-$cudaRuntimeRoot = 'C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.9'
-$tensorRtRoot = Join-Path $RepositoryRoot 'third_party\nvidia\TensorRT-11.0.0.114-cuda 12.9'
+
+if ([string]::IsNullOrWhiteSpace($CudaRuntimeRoot)) {
+  $CudaRuntimeRoot = if (-not [string]::IsNullOrWhiteSpace($env:JYPPX_CUDA_ROOT)) { $env:JYPPX_CUDA_ROOT } else { $env:CUDA_PATH }
+}
+if ([string]::IsNullOrWhiteSpace($TensorRtRoot)) {
+  $TensorRtRoot = if (-not [string]::IsNullOrWhiteSpace($env:JYPPX_TENSORRT_ROOT)) { $env:JYPPX_TENSORRT_ROOT } else { $env:TENSORRT_ROOT }
+}
+if ([string]::IsNullOrWhiteSpace($CudaRuntimeRoot) -or -not (Test-Path -LiteralPath $CudaRuntimeRoot -PathType Container)) {
+  throw 'CudaRuntimeRoot must point to a user-installed CUDA Toolkit. Pass -CudaRuntimeRoot or set JYPPX_CUDA_ROOT.'
+}
+if ([string]::IsNullOrWhiteSpace($TensorRtRoot) -or -not (Test-Path -LiteralPath $TensorRtRoot -PathType Container)) {
+  throw 'TensorRtRoot must point to a user-installed TensorRT SDK/runtime. Pass -TensorRtRoot or set JYPPX_TENSORRT_ROOT.'
+}
+$CudaRuntimeRoot = (Resolve-Path -LiteralPath $CudaRuntimeRoot).Path
+$TensorRtRoot = (Resolve-Path -LiteralPath $TensorRtRoot).Path
+
+if ($CudaToolkitRoots.Count -eq 0 -and -not [string]::IsNullOrWhiteSpace($env:JYPPX_CUDA_TOOLKIT_ROOTS)) {
+  $CudaToolkitRoots = @($env:JYPPX_CUDA_TOOLKIT_ROOTS -split [IO.Path]::PathSeparator | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+}
+if ($CudaToolkitRoots.Count -eq 0) {
+  $CudaToolkitRoots = @($CudaRuntimeRoot)
+}
+
 $toolkits = @(
-  [ordered]@{ version = '11.8'; library = 'C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8\bin\nvrtc64_112_0.dll' },
-  [ordered]@{ version = '12.1'; library = 'C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.1\bin\nvrtc64_120_0.dll' },
-  [ordered]@{ version = '12.9'; library = 'C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.9\bin\nvrtc64_120_0.dll' },
-  [ordered]@{ version = '13.2'; library = 'C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.2\bin\x64\nvrtc64_130_0.dll' }
+  foreach ($rootValue in $CudaToolkitRoots) {
+    if (-not (Test-Path -LiteralPath $rootValue -PathType Container)) {
+      throw "CUDA Toolkit root was not found: $rootValue"
+    }
+
+    $root = (Resolve-Path -LiteralPath $rootValue).Path
+    $version = $null
+    $versionJsonPath = Join-Path $root 'version.json'
+    if (Test-Path -LiteralPath $versionJsonPath -PathType Leaf) {
+      $versionDocument = Get-Content -LiteralPath $versionJsonPath -Raw -Encoding utf8 | ConvertFrom-Json
+      if ($null -ne $versionDocument.cuda -and [string]$versionDocument.cuda.version -match '^(\d+\.\d+)') {
+        $version = $Matches[1]
+      }
+    }
+    if ([string]::IsNullOrWhiteSpace($version) -and (Split-Path -Leaf $root) -match 'v?(\d+\.\d+)') {
+      $version = $Matches[1]
+    }
+    if ([string]::IsNullOrWhiteSpace($version)) {
+      throw "Unable to determine the CUDA Toolkit major.minor version from: $root"
+    }
+
+    $library = @(
+      Get-ChildItem -Path (Join-Path $root 'bin\nvrtc64_*.dll') -File -ErrorAction SilentlyContinue
+      Get-ChildItem -Path (Join-Path $root 'bin\x64\nvrtc64_*.dll') -File -ErrorAction SilentlyContinue
+    ) | Sort-Object FullName -Unique | Select-Object -First 1
+    if ($null -eq $library) {
+      throw "NVRTC library was not found under user-installed CUDA Toolkit root: $root"
+    }
+
+    [ordered]@{ version = $version; root = $root; library = $library.FullName }
+  }
 )
 
 function Get-PrefixedValue {
@@ -66,9 +117,9 @@ foreach ($toolkit in $toolkits) {
 
   $env:JYPPX_NATIVE_BRIDGE_PATH = $BridgePath
   $env:JYPPX_NVRTC_LIBRARY = $toolkit.library
-  $env:JYPPX_CUDA_ROOT = $cudaRuntimeRoot
-  $env:CUDA_PATH = $cudaRuntimeRoot
-  $env:JYPPX_TENSORRT_ROOT = $tensorRtRoot
+  $env:JYPPX_CUDA_ROOT = $CudaRuntimeRoot
+  $env:CUDA_PATH = $CudaRuntimeRoot
+  $env:JYPPX_TENSORRT_ROOT = $TensorRtRoot
   $lines = @(& dotnet $sampleDll 2>&1 | ForEach-Object { [string]$_ })
   $exitCode = $LASTEXITCODE
   if ($exitCode -ne 0) {
@@ -167,8 +218,8 @@ foreach ($toolkit in $toolkits) {
 $document = [ordered]@{
   schemaVersion = 4
   recordKind = 'cuda-rtc-local-smoke'
-  generatedLocalDate = '2026-07-28'
-  bridgePath = $BridgePath.Substring($RepositoryRoot.TrimEnd('\').Length).TrimStart('\').Replace('\', '/')
+  generatedLocalDate = (Get-Date -Format 'yyyy-MM-dd')
+  bridgePath = [IO.Path]::GetRelativePath($RepositoryRoot, $BridgePath).Replace('\', '/')
   bridgeSha256 = (Get-FileHash -LiteralPath $BridgePath -Algorithm SHA256).Hash.ToLowerInvariant()
   records = @($records)
   performsPublish = $false

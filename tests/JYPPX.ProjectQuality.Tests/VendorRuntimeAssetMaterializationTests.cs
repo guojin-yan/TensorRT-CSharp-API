@@ -1,3 +1,4 @@
+using System.Xml.Linq;
 using Xunit;
 
 namespace JYPPX.ProjectQuality.Tests;
@@ -5,53 +6,56 @@ namespace JYPPX.ProjectQuality.Tests;
 public sealed class VendorRuntimeAssetMaterializationTests
 {
     [Fact]
-    public void MaterializeScriptCopiesOnlyManifestRuntimeDllsFromArchivesOrDirectories()
+    public void VendorMaterializerAndFullRuntimeProjectsAreRemoved()
     {
-        string script = ReadSource("eng", "Materialize-WindowsVendorRuntimeAssets.ps1");
+        Assert.False(File.Exists(Path.Combine(
+            RepositoryPaths.Root,
+            "eng",
+            "Materialize-WindowsVendorRuntimeAssets.ps1")));
 
-        Assert.Contains("RuntimePackageKey", script);
-        Assert.Contains("pack\\runtime\\runtime-packages.manifest.json", script);
-        Assert.Contains("Resolve-RuntimeRoots.ps1", script);
-        Assert.Contains("tensorRtFiles", script);
-        Assert.Contains("cudnnFiles", script);
-        Assert.Contains("Test-EntryAllowedForKind", script);
-        Assert.Contains("TensorRT-$($package.tensorRtVersion)/bin/", script);
-        Assert.Contains("cudnn_cuda$($package.cudaVersion)/libcudnn/bin/$($package.cudaVersion)/x64/", script);
-        Assert.Contains("Get-SourceMatches", script);
-        Assert.Contains("fileName -like $fileNamePattern", script);
-        Assert.Contains("if ($entryPath -notmatch '\\.dll$')", script);
-        Assert.Contains("tar -tf", script);
-        Assert.Contains("tar -xf", script);
-        Assert.Contains("DryRun", script);
-        Assert.Contains("dry-run-ready", script);
-        Assert.Contains("skipped-existing", script);
-        Assert.Contains("missingExpectedCount", script);
-        Assert.Contains("vendor-runtime-assets-summary.json", script);
-        Assert.Contains("vendor-runtime-assets-summary.md", script);
-        Assert.DoesNotContain(".lib$", script);
-        Assert.DoesNotContain("Start-Process", script);
+        Assert.Empty(Directory.GetFiles(
+            Path.Combine(RepositoryPaths.Root, "pack", "runtime"),
+            "*.csproj",
+            SearchOption.AllDirectories));
     }
 
     [Fact]
-    public void RuntimeReadinessPointsVendorBlockersAtMaterializationPreflight()
+    public void SplitRuntimeProjectsContainOnlyProjectOwnedBridges()
     {
-        string script = ReadSource("eng", "Test-RuntimePackageReadiness.ps1");
+        string[] projects = Directory.GetFiles(
+            Path.Combine(RepositoryPaths.Root, "pack", "runtime-split"),
+            "*.csproj",
+            SearchOption.AllDirectories);
 
-        Assert.Contains("Materialize-WindowsVendorRuntimeAssets.ps1", script);
-        Assert.Contains("-RuntimePackageKey $key -DryRun", script);
-        Assert.Contains("Use Materialize-WindowsVendorRuntimeAssets.ps1 when local NVIDIA archives are available.", script);
-        Assert.Contains("Resolve-RuntimeRoots.ps1", script);
+        Assert.NotEmpty(projects);
+        Assert.All(projects, static projectPath =>
+        {
+            Assert.EndsWith(".Bridge.csproj", projectPath, StringComparison.Ordinal);
+            XDocument document = XDocument.Load(projectPath);
+            string xml = document.ToString(SaveOptions.DisableFormatting);
+            Assert.Contains("<JYPPXPackageKind>bridge</JYPPXPackageKind>", xml, StringComparison.Ordinal);
+            string[] includes = document.Descendants()
+                .Select(static element => element.Attribute("Include")?.Value)
+                .Where(static value => !string.IsNullOrWhiteSpace(value))
+                .Cast<string>()
+                .ToArray();
+            Assert.DoesNotContain(includes, static value => value.Contains("nvinfer", StringComparison.OrdinalIgnoreCase));
+            Assert.DoesNotContain(includes, static value => value.Contains("cudnn", StringComparison.OrdinalIgnoreCase));
+            Assert.DoesNotContain(includes, static value => value.Contains("nvrtc", StringComparison.OrdinalIgnoreCase));
+        });
     }
 
     [Fact]
-    public void SplitRuntimeReadmeDocumentsVendorMaterializationBoundary()
+    public void RuntimeDocumentationRequiresConsumerInstalledNvidiaDependencies()
     {
-        string readme = ReadSource("pack", "runtime-split", "README.md");
+        string runtimeReadme = ReadSource("pack", "runtime", "README.md");
+        string splitReadme = ReadSource("pack", "runtime-split", "README.md");
 
-        Assert.Contains("Materialize-WindowsVendorRuntimeAssets.ps1", readme);
-        Assert.Contains("does not execute the cuDNN installer", readme);
-        Assert.Contains("manifest-declared runtime DLL", readme);
-        Assert.Contains("vendor-runtime-assets-summary.json", readme);
+        Assert.Contains("Consumers install matching NVIDIA dependencies themselves", runtimeReadme, StringComparison.Ordinal);
+        Assert.Contains("never included", splitReadme, StringComparison.Ordinal);
+        Assert.Contains("Only project-owned native bridge packages are active", splitReadme, StringComparison.Ordinal);
+        Assert.DoesNotContain("Materialize-WindowsVendorRuntimeAssets.ps1", runtimeReadme, StringComparison.Ordinal);
+        Assert.DoesNotContain("Materialize-WindowsVendorRuntimeAssets.ps1", splitReadme, StringComparison.Ordinal);
     }
 
     private static string ReadSource(params string[] pathParts)

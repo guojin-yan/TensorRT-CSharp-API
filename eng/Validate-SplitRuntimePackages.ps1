@@ -84,8 +84,13 @@ foreach ($splitPackage in @($splitManifest.packages)) {
   }
 
   $projectPath = Join-Path $RepositoryRoot "pack\runtime-split\$($splitPackage.key)\$($splitPackage.packageId).csproj"
-  if (-not (Test-Path -LiteralPath $projectPath -PathType Leaf)) {
-    $errors.Add("Split package '$($splitPackage.key)' is missing project file: $projectPath")
+  if ($splitPackage.role -eq "bridge") {
+    if (-not (Test-Path -LiteralPath $projectPath -PathType Leaf)) {
+      $errors.Add("Bridge package '$($splitPackage.key)' is missing project file: $projectPath")
+    }
+  }
+  elseif (Test-Path -LiteralPath $projectPath -PathType Leaf) {
+    $errors.Add("Retired vendor package '$($splitPackage.key)' must not keep a packable project file: $projectPath")
   }
 
   $rows.Add([pscustomobject]@{

@@ -2,7 +2,7 @@
 
 `eng` 不是面向最终用户的命令集合。它同时承载构建编排、资产获取、CI 验证、证据导出、Owner 回填模板和发布前只读门禁，因此文件数量很大。不能因为脚本存在，就认为它是日常支持入口，也不能直接批量删除或移动，否则会破坏 workflow、测试、文章和脚本之间的调用关系。
 
-2026-08-03 第一轮引用图审计后，目录保留 795 个 PowerShell 脚本、9 个 Python 辅助脚本和 1 个 Shell 脚本。首批已删除 12 个确认重复、失效或与当前交付边界冲突的入口；这里记录的是保留下来的工程资产，不是对外命令数量。
+2026-08-03 两轮引用图审计后，目录保留 794 个 PowerShell 脚本、9 个 Python 辅助脚本和 1 个 Shell 脚本。已删除 13 个确认重复、失效或与当前交付边界冲突的入口；同时移除了 39 个退役 full-runtime/vendor 包项目。这里记录的是保留下来的工程资产，不是对外命令数量。
 
 | PowerShell 类型 | 数量 | 定位 |
 | --- | ---: | --- |
@@ -13,7 +13,7 @@
 | `Invoke-*` | 12 | 组合编排或本机 smoke 入口 |
 | `Import-*` | 25 | 导入 Owner 或外部运行证据 |
 | `New-*` / `Collect-*` | 4 | 脚手架、源码归档和收集器 |
-| 其他 | 30 | 公共函数、验证、签名、归档工具和人工入口等 |
+| 其他 | 29 | 公共函数、验证、签名、归档工具和人工入口等 |
 
 剩余脚本大多能在源码、workflow、测试或文档中找到调用关系。少数没有字面引用的是本机 CUDA/TensorRT smoke、原生 ABI 诊断和 Windows 开发证书入口，属于明确保留的人工工具；公共函数也可能通过 dot-source 间接加载。因此不能仅凭“没有字面引用”判定无用。9 个 Python 辅助脚本用于模型转换、独立 reference 和受控变异，不执行模型上传。
 
@@ -39,6 +39,8 @@
 - `Export-*` 通常只生成 JSON/Markdown/模板。名字含 `Export` 不表示导出模型，也不表示上传或发布。
 - `Owner*`、`*Proof*`、`*Candidate*`、`*Readiness*` 多数是发布治理或真实证据回填工具，缺少 Owner 输入时会保持 blocked/non-proof。
 - `*.Common.ps1` 是 dot-source 公共函数，不能独立运行，也不能按“未引用”轻率删除。
+
+明确保留的无自动调用人工入口只有：`Invoke-CudaPowerShellSmoke.ps1`、`Invoke-CudaRtcLocalSmoke.ps1`、`Invoke-TensorRtPowerShellSmoke.ps1`、`Test-CudaDriverNativeAbiSurface.ps1`、`Test-CudaKernelLaunchNativeAbiSurface.ps1`、`Test-CudaRtcNativeAbiSurface.ps1` 和 `Trust-WindowsLocalDevCertificate.ps1`。前三项用于本机 smoke，三项 `*NativeAbiSurface` 用于导出桥接 ABI，最后一项只服务本机开发签名；它们都不下载、打包或发布 NVIDIA 运行库。
 
 ## 后续整理规则
 

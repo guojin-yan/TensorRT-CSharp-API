@@ -73,9 +73,8 @@
 
 ```powershell
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Resolve-RuntimeRoots.ps1 -RuntimePackageKey win-x64-trt11.0-cuda13.2-cudnn9.22
-pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Materialize-WindowsVendorRuntimeAssets.ps1 -RuntimePackageKey win-x64-trt11.0-cuda13.2-cudnn9.22 -DryRun
-pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Invoke-LocalRuntimePackage.ps1 -RuntimePackageKey win-x64-trt11.0-cuda13.2-cudnn9.22
-pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-PackageConsumer.ps1 -RuntimePackageKey win-x64-trt11.0-cuda13.2-cudnn9.22 -RunSmoke -AllowSmokeFailure
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Invoke-LocalSplitRuntimePackage.ps1 -SourceRuntimeKey win-x64-trt11.0-cuda13.2-cudnn9.22 -SplitPackageRole bridge
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-BridgePackageRuntimeConsumer.ps1 -SourceRuntimeKey win-x64-trt11.0-cuda13.2-cudnn9.22
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Export-ExternalRuntimeProofRecordTemplate.ps1 -RuntimePackageKey win-x64-trt11.0-cuda13.2-cudnn9.22
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-ExternalRuntimeProofRecord.ps1
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Export-ReleaseEvidenceBundle.ps1

@@ -1,6 +1,6 @@
 # Runtime compatibility matrix
 
-The projects under this directory are retired full-runtime package projects and are deliberately non-packable.
+The former full-runtime package projects have been removed. This directory now contains compatibility manifests and fail-closed policy metadata only; it contains no runtime package project.
 
 `runtime-packages.manifest.json` remains the canonical TensorRT/CUDA/cuDNN compatibility and build-input matrix. Its vendor file lists describe locally installed dependencies used for build and diagnostic probes. They are not package assets and must never be copied to NuGet packages or GitHub Release assets.
 
@@ -22,4 +22,4 @@ powershell -ExecutionPolicy Bypass -File .\eng\Invoke-LocalSplitRuntimePackage.p
   -SplitPackageRole bridge
 ```
 
-`eng/Invoke-LocalRuntimePackage.ps1` and `eng/Collect-RuntimeAssets.ps1` now fail closed. The enforced policy is `pack/external-vendor-runtime-policy.json`.
+`eng/Invoke-LocalRuntimePackage.ps1` and `eng/Collect-RuntimeAssets.ps1` remain fail-closed compatibility guards. The enforced policy is `pack/external-vendor-runtime-policy.json`.

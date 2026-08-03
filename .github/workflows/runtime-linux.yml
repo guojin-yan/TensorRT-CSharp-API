@@ -510,22 +510,6 @@ jobs:
       - name: Export Linux handoff index
         run: pwsh -NoProfile -File ./eng/Export-LinuxHandoffIndex.ps1 -RuntimePackageKey "${{ matrix.key }}"
 
-      - name: Retired full-runtime asset collection
-        if: ${{ false }}
-        run: pwsh -NoProfile -File ./eng/Collect-RuntimeAssets.ps1 -RuntimePackageKey "${{ matrix.key }}" -TensorRtRoot "${{ steps.roots.outputs.tensor_rt_root }}" -CudaRoot "${{ steps.roots.outputs.cuda_root }}" -CudnnRoot "${{ steps.roots.outputs.cudnn_root }}"
-
-      - name: Retired full-runtime package
-        if: ${{ false }}
-        run: dotnet pack "./pack/runtime/${{ matrix.key }}/${{ matrix.packageId }}.csproj" -c "${{ inputs.configuration }}" -o ./artifacts/runtime-nupkg -p:JYPPXPackageVersion=${{ needs.prepare.outputs.package_version }}
-
-      - name: Retired full-runtime consumer validation
-        if: ${{ false }}
-        run: pwsh -NoProfile -File ./eng/Test-PackageConsumer.ps1 -RuntimePackageKey "${{ matrix.key }}" -ManagedPackageDirectory "./artifacts/managed" -RuntimePackageDirectory "./artifacts/runtime-nupkg"
-
-      - name: Retired full-runtime consumer smoke
-        if: ${{ false }}
-        run: pwsh -NoProfile -File ./eng/Test-PackageConsumer.ps1 -RuntimePackageKey "${{ matrix.key }}" -ManagedPackageDirectory "./artifacts/managed" -RuntimePackageDirectory "./artifacts/runtime-nupkg" -RunSmoke
-
       - name: Pack bridge package
         if: ${{ inputs.runtime_delivery_mode == 'split' }}
         shell: pwsh
@@ -683,17 +667,6 @@ jobs:
           pwsh -NoProfile -File ./eng/Test-ExternalVendorRuntimePackagePolicy.ps1 `
             -PackagePath (Join-Path './artifacts/runtime-split-nupkg' '${{ matrix.key }}')
 
-      - name: Upload Linux runtime artifacts
-        if: ${{ false }}
-        uses: actions/upload-artifact@v7
-        with:
-          compression-level: 0
-          name: runtime-linux-${{ matrix.key }}
-          path: |
-            artifacts/runtime-nupkg/*.nupkg
-            artifacts/package-consumer/package-consumer-validation-summary.*
-            artifacts/linux-dry-run/${{ matrix.key }}/**
-
       - name: Upload Linux split runtime artifacts
         if: ${{ inputs.attach_to_github_release && inputs.release_tag == '' && inputs.runtime_delivery_mode == 'split' }}
         uses: actions/upload-artifact@v7
@@ -704,26 +677,6 @@ jobs:
             artifacts/runtime-split-nupkg/${{ matrix.key }}/*.nupkg
             artifacts/package-consumer/package-consumer-validation-summary.*
             artifacts/linux-dry-run/${{ matrix.key }}/**
-
-      - name: Retired Linux full-runtime Release upload
-        if: ${{ false }}
-        shell: pwsh
-        env:
-          GH_TOKEN: ${{ github.token }}
-          GH_REPO: ${{ github.repository }}
-        run: |
-          $packages = @(Get-ChildItem -LiteralPath .\artifacts\runtime-nupkg -Filter *.nupkg | Sort-Object Name)
-          if ($packages.Count -eq 0) {
-            throw "No Linux runtime packages were found for direct release upload."
-          }
-
-          pwsh -NoProfile -File ./eng/Test-PublicationLicenseReadiness.ps1 -ArtifactPath ./artifacts/runtime-nupkg
-
-          $releaseTag = "${{ inputs.release_tag }}"
-          foreach ($package in $packages) {
-            Write-Host "Uploading release asset: $($package.FullName)"
-            gh release upload $releaseTag $package.FullName --clobber --repo "$env:GH_REPO"
-          }
 
       - name: Upload Linux bridge package to GitHub Release
         if: ${{ inputs.attach_to_github_release && inputs.release_tag != '' && inputs.runtime_delivery_mode == 'split' }}
@@ -763,30 +716,6 @@ jobs:
               throw "gh release upload failed for '$($package.FullName)' with exit code $LASTEXITCODE."
             }
           }
-
-      - name: Retired Linux full-runtime GitHub Packages publish
-        if: ${{ false }}
-        shell: pwsh
-        env:
-          GITHUB_PACKAGES_TOKEN: ${{ github.token }}
-        run: |
-          $maxBytes = 2147000000
-          $packages = Get-ChildItem -LiteralPath ./artifacts/runtime-nupkg -Filter *.nupkg
-          foreach ($package in $packages) {
-            if ($package.Length -ge $maxBytes) {
-              $actualMb = [Math]::Round($package.Length / 1MB, 2)
-              throw "Runtime package '$($package.Name)' is ${actualMb} MB and exceeds the GitHub NuGet registry limit (< 2.147 GB). Split the runtime package before publishing."
-            }
-          }
-
-          pwsh -NoProfile -File ./eng/Push-NuGetPackages.ps1 `
-            -PackageRoot ./artifacts/runtime-nupkg `
-            -Source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" `
-            -ApiKeyEnvironmentVariable GITHUB_PACKAGES_TOKEN `
-            -TimeoutSeconds 3600 `
-            -MaxAttempts 3 `
-            -RetryDelaySeconds 30 `
-            -SortMode size-ascending
 
       - name: Publish Linux bridge package to GitHub Packages
         if: ${{ inputs.publish_to_github_packages && inputs.runtime_delivery_mode == 'split' }}

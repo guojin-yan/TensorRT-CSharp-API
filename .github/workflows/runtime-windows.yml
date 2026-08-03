@@ -340,34 +340,6 @@ jobs:
       - name: Test first release core package contracts
         run: dotnet test .\tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj -c "${{ inputs.configuration }}" --no-build --filter "FullyQualifiedName~RuntimeManifestTests|FullyQualifiedName~ManagedPackageTests|FullyQualifiedName~ExternalVendorRuntimePackagePolicyTests|FullyQualifiedName~PublicationLicenseReadinessTests|FullyQualifiedName~BridgePackageConsumerTests|FullyQualifiedName~YoloVisionManagedPackagePublicationTests|FullyQualifiedName~ReleaseAutomationTests|FullyQualifiedName~ReleaseQualityGateWorkflowTests"
 
-      - name: Retired full-runtime packages
-        if: ${{ false }}
-        shell: pwsh
-        run: |
-          $arguments = @(
-            '-NoProfile',
-            '-ExecutionPolicy', 'Bypass',
-            '-File', '.\eng\Invoke-LocalRuntimePackage.ps1',
-            '-RuntimePackageKey', '${{ inputs.runtime_keys }}',
-            '-Version', '${{ inputs.version }}',
-            '-Configuration', '${{ inputs.configuration }}'
-          )
-          if ('${{ inputs.run_smoke }}' -eq 'true') {
-            $arguments += '-RunSmoke'
-            if (-not [string]::IsNullOrWhiteSpace('${{ inputs.smoke_runtime_keys }}')) {
-              $arguments += @('-SmokeRuntimePackageKey', '${{ inputs.smoke_runtime_keys }}')
-            }
-            if ('${{ inputs.sign_consumer_output }}' -eq 'true') {
-              $arguments += '-SignConsumerOutput'
-              $arguments += '-TrustConsumerSigningCertificate'
-              $arguments += '-TrustConsumerSigningCertificateRoot'
-            }
-          }
-          powershell @arguments
-          if ($LASTEXITCODE -ne 0) {
-            throw "Invoke-LocalRuntimePackage.ps1 failed with exit code $LASTEXITCODE."
-          }
-
       - name: Build bridge packages
         if: ${{ inputs.runtime_delivery_mode == 'split' }}
         shell: pwsh
@@ -615,19 +587,6 @@ jobs:
             Select-Object Name,Root,@{Name='FreeGB';Expression={[math]::Round($_.Free/1GB,2)}} |
             Format-Table -AutoSize
 
-      - name: Upload Windows runtime artifacts
-        if: ${{ false }}
-        uses: actions/upload-artifact@v7
-        with:
-          compression-level: 0
-          name: runtime-windows-full
-          path: |
-            artifacts/managed/*.nupkg
-            artifacts/runtime-nupkg/*.nupkg
-            artifacts/package-consumer/package-consumer-validation-summary.*
-            artifacts/local-runtime-validation/*.json
-            artifacts/local-runtime-validation/*.md
-
       - name: Upload Windows split runtime artifacts
         if: ${{ inputs.attach_to_github_release && inputs.release_tag == '' && inputs.runtime_delivery_mode == 'split' }}
         uses: actions/upload-artifact@v7
@@ -640,28 +599,6 @@ jobs:
             artifacts/package-consumer/package-consumer-validation-summary.*
             artifacts/local-runtime-validation/*.json
             artifacts/local-runtime-validation/*.md
-
-      - name: Retired Windows full-runtime Release upload
-        if: ${{ false }}
-        shell: pwsh
-        env:
-          GH_TOKEN: ${{ github.token }}
-          GH_REPO: ${{ github.repository }}
-        run: |
-          $packages = @(Get-ChildItem -LiteralPath .\artifacts\runtime-nupkg -Filter *.nupkg | Sort-Object Name)
-          if ($packages.Count -eq 0) {
-            throw "No Windows runtime packages were found for direct release upload."
-          }
-
-          pwsh -NoProfile -File .\eng\Test-PublicationLicenseReadiness.ps1 -ArtifactPath .\artifacts\runtime-nupkg
-
-          foreach ($package in $packages) {
-            Write-Host "Uploading release asset: $($package.FullName)"
-            gh release upload "${{ inputs.release_tag }}" $package.FullName --clobber --repo "$env:GH_REPO"
-            if ($LASTEXITCODE -ne 0) {
-              throw "gh release upload failed for '$($package.FullName)' with exit code $LASTEXITCODE."
-            }
-          }
 
       - name: Upload Windows bridge packages to GitHub Release
         if: ${{ inputs.attach_to_github_release && inputs.release_tag != '' && inputs.runtime_delivery_mode == 'split' }}
@@ -688,30 +625,6 @@ jobs:
               throw "gh release upload failed for '$($package.FullName)' with exit code $LASTEXITCODE."
             }
           }
-
-      - name: Retired Windows full-runtime GitHub Packages publish
-        if: ${{ false }}
-        shell: pwsh
-        env:
-          GITHUB_PACKAGES_TOKEN: ${{ github.token }}
-        run: |
-          $maxBytes = 2147000000
-          $packages = Get-ChildItem -LiteralPath .\artifacts\runtime-nupkg -Filter *.nupkg
-          foreach ($package in $packages) {
-            if ($package.Length -ge $maxBytes) {
-              $actualMb = [Math]::Round($package.Length / 1MB, 2)
-              throw "Runtime package '$($package.Name)' is ${actualMb} MB and exceeds the GitHub NuGet registry limit (< 2.147 GB). Split the runtime package before publishing."
-            }
-          }
-
-          pwsh -NoProfile -File .\eng\Push-NuGetPackages.ps1 `
-            -PackageRoot .\artifacts\runtime-nupkg `
-            -Source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" `
-            -ApiKeyEnvironmentVariable GITHUB_PACKAGES_TOKEN `
-            -TimeoutSeconds 3600 `
-            -MaxAttempts 3 `
-            -RetryDelaySeconds 30 `
-            -SortMode size-ascending
 
       - name: Publish Windows bridge packages to GitHub Packages
         if: ${{ inputs.publish_to_github_packages && inputs.runtime_delivery_mode == 'split' }}

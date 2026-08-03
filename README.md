@@ -452,7 +452,7 @@ Public publication also requires `eng/Test-PublicationLicenseReadiness.ps1` to p
 
 Before 2026-07-30, this repository modeled package roles that could carry CUDA, cuDNN, TensorRT, NVRTC, parser, plugin, builder-resource, collection, and meta assets. Those publication paths are retired and must not be replayed.
 
-The historical package identities remain in selected manifests only for cleanup, compatibility audits, and interpretation of old evidence. Their projects are non-packable. `eng/Invoke-LocalRuntimePackage.ps1` fails closed, and `eng/Invoke-LocalSplitRuntimePackage.ps1` accepts only `bridge`.
+The historical package identities remain in selected manifests only for compatibility audits and interpretation of old evidence. Their project files have been removed. `eng/Invoke-LocalRuntimePackage.ps1` fails closed, and `eng/Invoke-LocalSplitRuntimePackage.ps1` accepts only `bridge`.
 
 After explicit Owner fingerprint review, 65 retired GitHub Package versions and 65 matching Release assets were deleted from `guojin-yan/TensorRT-CSharp-API`. The post-delete inventory contained zero remaining deletion candidates. Managed and `.Bridge` package identities were preserved.
 

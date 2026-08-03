@@ -1,9 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <PackageId>JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.TensorRtBuilder.Sm100Sm120Ptx</PackageId>
-    <Title>JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.TensorRtBuilder.Sm100Sm120Ptx</Title>
-    <Description>TensorRT 11 builder-resource libraries for SM100, SM120, and PTX fallback with CUDA 12.9 and cuDNN 9.22.0 on win-x64.</Description>
-    <JYPPXRuntimeKey>win-x64-trt11.0-cuda12.9-cudnn9.22-tensorrt-builder-sm100-sm120-ptx</JYPPXRuntimeKey>
-    <PackageTags>TensorRT;CUDA;cuDNN;runtime;split-delivery;tensorrt;builder-resource</PackageTags>
-  </PropertyGroup>
-</Project>

@@ -26,19 +26,10 @@ public sealed class RuntimeManifestTests
     }
 
     [Fact]
-    public void RuntimeProjectsExistForEveryManifestPackage()
+    public void RetiredFullRuntimeProjectsAreAbsent()
     {
-        string path = Path.Combine(RepositoryPaths.Root, "pack", "runtime", "runtime-packages.manifest.json");
-        using JsonDocument document = JsonDocument.Parse(File.ReadAllText(path));
-
-        foreach (JsonElement package in document.RootElement.GetProperty("packages").EnumerateArray())
-        {
-            string key = package.GetProperty("key").GetString()!;
-            string packageId = package.GetProperty("packageId").GetString()!;
-            string projectPath = Path.Combine(RepositoryPaths.Root, "pack", "runtime", key, packageId + ".csproj");
-
-            Assert.True(File.Exists(projectPath), $"Runtime project is missing for {key}: {projectPath}");
-        }
+        string root = Path.Combine(RepositoryPaths.Root, "pack", "runtime");
+        Assert.Empty(Directory.GetFiles(root, "*.csproj", SearchOption.AllDirectories));
     }
 
     [Fact]
@@ -146,7 +137,7 @@ public sealed class RuntimeManifestTests
     }
 
     [Fact]
-    public void SplitRuntimeProjectsExistForEverySplitManifestPackage()
+    public void SplitRuntimeProjectsExistOnlyForBridgePackages()
     {
         string path = Path.Combine(RepositoryPaths.Root, "pack", "runtime-split", "split-runtime-packages.manifest.json");
         using JsonDocument document = JsonDocument.Parse(File.ReadAllText(path));
@@ -159,10 +150,23 @@ public sealed class RuntimeManifestTests
             string prototypeState = package.GetProperty("prototypeState").GetString()!;
             string projectPath = Path.Combine(RepositoryPaths.Root, "pack", "runtime-split", key, packageId + ".csproj");
 
-            Assert.True(File.Exists(projectPath), $"Split runtime project is missing for {key}: {projectPath}");
+            if (role == "bridge")
+            {
+                Assert.True(File.Exists(projectPath), $"Bridge runtime project is missing for {key}: {projectPath}");
+            }
+            else
+            {
+                Assert.False(File.Exists(projectPath), $"Retired vendor runtime project must be removed: {projectPath}");
+            }
+
             Assert.Contains(role, SplitRuntimeRoles);
             Assert.Contains(prototypeState, new[] { "design-only", "local-validated", "pending-local-validation" });
         }
+
+        string splitRoot = Path.Combine(RepositoryPaths.Root, "pack", "runtime-split");
+        Assert.All(
+            Directory.GetFiles(splitRoot, "*.csproj", SearchOption.AllDirectories),
+            static projectPath => Assert.EndsWith(".Bridge.csproj", projectPath, StringComparison.Ordinal));
     }
 
     [Fact]

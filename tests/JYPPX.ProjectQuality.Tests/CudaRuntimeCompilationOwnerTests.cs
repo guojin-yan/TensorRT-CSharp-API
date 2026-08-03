@@ -100,6 +100,13 @@ public sealed class CudaRuntimeCompilationOwnerTests
     [Fact]
     public void CapabilityMatrixAndLocalSmokeKeepVersionAndProofBoundaries()
     {
+        string smokeRunner = ReadSource("eng", "Invoke-CudaRtcLocalSmoke.ps1");
+        Assert.Contains("CudaToolkitRoots", smokeRunner, StringComparison.Ordinal);
+        Assert.Contains("JYPPX_CUDA_TOOLKIT_ROOTS", smokeRunner, StringComparison.Ordinal);
+        Assert.Contains("JYPPX_TENSORRT_ROOT", smokeRunner, StringComparison.Ordinal);
+        Assert.DoesNotContain("third_party\\nvidia", smokeRunner, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("C:\\Program Files\\NVIDIA", smokeRunner, StringComparison.OrdinalIgnoreCase);
+
         using JsonDocument matrix = JsonDocument.Parse(ReadSource("artifacts", "cuda-runtime-compilation", "capability-matrix.json"));
         JsonElement root = matrix.RootElement;
         JsonElement[] windows = root.GetProperty("windows").EnumerateArray().ToArray();
