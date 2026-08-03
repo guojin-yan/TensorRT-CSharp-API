@@ -14,8 +14,9 @@ YoloVision 的 managed pose 路径已经支持：
 6. 单输出同时接受 `[1,C,N]` / `[1,N,C]`；独立 keypoint tensor 接受 `[1,N,K*stride]` / `[1,K*stride,N]`。
 7. 对内嵌输出要求 detection 前缀与 `K*stride` 精确解释全部通道，额外或错位通道直接失败。
 8. 解析 `x,y` 或 `x,y,score`，生成 `YoloPosePrediction`，并写入 JSON/SVG。
+9. 对官方 COCO 17 点语义绘制人体骨架；有图片预处理元数据和同尺寸背景时，将 box、关键点和骨架统一逆变换到原图坐标。
 
-当前通用路径不推断骨架连接、不做关键点类别重排，也不自动把 letterbox 后的关键点逆变换到原图坐标。SVG 会将绝对值直接当作模型画布坐标，将绝对值不超过 `1.5` 的数按 normalized coordinate 缩放。owner 必须确认 exporter 坐标空间，不能依赖这个显示启发式替代模型合同。
+COCO 17 点骨架只适用于索引语义与官方 COCO Pose 一致的模型。通用路径不做关键点类别重排；自定义关键点集合仍需调用方提供适配。未提供图片元数据和背景时，SVG 保持模型输入坐标；提供完整 letterbox 合同时才执行原图逆变换。
 
 ## 输出合同
 
@@ -28,7 +29,7 @@ YoloVision 的 managed pose 路径已经支持：
 | 内嵌起点 | 官方 YOLOv8n-pose 为 `--aux-channel-start 5` | class 与 keypoint 通道混读 |
 | layout | `--layout` 与 `--aux-layout` 必须与同一 tensor 一致 | N/C 维交换 |
 | coordinate space | exporter/owner 显式记录 | 原图 overlay 偏移 |
-| skeleton map | owner 侧记录 | 点位含义无法审核 |
+| skeleton map | 官方 COCO 17 点使用内置 19 条边；自定义模型需显式适配 | 点位含义或连线错误 |
 
 当 stride 为 2 时，decoder 只读取 `x,y`，并将 score 设为 `1.0`。当 stride 大于等于 3 时，第三个值是 score；额外列目前不会写为 visibility 或其他语义。若 exporter 将 visibility 与 score 分列，必须增加显式 adapter，不能仅把 stride 改成 4 就声称语义完整。
 
@@ -207,9 +208,9 @@ dotnet run --project .\samples\YoloVision -- `
   *> E:\TensorRtSharpAssets\cases\yolov8n-pose\logs\run.log
 ```
 
-真实日志至少应包含 `Profile Family=YoloV8 Task=Pose Layout=ChannelsFirst`、`output0:[1,56,8400]`、`ReferenceOutputValidation ... Passed=True`、`Poses=4` 和 `YoloVision Passed=True`。具体数量以实际资产为准，evidence pack 中的 expected line 必须与采集结果一致。
+真实日志至少应包含 `Profile Family=YoloV8 Task=Pose Layout=ChannelsFirst`、`output0:[1,56,8400]`、`ReferenceOutputValidation ... Passed=True`、`Poses=2` 和 `YoloVision Passed=True`。具体数量以实际资产为准，证据记录中的 expected line 必须与采集结果一致。
 
-本次 TensorRT 正例比较了全部 `470400` 个输出值，mismatch 为 `0`。通用 comparator 同时覆盖坐标与置信度通道，因此使用 `abs=1.25/rel=0.05` 容纳 TensorRT/ONNX Runtime 的坐标 kernel 差异；不能仅凭这组统一阈值判断后处理正确性。独立 Ultralytics/PyTorch CPU 对照另外约束了结果：4 个 person pose 的最小 box IoU 为 `0.998815`，可见关键点最大原图坐标误差为 `3.920` 像素，最大目标分数误差小于 `0.000272`。
+本次 TensorRT 正例比较了全部 `470400` 个输出值，mismatch 为 `0`，最大绝对误差为 `0.001373291`。独立 Ultralytics/PyTorch CPU 对照读取同一个 C# tensor，两个 person pose 的 box IoU 分别为 `0.999999` 和 `0.999998`，可见关键点最大原图坐标误差分别为 `0.000095` 和 `0.000126` 像素。
 
 `eng/New-YoloVisionReferenceMutation.py` 将 reference 第 0 个值增加 `10000` 后，运行必须非零退出。本次负例得到 `Mismatches=1`、`FirstMismatch=0`、`YoloVision Passed=False`，证明 reference 门禁不是只记录不阻断。
 
@@ -217,7 +218,7 @@ dotnet run --project .\samples\YoloVision -- `
 
 每条 pose prediction 包含 detection `box`、`classId`、`className`、目标 `score`，以及 keypoint 数组中的 `index/x/y/score`。示例位于 `samples/YoloVision/examples/yolovision-output-pose.example.json`。
 
-SVG 只画 box 和 keypoint 圆点，不包含人体骨架边。它最多处理 50 个 pose，适合 owner review 和文章截图，但不是像素级正确性 proof。若点位仍在 letterbox/model-input 坐标，必须在 owner adapter 中显式逆变换后再制作最终原图 overlay。
+SVG 会绘制 box、可见 keypoint 圆点和 COCO 人体骨架边。它最多处理 50 个 pose；当 `--image`、预处理元数据与同尺寸 `--visualization-background` 同时存在时，全部几何元素映射回原图坐标。该图适合结果复查和文章展示，但不替代 raw tensor 与独立后处理比较。
 
 ## 输出校验
 

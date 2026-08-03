@@ -275,7 +275,7 @@ public sealed class YoloVisionDocumentationMatrixTests
             "[1,K*stride,N]",
             "stride 为 2",
             "score 设为 `1.0`",
-            "不推断骨架连接",
+            "COCO 17 点骨架",
             "E:\\TensorRtSharpAssets\\cases\\yolov8n-pose",
             "--exportReport",
             "--output-role-map boxes:det,keypoints:pose-keypoints",
@@ -299,7 +299,7 @@ public sealed class YoloVisionDocumentationMatrixTests
         }
 
         Assert.DoesNotContain("--exportProfile", article, StringComparison.Ordinal);
-        Assert.DoesNotContain("已经实现人体骨架", article, StringComparison.Ordinal);
+        Assert.Contains("人体骨架", article, StringComparison.Ordinal);
     }
 
     [Fact]

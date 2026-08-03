@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "recordKind": "sample-run-evidence-record",
+  "recordId": "yolovision-yolov8n-pose-article-local-package-win-x64-trt10.11-20260803",
+  "sampleName": "YoloVision",
+  "family": "yolov8",
+  "task": "pose",
+  "proofClassification": "local-package-consumer-runtime",
+  "validatorState": "local-package-consumer-runtime",
+  "templateOnly": false,
+  "isSmokePassed": true,
+  "canPromoteRealModelRuntime": true,
+  "canPromotePackageConsumerRuntime": false,
+  "executedUtcDate": "2026-08-03",
+  "sourceBaseCommit": "b2b9249d38565808bf555c94c61948123db6444d",
+  "referenceImplementationCommit": "962a60531b8bbca942a9879e5580299428bd8a0a",
+  "packageConsumer": {
+    "projectOutsideRepository": true,
+    "packageCount": 3,
+    "projectReferenceCount": 0,
+    "assemblyReferenceCount": 0,
+    "runtimeExitCode": 0,
+    "nativeBridgePathEnvironmentVariableSet": true,
+    "nativeBridgeCopiedByNuGet": true,
+    "packages": [
+      {
+        "id": "JYPPX.TensorRT.CSharp.API",
+        "version": "4.0.0",
+        "length": 15229493,
+        "sha256": "139696bd79be6469d26747b7a3da7ba82e8279c69a9b42e2bf4f5a1ade607898"
+      },
+      {
+        "id": "JYPPX.TensorRT.CSharp.API.YoloVision",
+        "version": "4.0.0",
+        "length": 120201,
+        "sha256": "c563713e05b76764bcaf1a729f3338e807f940fa3ab81eb02570b9e056c0d3a7"
+      },
+      {
+        "id": "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge",
+        "version": "4.0.0",
+        "length": 376999,
+        "sha256": "296eac2d6376cf3c6eaeb9394c662d71b2d838ad7e339cd75587ef7040ebcb2c"
+      }
+    ]
+  },
+  "runtimeEnvironment": {
+    "os": "Microsoft Windows 10.0.26200",
+    "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+    "driverVersion": "576.02",
+    "dotnetVersion": "10.0.301",
+    "tensorRtVersion": "10.11.0",
+    "cudaToolkitVersion": "12.9",
+    "nativeBridgeLength": 1143808,
+    "nativeBridgeSha256": "0da3f8751d10f3f221fa7c4145ba8dd2927b7d98a8afdce4645531792b3b42e8"
+  },
+  "assets": {
+    "weightsSha256": "c6fa93dd1ee4a2c18c900a45c1d864a1c6f7aba75d84f91648a30b7fb641d212",
+    "modelSha256": "ed1e8d2d2aeb8a2c66e642a16295a72a2990393e3a3843325537da7e11c8a899",
+    "sourceImageSha256": "52b889d4fc9baea772ba2d9bbdfdef8b70710f993d7f27d193a965b11e708bcb",
+    "ppmImageSha256": "80715af66669147b049fec9386152bd45505f4e494a65079fdc55404d4589b8e",
+    "inputTensorSha256": "050935ebf471ec32ab4327d9f5643f0fe1a203289088895205e732e448a8d225",
+    "referenceOutputSha256": "26f2de5b10573a784fad695a46b690b57a203de821eaef9fb3ab30daaf896a92",
+    "outputJsonSha256": "bca028bfbc0a2a16a2c24de2f812ef0258e2dfbccde3ec99978234d0d35e7d1b",
+    "runtimeLogSha256": "a2364cfbe5c36e4d3a952633fde966c58fdcca6ebdfeececaafbe9802616a5b0",
+    "visualizationSvgSha256": "d91952608437e078a4064a2264c69b78f0a37cca495e943091e978b8eb1cd4d9",
+    "annotatedResultSha256": "874a4c659410739400fd00fcd4cb14defd2dfdca9bec5641199afd5b495c9703",
+    "runtimeScreenshotSha256": "cabe583192cfe8b883ef722e28f9e2b8821a7f57ab1ba072f3cb990a8af388f5"
+  },
+  "modelContract": {
+    "input": "images:float32[1,3,640,640]",
+    "preprocess": "center-letterbox-640x640; RGB; NCHW; scale=1/255; mean=0,0,0; std=1,1,1; fill=114",
+    "output": "output0:float32[1,56,8400]",
+    "postprocess": "4 box channels; 1 person class; no objectness; 17x3 embedded COCO keypoints; class-aware NMS"
+  },
+  "rawTensorReferenceValidation": {
+    "sourceClassification": "independent-onnxruntime-cpu-csharp-input",
+    "absoluteTolerance": 1.25,
+    "relativeTolerance": 0.05,
+    "comparedElementCount": 470400,
+    "mismatchCount": 0,
+    "firstMismatchIndex": -1,
+    "maximumAbsoluteError": 0.001373291,
+    "passed": true
+  },
+  "poseValidation": {
+    "predictionCount": 2,
+    "keypointCountPerPrediction": 17,
+    "visibleSkeletonEdgeCount": 27,
+    "scores": [0.46771556, 0.44162524],
+    "independentReferenceSha256": "3f36c21615b58012e7eec591033e374aed302461bbf8efb7e3feeaac166c6a28",
+    "comparisonSha256": "f726b6f2ad489e67dd53c5cd5dfcc50cf24cd19a3885e770ec535a922c3ebf99",
+    "boxIoU": [0.9999993975538791, 0.9999978587541288],
+    "maximumVisibleKeypointCoordinateError": [0.00009547670319033649, 0.0001259707983769159],
+    "passed": true
+  },
+  "controlledNegativeValidation": {
+    "kind": "single-reference-value-mutation",
+    "mutationIndex": 0,
+    "mutationDelta": 100.0,
+    "mutatedReferenceSha256": "b7f4da29cc00bb086739f42e25340f7b4855824c38212490c4eeea0f426b7a9e",
+    "runtimeLogSha256": "9451262f0ee3164a59e2f547c38369a203b2d32eb20768e19fdc7d7f9a62cc16",
+    "exitCode": 1,
+    "comparedElementCount": 470400,
+    "mismatchCount": 1,
+    "firstMismatchIndex": 0,
+    "maximumAbsoluteError": 100.00148,
+    "validationPassed": false,
+    "failClosed": true
+  },
+  "proofBoundary": {
+    "localPackageConsumerRuntimeEvidence": true,
+    "packagesDownloadedFromPublicFeed": false,
+    "publicPackageProof": false,
+    "postPublishProof": false,
+    "publicRedistributionOwnerApprovalForModel": false,
+    "publicRedistributionPermittedForSourceImage": true,
+    "ownerReleaseAcceptance": false,
+    "releaseProof": false,
+    "performsPublish": false,
+    "uploadsAssets": false
+  }
+}
