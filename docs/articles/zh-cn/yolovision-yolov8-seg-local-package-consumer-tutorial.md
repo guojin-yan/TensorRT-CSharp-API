@@ -42,6 +42,26 @@ pwsh -NoProfile -ExecutionPolicy Bypass `
   -OutputRoot $assetRoot
 ```
 
+演示图片独立于模型资产。使用一个环境变量指向本机已获准使用的素材目录，再复制并校验本文固定输入，避免在文章中暴露作者机器路径：
+
+```powershell
+$demoImageRoot = $env:JYPPX_DEMO_IMAGE_ROOT
+if ([string]::IsNullOrWhiteSpace($demoImageRoot)) {
+  throw '请先设置 JYPPX_DEMO_IMAGE_ROOT，使其指向本机演示图片目录。'
+}
+
+$inputRoot = Join-Path $assetRoot 'input'
+$inputJpeg = Join-Path $inputRoot 'dog.jpg'
+New-Item -ItemType Directory -Force $inputRoot | Out-Null
+Copy-Item (Join-Path $demoImageRoot 'dog.jpg') $inputJpeg -Force
+
+$expectedImageSha256 = 'bf76876b90e3ebd521f9882b9177ba8f33e80cb7ec09c630f179b122edd125e1'
+$actualImageSha256 = (Get-FileHash $inputJpeg -Algorithm SHA256).Hash.ToLowerInvariant()
+if ($actualImageSha256 -ne $expectedImageSha256) {
+  throw "dog.jpg SHA256 不匹配：$actualImageSha256"
+}
+```
+
 权重许可证为 `AGPL-3.0-only`。模型分发需要使用者按实际业务自行复核，因此 `.pt` 和 ONNX 都留在仓库外。本文输入 `dog.jpg` 由项目所有者提供，并已明确授权用于本仓库技术文章；原图 SHA256 为 `bf76876b90e3ebd521f9882b9177ba8f33e80cb7ec09c630f179b122edd125e1`。
 
 ## ONNX 转换与暂存
@@ -74,8 +94,8 @@ output1: float32[1,32,160,160] # mask prototypes
 把已获准使用的原图转换为 P6 RGB PPM，原 JPEG 继续作为结果图背景：
 
 ```powershell
-$inputJpeg = Join-Path $assetRoot 'input/dog.jpg'
 $inputPpm = Join-Path $assetRoot 'derived/dog.ppm'
+New-Item -ItemType Directory -Force (Split-Path $inputPpm) | Out-Null
 & $env:JYPPX_YOLO_PYTHON -c "from PIL import Image; import sys; Image.open(sys.argv[1]).convert('RGB').save(sys.argv[2], format='PPM')" $inputJpeg $inputPpm
 ```
 

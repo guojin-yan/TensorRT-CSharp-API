@@ -43,6 +43,26 @@ pwsh -NoProfile -ExecutionPolicy Bypass `
   -PythonPath $env:JYPPX_YOLO_PYTHON
 ```
 
+演示图片不随模型下载。把已获准使用的素材目录写入环境变量，再复制并核对本文固定输入；文章命令不依赖作者机器上的绝对路径：
+
+```powershell
+$demoImageRoot = $env:JYPPX_DEMO_IMAGE_ROOT
+if ([string]::IsNullOrWhiteSpace($demoImageRoot)) {
+  throw '请先设置 JYPPX_DEMO_IMAGE_ROOT，使其指向本机演示图片目录。'
+}
+
+$inputRoot = Join-Path $assetRoot 'input'
+$inputPng = Join-Path $inputRoot 'plane.png'
+New-Item -ItemType Directory -Force $inputRoot | Out-Null
+Copy-Item (Join-Path $demoImageRoot 'plane.png') $inputPng -Force
+
+$expectedImageSha256 = 'dde925501ff0f2bddb7e28198fdd0586620f7a7ef587412717f666b7ea6584c9'
+$actualImageSha256 = (Get-FileHash $inputPng -Algorithm SHA256).Hash.ToLowerInvariant()
+if ($actualImageSha256 -ne $expectedImageSha256) {
+  throw "plane.png SHA256 不匹配：$actualImageSha256"
+}
+```
+
 权重采用 `AGPL-3.0-only`，本文不把 `.pt` 或 ONNX 放进 Git。演示图片 `plane.png` 由项目所有者提供，并已明确授权用于本仓库技术文章；原图 SHA256 为 `dde925501ff0f2bddb7e28198fdd0586620f7a7ef587412717f666b7ea6584c9`。该授权不扩展为对模型或其他资产的再分发许可。
 
 ## ONNX 转换与暂存
@@ -76,8 +96,8 @@ output0: float32[1,20,21504]
 将获准使用的图片转换为 YoloVision 可读的 P6 RGB PPM，同时保留原图给可视化使用：
 
 ```powershell
-$inputPng = Join-Path $assetRoot 'input/plane.png'
 $inputPpm = Join-Path $assetRoot 'derived/plane.ppm'
+New-Item -ItemType Directory -Force (Split-Path $inputPpm) | Out-Null
 & $env:JYPPX_YOLO_PYTHON -c "from PIL import Image; import sys; Image.open(sys.argv[1]).convert('RGB').save(sys.argv[2], format='PPM')" $inputPng $inputPpm
 ```
 
