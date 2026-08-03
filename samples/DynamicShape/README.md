@@ -10,6 +10,8 @@ This sample builds a small dynamic-batch identity network directly in C# and dem
 - `TensorRtInferenceBindings` input/output workflow
 - CUDA stream based enqueue and output readback
 
+This sample creates its Identity network in C# memory. It does not download a model and does not require ONNX conversion.
+
 Run from the repository root with development probing enabled:
 
 ```powershell
@@ -19,7 +21,7 @@ $env:JYPPX_ENABLE_DEVELOPMENT_PROBING = "1"
 Run:
 
 ```powershell
-dotnet .\samples\DynamicShape\bin\Debug\net8.0\DynamicShape.dll --tensor-rt-line 10 --batch 3
+dotnet .\samples\DynamicShape\bin\Release\net8.0\DynamicShape.dll --tensor-rt-line 10 --batch 3
 ```
 
 Options:
@@ -36,3 +38,5 @@ Expected evidence includes:
 - `DynamicShape Passed=True`
 
 If runtime, builder, CUDA, or vendor dependency probing is unavailable, the sample prints `DynamicShape=Skipped` with a diagnostic reason. That skip should be treated as environment evidence, not as a deferred API completion shortcut.
+
+The complete Chinese walkthrough, real Windows Terminal screenshot, and runtime evidence are available in [使用 TensorRtSharp4.0 完成 Dynamic Shape 推理](../../docs/articles/zh-cn/dynamic-shape-optimization-profile-tutorial.md).

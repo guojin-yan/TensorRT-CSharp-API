@@ -49,6 +49,7 @@
 非模型实机文章不需要原图叠加结果，按独立标准检查真实运行窗口、依赖获取、完整代码流程、失败诊断和证据边界：
 
 - [在 C# 中使用 TensorRtSharp4.0 动态编译并运行 CUDA Kernel](cuda-runtime-compilation-technical-article.md)。
+- [使用 TensorRtSharp4.0 完成 Dynamic Shape 推理](dynamic-shape-optimization-profile-tutorial.md)。
 
 其余模型教程即使已有真实 TensorRT 证据，在补齐原图叠加结果和真实程序窗口截图前，也不会标记为完整技术文章。
 
