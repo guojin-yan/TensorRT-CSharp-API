@@ -249,6 +249,8 @@ validator 会检查 task、center、size、angle、angleUnit、angleRange、输�
 
 owner 审核通过后最多形成 `real-model-runtime` 候选。它不是 `package-consumer-runtime`；后者要求仓库外 clean consumer 从目标 package source restore/build/run。`blocked-by-cuda-driver`、template、build-only、sidecar-only、synthetic input、ProjectReference 和本地 `.nupkg` 都不能替代真实 OBB runtime proof。
 
+当前官方 YOLOv8n-obb 已完成仓库外三包 `PackageReference` 运行、430,080 值 raw 对照、40 个旋转框独立几何对照和受控负例，详见 [YoloVision YOLOv8n OBB 本地包消费教程](yolovision-yolov8n-obb-local-package-consumer-tutorial.md)。该记录分类为 `local-package-consumer-runtime`，仍不是公共 feed 下载、post-publish、Owner 发布批准或 release proof。转换后的 ONNX 暂存在外层 `E:\GitSpace\TensorRT-CSharp-API-4.0\models`，不上传当前仓库。
+
 ## 代码入口
 
 - `samples/YoloVision/YoloRuntimeOutputRoleResolver.cs`：angle role、单位和 auxiliary layout 参数。

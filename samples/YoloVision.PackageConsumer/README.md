@@ -26,6 +26,9 @@ reference mutation to fail closed.
 `eng/Test-YoloVisionPoseLocalPackageConsumer.ps1` selects official YOLOv8n-pose, verifies the
 authoritative C# letterbox tensor, compares all 470,400 raw values and four 17-keypoint poses
 against independent references, and requires a single-value reference mutation to fail closed.
+`eng/Test-YoloVisionObbLocalPackageConsumer.ps1` selects official YOLOv8n-obb, verifies the
+authoritative 1024x1024 C# letterbox tensor, compares all 430,080 raw values and 40 ship oriented
+boxes against independent references, and requires a single-value reference mutation to fail closed.
 Every scenario restores from isolated one-package feeds and
 checks the restored nupkg SHA256 against the selected package.
 

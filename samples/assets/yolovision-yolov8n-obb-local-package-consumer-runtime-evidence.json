@@ -1,0 +1,650 @@
+{
+  "schemaVersion": 1,
+  "recordKind": "yolovision-local-package-consumer-runtime-evidence",
+  "recordName": "yolovision-yolov8n-obb-local-package-consumer-trt10.11",
+  "generatedAtUtc": "2026-08-02T16:05:39.0000000+00:00",
+  "templateOnly": false,
+  "sampleName": "YoloVision.PackageConsumer",
+  "family": "yolov8",
+  "task": "obb",
+  "proofClassification": "local-package-consumer-runtime",
+  "repositoryHeadAtExecution": "eb0a885db2f5dd728416dceb443f09b032e0610e",
+  "fullLocalReportSha256": "5c0229843627057f226a11ae10f438b03febe154039c826bef55e782a6ef207e",
+  "packageConsumer": {
+    "targetFramework": "net8.0",
+    "packageSourceKind": "local-file-feed-only",
+    "packageSourceIsolation": "one-selected-nupkg-per-feed",
+    "remotePackageSourceCount": 0,
+    "packageCount": 3,
+    "packages": [
+      {
+        "role": "managed-api",
+        "id": "JYPPX.TensorRT.CSharp.API",
+        "version": "4.0.0",
+        "length": 15230224,
+        "sha256": "b0069c4d0bec54f9a998f8c7519fc3d5096fc34b1b72ee02ab26a0b14b4f08d7"
+      },
+      {
+        "role": "yolovision",
+        "id": "JYPPX.TensorRT.CSharp.API.YoloVision",
+        "version": "4.0.0",
+        "length": 114393,
+        "sha256": "234b14eba88ca70a227829264024a41d90ff8ceccf273c5caf8cc2640e52860c"
+      },
+      {
+        "role": "bridge-only",
+        "id": "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge",
+        "version": "4.0.0",
+        "length": 376972,
+        "sha256": "b0531fbe271583b0f7808a0a9907f72b3ac8f99199dcc5e3b83bdb85157a821b"
+      }
+    ],
+    "projectReferenceCount": 0,
+    "directAssemblyReferenceCount": 0,
+    "restoredProjectLibraryCount": 0,
+    "restoredPackageHashesMatchSelected": true,
+    "nativeBridgeCopiedByNuGet": true,
+    "nativeBridgePathEnvironmentVariableSet": false,
+    "tensorRtCudaAndCudnnAreExternalDependencies": true,
+    "vendorRuntimePackageEntryCount": 0,
+    "bridgeNativePackageEntryCount": 1,
+    "workspaceDrive": "E:",
+    "workspaceRemovedAfterValidation": true,
+    "restoreExitCode": 0,
+    "buildExitCode": 0,
+    "runtimeExitCode": 0
+  },
+  "assets": {
+    "weightsSha256": "fa6e4cd2691f132875c143135affaa66b5d89394ebb1d07d19770a9b6382c1b8",
+    "onnxSha256": "5f2701ef5326fb5a691999438cfc55a69656323c21ffddebaff8968ab6de2e92",
+    "labelsSha256": "4b1932ade5050f71f3a8ff9031993d8bb2891b2c31291e29cbe2331820221272",
+    "imageSha256": "9156edd731c3dcc7baaa59d93d0753c5098003c6bffc5eecaca1087713d07c76",
+    "sourceImageSha256": "8c5ada657cf8110a9f8aaac954c1dd96cde0187315b581276c32b0d1863e756f",
+    "authoritativeInputTensorSha256": "c56c027619088bce94f9160a3f602b4ad81fe323001867b1ee456100040fec6e",
+    "generatedInputTensorSha256": "c56c027619088bce94f9160a3f602b4ad81fe323001867b1ee456100040fec6e",
+    "inputTensorElementCount": 3145728,
+    "rawReferenceSha256": "53f00a488c44227a3e5fbc86b530355acfd0c17cf9fdfc771a6d1f99f72fd65d",
+    "pinnedIndependentReferenceSha256": "97e777e1bcecec7fdb3b15e8d4d1e34468505947522c8881c435b484afc10045",
+    "annotatedReferenceImageSha256": "7231b76afc3d823e4dafb41c3c37f8e150c58c842f1c7334def386fa1c686ce1",
+    "onnxStoredUnderWorkspaceModelsDirectory": true,
+    "heavyAssetsRemainOutsideGit": true,
+    "publicRedistributionOwnerApproval": false
+  },
+  "runtimeEnvironment": {
+    "os": "Microsoft Windows 10.0.26200",
+    "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+    "driverVersion": "576.02",
+    "dotnetVersion": "10.0.301",
+    "tensorRtVersion": "10.11.0",
+    "cudaToolkitVersion": "12.9",
+    "nativeBridgeSha256": "74d89fd7e1cb414751ca943298e003ecf48cadcda3e4c1952e5a2d5ba0b0cfc9"
+  },
+  "modelContract": {
+    "input": {
+      "name": "images",
+      "shape": [
+        1,
+        3,
+        1024,
+        1024
+      ],
+      "dataType": "float32",
+      "preprocess": "center-letterbox-1024x1024; RGB; NCHW; scale=1/255; fill=114"
+    },
+    "outputs": [
+      {
+        "name": "output0",
+        "shape": [
+          1,
+          20,
+          21504
+        ],
+        "role": "detection-rows-with-embedded-obb-angle",
+        "boxChannelCount": 4,
+        "classCount": 15,
+        "hasObjectness": false,
+        "auxiliaryChannelStart": 19,
+        "angleChannelCount": 1,
+        "angleUnit": "radian",
+        "angleRange": "[-pi/4,3pi/4]",
+        "layout": "channels-first"
+      }
+    ],
+    "postprocess": {
+      "confidenceThreshold": 0.25,
+      "iouThreshold": 0.45,
+      "topK": 40,
+      "applyNms": true,
+      "nmsMode": "ClassAware",
+      "overlapMetric": "probabilistic-rotated-iou"
+    }
+  },
+  "preprocessingValidation": {
+    "tensorSha256": "c56c027619088bce94f9160a3f602b4ad81fe323001867b1ee456100040fec6e",
+    "authoritativeTensorSha256": "c56c027619088bce94f9160a3f602b4ad81fe323001867b1ee456100040fec6e",
+    "elementCount": 3145728,
+    "matchesAuthoritativeTensor": true,
+    "passed": true
+  },
+  "rawTensorReferenceValidation": {
+    "sourceClassification": "independent-onnxruntime-cpu-execution-provider",
+    "absoluteTolerance": 4.25,
+    "relativeTolerance": 0.05,
+    "tensorCount": 1,
+    "comparedElementCount": 430080,
+    "mismatchCount": 0,
+    "tensor": {
+      "tensorName": "output0",
+      "actualShape": [
+        1,
+        20,
+        21504
+      ],
+      "referenceShape": [
+        1,
+        20,
+        21504
+      ],
+      "maximumAbsoluteError": 3.7340698,
+      "maximumRelativeError": 1.4397163,
+      "referenceSha256": "53f00a488c44227a3e5fbc86b530355acfd0c17cf9fdfc771a6d1f99f72fd65d"
+    },
+    "completed": true,
+    "passed": true
+  },
+  "independentPostprocessValidation": {
+    "sourceClassification": "independent-ultralytics-pytorch-cpu-reference",
+    "referenceFramework": "Ultralytics PyTorch",
+    "ultralyticsVersion": "8.4.21",
+    "torchVersion": "2.10.0+cpu",
+    "referenceSha256": "bebc73ccfe9957f9bd79de914a5f387df6258daa820ec542645165aae54a51b3",
+    "comparisonSha256": "b34582c7fbd0187db8ed8e5a0dd07fd3c25c708c7eeac1b6d7de73897fe59708",
+    "thresholds": {
+      "minimumRotatedIoU": 0.98,
+      "maximumCoordinateError": 5.0,
+      "maximumAngleErrorRadians": 0.02,
+      "maximumScoreError": 0.03
+    },
+    "predictionCount": 40,
+    "minimumObservedRotatedIoU": 0.9977500996659665,
+    "maximumObservedCoordinateError": 0.12243036369432048,
+    "maximumObservedAngleErrorRadians": 0.000419834352111792,
+    "maximumObservedScoreError": 0.0004946553031921486,
+    "comparisons": [
+      {
+        "referenceIndex": 0,
+        "actualIndex": 0,
+        "classId": 1,
+        "className": "ship",
+        "rotatedIoU": 0.9994604508834901,
+        "maximumCoordinateAbsoluteError": 0.012384574789706448,
+        "anglePeriodicAbsoluteErrorRadians": 0.0001487189071655015,
+        "scoreAbsoluteError": 0.00018594097824098377,
+        "passed": true
+      },
+      {
+        "referenceIndex": 1,
+        "actualIndex": 1,
+        "classId": 1,
+        "className": "ship",
+        "rotatedIoU": 0.9981227201648606,
+        "maximumCoordinateAbsoluteError": 0.07900501166980689,
+        "anglePeriodicAbsoluteErrorRadians": 2.9062141418401133E-06,
+        "scoreAbsoluteError": 0.00019234423141478718,
+        "passed": true
+      },
+      {
+        "referenceIndex": 2,
+        "actualIndex": 2,
+        "classId": 1,
+        "className": "ship",
+        "rotatedIoU": 0.9996668461055142,
+        "maximumCoordinateAbsoluteError": 0.009875575295481553,
+        "anglePeriodicAbsoluteErrorRadians": 4.359945640564078E-05,
+        "scoreAbsoluteError": 5.006436767573952E-05,
+        "passed": true
+      },
+      {
+        "referenceIndex": 3,
+        "actualIndex": 3,
+        "classId": 1,
+        "className": "ship",
+        "rotatedIoU": 0.9989092520339243,
+        "maximumCoordinateAbsoluteError": 0.029251452555641322,
+        "anglePeriodicAbsoluteErrorRadians": 0.00028518317970277485,
+        "scoreAbsoluteError": 0.0002447044494628958,
+        "passed": true
+      },
+      {
+        "referenceIndex": 4,
+        "actualIndex": 4,
+        "classId": 1,
+        "className": "ship",
+        "rotatedIoU": 0.99927581238229,
+        "maximumCoordinateAbsoluteError": 0.022156954179337163,
+        "anglePeriodicAbsoluteErrorRadians": 0.00016460730934142465,
+        "scoreAbsoluteError": 4.370005264286991E-05,
+        "passed": true
+      },
+      {
+        "referenceIndex": 5,
+        "actualIndex": 5,
+        "classId": 1,
+        "className": "ship",
+        "rotatedIoU": 0.9993978781333543,
+        "maximumCoordinateAbsoluteError": 0.020484537708682637,
+        "anglePeriodicAbsoluteErrorRadians": 0.00010002851867674245,
+        "scoreAbsoluteError": 0.00015402855758661627,
+        "passed": true
+      },
+      {
+        "referenceIndex": 6,
+        "actualIndex": 6,
+        "classId": 1,
+        "className": "ship",
+        "rotatedIoU": 0.9987641244200485,
+        "maximumCoordinateAbsoluteError": 0.030449055776209377,
+        "anglePeriodicAbsoluteErrorRadians": 0.00015041588188169364,
+        "scoreAbsoluteError": 0.00028676017318729485,
+        "passed": true
+      },
+      {
+        "referenceIndex": 7,
+        "actualIndex": 7,
+        "classId": 1,
+        "className": "ship",
+        "rotatedIoU": 0.9989285743980837,
+        "maximumCoordinateAbsoluteError": 0.05781906687911942,
+        "anglePeriodicAbsoluteErrorRadians": 3.0108866882316843E-05,
+        "scoreAbsoluteError": 0.00010972719268798059,
+        "passed": true
+      },
+      {
+        "referenceIndex": 8,
+        "actualIndex": 8,
+        "classId": 1,
+        "className": "ship",
+        "rotatedIoU": 0.9987393443085971,
+        "maximumCoordinateAbsoluteError": 0.02442799471747037,
+        "anglePeriodicAbsoluteErrorRadians": 0.0002753109382629404,
+        "scoreAbsoluteError": 3.694992080693904E-05,
+        "passed": true
+      },
+      {
+        "referenceIndex": 9,
+        "actualIndex": 9,
+        "classId": 1,
+        "className": "ship",
+        "rotatedIoU": 0.9991358148587691,
+        "maximumCoordinateAbsoluteError": 0.019565921403454922,
+        "anglePeriodicAbsoluteErrorRadians": 0.00023549436531067336,
+        "scoreAbsoluteError": 0.0001284444311523414,
+        "passed": true
+      },
+      {
+        "referenceIndex": 10,
+        "actualIndex": 10,
+        "classId": 1,
+        "className": "ship",
+        "rotatedIoU": 0.9986948336426432,
+        "maximumCoordinateAbsoluteError": 0.08509968060943152,
+        "anglePeriodicAbsoluteErrorRadians": 9.949902038564051E-06,
+        "scoreAbsoluteError": 1.2221756591768163E-05,
+        "passed": true
+      },
+      {
+        "referenceIndex": 11,
+        "actualIndex": 11,
+        "classId": 1,
+        "className": "ship",
+        "rotatedIoU": 0.999131162416875,
+        "maximumCoordinateAbsoluteError": 0.016764098736842925,
+        "anglePeriodicAbsoluteErrorRadians": 0.0003497407173156941,
+        "scoreAbsoluteError": 7.054386901850229E-05,
+        "passed": true
+      },
+      {
+        "referenceIndex": 12,
+        "actualIndex": 12,
+        "classId": 1,
+        "className": "ship",
+        "rotatedIoU": 0.9993386902528205,
+        "maximumCoordinateAbsoluteError": 0.017278441972841563,
+        "anglePeriodicAbsoluteErrorRadians": 9.146028518702831E-06,
+        "scoreAbsoluteError": 0.0002036102468871981,
+        "passed": true
+      },
+      {
+        "referenceIndex": 13,
+        "actualIndex": 13,
+        "classId": 1,
+        "className": "ship",
+        "rotatedIoU": 0.999490685228828,
+        "maximumCoordinateAbsoluteError": 0.010656614422885013,
+        "anglePeriodicAbsoluteErrorRadians": 0.00012724517097473242,
+        "scoreAbsoluteError": 4.740560989380249E-05,
+        "passed": true
+      },
+      {
+        "referenceIndex": 14,
+        "actualIndex": 14,
+        "classId": 1,
+        "className": "ship",
+        "rotatedIoU": 0.9989202195683897,
+        "maximumCoordinateAbsoluteError": 0.03220095259050737,
+        "anglePeriodicAbsoluteErrorRadians": 0.00015685221145628203,
+        "scoreAbsoluteError": 9.936208038330285E-05,
+        "passed": true
+      },
+      {
+        "referenceIndex": 15,
+        "actualIndex": 15,
+        "classId": 1,
+        "className": "ship",
+        "rotatedIoU": 0.9987988378673023,
+        "maximumCoordinateAbsoluteError": 0.030733297908778212,
+        "anglePeriodicAbsoluteErrorRadians": 1.960701644898588E-05,
+        "scoreAbsoluteError": 1.443506622311741E-05,
+        "passed": true
+      },
+      {
+        "referenceIndex": 16,
+        "actualIndex": 16,
+        "classId": 1,
+        "className": "ship",
+        "rotatedIoU": 0.9994312001036578,
+        "maximumCoordinateAbsoluteError": 0.026575769496787416,
+        "anglePeriodicAbsoluteErrorRadians": 0.0001433158409881452,
+        "scoreAbsoluteError": 0.00012465443572995394,
+        "passed": true
+      },
+      {
+        "referenceIndex": 17,
+        "actualIndex": 17,
+        "classId": 1,
+        "className": "ship",
+        "rotatedIoU": 0.9991061009712076,
+        "maximumCoordinateAbsoluteError": 0.025027344542358776,
+        "anglePeriodicAbsoluteErrorRadians": 5.456637069700676E-05,
+        "scoreAbsoluteError": 2.375373611451792E-05,
+        "passed": true
+      },
+      {
+        "referenceIndex": 18,
+        "actualIndex": 18,
+        "classId": 1,
+        "className": "ship",
+        "rotatedIoU": 0.9995583049127462,
+        "maximumCoordinateAbsoluteError": 0.014355841916980694,
+        "anglePeriodicAbsoluteErrorRadians": 7.256638473512877E-05,
+        "scoreAbsoluteError": 0.00013548552627562493,
+        "passed": true
+      },
+      {
+        "referenceIndex": 19,
+        "actualIndex": 20,
+        "classId": 1,
+        "className": "ship",
+        "rotatedIoU": 0.9988373467283553,
+        "maximumCoordinateAbsoluteError": 0.05079212595846627,
+        "anglePeriodicAbsoluteErrorRadians": 0.0004129980286407542,
+        "scoreAbsoluteError": 5.33831840514587E-05,
+        "passed": true
+      },
+      {
+        "referenceIndex": 20,
+        "actualIndex": 19,
+        "classId": 1,
+        "className": "ship",
+        "rotatedIoU": 0.9983938325653255,
+        "maximumCoordinateAbsoluteError": 0.07281764383455425,
+        "anglePeriodicAbsoluteErrorRadians": 2.5965244292991407E-06,
+        "scoreAbsoluteError": 0.0001824158843993784,
+        "passed": true
+      },
+      {
+        "referenceIndex": 21,
+        "actualIndex": 21,
+        "classId": 1,
+        "className": "ship",
+        "rotatedIoU": 0.9995775177775725,
+        "maximumCoordinateAbsoluteError": 0.015030275879666988,
+        "anglePeriodicAbsoluteErrorRadians": 8.179754333492717E-05,
+        "scoreAbsoluteError": 5.97409057612186E-06,
+        "passed": true
+      },
+      {
+        "referenceIndex": 22,
+        "actualIndex": 22,
+        "classId": 1,
+        "className": "ship",
+        "rotatedIoU": 0.999049338784344,
+        "maximumCoordinateAbsoluteError": 0.0242792483404628,
+        "anglePeriodicAbsoluteErrorRadians": 1.9136789474460958E-05,
+        "scoreAbsoluteError": 3.5673642730715827E-05,
+        "passed": true
+      },
+      {
+        "referenceIndex": 23,
+        "actualIndex": 23,
+        "classId": 1,
+        "className": "ship",
+        "rotatedIoU": 0.9989290418623522,
+        "maximumCoordinateAbsoluteError": 0.04932331784023347,
+        "anglePeriodicAbsoluteErrorRadians": 0.0002306426109314197,
+        "scoreAbsoluteError": 7.915915466305545E-05,
+        "passed": true
+      },
+      {
+        "referenceIndex": 24,
+        "actualIndex": 24,
+        "classId": 1,
+        "className": "ship",
+        "rotatedIoU": 0.9992218240408921,
+        "maximumCoordinateAbsoluteError": 0.023561755947383745,
+        "anglePeriodicAbsoluteErrorRadians": 4.229138748168548E-05,
+        "scoreAbsoluteError": 3.250144195554583E-06,
+        "passed": true
+      },
+      {
+        "referenceIndex": 25,
+        "actualIndex": 25,
+        "classId": 1,
+        "className": "ship",
+        "rotatedIoU": 0.9989987219455405,
+        "maximumCoordinateAbsoluteError": 0.01971550803983746,
+        "anglePeriodicAbsoluteErrorRadians": 0.00023457722938535763,
+        "scoreAbsoluteError": 0.0002315015357970962,
+        "passed": true
+      },
+      {
+        "referenceIndex": 26,
+        "actualIndex": 26,
+        "classId": 1,
+        "className": "ship",
+        "rotatedIoU": 0.9995772035166862,
+        "maximumCoordinateAbsoluteError": 0.008780064368011153,
+        "anglePeriodicAbsoluteErrorRadians": 0.00010697537803650015,
+        "scoreAbsoluteError": 2.5019677734383627E-05,
+        "passed": true
+      },
+      {
+        "referenceIndex": 27,
+        "actualIndex": 27,
+        "classId": 1,
+        "className": "ship",
+        "rotatedIoU": 0.9995421461860255,
+        "maximumCoordinateAbsoluteError": 0.040966145497691286,
+        "anglePeriodicAbsoluteErrorRadians": 4.711784980776512E-05,
+        "scoreAbsoluteError": 1.8002382049520094E-05,
+        "passed": true
+      },
+      {
+        "referenceIndex": 28,
+        "actualIndex": 30,
+        "classId": 1,
+        "className": "ship",
+        "rotatedIoU": 0.9977500996659665,
+        "maximumCoordinateAbsoluteError": 0.061844529801149406,
+        "anglePeriodicAbsoluteErrorRadians": 7.450232887268315E-05,
+        "scoreAbsoluteError": 0.0002206880241394371,
+        "passed": true
+      },
+      {
+        "referenceIndex": 29,
+        "actualIndex": 29,
+        "classId": 1,
+        "className": "ship",
+        "rotatedIoU": 0.9992157437333715,
+        "maximumCoordinateAbsoluteError": 0.015694989782218727,
+        "anglePeriodicAbsoluteErrorRadians": 0.0002274764108276539,
+        "scoreAbsoluteError": 0.00011753556076055105,
+        "passed": true
+      },
+      {
+        "referenceIndex": 30,
+        "actualIndex": 31,
+        "classId": 1,
+        "className": "ship",
+        "rotatedIoU": 0.9985444213632283,
+        "maximumCoordinateAbsoluteError": 0.030087183798663375,
+        "anglePeriodicAbsoluteErrorRadians": 0.00011521238380429732,
+        "scoreAbsoluteError": 0.00012713577209477744,
+        "passed": true
+      },
+      {
+        "referenceIndex": 31,
+        "actualIndex": 28,
+        "classId": 1,
+        "className": "ship",
+        "rotatedIoU": 0.9983914097384267,
+        "maximumCoordinateAbsoluteError": 0.12243036369432048,
+        "anglePeriodicAbsoluteErrorRadians": 0.000419834352111792,
+        "scoreAbsoluteError": 0.00043969116058351077,
+        "passed": true
+      },
+      {
+        "referenceIndex": 32,
+        "actualIndex": 32,
+        "classId": 1,
+        "className": "ship",
+        "rotatedIoU": 0.9992642271264502,
+        "maximumCoordinateAbsoluteError": 0.022822248169177328,
+        "anglePeriodicAbsoluteErrorRadians": 0.00017042807846068264,
+        "scoreAbsoluteError": 0.0004946553031921486,
+        "passed": true
+      },
+      {
+        "referenceIndex": 33,
+        "actualIndex": 33,
+        "classId": 1,
+        "className": "ship",
+        "rotatedIoU": 0.9984599657224479,
+        "maximumCoordinateAbsoluteError": 0.07975453482910666,
+        "anglePeriodicAbsoluteErrorRadians": 0.00026154358848573533,
+        "scoreAbsoluteError": 9.195716934207177E-05,
+        "passed": true
+      },
+      {
+        "referenceIndex": 34,
+        "actualIndex": 34,
+        "classId": 1,
+        "className": "ship",
+        "rotatedIoU": 0.999711399700448,
+        "maximumCoordinateAbsoluteError": 0.005794212681024646,
+        "anglePeriodicAbsoluteErrorRadians": 0.0001463549179077095,
+        "scoreAbsoluteError": 0.0003426496482848984,
+        "passed": true
+      },
+      {
+        "referenceIndex": 35,
+        "actualIndex": 35,
+        "classId": 1,
+        "className": "ship",
+        "rotatedIoU": 0.9991257990502584,
+        "maximumCoordinateAbsoluteError": 0.01829175606167155,
+        "anglePeriodicAbsoluteErrorRadians": 0.0003073174856567107,
+        "scoreAbsoluteError": 3.457551971430828E-05,
+        "passed": true
+      },
+      {
+        "referenceIndex": 36,
+        "actualIndex": 36,
+        "classId": 1,
+        "className": "ship",
+        "rotatedIoU": 0.9994405428696216,
+        "maximumCoordinateAbsoluteError": 0.00881989235074343,
+        "anglePeriodicAbsoluteErrorRadians": 7.513598175057368E-05,
+        "scoreAbsoluteError": 5.0558840179459885E-05,
+        "passed": true
+      },
+      {
+        "referenceIndex": 37,
+        "actualIndex": 37,
+        "classId": 1,
+        "className": "ship",
+        "rotatedIoU": 0.9994502219238444,
+        "maximumCoordinateAbsoluteError": 0.03791451700915616,
+        "anglePeriodicAbsoluteErrorRadians": 1.1018883514513078E-06,
+        "scoreAbsoluteError": 6.634389404291952E-05,
+        "passed": true
+      },
+      {
+        "referenceIndex": 38,
+        "actualIndex": 38,
+        "classId": 1,
+        "className": "ship",
+        "rotatedIoU": 0.9992987275318393,
+        "maximumCoordinateAbsoluteError": 0.023587994448206473,
+        "anglePeriodicAbsoluteErrorRadians": 0.00028362827232358834,
+        "scoreAbsoluteError": 6.389464584355409E-05,
+        "passed": true
+      },
+      {
+        "referenceIndex": 39,
+        "actualIndex": 39,
+        "classId": 1,
+        "className": "ship",
+        "rotatedIoU": 0.9988557514347408,
+        "maximumCoordinateAbsoluteError": 0.06139010195484218,
+        "anglePeriodicAbsoluteErrorRadians": 0.00017446547912597365,
+        "scoreAbsoluteError": 2.007146072391386E-05,
+        "passed": true
+      }
+    ],
+    "completed": true,
+    "passed": true
+  },
+  "controlledNegativeValidation": {
+    "kind": "single-reference-value-mutation",
+    "mutationIndex": 0,
+    "mutationDelta": 10000.0,
+    "mutatedReferenceSha256": "2c54da31a083a8d96a3abd10681db3802bcc58689b9a7ff9565c5f5b4a0a2ff0",
+    "exitCode": 1,
+    "tensorName": "output0",
+    "comparedElementCount": 430080,
+    "mismatchCount": 1,
+    "firstMismatchIndex": 0,
+    "validationPassed": false,
+    "failClosed": true
+  },
+  "proofBoundary": {
+    "localPackageConsumerRuntimeEvidence": true,
+    "sourceTreeRuntimeProof": false,
+    "publicPackageProof": false,
+    "packagesDownloadedFromPublicFeed": false,
+    "postPublishProof": false,
+    "publicRedistributionOwnerApproval": false,
+    "ownerReleaseAcceptance": false,
+    "releaseProof": false,
+    "performsPublish": false,
+    "uploadsAssets": false
+  },
+  "notes": [
+    "This record proves a clean local-file-feed PackageReference restore/build/run, not a public-feed package consumer.",
+    "The managed API, YoloVision, and bridge-only nupkg hashes are fixed; CUDA, cuDNN, and TensorRT are external host dependencies.",
+    "The AGPL-3.0-only weights, ONNX, images, tensor, raw reference, SVG, logs, and full report remain on E drive outside Git and are not approved for repository redistribution.",
+    "The converted ONNX remains under the outer workspace models directory for a future separately governed Model Zoo.",
+    "Local package-consumer evidence does not substitute for public-package, post-publish, Owner acceptance, or release proof."
+  ]
+}

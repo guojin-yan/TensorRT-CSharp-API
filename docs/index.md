@@ -112,6 +112,7 @@ Chinese articles:
 - [YoloVision LRASPP Semantic Local Package Consumer Tutorial](articles/zh-cn/yolovision-lraspp-semantic-local-package-consumer-tutorial.md)
 - [YoloVision YOLOv8n Classification Local Package Consumer Tutorial](articles/zh-cn/yolovision-yolov8n-cls-local-package-consumer-tutorial.md)
 - [YoloVision YOLOv8n Pose Local Package Consumer Tutorial](articles/zh-cn/yolovision-yolov8n-pose-local-package-consumer-tutorial.md)
+- [YoloVision YOLOv8n OBB Local Package Consumer Tutorial](articles/zh-cn/yolovision-yolov8n-obb-local-package-consumer-tutorial.md)
 - [Demo Model Acquisition And ONNX Conversion](articles/zh-cn/demo-model-acquisition-and-onnx-conversion.md)
 - [Sample Asset Manifest Guide](articles/zh-cn/sample-asset-manifest-guide.md)
 - [Sample Asset Acquisition Plan](articles/zh-cn/sample-asset-acquisition-plan.md)

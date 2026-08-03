@@ -264,9 +264,11 @@
       },
       "articles": [
         "docs/articles/zh-cn/demo-model-acquisition-and-onnx-conversion.md",
-        "docs/articles/zh-cn/yolovision-obb-tutorial.md"
+        "docs/articles/zh-cn/yolovision-obb-tutorial.md",
+        "docs/articles/zh-cn/yolovision-yolov8n-obb-local-package-consumer-tutorial.md"
       ],
-      "runtimeEvidence": "samples/assets/yolovision-yolov8n-obb-real-model-runtime-evidence.json"
+      "runtimeEvidence": "samples/assets/yolovision-yolov8n-obb-real-model-runtime-evidence.json",
+      "localPackageConsumerEvidence": "samples/assets/yolovision-yolov8n-obb-local-package-consumer-runtime-evidence.json"
     },
     {
       "id": "yolovision-lraspp-mobilenet-v3-large-v0.25.0",
