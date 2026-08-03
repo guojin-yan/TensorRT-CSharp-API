@@ -10,6 +10,16 @@ namespace YoloVisionSample;
 
 public static class YoloVisionVisualizationWriter
 {
+    private const float PoseKeypointConfidenceThreshold = 0.25f;
+
+    private static readonly (int From, int To)[] CocoPoseSkeletonEdges =
+    {
+        (15, 13), (13, 11), (16, 14), (14, 12), (11, 12),
+        (5, 11), (6, 12), (5, 6), (5, 7), (6, 8),
+        (7, 9), (8, 10), (1, 2), (0, 1), (0, 2),
+        (1, 3), (2, 4), (3, 5), (4, 6)
+    };
+
     private static readonly string[] Palette =
     {
         "#2563eb",
@@ -405,13 +415,26 @@ public static class YoloVisionVisualizationWriter
                 contentTop,
                 color,
                 "pose");
-            foreach (YoloPoseKeypoint keypoint in pose.Keypoints)
+            (float X, float Y, float Score)[] sourceKeypoints = pose.Keypoints
+                .Select(keypoint =>
+                {
+                    float modelX = normalized ? keypoint.X * preprocess.TargetWidth : keypoint.X;
+                    float modelY = normalized ? keypoint.Y * preprocess.TargetHeight : keypoint.Y;
+                    return (
+                        TransformCoordinateToSource(modelX, preprocess, horizontal: true),
+                        contentTop + TransformCoordinateToSource(modelY, preprocess, horizontal: false),
+                        keypoint.Score);
+                })
+                .ToArray();
+            AppendPoseSkeleton(builder, sourceKeypoints, color);
+            foreach ((float x, float y, float score) in sourceKeypoints)
             {
-                float modelX = normalized ? keypoint.X * preprocess.TargetWidth : keypoint.X;
-                float modelY = normalized ? keypoint.Y * preprocess.TargetHeight : keypoint.Y;
-                float x = TransformCoordinateToSource(modelX, preprocess, horizontal: true);
-                float y = TransformCoordinateToSource(modelY, preprocess, horizontal: false);
-                builder.AppendLine($"""  <circle cx="{Format(x)}" cy="{Format(contentTop + y)}" r="4" fill="{color}" stroke="#ffffff" stroke-width="1" opacity="{Format(Math.Clamp(keypoint.Score, 0.25f, 1.0f))}"/>""");
+                if (score < PoseKeypointConfidenceThreshold)
+                {
+                    continue;
+                }
+
+                builder.AppendLine($"""  <circle data-pose-keypoint="true" cx="{Format(x)}" cy="{Format(y)}" r="4" fill="{color}" stroke="#ffffff" stroke-width="1"/>""");
             }
 
             index++;
@@ -733,14 +756,48 @@ public static class YoloVisionVisualizationWriter
         {
             AppendBox(builder, pose.Detection, labels, width, height, index, "pose");
             string color = Palette[index % Palette.Length];
-            foreach (YoloPoseKeypoint keypoint in pose.Keypoints)
+            (float X, float Y, float Score)[] canvasKeypoints = pose.Keypoints
+                .Select(keypoint => (
+                    ScaleCoordinate(keypoint.X, width),
+                    ScaleCoordinate(keypoint.Y, height),
+                    keypoint.Score))
+                .ToArray();
+            AppendPoseSkeleton(builder, canvasKeypoints, color);
+            foreach ((float x, float y, float score) in canvasKeypoints)
             {
-                float x = ScaleCoordinate(keypoint.X, width);
-                float y = ScaleCoordinate(keypoint.Y, height);
-                builder.AppendLine($"""  <circle cx="{Format(x)}" cy="{Format(y)}" r="3" fill="{color}" opacity="{Format(Math.Clamp(keypoint.Score, 0.25f, 1.0f))}"/>""");
+                if (score < PoseKeypointConfidenceThreshold)
+                {
+                    continue;
+                }
+
+                builder.AppendLine($"""  <circle data-pose-keypoint="true" cx="{Format(x)}" cy="{Format(y)}" r="3" fill="{color}" stroke="#ffffff" stroke-width="1"/>""");
             }
 
             index++;
+        }
+    }
+
+    private static void AppendPoseSkeleton(
+        StringBuilder builder,
+        IReadOnlyList<(float X, float Y, float Score)> keypoints,
+        string color)
+    {
+        if (keypoints.Count < 17)
+        {
+            return;
+        }
+
+        foreach ((int from, int to) in CocoPoseSkeletonEdges)
+        {
+            (float fromX, float fromY, float fromScore) = keypoints[from];
+            (float toX, float toY, float toScore) = keypoints[to];
+            if (fromScore < PoseKeypointConfidenceThreshold || toScore < PoseKeypointConfidenceThreshold)
+            {
+                continue;
+            }
+
+            builder.AppendLine($"""  <line x1="{Format(fromX)}" y1="{Format(fromY)}" x2="{Format(toX)}" y2="{Format(toY)}" stroke="#ffffff" stroke-width="5" stroke-linecap="round" opacity="0.85"/>""");
+            builder.AppendLine($"""  <line data-pose-skeleton="true" data-pose-edge="{from}-{to}" x1="{Format(fromX)}" y1="{Format(fromY)}" x2="{Format(toX)}" y2="{Format(toY)}" stroke="{color}" stroke-width="3" stroke-linecap="round"/>""");
         }
     }
 

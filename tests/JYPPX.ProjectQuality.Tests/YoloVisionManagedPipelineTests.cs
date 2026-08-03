@@ -752,6 +752,40 @@ public sealed class YoloVisionManagedPipelineTests
     }
 
     [Fact]
+    public void VisualizationWriterDrawsCocoPoseSkeletonAndFiltersLowConfidenceEdges()
+    {
+        YoloModelProfile profile = YoloModelProfile.FromArgs(new[]
+        {
+            "--family", "v8",
+            "--task", "pose",
+            "--layout", "channels-first",
+            "--class-count", "1"
+        }, labelCount: 1);
+        YoloPoseKeypoint[] keypoints = Enumerable.Range(0, 17)
+            .Select(index => new YoloPoseKeypoint(40.0f + index * 10.0f, 60.0f + index * 8.0f, 0.9f))
+            .ToArray();
+        keypoints[0] = new YoloPoseKeypoint(keypoints[0].X, keypoints[0].Y, 0.1f);
+        YoloVisionResult result = YoloVisionResult.FromPoses(new[]
+        {
+            new YoloPosePrediction(
+                new YoloDetection(0, 0.93f, 320.0f, 320.0f, 160.0f, 240.0f),
+                keypoints)
+        });
+
+        string svg = YoloVisionVisualizationWriter.ToSvg(
+            result,
+            new[] { "person" },
+            profile,
+            new[] { 1, 3, 640, 640 });
+
+        Assert.Contains("data-pose-skeleton=\"true\"", svg, StringComparison.Ordinal);
+        Assert.Contains("data-pose-edge=\"5-6\"", svg, StringComparison.Ordinal);
+        Assert.DoesNotContain("data-pose-edge=\"0-1\"", svg, StringComparison.Ordinal);
+        Assert.DoesNotContain("data-pose-edge=\"0-2\"", svg, StringComparison.Ordinal);
+        Assert.Equal(16, svg.Split("data-pose-keypoint=\"true\"", StringSplitOptions.None).Length - 1);
+    }
+
+    [Fact]
     public void VisualizationWriterEmbedsSourceImageAndMapsDetectionsBackToSourceSpace()
     {
         string backgroundPath = Path.Combine(Path.GetTempPath(), $"yolovision-background-{Guid.NewGuid():N}.png");
