@@ -2,7 +2,7 @@
 
 本文验证第一版发布前最接近真实用户的语义分割安装路径：消费项目位于源码仓库外，只通过 `PackageReference` 引用 managed API、YoloVision 和一个 bridge-only 包；CUDA、cuDNN 与 TensorRT 由用户自行安装。模型与运行资产不进入 Git、NuGet 或 GitHub Release。
 
-## 模型来源与许可证
+## 模型获取与许可证
 
 本例固定使用 torchvision `v0.25.0` 的 LRASPP MobileNetV3 Large：
 
@@ -26,7 +26,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass `
 
 获取不等于允许本项目公开再分发。当前权重与图片的 `publicRedistributionOwnerApproval` 均为 `false`。
 
-## 转换 ONNX
+## ONNX 转换与暂存
 
 所有演示 ONNX 统一暂存到 Git 仓库外的：
 
@@ -65,6 +65,14 @@ images:[1,3,320,320] -> semantic:[1,21,320,320]
 
 转换后的 ONNX 长度为 `12,879,801`，SHA256 为 `3cb94e561bdefe606ed7d1a2c4d0296409bec066f3a39a9fe9dabd72b23728f8`。它只保存在外层 `models`，为后续独立 Model Zoo 暂存；不能执行 `git add`，也不能塞进任何 NuGet 包。
 
+用于清单和发布完整性复查的规范化转换命令为：
+
+```text
+python eng/Invoke-YoloVisionSemanticReference.py --weights <models>/lraspp_mobilenet_v3_large-d234d4ea.pth --image <downloads>/dog.jpg --onnx <models>/lraspp-mobilenet-v3-large-320.onnx --output-directory <artifacts> --export-onnx
+```
+
+ONNX 的工作区外暂存路径是 `models/YoloVision/SemanticSegmentation/lraspp-mobilenet-v3-large-torchvision-v0.25.0/lraspp-mobilenet-v3-large-320.onnx`。这里的 `models` 指 `E:\GitSpace\TensorRT-CSharp-API-4.0\models`，不是仓库内目录。
+
 ## 构建本地三包
 
 ```powershell
@@ -96,7 +104,26 @@ pwsh -NoProfile -ExecutionPolicy Bypass `
 
 runner 在外层 E 盘创建临时项目，并生成只有三个 `PackageReference` 的 `NuGet.config` 和项目文件。它不会设置 `JYPPX_NATIVE_BRIDGE_PATH`，bridge 必须由 NuGet 的 `runtimes/win-x64/native` 资产复制；TensorRT、CUDA、cuDNN 路径来自用户安装目录。运行结束后临时工作区必须被删除。
 
-实际模型参数为 `RGB + NCHW + stretch 320x320 + scale 1/255 + ImageNet mean/std`，并关闭 TF32。验证要求：
+## 已验证结果
+
+![LRASPP 语义分割本地三包真实执行结果](../../images/yolovision-lraspp-semantic-local-package-result.png)
+
+上图由本次真实运行报告生成，只呈现张量比较、逐像素 argmax、类别直方图和受控负例；不嵌入未获公开再分发授权的输入图片、模型或权重。
+
+实际模型参数为 `RGB + NCHW + stretch 320x320 + scale 1/255 + ImageNet mean/std`，并关闭 TF32。本次固定结果为：
+
+| 检查 | 结果 |
+| --- | --- |
+| 输入合同 | `images:[1,3,320,320]` |
+| 输出合同 | `semantic:[1,21,320,320]` |
+| TensorRT/ORT logits 比较 | `2,150,400` 个值，mismatch `0` |
+| 最大绝对误差 | `2.9563904e-05` |
+| argmax 类别图比较 | `102,400` 个像素，mismatch `0` |
+| 类别直方图 | background `65,193`，dog `37,207` |
+| raw reference 负例 | exit `1`、mismatch `1`、first index `0` |
+| class-index 完整性负例 | exit `1`、命中 `artifact-sha256` |
+
+严格验证还要求：
 
 - `semantic` 的 `2,150,400` 个 logits 与 ONNX Runtime reference 在 `abs=1e-4`、`rel=1e-4` 下零 mismatch。
 - 完整 `320x320` 类别索引共 `102,400` 个像素，与 ONNX Runtime 的 int32 little-endian 参考哈希完全一致。
@@ -110,7 +137,14 @@ runner 在外层 E 盘创建临时项目，并生成只有三个 `PackageReferen
 - `eng/Test-YoloVisionSemanticMapArtifact.ps1`
 - `eng/Export-YoloVisionSemanticLocalPackageConsumerEvidence.ps1`
 
-## 证据边界
+## 复查与边界
+
+结果图可以从已提交的轻量运行证据重新生成：
+
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass `
+  -File .\eng\Export-YoloVisionSemanticArticleResultImage.ps1
+```
 
 该记录是 `local-package-consumer-runtime` 工程证据，证明本地生成的三个包可以由仓库外项目 restore、build 和运行。它不是 nuget.org 下载证明，不是公开包证明，不是模型再分发授权，不是 post-publish 证明，也不授权创建 tag、Release 或推送包。
 

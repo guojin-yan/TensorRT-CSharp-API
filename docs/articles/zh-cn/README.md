@@ -8,7 +8,7 @@
 - Owner 输入、候选 proof 和 post-publish 模板；
 - `publishing` 子目录中的文章规划与发布治理材料。
 
-2026-08-03 盘点到 485 个 Markdown 文件，其中此前没有任何文章引用执行结果图片。数量代表项目过程材料多，不代表有 485 篇完整成稿。
+2026-08-03 盘点到 486 个 Markdown 文件。当前有 2 篇文章引用了由真实运行证据生成的执行结果图，其余文件仍以项目文档、内部记录或待完善稿为主。数量代表项目过程材料多，不代表有 486 篇完整成稿。
 
 ## 完整文章标准
 
@@ -34,6 +34,11 @@
 
 机器可读发布目录位于 `publication-catalog.json`。只有被显式列入 `articles` 且通过严格门禁的文件，才算内容完整；所有未列入文件默认是 `project-documentation-not-publication-ready`。
 
-当前首篇完成门禁的文章是 [YoloVision YOLOv8n Detection 本地包消费教程](yolovision-yolov8n-det-local-package-consumer-tutorial.md)。其结果图来自真实 TensorRT、本地三包、ONNX Runtime 和 Ultralytics/PyTorch 对照，不包含未授权测试原图。
+当前完成门禁的文章有：
+
+- [YoloVision YOLOv8n Detection 本地包消费教程](yolovision-yolov8n-det-local-package-consumer-tutorial.md)；
+- [YoloVision LRASPP 语义分割本地包消费教程](yolovision-lraspp-semantic-local-package-consumer-tutorial.md)。
+
+两篇文章的结果图都来自真实 TensorRT、本地三包和独立参考比较，不包含未授权测试原图、模型或权重。
 
 DocFX 构建成功只说明链接和站点生成正确，不等于外部文章已经发布，也不替代 public-package、post-publish、Owner acceptance 或 release proof。

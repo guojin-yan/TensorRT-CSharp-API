@@ -52,7 +52,7 @@ public sealed class EngineeringAndArticleCatalogTests
                 Assert.False(string.IsNullOrWhiteSpace(model.GetProperty(propertyName).GetString()));
             }
             Assert.Contains(model.GetProperty("sourceUrl").GetString()!, articleText, StringComparison.Ordinal);
-            Assert.Contains("yolo export", articleText, StringComparison.Ordinal);
+            Assert.Contains(model.GetProperty("conversionCommand").GetString()!, articleText, StringComparison.Ordinal);
             Assert.Contains(model.GetProperty("onnxSha256").GetString()!, articleText, StringComparison.Ordinal);
             Assert.False(model.GetProperty("trackedByGit").GetBoolean());
             Assert.False(model.GetProperty("uploadsModelFiles").GetBoolean());

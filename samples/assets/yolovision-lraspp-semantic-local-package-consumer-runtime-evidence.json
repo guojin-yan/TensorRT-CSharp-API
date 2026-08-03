@@ -2,14 +2,14 @@
   "schemaVersion": 1,
   "recordKind": "yolovision-local-package-consumer-runtime-evidence",
   "recordName": "yolovision-lraspp-semantic-local-package-consumer-trt10.11",
-  "generatedAtUtc": "2026-08-02T22:15:19.4706954Z",
+  "generatedAtUtc": "2026-08-03T01:48:30.5716409Z",
   "templateOnly": false,
   "sampleName": "YoloVision.PackageConsumer",
   "family": "torchvision-lraspp-mobilenet-v3-large",
   "task": "sem",
   "proofClassification": "local-package-consumer-runtime",
-  "repositoryHeadAtExecution": "8cfba6a48cc1f5ea36bab8905c56ae8c999b1611",
-  "fullLocalReportSha256": "22c78f2170620a1b9b3aab06b245caca271d76c1c362e6b84a0907217d09b73c",
+  "repositoryHeadAtExecution": "ac34f82e57ea124b95c7edd330aa5064115dbcd7",
+  "fullLocalReportSha256": "5a99293ca029d6add75811f0cadab884ea47588751e24d85e057e1d982568422",
   "packageConsumer": {
     "targetFramework": "net8.0",
     "packageSourceKind": "local-file-feed-only",
@@ -28,8 +28,8 @@
         "role": "yolovision",
         "id": "JYPPX.TensorRT.CSharp.API.YoloVision",
         "version": "4.0.0",
-        "length": 114430,
-        "sha256": "88c7c9a00765963c5fe5ca3a2de4e46dd6c0de7bf136989a67d196185066cc62"
+        "length": 114405,
+        "sha256": "12510a46182cb0680564c125591eaa6ce21b7902d5edd0e5229a99dda787e6de"
       },
       {
         "role": "bridge-only",
@@ -135,7 +135,7 @@
         320
       ],
       "maximumAbsoluteError": 2.9563904E-05,
-      "maximumRelativeError": 0.7170031,
+      "maximumRelativeError": 0.65211165,
       "referenceSha256": "09a27bfe1ee7cd48413806f057bcface6c3c8ed224ed4766e1618d9766b14dff"
     },
     "completed": true,
@@ -257,7 +257,7 @@
         "pixelCount": 0
       }
     ],
-    "validationReportSha256": "779dfd606034121c461a9acec5e148901fe0ffd6442ff41324a33ae56186dd6d",
+    "validationReportSha256": "00164802d316c6f299dc5e3e4d54b1d01fa84c6fc52015dd6b5386c54d8d43db",
     "passed": true
   },
   "controlledNegativeValidation": {
