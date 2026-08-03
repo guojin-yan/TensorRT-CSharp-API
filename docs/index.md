@@ -105,7 +105,7 @@ Chinese articles:
 - [TensorRtExec Timing Cache Owner Field Guide](articles/zh-cn/tensorrtexec-timing-cache-owner-field-guide.md)
 - [TensorRtExec INT8 Calibration Owner Field Guide](articles/zh-cn/tensorrtexec-int8-calibration-owner-field-guide.md)
 - [YoloVision YOLOv8 Detection Real Asset Tutorial](articles/zh-cn/yolovision-yolov8-det-real-asset-tutorial.md)
-- [YoloVision YOLOv8n Detection Local Package Consumer Tutorial](articles/zh-cn/yolovision-yolov8n-det-local-package-consumer-tutorial.md)
+- [C# 使用 TensorRtSharp4.0 运行 YOLOv8n 目标检测](articles/zh-cn/yolovision-yolov8n-det-local-package-consumer-tutorial.md)
 - [YoloVision YOLOv8 Segmentation Real Asset Tutorial](articles/zh-cn/yolovision-yolov8-seg-real-asset-tutorial.md)
 - [YoloVision YOLOv8 Segmentation Local Package Consumer Tutorial](articles/zh-cn/yolovision-yolov8-seg-local-package-consumer-tutorial.md)
 - [YoloVision Managed Extension Publication Dry-Run](articles/zh-cn/yolovision-managed-package-publication-dry-run.md)

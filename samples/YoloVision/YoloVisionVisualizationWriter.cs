@@ -59,6 +59,34 @@ public static class YoloVisionVisualizationWriter
             Encoding.UTF8);
     }
 
+    public static void Write(
+        string outputPath,
+        YoloVisionResult result,
+        IReadOnlyList<string> labels,
+        YoloModelProfile profile,
+        IReadOnlyList<int> inputShape,
+        YoloImagePreprocessResult imagePreprocess,
+        YoloSegmentationSpatialTransformOptions? segmentationSpatialTransform,
+        string backgroundImagePath)
+    {
+        if (string.IsNullOrWhiteSpace(outputPath))
+        {
+            throw new ArgumentException("Visualization path must not be empty.", nameof(outputPath));
+        }
+
+        string fullPath = Path.GetFullPath(outputPath);
+        string? directory = Path.GetDirectoryName(fullPath);
+        if (!string.IsNullOrWhiteSpace(directory))
+        {
+            Directory.CreateDirectory(directory);
+        }
+
+        File.WriteAllText(
+            fullPath,
+            ToSvg(result, labels, profile, inputShape, imagePreprocess, segmentationSpatialTransform, backgroundImagePath),
+            Encoding.UTF8);
+    }
+
     public static string ToSvg(
         YoloVisionResult result,
         IReadOnlyList<string> labels,
@@ -158,6 +186,323 @@ public static class YoloVisionVisualizationWriter
 
         builder.AppendLine("</svg>");
         return builder.ToString();
+    }
+
+    public static string ToSvg(
+        YoloVisionResult result,
+        IReadOnlyList<string> labels,
+        YoloModelProfile profile,
+        IReadOnlyList<int> inputShape,
+        YoloImagePreprocessResult imagePreprocess,
+        YoloSegmentationSpatialTransformOptions? segmentationSpatialTransform,
+        string backgroundImagePath)
+    {
+        if (inputShape == null)
+        {
+            throw new ArgumentNullException(nameof(inputShape));
+        }
+
+        if (result == null)
+        {
+            throw new ArgumentNullException(nameof(result));
+        }
+
+        if (profile == null)
+        {
+            throw new ArgumentNullException(nameof(profile));
+        }
+
+        if (imagePreprocess == null)
+        {
+            throw new ArgumentNullException(nameof(imagePreprocess));
+        }
+
+        if (string.IsNullOrWhiteSpace(backgroundImagePath))
+        {
+            throw new ArgumentException("Visualization background path must not be empty.", nameof(backgroundImagePath));
+        }
+
+        string fullBackgroundPath = Path.GetFullPath(backgroundImagePath);
+        if (!File.Exists(fullBackgroundPath))
+        {
+            throw new FileNotFoundException("Visualization background image was not found.", fullBackgroundPath);
+        }
+
+        if (segmentationSpatialTransform != null && result.TaskType != YoloTaskType.Segmentation)
+        {
+            throw new ArgumentException(
+                "Segmentation spatial transform can only visualize a segmentation result.",
+                nameof(result));
+        }
+
+        labels ??= Array.Empty<string>();
+        const int contentTop = 66;
+        int sourceWidth = imagePreprocess.SourceWidth;
+        int sourceHeight = imagePreprocess.SourceHeight;
+        if (sourceWidth <= 0 || sourceHeight <= 0)
+        {
+            throw new ArgumentException("Source image dimensions must be positive.", nameof(imagePreprocess));
+        }
+
+        (int backgroundWidth, int backgroundHeight) = ReadImageDimensions(fullBackgroundPath);
+        if (backgroundWidth != sourceWidth || backgroundHeight != sourceHeight)
+        {
+            throw new ArgumentException(
+                $"Visualization background dimensions {backgroundWidth}x{backgroundHeight} do not match the preprocessed source image {sourceWidth}x{sourceHeight}.",
+                nameof(backgroundImagePath));
+        }
+
+        int canvasWidth = Math.Max(sourceWidth, 360);
+        int canvasHeight = Math.Max(sourceHeight + contentTop, 260);
+        string mimeType = ResolveImageMimeType(fullBackgroundPath);
+        string imageData = Convert.ToBase64String(File.ReadAllBytes(fullBackgroundPath));
+
+        StringBuilder builder = new StringBuilder();
+        builder.AppendLine($"""<svg xmlns="http://www.w3.org/2000/svg" width="{canvasWidth}" height="{canvasHeight}" viewBox="0 0 {canvasWidth} {canvasHeight}" role="img" aria-label="YoloVision source image visualization">""");
+        builder.AppendLine("""  <rect width="100%" height="100%" fill="#f8fafc"/>""");
+        builder.AppendLine($"""  <text x="16" y="28" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700" fill="#111827">YoloVision {Escape(ToTaskAlias(result.TaskType))}</text>""");
+        builder.AppendLine($"""  <text x="16" y="50" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#475569">Family={Escape(profile.Family.ToString())} Detections={result.Detections.Count} Classifications={result.Classifications.Count} Segmentations={result.Segmentations.Count} Poses={result.Poses.Count}</text>""");
+        builder.AppendLine($"""  <image data-source-image="true" x="0" y="{contentTop}" width="{sourceWidth}" height="{sourceHeight}" preserveAspectRatio="none" href="data:{mimeType};base64,{imageData}"/>""");
+
+        switch (result.TaskType)
+        {
+            case YoloTaskType.Classification:
+                AppendSourceClassification(builder, result.Classifications, labels, sourceWidth, contentTop);
+                break;
+            case YoloTaskType.SemanticSegmentation:
+                AppendSourceSemantic(builder, result.SemanticMap, sourceWidth, sourceHeight, contentTop);
+                break;
+            case YoloTaskType.Segmentation:
+                if (segmentationSpatialTransform == null)
+                {
+                    throw new ArgumentException(
+                        "Source-image segmentation visualization requires an explicit spatial transform.",
+                        nameof(segmentationSpatialTransform));
+                }
+
+                AppendSpatialSegmentation(
+                    builder,
+                    result.Segmentations,
+                    labels,
+                    imagePreprocess,
+                    segmentationSpatialTransform,
+                    contentTop);
+                break;
+            case YoloTaskType.OrientedBoundingBox:
+                AppendSourceObb(builder, result.OrientedBoxes, labels, imagePreprocess, contentTop);
+                break;
+            case YoloTaskType.Pose:
+                AppendSourcePose(builder, result.Poses, labels, imagePreprocess, contentTop);
+                break;
+            default:
+                AppendSourceDetections(builder, result.Detections, labels, imagePreprocess, contentTop);
+                break;
+        }
+
+        builder.AppendLine("</svg>");
+        return builder.ToString();
+    }
+
+    private static void AppendSourceDetections(
+        StringBuilder builder,
+        IReadOnlyList<YoloDetection> detections,
+        IReadOnlyList<string> labels,
+        YoloImagePreprocessResult preprocess,
+        int contentTop)
+    {
+        if (detections.Count == 0)
+        {
+            AppendEmpty(builder, "No detections above threshold.");
+            return;
+        }
+
+        int index = 0;
+        foreach (YoloDetection detection in detections.Take(100))
+        {
+            YoloDetection sourceDetection = TransformDetectionToSource(detection, preprocess);
+            string color = Palette[index % Palette.Length];
+            AppendSourceIndexedBox(
+                builder,
+                sourceDetection,
+                preprocess.SourceWidth,
+                preprocess.SourceHeight,
+                contentTop,
+                color,
+                index + 1);
+            index++;
+        }
+
+        AppendSourceDetectionLegend(builder, detections, labels, contentTop);
+    }
+
+    private static void AppendSourceIndexedBox(
+        StringBuilder builder,
+        YoloDetection detection,
+        int sourceWidth,
+        int sourceHeight,
+        int contentTop,
+        string color,
+        int number)
+    {
+        float left = Math.Clamp(detection.Left, 0.0f, sourceWidth);
+        float top = Math.Clamp(detection.Top, 0.0f, sourceHeight);
+        float right = Math.Clamp(detection.Right, 0.0f, sourceWidth);
+        float bottom = Math.Clamp(detection.Bottom, 0.0f, sourceHeight);
+        float width = Math.Max(1.0f, right - left);
+        float height = Math.Max(1.0f, bottom - top);
+        float tagY = Math.Max(contentTop, contentTop + top - 22.0f);
+        builder.AppendLine($"""  <rect x="{Format(left)}" y="{Format(contentTop + top)}" width="{Format(width)}" height="{Format(height)}" fill="none" stroke="{color}" stroke-width="3"/>""");
+        builder.AppendLine($"""  <rect x="{Format(left)}" y="{Format(tagY)}" width="24" height="22" fill="{color}"/>""");
+        builder.AppendLine($"""  <text x="{Format(left + 7)}" y="{Format(tagY + 16)}" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="700" fill="#ffffff">{number}</text>""");
+    }
+
+    private static void AppendSourceDetectionLegend(
+        StringBuilder builder,
+        IReadOnlyList<YoloDetection> detections,
+        IReadOnlyList<string> labels,
+        int contentTop)
+    {
+        int count = Math.Min(detections.Count, 12);
+        int panelHeight = 40 + count * 25;
+        builder.AppendLine($"""  <rect x="16" y="{contentTop + 16}" width="238" height="{panelHeight}" fill="#111827" opacity="0.84"/>""");
+        builder.AppendLine($"""  <text x="32" y="{contentTop + 43}" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="700" fill="#ffffff">Detections</text>""");
+        for (int index = 0; index < count; index++)
+        {
+            YoloDetection detection = detections[index];
+            string color = Palette[index % Palette.Length];
+            int y = contentTop + 60 + index * 25;
+            builder.AppendLine($"""  <rect x="32" y="{y}" width="18" height="18" fill="{color}"/>""");
+            builder.AppendLine($"""  <text x="38" y="{y + 14}" font-family="Segoe UI, Arial, sans-serif" font-size="11" font-weight="700" fill="#ffffff">{index + 1}</text>""");
+            builder.AppendLine($"""  <text x="60" y="{y + 14}" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#ffffff">{Escape(LabelOrIndex(labels, detection.ClassIndex))} {detection.Score:0.000}</text>""");
+        }
+    }
+
+    private static void AppendSourcePose(
+        StringBuilder builder,
+        IReadOnlyList<YoloPosePrediction> poses,
+        IReadOnlyList<string> labels,
+        YoloImagePreprocessResult preprocess,
+        int contentTop)
+    {
+        if (poses.Count == 0)
+        {
+            AppendEmpty(builder, "No poses above threshold.");
+            return;
+        }
+
+        int index = 0;
+        foreach (YoloPosePrediction pose in poses.Take(50))
+        {
+            bool normalized = IsNormalized(pose.Detection);
+            YoloDetection sourceDetection = TransformDetectionToSource(pose.Detection, preprocess);
+            string color = Palette[index % Palette.Length];
+            AppendSourceBox(
+                builder,
+                sourceDetection,
+                labels,
+                preprocess.SourceWidth,
+                preprocess.SourceHeight,
+                contentTop,
+                color,
+                "pose");
+            foreach (YoloPoseKeypoint keypoint in pose.Keypoints)
+            {
+                float modelX = normalized ? keypoint.X * preprocess.TargetWidth : keypoint.X;
+                float modelY = normalized ? keypoint.Y * preprocess.TargetHeight : keypoint.Y;
+                float x = TransformCoordinateToSource(modelX, preprocess, horizontal: true);
+                float y = TransformCoordinateToSource(modelY, preprocess, horizontal: false);
+                builder.AppendLine($"""  <circle cx="{Format(x)}" cy="{Format(contentTop + y)}" r="4" fill="{color}" stroke="#ffffff" stroke-width="1" opacity="{Format(Math.Clamp(keypoint.Score, 0.25f, 1.0f))}"/>""");
+            }
+
+            index++;
+        }
+    }
+
+    private static void AppendSourceObb(
+        StringBuilder builder,
+        IReadOnlyList<YoloObbDetection> boxes,
+        IReadOnlyList<string> labels,
+        YoloImagePreprocessResult preprocess,
+        int contentTop)
+    {
+        if (boxes.Count == 0)
+        {
+            AppendEmpty(builder, "No oriented boxes above threshold.");
+            return;
+        }
+
+        int index = 0;
+        foreach (YoloObbDetection oriented in boxes.Take(100))
+        {
+            YoloDetection sourceDetection = TransformDetectionToSource(oriented.Box, preprocess);
+            BoxRect rect = ResolveBox(sourceDetection, preprocess.SourceWidth, preprocess.SourceHeight);
+            string color = Palette[index % Palette.Length];
+            double angleDegrees = oriented.AngleRadians * 180.0 / Math.PI;
+            string label = $"{LabelOrIndex(labels, oriented.Box.ClassIndex)} {oriented.Box.Score:0.###} angle={angleDegrees:0.#}";
+            builder.AppendLine($"""  <g transform="rotate({Format(angleDegrees)} {Format(rect.CenterX)} {Format(contentTop + rect.CenterY)})">""");
+            builder.AppendLine($"""    <rect x="{Format(rect.X)}" y="{Format(contentTop + rect.Y)}" width="{Format(rect.Width)}" height="{Format(rect.Height)}" fill="none" stroke="{color}" stroke-width="3"/>""");
+            builder.AppendLine("  </g>");
+            AppendLabel(builder, rect.X, contentTop + rect.Y, color, label);
+            index++;
+        }
+    }
+
+    private static void AppendSourceClassification(
+        StringBuilder builder,
+        IReadOnlyList<YoloClassificationPrediction> predictions,
+        IReadOnlyList<string> labels,
+        int sourceWidth,
+        int contentTop)
+    {
+        if (predictions.Count == 0)
+        {
+            AppendEmpty(builder, "No classification scores above threshold.");
+            return;
+        }
+
+        int count = Math.Min(predictions.Count, 5);
+        int panelWidth = Math.Min(440, Math.Max(280, sourceWidth - 32));
+        int panelHeight = 42 + count * 31;
+        builder.AppendLine($"""  <rect x="16" y="{contentTop + 16}" width="{panelWidth}" height="{panelHeight}" fill="#111827" opacity="0.82"/>""");
+        builder.AppendLine($"""  <text x="32" y="{contentTop + 43}" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="700" fill="#ffffff">Top predictions</text>""");
+        for (int index = 0; index < count; index++)
+        {
+            YoloClassificationPrediction prediction = predictions[index];
+            int y = contentTop + 68 + index * 31;
+            string label = $"{index + 1}. {LabelOrIndex(labels, prediction.ClassIndex)}";
+            builder.AppendLine($"""  <text x="32" y="{y + 14}" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#ffffff">{Escape(label)}</text>""");
+            builder.AppendLine($"""  <text x="{panelWidth - 70}" y="{y + 14}" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#ffffff">{prediction.Score:0.000}</text>""");
+        }
+    }
+
+    private static void AppendSourceSemantic(
+        StringBuilder builder,
+        YoloSemanticMap? map,
+        int sourceWidth,
+        int sourceHeight,
+        int contentTop)
+    {
+        if (map == null)
+        {
+            AppendEmpty(builder, "No semantic map available.");
+            return;
+        }
+
+        int columns = Math.Max(1, Math.Min(sourceWidth, 64));
+        int rows = Math.Max(1, Math.Min(sourceHeight, 48));
+        float cellWidth = sourceWidth / (float)columns;
+        float cellHeight = sourceHeight / (float)rows;
+        for (int row = 0; row < rows; row++)
+        {
+            int mapY = Math.Min(map.Height - 1, row * map.Height / rows);
+            for (int column = 0; column < columns; column++)
+            {
+                int mapX = Math.Min(map.Width - 1, column * map.Width / columns);
+                int classIndex = InferSemanticClassAt(map, mapX, mapY);
+                string color = Palette[classIndex % Palette.Length];
+                builder.AppendLine($"""  <rect data-semantic-cell="true" x="{Format(column * cellWidth)}" y="{Format(contentTop + row * cellHeight)}" width="{Format(cellWidth + 0.5f)}" height="{Format(cellHeight + 0.5f)}" fill="{color}" opacity="0.42"/>""");
+            }
+        }
     }
 
     private static void AppendDetections(StringBuilder builder, IReadOnlyList<YoloDetection> detections, IReadOnlyList<string> labels, int width, int height)
@@ -284,7 +629,8 @@ public static class YoloVisionVisualizationWriter
         int sourceWidth,
         int sourceHeight,
         int contentTop,
-        string color)
+        string color,
+        string prefix = "mask")
     {
         float left = Math.Clamp(detection.Left, 0.0f, sourceWidth);
         float top = Math.Clamp(detection.Top, 0.0f, sourceHeight);
@@ -298,7 +644,7 @@ public static class YoloVisionVisualizationWriter
             left,
             contentTop + top,
             color,
-            $"mask {LabelOrIndex(labels, detection.ClassIndex)} {detection.Score:0.###}");
+            $"{prefix} {LabelOrIndex(labels, detection.ClassIndex)} {detection.Score:0.###}");
     }
 
     private static void AppendObb(StringBuilder builder, IReadOnlyList<YoloObbDetection> boxes, IReadOnlyList<string> labels, int width, int height)
@@ -431,6 +777,58 @@ public static class YoloVisionVisualizationWriter
         return new BoxRect(x, y, boxWidth, boxHeight);
     }
 
+    private static YoloDetection TransformDetectionToSource(
+        YoloDetection detection,
+        YoloImagePreprocessResult preprocess)
+    {
+        bool normalized = IsNormalized(detection);
+        float centerX = normalized ? detection.CenterX * preprocess.TargetWidth : detection.CenterX;
+        float centerY = normalized ? detection.CenterY * preprocess.TargetHeight : detection.CenterY;
+        float width = normalized ? detection.Width * preprocess.TargetWidth : detection.Width;
+        float height = normalized ? detection.Height * preprocess.TargetHeight : detection.Height;
+        if (!float.IsFinite(centerX) || !float.IsFinite(centerY) ||
+            !float.IsFinite(width) || !float.IsFinite(height) ||
+            width < 0.0f || height < 0.0f)
+        {
+            throw new ArgumentException("Detection coordinates must be finite and sizes must be non-negative.", nameof(detection));
+        }
+
+        float left = TransformCoordinateToSource(centerX - width / 2.0f, preprocess, horizontal: true);
+        float top = TransformCoordinateToSource(centerY - height / 2.0f, preprocess, horizontal: false);
+        float right = TransformCoordinateToSource(centerX + width / 2.0f, preprocess, horizontal: true);
+        float bottom = TransformCoordinateToSource(centerY + height / 2.0f, preprocess, horizontal: false);
+        return new YoloDetection(
+            detection.ClassIndex,
+            detection.Score,
+            (left + right) / 2.0f,
+            (top + bottom) / 2.0f,
+            Math.Max(0.0f, right - left),
+            Math.Max(0.0f, bottom - top),
+            detection.SourceIndex);
+    }
+
+    private static float TransformCoordinateToSource(
+        float modelCoordinate,
+        YoloImagePreprocessResult preprocess,
+        bool horizontal)
+    {
+        float sourceSize = horizontal ? preprocess.SourceWidth : preprocess.SourceHeight;
+        float resizedSize = horizontal ? preprocess.ResizedWidth : preprocess.ResizedHeight;
+        float offset = preprocess.CenterCropEnabled
+            ? (horizontal ? preprocess.CropX : preprocess.CropY)
+            : -(horizontal ? preprocess.PadX : preprocess.PadY);
+        float sourceCoordinate = (modelCoordinate + offset) / (resizedSize / sourceSize);
+        return Math.Clamp(sourceCoordinate, 0.0f, sourceSize);
+    }
+
+    private static bool IsNormalized(YoloDetection detection)
+    {
+        return MathF.Abs(detection.CenterX) <= 1.5f &&
+               MathF.Abs(detection.CenterY) <= 1.5f &&
+               MathF.Abs(detection.Width) <= 1.5f &&
+               MathF.Abs(detection.Height) <= 1.5f;
+    }
+
     private static int InferSemanticClass(YoloSemanticMap map, int x, int y)
     {
         int sourceX = Math.Clamp((int)MathF.Round(x * (map.Width - 1.0f) / Math.Max(1, Math.Min(map.Width, 32) - 1)), 0, map.Width - 1);
@@ -449,6 +847,174 @@ public static class YoloVisionVisualizationWriter
         }
 
         return bestClass;
+    }
+
+    private static int InferSemanticClassAt(YoloSemanticMap map, int x, int y)
+    {
+        int spatialIndex = y * map.Width + x;
+        int bestClass = 0;
+        float bestScore = float.NegativeInfinity;
+        for (int classIndex = 0; classIndex < map.ClassCount; classIndex++)
+        {
+            float score = map.Values[classIndex * map.Width * map.Height + spatialIndex];
+            if (score > bestScore)
+            {
+                bestScore = score;
+                bestClass = classIndex;
+            }
+        }
+
+        return bestClass;
+    }
+
+    private static string ResolveImageMimeType(string path)
+    {
+        return Path.GetExtension(path).ToLowerInvariant() switch
+        {
+            ".jpg" or ".jpeg" => "image/jpeg",
+            ".png" => "image/png",
+            ".bmp" => "image/bmp",
+            _ => throw new NotSupportedException("Visualization background must be a JPEG, PNG, or BMP image.")
+        };
+    }
+
+    private static (int Width, int Height) ReadImageDimensions(string path)
+    {
+        string extension = Path.GetExtension(path).ToLowerInvariant();
+        using FileStream stream = File.OpenRead(path);
+        using BinaryReader reader = new BinaryReader(stream, Encoding.UTF8, leaveOpen: true);
+        try
+        {
+            return extension switch
+            {
+                ".jpg" or ".jpeg" => ReadJpegDimensions(reader),
+                ".png" => ReadPngDimensions(reader),
+                ".bmp" => ReadBmpDimensions(reader),
+                _ => throw new NotSupportedException("Visualization background must be a JPEG, PNG, or BMP image.")
+            };
+        }
+        catch (EndOfStreamException exception)
+        {
+            throw new InvalidDataException("Visualization background image header is truncated.", exception);
+        }
+    }
+
+    private static (int Width, int Height) ReadPngDimensions(BinaryReader reader)
+    {
+        byte[] header = reader.ReadBytes(24);
+        byte[] signature = { 137, 80, 78, 71, 13, 10, 26, 10 };
+        if (header.Length != 24 || !header.Take(8).SequenceEqual(signature) ||
+            ReadBigEndianInt32(header, 8) != 13 ||
+            header[12] != (byte)'I' || header[13] != (byte)'H' || header[14] != (byte)'D' || header[15] != (byte)'R')
+        {
+            throw new InvalidDataException("Visualization background is not a valid PNG header.");
+        }
+
+        int width = ReadBigEndianInt32(header, 16);
+        int height = ReadBigEndianInt32(header, 20);
+        return ValidateImageDimensions(width, height);
+    }
+
+    private static (int Width, int Height) ReadBmpDimensions(BinaryReader reader)
+    {
+        byte[] header = reader.ReadBytes(26);
+        if (header.Length != 26 || header[0] != (byte)'B' || header[1] != (byte)'M')
+        {
+            throw new InvalidDataException("Visualization background is not a valid BMP header.");
+        }
+
+        int width = BitConverter.ToInt32(header, 18);
+        int rawHeight = BitConverter.ToInt32(header, 22);
+        if (rawHeight == int.MinValue)
+        {
+            throw new InvalidDataException("Visualization background contains an invalid BMP height.");
+        }
+
+        int height = Math.Abs(rawHeight);
+        return ValidateImageDimensions(width, height);
+    }
+
+    private static (int Width, int Height) ReadJpegDimensions(BinaryReader reader)
+    {
+        if (reader.ReadByte() != 0xff || reader.ReadByte() != 0xd8)
+        {
+            throw new InvalidDataException("Visualization background is not a valid JPEG header.");
+        }
+
+        while (reader.BaseStream.Position < reader.BaseStream.Length)
+        {
+            byte prefix;
+            do
+            {
+                prefix = reader.ReadByte();
+            }
+            while (prefix != 0xff && reader.BaseStream.Position < reader.BaseStream.Length);
+
+            byte marker;
+            do
+            {
+                marker = reader.ReadByte();
+            }
+            while (marker == 0xff);
+
+            if (marker == 0xd9 || marker == 0xda)
+            {
+                break;
+            }
+
+            if (marker is 0x01 or >= 0xd0 and <= 0xd7)
+            {
+                continue;
+            }
+
+            int segmentLength = ReadBigEndianUInt16(reader);
+            if (segmentLength < 2)
+            {
+                throw new InvalidDataException("Visualization background contains an invalid JPEG segment.");
+            }
+
+            if (marker is 0xc0 or 0xc1 or 0xc2 or 0xc3 or 0xc5 or 0xc6 or 0xc7 or 0xc9 or 0xca or 0xcb or 0xcd or 0xce or 0xcf)
+            {
+                if (segmentLength < 7)
+                {
+                    throw new InvalidDataException("Visualization background contains an invalid JPEG frame header.");
+                }
+
+                reader.ReadByte();
+                int height = ReadBigEndianUInt16(reader);
+                int width = ReadBigEndianUInt16(reader);
+                return ValidateImageDimensions(width, height);
+            }
+
+            reader.BaseStream.Seek(segmentLength - 2, SeekOrigin.Current);
+        }
+
+        throw new InvalidDataException("Visualization background JPEG dimensions could not be resolved.");
+    }
+
+    private static int ReadBigEndianUInt16(BinaryReader reader)
+    {
+        int high = reader.ReadByte();
+        int low = reader.ReadByte();
+        return (high << 8) | low;
+    }
+
+    private static int ReadBigEndianInt32(byte[] bytes, int offset)
+    {
+        return (bytes[offset] << 24) |
+               (bytes[offset + 1] << 16) |
+               (bytes[offset + 2] << 8) |
+               bytes[offset + 3];
+    }
+
+    private static (int Width, int Height) ValidateImageDimensions(int width, int height)
+    {
+        if (width <= 0 || height <= 0)
+        {
+            throw new InvalidDataException("Visualization background dimensions must be positive.");
+        }
+
+        return (width, height);
     }
 
     private static float ScaleCoordinate(float value, int limit)

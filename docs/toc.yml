@@ -230,7 +230,7 @@
     href: articles/zh-cn/tensorrtexec-int8-calibration-owner-field-guide.md
   - name: YoloVision YOLOv8 Detection Real Asset Tutorial
     href: articles/zh-cn/yolovision-yolov8-det-real-asset-tutorial.md
-  - name: YoloVision YOLOv8n Detection Local Package Consumer Tutorial
+  - name: C# 使用 TensorRtSharp4.0 运行 YOLOv8n 目标检测
     href: articles/zh-cn/yolovision-yolov8n-det-local-package-consumer-tutorial.md
   - name: YoloVision YOLOv8 Segmentation Real Asset Tutorial
     href: articles/zh-cn/yolovision-yolov8-seg-real-asset-tutorial.md

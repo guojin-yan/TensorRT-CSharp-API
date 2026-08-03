@@ -47,7 +47,7 @@ if (-not (Test-Path -LiteralPath $CatalogPath -PathType Leaf)) {
   throw "Technical article publication catalog does not exist: $CatalogPath"
 }
 $catalog = Get-Content -LiteralPath $CatalogPath -Raw -Encoding utf8 | ConvertFrom-Json
-if ([int]$catalog.schemaVersion -ne 1 -or [string]$catalog.recordKind -ne "technical-article-publication-catalog") {
+if ([int]$catalog.schemaVersion -ne 2 -or [string]$catalog.recordKind -ne "technical-article-publication-catalog") {
   throw "Unsupported technical article publication catalog contract."
 }
 if ([bool]$catalog.publicPublicationAuthorized -or [bool]$catalog.performsPublish) {
@@ -79,13 +79,28 @@ $results = @(
     else {
       ""
     }
-    foreach ($heading in @("## 模型获取与许可证", "## ONNX 转换与暂存", "## 已验证结果", "## 复查与边界")) {
+    foreach ($heading in @(
+      "## 本文使用的项目与库",
+      "## 模型获取与许可证",
+      "## ONNX 转换与暂存",
+      "## 创建本地包消费项目",
+      "## 编写程序入口",
+      "## 编译并运行",
+      "## 已验证结果",
+      "## 复查与边界"
+    )) {
       if ($content.IndexOf($heading, [StringComparison]::Ordinal) -lt 0) {
         $failures.Add("missing-heading:$heading")
       }
     }
-    if ($content.IndexOf("上图由本次真实运行报告生成", [StringComparison]::Ordinal) -lt 0) {
-      $failures.Add("missing-result-image-source-statement")
+    if ($content.IndexOf("终端截图来自本次真实运行的 stdout", [StringComparison]::Ordinal) -lt 0 -or
+        $content.IndexOf("两张图都来自同一次真实 TensorRT 执行", [StringComparison]::Ordinal) -lt 0) {
+      $failures.Add("missing-runtime-and-annotated-image-source-statement")
+    }
+
+    $machineSpecificAbsolutePaths = @([regex]::Matches($content, '(?im)(?:[A-Z]:\\|/Users/[^/\s]+/|/home/[^/\s]+/)'))
+    if ($machineSpecificAbsolutePaths.Count -gt [int]$catalog.completenessRule.maximumMachineSpecificAbsolutePathCount) {
+      $failures.Add("too-many-machine-specific-absolute-paths:$($machineSpecificAbsolutePaths.Count)")
     }
 
     $evidencePath = Resolve-RepositoryPath -Path ([string]$article.realExecutionEvidence)
@@ -111,6 +126,15 @@ $results = @(
     if ($resultImages.Count -lt [int]$catalog.completenessRule.minimumResultImageCount) {
       $failures.Add("insufficient-result-images")
     }
+    $resultImageRoles = @($resultImages | ForEach-Object { [string]$_.role })
+    foreach ($requiredRole in @($catalog.completenessRule.requiredResultImageRoles)) {
+      if ($resultImageRoles -notcontains [string]$requiredRole) {
+        $failures.Add("required-result-image-role-missing:$requiredRole")
+      }
+    }
+    if (@($resultImageRoles | Group-Object | Where-Object Count -ne 1).Count -gt 0) {
+      $failures.Add("result-image-role-not-unique")
+    }
     foreach ($image in $resultImages) {
       $imagePath = Resolve-RepositoryPath -Path ([string]$image.path)
       $extension = [IO.Path]::GetExtension($imagePath).ToLowerInvariant()
@@ -129,6 +153,41 @@ $results = @(
       }
       if ([string]::IsNullOrWhiteSpace([string]$image.source)) {
         $failures.Add("result-image-source-missing:$($image.path)")
+      }
+    }
+
+    $visualAssetEvidencePath = Resolve-RepositoryPath -Path ([string]$article.visualAssetEvidence)
+    if (-not (Test-Path -LiteralPath $visualAssetEvidencePath -PathType Leaf)) {
+      $failures.Add("visual-asset-evidence-missing")
+    }
+    else {
+      $visualAssetEvidence = Get-Content -LiteralPath $visualAssetEvidencePath -Raw -Encoding utf8 | ConvertFrom-Json
+      if ([string]$visualAssetEvidence.recordKind -ne "technical-article-visual-assets") {
+        $failures.Add("visual-asset-evidence-kind-invalid")
+      }
+      if ([string]$visualAssetEvidence.articleId -ne [string]$article.id) {
+        $failures.Add("visual-asset-evidence-article-id-mismatch")
+      }
+      foreach ($propertyName in @("descriptionUrl", "downloadUrl", "downloadedSha256", "license", "licenseUrl")) {
+        if ([string]::IsNullOrWhiteSpace([string]$visualAssetEvidence.sourceImage.$propertyName)) {
+          $failures.Add("visual-source-field-missing:$propertyName")
+        }
+      }
+      if (-not [bool]$visualAssetEvidence.sourceImage.publicRedistributionPermittedByLicense) {
+        $failures.Add("visual-source-public-redistribution-not-permitted")
+      }
+      if ([bool]$visualAssetEvidence.modelFilesTrackedByGit -or
+          [bool]$visualAssetEvidence.uploadsModelFiles -or
+          [bool]$visualAssetEvidence.performsPublish) {
+        $failures.Add("visual-asset-evidence-boundary-invalid")
+      }
+      foreach ($image in $resultImages) {
+        $evidenceImage = @($visualAssetEvidence.resultImages | Where-Object { [string]$_.role -eq [string]$image.role })
+        if ($evidenceImage.Count -ne 1 -or
+            [string]$evidenceImage[0].path -ne [string]$image.path -or
+            [string]$evidenceImage[0].sha256 -ne [string]$image.sha256) {
+          $failures.Add("visual-asset-evidence-image-mismatch:$($image.role)")
+        }
       }
     }
 
@@ -167,6 +226,8 @@ $results = @(
       classification = [string]$article.classification
       status = [string]$article.status
       resultImageCount = $resultImages.Count
+      resultImageRoles = $resultImageRoles
+      machineSpecificAbsolutePathCount = $machineSpecificAbsolutePaths.Count
       failureCount = $failures.Count
       failures = @($failures)
       passed = ($failures.Count -eq 0)

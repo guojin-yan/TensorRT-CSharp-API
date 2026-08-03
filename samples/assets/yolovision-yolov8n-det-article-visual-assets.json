@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "recordKind": "technical-article-visual-assets",
+  "articleId": "yolovision-yolov8n-det-local-package-consumer",
+  "sourceImage": {
+    "title": "Liverpool Street Bus station 2025",
+    "artist": "UK bus Image",
+    "descriptionUrl": "https://commons.wikimedia.org/wiki/File:Liverpool_Street_Bus_station_2025.jpg",
+    "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/d/d4/Liverpool_Street_Bus_station_2025.jpg",
+    "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Liverpool_Street_Bus_station_2025.jpg/1280px-Liverpool_Street_Bus_station_2025.jpg",
+    "originalMediaWikiSha1": "b513340a949880e7605438102e27dbda6438db26",
+    "downloadedWidth": 1280,
+    "downloadedHeight": 961,
+    "downloadedLength": 346914,
+    "downloadedSha256": "52b889d4fc9baea772ba2d9bbdfdef8b70710f993d7f27d193a965b11e708bcb",
+    "ppmSha256": "80715af66669147b049fec9386152bd45505f4e494a65079fdc55404d4589b8e",
+    "license": "CC0 1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "attributionRequired": false,
+    "publicRedistributionPermittedByLicense": true
+  },
+  "resultImages": [
+    {
+      "role": "annotated-inference-result",
+      "path": "docs/images/yolovision-yolov8n-det-annotated-cc0.png",
+      "sha256": "79bdda279d13b7ffd1493455f38d42596fb5e8805f116be48fcc71d067de5e64",
+      "source": "Rendered from the SVG written by the real TensorRT YoloVision run; the CC0 source image is embedded and predictions are mapped back to source coordinates."
+    },
+    {
+      "role": "program-runtime-screenshot",
+      "path": "docs/images/yolovision-yolov8n-det-runtime-terminal.png",
+      "sha256": "97d56b2e6500893de78ebe49cd4c90270c5dee58fa270da90ef1fa1e13abd845",
+      "source": "Captured from a Windows Terminal window displaying the exact filtered stdout of the same real TensorRT execution."
+    }
+  ],
+  "modelFilesTrackedByGit": false,
+  "uploadsModelFiles": false,
+  "performsPublish": false
+}

@@ -8,19 +8,21 @@
 - Owner 输入、候选 proof 和 post-publish 模板；
 - `publishing` 子目录中的文章规划与发布治理材料。
 
-2026-08-03 盘点到 486 个 Markdown 文件。当前有 2 篇文章引用了由真实运行证据生成的执行结果图，其余文件仍以项目文档、内部记录或待完善稿为主。数量代表项目过程材料多，不代表有 486 篇完整成稿。
+2026-08-03 盘点到 486 个 Markdown 文件。当前只有 1 篇文章同时具备真实程序运行窗口截图和原图叠加识别结果；其余文件仍以项目文档、内部记录或待完善稿为主。数量代表项目过程材料多，不代表有 486 篇完整成稿。
 
 ## 完整文章标准
 
 技术文章只有同时满足以下条件，才可以标记为 `complete-technical-article`：
 
-1. 有明确读者、问题、环境、可复制命令和预期输出。
-2. 有真实执行结果，不把模板、build-only、local feed 或截图单独写成发布 proof。
-3. 至少有一张与本次真实执行结果对应的 PNG/JPEG/WebP 配图，并说明图片来自哪个报告或运行。
-4. 模型案例必须写明权重/ONNX 获取 URL、固定 revision、许可证、转换命令、ONNX 输入输出合同、SHA256 和外层 `models` 暂存路径。
-5. 配图不得嵌入没有公开再分发授权的模型、测试图片或第三方素材；可以使用本项目根据真实日志生成的结果图。
-6. 有证据路径、失败条件、已知限制和 proof boundary。
-7. 通过 `eng/Test-TechnicalArticleCompleteness.ps1`。
+1. 先介绍项目、使用到的库、各依赖职责和目标读者。
+2. 从环境、模型与图片获取开始，一步步完成项目创建、依赖配置、代码编写、编译和运行。
+3. 有真实执行结果，不把模板、build-only、local feed 或指标卡片单独写成程序运行结果。
+4. 图像模型文章至少有两张 PNG/JPEG/WebP：一张原图叠加识别结果，一张真实终端或软件运行页面截图。
+5. 模型案例必须写明权重/ONNX 获取 URL、固定 revision、许可证、转换命令、ONNX 输入输出合同、SHA256 和外层 `models` 暂存路径。
+6. 配图不得嵌入没有公开再分发授权的测试图片或第三方素材；图片来源和许可证必须可复核。
+7. 正文命令使用工作区变量和相对路径，不堆叠盘符、用户名或某台机器的绝对路径。
+8. 证据哈希、失败条件和 proof boundary 放在结果与复查部分，不代替教程主体。
+9. 通过 `eng/Test-TechnicalArticleCompleteness.ps1`。
 
 ## 分类
 
@@ -36,9 +38,8 @@
 
 当前完成门禁的文章有：
 
-- [YoloVision YOLOv8n Detection 本地包消费教程](yolovision-yolov8n-det-local-package-consumer-tutorial.md)；
-- [YoloVision LRASPP 语义分割本地包消费教程](yolovision-lraspp-semantic-local-package-consumer-tutorial.md)。
+- [使用 TensorRtSharp4.0 在 C# 中运行 YOLOv8n 目标检测](yolovision-yolov8n-det-local-package-consumer-tutorial.md)。
 
-两篇文章的结果图都来自真实 TensorRT、本地三包和独立参考比较，不包含未授权测试原图、模型或权重。
+LRASPP 语义分割等现有教程虽然已经有真实 TensorRT 证据，但在补齐原图叠加结果和真实程序窗口截图前，不再标记为完整技术文章。
 
 DocFX 构建成功只说明链接和站点生成正确，不等于外部文章已经发布，也不替代 public-package、post-publish、Owner acceptance 或 release proof。

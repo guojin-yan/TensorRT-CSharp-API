@@ -752,6 +752,97 @@ public sealed class YoloVisionManagedPipelineTests
     }
 
     [Fact]
+    public void VisualizationWriterEmbedsSourceImageAndMapsDetectionsBackToSourceSpace()
+    {
+        string backgroundPath = Path.Combine(Path.GetTempPath(), $"yolovision-background-{Guid.NewGuid():N}.png");
+        string truncatedJpegPath = Path.Combine(Path.GetTempPath(), $"yolovision-background-{Guid.NewGuid():N}.jpg");
+        try
+        {
+            byte[] pngHeader =
+            {
+                137, 80, 78, 71, 13, 10, 26, 10,
+                0, 0, 0, 13, 73, 72, 68, 82,
+                0, 0, 5, 0,
+                0, 0, 3, 193
+            };
+            File.WriteAllBytes(backgroundPath, pngHeader);
+            YoloModelProfile profile = YoloModelProfile.FromArgs(new[]
+            {
+                "--family", "v8",
+                "--task", "det",
+                "--layout", "channels-first",
+                "--class-count", "1"
+            }, labelCount: 1);
+            YoloVisionResult result = YoloVisionResult.FromDetections(
+                YoloTaskType.Detection,
+                new[] { new YoloDetection(0, 0.93f, 320.0f, 320.0f, 160.0f, 128.0f) });
+            YoloImagePreprocessResult preprocess = CreatePreprocess(
+                sourceWidth: 1280,
+                sourceHeight: 961,
+                targetWidth: 640,
+                targetHeight: 640,
+                resizedWidth: 640,
+                resizedHeight: 481,
+                padX: 0,
+                padY: 79,
+                scaleX: 0.5f,
+                scaleY: 0.5f);
+
+            string svg = YoloVisionVisualizationWriter.ToSvg(
+                result,
+                new[] { "bus" },
+                profile,
+                new[] { 1, 3, 640, 640 },
+                preprocess,
+                segmentationSpatialTransform: null,
+                backgroundImagePath: backgroundPath);
+
+            Assert.Contains("data-source-image=\"true\"", svg, StringComparison.Ordinal);
+            Assert.Contains($"data:image/png;base64,{Convert.ToBase64String(pngHeader)}", svg, StringComparison.Ordinal);
+            Assert.Contains("bus 0.930", svg, StringComparison.Ordinal);
+            Assert.Contains("width=\"320\"", svg, StringComparison.Ordinal);
+            Assert.DoesNotContain(backgroundPath, svg, StringComparison.OrdinalIgnoreCase);
+
+            YoloImagePreprocessResult mismatchedPreprocess = CreatePreprocess(
+                sourceWidth: 1279,
+                sourceHeight: 961,
+                targetWidth: 640,
+                targetHeight: 640,
+                resizedWidth: 640,
+                resizedHeight: 481,
+                padX: 0,
+                padY: 79,
+                scaleX: 0.5f,
+                scaleY: 0.5f);
+            ArgumentException mismatch = Assert.Throws<ArgumentException>(() => YoloVisionVisualizationWriter.ToSvg(
+                result,
+                new[] { "bus" },
+                profile,
+                new[] { 1, 3, 640, 640 },
+                mismatchedPreprocess,
+                segmentationSpatialTransform: null,
+                backgroundImagePath: backgroundPath));
+            Assert.Contains("do not match", mismatch.Message, StringComparison.Ordinal);
+
+            File.WriteAllBytes(truncatedJpegPath, new byte[] { 0xff, 0xd8, 0xff });
+            InvalidDataException truncated = Assert.Throws<InvalidDataException>(() => YoloVisionVisualizationWriter.ToSvg(
+                result,
+                new[] { "bus" },
+                profile,
+                new[] { 1, 3, 640, 640 },
+                preprocess,
+                segmentationSpatialTransform: null,
+                backgroundImagePath: truncatedJpegPath));
+            Assert.Contains("truncated", truncated.Message, StringComparison.OrdinalIgnoreCase);
+        }
+        finally
+        {
+            File.Delete(backgroundPath);
+            File.Delete(truncatedJpegPath);
+        }
+    }
+
+    [Fact]
     public void SegmentationOutputReportDistinguishesActiveAndTotalPrototypePixels()
     {
         YoloModelProfile profile = YoloModelProfile.FromArgs(new[]

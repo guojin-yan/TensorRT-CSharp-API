@@ -220,16 +220,44 @@ public static class YoloVisionCommand
                 args,
                 "--visualization",
                 SampleCommandLine.GetStringArgument(args, "--visualization-svg", string.Empty));
+            string visualizationBackgroundPath = ResolveOptionalFullPath(
+                SampleCommandLine.GetStringArgument(args, "--visualization-background", string.Empty));
+            if (!string.IsNullOrWhiteSpace(visualizationBackgroundPath) && string.IsNullOrWhiteSpace(visualizationPath))
+            {
+                throw new ArgumentException("--visualization-background requires --visualization <path>.");
+            }
+
             if (!string.IsNullOrWhiteSpace(visualizationPath))
             {
-                YoloVisionVisualizationWriter.Write(
-                    visualizationPath,
-                    visionResult,
-                    labels,
-                    profile,
-                    options.InputShape.Values,
-                    imagePreprocess,
-                    segmentationSpatialTransform);
+                if (string.IsNullOrWhiteSpace(visualizationBackgroundPath))
+                {
+                    YoloVisionVisualizationWriter.Write(
+                        visualizationPath,
+                        visionResult,
+                        labels,
+                        profile,
+                        options.InputShape.Values,
+                        imagePreprocess,
+                        segmentationSpatialTransform);
+                }
+                else
+                {
+                    if (imagePreprocess == null)
+                    {
+                        throw new ArgumentException("--visualization-background requires --image so source-space coordinates are available.");
+                    }
+
+                    YoloVisionVisualizationWriter.Write(
+                        visualizationPath,
+                        visionResult,
+                        labels,
+                        profile,
+                        options.InputShape.Values,
+                        imagePreprocess,
+                        segmentationSpatialTransform,
+                        visualizationBackgroundPath);
+                }
+
                 Console.WriteLine($"Visualization={Path.GetFullPath(visualizationPath)}");
             }
 
@@ -646,6 +674,7 @@ public static class YoloVisionCommand
         Console.WriteLine("  --output-json <path>   Alias for --output.");
         Console.WriteLine("  --visualization <path> Write an SVG visualization for detections, classification, segmentation, OBB, pose, or semantic maps.");
         Console.WriteLine("  --visualization-svg <path> Alias for --visualization.");
+        Console.WriteLine("  --visualization-background <path> Embed a same-size JPEG/PNG/BMP source image and map predictions back to source coordinates; requires --image and --visualization.");
         Console.WriteLine("  --input-pattern <pattern> zeros, ones, or ramp. Default: ramp.");
         Console.WriteLine("  --input <path>           Raw byte tensor normalized to [0,1]; byte count must match input element count.");
         Console.WriteLine("  --input-data <path>      Float tensor data from .bin/.raw float32 or comma/space/newline text.");

@@ -14,6 +14,7 @@ public sealed class EngineeringAndArticleCatalogTests
         using JsonDocument document = JsonDocument.Parse(File.ReadAllText(catalogPath));
         JsonElement root = document.RootElement;
 
+        Assert.Equal(2, root.GetProperty("schemaVersion").GetInt32());
         Assert.Equal("technical-article-publication-catalog", root.GetProperty("recordKind").GetString());
         Assert.Equal("project-documentation-not-publication-ready", root.GetProperty("defaultClassification").GetString());
         Assert.False(root.GetProperty("publicPublicationAuthorized").GetBoolean());
@@ -24,21 +25,39 @@ public sealed class EngineeringAndArticleCatalogTests
         Assert.True(rule.GetProperty("requiresImageSourceStatement").GetBoolean());
         Assert.True(rule.GetProperty("modelArticleRequiresAcquisitionAndConversion").GetBoolean());
         Assert.True(rule.GetProperty("requiresProofBoundary").GetBoolean());
-        Assert.True(rule.GetProperty("minimumResultImageCount").GetInt32() >= 1);
+        Assert.True(rule.GetProperty("requiresProjectAndLibraryIntroduction").GetBoolean());
+        Assert.True(rule.GetProperty("requiresStepByStepProjectFlow").GetBoolean());
+        Assert.True(rule.GetProperty("minimumResultImageCount").GetInt32() >= 2);
+        Assert.Equal(0, rule.GetProperty("maximumMachineSpecificAbsolutePathCount").GetInt32());
+        string[] requiredImageRoles = rule.GetProperty("requiredResultImageRoles")
+            .EnumerateArray()
+            .Select(static item => item.GetString()!)
+            .ToArray();
+        Assert.Equal(new[] { "annotated-inference-result", "program-runtime-screenshot" }, requiredImageRoles);
 
         JsonElement[] articles = root.GetProperty("articles").EnumerateArray().ToArray();
         Assert.NotEmpty(articles);
         foreach (JsonElement article in articles)
         {
             Assert.Equal("complete-technical-article", article.GetProperty("classification").GetString());
-            Assert.Equal("complete-with-runtime-results-and-images", article.GetProperty("status").GetString());
+            Assert.Equal("complete-with-runtime-screenshot-and-annotated-result", article.GetProperty("status").GetString());
             Assert.False(article.GetProperty("publicationAuthorized").GetBoolean());
             Assert.False(string.IsNullOrWhiteSpace(article.GetProperty("proofBoundary").GetString()));
 
             string articlePath = Resolve(article.GetProperty("path").GetString()!);
             string articleText = File.ReadAllText(articlePath);
-            Assert.Contains("## 已验证结果", articleText, StringComparison.Ordinal);
-            Assert.Contains("上图由本次真实运行报告生成", articleText, StringComparison.Ordinal);
+            foreach (string heading in new[]
+            {
+                "## 本文使用的项目与库", "## 模型获取与许可证", "## ONNX 转换与暂存",
+                "## 创建本地包消费项目", "## 编写程序入口", "## 编译并运行",
+                "## 已验证结果", "## 复查与边界"
+            })
+            {
+                Assert.Contains(heading, articleText, StringComparison.Ordinal);
+            }
+            Assert.Contains("终端截图来自本次真实运行的 stdout", articleText, StringComparison.Ordinal);
+            Assert.Contains("两张图都来自同一次真实 TensorRT 执行", articleText, StringComparison.Ordinal);
+            Assert.Empty(Regex.Matches(articleText, @"(?im)(?:[A-Z]:\\|/Users/[^/\s]+/|/home/[^/\s]+/)"));
 
             string evidencePath = Resolve(article.GetProperty("realExecutionEvidence").GetString()!);
             using JsonDocument evidence = JsonDocument.Parse(File.ReadAllText(evidencePath));
@@ -59,6 +78,9 @@ public sealed class EngineeringAndArticleCatalogTests
 
             JsonElement[] images = article.GetProperty("resultImages").EnumerateArray().ToArray();
             Assert.True(images.Length >= rule.GetProperty("minimumResultImageCount").GetInt32());
+            Assert.Equal(
+                requiredImageRoles.OrderBy(static item => item, StringComparer.Ordinal),
+                images.Select(static image => image.GetProperty("role").GetString()!).OrderBy(static item => item, StringComparer.Ordinal));
             foreach (JsonElement image in images)
             {
                 string relativePath = image.GetProperty("path").GetString()!;
@@ -68,6 +90,15 @@ public sealed class EngineeringAndArticleCatalogTests
                 Assert.False(string.IsNullOrWhiteSpace(image.GetProperty("source").GetString()));
                 Assert.Contains(Path.GetFileName(relativePath), articleText, StringComparison.Ordinal);
             }
+
+            string visualAssetEvidencePath = Resolve(article.GetProperty("visualAssetEvidence").GetString()!);
+            using JsonDocument visualAssetEvidence = JsonDocument.Parse(File.ReadAllText(visualAssetEvidencePath));
+            Assert.Equal("technical-article-visual-assets", visualAssetEvidence.RootElement.GetProperty("recordKind").GetString());
+            Assert.Equal(article.GetProperty("id").GetString(), visualAssetEvidence.RootElement.GetProperty("articleId").GetString());
+            Assert.True(visualAssetEvidence.RootElement.GetProperty("sourceImage").GetProperty("publicRedistributionPermittedByLicense").GetBoolean());
+            Assert.False(visualAssetEvidence.RootElement.GetProperty("modelFilesTrackedByGit").GetBoolean());
+            Assert.False(visualAssetEvidence.RootElement.GetProperty("uploadsModelFiles").GetBoolean());
+            Assert.False(visualAssetEvidence.RootElement.GetProperty("performsPublish").GetBoolean());
         }
     }
 
@@ -79,8 +110,11 @@ public sealed class EngineeringAndArticleCatalogTests
 
         foreach (string term in new[]
         {
-            "minimumResultImageCount", "result-image-missing", "result-image-sha256-mismatch",
-            "result-image-not-referenced-by-article", "missing-result-image-source-statement",
+            "minimumResultImageCount", "required-result-image-role-missing", "result-image-role-not-unique",
+            "result-image-missing", "result-image-sha256-mismatch", "result-image-not-referenced-by-article",
+            "missing-runtime-and-annotated-image-source-statement", "too-many-machine-specific-absolute-paths",
+            "visual-asset-evidence-missing", "visual-asset-evidence-image-mismatch",
+            "visual-source-public-redistribution-not-permitted", "visual-asset-evidence-boundary-invalid",
             "real-execution-evidence-missing", "model-contract-not-documented", "outer-model-sha256-mismatch",
             "model-git-or-upload-boundary-invalid", "article-must-not-self-authorize-publication",
             "PublicPublicationAuthorized=False", "performsPublish = $false"
@@ -94,6 +128,8 @@ public sealed class EngineeringAndArticleCatalogTests
         Assert.Contains("project-documentation-not-publication-ready", articleReadme, StringComparison.Ordinal);
         Assert.Contains("执行结果", articleReadme, StringComparison.Ordinal);
         Assert.Contains("配图", articleReadme, StringComparison.Ordinal);
+        Assert.Contains("原图叠加识别结果", articleReadme, StringComparison.Ordinal);
+        Assert.Contains("真实终端或软件运行页面截图", articleReadme, StringComparison.Ordinal);
     }
 
     [Fact]
