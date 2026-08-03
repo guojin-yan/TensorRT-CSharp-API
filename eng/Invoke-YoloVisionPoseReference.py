@@ -56,6 +56,15 @@ def clip_box(box: list[float], width: int, height: int) -> list[float]:
     return [(x1 + x2) / 2.0, (y1 + y2) / 2.0, x2 - x1, y2 - y1]
 
 
+def model_output_tensor(value: Any) -> Any:
+    import torch
+
+    output = value[0] if isinstance(value, (tuple, list)) else value
+    if not isinstance(output, torch.Tensor):
+        raise TypeError(f"Unexpected PyTorch pose output type: {type(output)!r}")
+    return output
+
+
 def generate_raw_reference(args: argparse.Namespace) -> tuple[dict[str, Any], Path]:
     import numpy as np
     import onnxruntime as ort
@@ -132,13 +141,16 @@ def generate_raw_reference(args: argparse.Namespace) -> tuple[dict[str, Any], Pa
 
 
 def generate_ultralytics_reference(args: argparse.Namespace) -> tuple[dict[str, Any], Path]:
+    import numpy as np
     import torch
     import ultralytics
     from ultralytics import YOLO
+    from ultralytics.utils.nms import non_max_suppression
 
     weights_path = Path(args.weights).resolve()
     image_path = Path(args.image).resolve()
-    result = YOLO(str(weights_path)).predict(
+    model = YOLO(str(weights_path))
+    result = model.predict(
         source=str(image_path),
         imgsz=args.image_size,
         conf=args.confidence,
@@ -152,11 +164,11 @@ def generate_ultralytics_reference(args: argparse.Namespace) -> tuple[dict[str, 
     if result.keypoints is None or len(result.boxes) != len(result.keypoints.data):
         raise RuntimeError("Ultralytics did not return one keypoint row for every retained box.")
 
-    predictions: list[dict[str, Any]] = []
+    canonical_predictions: list[dict[str, Any]] = []
     keypoint_values = result.keypoints.data.detach().cpu().numpy()
     for index in range(len(result.boxes)):
         class_id = int(result.boxes.cls[index].item())
-        predictions.append(
+        canonical_predictions.append(
             {
                 "index": index,
                 "classId": class_id,
@@ -175,16 +187,106 @@ def generate_ultralytics_reference(args: argparse.Namespace) -> tuple[dict[str, 
             }
         )
 
+    tensor_path = Path(args.input_tensor).resolve()
+    input_values = np.fromfile(tensor_path, dtype=np.float32)
+    expected_input_elements = 3 * args.image_size * args.image_size
+    if input_values.size != expected_input_elements:
+        raise ValueError(
+            f"Input tensor contains {input_values.size} values; expected {expected_input_elements}."
+        )
+    input_tensor = torch.from_numpy(
+        input_values.reshape(1, 3, args.image_size, args.image_size)
+    )
+    with torch.no_grad():
+        raw_output = model_output_tensor(model.model(input_tensor))
+    if list(raw_output.shape) != args.output_shape:
+        raise ValueError(
+            f"PyTorch output shape {list(raw_output.shape)} does not match {args.output_shape}."
+        )
+    if not bool(torch.isfinite(raw_output).all()):
+        raise ValueError("PyTorch output contains non-finite values.")
+    retained = non_max_suppression(
+        raw_output,
+        conf_thres=args.confidence,
+        iou_thres=args.iou_threshold,
+        agnostic=False,
+        max_det=args.max_detections,
+        nc=1,
+    )[0].detach().cpu().numpy()
+
+    source_height, source_width = (int(value) for value in result.orig_shape)
+    scale = min(args.image_size / source_width, args.image_size / source_height)
+    resized_width = round(source_width * scale)
+    resized_height = round(source_height * scale)
+    pad_x = (args.image_size - resized_width) // 2
+    pad_y = (args.image_size - resized_height) // 2
+    expected_row_width = 6 + args.keypoint_count * 3
+    if retained.ndim != 2 or retained.shape[1] != expected_row_width:
+        raise ValueError(
+            f"NMS pose row width {retained.shape} does not match [N,{expected_row_width}]."
+        )
+
+    predictions: list[dict[str, Any]] = []
+    for index, row in enumerate(retained):
+        left, top, right, bottom, score, class_value = [float(value) for value in row[:6]]
+        class_id = int(class_value)
+        source_box = clip_box(
+            [
+                ((left + right) / 2.0 - pad_x) / scale,
+                ((top + bottom) / 2.0 - pad_y) / scale,
+                (right - left) / scale,
+                (bottom - top) / scale,
+            ],
+            source_width,
+            source_height,
+        )
+        predictions.append(
+            {
+                "index": index,
+                "classId": class_id,
+                "className": str(result.names[class_id]),
+                "score": score,
+                "sourceBox": source_box,
+                "keypoints": [
+                    {
+                        "index": keypoint_index,
+                        "x": min(
+                            max(
+                                (float(row[6 + keypoint_index * 3]) - pad_x) / scale,
+                                0.0,
+                            ),
+                            float(source_width),
+                        ),
+                        "y": min(
+                            max(
+                                (float(row[7 + keypoint_index * 3]) - pad_y) / scale,
+                                0.0,
+                            ),
+                            float(source_height),
+                        ),
+                        "score": float(row[8 + keypoint_index * 3]),
+                    }
+                    for keypoint_index in range(args.keypoint_count)
+                ],
+            }
+        )
+
     reference = {
         "schemaVersion": 1,
         "recordKind": "yolovision-independent-pose-postprocess-reference",
-        "sourceClassification": "independent-ultralytics-pytorch-cpu-reference",
+        "sourceClassification": "independent-ultralytics-pytorch-cpu-csharp-letterbox-tensor",
         "model": {"path": str(weights_path), "sha256": sha256_file(weights_path)},
         "input": {
             "imagePath": str(image_path),
             "imageSha256": sha256_file(image_path),
-            "originalShape": [int(value) for value in result.orig_shape],
+            "preprocessedTensorPath": str(tensor_path),
+            "preprocessedTensorSha256": sha256_file(tensor_path),
+            "originalShape": [source_height, source_width],
             "imageSize": args.image_size,
+            "resize": "center-letterbox",
+            "resizedShape": [resized_height, resized_width],
+            "pad": [pad_x, pad_y],
+            "scale": scale,
             "confidenceThreshold": args.confidence,
             "iouThreshold": args.iou_threshold,
             "maxDetections": args.max_detections,
@@ -202,8 +304,13 @@ def generate_ultralytics_reference(args: argparse.Namespace) -> tuple[dict[str, 
         "predictionCount": len(predictions),
         "keypointCount": args.keypoint_count,
         "predictions": predictions,
+        "canonicalImagePipeline": {
+            "sourceClassification": "independent-ultralytics-pytorch-cpu-canonical-image-pipeline",
+            "predictionCount": len(canonical_predictions),
+            "predictions": canonical_predictions,
+        },
         "boundary": (
-            "Independent framework/runtime pose postprocess reference; not Owner acceptance, "
+            "Independent same-tensor framework/runtime pose postprocess reference; not Owner acceptance, "
             "redistribution approval, package-consumer proof, post-publish proof, or release proof."
         ),
     }

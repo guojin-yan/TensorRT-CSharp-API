@@ -66,6 +66,23 @@ public sealed class YoloVisionReferenceAssetAcquisitionTests
         Assert.Contains("performsPublish = $false", script, StringComparison.Ordinal);
         Assert.DoesNotContain("dotnet nuget push", script, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("gh release upload", script, StringComparison.OrdinalIgnoreCase);
+
+        string referenceScript = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "eng",
+            "Invoke-YoloVisionPoseReference.py"));
+        foreach (string marker in new[]
+        {
+            "independent-ultralytics-pytorch-cpu-csharp-letterbox-tensor",
+            "preprocessedTensorSha256",
+            "non_max_suppression",
+            "nc=1",
+            "canonicalImagePipeline",
+            "PyTorch output contains non-finite values"
+        })
+        {
+            Assert.Contains(marker, referenceScript, StringComparison.Ordinal);
+        }
     }
 
     [Fact]
