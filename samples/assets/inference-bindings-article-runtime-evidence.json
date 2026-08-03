@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "recordKind": "inference-bindings-technical-article-runtime-evidence",
+  "recordId": "inference-bindings-source-tree-win-x64-trt10-cuda12.9-20260803",
+  "proofClassification": "source-tree-tensorrt-runtime-readback",
+  "executedUtcDate": "2026-08-03",
+  "sourceBaseCommit": "d4e9e9f218256f5bd8096a4d2ab6ec4e9f2bf2b2",
+  "runtimeEnvironment": {
+    "os": "Microsoft Windows 11 Home Chinese, NT 10.0.26200.0",
+    "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+    "driverVersion": "576.02",
+    "cudaToolkitVersion": "12.9",
+    "tensorRtVersion": "10.11.0.33",
+    "dotnetSdkVersion": "10.0.301"
+  },
+  "assets": {
+    "sampleSourcePath": "samples/InferenceBindings/Program.cs",
+    "sampleSourceSha256": "58776f73b35f9b321fa905adcd4770bdabac8745ef956be044c3438633fe4a3e",
+    "sampleAssemblySha256": "06e0412c2f828e6ceca791c77f7d7736f0e79aae34caae6ab2920b8519c90689",
+    "nativeBridgeSha256": "0576f191617dcdad46fd40e238f61cf22b9fb04826b70c1c47993b7944bd26a0",
+    "runtimeLogSha256": "6d29c9d7a93421d1a8198435a959b35e68a9ebdc6613d21ccd2aeb4e3fd5c7dd",
+    "runtimeScreenshotPath": "docs/images/inference-bindings-runtime-terminal.png",
+    "runtimeScreenshotSha256": "ffc9aac34cb5c8f81f748ec78810aa9ec57b3144600efeb84e4fee7f7c0a8aae"
+  },
+  "network": {
+    "construction": "in-memory-csharp",
+    "modelOrOnnxRequired": false,
+    "inputName": "input",
+    "inputShape": [-1, 4],
+    "outputName": "output",
+    "outputShape": [-1, 4],
+    "layer": "Identity",
+    "profileIndex": 0,
+    "profileMin": [1, 4],
+    "profileOpt": [2, 4],
+    "profileMax": [4, 4]
+  },
+  "runtimeValidation": {
+    "runtimeShape": [2, 4],
+    "valueCount": 8,
+    "inputBytes": 32,
+    "outputBytes": 32,
+    "bindingReady": true,
+    "readinessReady": true,
+    "allTensorAddressesBound": true,
+    "activeOptimizationProfile": 0,
+    "bindingInputCount": 1,
+    "bindingOutputCount": 1,
+    "engineDeviceMemoryBytes": 0,
+    "profileDeviceMemoryBytes": 0,
+    "auxiliaryStreamCount": 0,
+    "synchronizedByEnqueue": false,
+    "elapsedMilliseconds": 0.66,
+    "outputMatch": true,
+    "processExitCode": 0,
+    "passed": true
+  },
+  "proofBoundary": {
+    "sourceTreeRuntime": true,
+    "realTensorRtEngineExecution": true,
+    "gpuReadbackValidated": true,
+    "realModelAccuracyProof": false,
+    "packageConsumerRuntimeProof": false,
+    "publicPackageProof": false,
+    "linuxRuntimeProof": false,
+    "postPublishProof": false,
+    "ownerReleaseAcceptance": false,
+    "performsPublish": false,
+    "uploadsVendorRuntime": false
+  }
+}

@@ -10,6 +10,8 @@ This sample builds a small explicit-batch identity network directly in C# and de
 - tensor binding
 - enqueue and output readback
 
+The sample creates its Identity network in C# memory. It does not download a model and does not require ONNX conversion.
+
 Run from the repository root with development probing enabled:
 
 ```powershell
@@ -19,7 +21,7 @@ $env:JYPPX_ENABLE_DEVELOPMENT_PROBING = "1"
 Run:
 
 ```powershell
-dotnet .\samples\InferenceBindings\bin\Debug\net8.0\InferenceBindings.dll --tensor-rt-line 10 --batch 2
+dotnet .\samples\InferenceBindings\bin\Release\net8.0\InferenceBindings.dll --tensor-rt-line 10 --batch 2
 ```
 
 Expected evidence includes:
@@ -28,3 +30,5 @@ Expected evidence includes:
 - `Readiness Ready=True Bound=True`
 - `Execution ... OutputMatch=True`
 - `InferenceBindings Passed=True`
+
+The complete Chinese walkthrough, real Windows Terminal screenshot, and runtime evidence are available in [使用 TensorRtSharp4.0 管理推理输入、显存绑定与 GPU 输出读回](../../docs/articles/zh-cn/inference-bindings-tutorial.md).
