@@ -230,6 +230,8 @@
     href: articles/zh-cn/tensorrtexec-int8-calibration-owner-field-guide.md
   - name: YoloVision YOLOv8 Detection Real Asset Tutorial
     href: articles/zh-cn/yolovision-yolov8-det-real-asset-tutorial.md
+  - name: YoloVision YOLOv8n Detection Local Package Consumer Tutorial
+    href: articles/zh-cn/yolovision-yolov8n-det-local-package-consumer-tutorial.md
   - name: YoloVision YOLOv8 Segmentation Real Asset Tutorial
     href: articles/zh-cn/yolovision-yolov8-seg-real-asset-tutorial.md
   - name: YoloVision YOLOv8 Segmentation Local Package Consumer Tutorial
@@ -248,6 +250,8 @@
     href: articles/zh-cn/yolovision-yolov8n-obb-local-package-consumer-tutorial.md
   - name: Demo Model Acquisition And ONNX Conversion
     href: articles/zh-cn/demo-model-acquisition-and-onnx-conversion.md
+  - name: Chinese Article Classification And Completeness
+    href: articles/zh-cn/README.md
   - name: Sample Asset Manifest Guide
     href: articles/zh-cn/sample-asset-manifest-guide.md
   - name: Sample Asset Acquisition Plan

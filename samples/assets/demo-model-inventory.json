@@ -92,9 +92,11 @@
       },
       "articles": [
         "docs/articles/zh-cn/demo-model-acquisition-and-onnx-conversion.md",
-        "docs/articles/zh-cn/yolovision-detection-yolov8n-download-export-run.md"
+        "docs/articles/zh-cn/yolovision-detection-yolov8n-download-export-run.md",
+        "docs/articles/zh-cn/yolovision-yolov8n-det-local-package-consumer-tutorial.md"
       ],
-      "runtimeEvidence": "samples/assets/yolovision-yolov8n-det-real-model-runtime-evidence.json"
+      "runtimeEvidence": "samples/assets/yolovision-yolov8n-det-real-model-runtime-evidence.json",
+      "localPackageConsumerEvidence": "samples/assets/yolovision-yolov8n-det-local-package-consumer-runtime-evidence.json"
     },
     {
       "id": "yolovision-yolov10n-detection-v1.1",

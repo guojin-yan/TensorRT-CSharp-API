@@ -135,6 +135,8 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Acquire-TorchVisionLrasppOff
 
 `eng/Test-YoloVisionObbLocalPackageConsumer.ps1` runs the official YOLOv8n-obb graph through the isolated three-package path. `yolovision-yolov8n-obb-local-package-consumer-runtime-evidence.json` records byte-identical C# preprocessing, all 430,080 raw comparisons, 40 independent ship OBB comparisons with rotated IoU and angle errors, a fail-closed single-value negative, and restored-package hash equality. The ONNX remains in the outer `models` directory and is not uploaded.
 
+`eng/Test-YoloVisionDetectionLocalPackageConsumer.ps1` runs the official YOLOv8n detection graph through the isolated three-package path. `yolovision-yolov8n-det-local-package-consumer-runtime-evidence.json` records byte-identical C# preprocessing, all 705,600 raw comparisons, four person and one bus comparison with source-space box IoU, a fail-closed single-value negative, and restored-package hash equality. The ONNX remains in the outer `models` directory for the future Model Zoo and is not uploaded.
+
 Recommended local names:
 
 | Sample | Local files |

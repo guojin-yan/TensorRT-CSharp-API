@@ -9,7 +9,7 @@ param(
   [string]$RuntimePackageKey = "win-x64-trt10.11-cuda12.9-cudnn9.22",
   [string]$BridgePackageId,
   [ValidateSet("8", "10", "11")][string]$TensorRtLine,
-  [ValidateSet("yolox-detection", "yolov8-segmentation", "torchvision-lraspp-semantic", "yolov8-classification", "yolov8-pose", "yolov8-obb")][string]$Scenario = "yolox-detection",
+  [ValidateSet("yolox-detection", "yolov8-detection", "yolov8-segmentation", "torchvision-lraspp-semantic", "yolov8-classification", "yolov8-pose", "yolov8-obb")][string]$Scenario = "yolox-detection",
   [string]$ModelPath,
   [string]$ModelWeightsPath,
   [string]$LabelsPath,
@@ -391,7 +391,8 @@ $isSemanticScenario = [string]::Equals($Scenario, "torchvision-lraspp-semantic",
 $isClassificationScenario = [string]::Equals($Scenario, "yolov8-classification", [StringComparison]::Ordinal)
 $isPoseScenario = [string]::Equals($Scenario, "yolov8-pose", [StringComparison]::Ordinal)
 $isObbScenario = [string]::Equals($Scenario, "yolov8-obb", [StringComparison]::Ordinal)
-$scenarioSlug = if ($isSegmentationScenario) { "yolov8n-seg" } elseif ($isSemanticScenario) { "lraspp-semantic" } elseif ($isClassificationScenario) { "yolov8n-cls" } elseif ($isPoseScenario) { "yolov8n-pose" } elseif ($isObbScenario) { "yolov8n-obb" } else { "yolox" }
+$isOfficialDetectionScenario = [string]::Equals($Scenario, "yolov8-detection", [StringComparison]::Ordinal)
+$scenarioSlug = if ($isSegmentationScenario) { "yolov8n-seg" } elseif ($isSemanticScenario) { "lraspp-semantic" } elseif ($isClassificationScenario) { "yolov8n-cls" } elseif ($isPoseScenario) { "yolov8n-pose" } elseif ($isObbScenario) { "yolov8n-obb" } elseif ($isOfficialDetectionScenario) { "yolov8n-det" } else { "yolox" }
 
 $resolvedRuntimeRoots = $null
 if ([string]::IsNullOrWhiteSpace($TensorRtRoot) -or
@@ -426,6 +427,9 @@ elseif ($isPoseScenario) {
 elseif ($isObbScenario) {
   Join-Path $outerRoot "consumer-workspaces\yolovision-yolov8n-obb-local-package-trt$TensorRtLine"
 }
+elseif ($isOfficialDetectionScenario) {
+  Join-Path $outerRoot "consumer-workspaces\yolovision-yolov8n-det-local-package-trt$TensorRtLine"
+}
 else {
   Join-Path $outerRoot "consumer-workspaces\yolovision-yolox-local-package-trt$TensorRtLine"
 }
@@ -449,6 +453,9 @@ elseif ($isPoseScenario) {
 elseif ($isObbScenario) {
   Join-Path $outerRoot "models\YoloVision\OrientedBoundingBox\yolov8n-obb-ultralytics-v8.3.0\yolov8n-obb.onnx"
 }
+elseif ($isOfficialDetectionScenario) {
+  Join-Path $outerRoot "models\YoloVision\Detection\yolov8n-ultralytics-v8.3.0\yolov8n.onnx"
+}
 else {
   Join-Path $outerRoot "downloads\yolox-apache\source\yolox_s.onnx"
 }
@@ -461,6 +468,9 @@ elseif ($isClassificationScenario) {
 }
 elseif ($isObbScenario) {
   Join-Path $outerRoot "downloads\yolov8n-obb-ultralytics-v8.3.0\derived\dota.names"
+}
+elseif ($isOfficialDetectionScenario) {
+  Join-Path $outerRoot "downloads\yolov8n-det-ultralytics-v8.3.0\derived\coco.names"
 }
 else {
   Join-Path $outerRoot "downloads\yolox-apache\derived\coco.names"
@@ -476,6 +486,9 @@ elseif ($isPoseScenario) {
 }
 elseif ($isObbScenario) {
   Join-Path $outerRoot "downloads\yolov8n-obb-ultralytics-v8.3.0\derived\boats.ppm"
+}
+elseif ($isOfficialDetectionScenario) {
+  Join-Path $outerRoot "downloads\yolov8n-det-ultralytics-v8.3.0\derived\bus.ppm"
 }
 else {
   Join-Path $outerRoot "downloads\yolox-apache\derived\dog.ppm"
@@ -525,6 +538,17 @@ elseif ($isObbScenario) {
   $defaultPythonPath = Join-Path $env:USERPROFILE ".conda\envs\ultralytics\python.exe"
   $PythonPath = Resolve-PathValue -Value $PythonPath -DefaultValue $defaultPythonPath -RelativeRoot $outerRoot
 }
+elseif ($isOfficialDetectionScenario) {
+  $officialDetectionRoot = Join-Path $outerRoot "downloads\yolov8n-det-ultralytics-v8.3.0"
+  $ModelWeightsPath = Resolve-PathValue -Value $ModelWeightsPath -DefaultValue (Join-Path $officialDetectionRoot "source\yolov8n.pt") -RelativeRoot $outerRoot
+  $ReferenceOutput0Path = Resolve-PathValue -Value $ReferenceOutput0Path -DefaultValue (Join-Path $officialDetectionRoot "reports\independent-reference\output0.reference.json") -RelativeRoot $outerRoot
+  $ReferenceInputTensorPath = Resolve-PathValue -Value $ReferenceInputTensorPath -DefaultValue (Join-Path $officialDetectionRoot "runtime\bus-csharp-letterbox-1x3x640x640.fp32.bin") -RelativeRoot $outerRoot
+  $officialDetectionSourceImagePath = Join-Path $officialDetectionRoot "source\bus.jpg"
+  $officialDetectionCocoYamlPath = Join-Path $officialDetectionRoot "source\coco.yaml"
+  $officialDetectionPinnedIndependentReferencePath = Join-Path $officialDetectionRoot "reports\independent-reference\ultralytics-pytorch-reference.json"
+  $defaultPythonPath = Join-Path $env:USERPROFILE ".conda\envs\ultralytics\python.exe"
+  $PythonPath = Resolve-PathValue -Value $PythonPath -DefaultValue $defaultPythonPath -RelativeRoot $outerRoot
+}
 $TensorRtRoot = Resolve-PathValue -Value $TensorRtRoot -DefaultValue $defaultTensorRtRoot -RelativeRoot $outerRoot
 $TensorRtRuntimeRoot = Resolve-PathValue -Value $TensorRtRuntimeRoot -DefaultValue $TensorRtRoot -RelativeRoot $outerRoot
 $CudaRoot = Resolve-PathValue -Value $CudaRoot -DefaultValue $defaultCudaRoot -RelativeRoot $outerRoot
@@ -550,6 +574,18 @@ if ($isSegmentationScenario) {
     @{ Path = $ModelWeightsPath; Description = "YOLOv8 segmentation weights" },
     @{ Path = $ReferenceOutput0Path; Description = "YOLOv8 output0 reference" },
     @{ Path = $ReferenceOutput1Path; Description = "YOLOv8 output1 reference" }
+  )) {
+    Assert-NonCDrivePath -Path $item.Path -Description $item.Description
+  }
+}
+elseif ($isOfficialDetectionScenario) {
+  foreach ($item in @(
+    @{ Path = $ModelWeightsPath; Description = "YOLOv8n detection source weights" },
+    @{ Path = $ReferenceOutput0Path; Description = "YOLOv8n detection output0 reference" },
+    @{ Path = $ReferenceInputTensorPath; Description = "YOLOv8n detection authoritative input tensor" },
+    @{ Path = $officialDetectionSourceImagePath; Description = "YOLOv8n detection source image" },
+    @{ Path = $officialDetectionCocoYamlPath; Description = "YOLOv8n detection COCO YAML" },
+    @{ Path = $officialDetectionPinnedIndependentReferencePath; Description = "YOLOv8n detection pinned independent reference" }
   )) {
     Assert-NonCDrivePath -Path $item.Path -Description $item.Description
   }
@@ -610,6 +646,9 @@ elseif ($isPoseScenario) {
 elseif ($isObbScenario) {
   $requiredPaths += @($ModelWeightsPath, $ReferenceOutput0Path, $ReferenceInputTensorPath, $obbSourceImagePath, $obbPinnedIndependentReferencePath, $PythonPath)
 }
+elseif ($isOfficialDetectionScenario) {
+  $requiredPaths += @($ModelWeightsPath, $ReferenceOutput0Path, $ReferenceInputTensorPath, $officialDetectionSourceImagePath, $officialDetectionCocoYamlPath, $officialDetectionPinnedIndependentReferencePath, $PythonPath)
+}
 foreach ($requiredPath in $requiredPaths) {
   if (-not (Test-Path -LiteralPath $requiredPath)) {
     throw "Required local dependency does not exist: $requiredPath"
@@ -658,6 +697,17 @@ elseif ($isObbScenario) {
   Assert-FileSha256 -Path $ImagePath -ExpectedSha256 "9156edd731c3dcc7baaa59d93d0753c5098003c6bffc5eecaca1087713d07c76" -Description "YOLOv8n-obb boats PPM image"
   Assert-FileSha256 -Path $obbSourceImagePath -ExpectedSha256 "8c5ada657cf8110a9f8aaac954c1dd96cde0187315b581276c32b0d1863e756f" -Description "YOLOv8n-obb boats source image"
   Assert-FileSha256 -Path $obbPinnedIndependentReferencePath -ExpectedSha256 "97e777e1bcecec7fdb3b15e8d4d1e34468505947522c8881c435b484afc10045" -Description "Pinned Ultralytics OBB reference"
+}
+elseif ($isOfficialDetectionScenario) {
+  Assert-FileSha256 -Path $ModelPath -ExpectedSha256 "db28a49ffbb0425f39ae56252e7e0b43d06b357416c7da58872e285560b4221e" -Description "YOLOv8n detection ONNX"
+  Assert-FileSha256 -Path $ModelWeightsPath -ExpectedSha256 "f59b3d833e2ff32e194b5bb8e08d211dc7c5bdf144b90d2c8412c47ccfc83b36" -Description "YOLOv8n detection weights"
+  Assert-FileSha256 -Path $ReferenceOutput0Path -ExpectedSha256 "6b7d8acb790fde1d41aa503e8d6a09ead9e4ea8e447f503b8fddab998c7387d6" -Description "YOLOv8n detection output0 reference"
+  Assert-FileSha256 -Path $ReferenceInputTensorPath -ExpectedSha256 "46a0278967f1230ef8db59b0b8311a3aba3dce45233f1ba68821418ae02a574d" -Description "YOLOv8n detection authoritative input tensor"
+  Assert-FileSha256 -Path $LabelsPath -ExpectedSha256 "bd17f1ee35d5f3c862a4894605855abbb9dda4b0621fdb0ac4c2c8c7bb7e730a" -Description "YOLOv8n detection COCO labels"
+  Assert-FileSha256 -Path $ImagePath -ExpectedSha256 "6cdb4b6728a36516826f9adb9387774a6b5db0a49837d515c9045324e04e8688" -Description "YOLOv8n detection bus PPM image"
+  Assert-FileSha256 -Path $officialDetectionSourceImagePath -ExpectedSha256 "c02019c4979c191eb739ddd944445ef408dad5679acab6fd520ef9d434bfbc63" -Description "YOLOv8n detection bus source image"
+  Assert-FileSha256 -Path $officialDetectionCocoYamlPath -ExpectedSha256 "bd6f98a2e18775c39a4d5214080c87fcb163d367c18a2fcf2609371bab00c0b8" -Description "YOLOv8n detection COCO YAML"
+  Assert-FileSha256 -Path $officialDetectionPinnedIndependentReferencePath -ExpectedSha256 "eae23c95dafee3904fb8adc519e90045929491ccbea613a32ed69f2290e405c0" -Description "Pinned Ultralytics detection reference"
 }
 
 $managedPackage = Find-Package -Directory $ManagedPackageDirectory -PackageId "JYPPX.TensorRT.CSharp.API" -ExpectedVersion $PackageVersion
@@ -782,7 +832,7 @@ if ($nativeBridgePaths.Count -ne 1) {
   throw "Expected one copied native bridge in consumer output, found $($nativeBridgePaths.Count)."
 }
 
-$tensorFileName = if ($isSegmentationScenario) { "dog-yolov8n-seg.fp32.bin" } elseif ($isSemanticScenario) { "dog-lraspp-semantic.fp32.bin" } elseif ($isClassificationScenario) { "bus-yolov8n-cls.fp32.bin" } elseif ($isPoseScenario) { "bus-yolov8n-pose.fp32.bin" } elseif ($isObbScenario) { "boats-yolov8n-obb.fp32.bin" } else { "dog-yolox-s.fp32.bin" }
+$tensorFileName = if ($isSegmentationScenario) { "dog-yolov8n-seg.fp32.bin" } elseif ($isSemanticScenario) { "dog-lraspp-semantic.fp32.bin" } elseif ($isClassificationScenario) { "bus-yolov8n-cls.fp32.bin" } elseif ($isPoseScenario) { "bus-yolov8n-pose.fp32.bin" } elseif ($isObbScenario) { "boats-yolov8n-obb.fp32.bin" } elseif ($isOfficialDetectionScenario) { "bus-yolov8n-det.fp32.bin" } else { "dog-yolox-s.fp32.bin" }
 $tensorPath = if ($isClassificationScenario) { $ReferenceInputTensorPath } else { Join-Path $runOutput $tensorFileName }
 $outputJsonPath = Join-Path $runOutput "yolovision-output.json"
 $visualizationPath = Join-Path $runOutput "yolovision-output.svg"
@@ -873,6 +923,33 @@ elseif ($isObbScenario) {
     "--angle-radians",
     "--reference-outputs", "output0:$ReferenceOutput0Path",
     "--reference-abs-tolerance", "4.25",
+    "--reference-rel-tolerance", "0.05"
+  )
+}
+elseif ($isOfficialDetectionScenario) {
+  $runArguments = @(
+    $consumerAssemblyPath,
+    "--model", $ModelPath,
+    "--labels", $LabelsPath,
+    "--image", $ImagePath,
+    "--preprocessed-output", $tensorPath,
+    "--output-json", $outputJsonPath,
+    "--visualization", $visualizationPath,
+    "--input-shape", "1x3x640x640",
+    "--input-name", "images",
+    "--output-name", "output0",
+    "--tensor-rt-line", $TensorRtLine,
+    "--family", "v8",
+    "--task", "det",
+    "--class-count", "80",
+    "--layout", "channels-first",
+    "--has-objectness", "false",
+    "--nms-mode", "class-aware",
+    "--confidence", "0.25",
+    "--iou-threshold", "0.45",
+    "--top-k", "10",
+    "--reference-outputs", "output0:$ReferenceOutput0Path",
+    "--reference-abs-tolerance", "0.02",
     "--reference-rel-tolerance", "0.05"
   )
 }
@@ -1107,6 +1184,13 @@ if ($isSegmentationScenario) {
     throw "YOLOv8 segmentation package consumer predictions must be dog, bicycle, truck, and car exactly once. Actual='$($actualClasses -join ',')'."
   }
 }
+elseif ($isOfficialDetectionScenario) {
+  $expectedClasses = @("person", "person", "person", "bus", "person")
+  $actualClasses = @($predictions | ForEach-Object { $_.className })
+  if ($predictions.Count -ne 5 -or ($actualClasses -join ',') -ne ($expectedClasses -join ',')) {
+    throw "YOLOv8n detection package consumer predictions must be four persons and one bus in the canonical order. Actual='$($actualClasses -join ',')'."
+  }
+}
 $elapsedMilliseconds = 0.0
 if ($runResult.Stdout -match 'Execution .* ElapsedMs=(?<elapsed>[0-9.]+)') {
   $elapsedMilliseconds = [double]::Parse($Matches.elapsed, [Globalization.CultureInfo]::InvariantCulture)
@@ -1221,6 +1305,39 @@ elseif ($isObbScenario) {
   if ([string]$yoloOutputReport.input.preprocessedTensor.sha256 -ne "c56c027619088bce94f9160a3f602b4ad81fe323001867b1ee456100040fec6e" -or
       [long]$yoloOutputReport.input.preprocessedTensor.elementCount -ne 3145728) {
     throw "YOLOv8n-obb C# preprocessing tensor does not match the authoritative input tensor."
+  }
+}
+elseif ($isOfficialDetectionScenario) {
+  $actualOutputs = @($yoloOutputReport.outputs)
+  if ($actualOutputs.Count -ne 1 -or [string]$actualOutputs[0].name -ne "output0" -or
+      (@($actualOutputs[0].shape) -join 'x') -ne "1x84x8400") {
+    throw "YOLOv8n detection output report must contain output0:[1,84,8400]."
+  }
+  if (-not $yoloOutputReport.referenceValidation.requested -or
+      -not $yoloOutputReport.referenceValidation.completed -or
+      -not $yoloOutputReport.referenceValidation.passed) {
+    throw "YOLOv8n detection raw tensor reference validation did not pass."
+  }
+  $referenceComparisons = @($yoloOutputReport.referenceValidation.tensorComparisons)
+  if ($referenceComparisons.Count -ne 1 -or
+      [long]$referenceComparisons[0].comparedElementCount -ne 705600 -or
+      [long]$referenceComparisons[0].mismatchCount -ne 0) {
+    throw "YOLOv8n detection raw tensor reference validation must compare 705,600 values with zero mismatches."
+  }
+  $detectionPredictions = @($yoloOutputReport.predictions | Where-Object { [string]$_.task -eq "det" })
+  $actualDetectionClasses = @($detectionPredictions | ForEach-Object { [string]$_.className })
+  if ($detectionPredictions.Count -ne 5 -or ($actualDetectionClasses -join ',') -ne "person,person,person,bus,person") {
+    throw "YOLOv8n detection output report must contain four persons and one bus in the canonical order."
+  }
+  if (-not [bool]$yoloOutputReport.postprocess.applyNms -or
+      [string]$yoloOutputReport.postprocess.nmsMode -ne "ClassAware" -or
+      [string]$yoloOutputReport.postprocess.layout -ne "ChannelsFirst" -or
+      [int]$yoloOutputReport.postprocess.classCount -ne 80) {
+    throw "YOLOv8n detection output report must declare 80 classes, class-aware NMS, and channels-first layout."
+  }
+  if ([string]$yoloOutputReport.input.preprocessedTensor.sha256 -ne "46a0278967f1230ef8db59b0b8311a3aba3dce45233f1ba68821418ae02a574d" -or
+      [long]$yoloOutputReport.input.preprocessedTensor.elementCount -ne 1228800) {
+    throw "YOLOv8n detection C# preprocessing tensor does not match the authoritative input tensor."
   }
 }
 elseif ($isSemanticScenario) {
@@ -1639,6 +1756,96 @@ elseif ($isObbScenario) {
   if ($controlledReferenceComparisons.Count -ne 1 -or [long]$controlledReferenceComparisons[0].mismatchCount -ne 1 -or
       [long]$controlledReferenceComparisons[0].firstMismatchIndex -ne 0 -or $controlledReferenceReport.referenceValidation.passed) {
     throw "Controlled OBB raw-reference mutation did not produce one mismatch at index zero."
+  }
+  Copy-Item -LiteralPath $controlledReferenceOutputPath -Destination (Join-Path $ReportDirectory "controlled-reference-output.json") -Force
+}
+elseif ($isOfficialDetectionScenario) {
+  Assert-FileSha256 -Path $tensorPath -ExpectedSha256 "46a0278967f1230ef8db59b0b8311a3aba3dce45233f1ba68821418ae02a574d" -Description "YOLOv8n detection generated input tensor"
+
+  $independentDirectory = Join-Path $ReportDirectory "independent-detection-reference"
+  if (Test-Path -LiteralPath $independentDirectory) {
+    Remove-Item -LiteralPath $independentDirectory -Recurse -Force
+  }
+  New-Item -ItemType Directory -Path $independentDirectory -Force | Out-Null
+  $independentArguments = @(
+    (Join-Path $RepositoryRoot "eng\Invoke-YoloVisionDetectionReference.py"),
+    "--weights", $ModelWeightsPath,
+    "--coco-yaml", $officialDetectionCocoYamlPath,
+    "--image", $officialDetectionSourceImagePath,
+    "--onnx", $ModelPath,
+    "--output-directory", $independentDirectory,
+    "--csharp-tensor", $tensorPath,
+    "--actual-output", $copiedOutputJson,
+    "--confidence", "0.25",
+    "--iou-threshold", "0.45",
+    "--max-detections", "10",
+    "--maximum-score-error", "0.01",
+    "--minimum-box-iou", "0.995"
+  )
+  $independentRuntimeResult = Invoke-CapturedProcess -FileName $PythonPath -Arguments $independentArguments -WorkingDirectory $RepositoryRoot
+  $independentStdoutPath = Join-Path $ReportDirectory "independent-detection.stdout.log"
+  $independentStderrPath = Join-Path $ReportDirectory "independent-detection.stderr.log"
+  [IO.File]::WriteAllText($independentStdoutPath, $independentRuntimeResult.Stdout, $utf8)
+  [IO.File]::WriteAllText($independentStderrPath, $independentRuntimeResult.Stderr, $utf8)
+  if ($independentRuntimeResult.ExitCode -ne 0) {
+    throw "Independent Ultralytics/PyTorch detection comparison failed with exit code $($independentRuntimeResult.ExitCode). See $independentStderrPath"
+  }
+  $independentRawReferencePath = Join-Path $independentDirectory "output0.reference.json"
+  $independentReferencePath = Join-Path $independentDirectory "ultralytics-pytorch-reference.json"
+  $independentComparisonPath = Join-Path $independentDirectory "yolovision-independent-comparison.json"
+  Assert-FileSha256 -Path $independentRawReferencePath -ExpectedSha256 "6b7d8acb790fde1d41aa503e8d6a09ead9e4ea8e447f503b8fddab998c7387d6" -Description "Regenerated YOLOv8n detection raw reference"
+  $independentReference = Get-Content -LiteralPath $independentReferencePath -Raw -Encoding utf8 | ConvertFrom-Json
+  $pinnedIndependentReference = Get-Content -LiteralPath $officialDetectionPinnedIndependentReferencePath -Raw -Encoding utf8 | ConvertFrom-Json
+  $independentComparison = Get-Content -LiteralPath $independentComparisonPath -Raw -Encoding utf8 | ConvertFrom-Json
+  $regeneratedPredictionJson = @($independentReference.predictions) | ConvertTo-Json -Depth 12 -Compress
+  $pinnedPredictionJson = @($pinnedIndependentReference.predictions) | ConvertTo-Json -Depth 12 -Compress
+  if (-not [string]::Equals($regeneratedPredictionJson, $pinnedPredictionJson, [StringComparison]::Ordinal) -or
+      [string]$independentReference.annotatedImage.sha256 -ne "909011789107f1573a75efa0ecd84dbc92ffd032cc2936f22f0319bede5c1dd3") {
+    throw "Regenerated Ultralytics/PyTorch detection predictions or annotated image do not match the pinned independent reference."
+  }
+  if (-not $independentComparison.completed -or -not $independentComparison.passed -or
+      [int]$independentComparison.referencePredictionCount -ne 5 -or
+      [int]$independentComparison.actualPredictionCount -ne 5 -or
+      @($independentComparison.comparisons | Where-Object { -not $_.passed }).Count -ne 0) {
+    throw "Independent Ultralytics/PyTorch detection comparison did not pass all five predictions."
+  }
+
+  $controlledReferenceDirectory = Join-Path $runOutput "controlled-reference-negative"
+  New-Item -ItemType Directory -Path $controlledReferenceDirectory -Force | Out-Null
+  $controlledReferencePath = Join-Path $controlledReferenceDirectory "output0.single-value-mutated.reference.json"
+  $mutationResult = Invoke-CapturedProcess -FileName $PythonPath -Arguments @(
+    (Join-Path $RepositoryRoot "eng\New-YoloVisionReferenceMutation.py"),
+    "--input", $ReferenceOutput0Path,
+    "--output", $controlledReferencePath,
+    "--index", "0",
+    "--delta", "125"
+  ) -WorkingDirectory $RepositoryRoot
+  $mutationLogPath = Join-Path $ReportDirectory "controlled-reference-mutation.log"
+  [IO.File]::WriteAllText($mutationLogPath, ($mutationResult.Stdout + $mutationResult.Stderr), $utf8)
+  if ($mutationResult.ExitCode -ne 0 -or -not (Test-Path -LiteralPath $controlledReferencePath -PathType Leaf)) {
+    throw "Failed to create the controlled detection raw-reference mutation. See $mutationLogPath"
+  }
+  $controlledReferenceMutationSha256 = (Get-FileHash -LiteralPath $controlledReferencePath -Algorithm SHA256).Hash.ToLowerInvariant()
+
+  $controlledReferenceArguments = Set-NamedArgumentValue -Arguments $runArguments -Name "--reference-outputs" -Value "output0:$controlledReferencePath"
+  $controlledReferenceArguments = Set-NamedArgumentValue -Arguments $controlledReferenceArguments -Name "--output-json" -Value (Join-Path $controlledReferenceDirectory "yolovision-output.json")
+  $controlledReferenceArguments = Set-NamedArgumentValue -Arguments $controlledReferenceArguments -Name "--visualization" -Value (Join-Path $controlledReferenceDirectory "yolovision-output.svg")
+  $controlledReferenceResult = Invoke-CapturedProcess -FileName "dotnet" -Arguments $controlledReferenceArguments -WorkingDirectory $workspace -Environment $runEnvironment -EnvironmentVariablesToRemove @("JYPPX_NATIVE_BRIDGE_PATH")
+  $controlledReferenceStdoutPath = Join-Path $ReportDirectory "controlled-reference.stdout.log"
+  $controlledReferenceStderrPath = Join-Path $ReportDirectory "controlled-reference.stderr.log"
+  [IO.File]::WriteAllText($controlledReferenceStdoutPath, $controlledReferenceResult.Stdout, $utf8)
+  [IO.File]::WriteAllText($controlledReferenceStderrPath, $controlledReferenceResult.Stderr, $utf8)
+  $controlledReferenceOutputPath = Join-Path $controlledReferenceDirectory "yolovision-output.json"
+  if ($controlledReferenceResult.ExitCode -ne 1 -or
+      $controlledReferenceResult.Stdout.IndexOf("YoloVision Passed=False", [StringComparison]::Ordinal) -lt 0 -or
+      -not (Test-Path -LiteralPath $controlledReferenceOutputPath -PathType Leaf)) {
+    throw "Controlled detection raw-reference mutation must fail closed and emit its diagnostic report."
+  }
+  $controlledReferenceReport = Get-Content -LiteralPath $controlledReferenceOutputPath -Raw -Encoding utf8 | ConvertFrom-Json
+  $controlledReferenceComparisons = @($controlledReferenceReport.referenceValidation.tensorComparisons)
+  if ($controlledReferenceComparisons.Count -ne 1 -or [long]$controlledReferenceComparisons[0].mismatchCount -ne 1 -or
+      [long]$controlledReferenceComparisons[0].firstMismatchIndex -ne 0 -or $controlledReferenceReport.referenceValidation.passed) {
+    throw "Controlled detection raw-reference mutation did not produce one mismatch at index zero."
   }
   Copy-Item -LiteralPath $controlledReferenceOutputPath -Destination (Join-Path $ReportDirectory "controlled-reference-output.json") -Force
 }
@@ -2301,13 +2508,112 @@ if ($isObbScenario) {
   }
 }
 
-$reportRecordKind = if ($isSegmentationScenario) { "yolovision-yolov8n-seg-local-package-consumer-runtime" } elseif ($isSemanticScenario) { "yolovision-lraspp-semantic-local-package-consumer-runtime" } elseif ($isClassificationScenario) { "yolovision-yolov8n-cls-local-package-consumer-runtime" } elseif ($isPoseScenario) { "yolovision-yolov8n-pose-local-package-consumer-runtime" } elseif ($isObbScenario) { "yolovision-yolov8n-obb-local-package-consumer-runtime" } else { "yolovision-yolox-local-package-consumer-runtime" }
-$reportFileName = if ($isSegmentationScenario) { "yolov8n-seg-local-package-consumer-runtime.json" } elseif ($isSemanticScenario) { "lraspp-semantic-local-package-consumer-runtime.json" } elseif ($isClassificationScenario) { "yolov8n-cls-local-package-consumer-runtime.json" } elseif ($isPoseScenario) { "yolov8n-pose-local-package-consumer-runtime.json" } elseif ($isObbScenario) { "yolov8n-obb-local-package-consumer-runtime.json" } else { "yolox-local-package-consumer-runtime.json" }
-$reportTitle = if ($isSegmentationScenario) { "YOLOv8n-seg Local Package Consumer Runtime" } elseif ($isSemanticScenario) { "TorchVision LRASPP Semantic Local Package Consumer Runtime" } elseif ($isClassificationScenario) { "YOLOv8n-cls Local Package Consumer Runtime" } elseif ($isPoseScenario) { "YOLOv8n-pose Local Package Consumer Runtime" } elseif ($isObbScenario) { "YOLOv8n-obb Local Package Consumer Runtime" } else { "YOLOX Local Package Consumer Runtime" }
+$officialDetectionEvidence = $null
+if ($isOfficialDetectionScenario) {
+  $rawTensorComparison = $referenceComparisons[0]
+  $detectionComparisonSummaries = @(
+    foreach ($comparison in @($independentComparison.comparisons)) {
+      [pscustomobject][ordered]@{
+        referenceIndex = [int]$comparison.referenceIndex
+        actualIndex = [int]$comparison.actualIndex
+        classId = [int]$comparison.classId
+        className = [string]$comparison.className
+        boxIoU = [double]$comparison.boxIoU
+        scoreAbsoluteError = [double]$comparison.scoreAbsoluteError
+        passed = [bool]$comparison.passed
+      }
+    }
+  )
+  $officialDetectionEvidence = [pscustomobject][ordered]@{
+    modelContract = [pscustomobject][ordered]@{
+      input = [pscustomobject][ordered]@{
+        name = "images"
+        shape = @(1, 3, 640, 640)
+        dataType = "float32"
+        preprocess = "center-letterbox-640x640; RGB; NCHW; scale=1/255; fill=114"
+      }
+      outputs = @(
+        [pscustomobject][ordered]@{
+          name = "output0"
+          shape = @(1, 84, 8400)
+          role = "detection-rows"
+          boxChannelCount = 4
+          classCount = 80
+          hasObjectness = $false
+          layout = "channels-first"
+        }
+      )
+      postprocess = [pscustomobject][ordered]@{
+        confidenceThreshold = 0.25
+        iouThreshold = 0.45
+        topK = 10
+        applyNms = $true
+        nmsMode = "ClassAware"
+      }
+    }
+    preprocessingValidation = [pscustomobject][ordered]@{
+      tensorSha256 = $tensorSha256
+      authoritativeTensorSha256 = "46a0278967f1230ef8db59b0b8311a3aba3dce45233f1ba68821418ae02a574d"
+      elementCount = 1228800
+      matchesAuthoritativeTensor = $true
+      passed = $true
+    }
+    rawTensorReferenceValidation = [pscustomobject][ordered]@{
+      sourceClassification = [string]$rawTensorComparison.sourceClassification
+      absoluteTolerance = 0.02
+      relativeTolerance = 0.05
+      tensorCount = 1
+      comparedElementCount = [long]$rawTensorComparison.comparedElementCount
+      mismatchCount = [long]$rawTensorComparison.mismatchCount
+      tensor = [pscustomobject][ordered]@{
+        tensorName = [string]$rawTensorComparison.tensorName
+        actualShape = @($rawTensorComparison.actualShape)
+        referenceShape = @($rawTensorComparison.referenceShape)
+        maximumAbsoluteError = [double]$rawTensorComparison.maximumAbsoluteError
+        maximumRelativeError = [double]$rawTensorComparison.maximumRelativeError
+        referenceSha256 = [string]$rawTensorComparison.referenceSha256
+      }
+      completed = $true
+      passed = $true
+    }
+    independentPostprocessValidation = [pscustomobject][ordered]@{
+      sourceClassification = [string]$independentReference.sourceClassification
+      referenceFramework = [string]$independentReference.runtime.framework
+      ultralyticsVersion = [string]$independentReference.runtime.ultralyticsVersion
+      torchVersion = [string]$independentReference.runtime.torchVersion
+      referenceSha256 = (Get-FileHash -LiteralPath $independentReferencePath -Algorithm SHA256).Hash.ToLowerInvariant()
+      comparisonSha256 = (Get-FileHash -LiteralPath $independentComparisonPath -Algorithm SHA256).Hash.ToLowerInvariant()
+      thresholds = $independentComparison.thresholds
+      predictionCount = [int]$independentComparison.actualPredictionCount
+      minimumObservedBoxIoU = [double](($detectionComparisonSummaries | Measure-Object boxIoU -Minimum).Minimum)
+      maximumObservedScoreError = [double](($detectionComparisonSummaries | Measure-Object scoreAbsoluteError -Maximum).Maximum)
+      comparisons = $detectionComparisonSummaries
+      completed = [bool]$independentComparison.completed
+      passed = [bool]$independentComparison.passed
+    }
+    controlledRawReferenceValidation = [pscustomobject][ordered]@{
+      kind = "single-reference-value-mutation"
+      mutationIndex = 0
+      mutationDelta = 125.0
+      mutatedReferenceSha256 = $controlledReferenceMutationSha256
+      exitCode = $controlledReferenceResult.ExitCode
+      tensorName = [string]$controlledReferenceComparisons[0].tensorName
+      comparedElementCount = [long]$controlledReferenceComparisons[0].comparedElementCount
+      mismatchCount = [long]$controlledReferenceComparisons[0].mismatchCount
+      firstMismatchIndex = [long]$controlledReferenceComparisons[0].firstMismatchIndex
+      validationPassed = [bool]$controlledReferenceReport.referenceValidation.passed
+      failClosed = $true
+    }
+  }
+}
+
+$reportRecordKind = if ($isSegmentationScenario) { "yolovision-yolov8n-seg-local-package-consumer-runtime" } elseif ($isSemanticScenario) { "yolovision-lraspp-semantic-local-package-consumer-runtime" } elseif ($isClassificationScenario) { "yolovision-yolov8n-cls-local-package-consumer-runtime" } elseif ($isPoseScenario) { "yolovision-yolov8n-pose-local-package-consumer-runtime" } elseif ($isObbScenario) { "yolovision-yolov8n-obb-local-package-consumer-runtime" } elseif ($isOfficialDetectionScenario) { "yolovision-yolov8n-det-local-package-consumer-runtime" } else { "yolovision-yolox-local-package-consumer-runtime" }
+$reportFileName = if ($isSegmentationScenario) { "yolov8n-seg-local-package-consumer-runtime.json" } elseif ($isSemanticScenario) { "lraspp-semantic-local-package-consumer-runtime.json" } elseif ($isClassificationScenario) { "yolov8n-cls-local-package-consumer-runtime.json" } elseif ($isPoseScenario) { "yolov8n-pose-local-package-consumer-runtime.json" } elseif ($isObbScenario) { "yolov8n-obb-local-package-consumer-runtime.json" } elseif ($isOfficialDetectionScenario) { "yolov8n-det-local-package-consumer-runtime.json" } else { "yolox-local-package-consumer-runtime.json" }
+$reportTitle = if ($isSegmentationScenario) { "YOLOv8n-seg Local Package Consumer Runtime" } elseif ($isSemanticScenario) { "TorchVision LRASPP Semantic Local Package Consumer Runtime" } elseif ($isClassificationScenario) { "YOLOv8n-cls Local Package Consumer Runtime" } elseif ($isPoseScenario) { "YOLOv8n-pose Local Package Consumer Runtime" } elseif ($isObbScenario) { "YOLOv8n-obb Local Package Consumer Runtime" } elseif ($isOfficialDetectionScenario) { "YOLOv8n Detection Local Package Consumer Runtime" } else { "YOLOX Local Package Consumer Runtime" }
 $sourceCommit = (& git -C $RepositoryRoot rev-parse HEAD).Trim()
 
 $report = [pscustomobject][ordered]@{
-  schemaVersion = if ($isObbScenario) { 7 } elseif ($isPoseScenario) { 6 } elseif ($isClassificationScenario) { 5 } elseif ($isSemanticScenario) { 4 } elseif ($isSegmentationScenario) { 3 } else { 2 }
+  schemaVersion = if ($isOfficialDetectionScenario) { 8 } elseif ($isObbScenario) { 7 } elseif ($isPoseScenario) { 6 } elseif ($isClassificationScenario) { 5 } elseif ($isSemanticScenario) { 4 } elseif ($isSegmentationScenario) { 3 } else { 2 }
   recordKind = $reportRecordKind
   generatedAtUtc = [DateTime]::UtcNow.ToString("O")
   validationState = "passed-local-package-consumer-runtime"
@@ -2368,12 +2674,12 @@ $report = [pscustomobject][ordered]@{
     modelSha256 = (Get-FileHash -LiteralPath $ModelPath -Algorithm SHA256).Hash.ToLowerInvariant()
     labelsSha256 = (Get-FileHash -LiteralPath $LabelsPath -Algorithm SHA256).Hash.ToLowerInvariant()
     imageSha256 = (Get-FileHash -LiteralPath $ImagePath -Algorithm SHA256).Hash.ToLowerInvariant()
-    modelWeightsSha256 = if ($isSegmentationScenario -or $isSemanticScenario -or $isClassificationScenario -or $isPoseScenario -or $isObbScenario) { (Get-FileHash -LiteralPath $ModelWeightsPath -Algorithm SHA256).Hash.ToLowerInvariant() } else { $null }
-    referenceOutput0Sha256 = if ($isSegmentationScenario -or $isSemanticScenario -or $isClassificationScenario -or $isPoseScenario -or $isObbScenario) { (Get-FileHash -LiteralPath $ReferenceOutput0Path -Algorithm SHA256).Hash.ToLowerInvariant() } else { $null }
+    modelWeightsSha256 = if ($isSegmentationScenario -or $isSemanticScenario -or $isClassificationScenario -or $isPoseScenario -or $isObbScenario -or $isOfficialDetectionScenario) { (Get-FileHash -LiteralPath $ModelWeightsPath -Algorithm SHA256).Hash.ToLowerInvariant() } else { $null }
+    referenceOutput0Sha256 = if ($isSegmentationScenario -or $isSemanticScenario -or $isClassificationScenario -or $isPoseScenario -or $isObbScenario -or $isOfficialDetectionScenario) { (Get-FileHash -LiteralPath $ReferenceOutput0Path -Algorithm SHA256).Hash.ToLowerInvariant() } else { $null }
     referenceOutput1Sha256 = if ($isSegmentationScenario) { (Get-FileHash -LiteralPath $ReferenceOutput1Path -Algorithm SHA256).Hash.ToLowerInvariant() } else { $null }
     referenceClassIndexSha256 = if ($isSemanticScenario) { (Get-FileHash -LiteralPath $ReferenceClassIndexPath -Algorithm SHA256).Hash.ToLowerInvariant() } else { $null }
-    referenceInputTensorSha256 = if ($isClassificationScenario -or $isPoseScenario -or $isObbScenario) { (Get-FileHash -LiteralPath $ReferenceInputTensorPath -Algorithm SHA256).Hash.ToLowerInvariant() } else { $null }
-    sourceImageSha256 = if ($isPoseScenario) { (Get-FileHash -LiteralPath $poseSourceImagePath -Algorithm SHA256).Hash.ToLowerInvariant() } elseif ($isObbScenario) { (Get-FileHash -LiteralPath $obbSourceImagePath -Algorithm SHA256).Hash.ToLowerInvariant() } else { $null }
+    referenceInputTensorSha256 = if ($isClassificationScenario -or $isPoseScenario -or $isObbScenario -or $isOfficialDetectionScenario) { (Get-FileHash -LiteralPath $ReferenceInputTensorPath -Algorithm SHA256).Hash.ToLowerInvariant() } else { $null }
+    sourceImageSha256 = if ($isPoseScenario) { (Get-FileHash -LiteralPath $poseSourceImagePath -Algorithm SHA256).Hash.ToLowerInvariant() } elseif ($isObbScenario) { (Get-FileHash -LiteralPath $obbSourceImagePath -Algorithm SHA256).Hash.ToLowerInvariant() } elseif ($isOfficialDetectionScenario) { (Get-FileHash -LiteralPath $officialDetectionSourceImagePath -Algorithm SHA256).Hash.ToLowerInvariant() } else { $null }
     tensorLength = $tensorLength
     tensorSha256 = $tensorSha256
     assetsRemainOnEDrive = $true
@@ -2395,6 +2701,7 @@ $report = [pscustomobject][ordered]@{
   classification = $classificationEvidence
   pose = $poseEvidence
   obb = $obbEvidence
+  officialDetection = $officialDetectionEvidence
   host = [pscustomobject][ordered]@{
     os = [Runtime.InteropServices.RuntimeInformation]::OSDescription
     processArchitecture = [Runtime.InteropServices.RuntimeInformation]::ProcessArchitecture.ToString()
@@ -2441,8 +2748,8 @@ $markdown = @(
   "- package-consumer runtime proof: ``False``",
   "- can publish publicly: ``False``",
   "",
-  $(if ($isSegmentationScenario) { "- raw tensor values compared: ``$($segmentationEvidence.rawTensorReferenceValidation.comparedElementCount)``" } elseif ($isSemanticScenario) { "- raw tensor values compared: ``$($semanticEvidence.rawTensorReferenceValidation.comparedElementCount)``" } elseif ($isClassificationScenario) { "- raw tensor values compared: ``$($classificationEvidence.rawTensorReferenceValidation.comparedElementCount)``" } elseif ($isPoseScenario) { "- raw tensor values compared: ``$($poseEvidence.rawTensorReferenceValidation.comparedElementCount)``" } elseif ($isObbScenario) { "- raw tensor values compared: ``$($obbEvidence.rawTensorReferenceValidation.comparedElementCount)``" } else { $null }),
-  $(if ($isSegmentationScenario -or $isSemanticScenario -or $isClassificationScenario -or $isPoseScenario -or $isObbScenario) { "- raw tensor mismatches: ``0``" } else { $null }),
+  $(if ($isSegmentationScenario) { "- raw tensor values compared: ``$($segmentationEvidence.rawTensorReferenceValidation.comparedElementCount)``" } elseif ($isSemanticScenario) { "- raw tensor values compared: ``$($semanticEvidence.rawTensorReferenceValidation.comparedElementCount)``" } elseif ($isClassificationScenario) { "- raw tensor values compared: ``$($classificationEvidence.rawTensorReferenceValidation.comparedElementCount)``" } elseif ($isPoseScenario) { "- raw tensor values compared: ``$($poseEvidence.rawTensorReferenceValidation.comparedElementCount)``" } elseif ($isObbScenario) { "- raw tensor values compared: ``$($obbEvidence.rawTensorReferenceValidation.comparedElementCount)``" } elseif ($isOfficialDetectionScenario) { "- raw tensor values compared: ``$($officialDetectionEvidence.rawTensorReferenceValidation.comparedElementCount)``" } else { $null }),
+  $(if ($isSegmentationScenario -or $isSemanticScenario -or $isClassificationScenario -or $isPoseScenario -or $isObbScenario -or $isOfficialDetectionScenario) { "- raw tensor mismatches: ``0``" } else { $null }),
   $(if ($isSegmentationScenario) { "- independent mask comparison passed: ``True``" } else { $null }),
   $(if ($isSemanticScenario) { "- semantic class-index pixels compared: ``102400``" } else { $null }),
   $(if ($isSemanticScenario) { "- semantic class-index SHA256: ``$semanticClassIndexSha256``" } else { $null }),
@@ -2451,11 +2758,13 @@ $markdown = @(
   $(if ($isPoseScenario) { "- independent minimum box IoU: ``$($poseEvidence.independentPostprocessValidation.minimumObservedBoxIoU)``" } else { $null }),
   $(if ($isObbScenario) { "- OBB predictions / class: ``40 / ship``" } else { $null }),
   $(if ($isObbScenario) { "- independent minimum rotated IoU: ``$($obbEvidence.independentPostprocessValidation.minimumObservedRotatedIoU)``" } else { $null }),
-  $(if ($isSegmentationScenario -or $isSemanticScenario -or $isClassificationScenario -or $isPoseScenario -or $isObbScenario) { "- raw-reference negative exit: ``$($controlledReferenceResult.ExitCode)``" } else { $null }),
+  $(if ($isOfficialDetectionScenario) { "- detection predictions / classes: ``5 / 4 person + 1 bus``" } else { $null }),
+  $(if ($isOfficialDetectionScenario) { "- independent minimum box IoU: ``$($officialDetectionEvidence.independentPostprocessValidation.minimumObservedBoxIoU)``" } else { $null }),
+  $(if ($isSegmentationScenario -or $isSemanticScenario -or $isClassificationScenario -or $isPoseScenario -or $isObbScenario -or $isOfficialDetectionScenario) { "- raw-reference negative exit: ``$($controlledReferenceResult.ExitCode)``" } else { $null }),
   $(if ($isSegmentationScenario) { "- mask-integrity negative exit: ``$($controlledMaskResult.ExitCode)``" } else { $null }),
   $(if ($isSemanticScenario) { "- class-index-integrity negative exit: ``$($controlledSemanticArtifactResult.ExitCode)``" } else { $null }),
   "",
-  $(if ($isSegmentationScenario) { "This record proves a clean local-feed PackageReference restore/build/run with the pinned YOLOv8n-seg assets, two raw tensor references, source-image mask artifacts, an independent PyTorch comparison, and two fail-closed negatives." } elseif ($isSemanticScenario) { "This record proves a clean local-feed PackageReference restore/build/run with the official torchvision LRASPP assets, one raw tensor reference, a full-resolution semantic class-index artifact, and two fail-closed negatives." } elseif ($isClassificationScenario) { "This record proves a clean local-feed PackageReference restore/build/run with the official YOLOv8n-cls assets, all 1,000 probabilities, the independent Top-5 order, and a fail-closed raw-reference negative." } elseif ($isPoseScenario) { "This record proves a clean local-feed PackageReference restore/build/run with the official YOLOv8n-pose assets, all 470,400 raw values, four 17-keypoint poses, an independent PyTorch comparison, and a fail-closed raw-reference negative." } elseif ($isObbScenario) { "This record proves a clean local-feed PackageReference restore/build/run with the official YOLOv8n-obb assets, all 430,080 raw values, 40 ship oriented boxes, an independent PyTorch rotated-IoU comparison, and a fail-closed raw-reference negative." } else { "This record proves a clean local-feed PackageReference restore/build/run with the official YOLOX assets." }),
+  $(if ($isSegmentationScenario) { "This record proves a clean local-feed PackageReference restore/build/run with the pinned YOLOv8n-seg assets, two raw tensor references, source-image mask artifacts, an independent PyTorch comparison, and two fail-closed negatives." } elseif ($isSemanticScenario) { "This record proves a clean local-feed PackageReference restore/build/run with the official torchvision LRASPP assets, one raw tensor reference, a full-resolution semantic class-index artifact, and two fail-closed negatives." } elseif ($isClassificationScenario) { "This record proves a clean local-feed PackageReference restore/build/run with the official YOLOv8n-cls assets, all 1,000 probabilities, the independent Top-5 order, and a fail-closed raw-reference negative." } elseif ($isPoseScenario) { "This record proves a clean local-feed PackageReference restore/build/run with the official YOLOv8n-pose assets, all 470,400 raw values, four 17-keypoint poses, an independent PyTorch comparison, and a fail-closed raw-reference negative." } elseif ($isObbScenario) { "This record proves a clean local-feed PackageReference restore/build/run with the official YOLOv8n-obb assets, all 430,080 raw values, 40 ship oriented boxes, an independent PyTorch rotated-IoU comparison, and a fail-closed raw-reference negative." } elseif ($isOfficialDetectionScenario) { "This record proves a clean local-feed PackageReference restore/build/run with the official YOLOv8n detection assets, all 705,600 raw values, four person detections and one bus, an independent PyTorch box-IoU comparison, and a fail-closed raw-reference negative." } else { "This record proves a clean local-feed PackageReference restore/build/run with the official YOLOX assets." }),
   "It does not prove public-feed download, redistribution approval, post-publish verification, Owner release acceptance, or release closure."
 )
 $markdown | Set-Content -LiteralPath $markdownPath -Encoding utf8

@@ -15,7 +15,7 @@
 | YOLOv5 | documented | det / cls / seg | Ultralytics YOLOv5 release 或用户自训模型 | 使用官方 export.py 或等价导出，固定 opset、input size、dynamic axes | not-proof，等待 owner 资产 |
 | YOLOv6 | documented | det | Meituan YOLOv6 release 或用户自训模型 | 使用官方部署脚本导出 ONNX，记录 decode 方式和 NMS 位置 | not-proof |
 | YOLOv7 | documented | det / pose variants | WongKinYiu YOLOv7 release 或用户自训模型 | 导出时记录 end-to-end NMS 是否在图内 | not-proof |
-| YOLOv8 | source-tree real-model-runtime ready | det / cls / seg / obb / pose | Ultralytics YOLOv8 模型或用户自训模型 | `yolo export format=onnx`，记录 imgsz、dynamic、simplify、opset | 官方 YOLOv8n det/cls/seg/pose/obb source-tree proof；不替代 package-consumer proof |
+| YOLOv8 | source-tree + local-package-consumer-runtime ready | det / cls / seg / obb / pose | Ultralytics YOLOv8 模型或用户自训模型 | `yolo export format=onnx`，记录 imgsz、dynamic、simplify、opset | 官方 YOLOv8n det/cls/seg/pose/obb 已有源码树与本地三包运行证据；不替代 public-package proof |
 | YOLOv9 | documented | det / seg variants | YOLOv9 release 或用户自训模型 | 记录 dual branch/head 输出是否已简化 | not-proof |
 | YOLOv10 | source-tree real-model-runtime ready | det | THU-MIG YOLOv10 或用户自训模型 | `[1,N,6]` 使用 `--layout end2end`；其他输出必须记录真实 metadata | official YOLOv10n v1.1 source-tree proof；not package-consumer-runtime |
 | YOLOv11 | documented | det / cls / seg / obb / pose | Ultralytics YOLOv11 模型或用户自训模型 | 与 v8 类似，但必须记录实际导出命令和输出 tensor metadata | not-proof |
@@ -25,7 +25,7 @@
 
 | 任务 | Alias | 当前代码路径 | 输入要求 | 输出 metadata | 后处理边界 | Runtime proof 状态 |
 |---|---|---|---|---|---|---|
-| Detection | `det` | `DecodeEndToEnd`、`YoloEndToEndOutput`、`YoloSampleRunner.DecodeOutput` | `NCHW` float32 tensor，典型 `1x3x640x640` | output shape、layout、class count、objectness/column rule、NMS mode | raw head 使用应用侧 NMS；end-to-end 六列输出禁止二次 NMS | YOLOv10n/YOLOX source-tree proof ready；other families owner-action-required |
+| Detection | `det` | `DecodeEndToEnd`、`YoloEndToEndOutput`、`YoloSampleRunner.DecodeOutput` | `NCHW` float32 tensor，典型 `1x3x640x640` | output shape、layout、class count、objectness/column rule、NMS mode | raw head 使用应用侧 NMS；end-to-end 六列输出禁止二次 NMS | 官方 YOLOv8n 已有 source-tree + local-package-consumer-runtime；YOLOv10n/YOLOX 有 source-tree 证据；均非 public-package proof |
 | Classification | `cls` | `YoloSampleRunner.DecodeClassifications` | 默认 224 短边缩放 + 中心裁剪，labels 必须与输出 1000 类严格匹配 | score mode、tensor name、class count、top-k | `raw` 保持兼容，`logits` 稳定 softmax，`probabilities` 严格校验 | 官方 YOLOv8n-cls source-tree real-model-runtime；非 package-consumer proof |
 | Segmentation | `seg` | `YoloMaskComposer`、`DecodeSegmentationOutputs` | detection 输入 + mask proto metadata | boxes tensor、mask coefficient count、prototype tensor shape/layout | mask coefficient/prototype compose；crop/resize 由 owner 记录 | managed metadata ready；real model not-proof |
 | Oriented Bounding Box | `obb` | `YoloObbDecoder`、`DecodeEmbeddedObbOutput`、`DecodeObbOutputs` | 单 tensor 内嵌 angle 或 detection + angle 双 tensor | class count、angle 起点/独立 tensor role、degree/radian、layout | probabilistic-IoU rotated Fast-NMS，按 `SourceIndex` 对齐 angle | 官方 YOLOv8n-obb source-tree real-model-runtime + local-package-consumer-runtime；not public-package proof |

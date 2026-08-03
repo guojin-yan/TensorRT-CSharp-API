@@ -242,7 +242,7 @@ YOLOv8n detection、classification、segmentation、pose 与 OBB 的源码树真
 
 1. 为 semantic segmentation 选择许可证与输出合同明确的真实模型。
 2. 为 YOLOv5/v6/v7/v9/v11/v26 逐个记录实际输出 layout 差异，而不是仅修改 family 字符串。
-3. 在仓库外 clean package consumer 中重复真实模型运行，补充 package-consumer-runtime 证据。
+3. 使用 [YOLOv8n Detection 本地包消费教程](yolovision-yolov8n-det-local-package-consumer-tutorial.md) 复现仓库外三包运行；其 `local-package-consumer-runtime` 证据已经完成，但仍不是公共包证明。
 4. 公开包发布后再建立 post-publish proof；本地源码树结果不能替代它。
 
 只有真实模型、真实输入、可复现命令、完整输出和 validator 同时成立，文章中的运行结果才可以作为公开案例引用。

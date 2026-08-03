@@ -29,6 +29,9 @@ against independent references, and requires a single-value reference mutation t
 `eng/Test-YoloVisionObbLocalPackageConsumer.ps1` selects official YOLOv8n-obb, verifies the
 authoritative 1024x1024 C# letterbox tensor, compares all 430,080 raw values and 40 ship oriented
 boxes against independent references, and requires a single-value reference mutation to fail closed.
+`eng/Test-YoloVisionDetectionLocalPackageConsumer.ps1` selects official YOLOv8n detection, verifies
+the authoritative 640x640 C# letterbox tensor, compares all 705,600 raw values and four person plus
+one bus detection against independent references, and requires a single-value reference mutation to fail closed.
 Every scenario restores from isolated one-package feeds and
 checks the restored nupkg SHA256 against the selected package.
 

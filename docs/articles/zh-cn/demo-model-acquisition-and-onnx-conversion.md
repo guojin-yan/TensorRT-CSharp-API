@@ -75,6 +75,7 @@ SHA256。命令里的 `<downloads>`、`<models>` 和 `<artifacts>` 是本机目�
 - 转换命令：`yolo export model=yolov8n.pt format=onnx imgsz=640 opset=17 simplify=True dynamic=False batch=1 device=cpu`
 - 工具链：`Ultralytics 8.4.21; opset 17`
 - ONNX 暂存：`models/YoloVision/Detection/yolov8n-ultralytics-v8.3.0/yolov8n.onnx`
+- 本地包消费：[YoloVision YOLOv8n Detection 本地包消费教程](yolovision-yolov8n-det-local-package-consumer-tutorial.md)
 - SHA256：`db28a49ffbb0425f39ae56252e7e0b43d06b357416c7da58872e285560b4221e`
 
 ### `yolovision-yolov10n-detection-v1.1`

@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "recordKind": "technical-article-publication-catalog",
+  "defaultClassification": "project-documentation-not-publication-ready",
+  "completenessRule": {
+    "requiresRealExecutionResult": true,
+    "minimumResultImageCount": 1,
+    "allowedImageExtensions": [".png", ".jpg", ".jpeg", ".webp"],
+    "requiresImageSourceStatement": true,
+    "modelArticleRequiresAcquisitionAndConversion": true,
+    "requiresProofBoundary": true
+  },
+  "publicPublicationAuthorized": false,
+  "performsPublish": false,
+  "articles": [
+    {
+      "id": "yolovision-yolov8n-det-local-package-consumer",
+      "path": "docs/articles/zh-cn/yolovision-yolov8n-det-local-package-consumer-tutorial.md",
+      "classification": "complete-technical-article",
+      "status": "complete-with-runtime-results-and-images",
+      "realExecutionEvidence": "samples/assets/yolovision-yolov8n-det-local-package-consumer-runtime-evidence.json",
+      "model": {
+        "sourceUrl": "https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8n.pt",
+        "pinnedRevision": "ultralytics-v8.3.0@6e43d1e1e5db72afbf686dee6745669bcb124b0a",
+        "license": "AGPL-3.0-only; public redistribution owner approval is false",
+        "conversionCommand": "yolo export model=yolov8n.pt format=onnx imgsz=640 opset=17 simplify=True dynamic=False batch=1 device=cpu",
+        "onnxWorkspacePath": "models/YoloVision/Detection/yolov8n-ultralytics-v8.3.0/yolov8n.onnx",
+        "onnxSha256": "db28a49ffbb0425f39ae56252e7e0b43d06b357416c7da58872e285560b4221e",
+        "trackedByGit": false,
+        "uploadsModelFiles": false
+      },
+      "resultImages": [
+        {
+          "path": "docs/images/yolovision-yolov8n-det-local-package-result.png",
+          "sha256": "5eac0c79dab1970fbdb76a20a973e150fbd27865d3dedc5f37d5250d96073b70",
+          "source": "Generated from the real local package consumer runtime report; no unapproved source image is embedded."
+        }
+      ],
+      "proofBoundary": "Content-complete local-package-consumer-runtime article; not public-package, post-publish, Owner acceptance, public redistribution approval, or release proof.",
+      "publicationAuthorized": false
+    }
+  ]
+}
