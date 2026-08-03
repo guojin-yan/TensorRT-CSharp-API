@@ -843,6 +843,66 @@ public sealed class YoloVisionManagedPipelineTests
     }
 
     [Fact]
+    public void VisualizationWriterOverlaysSemanticClassesAndIncludesAnActiveClassLegend()
+    {
+        string backgroundPath = Path.Combine(Path.GetTempPath(), $"yolovision-semantic-background-{Guid.NewGuid():N}.png");
+        try
+        {
+            byte[] pngHeader =
+            {
+                137, 80, 78, 71, 13, 10, 26, 10,
+                0, 0, 0, 13, 73, 72, 68, 82,
+                0, 0, 0, 4,
+                0, 0, 0, 2
+            };
+            File.WriteAllBytes(backgroundPath, pngHeader);
+            YoloModelProfile profile = YoloModelProfile.FromArgs(new[]
+            {
+                "--family", "custom",
+                "--task", "sem",
+                "--class-count", "2",
+                "--tensor-layout", "NCHW"
+            }, labelCount: 2);
+            YoloSemanticMap map = new YoloSemanticMap(
+                classCount: 2,
+                width: 2,
+                height: 1,
+                values: new[] { 1.0f, 0.0f, 0.0f, 1.0f });
+            YoloImagePreprocessResult preprocess = CreatePreprocess(
+                sourceWidth: 4,
+                sourceHeight: 2,
+                targetWidth: 2,
+                targetHeight: 1,
+                resizedWidth: 2,
+                resizedHeight: 1,
+                padX: 0,
+                padY: 0,
+                scaleX: 0.5f,
+                scaleY: 0.5f);
+
+            string svg = YoloVisionVisualizationWriter.ToSvg(
+                YoloVisionResult.FromSemanticMap(map),
+                new[] { "__background__", "dog" },
+                profile,
+                new[] { 1, 3, 1, 2 },
+                preprocess,
+                segmentationSpatialTransform: null,
+                backgroundImagePath: backgroundPath);
+
+            Assert.Contains("data-semantic-cell=\"true\"", svg, StringComparison.Ordinal);
+            Assert.Contains("data-semantic-legend=\"true\"", svg, StringComparison.Ordinal);
+            Assert.Contains("__background__  1 px (50.0%)", svg, StringComparison.Ordinal);
+            Assert.Contains("dog  1 px (50.0%)", svg, StringComparison.Ordinal);
+            Assert.Contains("opacity=\"0.10\"", svg, StringComparison.Ordinal);
+            Assert.DoesNotContain(backgroundPath, svg, StringComparison.OrdinalIgnoreCase);
+        }
+        finally
+        {
+            File.Delete(backgroundPath);
+        }
+    }
+
+    [Fact]
     public void SegmentationOutputReportDistinguishesActiveAndTotalPrototypePixels()
     {
         YoloModelProfile profile = YoloModelProfile.FromArgs(new[]

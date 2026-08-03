@@ -270,7 +270,7 @@ public static class YoloVisionVisualizationWriter
                 AppendSourceClassification(builder, result.Classifications, labels, sourceWidth, contentTop);
                 break;
             case YoloTaskType.SemanticSegmentation:
-                AppendSourceSemantic(builder, result.SemanticMap, sourceWidth, sourceHeight, contentTop);
+                AppendSourceSemantic(builder, result.SemanticMap, labels, sourceWidth, sourceHeight, contentTop);
                 break;
             case YoloTaskType.Segmentation:
                 if (segmentationSpatialTransform == null)
@@ -478,6 +478,7 @@ public static class YoloVisionVisualizationWriter
     private static void AppendSourceSemantic(
         StringBuilder builder,
         YoloSemanticMap? map,
+        IReadOnlyList<string> labels,
         int sourceWidth,
         int sourceHeight,
         int contentTop)
@@ -488,8 +489,8 @@ public static class YoloVisionVisualizationWriter
             return;
         }
 
-        int columns = Math.Max(1, Math.Min(sourceWidth, 64));
-        int rows = Math.Max(1, Math.Min(sourceHeight, 48));
+        int columns = Math.Max(1, Math.Min(sourceWidth, 96));
+        int rows = Math.Max(1, Math.Min(sourceHeight, 72));
         float cellWidth = sourceWidth / (float)columns;
         float cellHeight = sourceHeight / (float)rows;
         for (int row = 0; row < rows; row++)
@@ -500,9 +501,58 @@ public static class YoloVisionVisualizationWriter
                 int mapX = Math.Min(map.Width - 1, column * map.Width / columns);
                 int classIndex = InferSemanticClassAt(map, mapX, mapY);
                 string color = Palette[classIndex % Palette.Length];
-                builder.AppendLine($"""  <rect data-semantic-cell="true" x="{Format(column * cellWidth)}" y="{Format(contentTop + row * cellHeight)}" width="{Format(cellWidth + 0.5f)}" height="{Format(cellHeight + 0.5f)}" fill="{color}" opacity="0.42"/>""");
+                string opacity = IsSemanticBackgroundClass(labels, classIndex) ? "0.10" : "0.52";
+                builder.AppendLine($"""  <rect data-semantic-cell="true" x="{Format(column * cellWidth)}" y="{Format(contentTop + row * cellHeight)}" width="{Format(cellWidth + 0.5f)}" height="{Format(cellHeight + 0.5f)}" fill="{color}" opacity="{opacity}"/>""");
             }
         }
+
+        AppendSourceSemanticLegend(builder, map, labels, sourceWidth, contentTop);
+    }
+
+    private static void AppendSourceSemanticLegend(
+        StringBuilder builder,
+        YoloSemanticMap map,
+        IReadOnlyList<string> labels,
+        int sourceWidth,
+        int contentTop)
+    {
+        int[] histogram = map.GetClassHistogram();
+        int[] activeClasses = Enumerable.Range(0, histogram.Length)
+            .Where(classIndex => histogram[classIndex] > 0)
+            .OrderByDescending(classIndex => histogram[classIndex])
+            .ThenBy(classIndex => classIndex)
+            .Take(8)
+            .ToArray();
+        int panelWidth = Math.Min(310, Math.Max(250, sourceWidth - 32));
+        int panelHeight = 48 + activeClasses.Length * 27;
+        int panelX = Math.Max(16, sourceWidth - panelWidth - 16);
+        int pixelCount = checked(map.Width * map.Height);
+        builder.AppendLine($"""  <rect data-semantic-legend="true" x="{panelX}" y="{contentTop + 16}" width="{panelWidth}" height="{panelHeight}" fill="#111827" opacity="0.86"/>""");
+        builder.AppendLine($"""  <text x="{panelX + 16}" y="{contentTop + 43}" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="700" fill="#ffffff">Semantic classes</text>""");
+
+        for (int index = 0; index < activeClasses.Length; index++)
+        {
+            int classIndex = activeClasses[index];
+            int y = contentTop + 58 + index * 27;
+            string color = Palette[classIndex % Palette.Length];
+            string label = LabelOrIndex(labels, classIndex);
+            string percentage = (100.0 * histogram[classIndex] / pixelCount).ToString("0.0", CultureInfo.InvariantCulture);
+            string count = histogram[classIndex].ToString("N0", CultureInfo.InvariantCulture);
+            builder.AppendLine($"""  <rect x="{panelX + 16}" y="{y}" width="18" height="18" fill="{color}"/>""");
+            builder.AppendLine($"""  <text x="{panelX + 44}" y="{y + 14}" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#ffffff">{Escape(label)}  {count} px ({percentage}%)</text>""");
+        }
+    }
+
+    private static bool IsSemanticBackgroundClass(IReadOnlyList<string> labels, int classIndex)
+    {
+        if ((uint)classIndex >= (uint)labels.Count)
+        {
+            return false;
+        }
+
+        string label = labels[classIndex].Trim();
+        return label.Equals("background", StringComparison.OrdinalIgnoreCase) ||
+               label.Equals("__background__", StringComparison.OrdinalIgnoreCase);
     }
 
     private static void AppendDetections(StringBuilder builder, IReadOnlyList<YoloDetection> detections, IReadOnlyList<string> labels, int width, int height)
