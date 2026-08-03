@@ -26,6 +26,40 @@
   "performsPublish": false,
   "articles": [
     {
+      "id": "classification-resnet18-real-asset",
+      "path": "docs/articles/zh-cn/classification-real-asset-walkthrough.md",
+      "classification": "complete-technical-article",
+      "status": "complete-with-runtime-screenshot-and-annotated-result",
+      "realExecutionEvidence": "samples/assets/classification-resnet18-article-runtime-evidence.json",
+      "visualAssetEvidence": "samples/assets/classification-resnet18-article-visual-assets.json",
+      "model": {
+        "sourceUrl": "https://download.pytorch.org/models/resnet18-f37072fd.pth",
+        "pinnedRevision": "torchvision-v0.25.0@8ac84ee75afb1c327902156b5336f56ad63b7e2f",
+        "license": "BSD-3-Clause TorchVision source; model files remain outside Git and weight redistribution is not approved",
+        "conversionCommand": "python eng/Export-ClassificationResNet18Onnx.py --weights <downloads>/resnet18-f37072fd.pth --onnx <models>/resnet18-imagenet1k-v1.onnx --labels <models>/imagenet1k.names --report <models>/resnet18-onnx-export.json",
+        "onnxWorkspacePath": "models/Classification/resnet18-torchvision-v0.25.0/resnet18-imagenet1k-v1.onnx",
+        "onnxSha256": "ead3558569edd88aa73a4eb46acbe6c38dee113933234547f04a0f6e48169903",
+        "trackedByGit": false,
+        "uploadsModelFiles": false
+      },
+      "resultImages": [
+        {
+          "role": "annotated-inference-result",
+          "path": "docs/images/classification-resnet18-annotated-cc0.webp",
+          "sha256": "c80766d7f52264b5612a0e5088051106c07bcf24a6740befa49c7930371bbd96",
+          "source": "Rendered from the SVG written by the real TensorRT Classification run; Top-5 labels and probabilities are overlaid on the CC0 source image."
+        },
+        {
+          "role": "program-runtime-screenshot",
+          "path": "docs/images/classification-resnet18-runtime-terminal.png",
+          "sha256": "68a44952b4144183f6e32334ae790f8a582d773a0d20f659bd1a43abcc295e95",
+          "source": "Direct Windows Terminal capture showing path-free selected stdout values from the same real TensorRT execution."
+        }
+      ],
+      "proofBoundary": "Content-complete source-tree real-model article with exact-input ONNX Runtime validation, a real runtime screenshot, and a CC0 source-image Top-5 overlay; not package-consumer, public-package, post-publish, Owner acceptance, model upload authorization, or release proof.",
+      "publicationAuthorized": false
+    },
+    {
       "id": "yolovision-yolov8n-det-local-package-consumer",
       "path": "docs/articles/zh-cn/yolovision-yolov8n-det-local-package-consumer-tutorial.md",
       "classification": "complete-technical-article",

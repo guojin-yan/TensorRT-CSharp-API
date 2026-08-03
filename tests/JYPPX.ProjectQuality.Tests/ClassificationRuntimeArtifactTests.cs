@@ -123,6 +123,52 @@ public sealed class ClassificationRuntimeArtifactTests
     }
 
     [Fact]
+    public void VisualizationEmbedsTheRealImageAndTopKPredictions()
+    {
+        string directory = CreateTempDirectory("classification-visualization");
+        try
+        {
+            string imagePath = Path.Combine(directory, "image.bmp");
+            File.WriteAllBytes(imagePath, CreateBmp24(new byte[] { 255, 0, 0, 0, 255, 0 }, 2, 1));
+            ClassificationImagePreprocessResult preprocess = ClassificationImagePreprocessor.Preprocess(
+                imagePath,
+                Path.Combine(directory, "input.bin"),
+                new[] { 1, 3, 1, 2 },
+                StretchOptions("NCHW", "RGB", 1.0f));
+            string outputPath = Path.Combine(directory, "classification.svg");
+
+            ClassificationVisualizationWriter.Write(
+                outputPath,
+                imagePath,
+                preprocess,
+                new[]
+                {
+                    new ClassificationPrediction(1, "dog & friend", 0.75f),
+                    new ClassificationPrediction(2, "second", 0.25f)
+                });
+
+            string svg = File.ReadAllText(outputPath);
+            Assert.Contains("data-source-image=\"true\"", svg, StringComparison.Ordinal);
+            Assert.Contains("data:image/bmp;base64,", svg, StringComparison.Ordinal);
+            Assert.Contains("Top-2 predictions from the real TensorRT execution", svg, StringComparison.Ordinal);
+            Assert.Contains("1. dog &amp; friend", svg, StringComparison.Ordinal);
+            Assert.Contains("0.7500", svg, StringComparison.Ordinal);
+
+            string mismatched = Path.Combine(directory, "mismatched.bmp");
+            File.WriteAllBytes(mismatched, CreateBmp24(new byte[] { 255, 0, 0 }, 1, 1));
+            Assert.Throws<ArgumentException>(() => ClassificationVisualizationWriter.Write(
+                Path.Combine(directory, "mismatched.svg"),
+                mismatched,
+                preprocess,
+                new[] { new ClassificationPrediction(0, "zero", 1.0f) }));
+        }
+        finally
+        {
+            Directory.Delete(directory, recursive: true);
+        }
+    }
+
+    [Fact]
     public void ReferenceValidationChecksProvenanceAndValuesSeparately()
     {
         string directory = CreateTempDirectory("classification-reference");

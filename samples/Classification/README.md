@@ -12,11 +12,11 @@ The reproducible baseline is TorchVision ResNet18 `IMAGENET1K_V1`. Acquire the p
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Acquire-TorchVisionResNet18OfficialAssets.ps1 `
   -AllowDownload `
   -ExportOnnx `
-  -PythonPath C:\Users\guoji\.conda\envs\ultralytics\python.exe
+  -PythonPath python
 ```
 
 The default ONNX path is
-`E:\GitSpace\TensorRT-CSharp-API-4.0\models\Classification\resnet18-torchvision-v0.25.0\resnet18-imagenet1k-v1.onnx`.
+`..\models\Classification\resnet18-torchvision-v0.25.0\resnet18-imagenet1k-v1.onnx`, relative to the repository root.
 The model, labels, weights, and export report remain outside Git. Source, conversion, preprocessing, length, and SHA256 are recorded
 in `samples/assets/classification-resnet18-official-assets.json` and
 `docs/articles/zh-cn/demo-model-acquisition-and-onnx-conversion.md`.
@@ -41,9 +41,9 @@ For a real BMP or PPM image, use the built-in resize/crop and normalization path
 
 ```powershell
 dotnet run --project .\samples\Classification -- `
-  --model .\models\classifier.onnx `
-  --labels .\models\labels.txt `
-  --image .\models\input.ppm `
+  --model ..\models\Classification\resnet18-torchvision-v0.25.0\resnet18-imagenet1k-v1.onnx `
+  --labels ..\models\Classification\resnet18-torchvision-v0.25.0\imagenet1k.names `
+  --image ..\models\Classification\resnet18-torchvision-v0.25.0\input.ppm `
   --preprocessed-output .\artifacts\classification\input-f32.bin `
   --input-shape 1x3x224x224 `
   --image-resize shorter-side-center-crop `
@@ -55,10 +55,14 @@ dotnet run --project .\samples\Classification -- `
   --std 0.229,0.224,0.225 `
   --score-transform softmax `
   --top-k 5 `
-  --output-json .\artifacts\classification\output.json
+  --output-json .\artifacts\classification\output.json `
+  --visualization .\artifacts\classification\result.svg `
+  --visualization-background ..\models\Classification\resnet18-torchvision-v0.25.0\input.jpg
 ```
 
 `--image` accepts uncompressed 24/32-bit BMP and P3/P6 PPM/PNM files. `--input <path>` is different: it reads exactly one raw byte per tensor element and normalizes each byte to `[0,1]`. `--input-data <path>` reads an already-preprocessed float32 binary or text tensor. Externally preprocessed JPG/PNG inputs must therefore be decoded by the caller and passed with `--input-data`.
+
+`--visualization` writes an SVG with the Top-K result over the original image. A BMP input can be used directly. For a PPM/PNM input, also pass `--visualization-background` with a JPEG, PNG, or BMP copy that has exactly the same source dimensions. The complete acquisition, conversion, execution, validation, and result-image workflow is documented in `docs/articles/zh-cn/classification-real-asset-walkthrough.md`.
 
 For dynamic classifiers, provide profile bounds:
 

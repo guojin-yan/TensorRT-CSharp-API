@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "recordKind": "technical-article-visual-assets",
+  "articleId": "classification-resnet18-real-asset",
+  "sourceImage": {
+    "title": "Dog at Norre Vorupor Strand",
+    "artist": "W.carter",
+    "descriptionUrl": "https://commons.wikimedia.org/wiki/File:Dog_at_N%C3%B8rre_Vorup%C3%B8r_Strand.jpg",
+    "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/0/0d/Dog_at_N%C3%B8rre_Vorup%C3%B8r_Strand.jpg",
+    "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Dog_at_N%C3%B8rre_Vorup%C3%B8r_Strand.jpg/1280px-Dog_at_N%C3%B8rre_Vorup%C3%B8r_Strand.jpg",
+    "originalMediaWikiSha1": "15636426634b8ab942ee9b2fbfef1819ae8d1018",
+    "downloadedWidth": 1280,
+    "downloadedHeight": 1091,
+    "downloadedLength": 264368,
+    "downloadedSha256": "e678ecf8dab63da112812ada0553d72d46033e4e9ea3b568bf0e53d92e1d6910",
+    "bmpSha256": "0516933cf05213539e0a128ad5df5668acc6d32157ce50cc55c38e4125a21ead",
+    "license": "CC0 1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "attributionRequired": false,
+    "publicRedistributionPermittedByLicense": true
+  },
+  "resultImages": [
+    {
+      "role": "annotated-inference-result",
+      "path": "docs/images/classification-resnet18-annotated-cc0.webp",
+      "sha256": "c80766d7f52264b5612a0e5088051106c07bcf24a6740befa49c7930371bbd96",
+      "source": "Rendered from the SVG written by the real TensorRT Classification run; Top-5 labels and probabilities are overlaid on the CC0 source image."
+    },
+    {
+      "role": "program-runtime-screenshot",
+      "path": "docs/images/classification-resnet18-runtime-terminal.png",
+      "sha256": "68a44952b4144183f6e32334ae790f8a582d773a0d20f659bd1a43abcc295e95",
+      "source": "Captured directly from a Windows Terminal window displaying path-free selected stdout values from the same real TensorRT execution."
+    }
+  ],
+  "modelFilesTrackedByGit": false,
+  "uploadsModelFiles": false,
+  "performsPublish": false
+}

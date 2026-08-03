@@ -83,6 +83,35 @@ internal static class Program
                 referenceContext,
                 validation);
 
+            string visualizationPath = SampleCommandLine.GetStringArgument(
+                args,
+                "--visualization",
+                SampleCommandLine.GetStringArgument(args, "--visualization-svg", string.Empty));
+            string visualizationBackgroundPath = SampleCommandLine.GetStringArgument(
+                args,
+                "--visualization-background",
+                string.Empty);
+            if (!string.IsNullOrWhiteSpace(visualizationBackgroundPath) && string.IsNullOrWhiteSpace(visualizationPath))
+            {
+                throw new ArgumentException("--visualization-background requires --visualization <path>.");
+            }
+            if (!string.IsNullOrWhiteSpace(visualizationPath))
+            {
+                if (preprocess == null)
+                {
+                    throw new ArgumentException("--visualization requires --image so source image dimensions are available.");
+                }
+                if (string.IsNullOrWhiteSpace(visualizationBackgroundPath))
+                {
+                    visualizationBackgroundPath = preprocess.SourcePath;
+                }
+                ClassificationVisualizationWriter.Write(
+                    visualizationPath,
+                    ResolveOptionalFile(visualizationBackgroundPath, "Classification visualization background"),
+                    preprocess,
+                    predictions);
+            }
+
             Console.WriteLine($"Classification TensorRtLine={(int)result.Line} Model={options.ModelPath}");
             Console.WriteLine($"Input={result.InputName}:{result.InputShape} Inputs={result.Inputs.Count} Output={result.OutputName}:{result.OutputShape}");
             foreach (OnnxSampleInputTensor input in result.Inputs)
@@ -116,6 +145,10 @@ internal static class Program
             if (!string.IsNullOrWhiteSpace(outputJsonPath))
             {
                 Console.WriteLine("OutputJson=" + Path.GetFullPath(outputJsonPath));
+            }
+            if (!string.IsNullOrWhiteSpace(visualizationPath))
+            {
+                Console.WriteLine("Visualization=" + Path.GetFullPath(visualizationPath));
             }
 
             bool success = validationPassed;
@@ -329,6 +362,9 @@ internal static class Program
         Console.WriteLine("  --input-shapes <map> with --load-inputs/--load-byte-inputs/--input-patterns <map> enables strict named multi-input binding.");
         Console.WriteLine("  --min-shapes/--opt-shapes/--max-shapes <map> provide the complete named dynamic profile.");
         Console.WriteLine("  --score-transform <raw|softmax> --top-k <n> --output-json <path>");
+        Console.WriteLine("  --visualization <path> Write an SVG with Top-K predictions over the source image.");
+        Console.WriteLine("  --visualization-svg <path> Alias for --visualization.");
+        Console.WriteLine("  --visualization-background <jpg|png|bmp> Same-size background; required when --image uses PPM.");
         Console.WriteLine("Reference options:");
         Console.WriteLine("  --reference-output <json> --reference-abs <n> --reference-rel <n>");
         Console.WriteLine("  --reference-nan-policy <reject|equal> --reference-infinity-policy <exact|reject>");

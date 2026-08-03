@@ -87,6 +87,8 @@ public sealed class ClassificationResNet18RealModelTests
             "Invoke-ClassificationResNet18Reference.py"));
 
         Assert.Contains("EXPECTED_INPUT_SHA256", script, StringComparison.Ordinal);
+        Assert.Contains("--expected-input-sha256", script, StringComparison.Ordinal);
+        Assert.Contains("require_sha256(args.input_tensor, expected_input_sha256", script, StringComparison.Ordinal);
         Assert.Contains("CPUExecutionProvider", script, StringComparison.Ordinal);
         Assert.Contains("pytorchOnnxRuntimeComparison", script, StringComparison.Ordinal);
         Assert.Contains("classification.onnxruntime.reference.json", script, StringComparison.Ordinal);

@@ -1,295 +1,233 @@
-# Classification 真实资产接入教程：从 ResNet18 获取和 ONNX 转换到可审计运行证据
+# Classification 真实资产接入教程：C#、TensorRT 与 ResNet18 Top-5 分类
 
-`samples/Classification` 是一个真实可运行的分类样例，但仓库不会内置模型、labels 或图片。原因很直接：权重、ImageNet labels、测试图片各自有许可证和体积边界。本文给出 owner 侧完整接入路径，让你把一个分类模型从“候选资产”推进到“可审计的真实模型 runtime 证据”，同时不把未实跑内容写成 smoke passed。
+这篇文章从空白环境开始，完整演示如何获取 TorchVision ResNet18、转换为 ONNX、把模型暂存在 Git 仓库外、用 `samples/Classification` 生成 C# 预处理 tensor、建立独立 ONNX Runtime 参考，并执行真实 TensorRT 推理。最终结果不是一段模板日志，而是原图上的 Top-5 叠加图和同次运行的 Windows Terminal 截图。
 
-## 目标读者
+## 本文使用的项目与库
 
-你适合从这篇开始，如果你想回答这些问题：
+本文使用 TensorRtSharp4.0 仓库中的 `samples/Classification`。这个样例负责图片预处理、TensorRT engine 构建与执行、Softmax、Top-K、结构化 JSON、独立参考比较和 SVG 结果图导出。
 
-- 我应该把 ONNX、labels、图片放在哪里。
-- `TensorRtExec` build-only 报告和 `Classification Passed=True` 有什么区别。
-- 什么时候可以把 manifest 改成 `real-model-runtime`。
-- 如何让 release evidence bundle 看到 Classification 仍是 owner action required，或者看到它已经有真实 runner 证据。
+主要组件如下：
 
-## 模型获取与 ONNX 转换
+| 组件 | 本文中的职责 |
+| --- | --- |
+| `JYPPX.TensorRtSharp` | 解析 ONNX、构建 engine、绑定 tensor 并执行推理 |
+| `JYPPX.CudaSharp` | 提供 CUDA 设备、内存和 stream 基础能力 |
+| `samples/Classification` | 完成图片预处理、Softmax、Top-5、结果 JSON 和可视化 |
+| TorchVision `v0.25.0` | 提供 ResNet18 网络定义、权重和 ImageNet-1K 标签 |
+| ONNX Runtime CPU | 对同一个 C# float32 输入 tensor 生成独立参考 |
+| TensorRT `10.11` | 本文实际运行使用的推理后端 |
 
-第一版固定基线是 TorchVision ResNet18 `IMAGENET1K_V1`：torchvision `v0.25.0`、源码 commit
-`8ac84ee75afb1c327902156b5336f56ad63b7e2f`、权重
-`https://download.pytorch.org/models/resnet18-f37072fd.pth`。权重长度 `46,830,571` bytes，SHA256
-`f37072fd47e89c5e827621c5baffa7500819f7896bbacec160b1a16c560e07ec`。
+运行前需要安装 .NET 8 SDK、与本机 GPU 匹配的 CUDA 和 TensorRT，并按仓库构建说明生成 `jyppxtrtbridge.dll`。CUDA、cuDNN、TensorRT 和 NVRTC 都由用户自行安装，不进入源码包、NuGet 包或 GitHub Release。
 
-从仓库根目录执行：
+## 模型获取与许可证
+
+本文固定使用 TorchVision ResNet18 `IMAGENET1K_V1`：
+
+- 权重地址：`https://download.pytorch.org/models/resnet18-f37072fd.pth`
+- TorchVision tag：`v0.25.0`
+- 固定 commit：`8ac84ee75afb1c327902156b5336f56ad63b7e2f`
+- 权重 SHA256：`f37072fd47e89c5e827621c5baffa7500819f7896bbacec160b1a16c560e07ec`
+- TorchVision 源码许可证：BSD-3-Clause
+
+仓库提供固定来源和哈希校验的获取入口：
 
 ```powershell
-pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Acquire-TorchVisionResNet18OfficialAssets.ps1 `
-  -AllowDownload `
-  -ExportOnnx `
-  -PythonPath python
+pwsh -NoProfile -ExecutionPolicy Bypass `
+  -File ./eng/Acquire-TorchVisionResNet18OfficialAssets.ps1 `
+  -AllowDownload -ExportOnnx -PythonPath python
 ```
 
-脚本通过 `eng/Export-ClassificationResNet18Onnx.py` 使用 PyTorch `2.10.0+cpu`、torchvision `0.25.0+cpu` 和 opset 17
-导出 `images:[1,3,224,224] -> logits:[1,1000]`，并生成 1000 行 ImageNet labels。当前 ONNX 长度
-`46,748,553` bytes，SHA256 `ead3558569edd88aa73a4eb46acbe6c38dee113933234547f04a0f6e48169903`。
+测试图片使用 Wikimedia Commons 上的 `Dog at Norre Vorupor Strand`：
 
-默认文件放在 Git 仓库外：
+- 说明页：`https://commons.wikimedia.org/wiki/File:Dog_at_N%C3%B8rre_Vorup%C3%B8r_Strand.jpg`
+- 下载地址：`https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Dog_at_N%C3%B8rre_Vorup%C3%B8r_Strand.jpg/1280px-Dog_at_N%C3%B8rre_Vorup%C3%B8r_Strand.jpg`
+- 许可证：CC0 1.0
+- 本文下载文件 SHA256：`e678ecf8dab63da112812ada0553d72d46033e4e9ea3b568bf0e53d92e1d6910`
+
+模型权重只用于本地转换和验证，当前没有模型再分发授权，因此不得提交到 Git、上传 GitHub Packages 或附加到 Release。CC0 图片允许公开再分发，文章中的结果图可以保留原图。
+
+## ONNX 转换与暂存
+
+获取脚本内部使用下面的固定转换命令。这里保留完整命令，便于不使用 PowerShell 获取器时复现：
 
 ```text
-..\models\Classification\resnet18-torchvision-v0.25.0\
+python eng/Export-ClassificationResNet18Onnx.py --weights <downloads>/resnet18-f37072fd.pth --onnx <models>/resnet18-imagenet1k-v1.onnx --labels <models>/imagenet1k.names --report <models>/resnet18-onnx-export.json
 ```
 
-TorchVision 源码许可证是 BSD-3-Clause，但 pretrained weights、labels 和测试图片仍要由 owner 复核。模型、权重、labels
-和图片都不能提交到 GitHub。固定记录见 `samples/assets/classification-resnet18-official-assets.json`；全部演示模型总表见
-`docs/articles/zh-cn/demo-model-acquisition-and-onnx-conversion.md`。
-
-### 独立 reference 与当前源树实跑结果
-
-先对 C# 内置预处理生成的固定 float32 tensor 运行独立 PyTorch/ONNX Runtime CPU reference：
-
-```powershell
-$root = '..'
-$case = '.\artifacts\classification\resnet18-torchvision-v0.25.0'
-& python .\eng\Invoke-ClassificationResNet18Reference.py `
-  --weights "$root\downloads\resnet18-torchvision-v0.25.0\source\resnet18-f37072fd.pth" `
-  --onnx "$root\models\Classification\resnet18-torchvision-v0.25.0\resnet18-imagenet1k-v1.onnx" `
-  --labels "$root\models\Classification\resnet18-torchvision-v0.25.0\imagenet1k.names" `
-  --input-tensor "$case\dog-input.fp32.bin" `
-  --output-directory "$case\reference"
-```
-
-脚本重算 model、input、preprocess、output contract、labels 和 task semantics 六个 SHA256 指纹，生成 raw logits reference、
-Softmax probabilities 任务 reference 和只把 index 0 加 `0.125` 的受控负例。PyTorch/ONNX Runtime 的 1000 个 logits 最大
-绝对误差为 `7.62939453125e-6`，argmax 相同，概率和为 `0.9999999947211421`。
-
-2026-08-03（Asia/Shanghai）使用 TensorRT 10.11、关闭 TF32、内置 `shorter-side-center-crop` 与 ImageNet mean/std 完成
-源树实跑。raw logits 与任务 probabilities 各比较 1000 个值，均为 mismatch 0：raw 最大绝对误差 `9.536743e-6`，任务
-概率最大绝对误差 `2.9802322e-7`。JSON 记录 `outputValidated=true`，日志结束于 `Classification Passed=True`；Top-1 是
-`Samoyed`，score `0.8799871`。
-
-受控负例保持 raw reference 正确，只篡改任务 probability index 0，得到 mismatch 1、first mismatch 0、最大绝对误差
-`0.125`、exit code 1 和 `Classification Passed=False`。小型证据记录是
-`samples/assets/classification-resnet18-real-model-runtime-evidence.json`。这证明源树真实模型主路径与 fail-closed 比较，仍不
-替代 owner-reviewed golden、package consumer、公开包、再分发授权或发布后验证。
-
-运行证据建议在同一外层用例目录保存为：
+转换环境为 PyTorch `2.10.0+cpu`、TorchVision `0.25.0+cpu`、ONNX opset 17。转换后的模型统一暂存在仓库外的：
 
 ```text
-models/
-  classifier.onnx
-  classifier.labels.txt
-  classifier.input.png
-  classifier.plan
-  classifier-build-report.json
-  classifier-evidence.sidecar.json
-  classifier-sample-run-evidence.json
-  classifier-run.log
+models/Classification/resnet18-torchvision-v0.25.0/resnet18-imagenet1k-v1.onnx
 ```
 
-## 资产清单
-
-复制模板作为 owner 本地 manifest：
-
-```powershell
-Copy-Item .\samples\assets\classification-assets.template.json .\models\classifier.assets.json
-```
-
-至少补齐：
-
-- `model.sourceUrl`
-- `model.license`
-- `model.downloadUrl`
-- `model.sha256`
-- `model.opset`
-- `labels.sourceUrl`
-- `labels.license`
-- `labels.sha256`
-- `input.sourceUrl`
-- `input.license`
-- `input.sha256`
-- `tensor.inputName`
-- `tensor.outputName`
-- `preprocess.resize/crop/mean/std`
-- `evidence.evidenceSidecar`
-- `evidence.sampleRunEvidenceRecord`
-
-模板中的 `proofClassification=template-only`、`status=candidate-not-downloaded`、`isSmokePassed=false` 必须保持，直到真实运行证据齐全。
-
-## SHA256
-
-用 PowerShell 记录 hash：
-
-```powershell
-Get-FileHash .\models\classifier.onnx -Algorithm SHA256
-Get-FileHash .\models\classifier.labels.txt -Algorithm SHA256
-Get-FileHash .\models\classifier.input.png -Algorithm SHA256
-```
-
-真实运行后还要记录日志：
-
-```powershell
-Get-FileHash .\models\classifier-run.log -Algorithm SHA256
-```
-
-不要提前填假 hash。校验器只接受 64 位十六进制字符串，但真正的发布意义来自 hash 和文件实际一致。
-
-## TensorRtExec Build-Only
-
-先确认 ONNX 能构建 engine：
-
-```powershell
-dotnet run --project .\applications\TensorRtExec -- `
-  --onnx .\models\classifier.onnx `
-  --saveEngine .\models\classifier.plan `
-  --minShapes input:1x3x224x224 `
-  --optShapes input:1x3x224x224 `
-  --maxShapes input:1x3x224x224 `
-  --buildOnly `
-  --exportReport .\models\classifier-build-report.json `
-  --evidenceSidecar .\models\classifier-evidence.sidecar.json
-```
-
-这一步只能证明 parser/builder/build report 路径，不能证明分类结果正确。build report 常见 classification 是 `build-only`，不是 sample runtime proof。
-
-## Evidence Sidecar
-
-生成模板：
-
-```powershell
-pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Export-OnnxEngineBuildEvidenceSidecarTemplate.ps1
-```
-
-从 `artifacts/user-acceptance/onnx-engine-build-evidence-sidecar.classification.template.json` 复制到：
+固定 ONNX 长度为 `46,748,553` bytes，SHA256 为：
 
 ```text
-models/classifier-evidence.sidecar.json
+ead3558569edd88aa73a4eb46acbe6c38dee113933234547f04a0f6e48169903
 ```
 
-回填模型 SHA256、license、输入图片 SHA256、stdout/stderr summary 后校验：
+模型合同是 `images:float32[1,3,224,224] -> logits:float32[1,1000]`。输入采用 RGB、NCHW、短边缩放到 256、中心裁剪 224 x 224、scale `1/255`、ImageNet mean/std；输出 logits 再执行 Softmax 和稳定 Top-5 排序。
 
-```powershell
-pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-OnnxEngineBuildEvidenceSidecar.ps1 -SidecarPath .\models\classifier-evidence.sidecar.json
-```
+## 创建本地包消费项目
 
-sidecar 不能把 build-only report 晋级成 `package-consumer-runtime`。它只是把 build report 和真实资产信息连接起来。
-
-## Classification 真实运行
-
-下面的命令与仓库内 ResNet18 证据记录使用同一模型、图片预处理和独立 reference，并保存完整日志：
-
-```powershell
-$root = '..'
-$modelRoot = "$root\models\Classification\resnet18-torchvision-v0.25.0"
-$case = '.\artifacts\classification\resnet18-torchvision-v0.25.0'
-$image = '.\artifacts\yolovision\semantic-lraspp-reference\dog.ppm'
-
-dotnet .\samples\Classification\bin\Release\net8.0\Classification.dll `
-  --model "$modelRoot\resnet18-imagenet1k-v1.onnx" `
-  --labels "$modelRoot\imagenet1k.names" `
-  --image $image `
-  --preprocessed-output "$case\dog-input.fp32.bin" `
-  --input-shape 1x3x224x224 `
-  --tensor-rt-line 10 `
-  --image-resize shorter-side-center-crop `
-  --resize-shorter-side 256 `
-  --tensor-layout NCHW `
-  --color-order RGB `
-  --scale 0.00392156862745098 `
-  --mean 0.485,0.456,0.406 `
-  --std 0.229,0.224,0.225 `
-  --score-transform softmax `
-  --top-k 5 `
-  --noTF32 `
-  --reference-output "$case\reference\classification.onnxruntime.reference.json" `
-  --reference-abs 0.00001 `
-  --reference-rel 0.0001 `
-  --reference-outputs "logits:$case\reference\logits.onnxruntime.reference.json" `
-  --reference-abs-tolerance 0.0001 `
-  --reference-rel-tolerance 0.0001 `
-  --output-json "$case\classification-positive-output.json" `
-  *> "$case\classification-positive-run.log"
-```
-
-日志里至少应能看到：
+项目仍处于第一版开发收尾阶段，本文不从 NuGet.org 或 GitHub Packages 安装 4.0 包，也不会执行任何发布工作流。当前可复现入口就是仓库内的本地消费项目：
 
 ```text
-Classification TensorRtLine=...
-TopK Index=... Label=... Score=...
-Classification Passed=True
+samples/Classification/Classification.csproj
 ```
 
-只有真实模型、真实 labels、真实输入图片和真实日志都存在时，才能考虑把 sample 证据晋级到 `real-model-runtime`。
+它通过 `ProjectReference` 引用当前源码，适合在发布前验证接口和行为。正式包发布后，才会把同一流程迁移到仓库外的 NuGet consumer，并用 `classifier-sample-run-evidence.json`、`Test-SampleRunEvidenceRecord.ps1` 和 `Export-ReleaseEvidenceBundle.ps1` 记录 `package-consumer-runtime`；这些不是本文当前声称已经完成的证明。
 
-## Sample Run Evidence Record
-
-生成模板：
+先定义工作目录，正文后续命令都使用变量，避免绑定某台机器的盘符：
 
 ```powershell
-pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Export-SampleRunEvidenceRecordTemplate.ps1
+$RepoRoot = (Resolve-Path .).Path
+$WorkspaceRoot = Split-Path -Parent $RepoRoot
+$ModelRoot = Join-Path $WorkspaceRoot 'models/Classification/resnet18-torchvision-v0.25.0'
+$CaseRoot = Join-Path $WorkspaceRoot 'downloads/article-assets/classification-resnet18'
+$ImageJpeg = Join-Path $CaseRoot 'dog.jpg'
+$ImageBmp = Join-Path $CaseRoot 'dog.bmp'
+New-Item -ItemType Directory -Force -Path $CaseRoot | Out-Null
 ```
 
-从 `artifacts/user-acceptance/sample-run-evidence-record.classification.template.json` 复制到：
-
-```text
-models/classifier-sample-run-evidence.json
-```
-
-真实回填时设置：
-
-- `recordKind=sample-run-evidence-record`
-- `templateOnly=false`
-- `sampleName=Classification`
-- `proofClassification=real-model-runtime`
-- `modelPath/modelSha256/modelLicense`
-- `labelsPath/labelsSha256/labelsLicense`
-- `inputAssetPath/inputAssetSha256/inputAssetLicense`
-- `preprocessedInputTensorPath/preprocessedInputTensorSha256/preprocessedInputTensorElementCount`
-- `evidenceSidecarPath` 和 `buildReportPath`
-- `sampleRunCommand` 和 `expectedEvidenceLines`
-- `sampleRunLogPath/sampleRunLogSha256`
-- `stdoutSummary` 或 `stderrSummary`
-- `isSmokePassed=true`
-- `canPromoteRealModelRuntime=true`
-
-然后校验：
+下载 CC0 图片，并转换为样例原生支持的 24-bit BMP：
 
 ```powershell
-pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-SampleRunEvidenceRecord.ps1 `
-  -InputPath .\models\classifier-sample-run-evidence.json `
-  -RequireExistingLog `
-  -FailOnNotProof
+Invoke-WebRequest `
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Dog_at_N%C3%B8rre_Vorup%C3%B8r_Strand.jpg/1280px-Dog_at_N%C3%B8rre_Vorup%C3%B8r_Strand.jpg' `
+  -OutFile $ImageJpeg
+
+Add-Type -AssemblyName System.Drawing
+$source = [Drawing.Image]::FromFile($ImageJpeg)
+$bitmap = [Drawing.Bitmap]::new($source.Width, $source.Height, [Drawing.Imaging.PixelFormat]::Format24bppRgb)
+$graphics = [Drawing.Graphics]::FromImage($bitmap)
+$graphics.DrawImage($source, 0, 0, $source.Width, $source.Height)
+$bitmap.Save($ImageBmp, [Drawing.Imaging.ImageFormat]::Bmp)
+$graphics.Dispose(); $bitmap.Dispose(); $source.Dispose()
 ```
 
-sample run evidence record 不允许写 `package-consumer-runtime`。NuGet/runtime package consumer proof 是 release proof record 的职责。
-仓库内固定 ResNet18 记录执行同一严格命令后得到 `ValidationState=real-model-runtime`、`ErrorCount=0`、
-`OwnerActionRequiredCount=0`。
+## 编写程序入口
 
-## Manifest 与 Catalog
+`samples/Classification/Program.cs` 的主流程可以概括为下面五步：
 
-回填后运行：
+```csharp
+ClassificationImagePreprocessResult? preprocess = TryPreprocessImage(args);
+OnnxSampleResult result = TensorRtOnnxSample.RunSingleFloatInputOutput(options);
+
+float[] probabilities = ClassificationOutputProcessor.Transform(
+    result.OutputValues,
+    ClassificationScoreTransform.Softmax);
+IReadOnlyList<ClassificationPrediction> top5 =
+    ClassificationOutputProcessor.GetTopK(probabilities, labels, 5);
+
+ClassificationOutputReportWriter.Write(
+    outputJsonPath, options, result, preprocess, labelsPath, labelsSha256,
+    labels.Count, transform, probabilities, top5, referenceContext, validation);
+
+ClassificationVisualizationWriter.Write(
+    visualizationPath, visualizationBackgroundPath, preprocess!, top5);
+```
+
+图片预处理结果会保存 source/tensor SHA256 和完整语义合同。可视化写入器只接受与预处理源图同尺寸的 JPEG、PNG 或 BMP 背景；尺寸不一致、没有真实图片输入或 Top-K 为空都会直接失败，防止把结果贴到错误图片上。
+
+## 编译并运行
+
+先编译样例：
 
 ```powershell
-pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-SampleAssetManifest.ps1
-pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Export-UserAcceptanceSampleCatalog.ps1
-pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Export-ReleaseEvidenceBundle.ps1
+dotnet build ./samples/Classification/Classification.csproj -c Release
 ```
 
-`Test-SampleAssetManifest.ps1` 会在 sample run evidence record 存在时检查：
+设置本机运行时。`TENSORRT_PATH` 和 bridge 路径由用户按实际安装位置填写：
 
-- record `sampleName` 是否等于 `Classification`
-- record `modelSha256` 是否匹配 manifest `model.sha256`
-- record `labelsSha256` 是否匹配 manifest `labels.sha256`
-- record `inputAssetSha256` 是否匹配 manifest `input.sha256`
-- record 是否错误声明 `package-consumer-runtime`
+```powershell
+$env:TENSORRT_PATH = '<TensorRT-root>'
+$env:JYPPX_TENSORRT_ROOT = $env:TENSORRT_PATH
+$env:JYPPX_NATIVE_BRIDGE_PATH = '<bridge-output>/jyppxtrtbridge.dll'
+$env:JYPPX_ENABLE_DEVELOPMENT_PROBING = 'true'
+```
 
-catalog 会展示 runner evidence state；release evidence bundle 会把 manifest audit、sidecar audit、sample run validation 和 user acceptance catalog 一起聚合。
+第一次运行只用于让 C# 写出权威预处理 tensor，不把这一步当作最终验证结果：
 
-## 常见误区
+```powershell
+$App = './samples/Classification/bin/Release/net8.0/Classification.dll'
+$InputTensor = Join-Path $CaseRoot 'classification-input.fp32.bin'
 
-- `TensorRtExec --buildOnly` 成功不是 `Classification Passed=True`。
-- synthetic input 通过不是图片分类质量证明。
-- sidecar 不是 release proof record。
-- sample run evidence record 最多晋级到 `real-model-runtime`。
-- 没有真实 run log 和 SHA256 时，不要把 `isSmokePassed` 改为 true。
+dotnet $App `
+  --model (Join-Path $ModelRoot 'resnet18-imagenet1k-v1.onnx') `
+  --labels (Join-Path $ModelRoot 'imagenet1k.names') `
+  --image $ImageBmp --preprocessed-output $InputTensor `
+  --input-shape 1x3x224x224 --tensor-rt-line 10 `
+  --image-resize shorter-side-center-crop --resize-shorter-side 256 `
+  --tensor-layout NCHW --color-order RGB --scale 0.00392156862745098 `
+  --mean 0.485,0.456,0.406 --std 0.229,0.224,0.225 `
+  --score-transform softmax --top-k 5 --noTF32
+```
 
-## 小结
+为这个精确 tensor 生成独立参考：
 
-Classification 真实资产接入的关键不是“找一个模型跑一下”，而是把模型来源、许可证、hash、build report、sidecar、真实 runner 日志和 release evidence 聚合串成一条可复核证据链。这样文章、样例和发布检查才能一致，用户也能按同样结构替换成自己的分类模型。
+```powershell
+$InputSha = (Get-FileHash $InputTensor -Algorithm SHA256).Hash.ToLowerInvariant()
+$ReferenceRoot = Join-Path $CaseRoot 'reference'
+
+python ./eng/Invoke-ClassificationResNet18Reference.py `
+  --weights (Join-Path $WorkspaceRoot 'downloads/resnet18-torchvision-v0.25.0/source/resnet18-f37072fd.pth') `
+  --onnx (Join-Path $ModelRoot 'resnet18-imagenet1k-v1.onnx') `
+  --labels (Join-Path $ModelRoot 'imagenet1k.names') `
+  --input-tensor $InputTensor --output-directory $ReferenceRoot `
+  --expected-input-sha256 $InputSha
+```
+
+最后执行带任务概率、原始 logits 和结果图的严格运行：
+
+```powershell
+dotnet $App `
+  --model (Join-Path $ModelRoot 'resnet18-imagenet1k-v1.onnx') `
+  --labels (Join-Path $ModelRoot 'imagenet1k.names') `
+  --image $ImageBmp --preprocessed-output $InputTensor `
+  --input-shape 1x3x224x224 --tensor-rt-line 10 `
+  --image-resize shorter-side-center-crop --resize-shorter-side 256 `
+  --tensor-layout NCHW --color-order RGB --scale 0.00392156862745098 `
+  --mean 0.485,0.456,0.406 --std 0.229,0.224,0.225 `
+  --score-transform softmax --top-k 5 --noTF32 `
+  --reference-output (Join-Path $ReferenceRoot 'classification.onnxruntime.reference.json') `
+  --reference-abs 0.00001 --reference-rel 0.0001 `
+  --reference-outputs ('logits:' + (Join-Path $ReferenceRoot 'logits.onnxruntime.reference.json')) `
+  --reference-abs-tolerance 0.0001 --reference-rel-tolerance 0.0001 `
+  --output-json (Join-Path $CaseRoot 'classification-output.json') `
+  --visualization (Join-Path $CaseRoot 'classification-annotated.svg') `
+  --visualization-background $ImageJpeg
+```
+
+## 已验证结果
+
+本文实跑环境为 Windows 11、NVIDIA GeForce RTX 3060 Laptop GPU、CUDA 12.9、TensorRT 10.11。24-bit BMP 和同图 PPM 得到的 C# 输入 tensor 完全一致，SHA256 为 `43de394443f6fc3ccfd08cd9df61ee645ee5c51d1954c52267c221a438252f9e`。
+
+独立参考先比较 PyTorch 与 ONNX Runtime，1000 个 logits 的最大绝对误差为 `1.049041748046875e-05`，argmax 一致。TensorRT 再与 ONNX Runtime 比较：
+
+| 项目 | 比较值数 | mismatch | 最大绝对误差 |
+| --- | ---: | ---: | ---: |
+| Softmax 任务概率 | 1000 | 0 | `5.22e-7` |
+| 原始 logits | 1000 | 0 | `5.72e-6` |
+
+最终 Top-5 为：Tibetan terrier `0.309864`、Dandie Dinmont `0.242565`、Lhasa `0.124854`、Shih-Tzu `0.119756`、miniature poodle `0.044701`。本次 TensorRT enqueue 记录为 `3.463 ms`，程序结束于 `OutputValidated=True` 和 `Classification Passed=True`。
+
+![ResNet18 在 CC0 狗图片上的真实 TensorRT Top-5 结果](../../images/classification-resnet18-annotated-cc0.webp)
+
+![Classification 样例真实 Windows Terminal 运行窗口](../../images/classification-resnet18-runtime-terminal.png)
+
+终端截图来自本次真实运行的 stdout，只移除了机器相关路径并压缩成长短适合窗口展示的关键行，shape、耗时、Top-5、误差和通过状态均未修改。两张图都来自同一次真实 TensorRT 执行：第一张由程序写出的 SVG 渲染为 WebP，第二张直接截取显示同次运行结果的 Windows Terminal 窗口。
+
+## 复查与边界
+
+复查时至少确认：
+
+```powershell
+Get-FileHash (Join-Path $ModelRoot 'resnet18-imagenet1k-v1.onnx') -Algorithm SHA256
+Get-FileHash $InputTensor -Algorithm SHA256
+pwsh -NoProfile -ExecutionPolicy Bypass -File ./eng/Test-TechnicalArticleCompleteness.ps1 -Strict
+```
+
+本文证明的是固定 ResNet18、固定 CC0 图片、固定预处理和 TensorRT 10.11 的 `real-model-runtime` 主路径，以及任务概率和原始 logits 的 fail-closed 对照。它不证明 ImageNet 整体精度，也不是 `package-consumer-runtime`、公开包、post-publish、Owner release acceptance、Tag 或 GitHub Release 证明。
+
+模型文件继续只放在外层 `models` 目录，不上传 GitHub；CUDA、cuDNN、TensorRT 和 NVRTC 继续由用户安装。本文内容完整不等于已授权公开发布，更不会触发包、Release 或版本发布。

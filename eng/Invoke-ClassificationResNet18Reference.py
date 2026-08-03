@@ -30,6 +30,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--labels", type=Path, required=True)
     parser.add_argument("--input-tensor", type=Path, required=True)
     parser.add_argument("--output-directory", type=Path, required=True)
+    parser.add_argument("--expected-input-sha256", default=EXPECTED_INPUT_SHA256)
     parser.add_argument("--top-k", type=int, default=5)
     return parser.parse_args()
 
@@ -77,6 +78,9 @@ def main() -> int:
     args = parse_args()
     if args.top_k <= 0:
         raise ValueError("--top-k must be positive")
+    expected_input_sha256 = args.expected_input_sha256.strip().lower()
+    if len(expected_input_sha256) != 64 or any(character not in "0123456789abcdef" for character in expected_input_sha256):
+        raise ValueError("--expected-input-sha256 must be a 64-character lowercase hexadecimal SHA256")
 
     import numpy as np
     import onnx
@@ -88,7 +92,7 @@ def main() -> int:
     require_sha256(args.weights, EXPECTED_WEIGHTS_SHA256, "weights")
     require_sha256(args.onnx, EXPECTED_ONNX_SHA256, "ONNX")
     require_sha256(args.labels, EXPECTED_LABELS_SHA256, "labels")
-    require_sha256(args.input_tensor, EXPECTED_INPUT_SHA256, "C# input tensor")
+    require_sha256(args.input_tensor, expected_input_sha256, "C# input tensor")
 
     labels = args.labels.read_text(encoding="utf-8").splitlines()
     if len(labels) != 1000 or any(not label for label in labels):
@@ -160,7 +164,7 @@ def main() -> int:
         "values": [float(value) for value in probabilities],
         "valueKind": "probabilities",
         "modelSha256": EXPECTED_ONNX_SHA256,
-        "inputTensorSha256": EXPECTED_INPUT_SHA256,
+        "inputTensorSha256": expected_input_sha256,
         "preprocessContractSha256": preprocess_contract_sha256,
         "outputTensorContractSha256": output_tensor_contract_sha256,
         "labelsSha256": EXPECTED_LABELS_SHA256,
@@ -190,7 +194,7 @@ def main() -> int:
                 "weightsSha256": EXPECTED_WEIGHTS_SHA256,
                 "onnxSha256": EXPECTED_ONNX_SHA256,
                 "labelsSha256": EXPECTED_LABELS_SHA256,
-                "inputTensorSha256": EXPECTED_INPUT_SHA256,
+                "inputTensorSha256": expected_input_sha256,
             },
             "contracts": {
                 "preprocessCanonical": PREPROCESS_CANONICAL,
