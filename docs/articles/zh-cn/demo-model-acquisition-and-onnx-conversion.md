@@ -3,7 +3,7 @@
 TensorRtSharp4.0 的演示代码不把深度学习模型提交到 GitHub。仓库只保存模型来源、许可证边界、固定版本、获取脚本、转换命令、ONNX 契约、文件长度和 SHA256；实际 ONNX 统一暂存在 Git 仓库外：
 
 ```text
-E:\GitSpace\TensorRT-CSharp-API-4.0\models
+<workspace-root>/models
 ```
 
 这个目录是第一版发布前的本地模型缓存，后续迁移到独立 Model Zoo。不得把该目录复制进 `TensorRtSharp4.0`，不得把模型塞进 managed/native NuGet 包，也不得把 CUDA、cuDNN、TensorRT 或 NVRTC 一并打包。用户自行安装 GPU 依赖。
@@ -13,6 +13,10 @@ E:\GitSpace\TensorRT-CSharp-API-4.0\models
 各获取/导出步骤完成后，执行统一同步和哈希校验：
 
 ```powershell
+$repositoryRoot = (git rev-parse --show-toplevel)
+$workspaceRoot = Split-Path -Parent $repositoryRoot
+$modelsRoot = Join-Path $workspaceRoot 'models'
+$python = (Get-Command python).Source
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Sync-DemoOnnxModels.ps1
 ```
 
@@ -173,7 +177,7 @@ SHA256。命令里的 `<downloads>`、`<models>` 和 `<artifacts>` 是本机目�
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Acquire-TorchVisionResNet18OfficialAssets.ps1 `
   -AllowDownload `
   -ExportOnnx `
-  -PythonPath C:\Users\guoji\.conda\envs\ultralytics\python.exe
+  -PythonPath $python
 ```
 
 脚本调用 `eng/Export-ClassificationResNet18Onnx.py`，同时生成 `imagenet1k.names` 和导出报告。当前 ONNX 长度是 `46,748,553` bytes，SHA256 是 `ead3558569edd88aa73a4eb46acbe6c38dee113933234547f04a0f6e48169903`。
@@ -192,7 +196,7 @@ source-tree `real-model-runtime`，不是 package consumer、公开包、再分�
 
 ```powershell
 $source = Join-Path $env:TENSORRT_PATH 'data\mnist\mnist.onnx'
-$target = 'E:\GitSpace\TensorRT-CSharp-API-4.0\models\OnnxToEngine\MNIST\nvidia-tensorrt-10.11\mnist.onnx'
+$target = Join-Path $modelsRoot 'OnnxToEngine\MNIST\nvidia-tensorrt-10.11\mnist.onnx'
 New-Item -ItemType Directory -Force -Path (Split-Path $target) | Out-Null
 Copy-Item -LiteralPath $source -Destination $target
 Get-FileHash -Algorithm SHA256 -LiteralPath $target
@@ -295,7 +299,7 @@ ONNX 为 `12,664,838` bytes，SHA256 `5f2701ef5326fb5a691999438cfc55a69656323c21
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Acquire-TorchVisionLrasppOfficialAssets.ps1 `
   -AllowDownload `
   -ExportOnnx `
-  -PythonPath C:\Users\guoji\.conda\envs\ultralytics\python.exe
+  -PythonPath $python
 ```
 
 权重来自 TorchVision LRASPP MobileNetV3 Large，固定到 torchvision `v0.25.0`。转换脚本 `eng/Invoke-YoloVisionSemanticReference.py` 导出 opset 17、`images:[1,3,320,320] -> semantic:[1,21,320,320]`。ONNX 为 `12,879,801` bytes，SHA256 `3cb94e561bdefe606ed7d1a2c4d0296409bec066f3a39a9fe9dabd72b23728f8`。

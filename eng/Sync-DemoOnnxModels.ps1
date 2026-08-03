@@ -26,7 +26,13 @@ $inventory = Get-Content -LiteralPath $inventoryPath -Raw | ConvertFrom-Json
 $sourceById = @{
   "classification-resnet18-imagenet1k-v1" = Join-Path $modelRoot "Classification\resnet18-torchvision-v0.25.0\resnet18-imagenet1k-v1.onnx"
   "onnxtoengine-nvidia-mnist-opset8" = if ([string]::IsNullOrWhiteSpace($TensorRtMnistModelPath)) {
-    Join-Path $repositoryRoot "third_party\nvidia\TensorRT-10.11.0.33-cuda 12.9\data\mnist\mnist.onnx"
+    $tensorRtRoot = if (-not [string]::IsNullOrWhiteSpace($env:JYPPX_TENSORRT_ROOT)) { $env:JYPPX_TENSORRT_ROOT } else { $env:TENSORRT_PATH }
+    if ([string]::IsNullOrWhiteSpace($tensorRtRoot)) {
+      Join-Path $modelRoot "OnnxToEngine\MNIST\nvidia-tensorrt-10.11\mnist.onnx"
+    }
+    else {
+      Join-Path $tensorRtRoot "data\mnist\mnist.onnx"
+    }
   } else { [IO.Path]::GetFullPath($TensorRtMnistModelPath) }
   "yolovision-yolov8n-detection-v8.3.0" = Join-Path $resolvedWorkspaceRoot "downloads\yolov8n-det-ultralytics-v8.3.0\source\yolov8n.onnx"
   "yolovision-yolov10n-detection-v1.1" = Join-Path $resolvedWorkspaceRoot "downloads\yolov10-agpl\source\yolov10n.onnx"

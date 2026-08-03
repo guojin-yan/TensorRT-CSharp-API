@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "recordKind": "demo-model-acquisition-and-onnx-inventory",
-  "workspaceModelRoot": "E:/GitSpace/TensorRT-CSharp-API-4.0/models",
+  "workspaceModelRoot": "../models",
   "materializationScript": "eng/Sync-DemoOnnxModels.ps1",
   "policy": {
     "modelRootOutsideGitRepository": true,

@@ -13,7 +13,7 @@ public sealed class DemoModelInventoryTests
         JsonElement models = root.GetProperty("models");
 
         Assert.Equal("demo-model-acquisition-and-onnx-inventory", root.GetProperty("recordKind").GetString());
-        Assert.Equal("E:/GitSpace/TensorRT-CSharp-API-4.0/models", root.GetProperty("workspaceModelRoot").GetString());
+        Assert.Equal("../models", root.GetProperty("workspaceModelRoot").GetString());
         Assert.Equal("eng/Sync-DemoOnnxModels.ps1", root.GetProperty("materializationScript").GetString());
         Assert.Equal(10, models.GetArrayLength());
 
@@ -120,12 +120,14 @@ public sealed class DemoModelInventoryTests
         Assert.Contains("不得把模型塞进 managed/native NuGet 包", catalog, StringComparison.Ordinal);
         Assert.Contains("真实运行证据索引", catalog, StringComparison.Ordinal);
         Assert.Contains("CUDA、cuDNN、TensorRT 与 NVRTC 始终由用户自行安装", catalog, StringComparison.Ordinal);
+        Assert.DoesNotMatch("[A-Za-z]:\\\\", catalog);
 
         string syncScript = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "eng", "Sync-DemoOnnxModels.ps1"));
         Assert.Contains("demo-model-inventory.json", syncScript, StringComparison.Ordinal);
         Assert.Contains("modelRootOutsideGitRepository = $true", syncScript, StringComparison.Ordinal);
         Assert.Contains("uploadsAssets = $false", syncScript, StringComparison.Ordinal);
         Assert.Contains("performsPublish = $false", syncScript, StringComparison.Ordinal);
+        Assert.DoesNotContain("third_party\\nvidia", syncScript, StringComparison.OrdinalIgnoreCase);
     }
 
     private static void AssertRuntimeEvidenceIsPositiveAndNonPublishing(string path, JsonElement evidence)
