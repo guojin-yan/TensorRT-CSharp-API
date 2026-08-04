@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-  [ValidateSet("GpuAllocator", "OutputAllocator", "DebugListener", "ProgressMonitor")][string]$Scenario = "GpuAllocator",
+  [ValidateSet("GpuAllocator", "OutputAllocator", "DebugListener", "ProgressMonitor", "Profiler")][string]$Scenario = "GpuAllocator",
   [string]$RepositoryRoot,
   [string]$OutputRoot,
   [string]$ReportDirectory,
@@ -92,6 +92,26 @@ $scenarioConfig = switch ($Scenario) {
         "SetProgressMonitor",
         "ClearProgressMonitor",
         "HasProgressMonitor"
+      )
+    }
+  }
+  "Profiler" {
+    [pscustomobject][ordered]@{
+      slug = "profiler"
+      sampleDirectory = "Profiler.PackageConsumer"
+      projectFileName = "ProfilerPackageConsumer.csproj"
+      projectTemplateFileName = "Profiler.PackageConsumer.csproj.template"
+      runtimeSwitch = "--profiler-runtime-smoke-only"
+      runtimeMarkerPrefix = "ProfilerRealRuntime=Passed "
+      finalMarker = "Passed=True Mode=ProfilerRuntimeSmokeOnly"
+      publicSurfaceMarkers = @(
+        "TensorRtProfiler",
+        "TensorRtProfilerHandler",
+        "SetProfiler",
+        "ClearProfiler",
+        "ReportToProfiler",
+        "EnqueueEmitsProfile",
+        "HasNativeProfiler"
       )
     }
   }
@@ -677,6 +697,71 @@ switch ($Scenario) {
       "Callbacks=$invocationCount Start=$phaseStartCount Step=$stepCompleteCount Finish=$phaseFinishCount Phases=$distinctPhaseCount",
       "CancellationRequested=$negativeCancellationRequested BuildFailed=$negativeBuildFailed NegativeFailures=$negativeFailureCount",
       "MetadataCopied=$metadataCopied DetachVerified=$detachVerified"
+    )
+  }
+  "Profiler" {
+    $immediateMode = [bool]::Parse((Get-MarkerField -Line $marker -Name "ImmediateMode"))
+    $immediateInvocationCount = [uint64](Get-MarkerField -Line $marker -Name "ImmediateInvocationCount")
+    $immediateLayerCount = [uint64](Get-MarkerField -Line $marker -Name "ImmediateLayerCount")
+    $immediateFailureCount = [uint64](Get-MarkerField -Line $marker -Name "ImmediateFailureCount")
+    $immediateDetachVerified = [bool]::Parse((Get-MarkerField -Line $marker -Name "ImmediateDetachVerified"))
+    $deferredMode = [bool]::Parse((Get-MarkerField -Line $marker -Name "DeferredMode"))
+    $deferredBeforeReportCount = [uint64](Get-MarkerField -Line $marker -Name "DeferredBeforeReportCount")
+    $deferredReported = [bool]::Parse((Get-MarkerField -Line $marker -Name "DeferredReported"))
+    $deferredInvocationCount = [uint64](Get-MarkerField -Line $marker -Name "DeferredInvocationCount")
+    $deferredLayerCount = [uint64](Get-MarkerField -Line $marker -Name "DeferredLayerCount")
+    $deferredFailureCount = [uint64](Get-MarkerField -Line $marker -Name "DeferredFailureCount")
+    $deferredDetachVerified = [bool]::Parse((Get-MarkerField -Line $marker -Name "DeferredDetachVerified"))
+    $metadataCopied = [bool]::Parse((Get-MarkerField -Line $marker -Name "MetadataCopied"))
+    $negativeEnqueueFailed = [bool]::Parse((Get-MarkerField -Line $marker -Name "NegativeEnqueueFailed"))
+    $negativeInvocationCount = [uint64](Get-MarkerField -Line $marker -Name "NegativeInvocationCount")
+    $negativeFailureCount = [uint64](Get-MarkerField -Line $marker -Name "NegativeFailureCount")
+    $negativeDetachVerified = [bool]::Parse((Get-MarkerField -Line $marker -Name "NegativeDetachVerified"))
+    $realCallbackRuntime = [bool]::Parse((Get-MarkerField -Line $marker -Name "RealCallbackRuntime"))
+    if (-not $immediateMode -or $immediateInvocationCount -eq 0 -or $immediateLayerCount -eq 0 -or
+        $immediateFailureCount -ne 0 -or -not $immediateDetachVerified -or $deferredMode -or
+        $deferredBeforeReportCount -ne 0 -or -not $deferredReported -or
+        $deferredInvocationCount -eq 0 -or $deferredLayerCount -eq 0 -or
+        $deferredFailureCount -ne 0 -or -not $deferredDetachVerified -or -not $metadataCopied -or
+        $negativeInvocationCount -eq 0 -or $negativeFailureCount -eq 0 -or
+        -not $negativeDetachVerified -or -not $realCallbackRuntime) {
+      throw "External profiler marker did not satisfy immediate, deferred-report, copied-metadata, exception, and detach invariants: $marker"
+    }
+
+    $scenarioRuntime = [pscustomobject][ordered]@{
+      passed = $true
+      immediate = [pscustomobject][ordered]@{
+        enqueueEmitsProfile = $immediateMode
+        invocationCount = $immediateInvocationCount
+        layerCount = $immediateLayerCount
+        failureCount = $immediateFailureCount
+        detachVerified = $immediateDetachVerified
+      }
+      deferred = [pscustomobject][ordered]@{
+        enqueueEmitsProfile = $deferredMode
+        beforeReportCount = $deferredBeforeReportCount
+        reportToProfilerReturned = $deferredReported
+        invocationCount = $deferredInvocationCount
+        layerCount = $deferredLayerCount
+        failureCount = $deferredFailureCount
+        detachVerified = $deferredDetachVerified
+      }
+      metadataCopied = $metadataCopied
+      realCallbackRuntime = $realCallbackRuntime
+    }
+    $scenarioNegatives = [pscustomobject][ordered]@{
+      handlerException = [pscustomobject][ordered]@{
+        passed = $true
+        enqueueFailed = $negativeEnqueueFailed
+        invocationCount = $negativeInvocationCount
+        failureCount = $negativeFailureCount
+        detachVerified = $negativeDetachVerified
+      }
+    }
+    $resultSummary = @(
+      "ImmediateCallbacks=$immediateInvocationCount Layers=$immediateLayerCount Failures=$immediateFailureCount",
+      "DeferredBeforeReport=$deferredBeforeReportCount Reported=$deferredReported Callbacks=$deferredInvocationCount",
+      "NegativeEnqueueFailed=$negativeEnqueueFailed NegativeFailures=$negativeFailureCount MetadataCopied=$metadataCopied"
     )
   }
 }

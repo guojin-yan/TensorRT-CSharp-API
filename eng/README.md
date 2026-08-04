@@ -2,11 +2,11 @@
 
 `eng` 不是面向最终用户的命令集合。它同时承载构建编排、资产获取、CI 验证、证据导出、Owner 回填模板和发布前只读门禁，因此文件数量很大。不能因为脚本存在，就认为它是日常支持入口，也不能直接批量删除或移动，否则会破坏 workflow、测试、文章和脚本之间的调用关系。
 
-2026-08-05 四轮引用图审计与 callback owner 独立包验证补充后，目录保留 800 个 PowerShell 脚本、9 个 Python 辅助脚本和 1 个 Shell 脚本。已删除 15 个确认重复、失效或与当前交付边界冲突的入口；同时移除了 39 个退役 full-runtime/vendor 包项目。这里记录的是保留下来的工程资产，不是对外命令数量。
+2026-08-05 四轮引用图审计与 callback owner 独立包验证补充后，目录保留 801 个 PowerShell 脚本、9 个 Python 辅助脚本和 1 个 Shell 脚本。已删除 15 个确认重复、失效或与当前交付边界冲突的入口；同时移除了 39 个退役 full-runtime/vendor 包项目。这里记录的是保留下来的工程资产，不是对外命令数量。
 
 | PowerShell 类型 | 数量 | 定位 |
 | --- | ---: | --- |
-| `Test-*` | 356 | CI、合同、证据和 fail-closed 验证器 |
+| `Test-*` | 357 | CI、合同、证据和 fail-closed 验证器 |
 | `Export-*` | 360 | 生成机器可读报告、候选包和内部审计材料；多数不执行发布 |
 | `Acquire-*` | 10 | 固定来源和 SHA 的模型/资产获取入口 |
 | `Sync-*` | 2 | 本地资产同步和校验入口 |
@@ -33,6 +33,7 @@
 | OutputAllocator 本地两包验证 | `Test-OutputAllocatorLocalPackageConsumer.ps1` | 隔离 managed 与 bridge-only 包，执行动态输出分配、释放、detach 和拒绝负例；不发布包 |
 | DebugListener 本地两包验证 | `Test-DebugListenerLocalPackageConsumer.ps1` | 隔离 managed 与 bridge-only 包，执行真实调试张量回调、复制元数据、detach 和拒绝负例；不发布包 |
 | ProgressMonitor 本地两包验证 | `Test-ProgressMonitorLocalPackageConsumer.ps1` | 隔离 managed 与 bridge-only 包，执行真实构建进度、线程安全状态、主动取消和 detach 负例；不发布包 |
+| Profiler 本地两包验证 | `Test-ProfilerLocalPackageConsumer.ps1` | 隔离 managed 与 bridge-only 包，执行即时/延迟 layer timing、异常记录和 detach；不发布包 |
 | 通用 YoloVision 三包验证器 | `Test-YoloVisionLocalPackageConsumer.ps1` | 被各任务专用入口调用；不建议手工拼接参数 |
 | 文章完整性门禁 | `Test-TechnicalArticleCompleteness.ps1` | 检查发布目录中的真实结果、配图、模型获取/转换和边界 |
 

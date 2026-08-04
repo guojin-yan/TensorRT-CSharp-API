@@ -1,0 +1,115 @@
+{
+  "schemaVersion": 1,
+  "evidenceKind": "local-package-consumer-tensorrt-profiler-runtime",
+  "validationState": "passed-local-package-consumer-runtime",
+  "recordedAtLocal": "2026-08-05",
+  "tensorRtLine": 10,
+  "tensorRtVersion": "10.11.0",
+  "cudaToolkitVersion": "12.9",
+  "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+  "runtimePackageKey": "win-x64-trt10.11-cuda12.9-cudnn9.22",
+  "sample": "Profiler.PackageConsumer",
+  "mode": "ProfilerRuntimeSmokeOnly",
+  "model": {
+    "kind": "programmatically-created-1x1-convolution-network",
+    "description": "The consumer creates a [1,1,32,32] FP32 input and a 1x1 convolution directly through the TensorRT network API.",
+    "acquisition": "not-applicable",
+    "conversion": "not-applicable",
+    "externalModelRequired": false,
+    "onnxProduced": false,
+    "outerModelsDirectoryUsed": false
+  },
+  "packages": [
+    {
+      "role": "managed-api",
+      "id": "JYPPX.TensorRT.CSharp.API",
+      "version": "4.0.0",
+      "length": 15448064,
+      "sha256": "611dc204069c0a26fbaa9e7a67c97b27759865b85069cbe11dfdb5a14123fce8"
+    },
+    {
+      "role": "bridge-only",
+      "id": "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge",
+      "version": "4.0.0",
+      "length": 398742,
+      "sha256": "aa3230172dbc3251687778efc2583562ab1bf9716954a5c0ed6c830ab12d7ce0",
+      "nativeEntry": "runtimes/win-x64/native/jyppxtrtbridge.dll",
+      "nativeEntrySha256": "c3814f36b0e74976ecbde6849c78ad007e76fb5566f8aa3e624a8f39ed281cfe"
+    }
+  ],
+  "isolation": {
+    "workspaceOutsideRepository": true,
+    "packageReferenceOnly": true,
+    "projectReference": false,
+    "hintPath": false,
+    "sourceTreeBinary": false,
+    "developmentBridgePathRemoved": true,
+    "developmentProbingRemoved": true,
+    "consumerBridgeMatchesPackage": true,
+    "vendorRuntimeBinaryCountInPackages": 0,
+    "vendorRuntimeBinaryCountInConsumerOutput": 0,
+    "vendorDependenciesProvidedByHost": true
+  },
+  "immediate": {
+    "passed": true,
+    "enqueueEmitsProfile": true,
+    "invocationCount": 3,
+    "distinctLayerCount": 3,
+    "failureCount": 0,
+    "metadataCopied": true,
+    "detachVerified": true
+  },
+  "deferred": {
+    "passed": true,
+    "enqueueEmitsProfile": false,
+    "beforeReportCount": 0,
+    "reportToProfilerReturned": true,
+    "invocationCount": 3,
+    "distinctLayerCount": 3,
+    "failureCount": 0,
+    "metadataCopied": true,
+    "detachVerified": true,
+    "realCallbackRuntime": true
+  },
+  "handlerExceptionNegative": {
+    "passed": true,
+    "enqueueFailed": false,
+    "invocationCount": 3,
+    "failureCount": 3,
+    "lastExceptionType": "InvalidOperationException",
+    "detachVerified": true,
+    "interpretation": "IProfiler::reportLayerTime has no rejection return value. The bridge swallows and records managed exceptions; TensorRT 10.11 completed this enqueue, so failure counters and detach state are the required negative evidence."
+  },
+  "artifacts": {
+    "consumerSource": {
+      "path": "samples/Profiler.PackageConsumer/Program.cs",
+      "sha256": "c492f67cfc9f1fccb3d83d1357516ecc6788c065447660d3fb8c5304f9e663d3",
+      "length": 14595
+    },
+    "projectTemplate": {
+      "path": "samples/Profiler.PackageConsumer/Profiler.PackageConsumer.csproj.template",
+      "sha256": "14459d08ff40d4df87364d973684dda5a9fad1892145df09e279c2b3a2739c6a",
+      "length": 550
+    },
+    "stdout": {
+      "path": "samples/assets/profiler-local-package-consumer-tensorrt10.11.txt",
+      "sha256": "f57c5e0ac668cae105e29ace3ddf0570cc644381cfaeb2a0e74a350c651e130f",
+      "length": 1109,
+      "source": "Line-ending-normalized copy of the captured package-consumer stdout; result values are unchanged."
+    },
+    "runtimeResultImage": {
+      "path": "docs/images/profiler-local-package-consumer-terminal.png",
+      "sha256": "09d937b5e0e246d3a2a4671e8047fee06e6e48fcbdfdb18846bb8d867953e627",
+      "length": 92501,
+      "source": "Path-free terminal rendering of selected stdout from the same real run; the complete machine marker remains in the stdout artifact."
+    }
+  },
+  "boundary": {
+    "isLocalPackageConsumerRuntimeEvidence": true,
+    "isPublicPackageConsumerProof": false,
+    "isReleaseProof": false,
+    "isPostPublishProof": false,
+    "performsPublish": false,
+    "statement": "Repository-external local-feed proof for the managed and bridge-only packages. CUDA and TensorRT are host-installed. No public package, tag, Release, or package publication was created."
+  }
+}

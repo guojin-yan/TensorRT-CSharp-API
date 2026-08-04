@@ -448,6 +448,8 @@
     href: articles/zh-cn/debug-listener-local-package-consumer-tutorial.md
   - name: ProgressMonitor Local Package Consumer Tutorial
     href: articles/zh-cn/progress-monitor-local-package-consumer-tutorial.md
+  - name: Profiler Local Package Consumer Tutorial
+    href: articles/zh-cn/profiler-local-package-consumer-tutorial.md
   - name: DebugListener Callback Proof Gap Report
     href: articles/zh-cn/debug-listener-callback-proof-gap-report.md
   - name: Real Callback Runtime Evidence Schema

@@ -1,0 +1,12 @@
+PackageReferenceOnly=True
+ProjectReference=False
+SourceTreeBinary=False
+RuntimeEnvironment TRT=10.11.0 CUDA=12.9 TensorRtAvailable=True CudaAvailable=True
+ProfilerRuntimeSummary
+  TensorRtLine=10 RuntimePackageKey=win-x64-trt10.11-cuda12.9-cudnn9.22
+  ImmediateCallbacks=3 Layers=3 Failures=0
+  DeferredBeforeReport=0 Reported=True Callbacks=3 Layers=3
+  ExceptionCase=Passed EnqueueFailed=False Callbacks=3 Failures=3
+  MetadataCopied=True ImmediateDetached=True DeferredDetached=True NegativeDetached=True
+ProfilerRealRuntime=Passed TensorRtLine=10 RuntimePackageKey=win-x64-trt10.11-cuda12.9-cudnn9.22 ImmediateMode=True ImmediateInvocationCount=3 ImmediateLayerCount=3 ImmediateFailureCount=0 ImmediateDetachVerified=True DeferredMode=False DeferredBeforeReportCount=0 DeferredReported=True DeferredInvocationCount=3 DeferredLayerCount=3 DeferredFailureCount=0 DeferredDetachVerified=True MetadataCopied=True NegativeEnqueueFailed=False NegativeInvocationCount=3 NegativeFailureCount=3 NegativeDetachVerified=True RealCallbackRuntime=True
+ProfilerPackageConsumer Passed=True Mode=ProfilerRuntimeSmokeOnly
