@@ -17,4 +17,4 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $entrypoint = Join-Path $PSScriptRoot "Test-CallbackOwnerLocalPackageConsumer.ps1"
-& $entrypoint -Scenario GpuAllocator @PSBoundParameters
+& $entrypoint -Scenario OutputAllocator @PSBoundParameters

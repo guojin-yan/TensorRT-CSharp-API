@@ -141,6 +141,8 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Acquire-TorchVisionLrasppOff
 
 `eng/Test-GpuAllocatorLocalPackageConsumer.ps1` copies `samples/GpuAllocator.PackageConsumer` into a repository-external workspace and restores only the managed API and matching bridge-only packages from local feeds. `gpu-allocator-local-package-consumer-tensorrt10.11-evidence.json` records package and bridge hashes, eight real builder callbacks, zero final live allocations, and fail-closed rejection and exception cases. The sample constructs an identity network in code, so model acquisition and ONNX conversion are explicitly not applicable. CUDA and TensorRT are host-installed; the record is not public-package, Release, or post-publish proof.
 
+`eng/Test-OutputAllocatorLocalPackageConsumer.ps1` uses the same repository-external two-package harness for `samples/OutputAllocator.PackageConsumer`. `output-allocator-local-package-consumer-tensorrt10.11-evidence.json` records the package and restored bridge hashes, real `reallocateOutput` and `notifyShape` callbacks, paired CUDA allocation/release, zero live allocations after detach, and a rejection case that fails enqueue without allocating. Its identity network is created in code, so model acquisition, ONNX conversion, and image visualization are not applicable. This remains local-package evidence only.
+
 Recommended local names:
 
 | Sample | Local files |

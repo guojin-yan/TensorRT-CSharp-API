@@ -177,3 +177,5 @@ runtime 结果不代表 API 不存在，使用者应确保 bridge、TensorRT、C
 `RealCallbackRuntime=False`、`IsRealCallbackRuntimeProof=False`，属于 not proof 的合成设计诊断。旧的
 `output-allocator-attach-detach-design-gate`、`output-buffer-ownership-safety-gate` 和
 `output-allocator-runtime-proof-precheck` 也仅用于兼容历史 readiness 数据，不能替代本文的真实 enqueue 结果。
+
+生成本地 managed 包与 bridge-only 包后，可继续执行[本地 NuGet 包独立消费者全流程](output-allocator-local-package-consumer-tutorial.md)。该流程只用两个 `PackageReference` 在仓库外还原、编译和执行同一组正负例，不使用源码树 DLL 或开发期 bridge 探测。

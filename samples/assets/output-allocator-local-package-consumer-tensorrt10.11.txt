@@ -1,0 +1,12 @@
+PackageReferenceOnly=True
+ProjectReference=False
+SourceTreeBinary=False
+RuntimeEnvironment TRT=10.11.0 CUDA=12.9 TensorRtAvailable=True CudaAvailable=True
+OutputAllocatorRuntimeSummary
+  TensorRtLine=10 RuntimePackageKey=win-x64-trt10.11-cuda12.9-cudnn9.22
+  Callbacks=2 NotifyShape=1 Reallocate=1
+  Allocations=1 Releases=1 LiveAllocations=0
+  PeakLiveBytes=527 NativePointerExposed=False
+  RejectionCase=Passed EnqueueFailed=True Allocations=0 Failures=1
+OutputAllocatorRealRuntime=Passed TensorRtLine=10 RuntimePackageKey=win-x64-trt10.11-cuda12.9-cudnn9.22 InvocationCount=2 NotifyShapeCount=1 ReallocateOutputCount=1 AllocationCount=1 ReleaseCount=1 LiveAllocationCount=0 PeakLiveAllocationBytes=527 PointerExposed=False NegativeEnqueueFailed=True NegativeAllocationCount=0 NegativeFailureCount=1 RealCallbackRuntime=True
+OutputAllocatorPackageConsumer Passed=True Mode=OutputAllocatorRuntimeSmokeOnly

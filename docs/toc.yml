@@ -370,6 +370,8 @@
     href: articles/zh-cn/output-allocator-runtime-gate.md
   - name: OutputAllocator Owner-Safe Runtime
     href: articles/zh-cn/output-allocator-callback-owner-design.md
+  - name: OutputAllocator Local Package Consumer
+    href: articles/zh-cn/output-allocator-local-package-consumer-tutorial.md
   - name: IGpuAllocator Owner-Safe Runtime
     href: articles/zh-cn/gpu-allocator-owner-safe-runtime-tutorial.md
   - name: IGpuAllocator Local Package Consumer

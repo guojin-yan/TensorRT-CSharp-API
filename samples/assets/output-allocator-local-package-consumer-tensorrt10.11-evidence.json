@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "evidenceKind": "local-package-consumer-tensorrt-output-allocator-runtime",
+  "validationState": "passed-local-package-consumer-runtime",
+  "recordedAtLocal": "2026-08-05",
+  "tensorRtLine": 10,
+  "tensorRtVersion": "10.11.0",
+  "cudaToolkitVersion": "12.9",
+  "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+  "runtimePackageKey": "win-x64-trt10.11-cuda12.9-cudnn9.22",
+  "sample": "OutputAllocator.PackageConsumer",
+  "mode": "OutputAllocatorRuntimeSmokeOnly",
+  "model": {
+    "kind": "programmatically-created-identity-network",
+    "acquisition": "not-applicable",
+    "conversion": "not-applicable",
+    "externalModelRequired": false,
+    "onnxProduced": false
+  },
+  "packages": [
+    {
+      "role": "managed-api",
+      "id": "JYPPX.TensorRT.CSharp.API",
+      "version": "4.0.0",
+      "length": 15448144,
+      "sha256": "1fbf8f150ecd1e0ef79d51374aee8a5269f8b699b5e25f9f7619a4167f525499"
+    },
+    {
+      "role": "bridge-only",
+      "id": "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge",
+      "version": "4.0.0",
+      "length": 398656,
+      "sha256": "b0a4287428e39e8ee25749de19d3591b5071b02cafc121193098038880f19bfa",
+      "nativeEntry": "runtimes/win-x64/native/jyppxtrtbridge.dll",
+      "nativeEntrySha256": "297bf1f8f586dde5b64386633065d6946650d5355e43a246c5fff6b35872b03c"
+    }
+  ],
+  "isolation": {
+    "workspaceOutsideRepository": true,
+    "packageReferenceOnly": true,
+    "projectReference": false,
+    "hintPath": false,
+    "sourceTreeBinary": false,
+    "developmentBridgePathRemoved": true,
+    "developmentProbingRemoved": true,
+    "consumerBridgeMatchesPackage": true,
+    "vendorRuntimeBinaryCountInPackages": 0,
+    "vendorRuntimeBinaryCountInConsumerOutput": 0,
+    "vendorDependenciesProvidedByHost": true
+  },
+  "positive": {
+    "passed": true,
+    "invocationCount": 2,
+    "notifyShapeCount": 1,
+    "reallocateOutputCount": 1,
+    "allocationCount": 1,
+    "releaseCount": 1,
+    "liveAllocationCountAfterDetach": 0,
+    "peakLiveAllocationBytes": 527,
+    "nativePointerExposed": false,
+    "realCallbackRuntime": true
+  },
+  "rejectionNegative": {
+    "passed": true,
+    "enqueueFailed": true,
+    "allocationCount": 0,
+    "failureCount": 1,
+    "liveAllocationCountAfterDetach": 0
+  },
+  "artifacts": {
+    "consumerSource": {
+      "path": "samples/OutputAllocator.PackageConsumer/Program.cs",
+      "sha256": "8aad7fa45efd9c18c23fc8f279f23432c103e39aca1ba64e5c9f360b4eb01fa0",
+      "length": 11244
+    },
+    "projectTemplate": {
+      "path": "samples/OutputAllocator.PackageConsumer/OutputAllocator.PackageConsumer.csproj.template",
+      "sha256": "14459d08ff40d4df87364d973684dda5a9fad1892145df09e279c2b3a2739c6a",
+      "length": 550
+    },
+    "stdout": {
+      "path": "samples/assets/output-allocator-local-package-consumer-tensorrt10.11.txt",
+      "sha256": "ade3c10969034050966cef31d91cf748fc904099cf908d9a9999b7f876e9e87c",
+      "length": 907,
+      "source": "Line-ending-normalized copy of the captured package-consumer stdout; result values are unchanged."
+    },
+    "runtimeResultImage": {
+      "path": "docs/images/output-allocator-local-package-consumer-terminal.png",
+      "sha256": "17d50d40ea947b2af3aead76534eff18b2bbf1836263a154b81857fea1fbac81",
+      "length": 44165,
+      "source": "Rendered from the same captured stdout without changing result values."
+    }
+  },
+  "boundary": {
+    "isLocalPackageConsumerRuntimeEvidence": true,
+    "isPublicPackageConsumerProof": false,
+    "isReleaseProof": false,
+    "isPostPublishProof": false,
+    "performsPublish": false,
+    "statement": "Repository-external local-feed proof for the managed and bridge-only packages. CUDA and TensorRT are host-installed. No public package, tag, Release, or package publication was created."
+  }
+}
