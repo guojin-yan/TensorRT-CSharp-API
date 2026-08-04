@@ -10656,6 +10656,10 @@ JYPPX_StatusCode jyppx_trt10_resize_layer_set_resize_mode(JYPPX_TensorRtLayer* l
 #include "../common/output_allocator_callback_owner.inc"
 #undef JYPPX_TRT_OUTPUT_ALLOCATOR_OWNER_API
 
+#define JYPPX_TRT_GPU_ALLOCATOR_OWNER_API(name) jyppx_trt10_##name
+#include "../common/gpu_allocator_callback_owner.inc"
+#undef JYPPX_TRT_GPU_ALLOCATOR_OWNER_API
+
 #include "modules/layers/convolution_scale_padding.inc"
 #include "modules/layers/deconvolution.inc"
 #include "modules/layers/lrn.inc"

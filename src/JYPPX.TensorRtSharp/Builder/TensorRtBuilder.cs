@@ -160,7 +160,8 @@ public sealed partial class TensorRtBuilder : IDisposable
             throw new ArgumentException("Network and config must belong to the same TensorRT API line as the builder.");
         }
 
-        return new TensorRtHostMemory(Line, NativeBridgeApi.BuildSerializedNetwork(Line, _handle, network.Handle, config.Handle));
+        return ExecuteWithGpuAllocatorLease(() =>
+            new TensorRtHostMemory(Line, NativeBridgeApi.BuildSerializedNetwork(Line, _handle, network.Handle, config.Handle)));
     }
 
     /// <summary>
@@ -174,6 +175,7 @@ public sealed partial class TensorRtBuilder : IDisposable
             return;
         }
 
+        ReleaseManagedGpuAllocatorForDispose();
         _disposed = true;
         _handle.Dispose();
         GC.KeepAlive(_loggerKeepAlive);

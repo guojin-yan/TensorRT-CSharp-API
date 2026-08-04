@@ -9735,6 +9735,10 @@ JYPPX_StatusCode jyppx_trt8_execution_context_get_shape_binding(
 #include "../common/output_allocator_callback_owner.inc"
 #undef JYPPX_TRT_OUTPUT_ALLOCATOR_OWNER_API
 
+#define JYPPX_TRT_GPU_ALLOCATOR_OWNER_API(name) jyppx_trt8_##name
+#include "../common/gpu_allocator_callback_owner.inc"
+#undef JYPPX_TRT_GPU_ALLOCATOR_OWNER_API
+
 #define JYPPX_TRT_DIRECT_ENGINE_BUILD_API jyppx_trt8_builder_build_engine_with_config
 #define JYPPX_TRT_DIRECT_ENGINE_DESTROY destroy_engine_payload
 #include "../common/direct_engine_build.inc"

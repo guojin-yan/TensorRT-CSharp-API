@@ -1203,6 +1203,11 @@
 #define JYPPX_API_TRT10_GPU_ALLOCATOR_ALLOCATE_DEFERRED "jyppx_trt10_gpu_allocator_allocate_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_GPU_ALLOCATOR_DEALLOCATE_DEFERRED "jyppx_trt10_gpu_allocator_deallocate_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_GPU_ALLOCATOR_GET_INTERFACE_INFO_DEFERRED "jyppx_trt10_gpu_allocator_get_interface_info_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_TRT10_GPU_ALLOCATOR_OWNER_ATTACH_BUILDER "jyppx_trt10_gpu_allocator_owner_attach_builder" // module=tensorrt; line=10; ownership=borrowed-by-builder-and-created-engines-until-detach; manualOverride=false
+#define JYPPX_API_TRT10_GPU_ALLOCATOR_OWNER_ATTACH_RUNTIME "jyppx_trt10_gpu_allocator_owner_attach_runtime" // module=tensorrt; line=10; ownership=borrowed-by-runtime-and-created-engines-until-detach; manualOverride=false
+#define JYPPX_API_TRT10_GPU_ALLOCATOR_OWNER_CREATE "jyppx_trt10_gpu_allocator_owner_create" // module=tensorrt; line=10; ownership=caller-destroys; manualOverride=false
+#define JYPPX_API_TRT10_GPU_ALLOCATOR_OWNER_DETACH "jyppx_trt10_gpu_allocator_owner_detach" // module=tensorrt; line=10; ownership=caller-owned-owner-retained-by-managed-engine-leases; manualOverride=false
+#define JYPPX_API_TRT10_GPU_ALLOCATOR_OWNER_GET_INFO "jyppx_trt10_gpu_allocator_owner_get_info" // module=tensorrt; line=10; ownership=caller-owned-copied-pointer-free-snapshot; manualOverride=false
 #define JYPPX_API_TRT10_GPU_ALLOCATOR_REALLOCATE_DEFERRED "jyppx_trt10_gpu_allocator_reallocate_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_GPU_ASYNC_ALLOCATOR_ALLOCATE_ASYNC_DEFERRED "jyppx_trt10_gpu_async_allocator_allocate_async_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_GPU_ASYNC_ALLOCATOR_DEALLOCATE_ASYNC_DEFERRED "jyppx_trt10_gpu_async_allocator_deallocate_async_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
@@ -2450,6 +2455,11 @@
 #define JYPPX_API_TRT11_GPU_ALLOCATOR_ALLOCATE_DEFERRED "jyppx_trt11_gpu_allocator_allocate_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_GPU_ALLOCATOR_DEALLOCATE_DEFERRED "jyppx_trt11_gpu_allocator_deallocate_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_GPU_ALLOCATOR_GET_INTERFACE_INFO_DEFERRED "jyppx_trt11_gpu_allocator_get_interface_info_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_TRT11_GPU_ALLOCATOR_OWNER_ATTACH_BUILDER "jyppx_trt11_gpu_allocator_owner_attach_builder" // module=tensorrt; line=11; ownership=borrowed-by-builder-and-created-engines-until-detach; manualOverride=false
+#define JYPPX_API_TRT11_GPU_ALLOCATOR_OWNER_ATTACH_RUNTIME "jyppx_trt11_gpu_allocator_owner_attach_runtime" // module=tensorrt; line=11; ownership=borrowed-by-runtime-and-created-engines-until-detach; manualOverride=false
+#define JYPPX_API_TRT11_GPU_ALLOCATOR_OWNER_CREATE "jyppx_trt11_gpu_allocator_owner_create" // module=tensorrt; line=11; ownership=caller-destroys; manualOverride=false
+#define JYPPX_API_TRT11_GPU_ALLOCATOR_OWNER_DETACH "jyppx_trt11_gpu_allocator_owner_detach" // module=tensorrt; line=11; ownership=caller-owned-owner-retained-by-managed-engine-leases; manualOverride=false
+#define JYPPX_API_TRT11_GPU_ALLOCATOR_OWNER_GET_INFO "jyppx_trt11_gpu_allocator_owner_get_info" // module=tensorrt; line=11; ownership=caller-owned-copied-pointer-free-snapshot; manualOverride=false
 #define JYPPX_API_TRT11_GPU_ALLOCATOR_REALLOCATE_DEFERRED "jyppx_trt11_gpu_allocator_reallocate_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_GPU_ASYNC_ALLOCATOR_ALLOCATE_ASYNC_DEFERRED "jyppx_trt11_gpu_async_allocator_allocate_async_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_GPU_ASYNC_ALLOCATOR_DEALLOCATE_ASYNC_DEFERRED "jyppx_trt11_gpu_async_allocator_deallocate_async_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
@@ -3523,6 +3533,11 @@
 #define JYPPX_API_TRT8_GLOBAL_TRANSPOSE_SUB_BUFFERS_DEFERRED "jyppx_trt8_global_transpose_sub_buffers_deferred" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_GPU_ALLOCATOR_ALLOCATE_DEFERRED "jyppx_trt8_gpu_allocator_allocate_deferred" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_GPU_ALLOCATOR_FREE_DEFERRED "jyppx_trt8_gpu_allocator_free_deferred" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_TRT8_GPU_ALLOCATOR_OWNER_ATTACH_BUILDER "jyppx_trt8_gpu_allocator_owner_attach_builder" // module=tensorrt; line=8; ownership=borrowed-by-builder-and-created-engines-until-detach; manualOverride=false
+#define JYPPX_API_TRT8_GPU_ALLOCATOR_OWNER_ATTACH_RUNTIME "jyppx_trt8_gpu_allocator_owner_attach_runtime" // module=tensorrt; line=8; ownership=borrowed-by-runtime-and-created-engines-until-detach; manualOverride=false
+#define JYPPX_API_TRT8_GPU_ALLOCATOR_OWNER_CREATE "jyppx_trt8_gpu_allocator_owner_create" // module=tensorrt; line=8; ownership=caller-destroys; manualOverride=false
+#define JYPPX_API_TRT8_GPU_ALLOCATOR_OWNER_DETACH "jyppx_trt8_gpu_allocator_owner_detach" // module=tensorrt; line=8; ownership=caller-owned-owner-retained-by-managed-engine-leases; manualOverride=false
+#define JYPPX_API_TRT8_GPU_ALLOCATOR_OWNER_GET_INFO "jyppx_trt8_gpu_allocator_owner_get_info" // module=tensorrt; line=8; ownership=caller-owned-copied-pointer-free-snapshot; manualOverride=false
 #define JYPPX_API_TRT8_GPU_ALLOCATOR_REALLOCATE_DEFERRED "jyppx_trt8_gpu_allocator_reallocate_deferred" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_GRID_SAMPLE_LAYER_GET_ALIGN_CORNERS "jyppx_trt8_grid_sample_layer_get_align_corners" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_GRID_SAMPLE_LAYER_GET_INTERPOLATION_MODE "jyppx_trt8_grid_sample_layer_get_interpolation_mode" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false

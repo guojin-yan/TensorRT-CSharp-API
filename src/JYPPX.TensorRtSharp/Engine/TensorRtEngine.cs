@@ -14,11 +14,23 @@ namespace JYPPX.TensorRtSharp;
 public sealed partial class TensorRtEngine : IDisposable
 {
     private readonly SafeTensorRtObjectHandle _handle;
+    private readonly TensorRtGpuAllocatorCallbackOwner? _gpuAllocatorKeepAlive;
+    private bool _disposed;
 
     internal TensorRtEngine(TensorRtApiLine line, SafeTensorRtObjectHandle handle)
+        : this(line, handle, null)
+    {
+    }
+
+    internal TensorRtEngine(
+        TensorRtApiLine line,
+        SafeTensorRtObjectHandle handle,
+        TensorRtGpuAllocatorCallbackOwner? gpuAllocatorKeepAlive)
     {
         Line = line;
         _handle = handle;
+        _gpuAllocatorKeepAlive = gpuAllocatorKeepAlive;
+        _gpuAllocatorKeepAlive?.AttachEngineBorrower(line);
     }
 
     internal SafeTensorRtObjectHandle Handle => _handle;
@@ -117,7 +129,20 @@ public sealed partial class TensorRtEngine : IDisposable
     /// </summary>
     public void Dispose()
     {
-        _handle.Dispose();
+        if (_disposed)
+        {
+            return;
+        }
+
+        _disposed = true;
+        try
+        {
+            _handle.Dispose();
+        }
+        finally
+        {
+            _gpuAllocatorKeepAlive?.DetachEngineBorrower();
+        }
         GC.SuppressFinalize(this);
     }
 

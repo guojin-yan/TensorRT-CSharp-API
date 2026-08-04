@@ -72,7 +72,7 @@ public sealed partial class TensorRtRuntime : IDisposable
             throw new ArgumentException("Host memory belongs to a different TensorRT API line.", nameof(hostMemory));
         }
 
-        return new TensorRtEngine(Line, NativeBridgeApi.DeserializeHostMemory(Line, _handle, hostMemory.Handle));
+        return DeserializeWithGpuAllocatorLease(() => NativeBridgeApi.DeserializeHostMemory(Line, _handle, hostMemory.Handle));
     }
 
     /// <summary>
@@ -88,7 +88,7 @@ public sealed partial class TensorRtRuntime : IDisposable
             throw new ArgumentNullException(nameof(serializedEngine));
         }
 
-        return new TensorRtEngine(Line, NativeBridgeApi.DeserializeEngineData(Line, _handle, serializedEngine));
+        return DeserializeWithGpuAllocatorLease(() => NativeBridgeApi.DeserializeEngineData(Line, _handle, serializedEngine));
     }
 
     /// <summary>
@@ -184,6 +184,7 @@ public sealed partial class TensorRtRuntime : IDisposable
             return;
         }
 
+        ReleaseManagedGpuAllocatorForDispose();
         _disposed = true;
         _handle.Dispose();
         GC.KeepAlive(_loggerKeepAlive);

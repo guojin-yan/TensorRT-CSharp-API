@@ -111,6 +111,11 @@ JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_output_allocator_owner_create(JYPPX_Te
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_output_allocator_owner_attach(JYPPX_TensorRtOutputAllocatorOwner* owner, JYPPX_TensorRtExecutionContext* context, const char* tensor_name, JYPPX_Boolean* out_attached);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_output_allocator_owner_detach(JYPPX_TensorRtOutputAllocatorOwner* owner, JYPPX_Boolean* out_detached);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_output_allocator_owner_get_info(JYPPX_TensorRtOutputAllocatorOwner* owner, JYPPX_TensorRtOutputAllocatorOwnerInfo* out_info);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_gpu_allocator_owner_create(JYPPX_TensorRtGpuAllocatorCallback callback, void* user_state, JYPPX_TensorRtGpuAllocatorOwner** out_owner);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_gpu_allocator_owner_attach_runtime(JYPPX_TensorRtGpuAllocatorOwner* owner, JYPPX_TensorRtRuntime* runtime, JYPPX_Boolean* out_attached);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_gpu_allocator_owner_attach_builder(JYPPX_TensorRtGpuAllocatorOwner* owner, JYPPX_TensorRtBuilder* builder, JYPPX_Boolean* out_attached);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_gpu_allocator_owner_detach(JYPPX_TensorRtGpuAllocatorOwner* owner, JYPPX_Boolean* out_detached);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_gpu_allocator_owner_get_info(JYPPX_TensorRtGpuAllocatorOwner* owner, JYPPX_TensorRtGpuAllocatorOwnerInfo* out_info);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_runtime_create(JYPPX_TensorRtLogger* logger, JYPPX_TensorRtRuntime** out_runtime);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_runtime_create_diagnostic(JYPPX_TensorRtLogger* logger, JYPPX_TensorRtRuntimeCreateDiagnosticInfo* out_info);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt11_builder_create(JYPPX_TensorRtLogger* logger, JYPPX_TensorRtBuilder** out_builder);

@@ -1208,6 +1208,11 @@ internal static class GeneratedEntryPointNames
     public const string Trt10GpuAllocatorAllocateDeferred = "jyppx_trt10_gpu_allocator_allocate_deferred";
     public const string Trt10GpuAllocatorDeallocateDeferred = "jyppx_trt10_gpu_allocator_deallocate_deferred";
     public const string Trt10GpuAllocatorGetInterfaceInfoDeferred = "jyppx_trt10_gpu_allocator_get_interface_info_deferred";
+    public const string Trt10GpuAllocatorOwnerAttachBuilder = "jyppx_trt10_gpu_allocator_owner_attach_builder";
+    public const string Trt10GpuAllocatorOwnerAttachRuntime = "jyppx_trt10_gpu_allocator_owner_attach_runtime";
+    public const string Trt10GpuAllocatorOwnerCreate = "jyppx_trt10_gpu_allocator_owner_create";
+    public const string Trt10GpuAllocatorOwnerDetach = "jyppx_trt10_gpu_allocator_owner_detach";
+    public const string Trt10GpuAllocatorOwnerGetInfo = "jyppx_trt10_gpu_allocator_owner_get_info";
     public const string Trt10GpuAllocatorReallocateDeferred = "jyppx_trt10_gpu_allocator_reallocate_deferred";
     public const string Trt10GpuAsyncAllocatorAllocateAsyncDeferred = "jyppx_trt10_gpu_async_allocator_allocate_async_deferred";
     public const string Trt10GpuAsyncAllocatorDeallocateAsyncDeferred = "jyppx_trt10_gpu_async_allocator_deallocate_async_deferred";
@@ -2455,6 +2460,11 @@ internal static class GeneratedEntryPointNames
     public const string Trt11GpuAllocatorAllocateDeferred = "jyppx_trt11_gpu_allocator_allocate_deferred";
     public const string Trt11GpuAllocatorDeallocateDeferred = "jyppx_trt11_gpu_allocator_deallocate_deferred";
     public const string Trt11GpuAllocatorGetInterfaceInfoDeferred = "jyppx_trt11_gpu_allocator_get_interface_info_deferred";
+    public const string Trt11GpuAllocatorOwnerAttachBuilder = "jyppx_trt11_gpu_allocator_owner_attach_builder";
+    public const string Trt11GpuAllocatorOwnerAttachRuntime = "jyppx_trt11_gpu_allocator_owner_attach_runtime";
+    public const string Trt11GpuAllocatorOwnerCreate = "jyppx_trt11_gpu_allocator_owner_create";
+    public const string Trt11GpuAllocatorOwnerDetach = "jyppx_trt11_gpu_allocator_owner_detach";
+    public const string Trt11GpuAllocatorOwnerGetInfo = "jyppx_trt11_gpu_allocator_owner_get_info";
     public const string Trt11GpuAllocatorReallocateDeferred = "jyppx_trt11_gpu_allocator_reallocate_deferred";
     public const string Trt11GpuAsyncAllocatorAllocateAsyncDeferred = "jyppx_trt11_gpu_async_allocator_allocate_async_deferred";
     public const string Trt11GpuAsyncAllocatorDeallocateAsyncDeferred = "jyppx_trt11_gpu_async_allocator_deallocate_async_deferred";
@@ -3528,6 +3538,11 @@ internal static class GeneratedEntryPointNames
     public const string Trt8GlobalTransposeSubBuffersDeferred = "jyppx_trt8_global_transpose_sub_buffers_deferred";
     public const string Trt8GpuAllocatorAllocateDeferred = "jyppx_trt8_gpu_allocator_allocate_deferred";
     public const string Trt8GpuAllocatorFreeDeferred = "jyppx_trt8_gpu_allocator_free_deferred";
+    public const string Trt8GpuAllocatorOwnerAttachBuilder = "jyppx_trt8_gpu_allocator_owner_attach_builder";
+    public const string Trt8GpuAllocatorOwnerAttachRuntime = "jyppx_trt8_gpu_allocator_owner_attach_runtime";
+    public const string Trt8GpuAllocatorOwnerCreate = "jyppx_trt8_gpu_allocator_owner_create";
+    public const string Trt8GpuAllocatorOwnerDetach = "jyppx_trt8_gpu_allocator_owner_detach";
+    public const string Trt8GpuAllocatorOwnerGetInfo = "jyppx_trt8_gpu_allocator_owner_get_info";
     public const string Trt8GpuAllocatorReallocateDeferred = "jyppx_trt8_gpu_allocator_reallocate_deferred";
     public const string Trt8GridSampleLayerGetAlignCorners = "jyppx_trt8_grid_sample_layer_get_align_corners";
     public const string Trt8GridSampleLayerGetInterpolationMode = "jyppx_trt8_grid_sample_layer_get_interpolation_mode";

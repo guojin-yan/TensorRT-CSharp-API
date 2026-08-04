@@ -43,7 +43,8 @@ typedef enum JYPPX_TensorRtObjectKind
     JYPPX_TENSORRT_OBJECT_KIND_ALLOCATOR_CALLBACK_OWNER = 24,
     JYPPX_TENSORRT_OBJECT_KIND_ONNX_CONFIG = 25,
     JYPPX_TENSORRT_OBJECT_KIND_DEBUG_LISTENER_CALLBACK_OWNER = 26,
-    JYPPX_TENSORRT_OBJECT_KIND_OUTPUT_ALLOCATOR_CALLBACK_OWNER = 27
+    JYPPX_TENSORRT_OBJECT_KIND_OUTPUT_ALLOCATOR_CALLBACK_OWNER = 27,
+    JYPPX_TENSORRT_OBJECT_KIND_GPU_ALLOCATOR_CALLBACK_OWNER = 28
 } JYPPX_TensorRtObjectKind;
 
 typedef enum JYPPX_TensorRtProgressMonitorEventKind
@@ -89,6 +90,7 @@ typedef JYPPX_TensorRtObjectBase JYPPX_TensorRtAllocatorOwner;
 typedef JYPPX_TensorRtObjectBase JYPPX_TensorRtOnnxConfig;
 typedef JYPPX_TensorRtObjectBase JYPPX_TensorRtDebugListenerOwner;
 typedef JYPPX_TensorRtObjectBase JYPPX_TensorRtOutputAllocatorOwner;
+typedef JYPPX_TensorRtObjectBase JYPPX_TensorRtGpuAllocatorOwner;
 
 typedef JYPPX_StatusCode (*JYPPX_TensorRtLoggerCallback)(
     int32_t severity,
@@ -156,6 +158,34 @@ typedef JYPPX_StatusCode (*JYPPX_TensorRtOutputAllocatorCallback)(
     int64_t dim6,
     int64_t dim7,
     JYPPX_Boolean* out_should_allocate,
+    void* user_state);
+
+typedef enum JYPPX_TensorRtGpuAllocatorCallbackKind
+{
+    JYPPX_TENSORRT_GPU_ALLOCATOR_CALLBACK_UNKNOWN = 0,
+    JYPPX_TENSORRT_GPU_ALLOCATOR_CALLBACK_ALLOCATE = 1,
+    JYPPX_TENSORRT_GPU_ALLOCATOR_CALLBACK_REALLOCATE = 2,
+    JYPPX_TENSORRT_GPU_ALLOCATOR_CALLBACK_DEALLOCATE = 3,
+    JYPPX_TENSORRT_GPU_ALLOCATOR_CALLBACK_ALLOCATE_ASYNC = 4,
+    JYPPX_TENSORRT_GPU_ALLOCATOR_CALLBACK_DEALLOCATE_ASYNC = 5
+} JYPPX_TensorRtGpuAllocatorCallbackKind;
+
+typedef enum JYPPX_TensorRtGpuAllocatorAttachmentTarget
+{
+    JYPPX_TENSORRT_GPU_ALLOCATOR_TARGET_NONE = 0,
+    JYPPX_TENSORRT_GPU_ALLOCATOR_TARGET_RUNTIME = 1,
+    JYPPX_TENSORRT_GPU_ALLOCATOR_TARGET_BUILDER = 2
+} JYPPX_TensorRtGpuAllocatorAttachmentTarget;
+
+typedef JYPPX_StatusCode (*JYPPX_TensorRtGpuAllocatorCallback)(
+    uint32_t line,
+    int32_t callback_kind,
+    uint64_t requested_size,
+    uint64_t alignment,
+    uint32_t allocator_flags,
+    JYPPX_Boolean has_current_memory,
+    JYPPX_Boolean has_stream,
+    JYPPX_Boolean* out_should_proceed,
     void* user_state);
 
 typedef struct JYPPX_TensorRtAdapterInfo
@@ -321,6 +351,40 @@ typedef struct JYPPX_TensorRtOutputAllocatorOwnerInfo
     char last_tensor_name[256];
     char last_diagnostic[1024];
 } JYPPX_TensorRtOutputAllocatorOwnerInfo;
+
+typedef struct JYPPX_TensorRtGpuAllocatorOwnerInfo
+{
+    uint32_t line;
+    uint64_t owner_id;
+    uint64_t invocation_count;
+    uint64_t allocate_count;
+    uint64_t reallocate_count;
+    uint64_t deallocate_count;
+    uint64_t allocate_async_count;
+    uint64_t deallocate_async_count;
+    uint64_t rejected_count;
+    uint64_t callback_failure_count;
+    uint64_t cuda_failure_count;
+    uint64_t in_flight_callback_count;
+    uint64_t max_in_flight_callback_count;
+    uint64_t attach_count;
+    uint64_t detach_count;
+    uint64_t live_allocation_count;
+    uint64_t live_allocation_bytes;
+    uint64_t peak_live_allocation_bytes;
+    uint64_t last_requested_size;
+    uint64_t last_alignment;
+    uint32_t last_allocator_flags;
+    int32_t last_status;
+    int32_t attachment_target;
+    int32_t last_callback_kind;
+    JYPPX_Boolean is_attached;
+    JYPPX_Boolean last_callback_succeeded;
+    JYPPX_Boolean last_operation_succeeded;
+    JYPPX_Boolean last_had_current_memory;
+    JYPPX_Boolean last_had_stream;
+    char last_diagnostic[1024];
+} JYPPX_TensorRtGpuAllocatorOwnerInfo;
 
 typedef struct JYPPX_TensorRtRuntimeCreateDiagnosticInfo
 {

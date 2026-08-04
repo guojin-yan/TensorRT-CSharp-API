@@ -21,7 +21,7 @@ public sealed partial class TensorRtBuilder
     public TensorRtEngine BuildEngineWithConfig(TensorRtNetworkDefinition network, TensorRtBuilderConfig config)
     {
         ValidateBuildInputs(network, config);
-        return new TensorRtEngine(Line, NativeBridgeApi.BuildEngineWithConfig(Line, _handle, network.Handle, config.Handle));
+        return BuildEngineWithGpuAllocatorLease(() => NativeBridgeApi.BuildEngineWithConfig(Line, _handle, network.Handle, config.Handle));
     }
 
     /// <summary>
@@ -34,7 +34,8 @@ public sealed partial class TensorRtBuilder
     public TensorRtSerializedNetworkWithKernelText BuildSerializedNetworkWithKernelText(TensorRtNetworkDefinition network, TensorRtBuilderConfig config)
     {
         ValidateBuildInputs(network, config);
-        NativeTensorRtSerializedNetworkWithKernelText result = NativeBridgeApi.BuildSerializedNetworkWithKernelText(Line, _handle, network.Handle, config.Handle);
+        NativeTensorRtSerializedNetworkWithKernelText result = ExecuteWithGpuAllocatorLease(() =>
+            NativeBridgeApi.BuildSerializedNetworkWithKernelText(Line, _handle, network.Handle, config.Handle));
         TensorRtHostMemory plan = new TensorRtHostMemory(Line, result.Plan);
         TensorRtHostMemory? kernelText = result.KernelText == null ? null : new TensorRtHostMemory(Line, result.KernelText);
         return new TensorRtSerializedNetworkWithKernelText(plan, kernelText);

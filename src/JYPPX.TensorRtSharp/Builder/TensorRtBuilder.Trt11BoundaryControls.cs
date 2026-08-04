@@ -94,12 +94,14 @@ public sealed partial class TensorRtBuilder
     /// 清除当前 builder 上绑定的自定义 GPU allocator；适用于 TensorRT 8/10/11，不会调用用户 allocator 的 free/deallocate 回调。
     /// </summary>
     /// <remarks>
-    /// The bridge currently exposes clearing only. Installing a managed allocator is intentionally left out until callback ownership is designed.
-    /// 当前桥接层只暴露清除操作；托管 allocator 回调涉及生命周期和线程边界，暂不在普通高层 API 中暴露。
+    /// Managed owners installed through <see cref="SetGpuAllocator(TensorRtGpuAllocatorCallbackOwner)"/> are detached with their
+    /// borrower leases intact. When no managed owner is installed, this method clears an externally installed allocator pointer.
+    /// 通过 <see cref="SetGpuAllocator(TensorRtGpuAllocatorCallbackOwner)"/> 安装的托管 owner 会在保留其子对象租约的前提下解除绑定；
+    /// 未安装托管 owner 时，本方法清除外部设置的 allocator 指针。
     /// </remarks>
     public void ClearGpuAllocator()
     {
-        NativeBridgeApi.ClearBuilderGpuAllocator(Line, _handle);
+        ClearManagedGpuAllocator();
     }
 
     /// <summary>
@@ -144,6 +146,7 @@ public sealed partial class TensorRtBuilder
             throw new ArgumentException("Network and config must belong to the same TensorRT API line as the builder.");
         }
 
-        return NativeBridgeApi.IsNetworkSupported(Line, _handle, network.Handle, config.Handle);
+        return ExecuteWithGpuAllocatorLease(
+            () => NativeBridgeApi.IsNetworkSupported(Line, _handle, network.Handle, config.Handle));
     }
 }

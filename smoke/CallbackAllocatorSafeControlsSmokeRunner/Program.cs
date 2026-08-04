@@ -15,6 +15,7 @@ internal static class Program
         bool dependencyProbeOnly = JYPPX.SampleSupport.SampleCommandLine.HasSwitch(args, "--dependency-probe-only");
         bool debugListenerRuntimeSmokeOnly = JYPPX.SampleSupport.SampleCommandLine.HasSwitch(args, "--debug-listener-runtime-smoke-only");
         bool outputAllocatorRuntimeSmokeOnly = JYPPX.SampleSupport.SampleCommandLine.HasSwitch(args, "--output-allocator-runtime-smoke-only");
+        bool gpuAllocatorRuntimeSmokeOnly = JYPPX.SampleSupport.SampleCommandLine.HasSwitch(args, "--gpu-allocator-runtime-smoke-only");
         string callbackStateGetterProbe = JYPPX.SampleSupport.SampleCommandLine.GetStringArgument(args, "--callback-state-getter-probe", string.Empty);
         bool enableDebugListenerRuntimeSmoke =
             debugListenerRuntimeSmokeOnly ||
@@ -22,8 +23,11 @@ internal static class Program
         bool enableOutputAllocatorRuntimeSmoke =
             outputAllocatorRuntimeSmokeOnly ||
             JYPPX.SampleSupport.SampleCommandLine.HasSwitch(args, "--enable-output-allocator-runtime-smoke");
+        bool enableGpuAllocatorRuntimeSmoke =
+            gpuAllocatorRuntimeSmokeOnly ||
+            JYPPX.SampleSupport.SampleCommandLine.HasSwitch(args, "--enable-gpu-allocator-runtime-smoke");
 
-        Console.WriteLine($"CallbackAllocatorSafeControlsSmokeRunner TensorRtLineRequest={requestedLine} RuntimePackageKey={runtimePackageKey} DependencyProbeOnly={dependencyProbeOnly} EnableDebugListenerRuntimeSmoke={enableDebugListenerRuntimeSmoke} DebugListenerRuntimeSmokeOnly={debugListenerRuntimeSmokeOnly} EnableOutputAllocatorRuntimeSmoke={enableOutputAllocatorRuntimeSmoke} OutputAllocatorRuntimeSmokeOnly={outputAllocatorRuntimeSmokeOnly}");
+        Console.WriteLine($"CallbackAllocatorSafeControlsSmokeRunner TensorRtLineRequest={requestedLine} RuntimePackageKey={runtimePackageKey} DependencyProbeOnly={dependencyProbeOnly} EnableDebugListenerRuntimeSmoke={enableDebugListenerRuntimeSmoke} DebugListenerRuntimeSmokeOnly={debugListenerRuntimeSmokeOnly} EnableOutputAllocatorRuntimeSmoke={enableOutputAllocatorRuntimeSmoke} OutputAllocatorRuntimeSmokeOnly={outputAllocatorRuntimeSmokeOnly} EnableGpuAllocatorRuntimeSmoke={enableGpuAllocatorRuntimeSmoke} GpuAllocatorRuntimeSmokeOnly={gpuAllocatorRuntimeSmokeOnly}");
 
         if (dependencyProbeOnly)
         {
@@ -57,7 +61,7 @@ internal static class Program
         Console.WriteLine($"Adapter Runtime={adapter.RuntimeCreationSupported} Builder={adapter.BuilderCreationSupported} Message={adapter.StatusMessage}");
 
         PrintDependencyProbe(line.Value);
-        if (!debugListenerRuntimeSmokeOnly && !outputAllocatorRuntimeSmokeOnly)
+        if (!debugListenerRuntimeSmokeOnly && !outputAllocatorRuntimeSmokeOnly && !gpuAllocatorRuntimeSmokeOnly)
         {
             PrintSafeControlSurface(line.Value, enableDebugListenerRuntimeSmoke, runtimePackageKey);
         }
@@ -118,6 +122,23 @@ internal static class Program
             return;
         }
 
+        if (gpuAllocatorRuntimeSmokeOnly)
+        {
+            try
+            {
+                RunRealGpuAllocatorRuntimeSmoke(line.Value, runtimePackageKey);
+            }
+            catch (Exception exception) when (IsSkippableEnvironmentException(exception))
+            {
+                Console.WriteLine($"GpuAllocatorRealRuntime=Skipped Reason={exception.GetType().Name}:{exception.Message}");
+                Console.WriteLine($"Skipped=True Reason={exception.GetType().Name}:{exception.Message}");
+                return;
+            }
+
+            Console.WriteLine("CallbackAllocatorSafeControlsSmokeRunner Passed=True Mode=GpuAllocatorRuntimeSmokeOnly");
+            return;
+        }
+
         try
         {
             RunSafeControls(line.Value);
@@ -128,6 +149,10 @@ internal static class Program
             if (enableOutputAllocatorRuntimeSmoke)
             {
                 RunRealOutputAllocatorRuntimeSmoke(line.Value, runtimePackageKey);
+            }
+            if (enableGpuAllocatorRuntimeSmoke)
+            {
+                RunRealGpuAllocatorRuntimeSmoke(line.Value, runtimePackageKey);
             }
         }
         catch (Exception exception) when (IsSkippableEnvironmentException(exception))
@@ -501,6 +526,205 @@ internal static class Program
             $" NegativeAllocationCount={negativeAttached.AllocationCount}" +
             $" NegativeFailureCount={negativeAttached.FailureCount}" +
             $" RealCallbackRuntime={positiveAttached.RealCallbackRuntime}");
+    }
+
+    private static void RunRealGpuAllocatorRuntimeSmoke(TensorRtApiLine line, string runtimePackageKey)
+    {
+        using TensorRtLogger logger = new TensorRtLogger(line);
+        using TensorRtHostMemory hostMemory = BuildGpuAllocatorSmokePlan(line, logger);
+
+        TensorRtGpuAllocatorRuntimeSnapshot runtimeAttached;
+        TensorRtGpuAllocatorRuntimeSnapshot runtimeDetached;
+        TensorRtGpuAllocatorRuntimeSnapshot runtimeReleased;
+        using (TensorRtGpuAllocatorCallbackOwner runtimeOwner = new TensorRtGpuAllocatorCallbackOwner(
+            line,
+            static _ => true))
+        using (TensorRtRuntime runtime = new TensorRtRuntime(logger))
+        {
+            runtime.SetGpuAllocator(runtimeOwner);
+            using TensorRtEngine engine = runtime.Deserialize(hostMemory);
+            runtimeAttached = runtimeOwner.GetRuntimeSnapshot();
+            runtime.ClearGpuAllocator();
+            runtimeDetached = runtimeOwner.GetRuntimeSnapshot();
+            engine.Dispose();
+            runtimeReleased = runtimeOwner.GetRuntimeSnapshot();
+
+            bool runtimePassed =
+                runtimeAttached.IsAttached &&
+                runtimeAttached.AttachmentTarget == TensorRtGpuAllocatorAttachmentTarget.Runtime &&
+                !runtimeDetached.IsAttached &&
+                runtimeDetached.AttachmentTarget == TensorRtGpuAllocatorAttachmentTarget.None &&
+                !runtime.HasManagedGpuAllocator &&
+                runtimeReleased.LiveAllocationCount == 0UL &&
+                runtimeReleased.LiveAllocationBytes == 0UL &&
+                runtimeReleased.CallbackFailureCount == 0UL &&
+                runtimeReleased.CudaFailureCount == 0UL;
+            if (!runtimePassed)
+            {
+                throw new InvalidOperationException(
+                    "Real TensorRT runtime GPU allocator smoke did not satisfy attach/invoke/engine-lease/release invariants. " +
+                    "Attached=" + runtimeAttached + " Detached=" + runtimeDetached + " Released=" + runtimeReleased);
+            }
+        }
+
+        TensorRtGpuAllocatorRuntimeSnapshot builderAttached;
+        TensorRtGpuAllocatorRuntimeSnapshot builderDetached;
+        TensorRtGpuAllocatorRuntimeSnapshot builderReleased;
+        using (TensorRtGpuAllocatorCallbackOwner builderOwner = new TensorRtGpuAllocatorCallbackOwner(line, static _ => true))
+        using (TensorRtBuilder builder = new TensorRtBuilder(logger))
+        using (TensorRtBuilderConfig config = builder.CreateBuilderConfig())
+        using (TensorRtNetworkDefinition network = CreateGpuAllocatorSmokeNetwork(builder, "gpu_builder"))
+        {
+            config.SetMemoryPoolLimit(TensorRtMemoryPoolType.Workspace, 32UL * 1024UL * 1024UL);
+            builder.SetGpuAllocator(builderOwner);
+            using TensorRtEngine engine = builder.BuildEngineWithConfig(network, config);
+            builderAttached = builderOwner.GetRuntimeSnapshot();
+            builder.ClearGpuAllocator();
+            builderDetached = builderOwner.GetRuntimeSnapshot();
+            engine.Dispose();
+            builderReleased = builderOwner.GetRuntimeSnapshot();
+
+            bool builderPassed =
+                builderAttached.IsAttached &&
+                builderAttached.AttachmentTarget == TensorRtGpuAllocatorAttachmentTarget.Builder &&
+                builderAttached.RealCallbackRuntime &&
+                !builderDetached.IsAttached &&
+                !builder.HasManagedGpuAllocator &&
+                builderReleased.LiveAllocationCount == 0UL &&
+                builderReleased.LiveAllocationBytes == 0UL &&
+                builderReleased.DeallocateCount + builderReleased.DeallocateAsyncCount > 0UL &&
+                builderReleased.CallbackFailureCount == 0UL &&
+                builderReleased.CudaFailureCount == 0UL;
+            if (!builderPassed)
+            {
+                throw new InvalidOperationException(
+                    "Real TensorRT builder GPU allocator smoke did not satisfy attach/invoke/engine-lease/release invariants. " +
+                    "Attached=" + builderAttached + " Detached=" + builderDetached + " Released=" + builderReleased);
+            }
+        }
+
+        (TensorRtGpuAllocatorRuntimeSnapshot rejectedSnapshot, bool rejectedBuildFailed) =
+            RunGpuAllocatorBuilderFailureScenario(line, logger, static request => request.IsRelease, "gpu_rejected");
+        if (!rejectedBuildFailed ||
+            rejectedSnapshot.RejectedCount == 0UL ||
+            rejectedSnapshot.CallbackFailureCount != 0UL ||
+            rejectedSnapshot.CudaFailureCount != 0UL ||
+            rejectedSnapshot.LiveAllocationCount != 0UL)
+        {
+            throw new InvalidOperationException(
+                "Managed GPU allocator rejection did not fail closed without leaking native allocations. " +
+                "Snapshot=" + rejectedSnapshot + " BuildFailed=" + rejectedBuildFailed);
+        }
+
+        (TensorRtGpuAllocatorRuntimeSnapshot exceptionSnapshot, bool exceptionBuildFailed) =
+            RunGpuAllocatorBuilderFailureScenario(
+                line,
+                logger,
+                static request => request.IsRelease
+                    ? true
+                    : throw new InvalidOperationException("controlled GPU allocator callback failure"),
+                "gpu_exception");
+        if (!exceptionBuildFailed ||
+            exceptionSnapshot.CallbackFailureCount == 0UL ||
+            exceptionSnapshot.LiveAllocationCount != 0UL ||
+            exceptionSnapshot.CudaFailureCount != 0UL)
+        {
+            throw new InvalidOperationException(
+                "Managed GPU allocator exception did not map to a fail-closed native result. " +
+                "Snapshot=" + exceptionSnapshot + " BuildFailed=" + exceptionBuildFailed);
+        }
+
+        Console.WriteLine("GpuAllocatorRuntimeSummary");
+        Console.WriteLine($"  TensorRtLine={(int)line} RuntimePackageKey={runtimePackageKey}");
+        Console.WriteLine($"  RuntimeAttachLifecycle=Passed Callbacks={runtimeReleased.InvocationCount} LiveAllocations={runtimeReleased.LiveAllocationCount}");
+        Console.WriteLine($"  BuilderCallbacks={builderReleased.InvocationCount} Allocate={builderReleased.AllocateCount} Reallocate={builderReleased.ReallocateCount} AllocateAsync={builderReleased.AllocateAsyncCount}");
+        Console.WriteLine($"  BuilderDeallocate={builderReleased.DeallocateCount} DeallocateAsync={builderReleased.DeallocateAsyncCount}");
+        Console.WriteLine($"  PeakLiveBytes={builderReleased.PeakLiveAllocationBytes} FinalLiveAllocations={builderReleased.LiveAllocationCount}");
+        Console.WriteLine($"  RejectionCase=Passed BuildFailed={rejectedBuildFailed} RejectedCount={rejectedSnapshot.RejectedCount}");
+        Console.WriteLine($"  ExceptionCase=Passed BuildFailed={exceptionBuildFailed} CallbackFailures={exceptionSnapshot.CallbackFailureCount}");
+        Console.WriteLine($"  NativePointerExposed={builderReleased.NativePointerExposed} RealCallbackRuntime={builderReleased.RealCallbackRuntime}");
+        Console.WriteLine(
+            "GpuAllocatorRealRuntime=Passed" +
+            $" TensorRtLine={(int)line}" +
+            $" RuntimePackageKey={runtimePackageKey}" +
+            $" RuntimeInvocationCount={runtimeReleased.InvocationCount}" +
+            $" RuntimeAllocateCount={runtimeReleased.AllocateCount}" +
+            $" RuntimeAllocateAsyncCount={runtimeReleased.AllocateAsyncCount}" +
+            $" RuntimeDeallocateCount={runtimeReleased.DeallocateCount}" +
+            $" RuntimeDeallocateAsyncCount={runtimeReleased.DeallocateAsyncCount}" +
+            $" RuntimePeakLiveAllocationBytes={runtimeReleased.PeakLiveAllocationBytes}" +
+            $" RuntimeLiveAllocationCount={runtimeReleased.LiveAllocationCount}" +
+            $" BuilderInvocationCount={builderReleased.InvocationCount}" +
+            $" BuilderAllocateCount={builderReleased.AllocateCount}" +
+            $" BuilderReallocateCount={builderReleased.ReallocateCount}" +
+            $" BuilderAllocateAsyncCount={builderReleased.AllocateAsyncCount}" +
+            $" BuilderDeallocateCount={builderReleased.DeallocateCount}" +
+            $" BuilderDeallocateAsyncCount={builderReleased.DeallocateAsyncCount}" +
+            $" BuilderPeakLiveAllocationBytes={builderReleased.PeakLiveAllocationBytes}" +
+            $" BuilderLiveAllocationCount={builderReleased.LiveAllocationCount}" +
+            $" RejectedBuildFailed={rejectedBuildFailed}" +
+            $" RejectedCount={rejectedSnapshot.RejectedCount}" +
+            $" ExceptionBuildFailed={exceptionBuildFailed}" +
+            $" ExceptionCallbackFailureCount={exceptionSnapshot.CallbackFailureCount}" +
+            $" PointerExposed={runtimeReleased.NativePointerExposed}" +
+            $" RuntimeAttachLifecycle=True" +
+            $" RealCallbackRuntime={builderReleased.RealCallbackRuntime}");
+    }
+
+    private static TensorRtHostMemory BuildGpuAllocatorSmokePlan(TensorRtApiLine line, TensorRtLogger logger)
+    {
+        using TensorRtBuilder builder = new TensorRtBuilder(logger);
+        using TensorRtBuilderConfig config = builder.CreateBuilderConfig();
+        using TensorRtNetworkDefinition network = CreateGpuAllocatorSmokeNetwork(builder, "gpu_runtime");
+        config.SetMemoryPoolLimit(TensorRtMemoryPoolType.Workspace, 32UL * 1024UL * 1024UL);
+        return builder.BuildSerializedNetwork(network, config);
+    }
+
+    private static TensorRtNetworkDefinition CreateGpuAllocatorSmokeNetwork(TensorRtBuilder builder, string prefix)
+    {
+        TensorRtNetworkDefinition network = builder.CreateNetwork(TensorRtNetworkDefinitionCreationFlags.ExplicitBatch);
+        try
+        {
+            using TensorRtTensor input = network.AddInput(prefix + "_input", TensorRtDataType.Float, new TensorRtDims(new[] { 1, 4 }));
+            using TensorRtLayer identity = network.AddIdentity(input);
+            identity.Name = prefix + "_identity";
+            using TensorRtTensor output = identity.GetOutput(0);
+            output.Name = prefix + "_output";
+            network.MarkOutput(output);
+            return network;
+        }
+        catch
+        {
+            network.Dispose();
+            throw;
+        }
+    }
+
+    private static (TensorRtGpuAllocatorRuntimeSnapshot Snapshot, bool BuildFailed) RunGpuAllocatorBuilderFailureScenario(
+        TensorRtApiLine line,
+        TensorRtLogger logger,
+        TensorRtGpuAllocatorHandler handler,
+        string prefix)
+    {
+        using TensorRtGpuAllocatorCallbackOwner owner = new TensorRtGpuAllocatorCallbackOwner(line, handler);
+        using TensorRtBuilder builder = new TensorRtBuilder(logger);
+        using TensorRtBuilderConfig config = builder.CreateBuilderConfig();
+        using TensorRtNetworkDefinition network = CreateGpuAllocatorSmokeNetwork(builder, prefix);
+        config.SetMemoryPoolLimit(TensorRtMemoryPoolType.Workspace, 32UL * 1024UL * 1024UL);
+        builder.SetGpuAllocator(owner);
+        bool buildFailed = false;
+        try
+        {
+            using TensorRtEngine unexpected = builder.BuildEngineWithConfig(network, config);
+        }
+        catch (TensorRtException)
+        {
+            buildFailed = true;
+        }
+
+        TensorRtGpuAllocatorRuntimeSnapshot snapshot = owner.GetRuntimeSnapshot();
+        builder.ClearGpuAllocator();
+        return (snapshot, buildFailed);
     }
 
     private static void RunSafeControls(TensorRtApiLine line)

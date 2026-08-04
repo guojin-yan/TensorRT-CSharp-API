@@ -3610,6 +3610,21 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt10_gpu_allocator_deallocate_deferred(void
 // generated from manifest id=trt10-gpu-allocator-get-interface-info-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_gpu_allocator_get_interface_info_deferred(void);
 
+// generated from manifest id=trt10-gpu-allocator-owner-attach-builder
+JYPPX_C_API(BridgeStatusCode) jyppx_trt10_gpu_allocator_owner_attach_builder(JYPPX_TensorRtGpuAllocatorOwner* owner, JYPPX_TensorRtBuilder* builder, JYPPX_Boolean* out_attached);
+
+// generated from manifest id=trt10-gpu-allocator-owner-attach-runtime
+JYPPX_C_API(BridgeStatusCode) jyppx_trt10_gpu_allocator_owner_attach_runtime(JYPPX_TensorRtGpuAllocatorOwner* owner, JYPPX_TensorRtRuntime* runtime, JYPPX_Boolean* out_attached);
+
+// generated from manifest id=trt10-gpu-allocator-owner-create
+JYPPX_C_API(BridgeStatusCode) jyppx_trt10_gpu_allocator_owner_create(JYPPX_TensorRtGpuAllocatorCallback callback, void* user_state, JYPPX_TensorRtGpuAllocatorOwner** out_owner);
+
+// generated from manifest id=trt10-gpu-allocator-owner-detach
+JYPPX_C_API(BridgeStatusCode) jyppx_trt10_gpu_allocator_owner_detach(JYPPX_TensorRtGpuAllocatorOwner* owner, JYPPX_Boolean* out_detached);
+
+// generated from manifest id=trt10-gpu-allocator-owner-get-info
+JYPPX_C_API(BridgeStatusCode) jyppx_trt10_gpu_allocator_owner_get_info(JYPPX_TensorRtGpuAllocatorOwner* owner, JYPPX_TensorRtGpuAllocatorOwnerInfo* out_info);
+
 // generated from manifest id=trt10-gpu-allocator-reallocate-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_gpu_allocator_reallocate_deferred(void);
 
@@ -7351,6 +7366,21 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt11_gpu_allocator_deallocate_deferred(void
 // generated from manifest id=trt11-gpu-allocator-get-interface-info-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_gpu_allocator_get_interface_info_deferred(void);
 
+// generated from manifest id=trt11-gpu-allocator-owner-attach-builder
+JYPPX_C_API(BridgeStatusCode) jyppx_trt11_gpu_allocator_owner_attach_builder(JYPPX_TensorRtGpuAllocatorOwner* owner, JYPPX_TensorRtBuilder* builder, JYPPX_Boolean* out_attached);
+
+// generated from manifest id=trt11-gpu-allocator-owner-attach-runtime
+JYPPX_C_API(BridgeStatusCode) jyppx_trt11_gpu_allocator_owner_attach_runtime(JYPPX_TensorRtGpuAllocatorOwner* owner, JYPPX_TensorRtRuntime* runtime, JYPPX_Boolean* out_attached);
+
+// generated from manifest id=trt11-gpu-allocator-owner-create
+JYPPX_C_API(BridgeStatusCode) jyppx_trt11_gpu_allocator_owner_create(JYPPX_TensorRtGpuAllocatorCallback callback, void* user_state, JYPPX_TensorRtGpuAllocatorOwner** out_owner);
+
+// generated from manifest id=trt11-gpu-allocator-owner-detach
+JYPPX_C_API(BridgeStatusCode) jyppx_trt11_gpu_allocator_owner_detach(JYPPX_TensorRtGpuAllocatorOwner* owner, JYPPX_Boolean* out_detached);
+
+// generated from manifest id=trt11-gpu-allocator-owner-get-info
+JYPPX_C_API(BridgeStatusCode) jyppx_trt11_gpu_allocator_owner_get_info(JYPPX_TensorRtGpuAllocatorOwner* owner, JYPPX_TensorRtGpuAllocatorOwnerInfo* out_info);
+
 // generated from manifest id=trt11-gpu-allocator-reallocate-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_gpu_allocator_reallocate_deferred(void);
 
@@ -10569,6 +10599,21 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt8_gpu_allocator_allocate_deferred(void);
 
 // generated from manifest id=trt8-gpu-allocator-free-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt8_gpu_allocator_free_deferred(void);
+
+// generated from manifest id=trt8-gpu-allocator-owner-attach-builder
+JYPPX_C_API(BridgeStatusCode) jyppx_trt8_gpu_allocator_owner_attach_builder(JYPPX_TensorRtGpuAllocatorOwner* owner, JYPPX_TensorRtBuilder* builder, JYPPX_Boolean* out_attached);
+
+// generated from manifest id=trt8-gpu-allocator-owner-attach-runtime
+JYPPX_C_API(BridgeStatusCode) jyppx_trt8_gpu_allocator_owner_attach_runtime(JYPPX_TensorRtGpuAllocatorOwner* owner, JYPPX_TensorRtRuntime* runtime, JYPPX_Boolean* out_attached);
+
+// generated from manifest id=trt8-gpu-allocator-owner-create
+JYPPX_C_API(BridgeStatusCode) jyppx_trt8_gpu_allocator_owner_create(JYPPX_TensorRtGpuAllocatorCallback callback, void* user_state, JYPPX_TensorRtGpuAllocatorOwner** out_owner);
+
+// generated from manifest id=trt8-gpu-allocator-owner-detach
+JYPPX_C_API(BridgeStatusCode) jyppx_trt8_gpu_allocator_owner_detach(JYPPX_TensorRtGpuAllocatorOwner* owner, JYPPX_Boolean* out_detached);
+
+// generated from manifest id=trt8-gpu-allocator-owner-get-info
+JYPPX_C_API(BridgeStatusCode) jyppx_trt8_gpu_allocator_owner_get_info(JYPPX_TensorRtGpuAllocatorOwner* owner, JYPPX_TensorRtGpuAllocatorOwnerInfo* out_info);
 
 // generated from manifest id=trt8-gpu-allocator-reallocate-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt8_gpu_allocator_reallocate_deferred(void);

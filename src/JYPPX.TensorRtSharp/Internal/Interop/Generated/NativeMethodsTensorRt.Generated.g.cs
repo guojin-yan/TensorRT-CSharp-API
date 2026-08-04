@@ -1560,6 +1560,21 @@ internal static partial class NativeMethodsTensorRt
     internal static extern BridgeStatusCode jyppx_trt10_gpu_allocator_get_interface_info_deferred();
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt10_gpu_allocator_owner_attach_builder(SafeTensorRtObjectHandle owner, SafeTensorRtObjectHandle builder, out int out_attached);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt10_gpu_allocator_owner_attach_runtime(SafeTensorRtObjectHandle owner, SafeTensorRtObjectHandle runtime, out int out_attached);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt10_gpu_allocator_owner_create(TensorRtGpuAllocatorNativeCallback callback, IntPtr user_state, out SafeTensorRtObjectHandle out_owner);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt10_gpu_allocator_owner_detach(SafeTensorRtObjectHandle owner, out int out_detached);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt10_gpu_allocator_owner_get_info(SafeTensorRtObjectHandle owner, out NativeTensorRtGpuAllocatorOwnerInfo out_info);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt10_gpu_allocator_reallocate_deferred();
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
@@ -5295,6 +5310,21 @@ internal static partial class NativeMethodsTensorRt
     internal static extern BridgeStatusCode jyppx_trt11_gpu_allocator_get_interface_info_deferred();
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt11_gpu_allocator_owner_attach_builder(SafeTensorRtObjectHandle owner, SafeTensorRtObjectHandle builder, out int out_attached);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt11_gpu_allocator_owner_attach_runtime(SafeTensorRtObjectHandle owner, SafeTensorRtObjectHandle runtime, out int out_attached);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt11_gpu_allocator_owner_create(TensorRtGpuAllocatorNativeCallback callback, IntPtr user_state, out SafeTensorRtObjectHandle out_owner);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt11_gpu_allocator_owner_detach(SafeTensorRtObjectHandle owner, out int out_detached);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt11_gpu_allocator_owner_get_info(SafeTensorRtObjectHandle owner, out NativeTensorRtGpuAllocatorOwnerInfo out_info);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt11_gpu_allocator_reallocate_deferred();
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
@@ -8512,6 +8542,21 @@ internal static partial class NativeMethodsTensorRt
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt8_gpu_allocator_free_deferred();
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt8_gpu_allocator_owner_attach_builder(SafeTensorRtObjectHandle owner, SafeTensorRtObjectHandle builder, out int out_attached);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt8_gpu_allocator_owner_attach_runtime(SafeTensorRtObjectHandle owner, SafeTensorRtObjectHandle runtime, out int out_attached);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt8_gpu_allocator_owner_create(TensorRtGpuAllocatorNativeCallback callback, IntPtr user_state, out SafeTensorRtObjectHandle out_owner);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt8_gpu_allocator_owner_detach(SafeTensorRtObjectHandle owner, out int out_detached);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt8_gpu_allocator_owner_get_info(SafeTensorRtObjectHandle owner, out NativeTensorRtGpuAllocatorOwnerInfo out_info);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt8_gpu_allocator_reallocate_deferred();

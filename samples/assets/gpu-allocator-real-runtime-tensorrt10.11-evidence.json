@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "evidenceKind": "local-tensorrt-gpu-allocator-runtime",
+  "recordedAtLocal": "2026-08-05",
+  "tensorRtLine": 10,
+  "tensorRtVersion": "10.11.0",
+  "cudaToolkitVersion": "12.9",
+  "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+  "sample": "CallbackAllocatorSafeControlsSmokeRunner",
+  "mode": "GpuAllocatorRuntimeSmokeOnly",
+  "model": {
+    "kind": "programmatically-created-identity-network",
+    "acquisition": "not-applicable",
+    "conversion": "not-applicable",
+    "externalModelRequired": false,
+    "onnxProduced": false
+  },
+  "runtimeAttachment": {
+    "passed": true,
+    "attachTarget": "Runtime",
+    "callbackInvocationCount": 0,
+    "callbackInvocationClaimed": false,
+    "liveAllocationCountAfterEngineDispose": 0,
+    "note": "The minimal serialized identity plan did not request GPU allocation during deserialization; this path is attachment and lifecycle evidence only."
+  },
+  "builderPositive": {
+    "passed": true,
+    "attachTarget": "Builder",
+    "invocationCount": 8,
+    "allocateCount": 3,
+    "reallocateCount": 2,
+    "deallocateCount": 3,
+    "allocateAsyncCount": 0,
+    "deallocateAsyncCount": 0,
+    "peakLiveAllocationBytes": 1048576,
+    "liveAllocationCountAfterEngineDispose": 0,
+    "liveAllocationBytesAfterEngineDispose": 0,
+    "nativePointerExposed": false,
+    "realCallbackRuntime": true
+  },
+  "rejectionNegative": {
+    "passed": true,
+    "buildFailed": true,
+    "rejectedCount": 1,
+    "callbackFailureCount": 0,
+    "cudaFailureCount": 0,
+    "liveAllocationCount": 0
+  },
+  "exceptionNegative": {
+    "passed": true,
+    "buildFailed": true,
+    "callbackFailureCount": 1,
+    "cudaFailureCount": 0,
+    "liveAllocationCount": 0
+  },
+  "artifacts": {
+    "stdout": {
+      "path": "samples/assets/gpu-allocator-real-runtime-tensorrt10.11.txt",
+      "sha256": "ce394e0379699363ca90b0e753626ae51a0d8ac8cbe113bc82fdfac3174db41f",
+      "length": 1904
+    },
+    "runtimeResultImage": {
+      "path": "docs/images/gpu-allocator-real-runtime-terminal.png",
+      "sha256": "f60908555132c9fe79ca69f9a7220a9224d3aa5fd52d6612075b8c17453bc472",
+      "length": 55764,
+      "source": "Rendered from the captured stdout without changing result values."
+    }
+  },
+  "boundary": "Local source-tree TensorRT 10.11 runtime evidence. TensorRT 8 and 11 are ABI/source validated but were not executed on this host. This record is not package-consumer, public-package, release, or post-publish evidence."
+}

@@ -154,9 +154,15 @@ public sealed partial class TensorRtRuntime
     /// Clears the native GPU allocator pointer and returns runtime allocation to TensorRT defaults.
     /// 清除原生 GPU allocator 指针，让 runtime allocation 回到 TensorRT 默认行为；不会调用用户 allocator 的 free/deallocate 回调。
     /// </summary>
+    /// <remarks>
+    /// A managed owner installed through <see cref="SetGpuAllocator(TensorRtGpuAllocatorCallbackOwner)"/> remains alive while any
+    /// engine deserialized by this runtime still holds its inherited borrower lease.
+    /// 通过 <see cref="SetGpuAllocator(TensorRtGpuAllocatorCallbackOwner)"/> 安装的托管 owner 会持续存活，直到该 runtime
+    /// 反序列化出的所有 engine 都释放继承的借用租约。
+    /// </remarks>
     public void ClearGpuAllocator()
     {
-        NativeBridgeApi.ClearRuntimeGpuAllocator(Line, _handle);
+        ClearManagedGpuAllocator();
     }
 
     private static T TryCollect<T>(string fieldName, List<string> diagnostics, Func<T> getter, T fallback)

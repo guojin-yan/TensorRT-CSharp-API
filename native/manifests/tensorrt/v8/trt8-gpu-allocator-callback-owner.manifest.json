@@ -1,0 +1,70 @@
+{
+  "$schema": "../../bridge-api.schema.json",
+  "module": "tensorrt",
+  "versionLine": "8",
+  "apis": [
+    {
+      "id": "trt8-gpu-allocator-owner-create",
+      "entryPoint": "jyppx_trt8_gpu_allocator_owner_create",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-destroys",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8 && JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "callback", "type": "JYPPX_TensorRtGpuAllocatorCallback", "direction": "in", "managedType": "IntPtr", "moduleManagedType": "TensorRtGpuAllocatorNativeCallback" },
+        { "name": "user_state", "type": "void*", "direction": "in", "managedType": "IntPtr", "moduleManagedType": "IntPtr" },
+        { "name": "out_owner", "type": "JYPPX_TensorRtGpuAllocatorOwner**", "direction": "out", "ownership": "caller-destroys", "managedType": "out SafeTensorRtObjectHandle", "moduleManagedType": "out SafeTensorRtObjectHandle" }
+      ]
+    },
+    {
+      "id": "trt8-gpu-allocator-owner-attach-runtime",
+      "entryPoint": "jyppx_trt8_gpu_allocator_owner_attach_runtime",
+      "returnType": "BridgeStatusCode",
+      "ownership": "borrowed-by-runtime-and-created-engines-until-detach",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8 && JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "owner", "type": "JYPPX_TensorRtGpuAllocatorOwner*", "direction": "in", "managedType": "SafeTensorRtObjectHandle", "moduleManagedType": "SafeTensorRtObjectHandle" },
+        { "name": "runtime", "type": "JYPPX_TensorRtRuntime*", "direction": "in" },
+        { "name": "out_attached", "type": "JYPPX_Boolean*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
+    {
+      "id": "trt8-gpu-allocator-owner-attach-builder",
+      "entryPoint": "jyppx_trt8_gpu_allocator_owner_attach_builder",
+      "returnType": "BridgeStatusCode",
+      "ownership": "borrowed-by-builder-and-created-engines-until-detach",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8 && JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "owner", "type": "JYPPX_TensorRtGpuAllocatorOwner*", "direction": "in", "managedType": "SafeTensorRtObjectHandle", "moduleManagedType": "SafeTensorRtObjectHandle" },
+        { "name": "builder", "type": "JYPPX_TensorRtBuilder*", "direction": "in" },
+        { "name": "out_attached", "type": "JYPPX_Boolean*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
+    {
+      "id": "trt8-gpu-allocator-owner-detach",
+      "entryPoint": "jyppx_trt8_gpu_allocator_owner_detach",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned-owner-retained-by-managed-engine-leases",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8 && JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "owner", "type": "JYPPX_TensorRtGpuAllocatorOwner*", "direction": "in", "managedType": "SafeTensorRtObjectHandle", "moduleManagedType": "SafeTensorRtObjectHandle" },
+        { "name": "out_detached", "type": "JYPPX_Boolean*", "direction": "out", "managedType": "out int", "moduleManagedType": "out int" }
+      ]
+    },
+    {
+      "id": "trt8-gpu-allocator-owner-get-info",
+      "entryPoint": "jyppx_trt8_gpu_allocator_owner_get_info",
+      "returnType": "BridgeStatusCode",
+      "ownership": "caller-owned-copied-pointer-free-snapshot",
+      "manualOverride": false,
+      "versionGuard": "JYPPX_TENSORRT_VERSION_MAJOR_NUM == 8 && JYPPX_HAS_CUDA_TOOLKIT",
+      "parameters": [
+        { "name": "owner", "type": "JYPPX_TensorRtGpuAllocatorOwner*", "direction": "in", "managedType": "SafeTensorRtObjectHandle", "moduleManagedType": "SafeTensorRtObjectHandle" },
+        { "name": "out_info", "type": "JYPPX_TensorRtGpuAllocatorOwnerInfo*", "direction": "out", "managedType": "out NativeTensorRtGpuAllocatorOwnerInfo", "moduleManagedType": "out NativeTensorRtGpuAllocatorOwnerInfo" }
+      ]
+    }
+  ]
+}

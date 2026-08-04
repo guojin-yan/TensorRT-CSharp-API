@@ -257,6 +257,42 @@ internal struct NativeTensorRtOutputAllocatorOwnerInfo
 }
 
 [StructLayout(LayoutKind.Sequential)]
+internal struct NativeTensorRtGpuAllocatorOwnerInfo
+{
+    public uint Line;
+    public ulong OwnerId;
+    public ulong InvocationCount;
+    public ulong AllocateCount;
+    public ulong ReallocateCount;
+    public ulong DeallocateCount;
+    public ulong AllocateAsyncCount;
+    public ulong DeallocateAsyncCount;
+    public ulong RejectedCount;
+    public ulong CallbackFailureCount;
+    public ulong CudaFailureCount;
+    public ulong InFlightCallbackCount;
+    public ulong MaxInFlightCallbackCount;
+    public ulong AttachCount;
+    public ulong DetachCount;
+    public ulong LiveAllocationCount;
+    public ulong LiveAllocationBytes;
+    public ulong PeakLiveAllocationBytes;
+    public ulong LastRequestedSize;
+    public ulong LastAlignment;
+    public uint LastAllocatorFlags;
+    public int LastStatus;
+    public int AttachmentTarget;
+    public int LastCallbackKind;
+    public int IsAttached;
+    public int LastCallbackSucceeded;
+    public int LastOperationSucceeded;
+    public int LastHadCurrentMemory;
+    public int LastHadStream;
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 1024)]
+    public byte[] LastDiagnostic;
+}
+
+[StructLayout(LayoutKind.Sequential)]
 internal struct NativeTensorRtRuntimeCreateDiagnosticInfo
 {
     public uint Line;
