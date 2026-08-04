@@ -118,7 +118,10 @@ public:
         (void)addr;
         (void)stream;
 
-        enter_callback();
+        if (!enter_callback())
+        {
+            return false;
+        }
         struct CallbackExit final
         {
             explicit CallbackExit(DebugListenerCallbackOwner* owner) noexcept : owner_(owner) {}
@@ -195,61 +198,85 @@ public:
 
     JYPPX_StatusCode attach(nvinfer1::IExecutionContext* context, JYPPX_Boolean* out_attached)
     {
-        std::lock_guard<std::mutex> lock(state_mutex_);
-        if (attached_context_ != nullptr && attached_context_ != context)
         {
-            copy_debug_listener_text(last_diagnostic_, sizeof(last_diagnostic_), "Debug listener owner is already attached to another execution context.");
-            last_status_ = JYPPX_STATUS_INVALID_STATE;
-            return JYPPX_STATUS_INVALID_STATE;
-        }
+            std::lock_guard<std::mutex> lifecycle_lock(lifecycle_mutex_);
+            {
+                std::lock_guard<std::mutex> state_lock(state_mutex_);
+                if (attached_context_ != nullptr && attached_context_ != context)
+                {
+                    copy_debug_listener_text(last_diagnostic_, sizeof(last_diagnostic_), "Debug listener owner is already attached to another execution context.");
+                    last_status_ = JYPPX_STATUS_INVALID_STATE;
+                    return JYPPX_STATUS_INVALID_STATE;
+                }
 
-        if (attached_context_ == context)
-        {
+                if (attached_context_ == context)
+                {
+                    detaching_ = false;
+                    *out_attached = JYPPX_TRUE;
+                    return JYPPX_STATUS_OK;
+                }
+
+                detaching_ = false;
+            }
+
+            JYPPX_Boolean attached = JYPPX_FALSE;
+            const auto status = set_debug_listener_with_seh_guard(context, this, &attached, "execution context debug listener owner attach");
+            if (status != JYPPX_STATUS_OK)
+            {
+                std::lock_guard<std::mutex> state_lock(state_mutex_);
+                last_status_ = status;
+                copy_debug_listener_text(last_diagnostic_, sizeof(last_diagnostic_), "TensorRT debug listener attach raised a guarded native failure.");
+                return status;
+            }
+
+            if (attached == JYPPX_FALSE)
+            {
+                std::lock_guard<std::mutex> state_lock(state_mutex_);
+                last_status_ = JYPPX_STATUS_RUNTIME_ERROR;
+                copy_debug_listener_text(last_diagnostic_, sizeof(last_diagnostic_), "IExecutionContext::setDebugListener returned false.");
+                jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, last_diagnostic_);
+                return JYPPX_STATUS_RUNTIME_ERROR;
+            }
+
+            {
+                std::lock_guard<std::mutex> state_lock(state_mutex_);
+                attached_context_ = context;
+                detaching_ = false;
+                attach_count_.fetch_add(1U);
+                last_status_ = JYPPX_STATUS_OK;
+                copy_debug_listener_text(last_diagnostic_, sizeof(last_diagnostic_), "Native debug listener vtable attached to the TensorRT execution context.");
+            }
+
             *out_attached = JYPPX_TRUE;
             return JYPPX_STATUS_OK;
         }
-
-        JYPPX_Boolean attached = JYPPX_FALSE;
-        const auto status = set_debug_listener_with_seh_guard(context, this, &attached, "execution context debug listener owner attach");
-        if (status != JYPPX_STATUS_OK)
-        {
-            last_status_ = status;
-            copy_debug_listener_text(last_diagnostic_, sizeof(last_diagnostic_), "TensorRT debug listener attach raised a guarded native failure.");
-            return status;
-        }
-
-        if (attached == JYPPX_FALSE)
-        {
-            last_status_ = JYPPX_STATUS_RUNTIME_ERROR;
-            copy_debug_listener_text(last_diagnostic_, sizeof(last_diagnostic_), "IExecutionContext::setDebugListener returned false.");
-            jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, last_diagnostic_);
-            return JYPPX_STATUS_RUNTIME_ERROR;
-        }
-
-        attached_context_ = context;
-        attach_count_.fetch_add(1U);
-        last_status_ = JYPPX_STATUS_OK;
-        copy_debug_listener_text(last_diagnostic_, sizeof(last_diagnostic_), "Native debug listener vtable attached to the TensorRT execution context.");
-        *out_attached = JYPPX_TRUE;
-        return JYPPX_STATUS_OK;
     }
 
     JYPPX_StatusCode detach(JYPPX_Boolean* out_detached)
     {
-        std::unique_lock<std::mutex> lock(state_mutex_);
-        if (attached_context_ == nullptr)
+        std::lock_guard<std::mutex> lifecycle_lock(lifecycle_mutex_);
+        nvinfer1::IExecutionContext* context = nullptr;
         {
-            *out_detached = JYPPX_TRUE;
-            return JYPPX_STATUS_OK;
+            std::unique_lock<std::mutex> state_lock(state_mutex_);
+            detaching_ = true;
+            context = attached_context_;
+            if (context == nullptr)
+            {
+                *out_detached = JYPPX_TRUE;
+                callback_drained_.wait(state_lock, [this]() noexcept { return in_flight_callback_count_.load() == 0U; });
+                return JYPPX_STATUS_OK;
+            }
         }
 
         nvinfer1::IDebugListener* active_listener = nullptr;
         auto status = get_debug_listener_with_seh_guard(
-            attached_context_,
+            context,
             &active_listener,
             "execution context debug listener owner detach query");
         if (status != JYPPX_STATUS_OK)
         {
+            std::lock_guard<std::mutex> state_lock(state_mutex_);
+            detaching_ = false;
             last_status_ = status;
             return status;
         }
@@ -258,18 +285,22 @@ public:
         {
             JYPPX_Boolean cleared = JYPPX_FALSE;
             status = set_debug_listener_with_seh_guard(
-                attached_context_,
+                context,
                 nullptr,
                 &cleared,
                 "execution context debug listener owner detach");
             if (status != JYPPX_STATUS_OK)
             {
+                std::lock_guard<std::mutex> state_lock(state_mutex_);
+                detaching_ = false;
                 last_status_ = status;
                 return status;
             }
 
             if (cleared == JYPPX_FALSE)
             {
+                std::lock_guard<std::mutex> state_lock(state_mutex_);
+                detaching_ = false;
                 last_status_ = JYPPX_STATUS_RUNTIME_ERROR;
                 copy_debug_listener_text(last_diagnostic_, sizeof(last_diagnostic_), "IExecutionContext::setDebugListener(nullptr) returned false.");
                 jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, last_diagnostic_);
@@ -277,12 +308,16 @@ public:
             }
         }
 
-        attached_context_ = nullptr;
-        detach_count_.fetch_add(1U);
-        last_status_ = JYPPX_STATUS_OK;
-        copy_debug_listener_text(last_diagnostic_, sizeof(last_diagnostic_), "Native debug listener detached before callback owner release.");
-        *out_detached = JYPPX_TRUE;
-        callback_drained_.wait(lock, [this]() noexcept { return in_flight_callback_count_.load() == 0U; });
+        {
+            std::unique_lock<std::mutex> state_lock(state_mutex_);
+            attached_context_ = nullptr;
+            detach_count_.fetch_add(1U);
+            last_status_ = JYPPX_STATUS_OK;
+            copy_debug_listener_text(last_diagnostic_, sizeof(last_diagnostic_), "Native debug listener detached before callback owner release.");
+            *out_detached = JYPPX_TRUE;
+            callback_drained_.wait(state_lock, [this]() noexcept { return in_flight_callback_count_.load() == 0U; });
+        }
+
         return JYPPX_STATUS_OK;
     }
 
@@ -313,13 +348,21 @@ public:
     }
 
 private:
-    void enter_callback() noexcept
+    bool enter_callback() noexcept
     {
+        std::lock_guard<std::mutex> lock(state_mutex_);
+        if (detaching_)
+        {
+            return false;
+        }
+
         const uint64_t current = in_flight_callback_count_.fetch_add(1U) + 1U;
         uint64_t observed = max_in_flight_callback_count_.load();
         while (current > observed && !max_in_flight_callback_count_.compare_exchange_weak(observed, current))
         {
         }
+
+        return true;
     }
 
     void leave_callback() noexcept
@@ -364,13 +407,33 @@ private:
         }
     }
 
+public:
+    bool prepare_for_destroy_noexcept() noexcept
+    {
+        try
+        {
+            std::lock_guard<std::mutex> lifecycle_lock(lifecycle_mutex_);
+            std::unique_lock<std::mutex> state_lock(state_mutex_);
+            detaching_ = true;
+            callback_drained_.wait(state_lock, [this]() noexcept { return in_flight_callback_count_.load() == 0U; });
+            return attached_context_ == nullptr;
+        }
+        catch (...)
+        {
+            return false;
+        }
+    }
+
+private:
     JYPPX_TensorRtLine line_;
     uint64_t owner_id_;
     JYPPX_TensorRtDebugListenerCallback callback_;
     void* user_state_;
+    std::mutex lifecycle_mutex_;
     mutable std::mutex state_mutex_;
     std::condition_variable callback_drained_;
     nvinfer1::IExecutionContext* attached_context_{nullptr};
+    bool detaching_{false};
     std::atomic<uint64_t> invocation_count_{0U};
     std::atomic<uint64_t> failure_count_{0U};
     std::atomic<uint64_t> in_flight_callback_count_{0U};
@@ -410,7 +473,11 @@ static_assert(
 
 static void destroy_debug_listener_callback_owner(void* payload) noexcept
 {
-    delete static_cast<DebugListenerCallbackOwner*>(payload);
+    auto* owner = static_cast<DebugListenerCallbackOwner*>(payload);
+    if (owner != nullptr && owner->prepare_for_destroy_noexcept())
+    {
+        delete owner;
+    }
 }
 
 static JYPPX_StatusCode get_debug_listener_callback_owner(

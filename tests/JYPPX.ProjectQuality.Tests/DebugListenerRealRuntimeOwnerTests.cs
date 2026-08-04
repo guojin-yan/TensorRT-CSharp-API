@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Text.Json;
 using JYPPX.TensorRtSharp;
 using Xunit;
@@ -61,6 +62,14 @@ public sealed class DebugListenerRealRuntimeOwnerTests
         Assert.Contains("(void)addr", source);
         Assert.Contains("(void)stream", source);
         Assert.Contains("callback_drained_.wait", source);
+        Assert.Contains("bool detaching_{false};", source);
+        Assert.Contains("std::mutex lifecycle_mutex_;", source);
+        Assert.Contains("if (!enter_callback())", source);
+        Assert.Contains("std::lock_guard<std::mutex> lock(state_mutex_);\n        if (detaching_)", source);
+        Assert.Contains("nvinfer1::IExecutionContext* context = nullptr;", source);
+        Assert.Contains("prepare_for_destroy_noexcept", source);
+        Assert.Contains("owner->prepare_for_destroy_noexcept()", source);
+        Assert.DoesNotContain("return detach(&detached) == JYPPX_STATUS_OK", source);
         Assert.Contains("std::is_nothrow_destructible<DebugListenerCallbackOwner>", source);
         Assert.Contains("noexcept(std::declval<DebugListenerCallbackOwner&>().processDebugTensor", source);
 
@@ -153,10 +162,73 @@ public sealed class DebugListenerRealRuntimeOwnerTests
         Assert.Contains("context.SetDebugListener(owner)", source);
         Assert.Contains("context.SetTensorDebugState(\"debug_output\", true)", source);
         Assert.Contains("attached.IsRealCallbackRuntimeProof", source);
+        Assert.Contains("negativeEnqueueFailed", source);
+        Assert.Contains("negativeCallbackRejected", source);
+        Assert.Contains("negativeAttached.FailureCount > 0", source);
+        Assert.Contains("NegativeFailureCount={negativeAttached.FailureCount}", source);
         Assert.Contains("DebugListenerRealRuntime=Passed", source);
         Assert.Contains("BorrowedPointerExposed={attached.BorrowedPointerExposed}", source);
         Assert.Contains("--debug-listener-runtime-smoke-only", source);
         Assert.Contains("Mode=DebugListenerRuntimeSmokeOnly", source);
+    }
+
+    [Fact]
+    public void RuntimeEvidenceMatchesCapturedArtifactsAndTutorial()
+    {
+        string root = FindRepositoryRoot();
+        string evidencePath = Path.Combine(
+            root,
+            "samples",
+            "assets",
+            "debug-listener-real-runtime-tensorrt10.11-evidence.json");
+        using JsonDocument evidence = JsonDocument.Parse(File.ReadAllText(evidencePath));
+        JsonElement rootElement = evidence.RootElement;
+        Assert.Equal("local-tensorrt-debug-listener-runtime", rootElement.GetProperty("evidenceKind").GetString());
+        Assert.True(rootElement.GetProperty("positive").GetProperty("passed").GetBoolean());
+        Assert.True(rootElement.GetProperty("positive").GetProperty("isRealCallbackRuntimeProof").GetBoolean());
+        Assert.True(rootElement.GetProperty("negative").GetProperty("passed").GetBoolean());
+        Assert.False(rootElement.GetProperty("negative").GetProperty("enqueueFailed").GetBoolean());
+
+        foreach (string artifactName in new[] { "stdout", "runtimeResultImage" })
+        {
+            JsonElement artifact = rootElement.GetProperty("artifacts").GetProperty(artifactName);
+            string relativePath = artifact.GetProperty("path").GetString()!;
+            string expectedHash = artifact.GetProperty("sha256").GetString()!;
+            string artifactPath = Path.Combine(root, relativePath.Replace('/', Path.DirectorySeparatorChar));
+            Assert.True(File.Exists(artifactPath), $"Missing runtime evidence artifact: {relativePath}");
+            using SHA256 sha256 = SHA256.Create();
+            string actualHash = Convert.ToHexString(sha256.ComputeHash(File.ReadAllBytes(artifactPath))).ToLowerInvariant();
+            Assert.Equal(expectedHash, actualHash);
+        }
+
+        string tutorial = File.ReadAllText(Path.Combine(
+            root,
+            "docs",
+            "articles",
+            "zh-cn",
+            "debug-listener-real-runtime-tutorial.md"));
+        foreach (string requiredText in new[]
+        {
+            "JYPPX.TensorRtSharp",
+            "JYPPX.CudaSharp",
+            "模型与转换说明",
+            "没有模型下载地址或 ONNX 转换步骤",
+            "模型名称、官方获取方式、导出/转换命令",
+            "MarkDebugTensor",
+            "SetDebugListener",
+            "processDebugTensor",
+            "InvocationCount=1",
+            "NegativeFailureCount=1",
+            "NegativeEnqueueFailed",
+            "debug-listener-real-runtime-terminal.png",
+            "不创建 tag、Release、NuGet 或 GitHub Packages"
+        })
+        {
+            Assert.Contains(requiredText, tutorial);
+        }
+
+        Assert.DoesNotContain("E:\\GitSpace\\", tutorial, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("C:\\Users\\", tutorial, StringComparison.OrdinalIgnoreCase);
     }
 
     private static IEnumerable<Type> GetExposedTypes(MemberInfo member)

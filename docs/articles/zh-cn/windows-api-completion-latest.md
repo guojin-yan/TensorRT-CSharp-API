@@ -1,5 +1,7 @@
 # Windows API 最新状态
 
+> 2026-08-04 callback runtime 补充：TensorRT 10.11 / CUDA 12.9 源码树已完成 owner-safe OutputAllocator 与 DebugListener 的真实 callback 运行验证。DebugListener 实测包含 non-null attach、一次真实 `processDebugTensor` 调用、copied metadata、handler 返回 false 的受控负例和 detach，参见 [TensorRT DebugListener 真实运行教程](debug-listener-real-runtime-tutorial.md)。下文大量 `False` 字段属于历史 design/promotion gate 默认输入，继续用于兼容审计；它们不否定当前源码树实测，也不代表 clean package、公开 Release、Linux、TRT11 或 post-publish 已验证。
+
 截至 2026-06-12，本机扫描头文件的接口覆盖已经清零：
 
 - TensorRT interface coverage：`0` missing rows。

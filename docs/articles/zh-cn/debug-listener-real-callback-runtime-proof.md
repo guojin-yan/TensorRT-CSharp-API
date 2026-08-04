@@ -1,5 +1,7 @@
 # DebugListener Real Callback Runtime Proof
 
+> 当前实测入口：请先阅读 [TensorRT DebugListener 真实运行教程](debug-listener-real-runtime-tutorial.md)。该教程记录了 2026-08-04 在 TensorRT 10.11.0 / CUDA 12.9 上完成的 non-null attach、真实 `processDebugTensor` callback、copied metadata、受控失败和 detach 结果。本页后续的固定 `False` 字段属于历史 package promotion gate 默认输入，不能用于否定当前源码树本机实测，也不能替代尚未进行的公开包、Release 或 post-publish 验收。
+
 > 状态：real-callback-runtime-proof-gate-ready
 > readiness marker：`debug-listener-real-callback-runtime-proof`
 > 默认 runtime evidence：`RuntimeEvidenceKind=runtime-smoke-skipped`

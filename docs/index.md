@@ -190,8 +190,11 @@ Chinese articles:
 - [DebugListener Real Non-Null Attach Runtime Smoke](articles/zh-cn/debug-listener-real-non-null-attach-runtime-smoke.md)
 - [DebugListener ProcessDebugTensor Callback Trampoline](articles/zh-cn/debug-listener-process-debug-tensor-callback-trampoline.md)
 - [DebugListener Real Callback Runtime Proof](articles/zh-cn/debug-listener-real-callback-runtime-proof.md)
+- [TensorRT DebugListener 真实运行教程](articles/zh-cn/debug-listener-real-runtime-tutorial.md)
 - [DebugListener Callback Proof Gap Report](articles/zh-cn/debug-listener-callback-proof-gap-report.md)
 - [Real Callback Runtime Evidence Schema](articles/zh-cn/real-callback-runtime-evidence-schema.md)
+
+2026-08-04 更新：TensorRT 10.11 / CUDA 12.9 源码树已真实执行 non-null attach、`processDebugTensor`、copied metadata、受控失败和 detach，正例为 `InvocationCount=1`、`FailureCount=0`、`IsRealCallbackRuntimeProof=True`，负例为 `NegativeInvocationCount=1`、`NegativeFailureCount=1`。下列 marker index 是历史 promotion-gate 的默认/负例字段，用于防止缺少 package evidence 时误晋级；它们不是当前源码树 owner 是否已实现的状态。公开包、Release、Linux、TensorRT 11 与 post-publish 仍未由该次本机运行证明。
 
 DebugListener runtime proof attempt marker index: `debug-listener-runtime-proof-attempt-preflight`, `TensorRtDebugListenerRuntimeProofAttemptPreflight`, `CanEnableSetDebugListenerNonNull`, `CanInstallNativeVTable`, `CanCallProcessDebugTensorRuntime`, `CanPromoteRealCallbackRuntime`, `ReasonNonNullAttachStillBlocked`, `ReasonNativeVTableStillBlocked`, `ReasonRuntimeProofStillBlocked`, and `isRealCallbackRuntimeProof=false`.
 

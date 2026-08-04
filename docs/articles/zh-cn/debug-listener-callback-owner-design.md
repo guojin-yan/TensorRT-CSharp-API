@@ -1,5 +1,7 @@
 # DebugListener Callback Owner Design
 
+> 现状补充：本页记录的是历史 design gate。真实 owner 路径已在 TensorRT 10.11.0 / CUDA 12.9 上完成源码树运行验证，参见 [TensorRT DebugListener 真实运行教程](debug-listener-real-runtime-tutorial.md)。本页的 `not-present` / `False` 默认值仍用于验证旧门禁不会误晋级，不代表 native owner 尚未实现。
+
 > 状态：owner-design-gate / design-ready
 > readiness marker：`debug-listener-callback-owner-design`
 > runtime evidence：`RuntimeEvidenceKind=not-present`，`RealCallbackRuntime=False`，`IsRealCallbackRuntimeProof=False`

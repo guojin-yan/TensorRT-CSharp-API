@@ -7,7 +7,7 @@
 - name: Execution Context Device Memory Lifetime
   href: articles/zh-cn/execution-context-device-memory-lifetime.md
 # Release proof boundary: canPublishPublicly=false; canCloseReleaseIssue=false; navigation entries are not proof.
-# DebugListener runtime proof attempt marker index:
+# DebugListener historical promotion-gate marker index (default false values are not current source-tree runtime status):
 # debug-listener-runtime-proof-attempt-preflight
 # TensorRtDebugListenerRuntimeProofAttemptPreflight
 # CanEnableSetDebugListenerNonNull
@@ -18,6 +18,8 @@
 # ReasonNativeVTableStillBlocked
 # ReasonRuntimeProofStillBlocked
 # isRealCallbackRuntimeProof=false
+# Current local source-tree evidence: articles/zh-cn/debug-listener-real-runtime-tutorial.md
+# TensorRT 10.11 result: callback invoked, copied metadata, failure control, and detach all validated.
 - name: English
   items:
   - name: Getting Started
@@ -430,6 +432,8 @@
     href: articles/zh-cn/debug-listener-process-debug-tensor-callback-trampoline.md
   - name: DebugListener Real Callback Runtime Proof
     href: articles/zh-cn/debug-listener-real-callback-runtime-proof.md
+  - name: DebugListener TensorRT 10.11 Real Runtime Tutorial
+    href: articles/zh-cn/debug-listener-real-runtime-tutorial.md
   - name: DebugListener Callback Proof Gap Report
     href: articles/zh-cn/debug-listener-callback-proof-gap-report.md
   - name: Real Callback Runtime Evidence Schema

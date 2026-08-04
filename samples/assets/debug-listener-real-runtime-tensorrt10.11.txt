@@ -1,0 +1,6 @@
+CallbackAllocatorSafeControlsSmokeRunner TensorRtLineRequest=10 RuntimePackageKey= DependencyProbeOnly=False EnableDebugListenerRuntimeSmoke=True DebugListenerRuntimeSmokeOnly=True EnableOutputAllocatorRuntimeSmoke=False OutputAllocatorRuntimeSmokeOnly=False
+ResolvedTensorRtLine=10 TRT=10.11.0 CUDA=12.9
+Adapter Runtime=True Builder=True Message=TensorRT vendor dependency is available for this adapter line.
+DependencyProbe Line=10 BridgeInitialized=True Candidates=55 Loaded=1 SearchPathCandidates=31 Diagnostics=0 Message=Bridge loader initialized.
+DebugListenerRealRuntime=Passed TensorRtLine=10 RuntimePackageKey= NativeVTableInstalled=True ProcessDebugTensorInvoked=True InvocationCount=1 FailureCount=0 InFlightCallbackCount=0 TensorName=debug_output Shape=[1,4] MetadataCopied=True BorrowedPointerExposed=False DetachCount=1 NegativeCallbackRejected=True NegativeEnqueueFailed=False NegativeInvocationCount=1 NegativeFailureCount=1 IsRealCallbackRuntimeProof=True
+CallbackAllocatorSafeControlsSmokeRunner Passed=True Mode=DebugListenerRuntimeSmokeOnly

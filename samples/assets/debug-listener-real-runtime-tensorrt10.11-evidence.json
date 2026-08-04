@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "evidenceKind": "local-tensorrt-debug-listener-runtime",
+  "recordedAtLocal": "2026-08-04",
+  "tensorRtLine": 10,
+  "tensorRtVersion": "10.11.0",
+  "cudaToolkitVersion": "12.9",
+  "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+  "nvidiaDriverVersion": "576.02",
+  "sample": "CallbackAllocatorSafeControlsSmokeRunner",
+  "mode": "DebugListenerRuntimeSmokeOnly",
+  "model": {
+    "kind": "programmatically-created-identity-network",
+    "description": "The smoke runner creates a [1,4] float identity graph and marks debug_output as a build-time debug tensor.",
+    "acquisition": "not-applicable",
+    "conversion": "not-applicable",
+    "externalModelRequired": false
+  },
+  "positive": {
+    "passed": true,
+    "nativeVTableInstalled": true,
+    "processDebugTensorInvoked": true,
+    "invocationCount": 1,
+    "failureCount": 0,
+    "inFlightCallbackCount": 0,
+    "tensorName": "debug_output",
+    "shape": [1, 4],
+    "metadataCopied": true,
+    "borrowedPointerExposed": false,
+    "detachCount": 1,
+    "isRealCallbackRuntimeProof": true
+  },
+  "negative": {
+    "passed": true,
+    "callbackRejected": true,
+    "enqueueFailed": false,
+    "invocationCount": 1,
+    "failureCount": 1,
+    "lastCallbackSucceeded": false,
+    "isRealCallbackRuntimeProof": false,
+    "interpretation": "TensorRT 10.11 records a false callback result as callback failure but still completes this identity enqueue; the bridge therefore uses failure counters, last-callback status, in-flight drain, and detach state for fail-closed validation."
+  },
+  "artifacts": {
+    "stdout": {
+      "path": "samples/assets/debug-listener-real-runtime-tensorrt10.11.txt",
+      "sha256": "96cc8a5d8655b723618a1a550153e78a4d55be1b412193c20006114b68084eb1"
+    },
+    "runtimeResultImage": {
+      "path": "docs/images/debug-listener-real-runtime-terminal.png",
+      "sha256": "c4ab84ebb0fcd1a6920b12d254e0811fa780c22e02c93ac489c143451ec70add",
+      "source": "Rendered from the captured stdout without changing result values."
+    }
+  },
+  "boundary": "Local source-tree TensorRT 10.11 runtime evidence. CUDA, cuDNN, TensorRT, and NVRTC remain user-installed dependencies. This record is not package-consumer, public-package, release, post-publish, Linux, or TensorRT 11 proof. No release, tag, or package was created."
+}

@@ -284,7 +284,11 @@ public sealed class ManagedDebugListenerVTableExperimentOwnerAddressSourceLayout
     private static string Normalize(string value)
     {
         return value.Replace("\r\n", "\n", StringComparison.Ordinal)
-            .Replace('\r', '\n');
+            .Replace('\r', '\n')
+            .Replace(
+                "using JYPPX.TensorRtSharp.Shared.Interop;",
+                "using JYPPX.Shared.Interop;",
+                StringComparison.Ordinal);
     }
 
     private static string ReadSource(string fileName)

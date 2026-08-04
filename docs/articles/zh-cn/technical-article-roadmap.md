@@ -2,19 +2,19 @@
 
 > 状态：规划稿
 > 适用范围：项目宣传、发布说明、使用教程和案例教程。
-> 重要边界：当前 package readiness 已清零，`real-callback-runtime-evidence-schema` 为 `schema-ready`，但 full package consumer runtime smoke 在本机被 CUDA driver/runtime compatibility 阻塞为 `blocked-by-cuda-driver`，真实 callback runtime proof 仍为 `false`。
+> 重要边界：截至 2026-08-04，TensorRT 10.11 / CUDA 12.9 源码树已经取得 owner-safe OutputAllocator 与 DebugListener 真实 callback 运行证据；clean package consumer、公开包、Release、Linux、TRT11 与 post-publish 仍需分别验证，不能由源码树结果替代。
 
 ## 规划原则
 
 文章目标不是凑数量，而是把项目真实完成度、可用路径、部署方式、案例教程和风险边界讲清楚。每篇案例文章都必须能追溯到仓库中的样例、smoke、文档或 plan/diary 证据；凡涉及外部模型、标签或图片资产，都必须说明模型来源、授权注意事项、转换步骤、运行命令和验证输出。
 
-在真实 callback runtime proof 完成前，所有宣传材料都必须保留以下边界：
+所有宣传材料都必须按证据域保留以下边界：
 
 - `manifest/source 100%` 不等于 `100% runtime 可用`。
 - `readiness blockers: 0` 表示当前包完整性和消费端证据达标，不表示 callback runtime proof 完成。
-- `SmokeResult=passed` 不能自动证明 callback 由 TensorRT runtime 触发。
+- 普通 `SmokeResult=passed` 不能自动证明 callback 由 TensorRT runtime 触发；只有带真实 invocation、failure/in-flight、copied metadata 和 detach 结果的专用记录才能证明对应源码树运行。
 - `blocked-by-cuda-driver` 是环境阻塞证据，不是 API 缺失，也不是 callback proof。
-- `IGpuAllocator::*`、`IGpuAsyncAllocator::*`、`IOutputAllocator::*`、`IDebugListener::processDebugTensor` direct callback rows 在真实 proof 前必须继续 deferred。
+- `IOutputAllocator::*` 与 `IDebugListener::processDebugTensor` 已有 TRT10.11 源码树本机 proof，但 package/public/release 证据仍需 deferred；`IGpuAllocator::*`、`IGpuAsyncAllocator::*` 等未取得真实 runtime proof 的 direct callback rows 继续 deferred。
 
 ## 样例与文章底座
 

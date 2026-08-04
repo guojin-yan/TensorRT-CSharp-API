@@ -57,7 +57,7 @@ internal static class Program
         Console.WriteLine($"Adapter Runtime={adapter.RuntimeCreationSupported} Builder={adapter.BuilderCreationSupported} Message={adapter.StatusMessage}");
 
         PrintDependencyProbe(line.Value);
-        if (!outputAllocatorRuntimeSmokeOnly)
+        if (!debugListenerRuntimeSmokeOnly && !outputAllocatorRuntimeSmokeOnly)
         {
             PrintSafeControlSurface(line.Value, enableDebugListenerRuntimeSmoke, runtimePackageKey);
         }
@@ -302,6 +302,48 @@ internal static class Program
                 "Attached=" + attached + " Detached=" + detached);
         }
 
+        using TensorRtExecutionContext negativeContext = engine.CreateExecutionContext();
+        using TensorRtDebugListenerCallbackOwner negativeOwner = new TensorRtDebugListenerCallbackOwner(
+            line,
+            _ => false);
+        negativeContext.SetTensorAddress("debug_input", inputBuffer);
+        negativeContext.SetTensorAddress("debug_output", outputBuffer);
+        negativeContext.SetDebugListener(negativeOwner);
+        negativeContext.SetTensorDebugState("debug_output", true);
+        bool negativeEnqueueFailed = false;
+        try
+        {
+            negativeContext.EnqueueAsync(stream);
+            stream.Synchronize();
+        }
+        catch (TensorRtException)
+        {
+            negativeEnqueueFailed = true;
+        }
+
+        TensorRtDebugListenerRuntimeSnapshot negativeAttached = negativeOwner.GetRuntimeSnapshot();
+        bool negativeCleared = negativeContext.ClearDebugListener();
+        TensorRtDebugListenerRuntimeSnapshot negativeDetached = negativeOwner.GetRuntimeSnapshot();
+        bool negativeCallbackRejected =
+            negativeAttached.InvocationCount > 0 &&
+            negativeAttached.FailureCount > 0 &&
+            !negativeAttached.LastCallbackSucceeded &&
+            !negativeAttached.IsRealCallbackRuntimeProof;
+        bool negativePassed =
+            negativeCallbackRejected &&
+            negativeAttached.InFlightCallbackCount == 0 &&
+            negativeCleared &&
+            !negativeDetached.IsAttached &&
+            !negativeContext.HasManagedDebugListener &&
+            !negativeContext.HasDebugListener;
+        if (!negativePassed)
+        {
+            throw new InvalidOperationException(
+                "Real TensorRT debug listener rejection runtime smoke did not fail closed. " +
+                "Attached=" + negativeAttached + " Detached=" + negativeDetached +
+                " EnqueueFailed=" + negativeEnqueueFailed);
+        }
+
         Console.WriteLine(
             "DebugListenerRealRuntime=Passed" +
             $" TensorRtLine={(int)line}" +
@@ -316,6 +358,10 @@ internal static class Program
             $" MetadataCopied={managedMetadata.MetadataCopied}" +
             $" BorrowedPointerExposed={attached.BorrowedPointerExposed}" +
             $" DetachCount={detached.DetachCount}" +
+            $" NegativeCallbackRejected={negativeCallbackRejected}" +
+            $" NegativeEnqueueFailed={negativeEnqueueFailed}" +
+            $" NegativeInvocationCount={negativeAttached.InvocationCount}" +
+            $" NegativeFailureCount={negativeAttached.FailureCount}" +
             $" IsRealCallbackRuntimeProof={attached.IsRealCallbackRuntimeProof}");
     }
 
