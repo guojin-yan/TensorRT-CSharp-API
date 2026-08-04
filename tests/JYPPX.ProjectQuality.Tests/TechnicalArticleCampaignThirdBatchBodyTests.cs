@@ -9,7 +9,6 @@ public sealed class TechnicalArticleCampaignThirdBatchBodyTests
         "yolovision-detection-real-model-tutorial.md",
         "yolovision-classification-real-model-tutorial.md",
         "yolovision-segmentation-real-model-tutorial.md",
-        "yolovision-pose-obb-sem-roadmap.md",
         "tensorrtexec-gui-user-guide.md",
         "tensorrtexec-trtexec-parity-deep-dive.md",
         "onnx-to-engine-trtexec-conversion-guide.md",

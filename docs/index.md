@@ -692,7 +692,6 @@ Application entry points:
 - [YoloVision Detection Real Model Tutorial](articles/zh-cn/yolovision-detection-real-model-tutorial.md)
 - [YoloVision Classification Real Model Tutorial](articles/zh-cn/yolovision-classification-real-model-tutorial.md)
 - [YoloVision Segmentation Real Model Tutorial](articles/zh-cn/yolovision-segmentation-real-model-tutorial.md)
-- [YoloVision Pose OBB Sem Roadmap](articles/zh-cn/yolovision-pose-obb-sem-roadmap.md)
 - [TensorRtExec GUI User Guide](articles/zh-cn/tensorrtexec-gui-user-guide.md)
 - [TensorRtExec Trtexec Parity Deep Dive](articles/zh-cn/tensorrtexec-trtexec-parity-deep-dive.md)
 - [ONNX To Engine Trtexec Conversion Guide](articles/zh-cn/onnx-to-engine-trtexec-conversion-guide.md)

@@ -956,8 +956,6 @@
   href: articles/zh-cn/yolovision-classification-real-model-tutorial.md
 - name: YoloVision Segmentation Real Model Tutorial
   href: articles/zh-cn/yolovision-segmentation-real-model-tutorial.md
-- name: YoloVision Pose OBB Sem Roadmap
-  href: articles/zh-cn/yolovision-pose-obb-sem-roadmap.md
 - name: TensorRtExec Trtexec Parity Deep Dive
   href: articles/zh-cn/tensorrtexec-trtexec-parity-deep-dive.md
 - name: Runtime Package Installation Deep Dive

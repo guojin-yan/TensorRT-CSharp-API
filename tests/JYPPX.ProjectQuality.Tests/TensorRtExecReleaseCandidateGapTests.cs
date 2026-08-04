@@ -48,7 +48,11 @@ public sealed class TensorRtExecReleaseCandidateGapTests
             item.GetProperty("id").GetString() == "binding-metadata" &&
             item.GetProperty("currentStatus").GetString() == "implemented-pointer-free-multi-input-binding-multi-output-artifacts-and-reference-validation" &&
             item.GetProperty("winFormsSupported").GetBoolean());
-        Assert.Contains(items, static item => item.GetProperty("id").GetString() == "winforms-command-surface" && item.GetProperty("currentStatus").GetString() == "checklist-backed-command-preview" && item.GetProperty("winFormsSupported").GetBoolean());
+        Assert.Contains(items, static item =>
+            item.GetProperty("id").GetString() == "winforms-command-surface" &&
+            item.GetProperty("currentStatus").GetString() == "checklist-and-real-gui-build-backed" &&
+            item.GetProperty("winFormsSupported").GetBoolean() &&
+            item.GetProperty("nextImplementationPaths").EnumerateArray().Any(path => path.GetString() == "samples/assets/tensorrtexec-gui-article-runtime-evidence.json"));
         Assert.Contains(items, static item =>
             item.GetProperty("id").GetString() == "package-consumer-runtime-proof-boundary" &&
             item.GetProperty("currentStatus").GetString() == "local-refitted-plan-package-consumer-runtime-public-proof-owner-action-required" &&
@@ -70,7 +74,7 @@ public sealed class TensorRtExecReleaseCandidateGapTests
         Assert.Contains("workspace-memory-pool", markdown, StringComparison.Ordinal);
         Assert.Contains("implemented-readback-report", markdown, StringComparison.Ordinal);
         Assert.Contains("winforms-command-surface", markdown, StringComparison.Ordinal);
-        Assert.Contains("checklist-backed-command-preview", markdown, StringComparison.Ordinal);
+        Assert.Contains("checklist-and-real-gui-build-backed", markdown, StringComparison.Ordinal);
         Assert.Contains("implemented-pointer-free-multi-input-binding-multi-output-artifacts-and-reference-validation", markdown, StringComparison.Ordinal);
         Assert.Contains("samples/YoloVision/yolovision-task-output-contract.json", markdown, StringComparison.Ordinal);
 

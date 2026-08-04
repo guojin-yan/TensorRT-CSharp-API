@@ -215,13 +215,13 @@
     {
       "id": "winforms-command-surface",
       "officialTrtexecParity": "GUI parity for CLI options",
-      "currentStatus": "checklist-backed-command-preview",
+      "currentStatus": "checklist-and-real-gui-build-backed",
       "isRuntimeProof": false,
       "isPackageConsumerRuntimeProof": false,
       "cliSupported": false,
       "winFormsSupported": true,
-      "nextImplementationPaths": ["applications/TensorRtExec/WinForms", "docs/articles/zh-cn/publishing/tensorrtexec-cli-public-article.md"],
-      "nextStep": "Continue using the GUI/CLI field map and generated command preview to lock parity without promoting screenshots or preview text as proof."
+      "nextImplementationPaths": ["applications/TensorRtExec/WinForms", "applications/TensorRtExec/tensor-rt-exec-gui-cli-field-map.json", "docs/articles/zh-cn/tensorrtexec-gui-user-guide.md", "samples/assets/tensorrtexec-gui-article-runtime-evidence.json"],
+      "nextStep": "Retain the 84-option GUI/CLI map and the real MNIST ONNX GUI build record. Keep both classified as parity/build evidence rather than inference or release proof."
     },
     {
       "id": "package-consumer-runtime-proof-boundary",
