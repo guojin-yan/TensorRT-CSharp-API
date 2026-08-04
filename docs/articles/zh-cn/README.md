@@ -8,7 +8,7 @@
 - Owner 输入、候选 proof 和 post-publish 模板；
 - `publishing` 子目录中的文章规划与发布治理材料。
 
-2026-08-04 盘点到 487 个 Markdown 文件。当前有 7 篇文章同时具备真实程序运行窗口截图和原图叠加识别结果；其余文件仍以项目文档、内部记录或待完善稿为主。数量代表项目过程材料多，不代表有 487 篇完整成稿。
+2026-08-04 盘点到 486 个 Markdown 文件。当前有 7 篇文章同时具备真实程序运行窗口截图和原图叠加识别结果；其余文件仍以项目文档、内部记录或待完善稿为主。数量代表项目过程材料多，不代表有 486 篇完整成稿。
 
 ## 完整文章标准
 
@@ -53,9 +53,10 @@
 - [使用 TensorRtSharp4.0 管理推理输入、显存绑定与 GPU 输出读回](inference-bindings-tutorial.md)。
 - [使用 TensorRtSharp4.0 在 C# 中实现 CUDA 多流与 Event 同步](cuda-stream-event-multistream-tutorial.md)。
 
-模型转换工具文章需要真实模型构建、Engine 回读、程序窗口和输出语义校验，但不要求把未经授权的输入图片嵌入仓库：
+模型转换和桌面工具文章需要真实模型构建、程序窗口、报告校验和清楚的 build/runtime 边界；只有声称完成推理的文章才必须提供输出语义校验。未经授权的输入图片不嵌入仓库：
 
 - [使用 TensorRtSharp4.0 将 MNIST ONNX 转换为 TensorRT Engine 并推理](onnx-to-engine-quickstart.md)。
+- [使用 TensorRtExec GUI 将 ONNX 构建为 TensorRT Engine](tensorrtexec-gui-user-guide.md)。
 
 其余模型教程即使已有真实 TensorRT 证据，在补齐原图叠加结果和真实程序窗口截图前，也不会标记为完整技术文章。
 

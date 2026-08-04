@@ -314,8 +314,6 @@
     href: articles/zh-cn/yolovision-pose-keypoint-output-guide.md
   - name: YoloVision OBB Angle Output Guide
     href: articles/zh-cn/yolovision-obb-angle-output-guide.md
-  - name: TensorRtExec WinForms Screenshot Walkthrough
-    href: articles/zh-cn/tensorrtexec-winforms-screenshot-walkthrough.md
   - name: TensorRtExec Report Schema Guide
     href: articles/zh-cn/tensorrtexec-report-schema-guide.md
   - name: TensorRtExec Report Proof Boundary

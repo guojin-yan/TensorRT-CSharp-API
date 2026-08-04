@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "recordKind": "tensorrtexec-gui-technical-article-runtime-evidence",
+  "recordId": "tensorrtexec-gui-mnist-build-win-x64-trt10.11-cuda12.9-20260804",
+  "proofClassification": "build-only",
+  "executedUtcDate": "2026-08-04",
+  "sourceBaseCommit": "21a51a3610abf4184d428a6c96290ea587a59c69",
+  "runtimeEnvironment": {
+    "os": "Microsoft Windows 11 Home Chinese, NT 10.0.26200.0",
+    "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+    "driverVersion": "576.02",
+    "cudaToolkitVersion": "12.9",
+    "tensorRtVersion": "10.11.0.33",
+    "dotnetSdkVersion": "10.0.301"
+  },
+  "model": {
+    "path": "<workspace>/models/OnnxToEngine/MNIST/nvidia-tensorrt-10.11/mnist.onnx",
+    "length": 26454,
+    "sha256": "2f06e72de813a8635c9bc0397ac447a601bdbfa7df4bebc278723b958831c9bf",
+    "opset": 8,
+    "source": "TensorRT 10.11 sample data README attribution to ONNX Model Zoo",
+    "conversion": "upstream ONNX release; no local framework-to-ONNX conversion",
+    "redistributionApproved": false,
+    "trackedByGit": false
+  },
+  "applicationAssets": {
+    "programSha256": "1f7e33f044f6111efa207899cf589f515e5a24951795b49a36c09a2c7269c8c6",
+    "mainFormSha256": "6ae3a40c76d89c0f01074f32fff184a249da4bf5f83a0166a0bc8c48127dda75",
+    "projectSha256": "2b478b60f7abdb00c0fc2065f82c69e348044c6b0e307db01cc9090f7b9f9f4b",
+    "applicationAssemblySha256": "a529bc6889c94efdbf963903105bd2bebef82a89bc057412065d79754c3a64b7",
+    "toolsAssemblySha256": "62b35481335cfd11310b6cc46796e7e3e21ed439f831bb976007dc67b5a33024",
+    "nativeBridgeSha256": "0576f191617dcdad46fd40e238f61cf22b9fb04826b70c1c47993b7944bd26a0"
+  },
+  "runtimeValidation": {
+    "success": true,
+    "state": "external-onnx-build-only",
+    "tensorRtLine": 10,
+    "parsed": true,
+    "engineSaved": true,
+    "dryRun": false,
+    "inferenceRan": false,
+    "runtimeAvailable": true,
+    "builderAvailable": true,
+    "workspaceBytes": 67108864,
+    "builderOptimizationLevel": 3,
+    "tf32Requested": true,
+    "tf32Applied": true,
+    "tf32Readback": true,
+    "parserErrorCount": 0,
+    "proofClassification": "build-only",
+    "buildEvidenceOnly": true,
+    "isRuntimeExecutionProof": false,
+    "processExitCode": 0
+  },
+  "artifacts": {
+    "engine": {
+      "fileName": "mnist-gui.plan",
+      "length": 436540,
+      "sha256": "60a6d188956242b6b5c7d8f3ff65bb030902be0909139fba2f97369a3b4b7148",
+      "trackedByGit": false,
+      "crossHostDeterministic": false
+    },
+    "report": {
+      "fileName": "mnist-gui-report.json",
+      "length": 19569,
+      "sha256": "a4377624f7c3e0577434f09c7bcc89de195c5af1facc4e3fc06299dbeba3b2ef",
+      "trackedByGit": false
+    },
+    "configurationScreenshot": {
+      "path": "docs/images/tensorrtexec-gui-runtime-config.png",
+      "length": 78605,
+      "sha256": "ee1f41ee70b49bb62dcc82c1956a65ff9a4d6e1e93455c196ca4e034a7169290",
+      "captureMethod": "Windows PrintWindow from the real Release WinForms process"
+    },
+    "resultScreenshot": {
+      "path": "docs/images/tensorrtexec-gui-runtime-result.png",
+      "length": 92085,
+      "sha256": "d357b8a0c2e07b434dcec055f225d20af5a63c5f79335ff6308f0347efcee6f9",
+      "captureMethod": "Windows PrintWindow from the same successful Release WinForms process"
+    }
+  },
+  "displaySanitization": {
+    "appliedAfterSuccessfulRun": true,
+    "pathsReplacedWithPortablePlaceholders": true,
+    "runtimeValuesChanged": false,
+    "displayedCommand": "--tensor-rt-line 10 --onnx <models>/mnist.onnx --saveEngine <artifacts>/mnist-gui.plan --workspace 64 --buildOnly --skipInference",
+    "displayedLog": "SUCCESS Parsed=True EngineSaved=True TRT=10.11.0 CUDA=12.9 Runtime=True Builder=True Report=mnist-gui-report.json"
+  },
+  "proofBoundary": {
+    "sourceTreeGuiBuildProof": true,
+    "realOnnxParserAndBuilder": true,
+    "realModelInferenceProof": false,
+    "packageConsumerRuntimeProof": false,
+    "publicPackageProof": false,
+    "postPublishProof": false,
+    "modelRedistributionApproved": false,
+    "uploadsAssets": false,
+    "performsPublish": false
+  }
+}

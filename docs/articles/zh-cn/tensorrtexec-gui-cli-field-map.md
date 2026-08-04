@@ -24,7 +24,7 @@ TensorRtExec 的设计目标之一是 GUI/CLI parity。WinForms 降低上手门�
 
 - `applications/TensorRtExec`：CLI 与 WinForms 实现。
 - `applications/TensorRtExec/tensor-rt-exec-feature-matrix.json`：GUI/CLI 能力矩阵。
-- `docs/articles/zh-cn/tensorrtexec-winforms-screenshot-walkthrough.md`：WinForms 操作说明。
+- `docs/articles/zh-cn/tensorrtexec-gui-user-guide.md`：包含真实配置页和成功结果页的 WinForms 完整教程。
 - `docs/articles/zh-cn/tensorrtexec-report-json-schema-snapshot.md`：report snapshot 建议。
 - `docs/articles/zh-cn/tensorrt-exec-trtexec-parity-matrix.md`：trtexec parity 说明。
 

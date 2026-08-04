@@ -1,4 +1,6 @@
 using JYPPX.TensorRtSharp.Tools;
+using System.Security.Cryptography;
+using System.Text.Json;
 using Xunit;
 
 namespace JYPPX.ProjectQuality.Tests;
@@ -36,6 +38,75 @@ public sealed class TensorRtExecApplicationTests
         Assert.Contains("blocked-by-cuda-driver", appReadme, StringComparison.Ordinal);
         Assert.Contains("src\\JYPPX.TensorRtSharp.Tools\\JYPPX.TensorRtSharp.Tools.csproj", projectText.Replace("/", "\\"), StringComparison.Ordinal);
         Assert.DoesNotContain("samples\\OnnxToEngine\\OnnxToEngine.csproj", projectText.Replace("/", "\\"), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void TensorRtExecGuiKeepsCommandPreviewAndRuntimeLogVisible()
+    {
+        string formSource = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "applications",
+            "TensorRtExec",
+            "WinForms",
+            "MainForm.cs"));
+
+        Assert.Contains("root.RowStyles.Add(new RowStyle(SizeType.Absolute, 38));", formSource, StringComparison.Ordinal);
+        Assert.Contains("root.RowStyles.Add(new RowStyle(SizeType.Absolute, 180));", formSource, StringComparison.Ordinal);
+        Assert.Contains("_log.Font = new Font(\"Consolas\", 9F", formSource, StringComparison.Ordinal);
+        Assert.Contains("root.Controls.Add(_commandPreview, 0, 50);", formSource, StringComparison.Ordinal);
+        Assert.Contains("root.Controls.Add(_log, 0, 51);", formSource, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void TensorRtExecGuiArticleUsesHashedRealScreenshotsAndRemovesPlaceholderDuplicate()
+    {
+        string articlePath = Path.Combine(RepositoryPaths.Root, "docs", "articles", "zh-cn", "tensorrtexec-gui-user-guide.md");
+        string evidencePath = Path.Combine(RepositoryPaths.Root, "samples", "assets", "tensorrtexec-gui-article-runtime-evidence.json");
+        string duplicatePath = Path.Combine(RepositoryPaths.Root, "docs", "articles", "zh-cn", "tensorrtexec-winforms-screenshot-walkthrough.md");
+        string article = File.ReadAllText(articlePath);
+
+        using JsonDocument document = JsonDocument.Parse(File.ReadAllText(evidencePath));
+        JsonElement root = document.RootElement;
+        JsonElement assets = root.GetProperty("artifacts");
+
+        Assert.Equal("tensorrtexec-gui-technical-article-runtime-evidence", root.GetProperty("recordKind").GetString());
+        Assert.Equal("build-only", root.GetProperty("proofClassification").GetString());
+        Assert.True(root.GetProperty("runtimeValidation").GetProperty("parsed").GetBoolean());
+        Assert.True(root.GetProperty("runtimeValidation").GetProperty("engineSaved").GetBoolean());
+        Assert.False(root.GetProperty("runtimeValidation").GetProperty("isRuntimeExecutionProof").GetBoolean());
+
+        foreach (string assetName in new[] { "configurationScreenshot", "resultScreenshot" })
+        {
+            JsonElement asset = assets.GetProperty(assetName);
+            string path = Path.Combine(RepositoryPaths.Root, asset.GetProperty("path").GetString()!.Replace('/', Path.DirectorySeparatorChar));
+            Assert.True(File.Exists(path), path);
+            Assert.Equal(asset.GetProperty("length").GetInt64(), new FileInfo(path).Length);
+            Assert.Equal(asset.GetProperty("sha256").GetString(), ComputeSha256(path));
+        }
+
+        string formPath = Path.Combine(RepositoryPaths.Root, "applications", "TensorRtExec", "WinForms", "MainForm.cs");
+        Assert.Equal(root.GetProperty("applicationAssets").GetProperty("mainFormSha256").GetString(), ComputeSha256(formPath));
+
+        Assert.Contains("模型获取、许可证与转换", article, StringComparison.Ordinal);
+        Assert.Contains("ONNX Model Zoo", article, StringComparison.Ordinal);
+        Assert.Contains("上游已经提供 ONNX，不做二次转换", article, StringComparison.Ordinal);
+        Assert.Contains("../../images/tensorrtexec-gui-runtime-config.png", article, StringComparison.Ordinal);
+        Assert.Contains("../../images/tensorrtexec-gui-runtime-result.png", article, StringComparison.Ordinal);
+        Assert.Contains("EngineSaved", article, StringComparison.Ordinal);
+        Assert.Contains("10.11.0", article, StringComparison.Ordinal);
+        Assert.Contains("图片来源", article, StringComparison.Ordinal);
+        Assert.DoesNotMatch("[A-Za-z]:\\\\", article);
+        Assert.DoesNotContain("下一步继续补 GUI 控件截图", article, StringComparison.Ordinal);
+        Assert.DoesNotContain("图示建议", article, StringComparison.Ordinal);
+        Assert.False(File.Exists(duplicatePath), duplicatePath);
+
+        string entrypoints = string.Concat(
+            File.ReadAllText(Path.Combine(RepositoryPaths.Root, "README.md")),
+            File.ReadAllText(Path.Combine(RepositoryPaths.Root, "README.zh-CN.md")),
+            File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "index.md")),
+            File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "toc.yml")),
+            File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "articles", "zh-cn", "tensorrtexec-gui-cli-field-map.md")));
+        Assert.DoesNotContain("tensorrtexec-winforms-screenshot-walkthrough.md", entrypoints, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -582,5 +653,10 @@ public sealed class TensorRtExecApplicationTests
             "JYPPX.TensorRtSharp.Tools",
             "Build",
             $"OnnxEngineBuildDiagnostics.{feature}.cs"))));
+    }
+
+    private static string ComputeSha256(string path)
+    {
+        return Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(path))).ToLowerInvariant();
     }
 }

@@ -10,7 +10,6 @@ public sealed class TechnicalArticleCampaignFourthBatchBodyTests
         "yolovision-segmentation-mask-postprocess-guide.md",
         "yolovision-pose-keypoint-output-guide.md",
         "yolovision-obb-angle-output-guide.md",
-        "tensorrtexec-winforms-screenshot-walkthrough.md",
         "tensorrtexec-report-schema-guide.md",
         "runtime-package-windows-linux-install-faq.md",
         "plugin-registry-inventory-user-guide.md",

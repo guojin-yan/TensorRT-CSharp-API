@@ -710,7 +710,6 @@ Application entry points:
 - [YoloVision OBB Angle Output Guide](articles/zh-cn/yolovision-obb-angle-output-guide.md)
 - [YoloVision Classification YOLOv8n Labels TopK Guide](articles/zh-cn/yolovision-classification-yolov8n-labels-topk-guide.md)
 - [YoloVision Real Asset Owner Backfill Pack](articles/zh-cn/yolovision-real-asset-owner-backfill-pack.md)
-- [TensorRtExec WinForms Screenshot Walkthrough](articles/zh-cn/tensorrtexec-winforms-screenshot-walkthrough.md)
 - [TensorRtExec Report Schema Guide](articles/zh-cn/tensorrtexec-report-schema-guide.md)
 - [TensorRtExec Report Proof Boundary](articles/zh-cn/tensorrtexec-report-proof-boundary.md)
 - [Runtime Package Windows Linux Install FAQ](articles/zh-cn/runtime-package-windows-linux-install-faq.md)

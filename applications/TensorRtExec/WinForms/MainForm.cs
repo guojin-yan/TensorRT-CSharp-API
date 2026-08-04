@@ -261,6 +261,9 @@ public sealed class MainForm : Form
         modePanel.Controls.AddRange(new Control[] { _buildOnly, _skipInference, _dryRun });
         AddLabeled(root, 49, "Mode", modePanel);
 
+        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 38));
+        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 180));
+
         Button previewButton = new Button { Text = "Preview", Dock = DockStyle.Fill, Height = 32 };
         previewButton.Click += OnPreview;
         root.Controls.Add(previewButton, 2, 49);
@@ -280,6 +283,7 @@ public sealed class MainForm : Form
         _log.ScrollBars = ScrollBars.Both;
         _log.ReadOnly = true;
         _log.WordWrap = false;
+        _log.Font = new Font("Consolas", 9F, FontStyle.Regular, GraphicsUnit.Point);
         root.Controls.Add(_log, 0, 51);
         root.SetColumnSpan(_log, 3);
 
