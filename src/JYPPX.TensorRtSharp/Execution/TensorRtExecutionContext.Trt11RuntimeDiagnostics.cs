@@ -87,7 +87,37 @@ public sealed partial class TensorRtExecutionContext
     /// <returns><see langword="true"/> when TensorRT accepts the clear operation. / TensorRT 接受清理操作时返回 <see langword="true"/>。</returns>
     public bool ClearOutputAllocator(string tensorName)
     {
-        return NativeBridgeApi.ClearExecutionContextOutputAllocator(Line, _handle, tensorName);
+        if (string.IsNullOrWhiteSpace(tensorName))
+        {
+            throw new ArgumentException("Output tensor name must not be empty.", nameof(tensorName));
+        }
+
+        if (TensorRtOutputAllocatorCallbackOwner.IsExecutingRuntimeCallbackOnCurrentThread)
+        {
+            throw new InvalidOperationException("An output allocator cannot be cleared from inside its own callback.");
+        }
+
+        lock (_outputAllocatorLeaseLock)
+        {
+            if (_outputAllocatorContextDisposed)
+            {
+                throw new ObjectDisposedException(nameof(TensorRtExecutionContext));
+            }
+
+            if (!_outputAllocatorKeepAlive.TryGetValue(tensorName, out TensorRtOutputAllocatorCallbackOwner? owner))
+            {
+                return NativeBridgeApi.ClearExecutionContextOutputAllocator(Line, _handle, tensorName);
+            }
+
+            bool detached = NativeBridgeApi.DetachOutputAllocatorOwner(Line, owner.NativeHandle);
+            if (detached)
+            {
+                _outputAllocatorKeepAlive.Remove(tensorName);
+                owner.DetachBorrower();
+            }
+
+            return detached;
+        }
     }
 
     /// <summary>

@@ -5,12 +5,12 @@ using JYPPX.TensorRtSharp.Shared.Interop;
 namespace JYPPX.TensorRtSharp;
 
 /// <summary>
-/// Describes one diagnostic request for the future TensorRT output allocator callback owner.
-/// 描述未来 TensorRT output allocator callback owner 的一次诊断请求。
+/// Describes copied metadata for one TensorRT output allocator callback.
+/// 描述一次 TensorRT output allocator 回调复制出的元数据。
 /// </summary>
 /// <remarks>
 /// This request contains copied metadata only. It does not carry a TensorRT output buffer, CUDA stream handle, or device
-/// pointer ownership.
+/// pointer ownership. Native code owns every CUDA allocation returned to TensorRT.
 /// 该请求只包含复制出的元数据；不携带 TensorRT output buffer、CUDA stream handle 或 device pointer 所有权。
 /// </remarks>
 public readonly struct TensorRtOutputAllocatorCallbackRequest
@@ -35,13 +35,52 @@ public readonly struct TensorRtOutputAllocatorCallbackRequest
         long[]? shapeDimensions,
         string reason = "",
         bool hasCurrentMemory = false)
+        : this(
+            TensorRtOutputAllocatorCallbackKind.ReallocateOutput,
+            tensorName,
+            requestedSize,
+            alignment,
+            shapeDimensions,
+            reason,
+            hasCurrentMemory,
+            hasStream: false)
     {
+    }
+
+    /// <summary>
+    /// Creates a copied output allocator callback request.
+    /// 创建复制后的 output allocator callback 请求。
+    /// </summary>
+    /// <param name="kind">The callback operation. callback 操作。</param>
+    /// <param name="tensorName">The copied output tensor name. 复制出的输出 tensor 名称。</param>
+    /// <param name="requestedSize">The requested output size, or zero for shape notification. 请求的输出大小；shape 通知时为零。</param>
+    /// <param name="alignment">The requested alignment, or zero for shape notification. 请求的对齐；shape 通知时为零。</param>
+    /// <param name="shapeDimensions">The copied shape dimensions. 复制出的 shape 维度。</param>
+    /// <param name="reason">A copied diagnostic reason. 复制出的诊断原因。</param>
+    /// <param name="hasCurrentMemory">Whether TensorRT supplied current memory. TensorRT 是否提供 current memory。</param>
+    /// <param name="hasStream">Whether the async callback supplied a CUDA stream. 异步 callback 是否提供 CUDA stream。</param>
+    public TensorRtOutputAllocatorCallbackRequest(
+        TensorRtOutputAllocatorCallbackKind kind,
+        string tensorName,
+        ulong requestedSize,
+        ulong alignment,
+        long[]? shapeDimensions,
+        string reason = "",
+        bool hasCurrentMemory = false,
+        bool hasStream = false)
+    {
+        if (kind != TensorRtOutputAllocatorCallbackKind.NotifyShape &&
+            kind != TensorRtOutputAllocatorCallbackKind.ReallocateOutput)
+        {
+            throw new ArgumentOutOfRangeException(nameof(kind));
+        }
+
         if (string.IsNullOrWhiteSpace(tensorName))
         {
             throw new ArgumentException("Output allocator tensor name must not be empty.", nameof(tensorName));
         }
 
-        if (alignment == 0UL)
+        if (kind == TensorRtOutputAllocatorCallbackKind.ReallocateOutput && alignment == 0UL)
         {
             throw new ArgumentOutOfRangeException(nameof(alignment), "Output allocator alignment must be greater than zero.");
         }
@@ -52,12 +91,17 @@ public readonly struct TensorRtOutputAllocatorCallbackRequest
             throw new ArgumentOutOfRangeException(nameof(shapeDimensions), "Output allocator diagnostic shape rank must be 8 or less.");
         }
 
+        Kind = kind;
         TensorName = tensorName;
         RequestedSize = requestedSize;
         Alignment = alignment;
         Reason = reason ?? string.Empty;
         HasCurrentMemory = hasCurrentMemory;
+        HasStream = hasStream;
     }
+
+    /// <summary>Gets the callback operation. 获取 callback 操作。</summary>
+    public TensorRtOutputAllocatorCallbackKind Kind { get; }
 
     /// <summary>Gets the copied output tensor name. 获取复制出的输出 tensor 名称。</summary>
     public string TensorName { get; }
@@ -72,7 +116,7 @@ public readonly struct TensorRtOutputAllocatorCallbackRequest
     public int ShapeRank => _shapeDimensions.Length;
 
     /// <summary>Gets the copied output shape dimensions. 获取复制出的输出 shape 维度。</summary>
-    public ReadOnlyCollection<long> ShapeDimensions => Array.AsReadOnly(_shapeDimensions);
+    public ReadOnlyCollection<long> ShapeDimensions => Array.AsReadOnly(_shapeDimensions ?? Array.Empty<long>());
 
     /// <summary>Gets the copied diagnostic reason. 获取复制出的诊断原因。</summary>
     public string Reason { get; }
@@ -80,8 +124,11 @@ public readonly struct TensorRtOutputAllocatorCallbackRequest
     /// <summary>Gets whether an existing current memory pointer was reported. 获取是否报告了已有 current memory pointer。</summary>
     public bool HasCurrentMemory { get; }
 
+    /// <summary>Gets whether TensorRT supplied an asynchronous CUDA stream. 获取 TensorRT 是否提供异步 CUDA stream。</summary>
+    public bool HasStream { get; }
+
     internal long[] CopyShapeDimensions()
     {
-        return (long[])_shapeDimensions.Clone();
+        return _shapeDimensions == null ? Array.Empty<long>() : (long[])_shapeDimensions.Clone();
     }
 }

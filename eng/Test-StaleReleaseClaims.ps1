@@ -91,6 +91,8 @@ function Test-AllowedClaimContext {
         "docs\articles\zh-cn\real-model-owner-backfill-checklist.md",
         "docs\articles\zh-cn\yolovision-real-asset-walkthrough.md",
         "docs\articles\zh-cn\yolovision-multi-output-metadata-guide.md",
+        "docs\articles\zh-cn\yolovision-yolov8n-det-local-package-consumer-tutorial.md",
+        "docs\articles\zh-cn\yolovision-lraspp-semantic-local-package-consumer-tutorial.md",
         "samples\Classification\README.md",
         "samples\YoloVision\README.md",
         "samples\assets\README.md")) {

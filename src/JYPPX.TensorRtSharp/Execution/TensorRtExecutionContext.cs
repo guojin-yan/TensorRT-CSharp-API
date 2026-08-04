@@ -18,6 +18,10 @@ public sealed partial class TensorRtExecutionContext : IDisposable
     private readonly object _debugListenerLeaseLock = new object();
     private TensorRtDebugListenerCallbackOwner? _debugListenerKeepAlive;
     private bool _debugListenerContextDisposed;
+    private readonly object _outputAllocatorLeaseLock = new object();
+    private readonly Dictionary<string, TensorRtOutputAllocatorCallbackOwner> _outputAllocatorKeepAlive =
+        new Dictionary<string, TensorRtOutputAllocatorCallbackOwner>(StringComparer.Ordinal);
+    private bool _outputAllocatorContextDisposed;
     private readonly object _auxiliaryStreamLeaseLock = new object();
     private TensorRtAuxiliaryStreamHandleLease? _auxiliaryStreamLease;
     private int _auxiliaryStreamAssignedCount;
@@ -103,6 +107,12 @@ public sealed partial class TensorRtExecutionContext : IDisposable
             throw new InvalidOperationException("An execution context cannot be disposed from inside its debug listener callback.");
         }
 
+        if (TensorRtOutputAllocatorCallbackOwner.IsExecutingRuntimeCallbackOnCurrentThread)
+        {
+            throw new InvalidOperationException("An execution context cannot be disposed from inside its output allocator callback.");
+        }
+
+        TensorRtOutputAllocatorCallbackOwner[] outputAllocators = DetachOutputAllocatorsForDispose();
         TensorRtDebugListenerCallbackOwner? debugListener = DetachDebugListenerForDispose();
         TensorRtAuxiliaryStreamHandleLease? auxiliaryStreamLease;
         lock (_auxiliaryStreamLeaseLock)
@@ -148,6 +158,7 @@ public sealed partial class TensorRtExecutionContext : IDisposable
                 _handle.Dispose();
                 GC.KeepAlive(profiler);
                 GC.KeepAlive(debugListener);
+                GC.KeepAlive(outputAllocators);
             }
             finally
             {
@@ -161,6 +172,32 @@ public sealed partial class TensorRtExecutionContext : IDisposable
                 debugListener?.DetachBorrower();
                 GC.SuppressFinalize(this);
             }
+        }
+    }
+
+    private TensorRtOutputAllocatorCallbackOwner[] DetachOutputAllocatorsForDispose()
+    {
+        lock (_outputAllocatorLeaseLock)
+        {
+            if (_outputAllocatorContextDisposed)
+            {
+                return Array.Empty<TensorRtOutputAllocatorCallbackOwner>();
+            }
+
+            TensorRtOutputAllocatorCallbackOwner[] owners = new TensorRtOutputAllocatorCallbackOwner[_outputAllocatorKeepAlive.Count];
+            _outputAllocatorKeepAlive.Values.CopyTo(owners, 0);
+            string[] tensorNames = new string[_outputAllocatorKeepAlive.Count];
+            _outputAllocatorKeepAlive.Keys.CopyTo(tensorNames, 0);
+            foreach (string tensorName in tensorNames)
+            {
+                TensorRtOutputAllocatorCallbackOwner owner = _outputAllocatorKeepAlive[tensorName];
+                NativeBridgeApi.DetachOutputAllocatorOwner(Line, owner.NativeHandle);
+                _outputAllocatorKeepAlive.Remove(tensorName);
+                owner.DetachBorrower();
+            }
+
+            _outputAllocatorContextDisposed = true;
+            return owners;
         }
     }
 

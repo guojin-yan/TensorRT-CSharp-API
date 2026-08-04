@@ -2274,6 +2274,18 @@ internal static partial class GeneratedTensorRtManifestNativeMethods
     internal static extern BridgeStatusCode jyppx_trt10_output_allocator_notify_shape_deferred();
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt10_output_allocator_owner_attach(SafeTensorRtObjectHandle owner, SafeTensorRtObjectHandle context, IntPtr tensor_name, out int out_attached);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt10_output_allocator_owner_create(TensorRtOutputAllocatorNativeCallback callback, IntPtr user_state, out SafeTensorRtObjectHandle out_owner);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt10_output_allocator_owner_detach(SafeTensorRtObjectHandle owner, out int out_detached);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt10_output_allocator_owner_get_info(SafeTensorRtObjectHandle owner, out NativeTensorRtOutputAllocatorOwnerInfo out_info);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt10_output_allocator_reallocate_output_deferred();
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
@@ -5925,6 +5937,18 @@ internal static partial class GeneratedTensorRtManifestNativeMethods
     internal static extern BridgeStatusCode jyppx_trt11_output_allocator_notify_shape_deferred();
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt11_output_allocator_owner_attach(SafeTensorRtObjectHandle owner, SafeTensorRtObjectHandle context, IntPtr tensor_name, out int out_attached);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt11_output_allocator_owner_create(TensorRtOutputAllocatorNativeCallback callback, IntPtr user_state, out SafeTensorRtObjectHandle out_owner);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt11_output_allocator_owner_detach(SafeTensorRtObjectHandle owner, out int out_detached);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt11_output_allocator_owner_get_info(SafeTensorRtObjectHandle owner, out NativeTensorRtOutputAllocatorOwnerInfo out_info);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt11_output_allocator_reallocate_output_deferred();
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
@@ -9151,6 +9175,18 @@ internal static partial class GeneratedTensorRtManifestNativeMethods
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt8_output_allocator_notify_shape_deferred();
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt8_output_allocator_owner_attach(SafeTensorRtObjectHandle owner, SafeTensorRtObjectHandle context, IntPtr tensor_name, out int out_attached);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt8_output_allocator_owner_create(TensorRtOutputAllocatorNativeCallback callback, IntPtr user_state, out SafeTensorRtObjectHandle out_owner);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt8_output_allocator_owner_detach(SafeTensorRtObjectHandle owner, out int out_detached);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt8_output_allocator_owner_get_info(SafeTensorRtObjectHandle owner, out NativeTensorRtOutputAllocatorOwnerInfo out_info);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt8_output_allocator_reallocate_output_deferred();

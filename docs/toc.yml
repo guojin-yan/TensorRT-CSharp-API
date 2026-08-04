@@ -364,7 +364,7 @@
     href: articles/zh-cn/real-callback-trampoline-gate.md
   - name: OutputAllocator Runtime Gate
     href: articles/zh-cn/output-allocator-runtime-gate.md
-  - name: OutputAllocator Callback Owner Design
+  - name: OutputAllocator Owner-Safe Runtime
     href: articles/zh-cn/output-allocator-callback-owner-design.md
   - name: OutputAllocator Attach/Detach Design Gate
     href: articles/zh-cn/output-allocator-attach-detach-design-gate.md

@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "evidenceKind": "local-tensorrt-output-allocator-runtime",
+  "recordedAtLocal": "2026-08-04",
+  "tensorRtLine": 10,
+  "tensorRtVersion": "10.11.0",
+  "cudaToolkitVersion": "12.9",
+  "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+  "nvidiaDriverVersion": "576.02",
+  "sample": "CallbackAllocatorSafeControlsSmokeRunner",
+  "mode": "OutputAllocatorRuntimeSmokeOnly",
+  "model": {
+    "kind": "programmatically-created-identity-network",
+    "acquisition": "not-applicable",
+    "conversion": "not-applicable",
+    "externalModelRequired": false
+  },
+  "positive": {
+    "passed": true,
+    "invocationCount": 2,
+    "notifyShapeCount": 1,
+    "reallocateOutputCount": 1,
+    "allocationCount": 1,
+    "releaseCount": 1,
+    "liveAllocationCountAfterDetach": 0,
+    "peakLiveAllocationBytes": 527,
+    "nativePointerExposed": false,
+    "realCallbackRuntime": true
+  },
+  "negative": {
+    "passed": true,
+    "enqueueFailed": true,
+    "allocationCount": 0,
+    "failureCount": 1
+  },
+  "artifacts": {
+    "stdout": {
+      "path": "samples/assets/output-allocator-real-runtime-tensorrt10.11.txt",
+      "sha256": "5f4a96bd7a79cbeb4c286badf56a1ae95052f523acb7a610ea9499ba9c8256f8"
+    },
+    "runtimeResultImage": {
+      "path": "docs/images/output-allocator-real-runtime-terminal.png",
+      "sha256": "6f71c8c4c491a022cd7e5f6f48ce98c0b1e63d3b231c51b8602a3272795eb258",
+      "source": "Rendered from the captured stdout without changing result values."
+    }
+  },
+  "boundary": "Local source-tree TensorRT 10.11 runtime evidence. TensorRT 8 and 11 are ABI/source validated but were not executed on this host. This record is not package-consumer, public-package, release, or post-publish evidence."
+}

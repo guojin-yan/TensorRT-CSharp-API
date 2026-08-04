@@ -8,9 +8,9 @@ namespace JYPPX.ProjectQuality.Tests;
 public sealed class ManagedOutputAllocatorSourceLayoutTests
 {
     private const string RuntimeGateOriginalNormalizedSha256 =
-        "6b3d38562983381a143a55aee63dfafbcf2844e7d4afa8c68d69c02d4301c8c0";
+        "d2d6e4a13731145ea77d01fe52b3b0538a3c12b1d8fdee9a0263599dd3fc3f13";
     private const string CallbackOwnerOriginalNormalizedSha256 =
-        "c856a61e9c679746f125e321cd488879b84edfa8c2bf56fd065019f48ed248a6";
+        "885640c061761b8af11ac18f764b067320d3715769d5112055ace93876d2d655";
 
     public static TheoryData<string, string[]> RuntimeGateFileMethods => new()
     {
@@ -41,7 +41,15 @@ public sealed class ManagedOutputAllocatorSourceLayoutTests
         { "TensorRtOutputAllocatorCallbackOwner.cs", Array.Empty<string>() },
         { "TensorRtOutputAllocatorCallbackOwner.DesignDiagnostic.cs", new[] { "RunDesignDiagnostic" } },
         { "TensorRtOutputAllocatorCallbackOwner.Snapshots.cs", new[] { "GetSnapshot" } },
-        { "TensorRtOutputAllocatorCallbackOwner.Lifecycle.cs", new[] { "Dispose", "ThrowIfDisposed" } }
+        {
+            "TensorRtOutputAllocatorCallbackOwner.Lifecycle.cs",
+            new[] { "Dispose", "AttachBorrower", "DetachBorrower", "ThrowIfDisposed", "ReleaseResources", "FreeRuntimeCallbackHandles" }
+        },
+        {
+            "TensorRtOutputAllocatorCallbackOwner.RuntimeCallback.cs",
+            new[] { "InvokeManagedOutputAllocator", "DecodeRuntimeTensorName", "CopyRuntimeShape" }
+        },
+        { "TensorRtOutputAllocatorCallbackOwner.RuntimeSnapshot.cs", new[] { "GetRuntimeSnapshot" } }
     };
 
     public static TheoryData<string, string[]> ModelProperties => new()
@@ -64,7 +72,19 @@ public sealed class ManagedOutputAllocatorSourceLayoutTests
         },
         {
             "TensorRtOutputAllocatorCallbackRequest.cs",
-            new[] { "TensorName", "RequestedSize", "Alignment", "ShapeRank", "ShapeDimensions", "Reason", "HasCurrentMemory" }
+            new[] { "Kind", "TensorName", "RequestedSize", "Alignment", "ShapeRank", "ShapeDimensions", "Reason", "HasCurrentMemory", "HasStream" }
+        },
+        {
+            "TensorRtOutputAllocatorRuntimeSnapshot.cs",
+            new[]
+            {
+                "Line", "OwnerId", "InvocationCount", "NotifyShapeCount", "ReallocateOutputCount", "FailureCount",
+                "InFlightCallbackCount", "MaxInFlightCallbackCount", "AttachCount", "DetachCount", "AllocationCount",
+                "ReuseCount", "ReleaseCount", "LiveAllocationCount", "LiveAllocationBytes", "PeakLiveAllocationBytes",
+                "LastRequestedSize", "LastAlignment", "LastStatus", "IsAttached", "LastCallbackSucceeded",
+                "LastAllocationSucceeded", "LastHadCurrentMemory", "LastHadStream", "LastCallbackKind", "TensorName",
+                "ShapeDimensions", "Diagnostic", "NativePointerExposed", "RealCallbackRuntime", "RuntimeEvidenceKind"
+            }
         },
         {
             "TensorRtOutputAllocatorCallbackOwnerSnapshot.cs",
@@ -160,8 +180,13 @@ public sealed class ManagedOutputAllocatorSourceLayoutTests
             "TensorRtOutputAllocatorCallbackOwner.DesignDiagnostic.cs",
             "TensorRtOutputAllocatorCallbackOwner.Snapshots.cs",
             "TensorRtOutputAllocatorCallbackOwner.Lifecycle.cs",
+            "TensorRtOutputAllocatorCallbackOwner.RuntimeCallback.cs",
+            "TensorRtOutputAllocatorCallbackOwner.RuntimeSnapshot.cs",
             "TensorRtOutputAllocatorCallbackRequest.cs",
-            "TensorRtOutputAllocatorCallbackOwnerSnapshot.cs"
+            "TensorRtOutputAllocatorCallbackOwnerSnapshot.cs",
+            "TensorRtOutputAllocatorCallbackKind.cs",
+            "TensorRtOutputAllocatorHandler.cs",
+            "TensorRtOutputAllocatorRuntimeSnapshot.cs"
         };
 
         foreach (string sourceFile in sourceFiles)

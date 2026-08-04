@@ -211,8 +211,13 @@ function Get-EvidenceSourceText {
         "TensorRtOutputAllocatorCallbackOwner.DesignDiagnostic.cs",
         "TensorRtOutputAllocatorCallbackOwner.Snapshots.cs",
         "TensorRtOutputAllocatorCallbackOwner.Lifecycle.cs",
+        "TensorRtOutputAllocatorCallbackOwner.RuntimeCallback.cs",
+        "TensorRtOutputAllocatorCallbackOwner.RuntimeSnapshot.cs",
         "TensorRtOutputAllocatorCallbackRequest.cs",
-        "TensorRtOutputAllocatorCallbackOwnerSnapshot.cs")
+        "TensorRtOutputAllocatorCallbackOwnerSnapshot.cs",
+        "TensorRtOutputAllocatorCallbackKind.cs",
+        "TensorRtOutputAllocatorHandler.cs",
+        "TensorRtOutputAllocatorRuntimeSnapshot.cs")
       break
     }
     "TensorRtLogger.cs" {

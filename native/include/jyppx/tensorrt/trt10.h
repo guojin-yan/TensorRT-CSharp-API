@@ -126,6 +126,10 @@ JYPPX_C_API(JYPPX_StatusCode) jyppx_trt10_debug_listener_owner_create(JYPPX_Tens
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt10_debug_listener_owner_attach(JYPPX_TensorRtDebugListenerOwner* owner, JYPPX_TensorRtExecutionContext* context, JYPPX_Boolean* out_attached);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt10_debug_listener_owner_detach(JYPPX_TensorRtDebugListenerOwner* owner, JYPPX_Boolean* out_detached);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt10_debug_listener_owner_get_info(JYPPX_TensorRtDebugListenerOwner* owner, JYPPX_TensorRtDebugListenerOwnerInfo* out_info);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt10_output_allocator_owner_create(JYPPX_TensorRtOutputAllocatorCallback callback, void* user_state, JYPPX_TensorRtOutputAllocatorOwner** out_owner);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt10_output_allocator_owner_attach(JYPPX_TensorRtOutputAllocatorOwner* owner, JYPPX_TensorRtExecutionContext* context, const char* tensor_name, JYPPX_Boolean* out_attached);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt10_output_allocator_owner_detach(JYPPX_TensorRtOutputAllocatorOwner* owner, JYPPX_Boolean* out_detached);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt10_output_allocator_owner_get_info(JYPPX_TensorRtOutputAllocatorOwner* owner, JYPPX_TensorRtOutputAllocatorOwnerInfo* out_info);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt10_runtime_create(JYPPX_TensorRtLogger* logger, JYPPX_TensorRtRuntime** out_runtime);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt10_runtime_set_dla_core(JYPPX_TensorRtRuntime* runtime, int32_t dla_core);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt10_runtime_get_dla_core(JYPPX_TensorRtRuntime* runtime, int32_t* out_dla_core);

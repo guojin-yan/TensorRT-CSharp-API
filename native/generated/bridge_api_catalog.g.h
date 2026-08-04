@@ -1441,6 +1441,10 @@
 #define JYPPX_API_TRT10_OPTIMIZATION_PROFILE_SET_SHAPE_VALUES "jyppx_trt10_optimization_profile_set_shape_values" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_OUTPUT_ALLOCATOR_GET_INTERFACE_INFO_DEFERRED "jyppx_trt10_output_allocator_get_interface_info_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_OUTPUT_ALLOCATOR_NOTIFY_SHAPE_DEFERRED "jyppx_trt10_output_allocator_notify_shape_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_TRT10_OUTPUT_ALLOCATOR_OWNER_ATTACH "jyppx_trt10_output_allocator_owner_attach" // module=tensorrt; line=10; ownership=borrowed-by-context-until-detach; manualOverride=false
+#define JYPPX_API_TRT10_OUTPUT_ALLOCATOR_OWNER_CREATE "jyppx_trt10_output_allocator_owner_create" // module=tensorrt; line=10; ownership=caller-destroys; manualOverride=false
+#define JYPPX_API_TRT10_OUTPUT_ALLOCATOR_OWNER_DETACH "jyppx_trt10_output_allocator_owner_detach" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_TRT10_OUTPUT_ALLOCATOR_OWNER_GET_INFO "jyppx_trt10_output_allocator_owner_get_info" // module=tensorrt; line=10; ownership=caller-owned-copied-snapshot; manualOverride=false
 #define JYPPX_API_TRT10_OUTPUT_ALLOCATOR_REALLOCATE_OUTPUT_DEFERRED "jyppx_trt10_output_allocator_reallocate_output_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_PADDING_LAYER_GET_POST_PADDING_ND "jyppx_trt10_padding_layer_get_post_padding_nd" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_PADDING_LAYER_GET_PRE_PADDING_ND "jyppx_trt10_padding_layer_get_pre_padding_nd" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
@@ -2658,6 +2662,10 @@
 #define JYPPX_API_TRT11_ONNX_PARSER_SUPPORTS_MODEL_V2 "jyppx_trt11_onnx_parser_supports_model_v2" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=true
 #define JYPPX_API_TRT11_OUTPUT_ALLOCATOR_GET_INTERFACE_INFO_DEFERRED "jyppx_trt11_output_allocator_get_interface_info_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_OUTPUT_ALLOCATOR_NOTIFY_SHAPE_DEFERRED "jyppx_trt11_output_allocator_notify_shape_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_TRT11_OUTPUT_ALLOCATOR_OWNER_ATTACH "jyppx_trt11_output_allocator_owner_attach" // module=tensorrt; line=11; ownership=borrowed-by-context-until-detach; manualOverride=false
+#define JYPPX_API_TRT11_OUTPUT_ALLOCATOR_OWNER_CREATE "jyppx_trt11_output_allocator_owner_create" // module=tensorrt; line=11; ownership=caller-destroys; manualOverride=false
+#define JYPPX_API_TRT11_OUTPUT_ALLOCATOR_OWNER_DETACH "jyppx_trt11_output_allocator_owner_detach" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_TRT11_OUTPUT_ALLOCATOR_OWNER_GET_INFO "jyppx_trt11_output_allocator_owner_get_info" // module=tensorrt; line=11; ownership=caller-owned-copied-snapshot; manualOverride=false
 #define JYPPX_API_TRT11_OUTPUT_ALLOCATOR_REALLOCATE_OUTPUT_DEFERRED "jyppx_trt11_output_allocator_reallocate_output_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_PADDING_LAYER_GET_POST_PADDING_ND "jyppx_trt11_padding_layer_get_post_padding_nd" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_PADDING_LAYER_GET_PRE_PADDING_ND "jyppx_trt11_padding_layer_get_pre_padding_nd" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
@@ -3734,6 +3742,10 @@
 #define JYPPX_API_TRT8_OPTIMIZATION_PROFILE_SET_SHAPE_VALUES "jyppx_trt8_optimization_profile_set_shape_values" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_OUTPUT_ALLOCATOR_GET_INTERFACE_VERSION_DEFERRED "jyppx_trt8_output_allocator_get_interface_version_deferred" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_OUTPUT_ALLOCATOR_NOTIFY_SHAPE_DEFERRED "jyppx_trt8_output_allocator_notify_shape_deferred" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_TRT8_OUTPUT_ALLOCATOR_OWNER_ATTACH "jyppx_trt8_output_allocator_owner_attach" // module=tensorrt; line=8; ownership=borrowed-by-context-until-detach; manualOverride=false
+#define JYPPX_API_TRT8_OUTPUT_ALLOCATOR_OWNER_CREATE "jyppx_trt8_output_allocator_owner_create" // module=tensorrt; line=8; ownership=caller-destroys; manualOverride=false
+#define JYPPX_API_TRT8_OUTPUT_ALLOCATOR_OWNER_DETACH "jyppx_trt8_output_allocator_owner_detach" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_TRT8_OUTPUT_ALLOCATOR_OWNER_GET_INFO "jyppx_trt8_output_allocator_owner_get_info" // module=tensorrt; line=8; ownership=caller-owned-copied-snapshot; manualOverride=false
 #define JYPPX_API_TRT8_OUTPUT_ALLOCATOR_REALLOCATE_OUTPUT_DEFERRED "jyppx_trt8_output_allocator_reallocate_output_deferred" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_PADDING_LAYER_GET_POST_PADDING_ND "jyppx_trt8_padding_layer_get_post_padding_nd" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT8_PADDING_LAYER_GET_PRE_PADDING_ND "jyppx_trt8_padding_layer_get_pre_padding_nd" // module=tensorrt; line=8; ownership=caller-owned; manualOverride=false

@@ -42,7 +42,8 @@ typedef enum JYPPX_TensorRtObjectKind
     JYPPX_TENSORRT_OBJECT_KIND_ONNX_PARSER_REFITTER = 23,
     JYPPX_TENSORRT_OBJECT_KIND_ALLOCATOR_CALLBACK_OWNER = 24,
     JYPPX_TENSORRT_OBJECT_KIND_ONNX_CONFIG = 25,
-    JYPPX_TENSORRT_OBJECT_KIND_DEBUG_LISTENER_CALLBACK_OWNER = 26
+    JYPPX_TENSORRT_OBJECT_KIND_DEBUG_LISTENER_CALLBACK_OWNER = 26,
+    JYPPX_TENSORRT_OBJECT_KIND_OUTPUT_ALLOCATOR_CALLBACK_OWNER = 27
 } JYPPX_TensorRtObjectKind;
 
 typedef enum JYPPX_TensorRtProgressMonitorEventKind
@@ -87,6 +88,7 @@ typedef JYPPX_TensorRtObjectBase JYPPX_TensorRtOnnxParserRefitter;
 typedef JYPPX_TensorRtObjectBase JYPPX_TensorRtAllocatorOwner;
 typedef JYPPX_TensorRtObjectBase JYPPX_TensorRtOnnxConfig;
 typedef JYPPX_TensorRtObjectBase JYPPX_TensorRtDebugListenerOwner;
+typedef JYPPX_TensorRtObjectBase JYPPX_TensorRtOutputAllocatorOwner;
 
 typedef JYPPX_StatusCode (*JYPPX_TensorRtLoggerCallback)(
     int32_t severity,
@@ -126,6 +128,34 @@ typedef JYPPX_StatusCode (*JYPPX_TensorRtDebugListenerCallback)(
     int64_t dim5,
     int64_t dim6,
     int64_t dim7,
+    void* user_state);
+
+typedef enum JYPPX_TensorRtOutputAllocatorCallbackKind
+{
+    JYPPX_TENSORRT_OUTPUT_ALLOCATOR_CALLBACK_UNKNOWN = 0,
+    JYPPX_TENSORRT_OUTPUT_ALLOCATOR_CALLBACK_NOTIFY_SHAPE = 1,
+    JYPPX_TENSORRT_OUTPUT_ALLOCATOR_CALLBACK_REALLOCATE_OUTPUT = 2
+} JYPPX_TensorRtOutputAllocatorCallbackKind;
+
+typedef JYPPX_StatusCode (*JYPPX_TensorRtOutputAllocatorCallback)(
+    uint32_t line,
+    int32_t callback_kind,
+    const char* tensor_name,
+    size_t tensor_name_length,
+    uint64_t requested_size,
+    uint64_t alignment,
+    JYPPX_Boolean has_current_memory,
+    JYPPX_Boolean has_stream,
+    int32_t shape_rank,
+    int64_t dim0,
+    int64_t dim1,
+    int64_t dim2,
+    int64_t dim3,
+    int64_t dim4,
+    int64_t dim5,
+    int64_t dim6,
+    int64_t dim7,
+    JYPPX_Boolean* out_should_allocate,
     void* user_state);
 
 typedef struct JYPPX_TensorRtAdapterInfo
@@ -258,6 +288,39 @@ typedef struct JYPPX_TensorRtDebugListenerOwnerInfo
     char last_tensor_name[256];
     char last_diagnostic[1024];
 } JYPPX_TensorRtDebugListenerOwnerInfo;
+
+typedef struct JYPPX_TensorRtOutputAllocatorOwnerInfo
+{
+    uint32_t line;
+    uint64_t owner_id;
+    uint64_t invocation_count;
+    uint64_t notify_shape_count;
+    uint64_t reallocate_output_count;
+    uint64_t failure_count;
+    uint64_t in_flight_callback_count;
+    uint64_t max_in_flight_callback_count;
+    uint64_t attach_count;
+    uint64_t detach_count;
+    uint64_t allocation_count;
+    uint64_t reuse_count;
+    uint64_t release_count;
+    uint64_t live_allocation_count;
+    uint64_t live_allocation_bytes;
+    uint64_t peak_live_allocation_bytes;
+    uint64_t last_requested_size;
+    uint64_t last_alignment;
+    int32_t last_status;
+    JYPPX_Boolean is_attached;
+    JYPPX_Boolean last_callback_succeeded;
+    JYPPX_Boolean last_allocation_succeeded;
+    JYPPX_Boolean last_had_current_memory;
+    JYPPX_Boolean last_had_stream;
+    int32_t last_callback_kind;
+    int32_t last_shape_rank;
+    int64_t last_shape[8];
+    char last_tensor_name[256];
+    char last_diagnostic[1024];
+} JYPPX_TensorRtOutputAllocatorOwnerInfo;
 
 typedef struct JYPPX_TensorRtRuntimeCreateDiagnosticInfo
 {

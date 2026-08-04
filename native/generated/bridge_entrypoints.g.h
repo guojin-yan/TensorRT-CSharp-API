@@ -4324,6 +4324,18 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt10_output_allocator_get_interface_info_de
 // generated from manifest id=trt10-output-allocator-notify-shape-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_output_allocator_notify_shape_deferred(void);
 
+// generated from manifest id=trt10-output-allocator-owner-attach
+JYPPX_C_API(BridgeStatusCode) jyppx_trt10_output_allocator_owner_attach(JYPPX_TensorRtOutputAllocatorOwner* owner, JYPPX_TensorRtExecutionContext* context, const char* tensor_name, JYPPX_Boolean* out_attached);
+
+// generated from manifest id=trt10-output-allocator-owner-create
+JYPPX_C_API(BridgeStatusCode) jyppx_trt10_output_allocator_owner_create(JYPPX_TensorRtOutputAllocatorCallback callback, void* user_state, JYPPX_TensorRtOutputAllocatorOwner** out_owner);
+
+// generated from manifest id=trt10-output-allocator-owner-detach
+JYPPX_C_API(BridgeStatusCode) jyppx_trt10_output_allocator_owner_detach(JYPPX_TensorRtOutputAllocatorOwner* owner, JYPPX_Boolean* out_detached);
+
+// generated from manifest id=trt10-output-allocator-owner-get-info
+JYPPX_C_API(BridgeStatusCode) jyppx_trt10_output_allocator_owner_get_info(JYPPX_TensorRtOutputAllocatorOwner* owner, JYPPX_TensorRtOutputAllocatorOwnerInfo* out_info);
+
 // generated from manifest id=trt10-output-allocator-reallocate-output-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_output_allocator_reallocate_output_deferred(void);
 
@@ -7975,6 +7987,18 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt11_output_allocator_get_interface_info_de
 // generated from manifest id=trt11-output-allocator-notify-shape-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_output_allocator_notify_shape_deferred(void);
 
+// generated from manifest id=trt11-output-allocator-owner-attach
+JYPPX_C_API(BridgeStatusCode) jyppx_trt11_output_allocator_owner_attach(JYPPX_TensorRtOutputAllocatorOwner* owner, JYPPX_TensorRtExecutionContext* context, const char* tensor_name, JYPPX_Boolean* out_attached);
+
+// generated from manifest id=trt11-output-allocator-owner-create
+JYPPX_C_API(BridgeStatusCode) jyppx_trt11_output_allocator_owner_create(JYPPX_TensorRtOutputAllocatorCallback callback, void* user_state, JYPPX_TensorRtOutputAllocatorOwner** out_owner);
+
+// generated from manifest id=trt11-output-allocator-owner-detach
+JYPPX_C_API(BridgeStatusCode) jyppx_trt11_output_allocator_owner_detach(JYPPX_TensorRtOutputAllocatorOwner* owner, JYPPX_Boolean* out_detached);
+
+// generated from manifest id=trt11-output-allocator-owner-get-info
+JYPPX_C_API(BridgeStatusCode) jyppx_trt11_output_allocator_owner_get_info(JYPPX_TensorRtOutputAllocatorOwner* owner, JYPPX_TensorRtOutputAllocatorOwnerInfo* out_info);
+
 // generated from manifest id=trt11-output-allocator-reallocate-output-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_output_allocator_reallocate_output_deferred(void);
 
@@ -11202,6 +11226,18 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt8_output_allocator_get_interface_version_
 
 // generated from manifest id=trt8-output-allocator-notify-shape-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt8_output_allocator_notify_shape_deferred(void);
+
+// generated from manifest id=trt8-output-allocator-owner-attach
+JYPPX_C_API(BridgeStatusCode) jyppx_trt8_output_allocator_owner_attach(JYPPX_TensorRtOutputAllocatorOwner* owner, JYPPX_TensorRtExecutionContext* context, const char* tensor_name, JYPPX_Boolean* out_attached);
+
+// generated from manifest id=trt8-output-allocator-owner-create
+JYPPX_C_API(BridgeStatusCode) jyppx_trt8_output_allocator_owner_create(JYPPX_TensorRtOutputAllocatorCallback callback, void* user_state, JYPPX_TensorRtOutputAllocatorOwner** out_owner);
+
+// generated from manifest id=trt8-output-allocator-owner-detach
+JYPPX_C_API(BridgeStatusCode) jyppx_trt8_output_allocator_owner_detach(JYPPX_TensorRtOutputAllocatorOwner* owner, JYPPX_Boolean* out_detached);
+
+// generated from manifest id=trt8-output-allocator-owner-get-info
+JYPPX_C_API(BridgeStatusCode) jyppx_trt8_output_allocator_owner_get_info(JYPPX_TensorRtOutputAllocatorOwner* owner, JYPPX_TensorRtOutputAllocatorOwnerInfo* out_info);
 
 // generated from manifest id=trt8-output-allocator-reallocate-output-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt8_output_allocator_reallocate_output_deferred(void);

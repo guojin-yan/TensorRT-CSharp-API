@@ -8,9 +8,9 @@ namespace JYPPX.ProjectQuality.Tests;
 public sealed class ManagedOutputAllocatorOwnershipAttachDetachSourceLayoutTests
 {
     private const string OwnershipGateOriginalNormalizedSha256 =
-        "49fcba6b4eabb700db2958b629491f0ad1d494628a658a30a7c528b8b6ba00bd";
+        "651c3cf8339d9d5909f43bee454a6cd077bbc5184590fcd6534cc24b817e7ff5";
     private const string AttachDetachGateOriginalNormalizedSha256 =
-        "982877db36e2cecf031311449c6be889097e468870b614d6af5ff85ed92056ce";
+        "15bcf6677919fdfbbc1eed97e52b6dd4c9a6c84280e7ab8bb46779b2b8d0dfd5";
 
     public static TheoryData<string, string, string[]> FileOwnersAndMethods => new()
     {

@@ -1446,6 +1446,10 @@ internal static class GeneratedEntryPointNames
     public const string Trt10OptimizationProfileSetShapeValues = "jyppx_trt10_optimization_profile_set_shape_values";
     public const string Trt10OutputAllocatorGetInterfaceInfoDeferred = "jyppx_trt10_output_allocator_get_interface_info_deferred";
     public const string Trt10OutputAllocatorNotifyShapeDeferred = "jyppx_trt10_output_allocator_notify_shape_deferred";
+    public const string Trt10OutputAllocatorOwnerAttach = "jyppx_trt10_output_allocator_owner_attach";
+    public const string Trt10OutputAllocatorOwnerCreate = "jyppx_trt10_output_allocator_owner_create";
+    public const string Trt10OutputAllocatorOwnerDetach = "jyppx_trt10_output_allocator_owner_detach";
+    public const string Trt10OutputAllocatorOwnerGetInfo = "jyppx_trt10_output_allocator_owner_get_info";
     public const string Trt10OutputAllocatorReallocateOutputDeferred = "jyppx_trt10_output_allocator_reallocate_output_deferred";
     public const string Trt10PaddingLayerGetPostPaddingNd = "jyppx_trt10_padding_layer_get_post_padding_nd";
     public const string Trt10PaddingLayerGetPrePaddingNd = "jyppx_trt10_padding_layer_get_pre_padding_nd";
@@ -2663,6 +2667,10 @@ internal static class GeneratedEntryPointNames
     public const string Trt11OnnxParserSupportsModelV2 = "jyppx_trt11_onnx_parser_supports_model_v2";
     public const string Trt11OutputAllocatorGetInterfaceInfoDeferred = "jyppx_trt11_output_allocator_get_interface_info_deferred";
     public const string Trt11OutputAllocatorNotifyShapeDeferred = "jyppx_trt11_output_allocator_notify_shape_deferred";
+    public const string Trt11OutputAllocatorOwnerAttach = "jyppx_trt11_output_allocator_owner_attach";
+    public const string Trt11OutputAllocatorOwnerCreate = "jyppx_trt11_output_allocator_owner_create";
+    public const string Trt11OutputAllocatorOwnerDetach = "jyppx_trt11_output_allocator_owner_detach";
+    public const string Trt11OutputAllocatorOwnerGetInfo = "jyppx_trt11_output_allocator_owner_get_info";
     public const string Trt11OutputAllocatorReallocateOutputDeferred = "jyppx_trt11_output_allocator_reallocate_output_deferred";
     public const string Trt11PaddingLayerGetPostPaddingNd = "jyppx_trt11_padding_layer_get_post_padding_nd";
     public const string Trt11PaddingLayerGetPrePaddingNd = "jyppx_trt11_padding_layer_get_pre_padding_nd";
@@ -3739,6 +3747,10 @@ internal static class GeneratedEntryPointNames
     public const string Trt8OptimizationProfileSetShapeValues = "jyppx_trt8_optimization_profile_set_shape_values";
     public const string Trt8OutputAllocatorGetInterfaceVersionDeferred = "jyppx_trt8_output_allocator_get_interface_version_deferred";
     public const string Trt8OutputAllocatorNotifyShapeDeferred = "jyppx_trt8_output_allocator_notify_shape_deferred";
+    public const string Trt8OutputAllocatorOwnerAttach = "jyppx_trt8_output_allocator_owner_attach";
+    public const string Trt8OutputAllocatorOwnerCreate = "jyppx_trt8_output_allocator_owner_create";
+    public const string Trt8OutputAllocatorOwnerDetach = "jyppx_trt8_output_allocator_owner_detach";
+    public const string Trt8OutputAllocatorOwnerGetInfo = "jyppx_trt8_output_allocator_owner_get_info";
     public const string Trt8OutputAllocatorReallocateOutputDeferred = "jyppx_trt8_output_allocator_reallocate_output_deferred";
     public const string Trt8PaddingLayerGetPostPaddingNd = "jyppx_trt8_padding_layer_get_post_padding_nd";
     public const string Trt8PaddingLayerGetPrePaddingNd = "jyppx_trt8_padding_layer_get_pre_padding_nd";

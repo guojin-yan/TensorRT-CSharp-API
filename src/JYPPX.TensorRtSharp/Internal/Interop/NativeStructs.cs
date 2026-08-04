@@ -220,6 +220,43 @@ internal struct NativeTensorRtDebugListenerOwnerInfo
 }
 
 [StructLayout(LayoutKind.Sequential)]
+internal struct NativeTensorRtOutputAllocatorOwnerInfo
+{
+    public uint Line;
+    public ulong OwnerId;
+    public ulong InvocationCount;
+    public ulong NotifyShapeCount;
+    public ulong ReallocateOutputCount;
+    public ulong FailureCount;
+    public ulong InFlightCallbackCount;
+    public ulong MaxInFlightCallbackCount;
+    public ulong AttachCount;
+    public ulong DetachCount;
+    public ulong AllocationCount;
+    public ulong ReuseCount;
+    public ulong ReleaseCount;
+    public ulong LiveAllocationCount;
+    public ulong LiveAllocationBytes;
+    public ulong PeakLiveAllocationBytes;
+    public ulong LastRequestedSize;
+    public ulong LastAlignment;
+    public int LastStatus;
+    public int IsAttached;
+    public int LastCallbackSucceeded;
+    public int LastAllocationSucceeded;
+    public int LastHadCurrentMemory;
+    public int LastHadStream;
+    public int LastCallbackKind;
+    public int LastShapeRank;
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
+    public long[] LastShape;
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)]
+    public byte[] LastTensorName;
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 1024)]
+    public byte[] LastDiagnostic;
+}
+
+[StructLayout(LayoutKind.Sequential)]
 internal struct NativeTensorRtRuntimeCreateDiagnosticInfo
 {
     public uint Line;

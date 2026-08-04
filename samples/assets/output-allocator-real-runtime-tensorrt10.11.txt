@@ -1,0 +1,6 @@
+CallbackAllocatorSafeControlsSmokeRunner TensorRtLineRequest=10 RuntimePackageKey= DependencyProbeOnly=False EnableDebugListenerRuntimeSmoke=False DebugListenerRuntimeSmokeOnly=False EnableOutputAllocatorRuntimeSmoke=True OutputAllocatorRuntimeSmokeOnly=True
+ResolvedTensorRtLine=10 TRT=10.11.0 CUDA=12.9
+Adapter Runtime=True Builder=True Message=TensorRT vendor dependency is available for this adapter line.
+DependencyProbe Line=10 BridgeInitialized=True Candidates=55 Loaded=1 SearchPathCandidates=31 Diagnostics=0 Message=Bridge loader initialized.
+OutputAllocatorRealRuntime=Passed TensorRtLine=10 RuntimePackageKey= InvocationCount=2 NotifyShapeCount=1 ReallocateOutputCount=1 AllocationCount=1 ReleaseCount=1 LiveAllocationCount=0 PeakLiveAllocationBytes=527 PointerExposed=False NegativeEnqueueFailed=True NegativeAllocationCount=0 NegativeFailureCount=1 RealCallbackRuntime=True
+CallbackAllocatorSafeControlsSmokeRunner Passed=True Mode=OutputAllocatorRuntimeSmokeOnly

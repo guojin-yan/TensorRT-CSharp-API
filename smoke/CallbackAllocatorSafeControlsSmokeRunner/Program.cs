@@ -14,12 +14,16 @@ internal static class Program
         string runtimePackageKey = JYPPX.SampleSupport.SampleCommandLine.GetStringArgument(args, "--runtime-package-key", string.Empty);
         bool dependencyProbeOnly = JYPPX.SampleSupport.SampleCommandLine.HasSwitch(args, "--dependency-probe-only");
         bool debugListenerRuntimeSmokeOnly = JYPPX.SampleSupport.SampleCommandLine.HasSwitch(args, "--debug-listener-runtime-smoke-only");
+        bool outputAllocatorRuntimeSmokeOnly = JYPPX.SampleSupport.SampleCommandLine.HasSwitch(args, "--output-allocator-runtime-smoke-only");
         string callbackStateGetterProbe = JYPPX.SampleSupport.SampleCommandLine.GetStringArgument(args, "--callback-state-getter-probe", string.Empty);
         bool enableDebugListenerRuntimeSmoke =
             debugListenerRuntimeSmokeOnly ||
             JYPPX.SampleSupport.SampleCommandLine.HasSwitch(args, "--enable-debug-listener-runtime-smoke");
+        bool enableOutputAllocatorRuntimeSmoke =
+            outputAllocatorRuntimeSmokeOnly ||
+            JYPPX.SampleSupport.SampleCommandLine.HasSwitch(args, "--enable-output-allocator-runtime-smoke");
 
-        Console.WriteLine($"CallbackAllocatorSafeControlsSmokeRunner TensorRtLineRequest={requestedLine} RuntimePackageKey={runtimePackageKey} DependencyProbeOnly={dependencyProbeOnly} EnableDebugListenerRuntimeSmoke={enableDebugListenerRuntimeSmoke} DebugListenerRuntimeSmokeOnly={debugListenerRuntimeSmokeOnly}");
+        Console.WriteLine($"CallbackAllocatorSafeControlsSmokeRunner TensorRtLineRequest={requestedLine} RuntimePackageKey={runtimePackageKey} DependencyProbeOnly={dependencyProbeOnly} EnableDebugListenerRuntimeSmoke={enableDebugListenerRuntimeSmoke} DebugListenerRuntimeSmokeOnly={debugListenerRuntimeSmokeOnly} EnableOutputAllocatorRuntimeSmoke={enableOutputAllocatorRuntimeSmoke} OutputAllocatorRuntimeSmokeOnly={outputAllocatorRuntimeSmokeOnly}");
 
         if (dependencyProbeOnly)
         {
@@ -53,7 +57,10 @@ internal static class Program
         Console.WriteLine($"Adapter Runtime={adapter.RuntimeCreationSupported} Builder={adapter.BuilderCreationSupported} Message={adapter.StatusMessage}");
 
         PrintDependencyProbe(line.Value);
-        PrintSafeControlSurface(line.Value, enableDebugListenerRuntimeSmoke, runtimePackageKey);
+        if (!outputAllocatorRuntimeSmokeOnly)
+        {
+            PrintSafeControlSurface(line.Value, enableDebugListenerRuntimeSmoke, runtimePackageKey);
+        }
 
         if (!adapter.RuntimeCreationSupported || !adapter.BuilderCreationSupported)
         {
@@ -94,12 +101,33 @@ internal static class Program
             return;
         }
 
+        if (outputAllocatorRuntimeSmokeOnly)
+        {
+            try
+            {
+                RunRealOutputAllocatorRuntimeSmoke(line.Value, runtimePackageKey);
+            }
+            catch (Exception exception) when (IsSkippableEnvironmentException(exception))
+            {
+                Console.WriteLine($"OutputAllocatorRealRuntime=Skipped Reason={exception.GetType().Name}:{exception.Message}");
+                Console.WriteLine($"Skipped=True Reason={exception.GetType().Name}:{exception.Message}");
+                return;
+            }
+
+            Console.WriteLine("CallbackAllocatorSafeControlsSmokeRunner Passed=True Mode=OutputAllocatorRuntimeSmokeOnly");
+            return;
+        }
+
         try
         {
             RunSafeControls(line.Value);
             if (enableDebugListenerRuntimeSmoke)
             {
                 RunRealDebugListenerRuntimeSmoke(line.Value, runtimePackageKey);
+            }
+            if (enableOutputAllocatorRuntimeSmoke)
+            {
+                RunRealOutputAllocatorRuntimeSmoke(line.Value, runtimePackageKey);
             }
         }
         catch (Exception exception) when (IsSkippableEnvironmentException(exception))
@@ -289,6 +317,144 @@ internal static class Program
             $" BorrowedPointerExposed={attached.BorrowedPointerExposed}" +
             $" DetachCount={detached.DetachCount}" +
             $" IsRealCallbackRuntimeProof={attached.IsRealCallbackRuntimeProof}");
+    }
+
+    private static void RunRealOutputAllocatorRuntimeSmoke(TensorRtApiLine line, string runtimePackageKey)
+    {
+        using TensorRtLogger logger = new TensorRtLogger(line);
+        using TensorRtRuntime runtime = new TensorRtRuntime(logger);
+        using TensorRtBuilder builder = new TensorRtBuilder(logger);
+        using TensorRtBuilderConfig config = builder.CreateBuilderConfig();
+        config.SetMemoryPoolLimit(TensorRtMemoryPoolType.Workspace, 32UL * 1024UL * 1024UL);
+        config.SetEngineCapability(TensorRtEngineCapability.Standard);
+        config.SetHardwareCompatibilityLevel(TensorRtHardwareCompatibilityLevel.None);
+
+        using TensorRtNetworkDefinition network = builder.CreateNetwork(TensorRtNetworkDefinitionCreationFlags.ExplicitBatch);
+        using TensorRtTensor input = network.AddInput("allocator_input", TensorRtDataType.Float, new TensorRtDims(new[] { 1, 4 }));
+        using TensorRtLayer identity = network.AddIdentity(input);
+        identity.Name = "allocator_identity";
+        using TensorRtTensor output = identity.GetOutput(0);
+        output.Name = "allocator_output";
+        network.MarkOutput(output);
+
+        using TensorRtHostMemory hostMemory = builder.BuildSerializedNetwork(network, config);
+        using TensorRtEngine engine = runtime.Deserialize(hostMemory);
+        using CudaStream stream = new CudaStream();
+        using CudaMemory inputBuffer = new CudaMemory(4 * sizeof(float));
+        inputBuffer.Fill(0, 4 * sizeof(float));
+
+        TensorRtOutputAllocatorCallbackRequest acceptedReallocateRequest = default;
+        bool acceptedReallocateObserved = false;
+        using TensorRtExecutionContext positiveContext = engine.CreateExecutionContext();
+        using TensorRtOutputAllocatorCallbackOwner positiveOwner = new TensorRtOutputAllocatorCallbackOwner(
+            line,
+            request =>
+            {
+                if (request.Kind == TensorRtOutputAllocatorCallbackKind.ReallocateOutput)
+                {
+                    acceptedReallocateRequest = request;
+                    acceptedReallocateObserved = true;
+                }
+                return true;
+            });
+        positiveContext.SetTensorAddress("allocator_input", inputBuffer);
+        positiveContext.SetOutputAllocator("allocator_output", positiveOwner);
+        positiveContext.EnqueueAsync(stream);
+        stream.Synchronize();
+
+        TensorRtOutputAllocatorRuntimeSnapshot positiveAttached = positiveOwner.GetRuntimeSnapshot();
+        bool positiveCleared = positiveContext.ClearOutputAllocator("allocator_output");
+        TensorRtOutputAllocatorRuntimeSnapshot positiveDetached = positiveOwner.GetRuntimeSnapshot();
+        bool positivePassed =
+            positiveAttached.IsAttached &&
+            positiveAttached.RealCallbackRuntime &&
+            positiveAttached.ReallocateOutputCount > 0UL &&
+            positiveAttached.AllocationCount > 0UL &&
+            positiveAttached.FailureCount == 0UL &&
+            positiveAttached.InFlightCallbackCount == 0UL &&
+            string.Equals(positiveAttached.TensorName, "allocator_output", StringComparison.Ordinal) &&
+            acceptedReallocateObserved &&
+            string.Equals(acceptedReallocateRequest.TensorName, "allocator_output", StringComparison.Ordinal) &&
+            positiveCleared &&
+            !positiveDetached.IsAttached &&
+            positiveDetached.LiveAllocationCount == 0UL &&
+            positiveDetached.LiveAllocationBytes == 0UL &&
+            positiveDetached.ReleaseCount > 0UL &&
+            !positiveContext.HasManagedOutputAllocator("allocator_output") &&
+            !positiveContext.HasOutputAllocator("allocator_output");
+        if (!positivePassed)
+        {
+            throw new InvalidOperationException(
+                "Real TensorRT output allocator positive runtime smoke did not satisfy attach/invoke/release/detach invariants. " +
+                "Attached=" + positiveAttached + " Detached=" + positiveDetached);
+        }
+
+        TensorRtOutputAllocatorCallbackRequest rejectedRequest = default;
+        bool rejectedReallocateObserved = false;
+        using TensorRtExecutionContext negativeContext = engine.CreateExecutionContext();
+        using TensorRtOutputAllocatorCallbackOwner negativeOwner = new TensorRtOutputAllocatorCallbackOwner(
+            line,
+            request =>
+            {
+                if (request.Kind == TensorRtOutputAllocatorCallbackKind.ReallocateOutput)
+                {
+                    rejectedRequest = request;
+                    rejectedReallocateObserved = true;
+                }
+                return request.Kind != TensorRtOutputAllocatorCallbackKind.ReallocateOutput;
+            });
+        negativeContext.SetTensorAddress("allocator_input", inputBuffer);
+        negativeContext.SetOutputAllocator("allocator_output", negativeOwner);
+        bool negativeEnqueueFailed = false;
+        try
+        {
+            negativeContext.EnqueueAsync(stream);
+            stream.Synchronize();
+        }
+        catch (TensorRtException)
+        {
+            negativeEnqueueFailed = true;
+        }
+
+        TensorRtOutputAllocatorRuntimeSnapshot negativeAttached = negativeOwner.GetRuntimeSnapshot();
+        bool negativeCleared = negativeContext.ClearOutputAllocator("allocator_output");
+        TensorRtOutputAllocatorRuntimeSnapshot negativeDetached = negativeOwner.GetRuntimeSnapshot();
+        bool negativePassed =
+            negativeEnqueueFailed &&
+            negativeAttached.ReallocateOutputCount > 0UL &&
+            negativeAttached.AllocationCount == 0UL &&
+            negativeAttached.FailureCount > 0UL &&
+            !negativeAttached.LastAllocationSucceeded &&
+            rejectedReallocateObserved &&
+            rejectedRequest.Kind == TensorRtOutputAllocatorCallbackKind.ReallocateOutput &&
+            negativeCleared &&
+            !negativeDetached.IsAttached &&
+            negativeDetached.LiveAllocationCount == 0UL &&
+            !negativeContext.HasManagedOutputAllocator("allocator_output");
+        if (!negativePassed)
+        {
+            throw new InvalidOperationException(
+                "Real TensorRT output allocator rejection runtime smoke did not fail closed. " +
+                "Attached=" + negativeAttached + " Detached=" + negativeDetached +
+                " EnqueueFailed=" + negativeEnqueueFailed);
+        }
+
+        Console.WriteLine(
+            "OutputAllocatorRealRuntime=Passed" +
+            $" TensorRtLine={(int)line}" +
+            $" RuntimePackageKey={runtimePackageKey}" +
+            $" InvocationCount={positiveAttached.InvocationCount}" +
+            $" NotifyShapeCount={positiveAttached.NotifyShapeCount}" +
+            $" ReallocateOutputCount={positiveAttached.ReallocateOutputCount}" +
+            $" AllocationCount={positiveAttached.AllocationCount}" +
+            $" ReleaseCount={positiveDetached.ReleaseCount}" +
+            $" LiveAllocationCount={positiveDetached.LiveAllocationCount}" +
+            $" PeakLiveAllocationBytes={positiveAttached.PeakLiveAllocationBytes}" +
+            $" PointerExposed={positiveAttached.NativePointerExposed}" +
+            $" NegativeEnqueueFailed={negativeEnqueueFailed}" +
+            $" NegativeAllocationCount={negativeAttached.AllocationCount}" +
+            $" NegativeFailureCount={negativeAttached.FailureCount}" +
+            $" RealCallbackRuntime={positiveAttached.RealCallbackRuntime}");
     }
 
     private static void RunSafeControls(TensorRtApiLine line)

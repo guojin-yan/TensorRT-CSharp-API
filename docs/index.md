@@ -157,7 +157,7 @@ Chinese articles:
 - [Callback Owner Closure Matrix](articles/zh-cn/callback-owner-closure-matrix.md)
 - [Real Callback Trampoline Gate](articles/zh-cn/real-callback-trampoline-gate.md)
 - [OutputAllocator Runtime Gate](articles/zh-cn/output-allocator-runtime-gate.md)
-- [OutputAllocator Callback Owner Design](articles/zh-cn/output-allocator-callback-owner-design.md)
+- [OutputAllocator Owner-Safe Runtime](articles/zh-cn/output-allocator-callback-owner-design.md)
 - [OutputAllocator Attach/Detach Design Gate](articles/zh-cn/output-allocator-attach-detach-design-gate.md)
 - [OutputBuffer Ownership Safety Gate](articles/zh-cn/output-buffer-ownership-safety-gate.md)
 - [OutputAllocator Runtime Proof Precheck](articles/zh-cn/output-allocator-runtime-proof-precheck.md)
