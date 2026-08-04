@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "evidenceKind": "local-package-consumer-tensorrt-progress-monitor-runtime",
+  "validationState": "passed-local-package-consumer-runtime",
+  "recordedAtLocal": "2026-08-05",
+  "tensorRtLine": 10,
+  "tensorRtVersion": "10.11.0",
+  "cudaToolkitVersion": "12.9",
+  "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+  "runtimePackageKey": "win-x64-trt10.11-cuda12.9-cudnn9.22",
+  "sample": "ProgressMonitor.PackageConsumer",
+  "mode": "ProgressMonitorRuntimeSmokeOnly",
+  "model": {
+    "kind": "programmatically-created-1x1-convolution-network",
+    "description": "The consumer creates a [1,1,32,32] FP32 input and a 1x1 convolution directly through the TensorRT network API.",
+    "acquisition": "not-applicable",
+    "conversion": "not-applicable",
+    "externalModelRequired": false,
+    "onnxProduced": false,
+    "outerModelsDirectoryUsed": false
+  },
+  "packages": [
+    {
+      "role": "managed-api",
+      "id": "JYPPX.TensorRT.CSharp.API",
+      "version": "4.0.0",
+      "length": 15448064,
+      "sha256": "611dc204069c0a26fbaa9e7a67c97b27759865b85069cbe11dfdb5a14123fce8"
+    },
+    {
+      "role": "bridge-only",
+      "id": "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge",
+      "version": "4.0.0",
+      "length": 398742,
+      "sha256": "aa3230172dbc3251687778efc2583562ab1bf9716954a5c0ed6c830ab12d7ce0",
+      "nativeEntry": "runtimes/win-x64/native/jyppxtrtbridge.dll",
+      "nativeEntrySha256": "c3814f36b0e74976ecbde6849c78ad007e76fb5566f8aa3e624a8f39ed281cfe"
+    }
+  ],
+  "isolation": {
+    "workspaceOutsideRepository": true,
+    "packageReferenceOnly": true,
+    "projectReference": false,
+    "hintPath": false,
+    "sourceTreeBinary": false,
+    "developmentBridgePathRemoved": true,
+    "developmentProbingRemoved": true,
+    "consumerBridgeMatchesPackage": true,
+    "vendorRuntimeBinaryCountInPackages": 0,
+    "vendorRuntimeBinaryCountInConsumerOutput": 0,
+    "vendorDependenciesProvidedByHost": true
+  },
+  "positive": {
+    "passed": true,
+    "attachedDuringBuild": true,
+    "invocationCount": 28409,
+    "phaseStartCount": 4768,
+    "stepCompleteCount": 18873,
+    "phaseFinishCount": 4768,
+    "distinctPhaseCount": 13,
+    "failureCount": 0,
+    "metadataCopied": true,
+    "detachVerified": true,
+    "threadSafeHandlerState": true,
+    "nativeFailureFlagAtomic": true,
+    "realCallbackRuntime": true
+  },
+  "cancellationNegative": {
+    "passed": true,
+    "cancellationRequested": true,
+    "buildFailed": true,
+    "invocationCount": 5,
+    "failureCount": 0,
+    "detachVerified": true,
+    "interpretation": "Returning false from stepComplete requests a normal TensorRT build cancellation. It must fail the build without being counted as a managed callback exception."
+  },
+  "artifacts": {
+    "consumerSource": {
+      "path": "samples/ProgressMonitor.PackageConsumer/Program.cs",
+      "sha256": "83afe797b10caa6245f54dedd85be9f9b9ad897f0456ba446c94ee422858bff3",
+      "length": 13570
+    },
+    "projectTemplate": {
+      "path": "samples/ProgressMonitor.PackageConsumer/ProgressMonitor.PackageConsumer.csproj.template",
+      "sha256": "14459d08ff40d4df87364d973684dda5a9fad1892145df09e279c2b3a2739c6a",
+      "length": 550
+    },
+    "stdout": {
+      "path": "samples/assets/progress-monitor-local-package-consumer-tensorrt10.11.txt",
+      "sha256": "cf99817b3e404a85dc3546d4fb901431abf5f0acedb7d63679dee60f005ceaa9",
+      "length": 1041,
+      "source": "Line-ending-normalized copy of the captured package-consumer stdout; result values are unchanged."
+    },
+    "runtimeResultImage": {
+      "path": "docs/images/progress-monitor-local-package-consumer-terminal.png",
+      "sha256": "677880e2f153c6cc44f47bf10835290c92d27615f6fa3a9176d14a7554c0f3fb",
+      "length": 98108,
+      "source": "Path-free terminal rendering of selected stdout from the same real run; the complete machine marker remains in the stdout artifact."
+    }
+  },
+  "boundary": {
+    "isLocalPackageConsumerRuntimeEvidence": true,
+    "isPublicPackageConsumerProof": false,
+    "isReleaseProof": false,
+    "isPostPublishProof": false,
+    "performsPublish": false,
+    "statement": "Repository-external local-feed proof for the managed and bridge-only packages. CUDA and TensorRT are host-installed. No public package, tag, Release, or package publication was created."
+  }
+}

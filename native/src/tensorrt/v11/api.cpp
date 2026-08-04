@@ -1,5 +1,6 @@
 #include "jyppx/tensorrt/trt11.h"
 
+#include <atomic>
 #include <cstring>
 #include <exception>
 #include <limits>
@@ -312,7 +313,7 @@ private:
 
     JYPPX_TensorRtProgressMonitorCallback callback_{nullptr};
     void* user_state_{nullptr};
-    bool last_callback_failed_{false};
+    std::atomic<bool> last_callback_failed_{false};
 };
 
 class ManagedProfiler final : public nvinfer1::IProfiler

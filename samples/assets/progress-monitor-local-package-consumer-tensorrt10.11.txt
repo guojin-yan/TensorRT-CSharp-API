@@ -1,0 +1,12 @@
+PackageReferenceOnly=True
+ProjectReference=False
+SourceTreeBinary=False
+RuntimeEnvironment TRT=10.11.0 CUDA=12.9 TensorRtAvailable=True CudaAvailable=True
+ProgressMonitorRuntimeSummary
+  TensorRtLine=10 RuntimePackageKey=win-x64-trt10.11-cuda12.9-cudnn9.22
+  Callbacks=28409 Start=4768 Step=18873 Finish=4768
+  DistinctPhases=13 MetadataCopied=True Failures=0
+  CancellationCase=Passed Requested=True BuildFailed=True Callbacks=5
+  PositiveDetached=True NegativeDetached=True ThreadSafeHandlerState=True
+ProgressMonitorRealRuntime=Passed TensorRtLine=10 RuntimePackageKey=win-x64-trt10.11-cuda12.9-cudnn9.22 AttachedDuringBuild=True InvocationCount=28409 PhaseStartCount=4768 StepCompleteCount=18873 PhaseFinishCount=4768 DistinctPhaseCount=13 FailureCount=0 MetadataCopied=True DetachVerified=True NegativeCancellationRequested=True NegativeBuildFailed=True NegativeInvocationCount=5 NegativeFailureCount=0 NegativeDetachVerified=True RealCallbackRuntime=True
+ProgressMonitorPackageConsumer Passed=True Mode=ProgressMonitorRuntimeSmokeOnly

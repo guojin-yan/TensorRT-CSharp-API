@@ -573,6 +573,7 @@ DebugListener callback proof gap report marker index: `debug-listener-callback-p
 - [Runtime Deserialization Dependency Diagnostics](articles/zh-cn/runtime-deserialization-dependency-diagnostics.md)
 - [Plugin Ownership Boundary](articles/zh-cn/plugin-ownership-boundary.md)
 - [Managed Logger Profiler Progress Monitor](articles/zh-cn/managed-logger-profiler-progress-monitor.md)
+- [ProgressMonitor Local Package Consumer Tutorial](articles/zh-cn/progress-monitor-local-package-consumer-tutorial.md)
 - [Local NuGet Feed Deep Dive](articles/zh-cn/local-nuget-feed-deep-dive.md)
 - [Signing And Trust Policy](articles/zh-cn/signing-and-trust-policy.md)
 - [NuGet And GitHub Packages Release Guide](articles/zh-cn/nuget-and-github-packages-release-guide.md)

@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-  [ValidateSet("GpuAllocator", "OutputAllocator", "DebugListener")][string]$Scenario = "GpuAllocator",
+  [ValidateSet("GpuAllocator", "OutputAllocator", "DebugListener", "ProgressMonitor")][string]$Scenario = "GpuAllocator",
   [string]$RepositoryRoot,
   [string]$OutputRoot,
   [string]$ReportDirectory,
@@ -73,6 +73,25 @@ $scenarioConfig = switch ($Scenario) {
         "SetDebugListener",
         "ClearDebugListener",
         "SetTensorDebugState"
+      )
+    }
+  }
+  "ProgressMonitor" {
+    [pscustomobject][ordered]@{
+      slug = "progress-monitor"
+      sampleDirectory = "ProgressMonitor.PackageConsumer"
+      projectFileName = "ProgressMonitorPackageConsumer.csproj"
+      projectTemplateFileName = "ProgressMonitor.PackageConsumer.csproj.template"
+      runtimeSwitch = "--progress-monitor-runtime-smoke-only"
+      runtimeMarkerPrefix = "ProgressMonitorRealRuntime=Passed "
+      finalMarker = "Passed=True Mode=ProgressMonitorRuntimeSmokeOnly"
+      publicSurfaceMarkers = @(
+        "TensorRtProgressMonitor",
+        "TensorRtProgressMonitorEvent",
+        "TensorRtProgressMonitorEventKind",
+        "SetProgressMonitor",
+        "ClearProgressMonitor",
+        "HasProgressMonitor"
       )
     }
   }
@@ -604,6 +623,60 @@ switch ($Scenario) {
       "Callbacks=$invocationCount Failures=$failureCount InFlight=$inFlightCallbackCount DetachCount=$detachCount",
       "Tensor=$tensorName Shape=$shape MetadataCopied=$metadataCopied PointerExposed=$borrowedPointerExposed",
       "NegativeEnqueueFailed=$negativeEnqueueFailed NegativeFailures=$negativeFailureCount"
+    )
+  }
+  "ProgressMonitor" {
+    $attachedDuringBuild = [bool]::Parse((Get-MarkerField -Line $marker -Name "AttachedDuringBuild"))
+    $invocationCount = [uint64](Get-MarkerField -Line $marker -Name "InvocationCount")
+    $phaseStartCount = [uint64](Get-MarkerField -Line $marker -Name "PhaseStartCount")
+    $stepCompleteCount = [uint64](Get-MarkerField -Line $marker -Name "StepCompleteCount")
+    $phaseFinishCount = [uint64](Get-MarkerField -Line $marker -Name "PhaseFinishCount")
+    $distinctPhaseCount = [uint64](Get-MarkerField -Line $marker -Name "DistinctPhaseCount")
+    $failureCount = [uint64](Get-MarkerField -Line $marker -Name "FailureCount")
+    $metadataCopied = [bool]::Parse((Get-MarkerField -Line $marker -Name "MetadataCopied"))
+    $detachVerified = [bool]::Parse((Get-MarkerField -Line $marker -Name "DetachVerified"))
+    $negativeCancellationRequested = [bool]::Parse((Get-MarkerField -Line $marker -Name "NegativeCancellationRequested"))
+    $negativeBuildFailed = [bool]::Parse((Get-MarkerField -Line $marker -Name "NegativeBuildFailed"))
+    $negativeInvocationCount = [uint64](Get-MarkerField -Line $marker -Name "NegativeInvocationCount")
+    $negativeFailureCount = [uint64](Get-MarkerField -Line $marker -Name "NegativeFailureCount")
+    $negativeDetachVerified = [bool]::Parse((Get-MarkerField -Line $marker -Name "NegativeDetachVerified"))
+    $realCallbackRuntime = [bool]::Parse((Get-MarkerField -Line $marker -Name "RealCallbackRuntime"))
+    if (-not $attachedDuringBuild -or $invocationCount -eq 0 -or $phaseStartCount -eq 0 -or
+        $stepCompleteCount -eq 0 -or $phaseFinishCount -eq 0 -or $distinctPhaseCount -eq 0 -or
+        $failureCount -ne 0 -or -not $metadataCopied -or -not $detachVerified -or
+        -not $negativeCancellationRequested -or -not $negativeBuildFailed -or
+        $negativeInvocationCount -eq 0 -or $negativeFailureCount -ne 0 -or
+        -not $negativeDetachVerified -or -not $realCallbackRuntime) {
+      throw "External progress monitor marker did not satisfy real callback, copied-metadata, cancellation, and detach invariants: $marker"
+    }
+
+    $scenarioRuntime = [pscustomobject][ordered]@{
+      passed = $true
+      attachedDuringBuild = $attachedDuringBuild
+      invocationCount = $invocationCount
+      phaseStartCount = $phaseStartCount
+      stepCompleteCount = $stepCompleteCount
+      phaseFinishCount = $phaseFinishCount
+      distinctPhaseCount = $distinctPhaseCount
+      failureCount = $failureCount
+      metadataCopied = $metadataCopied
+      detachVerified = $detachVerified
+      realCallbackRuntime = $realCallbackRuntime
+    }
+    $scenarioNegatives = [pscustomobject][ordered]@{
+      cancellation = [pscustomobject][ordered]@{
+        passed = $true
+        cancellationRequested = $negativeCancellationRequested
+        buildFailed = $negativeBuildFailed
+        invocationCount = $negativeInvocationCount
+        failureCount = $negativeFailureCount
+        detachVerified = $negativeDetachVerified
+      }
+    }
+    $resultSummary = @(
+      "Callbacks=$invocationCount Start=$phaseStartCount Step=$stepCompleteCount Finish=$phaseFinishCount Phases=$distinctPhaseCount",
+      "CancellationRequested=$negativeCancellationRequested BuildFailed=$negativeBuildFailed NegativeFailures=$negativeFailureCount",
+      "MetadataCopied=$metadataCopied DetachVerified=$detachVerified"
     )
   }
 }

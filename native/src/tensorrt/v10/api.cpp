@@ -1,5 +1,6 @@
 #include "jyppx/tensorrt/trt10.h"
 
+#include <atomic>
 #include <cstring>
 #include <exception>
 #include <memory>
@@ -263,7 +264,7 @@ private:
 
     JYPPX_TensorRtProgressMonitorCallback callback_{nullptr};
     void* user_state_{nullptr};
-    bool last_callback_failed_{false};
+    std::atomic<bool> last_callback_failed_{false};
 };
 #endif
 
