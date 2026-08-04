@@ -34,7 +34,7 @@ public sealed partial class MnistOnnxRuntimeService
         byte[] preprocessedInput = ToBytes(inputValues);
         List<string> log = new List<string>
         {
-            $"MnistOnnxRuntime TensorRtLine={(int)options.TensorRtLine} Model={modelPath} Input={inputPath} ExpectedDigit={options.ExpectedDigit}",
+            $"MnistOnnxRuntime TensorRtLine={(int)options.TensorRtLine} Model={Path.GetFileName(modelPath)} Input={Path.GetFileName(inputPath)} ExpectedDigit={options.ExpectedDigit}",
             $"MnistPreprocess Width={image.Width} Height={image.Height} Formula=1-pixel/255 ElementCount={inputValues.Length}",
             $"MnistHashes Model={ComputeSha256(model)} Input={ComputeSha256(inputFile)} PreprocessedInput={ComputeSha256(preprocessedInput)}"
         };
@@ -153,7 +153,7 @@ public sealed partial class MnistOnnxRuntimeService
             log.Add($"MnistBindings Input={input.Name}:{input.DataType}:{inputShape} Output={output.Name}:{output.DataType}:{outputShape}");
             log.Add($"MnistExecution {executionSummary} ElapsedMs={elapsedMilliseconds:0.###}");
             log.Add($"MnistClassification Expected={options.ExpectedDigit} Predicted={classification.PredictedDigit} Confidence={classification.Confidence:0.000000} Minimum={options.MinimumConfidence:0.000000} OutputMatch={outputMatch}");
-            log.Add($"MnistEngine Path={enginePath} Sha256={engineSha256} Bytes={new FileInfo(enginePath).Length}");
+            log.Add($"MnistEngine Path={Path.GetFileName(enginePath)} Sha256={engineSha256} Bytes={new FileInfo(enginePath).Length}");
 
             MnistOnnxRuntimeResult result = new MnistOnnxRuntimeResult(
                 success: outputMatch,

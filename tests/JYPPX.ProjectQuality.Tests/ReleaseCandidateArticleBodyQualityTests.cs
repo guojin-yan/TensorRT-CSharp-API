@@ -20,16 +20,41 @@ public sealed class ReleaseCandidateArticleBodyQualityTests
         {
             string article = ReadArticle(articleFile);
 
-            foreach (string marker in new[]
+            if (articleFile == "onnx-to-engine-quickstart.md")
             {
-                "## 目标读者",
-                "## 可复制命令",
-                "## 截图与图示建议",
-                "## 下一步",
-                "Boundary keywords: not public package proof, not post-publish proof, not package push, not release close approval"
-            })
+                foreach (string marker in new[]
+                {
+                    "## 目标读者",
+                    "## 本文使用的项目与库",
+                    "## 模型获取、许可证与暂存",
+                    "## ONNX 输入输出合同",
+                    "## 可复制命令",
+                    "## 真实运行结果",
+                    "../../images/onnx-to-engine-mnist-runtime-terminal.png",
+                    "终端截图来自本次真实运行的 stdout",
+                    "## 下一步"
+                })
+                {
+                    Assert.Contains(marker, article, StringComparison.Ordinal);
+                }
+
+                Assert.DoesNotContain("截图与图示建议", article, StringComparison.Ordinal);
+                Assert.DoesNotContain(@"E:\", article, StringComparison.OrdinalIgnoreCase);
+                Assert.DoesNotContain(@"C:\Users\", article, StringComparison.OrdinalIgnoreCase);
+            }
+            else
             {
-                Assert.Contains(marker, article, StringComparison.Ordinal);
+                foreach (string marker in new[]
+                {
+                    "## 目标读者",
+                    "## 可复制命令",
+                    "## 截图与图示建议",
+                    "## 下一步",
+                    "Boundary keywords: not public package proof, not post-publish proof, not package push, not release close approval"
+                })
+                {
+                    Assert.Contains(marker, article, StringComparison.Ordinal);
+                }
             }
 
             Assert.Contains("proof", article, StringComparison.OrdinalIgnoreCase);

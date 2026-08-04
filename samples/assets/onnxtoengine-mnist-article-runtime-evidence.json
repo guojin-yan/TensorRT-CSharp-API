@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "recordKind": "onnxtoengine-mnist-technical-article-runtime-evidence",
+  "recordId": "onnxtoengine-mnist-article-win-x64-trt10.11-cuda12.9-20260803",
+  "proofClassification": "real-model-runtime",
+  "executedUtcDate": "2026-08-03",
+  "sourceBaseCommit": "9fce90b110b45366a9e2492e6adadd5f5b4fe612",
+  "runtimeEnvironment": {
+    "os": "Microsoft Windows 11 Home Chinese, NT 10.0.26200.0",
+    "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+    "driverVersion": "576.02",
+    "cudaToolkitVersion": "12.9",
+    "tensorRtVersion": "10.11.0.33",
+    "dotnetSdkVersion": "10.0.301"
+  },
+  "model": {
+    "path": "<workspace>/models/OnnxToEngine/MNIST/nvidia-tensorrt-10.11/mnist.onnx",
+    "length": 26454,
+    "sha256": "2f06e72de813a8635c9bc0397ac447a601bdbfa7df4bebc278723b958831c9bf",
+    "opset": 8,
+    "source": "TensorRT 10.11 sample data README attribution to ONNX Model Zoo",
+    "conversion": "upstream ONNX release; no local framework-to-ONNX conversion",
+    "redistributionApproved": false
+  },
+  "input": {
+    "path": "<TensorRT>/data/mnist/7.pgm",
+    "length": 797,
+    "sha256": "880e75f93fe00ab6f5c4e8ab00ff695c61e7e30bdf0d967ff8b34de1f5a94634",
+    "preprocess": "P5 PGM 28x28; float32 1-pixel/255",
+    "tensorSha256": "81f2cd7784dca5c8f02a9887ae89a6a3582880a27d2eba95a53f845c63187564",
+    "redistributionApproved": false
+  },
+  "assets": {
+    "sampleProgramSha256": "6265fcf9ae3a4481b3f3912998c8f6fc00ec32c8468a7d979aa5ea8afd4cffcb",
+    "runtimeServiceSha256": "8ad566080148620b56f7125f49e85990fa27057b9b5a79e69df9d3ffea0b63f0",
+    "sampleAssemblySha256": "9bc2620422b85767d9a8d46b465a8db67bf8a949a27892235342522175964845",
+    "toolsAssemblySha256": "b77f28654a50687bf2903848bd263bbd2704c2d59ab3edb867649d29a7ec62d6",
+    "nativeBridgeSha256": "0576f191617dcdad46fd40e238f61cf22b9fb04826b70c1c47993b7944bd26a0",
+    "runtimeLogSha256": "bf1c7ea85d1370f22615bc630095b9671004ea3baa49ae2fa495ad56a33d420e",
+    "runtimeScreenshotPath": "docs/images/onnx-to-engine-mnist-runtime-terminal.png",
+    "runtimeScreenshotSha256": "d951c1e0ce2d984ee5c98e50c4ddebb4c7684f1c085fff59f3ca98e3c8ccf2c8",
+    "independentReferenceEvidencePath": "samples/assets/onnxtoengine-mnist-real-model-runtime-evidence.json",
+    "independentReferenceEvidenceSha256": "113c75508de30125677ebb7b7d08d10504002765e1ad4b21ca9d53aa5128bf1a"
+  },
+  "runtimeValidation": {
+    "inputTensorName": "Input3",
+    "inputShape": [1, 1, 28, 28],
+    "outputTensorName": "Plus214_Output_0",
+    "outputShape": [1, 10],
+    "expectedDigit": 7,
+    "predictedDigit": 7,
+    "confidence": 0.999993,
+    "minimumConfidence": 0.9,
+    "elapsedMilliseconds": 0.987,
+    "outputMatch": true,
+    "state": "mnist-real-model-runtime",
+    "processExitCode": 0,
+    "engineLength": 333364,
+    "engineSha256": "13fbfd354f4ba289f98566ba05fa523f09da4f93affe4bd24acbc1a62673a07c",
+    "reportSha256": "bb4ff457b94c6f3202210587c2c7d2df87f1ba86e931eaa0ba7896ec3b8bb3dd",
+    "outputSha256": "24e494dbcd0815046a370a64cb1f0c53bb6134fbcdbbd170a65a3aeeb65ec2d8",
+    "passed": true
+  },
+  "proofBoundary": {
+    "sourceTreeRealModelRuntime": true,
+    "independentReferencePassed": true,
+    "ownerReviewedGolden": false,
+    "modelRedistributionApproved": false,
+    "inputAssetRedistributionApproved": false,
+    "packageConsumerRuntimeProof": false,
+    "publicPackageProof": false,
+    "postPublishProof": false,
+    "ownerReleaseAcceptance": false,
+    "uploadsAssets": false,
+    "performsPublish": false
+  }
+}

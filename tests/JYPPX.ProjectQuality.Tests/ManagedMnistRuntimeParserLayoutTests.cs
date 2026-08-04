@@ -8,7 +8,7 @@ namespace JYPPX.ProjectQuality.Tests;
 public sealed class ManagedMnistRuntimeParserLayoutTests
 {
     private const string MnistOriginalNormalizedSha256 =
-        "bd8b5e607b5f966dc6be455adc2ecf6794db86669f1d9597dcd6a7c3a9998ff5";
+        "e6b7e415634821a90958686a83faa1df595c9a4c385e743d4ab7e0c4494f1501";
     private const string ParserOriginalNormalizedSha256 =
         "333c37056b216785710d0e32ee431b24e8d4261ad8acd9694a222b7bd2ae940e";
 

@@ -24,7 +24,7 @@ $env:JYPPX_ENABLE_DEVELOPMENT_PROBING = "1"
 Run:
 
 ```powershell
-dotnet .\samples\OnnxToEngine\bin\Debug\net8.0\OnnxToEngine.dll --tensor-rt-line 10
+dotnet .\samples\OnnxToEngine\bin\Release\net8.0\OnnxToEngine.dll --tensor-rt-line 10
 ```
 
 External ONNX build-only example:
@@ -103,6 +103,8 @@ The pinned source-tree evidence is
 `0.99999285`; all 10 logits match the independent ONNX Runtime CPU reference within `1e-4`. A controlled run that changes only
 `--expectedDigit` to 6 exits 2 with `State=mnist-output-mismatch` and `OutputMatch=False`. The model, engine, and logs remain outside
 Git, and this is not package-consumer, public-package, post-publish, redistribution, or release proof.
+
+The complete Chinese model acquisition, Engine build, real Windows Terminal screenshot, and validation walkthrough is [使用 TensorRtSharp4.0 将 MNIST ONNX 转换为 TensorRT Engine 并推理](../../docs/articles/zh-cn/onnx-to-engine-quickstart.md).
 
 Only a completed external-model enqueue with matching digit and confidence can be classified as `real-model-runtime`. This remains a source-tree sample execution, not `package-consumer-runtime`, post-publish proof, or release authorization. Generic external ONNX execution remains build-only unless another explicit model runner defines its input and output semantics.
 

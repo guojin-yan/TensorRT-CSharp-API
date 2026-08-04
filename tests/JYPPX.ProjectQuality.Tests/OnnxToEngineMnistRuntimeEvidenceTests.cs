@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using System.Text.Json;
 using Xunit;
 
@@ -69,5 +70,60 @@ public sealed class OnnxToEngineMnistRuntimeEvidenceTests
         Assert.Contains("--expectedDigit", readme, StringComparison.Ordinal);
         Assert.Contains("State=mnist-output-mismatch", readme, StringComparison.Ordinal);
         Assert.Contains("not package-consumer", readme, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void TechnicalArticleEvidenceMatchesPortableRuntimeSourceAndScreenshot()
+    {
+        string evidencePath = Path.Combine(
+            RepositoryPaths.Root,
+            "samples",
+            "assets",
+            "onnxtoengine-mnist-article-runtime-evidence.json");
+        using JsonDocument document = JsonDocument.Parse(File.ReadAllText(evidencePath));
+        JsonElement root = document.RootElement;
+        JsonElement assets = root.GetProperty("assets");
+        JsonElement runtime = root.GetProperty("runtimeValidation");
+        JsonElement boundary = root.GetProperty("proofBoundary");
+
+        Assert.Equal("onnxtoengine-mnist-technical-article-runtime-evidence", root.GetProperty("recordKind").GetString());
+        Assert.Equal(7, runtime.GetProperty("predictedDigit").GetInt32());
+        Assert.True(runtime.GetProperty("outputMatch").GetBoolean());
+        Assert.Equal(0, runtime.GetProperty("processExitCode").GetInt32());
+        Assert.False(boundary.GetProperty("modelRedistributionApproved").GetBoolean());
+        Assert.False(boundary.GetProperty("inputAssetRedistributionApproved").GetBoolean());
+        Assert.False(boundary.GetProperty("performsPublish").GetBoolean());
+
+        string servicePath = Path.Combine(
+            RepositoryPaths.Root,
+            "src",
+            "JYPPX.TensorRtSharp.Tools",
+            "Runtime",
+            "MnistOnnxRuntimeService.cs");
+        string screenshotPath = Path.Combine(
+            RepositoryPaths.Root,
+            assets.GetProperty("runtimeScreenshotPath").GetString()!.Replace('/', Path.DirectorySeparatorChar));
+        Assert.Equal(assets.GetProperty("runtimeServiceSha256").GetString(), ComputeSha256(servicePath));
+        Assert.Equal(assets.GetProperty("runtimeScreenshotSha256").GetString(), ComputeSha256(screenshotPath));
+
+        string service = File.ReadAllText(servicePath);
+        Assert.Contains("Model={Path.GetFileName(modelPath)}", service, StringComparison.Ordinal);
+        Assert.Contains("Path={Path.GetFileName(enginePath)}", service, StringComparison.Ordinal);
+
+        string article = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "docs",
+            "articles",
+            "zh-cn",
+            "onnx-to-engine-quickstart.md"));
+        Assert.Contains("onnx-to-engine-mnist-runtime-terminal.png", article, StringComparison.Ordinal);
+        Assert.Contains("Predicted=7 Confidence=0.999993", article, StringComparison.Ordinal);
+        Assert.DoesNotContain(@"E:\", article, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain(@"C:\Users\", article, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string ComputeSha256(string path)
+    {
+        return Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(path))).ToLowerInvariant();
     }
 }

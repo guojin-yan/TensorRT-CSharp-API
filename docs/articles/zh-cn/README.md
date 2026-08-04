@@ -53,6 +53,10 @@
 - [使用 TensorRtSharp4.0 管理推理输入、显存绑定与 GPU 输出读回](inference-bindings-tutorial.md)。
 - [使用 TensorRtSharp4.0 在 C# 中实现 CUDA 多流与 Event 同步](cuda-stream-event-multistream-tutorial.md)。
 
+模型转换工具文章需要真实模型构建、Engine 回读、程序窗口和输出语义校验，但不要求把未经授权的输入图片嵌入仓库：
+
+- [使用 TensorRtSharp4.0 将 MNIST ONNX 转换为 TensorRT Engine 并推理](onnx-to-engine-quickstart.md)。
+
 其余模型教程即使已有真实 TensorRT 证据，在补齐原图叠加结果和真实程序窗口截图前，也不会标记为完整技术文章。
 
 DocFX 构建成功只说明链接和站点生成正确，不等于外部文章已经发布，也不替代 public-package、post-publish、Owner acceptance 或 release proof。
