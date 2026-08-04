@@ -1,0 +1,131 @@
+{
+  "schemaVersion": 1,
+  "evidenceKind": "local-package-consumer-tensorrt-logger-runtime",
+  "validationState": "passed-local-package-consumer-runtime",
+  "recordedAtLocal": "2026-08-05",
+  "tensorRtLine": 10,
+  "tensorRtVersion": "10.11.0",
+  "cudaToolkitVersion": "12.9",
+  "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+  "runtimePackageKey": "win-x64-trt10.11-cuda12.9-cudnn9.22",
+  "sample": "Logger.PackageConsumer",
+  "mode": "LoggerRuntimeSmokeOnly",
+  "model": {
+    "kind": "programmatically-created-1x1-convolution-network",
+    "description": "The consumer creates a [1,1,32,32] FP32 input and a 1x1 convolution directly through the TensorRT network API.",
+    "acquisition": "not-applicable",
+    "conversion": "not-applicable",
+    "externalModelRequired": false,
+    "onnxProduced": false,
+    "outerModelsDirectoryUsed": false
+  },
+  "packages": [
+    {
+      "role": "managed-api",
+      "id": "JYPPX.TensorRT.CSharp.API",
+      "version": "4.0.0",
+      "length": 15448064,
+      "sha256": "611dc204069c0a26fbaa9e7a67c97b27759865b85069cbe11dfdb5a14123fce8"
+    },
+    {
+      "role": "bridge-only",
+      "id": "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge",
+      "version": "4.0.0",
+      "length": 398802,
+      "sha256": "ff849266e425406bc0bf8448f36abdb43ba2fc6389b789aaa09bf37fb317cf07",
+      "nativeEntry": "runtimes/win-x64/native/jyppxtrtbridge.dll",
+      "nativeEntrySha256": "401b299cda5cb26bdd284b97306901a32da75627f1317f0f70a0e3f2bbb4c418"
+    }
+  ],
+  "isolation": {
+    "workspaceOutsideRepository": true,
+    "packageReferenceOnly": true,
+    "projectReference": false,
+    "hintPath": false,
+    "sourceTreeBinary": false,
+    "developmentBridgePathRemoved": true,
+    "developmentProbingRemoved": true,
+    "consumerBridgeMatchesPackage": true,
+    "vendorRuntimeBinaryCountInPackages": 0,
+    "vendorRuntimeBinaryCountInConsumerOutput": 0,
+    "vendorDependenciesProvidedByHost": true
+  },
+  "positive": {
+    "passed": true,
+    "beforeOwnerCount": 0,
+    "afterBuildCount": 297,
+    "invocationCount": 305,
+    "distinctSeverityCount": 2,
+    "firstSeverity": "Info",
+    "firstMessageLength": 76,
+    "failureCount": 0,
+    "metadataCopied": true,
+    "builderAttached": true,
+    "builderDetached": true,
+    "runtimeAttached": true,
+    "runtimeDetached": true,
+    "threadSafeHandlerState": true,
+    "realCallbackRuntime": true,
+    "syntheticDiagnosticUsed": false
+  },
+  "deferredDispose": {
+    "passed": true,
+    "attachedBeforeDispose": true,
+    "attachedAfterDispose": true,
+    "postDisposeCallbacks": true,
+    "detached": true,
+    "rejectsNewBorrower": true
+  },
+  "handlerExceptionNegative": {
+    "passed": true,
+    "operationFailed": false,
+    "invocationCount": 299,
+    "failureCount": 299,
+    "lastExceptionType": "InvalidOperationException",
+    "detachVerified": true,
+    "interpretation": "ILogger::log returns void. Managed exceptions are swallowed and counted by the trampoline; TensorRT 10.11 completed the build, so callback counts, failure counts, copied state, and detach are the required negative evidence."
+  },
+  "nativeConcurrencyHardening": {
+    "loggerFailureFlagAtomicForTensorRt8": true,
+    "loggerFailureFlagAtomicForTensorRt10": true,
+    "loggerFailureFlagAtomicForTensorRt11": true,
+    "profilerFailureFlagAtomicForTensorRt8": true,
+    "profilerFailureFlagAtomicForTensorRt10": true,
+    "profilerFailureFlagAtomicForTensorRt11": true,
+    "tensorRt11DiagnosticSnapshotCopiedUnderLock": true,
+    "exportedCAbiChanged": false,
+    "publicManagedSignatureChanged": false
+  },
+  "artifacts": {
+    "consumerSource": {
+      "path": "samples/Logger.PackageConsumer/Program.cs",
+      "sha256": "78696aab03856ebc0e7cc370278aba488cbb8ea0ecd5a9d9cafc2f532e66370e",
+      "length": 17577
+    },
+    "projectTemplate": {
+      "path": "samples/Logger.PackageConsumer/Logger.PackageConsumer.csproj.template",
+      "sha256": "14459d08ff40d4df87364d973684dda5a9fad1892145df09e279c2b3a2739c6a",
+      "length": 550
+    },
+    "stdout": {
+      "path": "samples/assets/logger-local-package-consumer-tensorrt10.11.txt",
+      "sha256": "13569efd7a5a3cdb1b8228b9f85c07f1bf216ba20774f5f0f232f5fb0d995d28",
+      "length": 1396,
+      "source": "Line-ending-normalized copy of the captured package-consumer stdout; result values are unchanged."
+    },
+    "runtimeResultImage": {
+      "path": "docs/images/logger-local-package-consumer-terminal.png",
+      "sha256": "cd81ef4272f210b313aeab974bad773e3e50897015ab382836cb7c0eabf42f79",
+      "length": 81768,
+      "source": "Path-free terminal rendering of selected stdout from the same real run; the complete machine marker remains in the stdout artifact."
+    }
+  },
+  "boundary": {
+    "isLocalPackageConsumerRuntimeEvidence": true,
+    "isPublicPackageConsumerProof": false,
+    "isReleaseProof": false,
+    "isPostPublishProof": false,
+    "performsPublish": false,
+    "statement": "Repository-external local-feed proof for the managed and bridge-only packages. CUDA and TensorRT are host-installed. No public package, tag, Release, or package publication was created."
+  }
+}

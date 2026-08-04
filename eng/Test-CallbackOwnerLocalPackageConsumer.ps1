@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-  [ValidateSet("GpuAllocator", "OutputAllocator", "DebugListener", "ProgressMonitor", "Profiler")][string]$Scenario = "GpuAllocator",
+  [ValidateSet("GpuAllocator", "OutputAllocator", "DebugListener", "ProgressMonitor", "Profiler", "Logger")][string]$Scenario = "GpuAllocator",
   [string]$RepositoryRoot,
   [string]$OutputRoot,
   [string]$ReportDirectory,
@@ -112,6 +112,26 @@ $scenarioConfig = switch ($Scenario) {
         "ReportToProfiler",
         "EnqueueEmitsProfile",
         "HasNativeProfiler"
+      )
+    }
+  }
+  "Logger" {
+    [pscustomobject][ordered]@{
+      slug = "logger"
+      sampleDirectory = "Logger.PackageConsumer"
+      projectFileName = "LoggerPackageConsumer.csproj"
+      projectTemplateFileName = "Logger.PackageConsumer.csproj.template"
+      runtimeSwitch = "--logger-runtime-smoke-only"
+      runtimeMarkerPrefix = "LoggerRealRuntime=Passed "
+      finalMarker = "LoggerPackageConsumer Passed=True Mode=LoggerRuntimeSmokeOnly"
+      publicSurfaceMarkers = @(
+        "TensorRtLogger",
+        "TensorRtLogHandler",
+        "TensorRtLogSeverity",
+        "CallbackInvocationCount",
+        "CallbackFailureCount",
+        "LastCallbackException",
+        "IsAttached"
       )
     }
   }
@@ -762,6 +782,82 @@ switch ($Scenario) {
       "ImmediateCallbacks=$immediateInvocationCount Layers=$immediateLayerCount Failures=$immediateFailureCount",
       "DeferredBeforeReport=$deferredBeforeReportCount Reported=$deferredReported Callbacks=$deferredInvocationCount",
       "NegativeEnqueueFailed=$negativeEnqueueFailed NegativeFailures=$negativeFailureCount MetadataCopied=$metadataCopied"
+    )
+  }
+  "Logger" {
+    $beforeOwnerCount = [uint64](Get-MarkerField -Line $marker -Name "BeforeOwnerCount")
+    $afterBuildCount = [uint64](Get-MarkerField -Line $marker -Name "AfterBuildCount")
+    $positiveInvocationCount = [uint64](Get-MarkerField -Line $marker -Name "PositiveInvocationCount")
+    $positiveSeverityCount = [uint64](Get-MarkerField -Line $marker -Name "PositiveSeverityCount")
+    $positiveFailureCount = [uint64](Get-MarkerField -Line $marker -Name "PositiveFailureCount")
+    $metadataCopied = [bool]::Parse((Get-MarkerField -Line $marker -Name "MetadataCopied"))
+    $builderAttached = [bool]::Parse((Get-MarkerField -Line $marker -Name "BuilderAttached"))
+    $builderDetached = [bool]::Parse((Get-MarkerField -Line $marker -Name "BuilderDetached"))
+    $runtimeAttached = [bool]::Parse((Get-MarkerField -Line $marker -Name "RuntimeAttached"))
+    $runtimeDetached = [bool]::Parse((Get-MarkerField -Line $marker -Name "RuntimeDetached"))
+    $lifecycleAttachedBeforeDispose = [bool]::Parse((Get-MarkerField -Line $marker -Name "LifecycleAttachedBeforeDispose"))
+    $lifecycleAttachedAfterDispose = [bool]::Parse((Get-MarkerField -Line $marker -Name "LifecycleAttachedAfterDispose"))
+    $lifecyclePostDisposeCallbacks = [bool]::Parse((Get-MarkerField -Line $marker -Name "LifecyclePostDisposeCallbacks"))
+    $lifecycleDetached = [bool]::Parse((Get-MarkerField -Line $marker -Name "LifecycleDetached"))
+    $disposedRejectsNewBorrower = [bool]::Parse((Get-MarkerField -Line $marker -Name "DisposedRejectsNewBorrower"))
+    $negativeOperationFailed = [bool]::Parse((Get-MarkerField -Line $marker -Name "NegativeOperationFailed"))
+    $negativeInvocationCount = [uint64](Get-MarkerField -Line $marker -Name "NegativeInvocationCount")
+    $negativeFailureCount = [uint64](Get-MarkerField -Line $marker -Name "NegativeFailureCount")
+    $negativeDetachVerified = [bool]::Parse((Get-MarkerField -Line $marker -Name "NegativeDetachVerified"))
+    $threadSafeHandlerState = [bool]::Parse((Get-MarkerField -Line $marker -Name "ThreadSafeHandlerState"))
+    $nativeFailureFlagAtomic = [bool]::Parse((Get-MarkerField -Line $marker -Name "NativeFailureFlagAtomic"))
+    $realCallbackRuntime = [bool]::Parse((Get-MarkerField -Line $marker -Name "RealCallbackRuntime"))
+    $syntheticDiagnosticUsed = [bool]::Parse((Get-MarkerField -Line $marker -Name "SyntheticDiagnosticUsed"))
+    if ($beforeOwnerCount -ne 0 -or $afterBuildCount -eq 0 -or
+        $positiveInvocationCount -lt $afterBuildCount -or $positiveSeverityCount -eq 0 -or
+        $positiveFailureCount -ne 0 -or -not $metadataCopied -or
+        -not $builderAttached -or -not $builderDetached -or -not $runtimeAttached -or -not $runtimeDetached -or
+        -not $lifecycleAttachedBeforeDispose -or -not $lifecycleAttachedAfterDispose -or
+        -not $lifecyclePostDisposeCallbacks -or -not $lifecycleDetached -or -not $disposedRejectsNewBorrower -or
+        $negativeInvocationCount -eq 0 -or $negativeFailureCount -ne $negativeInvocationCount -or
+        -not $negativeDetachVerified -or -not $threadSafeHandlerState -or -not $nativeFailureFlagAtomic -or
+        -not $realCallbackRuntime -or $syntheticDiagnosticUsed) {
+      throw "External logger marker did not satisfy real-message, copied-metadata, owner-lifetime, exception, and detach invariants: $marker"
+    }
+
+    $scenarioRuntime = [pscustomobject][ordered]@{
+      passed = $true
+      beforeOwnerCount = $beforeOwnerCount
+      afterBuildCount = $afterBuildCount
+      invocationCount = $positiveInvocationCount
+      distinctSeverityCount = $positiveSeverityCount
+      failureCount = $positiveFailureCount
+      metadataCopied = $metadataCopied
+      builderAttached = $builderAttached
+      builderDetached = $builderDetached
+      runtimeAttached = $runtimeAttached
+      runtimeDetached = $runtimeDetached
+      threadSafeHandlerState = $threadSafeHandlerState
+      nativeFailureFlagAtomic = $nativeFailureFlagAtomic
+      realCallbackRuntime = $realCallbackRuntime
+      syntheticDiagnosticUsed = $syntheticDiagnosticUsed
+    }
+    $scenarioNegatives = [pscustomobject][ordered]@{
+      deferredDispose = [pscustomobject][ordered]@{
+        passed = $true
+        attachedBeforeDispose = $lifecycleAttachedBeforeDispose
+        attachedAfterDispose = $lifecycleAttachedAfterDispose
+        postDisposeCallbacks = $lifecyclePostDisposeCallbacks
+        detached = $lifecycleDetached
+        rejectsNewBorrower = $disposedRejectsNewBorrower
+      }
+      handlerException = [pscustomobject][ordered]@{
+        passed = $true
+        operationFailed = $negativeOperationFailed
+        invocationCount = $negativeInvocationCount
+        failureCount = $negativeFailureCount
+        detachVerified = $negativeDetachVerified
+      }
+    }
+    $resultSummary = @(
+      "Callbacks=$positiveInvocationCount Severities=$positiveSeverityCount Failures=$positiveFailureCount",
+      "BuilderAttached=$builderAttached BuilderDetached=$builderDetached RuntimeAttached=$runtimeAttached RuntimeDetached=$runtimeDetached",
+      "DeferredDisposeCallbacks=$lifecyclePostDisposeCallbacks NegativeOperationFailed=$negativeOperationFailed NegativeFailures=$negativeFailureCount"
     )
   }
 }

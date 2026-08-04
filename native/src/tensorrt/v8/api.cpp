@@ -1,5 +1,6 @@
 #include "jyppx/tensorrt/trt8.h"
 
+#include <atomic>
 #include <cstring>
 #include <exception>
 #include <memory>
@@ -118,14 +119,14 @@ public:
 
     bool last_callback_failed() const noexcept
     {
-        return last_callback_failed_;
+        return last_callback_failed_.load(std::memory_order_relaxed);
     }
 
 private:
     JYPPX_TensorRtLoggerCallback callback_{nullptr};
     void* user_state_{nullptr};
     int32_t minimum_severity_{static_cast<int32_t>(Severity::kWARNING)};
-    bool last_callback_failed_{false};
+    std::atomic<bool> last_callback_failed_{false};
 };
 
 class ManagedProfiler final : public nvinfer1::IProfiler
@@ -179,13 +180,13 @@ public:
 
     bool last_callback_failed() const noexcept
     {
-        return last_callback_failed_;
+        return last_callback_failed_.load(std::memory_order_relaxed);
     }
 
 private:
     JYPPX_TensorRtProfilerCallback callback_{nullptr};
     void* user_state_{nullptr};
-    bool last_callback_failed_{false};
+    std::atomic<bool> last_callback_failed_{false};
 };
 
 struct LayerReferencePayload

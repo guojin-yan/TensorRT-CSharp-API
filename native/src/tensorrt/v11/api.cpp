@@ -73,9 +73,7 @@ public:
 
         last_callback_failed_ = false;
         const auto severity_value = static_cast<int32_t>(severity);
-        ++message_count_;
-        last_severity_ = severity_value;
-        copy_c_string_noexcept(msg, last_message_, sizeof(last_message_));
+        record_message(severity_value, msg);
         if (severity_value > minimum_severity_)
         {
             return;
@@ -120,7 +118,7 @@ public:
 
     bool last_callback_failed() const noexcept
     {
-        return last_callback_failed_;
+        return last_callback_failed_.load(std::memory_order_relaxed);
     }
 
     bool callback_available() const noexcept
@@ -128,22 +126,43 @@ public:
         return callback_ != nullptr;
     }
 
-    uint32_t message_count() const noexcept
+    void copy_runtime_create_diagnostic(JYPPX_TensorRtRuntimeCreateDiagnosticInfo* out_info) const noexcept
     {
-        return message_count_;
-    }
+        if (out_info == nullptr)
+        {
+            return;
+        }
 
-    int32_t last_severity() const noexcept
-    {
-        return last_severity_;
-    }
-
-    const char* last_message() const noexcept
-    {
-        return last_message_;
+        try
+        {
+            std::lock_guard<std::mutex> lock(diagnostics_mutex_);
+            out_info->logger_message_count = message_count_;
+            out_info->last_logger_severity = last_severity_;
+            copy_c_string_noexcept(last_message_, out_info->last_logger_message, sizeof(out_info->last_logger_message));
+        }
+        catch (...)
+        {
+            out_info->logger_message_count = 0;
+            out_info->last_logger_severity = 0;
+            out_info->last_logger_message[0] = '\0';
+        }
     }
 
 private:
+    void record_message(const int32_t severity, const char* message) noexcept
+    {
+        try
+        {
+            std::lock_guard<std::mutex> lock(diagnostics_mutex_);
+            ++message_count_;
+            last_severity_ = severity;
+            copy_c_string_noexcept(message, last_message_, sizeof(last_message_));
+        }
+        catch (...)
+        {
+        }
+    }
+
     static void copy_c_string_noexcept(const char* source, char* destination, const size_t capacity) noexcept
     {
         if (destination == nullptr || capacity == 0)
@@ -166,7 +185,8 @@ private:
     JYPPX_TensorRtLoggerCallback callback_{nullptr};
     void* user_state_{nullptr};
     int32_t minimum_severity_{static_cast<int32_t>(Severity::kWARNING)};
-    bool last_callback_failed_{false};
+    std::atomic<bool> last_callback_failed_{false};
+    mutable std::mutex diagnostics_mutex_;
     uint32_t message_count_{0};
     int32_t last_severity_{0};
     char last_message_[1024]{};
@@ -232,7 +252,7 @@ public:
 
     bool last_callback_failed() const noexcept
     {
-        return last_callback_failed_;
+        return last_callback_failed_.load(std::memory_order_relaxed);
     }
 
 private:
@@ -367,13 +387,13 @@ public:
 
     bool last_callback_failed() const noexcept
     {
-        return last_callback_failed_;
+        return last_callback_failed_.load(std::memory_order_relaxed);
     }
 
 private:
     JYPPX_TensorRtProfilerCallback callback_{nullptr};
     void* user_state_{nullptr};
-    bool last_callback_failed_{false};
+    std::atomic<bool> last_callback_failed_{false};
 };
 
 struct LayerReferencePayload
@@ -680,9 +700,7 @@ void copy_logger_runtime_create_diagnostic(
     }
 
     out_info->logger_callback_available = logger.callback_available() ? JYPPX_TRUE : JYPPX_FALSE;
-    out_info->logger_message_count = logger.message_count();
-    out_info->last_logger_severity = logger.last_severity();
-    copy_c_string(logger.last_message(), out_info->last_logger_message, sizeof(out_info->last_logger_message));
+    logger.copy_runtime_create_diagnostic(out_info);
 }
 #endif
 

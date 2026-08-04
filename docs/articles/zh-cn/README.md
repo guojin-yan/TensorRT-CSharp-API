@@ -8,7 +8,7 @@
 - Owner 输入、候选 proof 和 post-publish 模板；
 - `publishing` 子目录中的文章规划与发布治理材料。
 
-2026-08-05 盘点到 487 个 Markdown 文件。当前有 9 篇文章同时具备真实程序运行窗口截图和原图叠加识别结果；其余文件仍以项目文档、内部记录或待完善稿为主。数量代表项目过程材料多，不代表有 487 篇完整成稿。
+2026-08-05 盘点到 488 个 Markdown 文件。当前有 9 篇文章同时具备真实程序运行窗口截图和原图叠加识别结果；其余文件仍以项目文档、内部记录或待完善稿为主。数量代表项目过程材料多，不代表有 488 篇完整成稿。
 
 ## 完整文章标准
 
@@ -56,6 +56,7 @@
 - [使用 TensorRtSharp4.0 在 C# 中实现 CUDA 多流与 Event 同步](cuda-stream-event-multistream-tutorial.md)。
 - [用本地 NuGet 包验证 TensorRT IProgressMonitor：真实构建进度与安全取消](progress-monitor-local-package-consumer-tutorial.md)。
 - [用本地 NuGet 包验证 TensorRT IProfiler：即时计时、延迟上报与异常隔离](profiler-local-package-consumer-tutorial.md)。
+- [用本地 NuGet 包验证 TensorRT ILogger：真实日志、生命周期与异常隔离](logger-local-package-consumer-tutorial.md)。
 
 模型转换和桌面工具文章需要真实模型构建、程序窗口、报告校验和清楚的 build/runtime 边界；只有声称完成推理的文章才必须提供输出语义校验。未经授权的输入图片不嵌入仓库：
 

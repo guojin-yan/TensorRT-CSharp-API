@@ -1,0 +1,12 @@
+PackageReferenceOnly=True
+ProjectReference=False
+SourceTreeBinary=False
+RuntimeEnvironment TRT=10.11.0 CUDA=12.9 TensorRtAvailable=True CudaAvailable=True
+LoggerRuntimeSummary
+  TensorRtLine=10 RuntimePackageKey=win-x64-trt10.11-cuda12.9-cudnn9.22
+  PositiveCallbacks=305 Severities=2 Failures=0 FirstSeverity=Info FirstMessageLength=76
+  BuilderAttached=True BuilderDetached=True RuntimeAttached=True RuntimeDetached=True
+  DeferredDispose=Passed AttachedBefore=True AttachedAfter=True PostDisposeCallbacks=True Detached=True RejectsNewBorrower=True
+  ExceptionCase=Passed OperationFailed=False Callbacks=299 Failures=299 Detached=True
+LoggerRealRuntime=Passed TensorRtLine=10 RuntimePackageKey=win-x64-trt10.11-cuda12.9-cudnn9.22 BeforeOwnerCount=0 AfterBuildCount=297 PositiveInvocationCount=305 PositiveSeverityCount=2 PositiveFailureCount=0 MetadataCopied=True BuilderAttached=True BuilderDetached=True RuntimeAttached=True RuntimeDetached=True LifecycleAttachedBeforeDispose=True LifecycleAttachedAfterDispose=True LifecyclePostDisposeCallbacks=True LifecycleDetached=True DisposedRejectsNewBorrower=True NegativeOperationFailed=False NegativeInvocationCount=299 NegativeFailureCount=299 NegativeDetachVerified=True ThreadSafeHandlerState=True NativeFailureFlagAtomic=True RealCallbackRuntime=True SyntheticDiagnosticUsed=False
+LoggerPackageConsumer Passed=True Mode=LoggerRuntimeSmokeOnly
