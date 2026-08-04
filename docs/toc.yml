@@ -314,8 +314,6 @@
     href: articles/zh-cn/yolovision-pose-keypoint-output-guide.md
   - name: YoloVision OBB Angle Output Guide
     href: articles/zh-cn/yolovision-obb-angle-output-guide.md
-  - name: TensorRtExec Report Schema Guide
-    href: articles/zh-cn/tensorrtexec-report-schema-guide.md
   - name: TensorRtExec Report Proof Boundary
     href: articles/zh-cn/tensorrtexec-report-proof-boundary.md
   - name: Runtime Package Windows Linux Install FAQ
@@ -978,8 +976,6 @@
   href: articles/zh-cn/yolovision-owner-asset-evidence-example.md
 - name: YoloVision Golden Output Validation Guide
   href: articles/zh-cn/yolovision-golden-output-validation-guide.md
-- name: TensorRtExec Report JSON Schema Snapshot
-  href: articles/zh-cn/tensorrtexec-report-json-schema-snapshot.md
 - name: Runtime Package Minimal Smoke Commands
   href: articles/zh-cn/runtime-package-minimal-smoke-commands.md
 - name: Runtime Package Native Load Troubleshooting

@@ -9,7 +9,6 @@ public sealed class TechnicalArticleCampaignFifthBatchBodyTests
         "yolovision-output-json-schema-guide.md",
         "yolovision-real-asset-record-template-guide.md",
         "yolovision-golden-output-validation-guide.md",
-        "tensorrtexec-report-json-schema-snapshot.md",
         "runtime-package-minimal-smoke-commands.md",
         "runtime-package-native-load-troubleshooting.md",
         "plugin-inventory-field-metadata-smoke-guide.md",
