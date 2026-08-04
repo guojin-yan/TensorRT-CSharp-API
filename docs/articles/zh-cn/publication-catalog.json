@@ -296,6 +296,40 @@
       ],
       "proofBoundary": "Content-complete source-tree real-model article with a real runtime screenshot and source-image detection overlay; not package-consumer, public-package, post-publish, Owner acceptance, model upload authorization, or release proof.",
       "publicationAuthorized": false
+    },
+    {
+      "id": "yolovision-yolox-s-real-asset",
+      "path": "docs/articles/zh-cn/yolovision-yolox-official-runtime-tutorial.md",
+      "classification": "complete-technical-article",
+      "status": "complete-with-runtime-screenshot-and-annotated-result",
+      "realExecutionEvidence": "samples/assets/yolovision-yolox-s-article-runtime-evidence.json",
+      "visualAssetEvidence": "samples/assets/yolovision-yolox-s-article-visual-assets.json",
+      "model": {
+        "sourceUrl": "https://github.com/Megvii-BaseDetection/YOLOX/releases/download/0.1.1rc0/yolox_s.onnx",
+        "pinnedRevision": "yolox-0.1.1rc0@e1052df71842031413f6030723c3607b839c80ce",
+        "license": "Apache-2.0; model files remain outside Git and public redistribution is not approved",
+        "conversionCommand": "python3 tools/export_onnx.py --output-name yolox_s.onnx -n yolox-s -c yolox_s.pth",
+        "onnxWorkspacePath": "models/YoloVision/Detection/yolox-s-megvii-v0.1.1rc0/yolox_s.onnx",
+        "onnxSha256": "c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063",
+        "trackedByGit": false,
+        "uploadsModelFiles": false
+      },
+      "resultImages": [
+        {
+          "role": "annotated-inference-result",
+          "path": "docs/images/yolovision-yolox-s-annotated-cc0.webp",
+          "sha256": "5d9f89019681b5e3c60fd3af8c1ac1f2912aaad04662e2374620c8afd258c5f3",
+          "source": "Rendered from the SVG written by the real TensorRT YoloVision run; the CC0 source image is embedded and eight YOLOX detections are mapped back to source coordinates."
+        },
+        {
+          "role": "program-runtime-screenshot",
+          "path": "docs/images/yolovision-yolox-s-runtime-terminal.png",
+          "sha256": "8be6f8a797f6853da6b28d46d2e320aa531fd050d0411d120118ad9a5726d7b0",
+          "source": "Path-sanitized console rendering of selected stdout from the same real TensorRT execution; model, shapes, detections, elapsed time, and Passed=True are unchanged."
+        }
+      ],
+      "proofBoundary": "Content-complete source-tree real-model article with a real runtime screenshot and source-image detection overlay; not package-consumer, public-package, post-publish, Owner acceptance, model upload authorization, or release proof.",
+      "publicationAuthorized": false
     }
   ]
 }

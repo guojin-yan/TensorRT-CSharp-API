@@ -54,6 +54,8 @@ CUDA、cuDNN、TensorRT 和 NVRTC 由用户自行安装，不进入项目包或 
 | 任务 | 模型 | ONNX 暂存位置 | 当前案例状态 |
 | --- | --- | --- | --- |
 | 检测 | YOLOv8n | `models/YoloVision/Detection/yolov8n-ultralytics-v8.3.0` | 真实 TensorRT、raw reference、标注图、终端截图 |
+| End-to-End 检测 | YOLOv10n | `models/YoloVision/Detection/yolov10n-thu-mig-v1.1` | 真实 TensorRT、六列输出合同、标注图、终端截图 |
+| 检测 | YOLOX-S | `models/YoloVision/Detection/yolox-s-megvii-v0.1.1rc0` | 真实 TensorRT、grid/stride 解码、标注图、终端截图 |
 | 分类 | YOLOv8n-cls | `models/YoloVision/Classification/yolov8n-cls-ultralytics-v8.3.0` | 真实 TensorRT、Top-5、标注图、终端截图 |
 | 实例分割 | YOLOv8n-seg | `models/YoloVision/InstanceSegmentation/yolov8n-seg-ultralytics-v8.3.0` | 真实 TensorRT、双输出、mask、标注图、终端截图 |
 | 姿态 | YOLOv8n-pose | `models/YoloVision/Pose/yolov8n-pose-ultralytics-v8.3.0` | 真实 TensorRT、关键点、标注图、终端截图 |

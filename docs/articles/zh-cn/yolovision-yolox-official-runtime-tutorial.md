@@ -1,152 +1,125 @@
-# YoloVision 官方 YOLOX-S 下载、构建与真实图片运行教程
+# 使用 TensorRtSharp4.0 在 C# 中运行官方 YOLOX-S 目标检测
 
-本文使用 YOLOX 官方仓库的 Apache-2.0 资产，把 `samples/YoloVision` 从 ONNX 下载推进到 TensorRT 10.11 真实图片检测。流程覆盖来源固定、SHA256、JPG 到 PPM 派生、官方预处理、engine 构建、C# enqueue、raw output 解码、NMS、JSON/SVG 和严格证据校验。
+本文使用 Megvii 官方 YOLOX-S ONNX，完整演示 `samples/YoloVision` 如何准备模型与图片、执行 YOLOX 专用预处理、调用 TensorRT、解码 `[1,8400,85]` raw head，并把检测框绘制到原图。示例通过 `JYPPX.TensorRtSharp` 使用 TensorRT 托管接口，通过 `JYPPX.CudaSharp` 管理 CUDA 资源；CUDA、cuDNN、TensorRT 和 native bridge 均由使用者自行安装，不随项目打包。
 
-本次已验证结果：
+本文只把代码、证据 JSON 和允许再分发的 CC0 结果图提交到仓库。ONNX、输入图片、预处理 tensor、engine 与原始日志保存在仓库外层工作目录，后续可迁移到独立 Model Zoo。
 
-- ONNX：官方 `yolox_s.onnx`，opset 11，SHA256 `c5c2d13e...998063`。
-- 输入：`images [1,3,640,640]`。
-- 输出：`output [1,8400,85]`。
-- TensorRT：10.11.0.33，FP32。
-- GPU：NVIDIA GeForce RTX 3060 Laptop GPU。
-- 检测：5 个，其中 `bicycle=0.954841`、`dog=0.913382`。
-- 真实运行日志最后应包含 marker：`YoloVision Passed=True`。
-- 严格 sample-run validator：`real-model-runtime`，owner-action 0。
+## 本文使用的项目与库
 
-这里的 `real-model-runtime` 只表示源码树中的真实模型运行。它不是 `package-consumer-runtime`，不代表资产已获准随仓库或 NuGet 公开发布。
+本案例由三个项目层次协作完成：
 
-## 1. 环境要求
+| 层次 | 项目 | 作用 |
+| --- | --- | --- |
+| 托管 TensorRT | `src/JYPPX.TensorRtSharp` | 解析 ONNX、创建 execution context、绑定输入输出并读取 TensorRT 结果 |
+| 托管 CUDA | `src/JYPPX.CudaSharp` | 提供 CUDA context、stream 与 device memory 的安全封装 |
+| 用户示例 | `samples/YoloVision` | 完成图片预处理、YOLOX grid/stride 解码、NMS、JSON 报告和 SVG 可视化 |
 
-从仓库根目录执行：
+YOLOX 与常见 YOLOv8 raw head 的差异不只在 family 名称。官方 YOLOX-S 输出需要先依据 stride 和 grid 还原中心点、宽高，再计算 `objectness * classScore` 并执行 NMS。本项目把这套语义限定在 detection；`cls/seg/obb/pose/sem` 会明确返回不支持，不会落入错误的通用 decoder。
 
-```powershell
-cd .
-dotnet --version
-cmake --version
-nvidia-smi
-```
+## 模型获取与许可证
 
-需要：
-
-- .NET 8 SDK。
-- Visual Studio 2022 C++ 工具链和 CMake。
-- TensorRT 10.x，通过 `JYPPX_TENSORRT_ROOT` 指向用户安装目录。
-- CUDA 12.x，本次 bridge 使用 `win-x64-trt10-cuda12-release` preset。
-- NVIDIA driver 能运行 TensorRT 10.11。
-
-模型、图片、engine 和 tensor 较大，获取脚本会拒绝 C 盘输出。本仓库默认把它们放到外层 E 盘目录：
+官方模型下载地址是 [YOLOX 0.1.1rc0 yolox_s.onnx](https://github.com/Megvii-BaseDetection/YOLOX/releases/download/0.1.1rc0/yolox_s.onnx)，对应上游 revision 为 `0.1.1rc0@e1052df71842031413f6030723c3607b839c80ce`，许可证为 `Apache-2.0`。固定文件长度为 `35858002` bytes，SHA256 为：
 
 ```text
-..\downloads\yolox-apache
+c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063
 ```
 
-## 2. 资产来源与固定版本
-
-清单位于：
-
-```text
-samples/assets/yolovision-yolox-official-assets.json
-```
-
-除 release 模型外，raw 文件都固定到 YOLOX `0.1.1rc0` 对应提交：
-
-```text
-e1052df71842031413f6030723c3607b839c80ce
-```
-
-核心文件：
-
-| 资产 | 长度 | SHA256 |
-| --- | ---: | --- |
-| `yolox_s.onnx` | 35,858,002 | `c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063` |
-| `LICENSE` | 11,352 | `577c03d505ec80f667ebf96ebd0cc4f6825c817ca1088ee348c48aaabd51bd92` |
-| `dog.jpg` | 163,759 | `5a9522051c3cec2bbd2f6323fccba32e8fbf3ddcc2b3e2fd46b04c720bc6f866` |
-| `coco_classes.py` | 1,296 | `b38193c481a73f1f674cedab9e551b15b39b1a7aaed3e09e16505362cc54ad51` |
-
-清单还固定了官方 `onnx_inference.py` 和 `data_augment.py`，用于审计预处理与后处理语义。
-
-## 3. 下载并派生可运行资产
-
-在线获取：
+项目使用 `eng/Acquire-YoloXOfficialAssets.ps1` 获取并校验模型、许可证、官方预处理参考和 COCO 类别文件；来源与哈希记录在 `samples/assets/yolovision-yolox-official-assets.json`。建议将下载目录放在仓库外层：
 
 ```powershell
 pwsh -NoProfile -ExecutionPolicy Bypass `
-  -File .\eng\Acquire-YoloXOfficialAssets.ps1
+  -File ./eng/Acquire-YoloXOfficialAssets.ps1 `
+  -OutputRoot <downloads-root>/yolox-apache
 ```
 
-已有缓存时进行离线复核：
+已有缓存时可增加 `-Offline` 只做哈希复核。模型目前仅用于本地开发验证，`publicRedistributionOwnerApproval=false`，不会上传到 GitHub、NuGet 或 Release。
 
-```powershell
-pwsh -NoProfile -ExecutionPolicy Bypass `
-  -File .\eng\Acquire-YoloXOfficialAssets.ps1 `
-  -Offline
-```
+本次结果图使用 Wikimedia Commons 的 `Liverpool Street Bus station 2025`，许可证为 [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/)。图片来源、媒体哈希和转换后的 PPM 哈希记录在 `samples/assets/yolovision-yolox-s-article-visual-assets.json`。
 
-脚本会完成四件事：
+## ONNX 转换与暂存
 
-1. 拒绝任何位于 `C:\` 的 `OutputRoot`。
-2. 下载或复用 E 盘文件，并核对长度和 SHA256。
-3. 从官方 `coco_classes.py` 生成按原顺序排列的 80 类 `coco.names`。
-4. 将官方 `dog.jpg` 转成内置图片解码器支持的 P6 RGB `dog.ppm`。
-
-派生文件固定结果：
-
-| 文件 | SHA256 |
-| --- | --- |
-| `derived/dog.ppm` | `6cb94c9cd0781412598fe179246b09041af4303d388a5ba3c55f760dff11ec2c` |
-| `derived/coco.names` | `4d4aaea7bee6be2f675d9b53a9195ca36dfe6429f7479f29155da522a6c85930` |
-
-获取报告位于：
+本次实机运行直接使用官方 release ONNX。转换后的模型统一暂存在仓库外层 models 工作区：
 
 ```text
-artifacts/yolovision/yolox-official-runtime/acquisition-report.json
+<models-root>/YoloVision/Detection/yolox-s-megvii-v0.1.1rc0/yolox_s.onnx
 ```
 
-## 4. YOLOX 预处理为什么不同
-
-官方 YOLOX-S 需要：
-
-- `NCHW`。
-- `BGR`。
-- float32 值保持 `0..255`，不除以 255。
-- 保持宽高比，填充值 114。
-- 图片放在左上角，剩余区域在右侧和底部填充。
-
-因此 `--family yolox` 默认使用：
+机器可读清单中的工作区路径写作：
 
 ```text
-Layout=NCHW Color=BGR Normalize=False ValueScale=1 Alignment=top-left Fill=114
+models/YoloVision/Detection/yolox-s-megvii-v0.1.1rc0/yolox_s.onnx
 ```
 
-可先只生成 tensor：
+如果需要从 checkpoint 重建 ONNX，先取得相同 revision 的 YOLOX 源码与 `yolox_s.pth`，再按上游方式执行：
 
-```powershell
-dotnet run --project .\samples\YoloVision -- `
-  --family yolox `
-  --task det `
-  --image ..\downloads\yolox-apache\derived\dog.ppm `
-  --preprocessed-output ..\downloads\yolox-apache\derived\dog-yolox-s-1x3x640x640-bgr-top-left.fp32.bin `
-  --input-shape 1x3x640x640 `
-  --preprocess-only
+```bash
+python3 tools/export_onnx.py --output-name yolox_s.onnx -n yolox-s -c yolox_s.pth
 ```
 
-本次 tensor SHA256：
+重建时应记录 Python、PyTorch、ONNX、opset、YOLOX revision 和输入尺寸。导出图不应仅凭文件名认定兼容，必须检查合同：
 
 ```text
-ca4e22bc6d8ebfe70f5aefeae8957d9ad15eb8d3bf99b6a42e016436dcbf1528
+images:[1,3,640,640]
+output:[1,8400,85]
 ```
 
-`--preprocess-only` 只是预处理证据，不是推理证明。
+输出的 8400 行来自 `80*80 + 40*40 + 20*20`，每行包含 `cx,cy,w,h,objectness` 和 80 个类别分数。若名称、shape 或列语义不同，应先调整 metadata 与 decoder，不能强行套用本文参数。
 
-## 5. YOLOX raw output 解码
+## 创建本地包消费项目
 
-官方 ONNX 输出 `[1,8400,85]`，不是已经还原到像素坐标的最终 box。8400 来自三个 feature map：
+本篇的证明目标是源码树真实模型运行，不把临时 `.nupkg` 或 `ProjectReference` 描述成公开包。仓库提供 `samples/YoloVision.PackageConsumer` 和 `eng/Test-YoloVisionManagedPackageDryRun.ps1`，可在发布前验证托管包布局和入口兼容性；当前未获得发布授权，因此本节不执行 NuGet/GitHub Packages 推送，也不把源码树运行提升为 `package-consumer-runtime`。
 
-```text
-80*80 + 40*40 + 20*20 = 8400
+需要单独验证消费方式时，应在仓库外创建控制台项目，通过本地 feed 引用 dry-run 生成的 `JYPPX.TensorRT.CSharp.API` 与 `JYPPX.TensorRT.CSharp.API.YoloVision`，然后调用公开的 `YoloVisionCommand.Run(args)`。这条流程与本文的模型、预处理和结果合同相同，但证据分类必须分别记录。
+
+## 编写程序入口
+
+`samples/YoloVision/Program.cs` 直接调用托管 TensorRT API，不通过 Python 或 `trtexec` 代跑推理。主链路可以归纳为：
+
+```csharp
+YoloImagePreprocessResult imagePreprocess = YoloImagePreprocessor.Preprocess(
+    imagePath,
+    tensorPath,
+    profile.InputShape,
+    profile.Preprocess);
+
+string[] effectiveArgs = AddOrReplaceArgument(
+    args,
+    "--input-data",
+    imagePreprocess.TensorPath);
+OnnxSampleOptions options = OnnxSampleOptions.FromArgs(effectiveArgs, "1x3x640x640");
+
+OnnxSampleMultiOutputResult runtime =
+    TensorRtOnnxSample.RunSingleFloatInputOutputs(options);
+OnnxSampleOutputTensor output = runtime.PrimaryOutput;
+
+YoloVisionResult result = YoloSampleRunner.DecodeOutput(
+    output.Values,
+    output.Shape.Values,
+    profile);
+
+YoloVisionOutputReport.Write(
+    outputJsonPath,
+    options,
+    runtime,
+    runtimeOutputs,
+    profile,
+    result,
+    labels,
+    labelsPath,
+    imagePreprocess);
+
+YoloVisionVisualizationWriter.Write(
+    visualizationPath,
+    result,
+    labels,
+    profile,
+    options.InputShape.Values,
+    imagePreprocess,
+    null,
+    visualizationBackgroundPath);
 ```
 
-`YoloXOutputDecoder` 按 stride `8,16,32` 和 row-major grid 执行：
+内置 YOLOX profile 使用 NCHW、BGR、raw `0..255` float、fill 114 和左上角 letterbox。解码器针对 stride `8/16/32` 逐格执行：
 
 ```text
 centerX = (rawX + gridX) * stride
@@ -156,72 +129,14 @@ height  = exp(rawHeight) * stride
 score   = objectness * bestClassScore
 ```
 
-转换后再进入 class-aware 或 class-agnostic NMS。内置 YOLOX profile 明确只支持 detection；`cls/seg/obb/pose/sem` 会报告 unsupported family/task，而不是虚假落入通用 decoder。
-
-## 6. 构建 native bridge
-
-已有 bridge 时可跳过。否则设置本机 TensorRT 路径后构建：
+坐标还原后再执行 class-aware NMS。程序入口显式写出所有影响结果的参数：
 
 ```powershell
-$env:TENSORRT_PATH = $env:JYPPX_TENSORRT_ROOT
-cmake --preset win-x64-trt10-cuda12-release
-cmake --build --preset win-x64-trt10-cuda12-release
-```
-
-输出：
-
-```text
-build-out/win-x64-trt10-cuda12-release/bin/Release/jyppxtrtbridge.dll
-```
-
-## 7. 用 trtexec 构建 engine
-
-engine 继续留在 E 盘 downloads：
-
-```powershell
-$trtexec = Join-Path $env:JYPPX_TENSORRT_ROOT 'bin\trtexec.exe'
-$onnx = '..\downloads\yolox-apache\source\yolox_s.onnx'
-$engine = '..\downloads\yolox-apache\derived\yolox_s-trt10.11-fp32.engine'
-
-& $trtexec `
-  "--onnx=$onnx" `
-  "--saveEngine=$engine" `
-  --skipInference `
-  --memPoolSize=workspace:1024 `
-  --profilingVerbosity=detailed
-```
-
-本次结果：
-
-```text
-EngineLength=48241100
-EngineSha256=9b31390a786e8f520d4f3f78fbb0444eb7563c4bc8c2dddd5d7861c5c69524b1
-Bindings: images, output
-```
-
-engine 与 GPU、TensorRT 版本、builder 配置相关，不应把上述 engine hash 当作跨机器固定值。
-
-## 8. 运行 YoloVision
-
-先让 Windows loader 找到 bridge、TensorRT 和 CUDA DLL：
-
-```powershell
-$bridge = (Resolve-Path '.\build-out\win-x64-trt10-cuda12-release\bin\Release').Path
-$trt = $env:JYPPX_TENSORRT_ROOT
-$cuda = 'C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.9'
-$env:PATH = "$bridge;$trt\bin;$trt\lib;$cuda\bin;$env:PATH"
-```
-
-执行真实图片检测：
-
-```powershell
-dotnet run --project .\samples\YoloVision -- `
-  --model ..\downloads\yolox-apache\source\yolox_s.onnx `
-  --labels ..\downloads\yolox-apache\derived\coco.names `
-  --image ..\downloads\yolox-apache\derived\dog.ppm `
-  --preprocessed-output ..\downloads\yolox-apache\derived\dog-yolox-s-1x3x640x640-bgr-top-left.fp32.bin `
-  --output-json .\artifacts\yolovision\yolox-official-runtime\yolovision-output.json `
-  --visualization .\artifacts\yolovision\yolox-official-runtime\yolovision-output.svg `
+dotnet run --project ./samples/YoloVision -- `
+  --model <models-root>/YoloVision/Detection/yolox-s-megvii-v0.1.1rc0/yolox_s.onnx `
+  --labels <asset-root>/coco.names `
+  --image <asset-root>/liverpool-street-bus-station-1280.ppm `
+  --preprocessed-output <evidence-root>/input-yolox-s.fp32.bin `
   --input-shape 1x3x640x640 `
   --tensor-rt-line 10 `
   --family yolox `
@@ -231,76 +146,53 @@ dotnet run --project .\samples\YoloVision -- `
   --nms-mode class-aware `
   --confidence 0.3 `
   --iou-threshold 0.45 `
-  --top-k 20
+  --top-k 100 `
+  --output-json <evidence-root>/yolox-s-output.json `
+  --visualization <evidence-root>/yolox-s-output.svg `
+  --visualization-background <asset-root>/liverpool-street-bus-station-1280.jpg
 ```
 
-关键输出：
+`--image` 生成 BGR/NCHW/左上 letterbox 的 float32 tensor；`--visualization-background` 让程序将模型坐标反变换回 1280x961 原图并绘制检测框。
 
-```text
-Input=images:[1, 3, 640, 640] Output=output:[1, 8400, 85]
-Detection Class=bicycle Score=0.954841 ...
-Detection Class=dog Score=0.913382 ...
-Real run log final marker: YoloVision Passed=True
-```
+## 编译并运行
 
-JSON 和 SVG 分别用于机器审计与人工检查，不能只保留截图而丢掉日志和 hash。
-
-## 9. 严格验证
-
-验证输出 report：
+先准备使用者安装的 TensorRT、CUDA 和与版本线对应的项目 native bridge。环境变量只用于本机 loader 探测：
 
 ```powershell
-pwsh -NoProfile -ExecutionPolicy Bypass `
-  -File .\eng\Test-YoloVisionOutputReport.ps1 `
-  -InputPath .\artifacts\yolovision\yolox-official-runtime\yolovision-output.json `
-  -OutputPath .\artifacts\yolovision\yolox-official-runtime\validation\yolovision-output-report-validation.json `
-  -Strict
+$env:JYPPX_NATIVE_BRIDGE_PATH = <bridge-root>/jyppxtrtbridge.dll
+$env:JYPPX_TENSORRT_ROOT = <TensorRT-root>
+$env:JYPPX_ENABLE_DEVELOPMENT_PROBING = "true"
+dotnet build ./TensorRtSharp.sln -c Release
 ```
 
-验证 sample-run record：
+本次真实运行环境为 RTX 3060 Laptop GPU、驱动 `576.02`、TensorRT `10.11.0.33` 和 CUDA `12.9`。预处理 tensor SHA256 为 `d8480974ed95b20415348a8ab73f88718b87b9787c7624a889e955270b1abf74`，运行输出为 `images:[1,3,640,640] -> output:[1,8400,85]`，最终标记为 `YoloVision Passed=True`，进程退出码为 0。
 
-```powershell
-pwsh -NoProfile -ExecutionPolicy Bypass `
-  -File .\eng\Test-SampleRunEvidenceRecord.ps1 `
-  -InputPath .\artifacts\yolovision\yolox-official-runtime\sample-run-evidence-record.yolox-official.json `
-  -OutputRoot .\artifacts\yolovision\yolox-official-runtime\validation `
-  -RequireExistingLog `
-  -FailOnNotProof
-```
+## 已验证结果
 
-预期：
+下面两张图都来自同一次真实 TensorRT 执行。第一张是程序生成 SVG 渲染后的原图叠加结果，第二张由同一份日志中的 stdout 脱敏渲染。终端截图来自本次真实运行的 stdout，不是指标卡片或手工填写的示意图。
 
-```text
-ValidationState=real-model-runtime
-CanPromoteRealModelRuntime=True
-ErrorCount=0
-OwnerActionRequiredCount=0
-```
+![YOLOX-S 原图叠加检测结果](../../images/yolovision-yolox-s-annotated-cc0.webp)
 
-## 10. 证据边界与清理
+![YOLOX-S TensorRT 实际运行窗口](../../images/yolovision-yolox-s-runtime-terminal.png)
 
-这条链已证明：
+本次检测结果为：
 
-- 官方 ONNX 可由 TRT10 parser/builder 构建。
-- 官方图片可由内置 profile 生成正确 tensor。
-- C# bridge 完成真实 enqueue 与 output readback。
-- raw YOLOX 坐标、objectness、class score 和 NMS 可生成合理检测。
-- 运行日志、JSON、SVG、模型、图片、labels 和 tensor hash 相互可追溯。
+| 类别 | 数量 | 最高置信度 |
+| --- | ---: | ---: |
+| bus | 1 | 0.956653 |
+| person | 7 | 0.852964 |
 
-它没有证明：
+推理耗时为 `11.271 ms`。输出数值 SHA256 为 `c5c3762b8cccf0bc57cddfc2b8aec48e0dd2e72ec428df744d28c967bd1bcf9d`，输出 JSON SHA256 为 `76fbcc4431e89940da185571af46fe23553aa8685fba9e040dd0080b8a6d7066`，运行日志 SHA256 为 `a9e2a4b9130627090cdbefcf279a18cc881e2cad509be4951d3979b4c800609e`。完整机器证据位于 `samples/assets/yolovision-yolox-s-article-runtime-evidence.json`。
 
-- 公开 NuGet/GitHub package 的干净消费者运行。
-- 资产可以随仓库、NuGet 或 GitHub Release 公开再分发。
-- owner 已签署公开发布批准。
+项目也保留了较早的官方 `dog.jpg` 基线用于回归追溯：其输入 tensor SHA256 为 `ca4e22bc6d8ebfe70f5aefeae8957d9ad15eb8d3bf99b6a42e016436dcbf1528`，当时生成的 engine SHA256 为 `9b31390a786e8f520d4f3f78fbb0444eb7563c4bc8c2dddd5d7861c5c69524b1`，代表性预测为 `bicycle=0.954841`、`dog=0.913382`。engine 哈希依赖 GPU、TensorRT 与 builder 配置，不能作为跨机器固定值；文章配图和主结果以本次 CC0 输入实跑为准。
 
-本地清理只删除外层 E 盘下载目录，不要删除 CUDA、TensorRT 或 Codex 自身依赖：
+## 复查与边界
 
-```powershell
-Remove-Item -LiteralPath '..\downloads\yolox-apache' -Recurse -Force
-```
+复查时至少确认：
 
-再次运行 acquisition 脚本即可恢复全部外部资产。
+1. ONNX 输入输出名称、shape、objectness 与 80 类列语义和 decoder 合同一致。
+2. 预处理确实是 BGR、NCHW、raw `0..255`、fill 114 和左上 letterbox。
+3. bus 框覆盖车辆主体，七个 person 框与原图中行人位置对应，坐标没有整体偏移。
+4. `YoloVision Passed=True` 且退出码为 0；JSON、SVG、tensor 与日志哈希可以相互追溯。
 
-## 小结
-
-YOLOX 的关键不是多加一个 family 名字，而是把不同于 YOLOv8 的 raw grid/stride 输出和左上 letterbox 语义真正实现并验证。完成后，YoloVision 才能在同一套 C# API 中得到可复现、可诊断、可审计的官方 YOLOX-S 检测结果。
+本篇证明的是源码树 `real-model-runtime`：官方真实模型、真实图片、TensorRT enqueue、输出读取、YOLOX grid/stride 解码和结果绘制均已完成。它不证明本地或公开 package consumer、公开 NuGet/GitHub 包、post-publish、Owner 接受、Release 或模型公开再分发授权。CUDA、cuDNN、TensorRT、native bridge 和模型文件继续由使用者按版本安装或获取。

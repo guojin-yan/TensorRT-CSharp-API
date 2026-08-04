@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "recordKind": "sample-run-evidence-record",
+  "recordId": "yolovision-yolox-s-cc0-bus-win-x64-trt10.11-cuda12.9-20260804",
+  "sampleName": "YoloVision",
+  "family": "yolox",
+  "task": "det",
+  "proofClassification": "real-model-runtime",
+  "validatorState": "real-model-runtime",
+  "templateOnly": false,
+  "isSmokePassed": true,
+  "canPromoteRealModelRuntime": true,
+  "canPromotePackageConsumerRuntime": false,
+  "modelPath": "../models/YoloVision/Detection/yolox-s-megvii-v0.1.1rc0/yolox_s.onnx",
+  "modelSha256": "c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063",
+  "modelLicense": "Apache-2.0; official 0.1.1rc0 asset remains outside Git and public redistribution is not approved",
+  "labelsPath": "../downloads/yolox-apache/derived/coco.names",
+  "labelsSha256": "4d4aaea7bee6be2f675d9b53a9195ca36dfe6429f7479f29155da522a6c85930",
+  "labelsLicense": "COCO class names derived from the hash-pinned Apache-2.0 YOLOX source asset",
+  "inputAssetPath": "../downloads/article-assets/yolovision-detection-cc0-bus-station/liverpool-street-bus-station-1280.ppm",
+  "inputAssetSha256": "80715af66669147b049fec9386152bd45505f4e494a65079fdc55404d4589b8e",
+  "inputAssetLicense": "Wikimedia Commons Liverpool Street Bus station 2025; CC0 1.0",
+  "preprocessedInputTensorPath": "../downloads/article-assets/yolovision-yolox-s-cc0-bus/input-yolox-s-cc0-bus-1x3x640x640-bgr-top-left.fp32.bin",
+  "preprocessedInputTensorSha256": "d8480974ed95b20415348a8ab73f88718b87b9787c7624a889e955270b1abf74",
+  "preprocessedInputTensorElementCount": 1228800,
+  "sampleRunCommand": "dotnet run --project ./samples/YoloVision -- --model <models-root>/YoloVision/Detection/yolox-s-megvii-v0.1.1rc0/yolox_s.onnx --labels <asset-root>/coco.names --image <asset-root>/liverpool-street-bus-station-1280.ppm --preprocessed-output <evidence-root>/input.fp32.bin --input-shape 1x3x640x640 --tensor-rt-line 10 --family yolox --task det --layout boxes-first --has-objectness true --nms-mode class-aware --confidence 0.3 --iou-threshold 0.45 --top-k 100 --output-json <evidence-root>/output.json --visualization <evidence-root>/output.svg --visualization-background <asset-root>/liverpool-street-bus-station-1280.jpg",
+  "sampleRunLogPath": "external-evidence/yolox-s-cc0-bus-run.log",
+  "sampleRunLogSha256": "a9e2a4b9130627090cdbefcf279a18cc881e2cad509be4951d3979b4c800609e",
+  "stdoutSummary": "TensorRT 10.11 executed the official YOLOX-S 0.1.1rc0 ONNX with BGR top-left letterbox preprocessing, consumed output [1,8400,85] through the grid/stride decoder and class-aware NMS, returned one bus and seven persons, and ended with YoloVision Passed=True and exit code 0.",
+  "expectedEvidenceLines": [
+    "Input=images:[1, 3, 640, 640] Inputs=1 Output=output:[1, 8400, 85] Outputs=1",
+    "ImagePreprocessConfig Mode=letterbox Layout=NCHW Color=BGR",
+    "Profile Family=YoloX Task=Detection Layout=BoxesFirst Nms=True NmsMode=ClassAware",
+    "Postprocess Task=Detection;Detections=8",
+    "Detection Class=bus Score=0.956653",
+    "YoloVision Passed=True"
+  ],
+  "executedUtcDate": "2026-08-04",
+  "sourceBaseCommit": "abb7a4ffc0ec669fe38aa8160071b07bddd19408",
+  "host": {
+    "os": "Microsoft Windows 10.0.26200",
+    "rid": "win-x64",
+    "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+    "driverVersion": "576.02",
+    "cudaVersion": "12.9",
+    "tensorRtVersion": "10.11.0.33",
+    "bridgePath": "build-out/win-x64-trt10-cuda12-release/bin/Release/jyppxtrtbridge.dll"
+  },
+  "assets": {
+    "onnx": {
+      "fileName": "yolox_s.onnx",
+      "length": 35858002,
+      "sha256": "c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063"
+    },
+    "labels": {
+      "fileName": "coco.names",
+      "classCount": 80,
+      "sha256": "4d4aaea7bee6be2f675d9b53a9195ca36dfe6429f7479f29155da522a6c85930"
+    },
+    "image": {
+      "fileName": "liverpool-street-bus-station-1280.ppm",
+      "width": 1280,
+      "height": 961,
+      "sha256": "80715af66669147b049fec9386152bd45505f4e494a65079fdc55404d4589b8e"
+    },
+    "preprocessedInputTensor": {
+      "shape": [1, 3, 640, 640],
+      "elementCount": 1228800,
+      "sha256": "d8480974ed95b20415348a8ab73f88718b87b9787c7624a889e955270b1abf74"
+    },
+    "outputJson": {
+      "fileName": "yolox-s-cc0-bus-output.json",
+      "sha256": "76fbcc4431e89940da185571af46fe23553aa8685fba9e040dd0080b8a6d7066"
+    },
+    "visualization": {
+      "fileName": "yolox-s-cc0-bus-output.svg",
+      "sha256": "229aac8269b0399c6135369fd1d10b7de07cb5c62f605ca8acb6c6163f142b3f"
+    }
+  },
+  "modelContract": {
+    "input": {
+      "name": "images",
+      "shape": [1, 3, 640, 640],
+      "dataType": "float32",
+      "preprocess": "top-left letterbox to 640x640; BGR; NCHW; raw 0..255 float values; fill=114"
+    },
+    "output": {
+      "name": "output",
+      "shape": [1, 8400, 85],
+      "channels": "cx,cy,w,h,objectness,80 class scores before grid/stride transform",
+      "hasObjectness": true,
+      "applyNms": true,
+      "nmsMode": "class-aware"
+    }
+  },
+  "runtimeValidation": {
+    "passed": true,
+    "outputValueSha256": "c5c3762b8cccf0bc57cddfc2b8aec48e0dd2e72ec428df744d28c967bd1bcf9d",
+    "detectionCount": 8,
+    "topPrediction": "bus",
+    "topScore": 0.9566531,
+    "elapsedMilliseconds": 11.270784378051758,
+    "outputJsonSha256": "76fbcc4431e89940da185571af46fe23553aa8685fba9e040dd0080b8a6d7066"
+  },
+  "license": {
+    "sourceCodeSpdxId": "Apache-2.0",
+    "publicModelRedistributionOwnerApproval": false,
+    "publicInputImageRedistributionPermittedByLicense": true
+  },
+  "proofBoundary": {
+    "sourceTreeRealModelRuntime": true,
+    "packageConsumerRuntimeProof": false,
+    "publicPackageProof": false,
+    "postPublishProof": false,
+    "ownerReleaseAcceptance": false,
+    "releaseProof": false,
+    "performsPublish": false,
+    "uploadsAssets": false
+  }
+}
