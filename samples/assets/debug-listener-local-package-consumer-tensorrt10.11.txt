@@ -1,0 +1,12 @@
+PackageReferenceOnly=True
+ProjectReference=False
+SourceTreeBinary=False
+RuntimeEnvironment TRT=10.11.0 CUDA=12.9 TensorRtAvailable=True CudaAvailable=True
+DebugListenerRuntimeSummary
+  TensorRtLine=10 RuntimePackageKey=win-x64-trt10.11-cuda12.9-cudnn9.22
+  Callbacks=1 Failures=0 InFlight=0
+  Tensor=debug_output Shape=[1,4] MetadataCopied=True
+  NativePointerExposed=False DetachCount=1
+  RejectionCase=Passed EnqueueFailed=False Callbacks=1 Failures=1
+DebugListenerRealRuntime=Passed TensorRtLine=10 RuntimePackageKey=win-x64-trt10.11-cuda12.9-cudnn9.22 NativeVTableInstalled=True ProcessDebugTensorInvoked=True InvocationCount=1 FailureCount=0 InFlightCallbackCount=0 TensorName=debug_output Shape=[1,4] MetadataCopied=True BorrowedPointerExposed=False DetachCount=1 NegativeCallbackRejected=True NegativeEnqueueFailed=False NegativeInvocationCount=1 NegativeFailureCount=1 IsRealCallbackRuntimeProof=True
+DebugListenerPackageConsumer Passed=True Mode=DebugListenerRuntimeSmokeOnly

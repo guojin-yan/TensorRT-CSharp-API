@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-  [ValidateSet("GpuAllocator", "OutputAllocator")][string]$Scenario = "GpuAllocator",
+  [ValidateSet("GpuAllocator", "OutputAllocator", "DebugListener")][string]$Scenario = "GpuAllocator",
   [string]$RepositoryRoot,
   [string]$OutputRoot,
   [string]$ReportDirectory,
@@ -53,6 +53,26 @@ $scenarioConfig = switch ($Scenario) {
         "TensorRtOutputAllocatorRuntimeSnapshot",
         "SetOutputAllocator",
         "ClearOutputAllocator"
+      )
+    }
+  }
+  "DebugListener" {
+    [pscustomobject][ordered]@{
+      slug = "debug-listener"
+      sampleDirectory = "DebugListener.PackageConsumer"
+      projectFileName = "DebugListenerPackageConsumer.csproj"
+      projectTemplateFileName = "DebugListener.PackageConsumer.csproj.template"
+      runtimeSwitch = "--debug-listener-runtime-smoke-only"
+      runtimeMarkerPrefix = "DebugListenerRealRuntime=Passed "
+      finalMarker = "Passed=True Mode=DebugListenerRuntimeSmokeOnly"
+      publicSurfaceMarkers = @(
+        "TensorRtDebugListenerCallbackOwner",
+        "TensorRtDebugListenerCallbackRequest",
+        "TensorRtDebugListenerRuntimeSnapshot",
+        "TensorRtDebugTensorMetadataSnapshot",
+        "SetDebugListener",
+        "ClearDebugListener",
+        "SetTensorDebugState"
       )
     }
   }
@@ -530,6 +550,59 @@ switch ($Scenario) {
     }
     $resultSummary = @(
       "Callbacks=$invocationCount Allocations=$allocationCount Releases=$releaseCount LiveAllocations=$liveAllocationCount",
+      "NegativeEnqueueFailed=$negativeEnqueueFailed NegativeFailures=$negativeFailureCount"
+    )
+  }
+  "DebugListener" {
+    $nativeVTableInstalled = [bool]::Parse((Get-MarkerField -Line $marker -Name "NativeVTableInstalled"))
+    $processDebugTensorInvoked = [bool]::Parse((Get-MarkerField -Line $marker -Name "ProcessDebugTensorInvoked"))
+    $invocationCount = [uint64](Get-MarkerField -Line $marker -Name "InvocationCount")
+    $failureCount = [uint64](Get-MarkerField -Line $marker -Name "FailureCount")
+    $inFlightCallbackCount = [uint64](Get-MarkerField -Line $marker -Name "InFlightCallbackCount")
+    $tensorName = Get-MarkerField -Line $marker -Name "TensorName"
+    $shape = Get-MarkerField -Line $marker -Name "Shape"
+    $metadataCopied = [bool]::Parse((Get-MarkerField -Line $marker -Name "MetadataCopied"))
+    $borrowedPointerExposed = [bool]::Parse((Get-MarkerField -Line $marker -Name "BorrowedPointerExposed"))
+    $detachCount = [uint64](Get-MarkerField -Line $marker -Name "DetachCount")
+    $negativeCallbackRejected = [bool]::Parse((Get-MarkerField -Line $marker -Name "NegativeCallbackRejected"))
+    $negativeEnqueueFailed = [bool]::Parse((Get-MarkerField -Line $marker -Name "NegativeEnqueueFailed"))
+    $negativeInvocationCount = [uint64](Get-MarkerField -Line $marker -Name "NegativeInvocationCount")
+    $negativeFailureCount = [uint64](Get-MarkerField -Line $marker -Name "NegativeFailureCount")
+    $realCallbackRuntime = [bool]::Parse((Get-MarkerField -Line $marker -Name "IsRealCallbackRuntimeProof"))
+    if (-not $nativeVTableInstalled -or -not $processDebugTensorInvoked -or
+        $invocationCount -eq 0 -or $failureCount -ne 0 -or $inFlightCallbackCount -ne 0 -or
+        $tensorName -ne "debug_output" -or $shape -ne "[1,4]" -or -not $metadataCopied -or
+        $borrowedPointerExposed -or $detachCount -eq 0 -or -not $negativeCallbackRejected -or
+        $negativeInvocationCount -eq 0 -or $negativeFailureCount -eq 0 -or -not $realCallbackRuntime) {
+      throw "External debug listener marker did not satisfy callback, copied-metadata, pointer-free, detach, and rejection invariants: $marker"
+    }
+
+    $scenarioRuntime = [pscustomobject][ordered]@{
+      passed = $true
+      nativeVTableInstalled = $nativeVTableInstalled
+      processDebugTensorInvoked = $processDebugTensorInvoked
+      invocationCount = $invocationCount
+      failureCount = $failureCount
+      inFlightCallbackCount = $inFlightCallbackCount
+      tensorName = $tensorName
+      shape = @(1, 4)
+      metadataCopied = $metadataCopied
+      borrowedPointerExposed = $borrowedPointerExposed
+      detachCount = $detachCount
+      realCallbackRuntime = $realCallbackRuntime
+    }
+    $scenarioNegatives = [pscustomobject][ordered]@{
+      rejection = [pscustomobject][ordered]@{
+        passed = $true
+        callbackRejected = $negativeCallbackRejected
+        enqueueFailed = $negativeEnqueueFailed
+        invocationCount = $negativeInvocationCount
+        failureCount = $negativeFailureCount
+      }
+    }
+    $resultSummary = @(
+      "Callbacks=$invocationCount Failures=$failureCount InFlight=$inFlightCallbackCount DetachCount=$detachCount",
+      "Tensor=$tensorName Shape=$shape MetadataCopied=$metadataCopied PointerExposed=$borrowedPointerExposed",
       "NegativeEnqueueFailed=$negativeEnqueueFailed NegativeFailures=$negativeFailureCount"
     )
   }

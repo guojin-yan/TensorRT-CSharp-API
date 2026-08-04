@@ -143,6 +143,8 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Acquire-TorchVisionLrasppOff
 
 `eng/Test-OutputAllocatorLocalPackageConsumer.ps1` uses the same repository-external two-package harness for `samples/OutputAllocator.PackageConsumer`. `output-allocator-local-package-consumer-tensorrt10.11-evidence.json` records the package and restored bridge hashes, real `reallocateOutput` and `notifyShape` callbacks, paired CUDA allocation/release, zero live allocations after detach, and a rejection case that fails enqueue without allocating. Its identity network is created in code, so model acquisition, ONNX conversion, and image visualization are not applicable. This remains local-package evidence only.
 
+`eng/Test-DebugListenerLocalPackageConsumer.ps1` applies the same repository-external two-package isolation to `samples/DebugListener.PackageConsumer`. `debug-listener-local-package-consumer-tensorrt10.11-evidence.json` records package and restored bridge hashes, a real `processDebugTensor` callback, copied `[1,4]` metadata, pointer isolation, clean detach, and a controlled handler rejection. TensorRT 10.11 records the rejected callback but completes this identity enqueue, so the proof uses failure state and lifecycle invariants instead of requiring an enqueue exception. No external model or image is involved, and this is not public-package, Release, or post-publish proof.
+
 Recommended local names:
 
 | Sample | Local files |

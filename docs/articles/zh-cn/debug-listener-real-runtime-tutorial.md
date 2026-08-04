@@ -143,3 +143,5 @@ TensorRT 10.11 在本 identity enqueue 中会记录 callback 返回值为失败�
 本次证据只证明：在一台已安装 TensorRT 10.11.0 / CUDA 12.9 的 Windows 本机，源码树中的 `JYPPX.TensorRtSharp` 与 native bridge 完成了 DebugListener 的安装、真实 callback、copied metadata、失败记录和 detach 生命周期。
 
 它不证明 Linux、TensorRT 11、clean package consumer、公开包、GitHub Release 或 post-publish 环境。项目仍处于持续开发阶段，当前不创建 tag、Release、NuGet 或 GitHub Packages；CUDA、cuDNN、TensorRT、NVRTC 由用户自行安装。待所有演示、接口和跨平台验证完成后，再单独进行发布验收。
+
+需要验证“不引用源码项目、只消费 managed 与 bridge-only 本地包”的完整流程时，继续阅读 [用本地 NuGet 包验证 TensorRT DebugListener：从调试张量到真实回调](debug-listener-local-package-consumer-tutorial.md)。
