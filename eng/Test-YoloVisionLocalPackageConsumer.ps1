@@ -9,7 +9,7 @@ param(
   [string]$RuntimePackageKey = "win-x64-trt10.11-cuda12.9-cudnn9.22",
   [string]$BridgePackageId,
   [ValidateSet("8", "10", "11")][string]$TensorRtLine,
-  [ValidateSet("yolox-detection", "yolov8-detection", "yolov8-segmentation", "torchvision-lraspp-semantic", "yolov8-classification", "yolov8-pose", "yolov8-obb")][string]$Scenario = "yolox-detection",
+  [ValidateSet("yolox-detection", "yolov8-detection", "yolov10-detection", "yolov8-segmentation", "torchvision-lraspp-semantic", "yolov8-classification", "yolov8-pose", "yolov8-obb")][string]$Scenario = "yolox-detection",
   [string]$ModelPath,
   [string]$ModelWeightsPath,
   [string]$LabelsPath,
@@ -392,7 +392,8 @@ $isClassificationScenario = [string]::Equals($Scenario, "yolov8-classification",
 $isPoseScenario = [string]::Equals($Scenario, "yolov8-pose", [StringComparison]::Ordinal)
 $isObbScenario = [string]::Equals($Scenario, "yolov8-obb", [StringComparison]::Ordinal)
 $isOfficialDetectionScenario = [string]::Equals($Scenario, "yolov8-detection", [StringComparison]::Ordinal)
-$scenarioSlug = if ($isSegmentationScenario) { "yolov8n-seg" } elseif ($isSemanticScenario) { "lraspp-semantic" } elseif ($isClassificationScenario) { "yolov8n-cls" } elseif ($isPoseScenario) { "yolov8n-pose" } elseif ($isObbScenario) { "yolov8n-obb" } elseif ($isOfficialDetectionScenario) { "yolov8n-det" } else { "yolox" }
+$isYoloV10DetectionScenario = [string]::Equals($Scenario, "yolov10-detection", [StringComparison]::Ordinal)
+$scenarioSlug = if ($isSegmentationScenario) { "yolov8n-seg" } elseif ($isSemanticScenario) { "lraspp-semantic" } elseif ($isClassificationScenario) { "yolov8n-cls" } elseif ($isPoseScenario) { "yolov8n-pose" } elseif ($isObbScenario) { "yolov8n-obb" } elseif ($isOfficialDetectionScenario) { "yolov8n-det" } elseif ($isYoloV10DetectionScenario) { "yolov10n-det" } else { "yolox" }
 
 $resolvedRuntimeRoots = $null
 if ([string]::IsNullOrWhiteSpace($TensorRtRoot) -or
@@ -430,6 +431,9 @@ elseif ($isObbScenario) {
 elseif ($isOfficialDetectionScenario) {
   Join-Path $outerRoot "consumer-workspaces\yolovision-yolov8n-det-local-package-trt$TensorRtLine"
 }
+elseif ($isYoloV10DetectionScenario) {
+  Join-Path $outerRoot "consumer-workspaces\yv-yolov10-pkg-trt$TensorRtLine"
+}
 else {
   Join-Path $outerRoot "consumer-workspaces\yv-yolox-pkg-trt$TensorRtLine"
 }
@@ -455,6 +459,9 @@ elseif ($isObbScenario) {
 }
 elseif ($isOfficialDetectionScenario) {
   Join-Path $outerRoot "models\YoloVision\Detection\yolov8n-ultralytics-v8.3.0\yolov8n.onnx"
+}
+elseif ($isYoloV10DetectionScenario) {
+  Join-Path $outerRoot "models\YoloVision\Detection\yolov10n-thu-mig-v1.1\yolov10n.onnx"
 }
 else {
   Join-Path $outerRoot "downloads\yolox-apache\source\yolox_s.onnx"
@@ -489,6 +496,9 @@ elseif ($isObbScenario) {
 }
 elseif ($isOfficialDetectionScenario) {
   Join-Path $outerRoot "downloads\yolov8n-det-ultralytics-v8.3.0\derived\bus.ppm"
+}
+elseif ($isYoloV10DetectionScenario) {
+  Join-Path $outerRoot "downloads\article-assets\yolovision-detection-cc0-bus-station\liverpool-street-bus-station-1280.ppm"
 }
 else {
   Join-Path $outerRoot "downloads\yolox-apache\derived\dog.ppm"
@@ -709,6 +719,11 @@ elseif ($isOfficialDetectionScenario) {
   Assert-FileSha256 -Path $officialDetectionCocoYamlPath -ExpectedSha256 "bd6f98a2e18775c39a4d5214080c87fcb163d367c18a2fcf2609371bab00c0b8" -Description "YOLOv8n detection COCO YAML"
   Assert-FileSha256 -Path $officialDetectionPinnedIndependentReferencePath -ExpectedSha256 "eae23c95dafee3904fb8adc519e90045929491ccbea613a32ed69f2290e405c0" -Description "Pinned Ultralytics detection reference"
 }
+elseif ($isYoloV10DetectionScenario) {
+  Assert-FileSha256 -Path $ModelPath -ExpectedSha256 "7025ea1913f9a259cf8a8465ed608e10610d1bb376db2e0348b13e3bd286e0d3" -Description "YOLOv10n v1.1 ONNX"
+  Assert-FileSha256 -Path $LabelsPath -ExpectedSha256 "4d4aaea7bee6be2f675d9b53a9195ca36dfe6429f7479f29155da522a6c85930" -Description "COCO labels"
+  Assert-FileSha256 -Path $ImagePath -ExpectedSha256 "80715af66669147b049fec9386152bd45505f4e494a65079fdc55404d4589b8e" -Description "YOLOv10n CC0 bus-station PPM image"
+}
 
 $managedPackage = Find-Package -Directory $ManagedPackageDirectory -PackageId "JYPPX.TensorRT.CSharp.API" -ExpectedVersion $PackageVersion
 $yoloVisionPackage = Find-Package -Directory $YoloVisionPackageDirectory -PackageId "JYPPX.TensorRT.CSharp.API.YoloVision" -ExpectedVersion $PackageVersion
@@ -832,7 +847,7 @@ if ($nativeBridgePaths.Count -ne 1) {
   throw "Expected one copied native bridge in consumer output, found $($nativeBridgePaths.Count)."
 }
 
-$tensorFileName = if ($isSegmentationScenario) { "dog-yolov8n-seg.fp32.bin" } elseif ($isSemanticScenario) { "dog-lraspp-semantic.fp32.bin" } elseif ($isClassificationScenario) { "bus-yolov8n-cls.fp32.bin" } elseif ($isPoseScenario) { "bus-yolov8n-pose.fp32.bin" } elseif ($isObbScenario) { "boats-yolov8n-obb.fp32.bin" } elseif ($isOfficialDetectionScenario) { "bus-yolov8n-det.fp32.bin" } else { "dog-yolox-s.fp32.bin" }
+$tensorFileName = if ($isSegmentationScenario) { "dog-yolov8n-seg.fp32.bin" } elseif ($isSemanticScenario) { "dog-lraspp-semantic.fp32.bin" } elseif ($isClassificationScenario) { "bus-yolov8n-cls.fp32.bin" } elseif ($isPoseScenario) { "bus-yolov8n-pose.fp32.bin" } elseif ($isObbScenario) { "boats-yolov8n-obb.fp32.bin" } elseif ($isOfficialDetectionScenario) { "bus-yolov8n-det.fp32.bin" } elseif ($isYoloV10DetectionScenario) { "bus-yolov10n-det.fp32.bin" } else { "dog-yolox-s.fp32.bin" }
 $tensorPath = if ($isClassificationScenario) { $ReferenceInputTensorPath } else { Join-Path $runOutput $tensorFileName }
 $outputJsonPath = Join-Path $runOutput "yolovision-output.json"
 $visualizationPath = Join-Path $runOutput "yolovision-output.svg"
@@ -951,6 +966,27 @@ elseif ($isOfficialDetectionScenario) {
     "--reference-outputs", "output0:$ReferenceOutput0Path",
     "--reference-abs-tolerance", "0.02",
     "--reference-rel-tolerance", "0.05"
+  )
+}
+elseif ($isYoloV10DetectionScenario) {
+  $runArguments = @(
+    $consumerAssemblyPath,
+    "--model", $ModelPath,
+    "--labels", $LabelsPath,
+    "--image", $ImagePath,
+    "--preprocessed-output", $tensorPath,
+    "--output-json", $outputJsonPath,
+    "--visualization", $visualizationPath,
+    "--input-shape", "1x3x640x640",
+    "--input-name", "images",
+    "--output-name", "output0",
+    "--tensor-rt-line", $TensorRtLine,
+    "--family", "v10",
+    "--task", "det",
+    "--layout", "end2end",
+    "--class-count", "80",
+    "--confidence", "0.25",
+    "--top-k", "100"
   )
 }
 elseif ($isSemanticScenario) {
@@ -1191,6 +1227,19 @@ elseif ($isOfficialDetectionScenario) {
     throw "YOLOv8n detection package consumer predictions must be four persons and one bus in the canonical order. Actual='$($actualClasses -join ',')'."
   }
 }
+elseif ($isYoloV10DetectionScenario) {
+  $actualClasses = @($predictions | ForEach-Object { $_.className })
+  if ($predictions.Count -ne 6 -or
+      @($actualClasses | Where-Object { $_ -eq "bus" }).Count -ne 1 -or
+      @($actualClasses | Where-Object { $_ -eq "person" }).Count -ne 5 -or
+      @($actualClasses | Where-Object { $_ -notin @("bus", "person") }).Count -ne 0) {
+    throw "YOLOv10n detection package consumer predictions must contain one bus and five persons. Actual='$($actualClasses -join ',')'."
+  }
+  $topBus = @($predictions | Where-Object { $_.className -eq "bus" } | Sort-Object score -Descending | Select-Object -First 1)
+  if ($topBus.Count -ne 1 -or [double]$topBus[0].score -lt 0.94) {
+    throw "YOLOv10n detection package consumer must contain a bus score of at least 0.94."
+  }
+}
 $elapsedMilliseconds = 0.0
 if ($runResult.Stdout -match 'Execution .* ElapsedMs=(?<elapsed>[0-9.]+)') {
   $elapsedMilliseconds = [double]::Parse($Matches.elapsed, [Globalization.CultureInfo]::InvariantCulture)
@@ -1338,6 +1387,34 @@ elseif ($isOfficialDetectionScenario) {
   if ([string]$yoloOutputReport.input.preprocessedTensor.sha256 -ne "46a0278967f1230ef8db59b0b8311a3aba3dce45233f1ba68821418ae02a574d" -or
       [long]$yoloOutputReport.input.preprocessedTensor.elementCount -ne 1228800) {
     throw "YOLOv8n detection C# preprocessing tensor does not match the authoritative input tensor."
+  }
+}
+elseif ($isYoloV10DetectionScenario) {
+  $actualOutputs = @($yoloOutputReport.outputs)
+  if ($actualOutputs.Count -ne 1 -or [string]$actualOutputs[0].name -ne "output0" -or
+      (@($actualOutputs[0].shape) -join 'x') -ne "1x300x6") {
+    throw "YOLOv10n detection output report must contain output0:[1,300,6]."
+  }
+  if ([bool]$yoloOutputReport.referenceValidation.requested) {
+    throw "YOLOv10n local package evidence must not claim an independent raw tensor reference."
+  }
+  $detectionPredictions = @($yoloOutputReport.predictions | Where-Object { [string]$_.task -eq "det" })
+  $detectionClasses = @($detectionPredictions | ForEach-Object { [string]$_.className })
+  if ($detectionPredictions.Count -ne 6 -or
+      @($detectionClasses | Where-Object { $_ -eq "bus" }).Count -ne 1 -or
+      @($detectionClasses | Where-Object { $_ -eq "person" }).Count -ne 5 -or
+      @($detectionClasses | Where-Object { $_ -notin @("bus", "person") }).Count -ne 0) {
+    throw "YOLOv10n detection output report must contain one bus and five persons."
+  }
+  if ([bool]$yoloOutputReport.postprocess.applyNms -or
+      [string]$yoloOutputReport.postprocess.nmsMode -ne "None" -or
+      [string]$yoloOutputReport.postprocess.layout -ne "EndToEndNms" -or
+      [int]$yoloOutputReport.postprocess.classCount -ne 80) {
+    throw "YOLOv10n detection output report must declare 80 classes, no application-side NMS, and end-to-end layout."
+  }
+  if ([string]$yoloOutputReport.input.preprocessedTensor.sha256 -ne "050935ebf471ec32ab4327d9f5643f0fe1a203289088895205e732e448a8d225" -or
+      [long]$yoloOutputReport.input.preprocessedTensor.elementCount -ne 1228800) {
+    throw "YOLOv10n C# preprocessing tensor does not match the pinned CC0 input contract."
   }
 }
 elseif ($isSemanticScenario) {
@@ -2607,13 +2684,67 @@ if ($isOfficialDetectionScenario) {
   }
 }
 
-$reportRecordKind = if ($isSegmentationScenario) { "yolovision-yolov8n-seg-local-package-consumer-runtime" } elseif ($isSemanticScenario) { "yolovision-lraspp-semantic-local-package-consumer-runtime" } elseif ($isClassificationScenario) { "yolovision-yolov8n-cls-local-package-consumer-runtime" } elseif ($isPoseScenario) { "yolovision-yolov8n-pose-local-package-consumer-runtime" } elseif ($isObbScenario) { "yolovision-yolov8n-obb-local-package-consumer-runtime" } elseif ($isOfficialDetectionScenario) { "yolovision-yolov8n-det-local-package-consumer-runtime" } else { "yolovision-yolox-local-package-consumer-runtime" }
-$reportFileName = if ($isSegmentationScenario) { "yolov8n-seg-local-package-consumer-runtime.json" } elseif ($isSemanticScenario) { "lraspp-semantic-local-package-consumer-runtime.json" } elseif ($isClassificationScenario) { "yolov8n-cls-local-package-consumer-runtime.json" } elseif ($isPoseScenario) { "yolov8n-pose-local-package-consumer-runtime.json" } elseif ($isObbScenario) { "yolov8n-obb-local-package-consumer-runtime.json" } elseif ($isOfficialDetectionScenario) { "yolov8n-det-local-package-consumer-runtime.json" } else { "yolox-local-package-consumer-runtime.json" }
-$reportTitle = if ($isSegmentationScenario) { "YOLOv8n-seg Local Package Consumer Runtime" } elseif ($isSemanticScenario) { "TorchVision LRASPP Semantic Local Package Consumer Runtime" } elseif ($isClassificationScenario) { "YOLOv8n-cls Local Package Consumer Runtime" } elseif ($isPoseScenario) { "YOLOv8n-pose Local Package Consumer Runtime" } elseif ($isObbScenario) { "YOLOv8n-obb Local Package Consumer Runtime" } elseif ($isOfficialDetectionScenario) { "YOLOv8n Detection Local Package Consumer Runtime" } else { "YOLOX Local Package Consumer Runtime" }
+$yoloV10DetectionEvidence = $null
+if ($isYoloV10DetectionScenario) {
+  $yoloV10DetectionEvidence = [pscustomobject][ordered]@{
+    modelContract = [pscustomobject][ordered]@{
+      input = [pscustomobject][ordered]@{
+        name = "images"
+        shape = @(1, 3, 640, 640)
+        dataType = "float32"
+        preprocess = "center-letterbox-640x640; RGB; NCHW; scale=1/255; fill=114"
+      }
+      outputs = @(
+        [pscustomobject][ordered]@{
+          name = "output0"
+          shape = @(1, 300, 6)
+          role = "end-to-end-detection-rows"
+          columns = @("x1", "y1", "x2", "y2", "score", "classId")
+          classCount = 80
+          hasObjectness = $false
+          layout = "end-to-end"
+        }
+      )
+      postprocess = [pscustomobject][ordered]@{
+        confidenceThreshold = 0.25
+        topK = 100
+        applyNms = $false
+        nmsMode = "None"
+      }
+    }
+    preprocessingValidation = [pscustomobject][ordered]@{
+      tensorSha256 = $tensorSha256
+      authoritativeTensorSha256 = "050935ebf471ec32ab4327d9f5643f0fe1a203289088895205e732e448a8d225"
+      elementCount = 1228800
+      matchesAuthoritativeTensor = $true
+      passed = $true
+    }
+    outputContractValidation = [pscustomobject][ordered]@{
+      tensorName = "output0"
+      shape = @(1, 300, 6)
+      predictionCount = 6
+      busCount = 1
+      personCount = 5
+      topBusScore = [double]$topBus[0].score
+      passed = $true
+    }
+    rawTensorReferenceValidation = [pscustomobject][ordered]@{
+      requested = $false
+      completed = $false
+      passed = $false
+      sourceClassification = "not-available-for-this-package-consumer-run"
+      claimMade = $false
+    }
+  }
+}
+
+$reportRecordKind = if ($isSegmentationScenario) { "yolovision-yolov8n-seg-local-package-consumer-runtime" } elseif ($isSemanticScenario) { "yolovision-lraspp-semantic-local-package-consumer-runtime" } elseif ($isClassificationScenario) { "yolovision-yolov8n-cls-local-package-consumer-runtime" } elseif ($isPoseScenario) { "yolovision-yolov8n-pose-local-package-consumer-runtime" } elseif ($isObbScenario) { "yolovision-yolov8n-obb-local-package-consumer-runtime" } elseif ($isOfficialDetectionScenario) { "yolovision-yolov8n-det-local-package-consumer-runtime" } elseif ($isYoloV10DetectionScenario) { "yolovision-yolov10n-det-local-package-consumer-runtime" } else { "yolovision-yolox-local-package-consumer-runtime" }
+$reportFileName = if ($isSegmentationScenario) { "yolov8n-seg-local-package-consumer-runtime.json" } elseif ($isSemanticScenario) { "lraspp-semantic-local-package-consumer-runtime.json" } elseif ($isClassificationScenario) { "yolov8n-cls-local-package-consumer-runtime.json" } elseif ($isPoseScenario) { "yolov8n-pose-local-package-consumer-runtime.json" } elseif ($isObbScenario) { "yolov8n-obb-local-package-consumer-runtime.json" } elseif ($isOfficialDetectionScenario) { "yolov8n-det-local-package-consumer-runtime.json" } elseif ($isYoloV10DetectionScenario) { "yolov10n-det-local-package-consumer-runtime.json" } else { "yolox-local-package-consumer-runtime.json" }
+$reportTitle = if ($isSegmentationScenario) { "YOLOv8n-seg Local Package Consumer Runtime" } elseif ($isSemanticScenario) { "TorchVision LRASPP Semantic Local Package Consumer Runtime" } elseif ($isClassificationScenario) { "YOLOv8n-cls Local Package Consumer Runtime" } elseif ($isPoseScenario) { "YOLOv8n-pose Local Package Consumer Runtime" } elseif ($isObbScenario) { "YOLOv8n-obb Local Package Consumer Runtime" } elseif ($isOfficialDetectionScenario) { "YOLOv8n Detection Local Package Consumer Runtime" } elseif ($isYoloV10DetectionScenario) { "YOLOv10n Detection Local Package Consumer Runtime" } else { "YOLOX Local Package Consumer Runtime" }
 $sourceCommit = (& git -C $RepositoryRoot rev-parse HEAD).Trim()
 
 $report = [pscustomobject][ordered]@{
-  schemaVersion = if ($isOfficialDetectionScenario) { 8 } elseif ($isObbScenario) { 7 } elseif ($isPoseScenario) { 6 } elseif ($isClassificationScenario) { 5 } elseif ($isSemanticScenario) { 4 } elseif ($isSegmentationScenario) { 3 } else { 2 }
+  schemaVersion = if ($isYoloV10DetectionScenario) { 9 } elseif ($isOfficialDetectionScenario) { 8 } elseif ($isObbScenario) { 7 } elseif ($isPoseScenario) { 6 } elseif ($isClassificationScenario) { 5 } elseif ($isSemanticScenario) { 4 } elseif ($isSegmentationScenario) { 3 } else { 2 }
   recordKind = $reportRecordKind
   generatedAtUtc = [DateTime]::UtcNow.ToString("O")
   validationState = "passed-local-package-consumer-runtime"
@@ -2702,6 +2833,7 @@ $report = [pscustomobject][ordered]@{
   pose = $poseEvidence
   obb = $obbEvidence
   officialDetection = $officialDetectionEvidence
+  yoloV10Detection = $yoloV10DetectionEvidence
   host = [pscustomobject][ordered]@{
     os = [Runtime.InteropServices.RuntimeInformation]::OSDescription
     processArchitecture = [Runtime.InteropServices.RuntimeInformation]::ProcessArchitecture.ToString()
@@ -2760,11 +2892,14 @@ $markdown = @(
   $(if ($isObbScenario) { "- independent minimum rotated IoU: ``$($obbEvidence.independentPostprocessValidation.minimumObservedRotatedIoU)``" } else { $null }),
   $(if ($isOfficialDetectionScenario) { "- detection predictions / classes: ``5 / 4 person + 1 bus``" } else { $null }),
   $(if ($isOfficialDetectionScenario) { "- independent minimum box IoU: ``$($officialDetectionEvidence.independentPostprocessValidation.minimumObservedBoxIoU)``" } else { $null }),
+  $(if ($isYoloV10DetectionScenario) { "- detection predictions / classes: ``6 / 5 person + 1 bus``" } else { $null }),
+  $(if ($isYoloV10DetectionScenario) { "- output contract: ``output0:[1,300,6] / end-to-end / application NMS disabled``" } else { $null }),
+  $(if ($isYoloV10DetectionScenario) { "- independent raw tensor reference: ``not available; no comparison claim made``" } else { $null }),
   $(if ($isSegmentationScenario -or $isSemanticScenario -or $isClassificationScenario -or $isPoseScenario -or $isObbScenario -or $isOfficialDetectionScenario) { "- raw-reference negative exit: ``$($controlledReferenceResult.ExitCode)``" } else { $null }),
   $(if ($isSegmentationScenario) { "- mask-integrity negative exit: ``$($controlledMaskResult.ExitCode)``" } else { $null }),
   $(if ($isSemanticScenario) { "- class-index-integrity negative exit: ``$($controlledSemanticArtifactResult.ExitCode)``" } else { $null }),
   "",
-  $(if ($isSegmentationScenario) { "This record proves a clean local-feed PackageReference restore/build/run with the pinned YOLOv8n-seg assets, two raw tensor references, source-image mask artifacts, an independent PyTorch comparison, and two fail-closed negatives." } elseif ($isSemanticScenario) { "This record proves a clean local-feed PackageReference restore/build/run with the official torchvision LRASPP assets, one raw tensor reference, a full-resolution semantic class-index artifact, and two fail-closed negatives." } elseif ($isClassificationScenario) { "This record proves a clean local-feed PackageReference restore/build/run with the official YOLOv8n-cls assets, all 1,000 probabilities, the independent Top-5 order, and a fail-closed raw-reference negative." } elseif ($isPoseScenario) { "This record proves a clean local-feed PackageReference restore/build/run with the official YOLOv8n-pose assets, all 470,400 raw values, four 17-keypoint poses, an independent PyTorch comparison, and a fail-closed raw-reference negative." } elseif ($isObbScenario) { "This record proves a clean local-feed PackageReference restore/build/run with the official YOLOv8n-obb assets, all 430,080 raw values, 40 ship oriented boxes, an independent PyTorch rotated-IoU comparison, and a fail-closed raw-reference negative." } elseif ($isOfficialDetectionScenario) { "This record proves a clean local-feed PackageReference restore/build/run with the official YOLOv8n detection assets, all 705,600 raw values, four person detections and one bus, an independent PyTorch box-IoU comparison, and a fail-closed raw-reference negative." } else { "This record proves a clean local-feed PackageReference restore/build/run with the official YOLOX assets." }),
+  $(if ($isSegmentationScenario) { "This record proves a clean local-feed PackageReference restore/build/run with the pinned YOLOv8n-seg assets, two raw tensor references, source-image mask artifacts, an independent PyTorch comparison, and two fail-closed negatives." } elseif ($isSemanticScenario) { "This record proves a clean local-feed PackageReference restore/build/run with the official torchvision LRASPP assets, one raw tensor reference, a full-resolution semantic class-index artifact, and two fail-closed negatives." } elseif ($isClassificationScenario) { "This record proves a clean local-feed PackageReference restore/build/run with the official YOLOv8n-cls assets, all 1,000 probabilities, the independent Top-5 order, and a fail-closed raw-reference negative." } elseif ($isPoseScenario) { "This record proves a clean local-feed PackageReference restore/build/run with the official YOLOv8n-pose assets, all 470,400 raw values, four 17-keypoint poses, an independent PyTorch comparison, and a fail-closed raw-reference negative." } elseif ($isObbScenario) { "This record proves a clean local-feed PackageReference restore/build/run with the official YOLOv8n-obb assets, all 430,080 raw values, 40 ship oriented boxes, an independent PyTorch rotated-IoU comparison, and a fail-closed raw-reference negative." } elseif ($isOfficialDetectionScenario) { "This record proves a clean local-feed PackageReference restore/build/run with the official YOLOv8n detection assets, all 705,600 raw values, four person detections and one bus, an independent PyTorch box-IoU comparison, and a fail-closed raw-reference negative." } elseif ($isYoloV10DetectionScenario) { "This record proves a clean local-feed PackageReference restore/build/run with the official YOLOv10n v1.1 ONNX, a pinned CC0 image, the fixed end-to-end output contract, and one bus plus five persons. No independent raw tensor reference was available, so no raw comparison claim is made." } else { "This record proves a clean local-feed PackageReference restore/build/run with the official YOLOX assets." }),
   "It does not prove public-feed download, redistribution approval, post-publish verification, Owner release acceptance, or release closure."
 )
 $markdown | Set-Content -LiteralPath $markdownPath -Encoding utf8

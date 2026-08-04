@@ -126,7 +126,8 @@
         "docs/articles/zh-cn/yolovision-yolov10-end-to-end-output-guide.md",
         "docs/articles/zh-cn/yolovision-yolov10n-real-asset-tutorial.md"
       ],
-      "runtimeEvidence": "artifacts/interface-coverage/yolov10-official-runtime-proof-closure.json"
+      "runtimeEvidence": "artifacts/interface-coverage/yolov10-official-runtime-proof-closure.json",
+      "localPackageConsumerEvidence": "samples/assets/yolovision-yolov10n-local-package-consumer-runtime-evidence.json"
     },
     {
       "id": "yolovision-yolox-s-detection-0.1.1rc0",

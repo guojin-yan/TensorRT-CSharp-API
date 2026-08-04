@@ -46,7 +46,10 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Acquire-YoloV10OfficialAsset
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Acquire-YoloV10OfficialAssets.ps1 -Offline
 ```
 
-This acquisition is not runtime proof, package-consumer-runtime proof, or redistribution approval. AGPL-3.0-only assets require owner review before any public redistribution decision.
+This acquisition is not runtime proof or redistribution approval. The separate
+`yolovision-yolov10n-local-package-consumer-runtime-evidence.json` record proves an isolated three-package restore/build/TensorRT run
+with the fixed `[1,300,6]` contract, a CC0 result image, and a path-sanitized terminal screenshot. It does not claim an independent
+raw-tensor comparison, public-feed availability, release authorization, or `AGPL-3.0-only` model redistribution approval.
 
 ## Official YOLOv8n Detection acquisition
 

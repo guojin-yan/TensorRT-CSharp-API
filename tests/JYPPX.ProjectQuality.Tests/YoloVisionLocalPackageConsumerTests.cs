@@ -846,6 +846,92 @@ public sealed class YoloVisionLocalPackageConsumerTests
     }
 
     [Fact]
+    public void YoloV10PackageConsumerUsesTheFixedEndToEndContractAndRealArticleEvidence()
+    {
+        string runner = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "eng",
+            "Test-YoloVisionLocalPackageConsumer.ps1"));
+        string article = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "docs",
+            "articles",
+            "zh-cn",
+            "yolovision-yolov10n-real-asset-tutorial.md"));
+        string evidencePath = Path.Combine(
+            RepositoryPaths.Root,
+            "samples",
+            "assets",
+            "yolovision-yolov10n-local-package-consumer-runtime-evidence.json");
+        string evidenceText = File.ReadAllText(evidencePath);
+        using JsonDocument document = JsonDocument.Parse(evidenceText);
+        JsonElement root = document.RootElement;
+
+        foreach (string required in new[]
+        {
+            "yolov10-detection",
+            "--family", "v10", "--layout", "end2end",
+            "1x300x6", "one bus and five persons",
+            "050935ebf471ec32ab4327d9f5643f0fe1a203289088895205e732e448a8d225",
+            "not-available-for-this-package-consumer-run",
+            "vendorRuntimePackageEntryCount"
+        })
+        {
+            Assert.Contains(required, runner, StringComparison.Ordinal);
+        }
+
+        foreach (string required in new[]
+        {
+            "## 1. 项目、功能与依赖库",
+            "## 3. 获取模型",
+            "## 4. 从 checkpoint 转换 ONNX",
+            "model.export(format=\"onnx\"",
+            "models/YoloVision/Detection/yolov10n-thu-mig-v1.1/yolov10n.onnx",
+            "## 6. 创建隔离的三包消费者",
+            "## 7. 图片预处理与输出解码",
+            "## 9. 实际运行结果",
+            "yolovision-yolov10n-local-package-consumer-annotated-cc0.jpg",
+            "yolovision-yolov10n-local-package-consumer-terminal.png",
+            "bus | 1 | `0.950415`",
+            "本次没有创建 tag、Release，也没有发布任何包"
+        })
+        {
+            Assert.Contains(required, article, StringComparison.Ordinal);
+        }
+
+        Assert.DoesNotMatch(@"[A-Za-z]:\\", article);
+        Assert.DoesNotContain("GitSpace", article, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("yolovision-yolov10n-local-package-consumer-runtime-evidence", root.GetProperty("recordKind").GetString());
+        Assert.Equal("local-package-consumer-runtime", root.GetProperty("proofClassification").GetString());
+        Assert.Equal("yolov10", root.GetProperty("family").GetString());
+        Assert.Equal(3, root.GetProperty("packageConsumer").GetProperty("packageCount").GetInt32());
+        Assert.Equal(0, root.GetProperty("packageConsumer").GetProperty("projectReferenceCount").GetInt32());
+        Assert.Equal(0, root.GetProperty("packageConsumer").GetProperty("vendorRuntimePackageEntryCount").GetInt32());
+        Assert.True(root.GetProperty("packageConsumer").GetProperty("restoredPackageHashesMatchSelected").GetBoolean());
+        Assert.Equal("7025ea1913f9a259cf8a8465ed608e10610d1bb376db2e0348b13e3bd286e0d3", root.GetProperty("assets").GetProperty("model").GetProperty("sha256").GetString());
+        Assert.Equal("050935ebf471ec32ab4327d9f5643f0fe1a203289088895205e732e448a8d225", root.GetProperty("assets").GetProperty("preprocessedInputTensor").GetProperty("sha256").GetString());
+        Assert.Equal(6, root.GetProperty("runtime").GetProperty("predictionCount").GetInt32());
+        Assert.Equal(1, root.GetProperty("runtime").GetProperty("classHistogram").GetProperty("bus").GetInt32());
+        Assert.Equal(5, root.GetProperty("runtime").GetProperty("classHistogram").GetProperty("person").GetInt32());
+        Assert.False(root.GetProperty("validation").GetProperty("independentRawTensorReferenceExecuted").GetBoolean());
+        Assert.True(root.GetProperty("proofBoundary").GetProperty("localPackageConsumerRuntimeEvidence").GetBoolean());
+        Assert.False(root.GetProperty("proofBoundary").GetProperty("publicPackageProof").GetBoolean());
+        Assert.False(root.GetProperty("proofBoundary").GetProperty("performsPublish").GetBoolean());
+        Assert.DoesNotMatch(@"[A-Za-z]:\\", evidenceText);
+
+        foreach (JsonProperty artifact in root.GetProperty("artifacts").EnumerateObject())
+        {
+            JsonElement value = artifact.Value;
+            string relativePath = value.GetProperty("path").GetString()!;
+            string path = Path.Combine(RepositoryPaths.Root, relativePath.Replace('/', Path.DirectorySeparatorChar));
+            Assert.True(File.Exists(path), $"Missing YOLOv10 package-consumer artifact: {relativePath}");
+            Assert.Equal(value.GetProperty("length").GetInt64(), new FileInfo(path).Length);
+            string actualHash = Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(File.ReadAllBytes(path))).ToLowerInvariant();
+            Assert.Equal(value.GetProperty("sha256").GetString(), actualHash);
+        }
+    }
+
+    [Fact]
     public void DetectionConsumerUsesOnlySelectedLocalPackagesAndRequiresIndependentBoxEvidence()
     {
         string runner = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "eng", "Test-YoloVisionLocalPackageConsumer.ps1"));

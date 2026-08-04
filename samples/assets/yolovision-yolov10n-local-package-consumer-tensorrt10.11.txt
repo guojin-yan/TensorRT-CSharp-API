@@ -1,0 +1,36 @@
+YOLOv10n Local Package Consumer - TensorRT 10.11
+Executed: 2026-08-05 Asia/Shanghai
+Source commit: ae959035b53816953bb5b260bf797c4ae756c18e
+
+Consumer: samples/YoloVision.PackageConsumer
+Target framework: net8.0
+ProjectReference count: 0
+Direct assembly reference count: 0
+Package source: isolated local file feeds
+Restore exit code: 0
+Build exit code: 0
+Runtime exit code: 0
+Restored package hashes match selected packages: True
+
+YoloVisionPackageConsumer ProjectReference=False CoreAssembly=YoloVision
+YoloVisionPackageConsumer BridgeTensorRt=10.11.0 BridgeCuda=12.9
+Profile Family=YoloV10 Task=Detection Layout=EndToEndNms Nms=False NmsMode=None
+ImagePreprocessConfig Mode=letterbox Layout=NCHW Color=RGB Target=640x640 Resized=640x480 Pad=0,80 Scale=0.5,0.5 Fill=114
+Input=images:[1, 3, 640, 640] Inputs=1 Output=output0:[1, 300, 6] Outputs=1
+Execution profile=0 bound=2 ready=True ElapsedMs=5.596
+Postprocess Task=Detection;Detections=6
+Detection Class=bus Score=0.950415 BoxCxCyWh=380.211,277.344,197.946,151.295
+Detection Class=person Score=0.804006 BoxCxCyWh=567.669,328.471,32.224,69.401
+Detection Class=person Score=0.775956 BoxCxCyWh=606.245,324.769,28.508,78.116
+Detection Class=person Score=0.644469 BoxCxCyWh=513.992,327.489,19.564,63.844
+Detection Class=person Score=0.614031 BoxCxCyWh=500.090,325.417,15.668,56.244
+Detection Class=person Score=0.596880 BoxCxCyWh=535.371,324.493,20.083,60.635
+YoloVision Passed=True
+
+Output contract validation: Passed
+Preprocessed tensor SHA256: 050935ebf471ec32ab4327d9f5643f0fe1a203289088895205e732e448a8d225
+Independent raw tensor reference: not available; no comparison claim made
+TensorRT, CUDA, and cuDNN are host-installed external dependencies: True
+Package contains TensorRT, CUDA, or cuDNN vendor runtime files: False
+Public package proof: False
+Performs publish: False

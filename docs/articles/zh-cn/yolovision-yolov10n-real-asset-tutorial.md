@@ -1,26 +1,63 @@
-# YoloVision YOLOv10n 实机检测：从官方 ONNX 到 TensorRT 结果
+# 使用 TensorRtSharp4.0 在 C# 中运行 YOLOv10n：从官方模型到本地三包实机验证
 
-本文以官方 YOLOv10n v1.1 ONNX 为例，完整演示 `samples/YoloVision` 如何读取 end-to-end 检测输出、构建 TensorRT runtime、执行真实图片推理并生成原图叠加结果。示例使用 `JYPPX.TensorRtSharp` 的 TensorRT 托管封装和 `JYPPX.CudaSharp` 的 CUDA 资源管理能力；CUDA、cuDNN、TensorRT 和 native bridge 均由使用者本机安装，不随项目发布。
+本文以 THU-MIG 官方 YOLOv10n v1.1 ONNX 为例，完整演示模型获取、ONNX 转换与合同确认、图片预处理、TensorRT 推理、end-to-end 输出解码、原图结果绘制，以及 managed、YoloVision、bridge-only 三个本地候选包的隔离消费验证。
 
-本文只提交代码、哈希和脱敏截图。模型、输入图片、预处理 tensor、engine 和原始日志保存在仓库外层工作目录，后续可迁移到独立 model zoo。
+本次验证使用真实模型、CC0 图片和 TensorRT 10.11 实机执行。CUDA、cuDNN、TensorRT 由使用者按版本安装，项目包不携带 NVIDIA 厂商运行库；ONNX、engine 和预处理 tensor 暂存在仓库外层 `models` 或工作目录，不上传 GitHub。
 
-## 本文使用的项目与库
+## 1. 项目、功能与依赖库
 
-本案例涉及三个项目层次：
+TensorRtSharp4.0 的顶层托管命名空间是 `JYPPX.TensorRtSharp` 和 `JYPPX.CudaSharp`。本案例使用四层能力：
 
-| 层次 | 项目 | 作用 |
+| 层次 | 项目或包 | 本案例职责 |
 | --- | --- | --- |
-| 托管 TensorRT | `src/JYPPX.TensorRtSharp` | 解析 ONNX、创建 execution context、绑定输入输出并读取 TensorRT 结果 |
-| 托管 CUDA | `src/JYPPX.CudaSharp` | 提供 CUDA context、stream 和 device memory 的安全封装 |
-| 用户示例 | `samples/YoloVision` | 完成图片预处理、end-to-end 解码、JSON 报告和 SVG 可视化 |
+| TensorRT 托管接口 | `JYPPX.TensorRtSharp` | 解析 ONNX、创建 engine/context、绑定 tensor、enqueue 并读取输出 |
+| CUDA 托管接口 | `JYPPX.CudaSharp` | 管理 CUDA context、stream 和 device memory 生命周期 |
+| 视觉任务接口 | `JYPPX.TensorRT.CSharp.API.YoloVision` | 图片预处理、模型配置、检测解码、JSON 报告和 SVG 可视化 |
+| 本地包消费者 | `samples/YoloVision.PackageConsumer` | 只通过三个 `PackageReference` 调用 YoloVision，不引用源码项目 |
 
-YOLOv10 与 YOLOv8 raw head 的关键区别是输出语义：本例输出为 `[1,300,6]`，每行依次是 `x1,y1,x2,y2,score,classId`，模型已经完成候选筛选，因此应用端不能再次执行 NMS。
+YOLOv10n v1.1 的关键点不是模型文件名，而是输出合同。本例的 `output0` 为 `[1,300,6]`，每行依次是：
 
-## 模型获取与许可证
+```text
+x1, y1, x2, y2, score, classId
+```
 
-模型来源是 [THU-MIG/yolov10 v1.1 release](https://github.com/THU-MIG/yolov10/releases/download/v1.1/yolov10n.onnx)，上游 revision 为 `799ff3be47d21173bcf29b351820d4b8e955e0fe`，许可证为 `AGPL-3.0-only`。固定 ONNX 文件长度为 `9386466` bytes，SHA256 为 `7025ea1913f9a259cf8a8465ed608e10610d1bb376db2e0348b13e3bd286e0d3`。
+模型图内已经完成候选筛选和 NMS，因此应用端必须使用 `EndToEndNms` 布局，并保持 `ApplyNms=false`、`NmsMode=None`。如果实际 ONNX 输出不是六列合同，就不能套用本文配置。
 
-项目提供 `eng/Acquire-YoloV10OfficialAssets.ps1` 和 `samples/assets/yolovision-yolov10-official-assets.json` 记录来源、版本、许可证和哈希。获取脚本的输出根目录应位于仓库外层：
+## 2. 模型与输入图片
+
+### 2.1 官方模型
+
+模型来自 [THU-MIG YOLOv10 v1.1 Release](https://github.com/THU-MIG/yolov10/releases/download/v1.1/yolov10n.onnx)：
+
+| 项目 | 固定值 |
+| --- | --- |
+| 上游 revision | `799ff3be47d21173bcf29b351820d4b8e955e0fe` |
+| 许可证 | `AGPL-3.0-only` |
+| 文件 | `yolov10n.onnx` |
+| 长度 | `9,386,466` bytes |
+| SHA256 | `7025ea1913f9a259cf8a8465ed608e10610d1bb376db2e0348b13e3bd286e0d3` |
+
+项目不再把模型或 NVIDIA 运行库打入 GitHub/Release 包。模型暂存位置为：
+
+```text
+models/YoloVision/Detection/yolov10n-thu-mig-v1.1/yolov10n.onnx
+```
+
+这里的 `models` 是仓库外层模型工作区，后续可迁移到独立 Model Zoo。机器可读来源和许可证记录位于 `samples/assets/yolovision-yolov10-official-assets.json`。
+
+### 2.2 CC0 输入图片
+
+实机输入为 Wikimedia Commons 的 `Liverpool Street Bus station 2025`，许可证为 [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/)。运行使用 1280×961 PPM，SHA256 为：
+
+```text
+80715af66669147b049fec9386152bd45505f4e494a65079fdc55404d4589b8e
+```
+
+模型因 AGPL 再分发尚未获得项目所有者批准而不提交；结果图使用可公开再分发的 CC0 输入。
+
+## 3. 获取模型
+
+仓库提供哈希固定的获取脚本。输出目录应位于仓库外层：
 
 ```powershell
 pwsh -NoProfile -ExecutionPolicy Bypass `
@@ -28,41 +65,99 @@ pwsh -NoProfile -ExecutionPolicy Bypass `
   -OutputRoot <downloads-root>/yolov10-agpl
 ```
 
-AGPL 资产只用于本地实机验证；当前 `publicRedistributionOwnerApproval=false`，不会上传到 GitHub、NuGet 或 Release。
+脚本会下载官方 ONNX 与许可证、校验长度和 SHA256，并生成本地获取报告。将校验通过的 ONNX 暂存到上一节的 `models/YoloVision/Detection/...` 目录即可；不要把模型复制进 Git 仓库。
 
-## ONNX 转换与暂存
+## 4. 从 checkpoint 转换 ONNX
 
-本次实机运行直接使用官方已经发布的 ONNX，不重复转换，因此模型暂存位置为：
+本文实机数据使用官方已发布 ONNX，因此复现本次哈希不需要再次转换。如果业务模型来自 checkpoint，应固定官方源码 revision、Python、PyTorch、导出器版本、opset 和输入尺寸，再执行上游导出：
 
-```text
-<models-root>/YoloVision/Detection/yolov10n-thu-mig-v1.1/yolov10n.onnx
+```powershell
+git clone https://github.com/THU-MIG/yolov10.git <work-root>/yolov10
+git -C <work-root>/yolov10 checkout 799ff3be47d21173bcf29b351820d4b8e955e0fe
+python -m pip install -r <work-root>/yolov10/requirements.txt
 ```
 
-仓库相对模型记录写作 `models/YoloVision/Detection/yolov10n-thu-mig-v1.1/yolov10n.onnx`；实际模型文件仍位于仓库外层的 models 工作区。
-
-如果使用者从 checkpoint 重新导出，必须在导出日志中记录 Python、PyTorch、YOLOv10/Ultralytics 版本、opset、输入尺寸和输出 shape。上游导出调用示例为：
-
 ```python
+from ultralytics import YOLOv10
+
+model = YOLOv10("<model-root>/yolov10n.pt")
 model.export(format="onnx", imgsz=640, opset=13, simplify=True)
 ```
 
-这条命令是 checkpoint 到 ONNX 的转换方式，不保证生成图与官方 release 完全相同。转换完成后先用 ONNX parser 检查：
+转换后必须先检查实际 ONNX：
 
 ```text
 images:[1,3,640,640]
 output0:[1,300,6]
 ```
 
-只有确认六列 end-to-end 合同后，才可以选择 `--layout end2end`。如果输出是 `[1,84,8400]` 或 `[1,8400,84]`，应改用对应的 raw head metadata，而不是强行套用本例 decoder。
+重新导出的文件不保证与 v1.1 Release 文件同哈希，也可能导出 raw head。若输出为 `[1,84,8400]`、`[1,8400,84]` 或其他布局，应根据真实 tensor metadata 选择 decoder，不能仅凭“YOLOv10”名称推断。
 
-## 创建本地包消费项目
+## 5. 准备本机运行环境
 
-本篇验证目标是源码树的真实模型运行，不把本地 `ProjectReference` 或临时 `.nupkg` 当作公开包证明，因此不会在本节伪造“包已发布”的结果。项目仍提供 `YoloVision.PackageConsumer` 和 `eng/Test-YoloVisionManagedPackageDryRun.ps1` 作为后续包消费验证入口；由于当前尚未获得发布授权，它们只能验证包布局和托管 API 兼容性，不能替代本篇 TensorRT 实机运行。
+本案例验证组合为 TensorRT `10.11.0`、CUDA Toolkit `12.9`、Windows x64 和 .NET 8。cuDNN、TensorRT、CUDA 由用户安装；bridge-only 包只包含本项目编译的 `jyppxtrtbridge.dll`。
 
-## 编写程序入口
+构建候选包时使用：
 
-`samples/YoloVision/Program.cs` 没有绕过托管 API 调用外部推理程序。核心路径可以归纳为下面几步；代码中的
-`profile` 保存 family、task、输入 shape、预处理和后处理合同：
+```powershell
+dotnet pack ./pack/JYPPX.TensorRT.CSharp.API/JYPPX.TensorRT.CSharp.API.csproj `
+  -c Release -o ./artifacts/managed -p:JYPPXPackageVersion=4.0.0
+
+dotnet pack ./samples/YoloVision/YoloVision.csproj `
+  -c Release -o ./artifacts/yolovision-nupkg -p:JYPPXPackageVersion=4.0.0
+
+pwsh -NoProfile -ExecutionPolicy Bypass `
+  -File ./eng/Invoke-LocalSplitRuntimePackage.ps1 `
+  -SourceRuntimeKey win-x64-trt10.11-cuda12.9-cudnn9.22 `
+  -Version 4.0.0 -SplitPackageRole bridge `
+  -SkipManagedPack -SkipBaseRuntimeBuild -SkipConsumerValidation
+```
+
+这些命令只生成本地候选包，不执行 `push`、不创建 tag、Release 或 GitHub Package。
+
+## 6. 创建隔离的三包消费者
+
+`samples/YoloVision.PackageConsumer` 的项目文件模板只引用三个包：
+
+```xml
+<ItemGroup>
+  <PackageReference Include="JYPPX.TensorRT.CSharp.API" Version="4.0.0" />
+  <PackageReference Include="JYPPX.TensorRT.CSharp.API.YoloVision" Version="4.0.0" />
+  <PackageReference
+    Include="JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge"
+    Version="4.0.0" />
+</ItemGroup>
+```
+
+验证脚本会为每个包创建只含一个 `.nupkg` 的隔离文件源，生成 `<clear />` NuGet 配置，再在仓库外工作目录执行 restore/build/run。它还会检查：
+
+1. restore graph 中 `ProjectReference` 数量为 0。
+2. 恢复到缓存的三个 `.nupkg` 与选中包 SHA256 一致。
+3. bridge 由 NuGet 复制到输出目录，且未设置 `JYPPX_NATIVE_BRIDGE_PATH` 绕过包布局。
+4. 三个包内 NVIDIA 厂商运行库数量为 0，bridge native 文件数量为 1。
+5. restore、build、runtime 退出码均为 0。
+
+## 7. 图片预处理与输出解码
+
+输入预处理合同如下：
+
+| 项目 | 值 |
+| --- | --- |
+| 原图 | `1280×961` |
+| 目标尺寸 | `640×640` |
+| resize | `640×480` |
+| padding | `x=0, y=80`，居中 |
+| color/layout | `RGB / NCHW` |
+| scale | `1/255` |
+| fill | `114` |
+
+生成的 float32 tensor 共 `1,228,800` 个值、`4,915,200` bytes，SHA256 为：
+
+```text
+050935ebf471ec32ab4327d9f5643f0fe1a203289088895205e732e448a8d225
+```
+
+程序入口通过 `YoloImagePreprocessor` 生成 tensor，随后调用 TensorRT 托管接口并交给 end-to-end decoder：
 
 ```csharp
 YoloImagePreprocessResult imagePreprocess = YoloImagePreprocessor.Preprocess(
@@ -71,117 +166,92 @@ YoloImagePreprocessResult imagePreprocess = YoloImagePreprocessor.Preprocess(
     profile.InputShape,
     profile.Preprocess);
 
-string[] effectiveArgs = AddOrReplaceArgument(
-    args,
-    "--input-data",
-    imagePreprocess.TensorPath);
-OnnxSampleOptions options = OnnxSampleOptions.FromArgs(effectiveArgs, "1x3x640x640");
-
 OnnxSampleMultiOutputResult runtime =
     TensorRtOnnxSample.RunSingleFloatInputOutputs(options);
-OnnxSampleOutputTensor output0 = runtime.PrimaryOutput;
-
-YoloRuntimeOutputSet runtimeOutputs = new(runtime.Outputs.Select(output =>
-    new YoloRuntimeOutputTensor(
-        output.Name,
-        YoloOutputTensorRole.Detection,
-        output.Values,
-        output.Shape.Values)));
 
 YoloVisionResult result = YoloSampleRunner.DecodeOutput(
-    output0.Values,
-    output0.Shape.Values,
+    runtime.PrimaryOutput.Values,
+    runtime.PrimaryOutput.Shape.Values,
     profile);
-
-YoloVisionOutputReport.Write(
-    outputJsonPath,
-    options,
-    runtime,
-    runtimeOutputs,
-    profile,
-    result,
-    labels,
-    labelsPath,
-    imagePreprocess);
-
-YoloVisionVisualizationWriter.Write(
-    visualizationPath,
-    result,
-    labels,
-    profile,
-    options.InputShape.Values,
-    imagePreprocess,
-    null,
-    visualizationBackgroundPath);
 ```
 
-`YoloPostprocessOptions` 在 `EndToEndNms` layout 下强制 `HasObjectness=false`、`ApplyNms=false` 和
-`NmsMode=None`。随后 `YoloDetectionDecoder.DecodeEndToEnd` 严格检查 `[1,N,6]`、value count、有限坐标、
-`x2 > x1`、`y2 > y1`、`score` 范围、整数 class id 和 class count，最后才按置信度和 `top-k` 返回检测结果。
-因此这里的“无第二次 NMS”是代码合同，不是文章里的使用建议。
+`YoloDetectionDecoder.DecodeEndToEnd` 会检查 rank、六列长度、有限坐标、`x2>x1`、`y2>y1`、score 范围、整数 class id 和 class count。检测框再按 `scale=0.5`、`padY=80` 反变换回原图坐标。
 
-运行入口需要显式写出模型、标签、输入图片、输入 shape 和输出布局：
+## 8. 执行本地包实机验证
+
+准备好本机 TensorRT、CUDA、cuDNN 根目录后执行：
 
 ```powershell
-dotnet run --project ./samples/YoloVision -- `
-  --model <models-root>/YoloVision/Detection/yolov10n-thu-mig-v1.1/yolov10n.onnx `
-  --labels <asset-root>/coco.names `
-  --image <asset-root>/liverpool-street-bus-station-1280.ppm `
-  --preprocessed-output <evidence-root>/input-yolov10n.fp32.bin `
-  --input-shape 1x3x640x640 `
-  --tensor-rt-line 10 `
-  --family v10 `
-  --task det `
-  --layout end2end `
-  --class-count 80 `
-  --confidence 0.25 `
-  --top-k 100 `
-  --output-json <evidence-root>/yolov10n-output.json `
-  --visualization <evidence-root>/yolov10n-output.svg `
-  --visualization-background <asset-root>/liverpool-street-bus-station-1280.jpg
+pwsh -NoProfile -ExecutionPolicy Bypass `
+  -File ./eng/Test-YoloVisionLocalPackageConsumer.ps1 `
+  -Scenario yolov10-detection `
+  -RuntimePackageKey win-x64-trt10.11-cuda12.9-cudnn9.22 `
+  -TensorRtRoot <TensorRT-root> `
+  -CudaRoot <CUDA-root> `
+  -CudnnRoot <cuDNN-root>
 ```
 
-`--image` 负责把 PPM 转为 RGB、NCHW、640×640 centered letterbox 的 float32 tensor；`--visualization-background` 让程序把模型坐标反变换回 1280×961 原图，并在原图上绘制检测框。
+脚本内部传给 YoloVision 的核心参数为：
 
-## 编译并运行
-
-先准备用户安装的 TensorRT 10.11、CUDA 12.9 和本项目 native bridge。Windows 环境变量只用于 loader 探测：
-
-```powershell
-$env:JYPPX_NATIVE_BRIDGE_PATH = <bridge-root>/jyppxtrtbridge.dll
-$env:JYPPX_TENSORRT_ROOT = <TensorRT-root>
-$env:JYPPX_ENABLE_DEVELOPMENT_PROBING = "true"
-dotnet build ./TensorRtSharp.sln -c Release
+```text
+--input-shape 1x3x640x640
+--input-name images
+--output-name output0
+--family v10
+--task det
+--layout end2end
+--class-count 80
+--confidence 0.25
+--top-k 100
 ```
 
-本次真实运行使用 RTX 3060 Laptop GPU、驱动 `576.02`、TensorRT `10.11.0.33`、CUDA `12.9`。机器相关 engine 不提交仓库；运行结束只保留 `sample-run-evidence`、图片和脱敏日志摘要。
+## 9. 实际运行结果
 
-## 已验证结果
+本次运行环境为 RTX 3060 Laptop GPU、驱动 `576.02`、TensorRT `10.11.0`、CUDA Toolkit `12.9`、.NET SDK `10.0.301`。结果不是模板或 dry-run：真实执行了图片预处理、TensorRT enqueue、输出读取和托管解码。
 
-下面两张图都来自同一次真实 TensorRT 执行。第一张是程序生成 SVG 渲染后的原图叠加结果，第二张是同一份 stdout 的脱敏终端窗口渲染。终端截图来自本次真实运行的 stdout，不是指标卡片或手工填写的示意图。
+![YOLOv10n 本地三包消费原图检测结果](../../images/yolovision-yolov10n-local-package-consumer-annotated-cc0.jpg)
 
-![YOLOv10n 原图叠加检测结果](../../images/yolovision-yolov10n-annotated-cc0.webp)
+上图由同次 `yolovision-output.json` 中的 6 个检测框和 letterbox 参数反投影到 CC0 原图生成。编号与顶部图例对应，避免右侧密集 person 框的文字互相遮挡。
 
-![YOLOv10n TensorRT 实际运行窗口](../../images/yolovision-yolov10n-runtime-terminal.png)
+![YOLOv10n 本地三包消费实际终端窗口](../../images/yolovision-yolov10n-local-package-consumer-terminal.png)
 
-输入图片是 Wikimedia Commons 的 `Liverpool Street Bus station 2025`，许可证为 [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/)。来源、原图 SHA256、两张结果图 SHA256 和同次运行关系记录在 `samples/assets/yolovision-yolov10n-article-visual-assets.json`。
-
-本次运行结果：
+实际结果为：
 
 | 类别 | 数量 | 最高置信度 |
 | --- | ---: | ---: |
-| bus | 1 | 0.950402 |
-| person | 5 | 0.804005 |
+| bus | 1 | `0.950415` |
+| person | 5 | `0.804006` |
 
-机器证据还记录了 `images:[1,3,640,640] -> output0:[1,300,6]`、center letterbox、9.451 ms 执行耗时、`Nms=False`、输出 JSON SHA256 `7286d3c47270f0a3c19aaa5e28d1e8546a82ae5485076d4311aad98babdb834a`、运行日志 SHA256 `76fdb0e23b87f412392d8480346b32568c6ea0a9b69e509cc636790d8accf424` 和最终标记 `YoloVision Passed=True`。
+关键运行事实：
 
-## 复查与边界
+```text
+ProjectReference=False
+BridgeTensorRt=10.11.0 BridgeCuda=12.9
+Input=images:[1,3,640,640] Output=output0:[1,300,6]
+Layout=EndToEndNms Nms=False NmsMode=None
+Execution ElapsedMs=5.596
+Postprocess Detections=6
+YoloVision Passed=True
+```
 
-复查时至少确认：
+输出 JSON SHA256 为 `369878a520f0256000c57892f12bc72f97d8a3c2e4e6a94ed3c1fa774a35173e`，脱敏文本和机器证据分别位于：
 
-1. ONNX 输入输出名称、shape 和六列顺序与 decoder 合同一致。
-2. 预处理 tensor 的 RGB/NCHW/letterbox 参数与运行日志一致。
-3. bus 框覆盖车辆主体，五个 person 框位于站台右侧，坐标没有整体偏移。
-4. `YoloVision Passed=True` 且进程退出码为 0；JSON、SVG、tensor 和日志 hash 可追溯。
+```text
+samples/assets/yolovision-yolov10n-local-package-consumer-tensorrt10.11.txt
+samples/assets/yolovision-yolov10n-local-package-consumer-runtime-evidence.json
+```
 
-本篇证明的是源码树 `real-model-runtime`：真实模型、真实图片、TensorRT enqueue、输出读取和结果绘制均已完成。它不证明公开 NuGet/GitHub 包、仓库外 clean consumer、post-publish、Owner 接受或 AGPL 模型公开再分发授权。CUDA、cuDNN、TensorRT、native bridge 和模型文件都由使用者按版本安装或获取。
+## 10. 证据边界与复查
+
+这次运行证明的是当前源码对应候选包的 `local-package-consumer-runtime`：三个本地包可被隔离 restore/build，bridge 能由 NuGet 布局加载，官方 YOLOv10n 能完成真实 TensorRT 推理，并生成可复查的检测结果。
+
+本次没有可用的独立 raw tensor reference，因此不声称跨框架 raw output 或后处理逐值一致。固定输出 shape、预处理 tensor SHA256、类别分布和结果图均已校验，但它们不能替代独立参考。
+
+它也不证明公开 NuGet 下载、GitHub Package、post-publish、Owner 发布验收或 AGPL 模型公开再分发授权。本次没有创建 tag、Release，也没有发布任何包。正式发布前仍应在目标机器确认：
+
+1. TensorRT、CUDA、cuDNN 与 bridge-only 包版本组合一致。
+2. 实际 ONNX 的输入输出名称、shape 和六列顺序符合合同。
+3. `ProjectReference=False`，恢复包哈希与选中候选包一致。
+4. `ApplyNms=false`，不对 end-to-end 结果执行第二次 NMS。
+5. bus 框覆盖车辆主体，5 个 person 框位于站台右侧，坐标无整体偏移。
+6. 进程退出码为 0，最终标记为 `YoloVision Passed=True`。

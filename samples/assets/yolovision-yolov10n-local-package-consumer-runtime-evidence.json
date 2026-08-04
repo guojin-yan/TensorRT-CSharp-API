@@ -1,0 +1,195 @@
+{
+  "schemaVersion": 1,
+  "recordKind": "yolovision-yolov10n-local-package-consumer-runtime-evidence",
+  "recordName": "yolovision-yolov10n-local-package-consumer-trt10.11-cc0",
+  "generatedAtUtc": "2026-08-04T20:03:22.8134913Z",
+  "templateOnly": false,
+  "sampleName": "YoloVision.PackageConsumer",
+  "family": "yolov10",
+  "task": "det",
+  "proofClassification": "local-package-consumer-runtime",
+  "repositoryHeadAtExecution": "ae959035b53816953bb5b260bf797c4ae756c18e",
+  "fullLocalReportSha256": "dd1a3badec2503837964549882deb8252767361ce1e76b7cae62031fa2046b2b",
+  "packageConsumer": {
+    "targetFramework": "net8.0",
+    "packageSourceKind": "local-file-feed-only",
+    "packageSourceIsolation": "one-selected-nupkg-per-feed",
+    "remotePackageSourceCount": 0,
+    "packageCount": 3,
+    "packages": [
+      {
+        "role": "managed-api",
+        "id": "JYPPX.TensorRT.CSharp.API",
+        "version": "4.0.0",
+        "repositoryCommit": "ae959035b53816953bb5b260bf797c4ae756c18e",
+        "length": 15447070,
+        "sha256": "fe82c66cd96527988ae03c6e81d9e50449b2b7477618bb13e7df963a519c0196"
+      },
+      {
+        "role": "yolovision",
+        "id": "JYPPX.TensorRT.CSharp.API.YoloVision",
+        "version": "4.0.0",
+        "repositoryCommit": "ae959035b53816953bb5b260bf797c4ae756c18e",
+        "length": 120410,
+        "sha256": "65cd1457e19f55f6b46002ac6ca57e8a20450a3ed2a0ddc2ec99ead5a96d3fbd"
+      },
+      {
+        "role": "bridge-only",
+        "id": "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge",
+        "version": "4.0.0",
+        "repositoryCommit": "ae959035b53816953bb5b260bf797c4ae756c18e",
+        "length": 398657,
+        "sha256": "8d92e0ab21c18db8ef1acf14a88d094da8303cc2deaa473d6665a5506ef1d077"
+      }
+    ],
+    "projectReferenceCount": 0,
+    "directAssemblyReferenceCount": 0,
+    "restoredProjectLibraryCount": 0,
+    "restoredPackageHashesMatchSelected": true,
+    "nativeBridgeCopiedByNuGet": true,
+    "nativeBridgeSha256": "297bf1f8f586dde5b64386633065d6946650d5355e43a246c5fff6b35872b03c",
+    "nativeBridgePathEnvironmentVariableSet": false,
+    "tensorRtCudaAndCudnnAreExternalDependencies": true,
+    "vendorRuntimePackageEntryCount": 0,
+    "bridgeNativePackageEntryCount": 1,
+    "workspaceOutsideRepository": true,
+    "workspaceRemovedAfterValidation": true,
+    "restoreExitCode": 0,
+    "buildExitCode": 0,
+    "runtimeExitCode": 0
+  },
+  "assets": {
+    "model": {
+      "name": "THU-MIG YOLOv10n v1.1 official ONNX",
+      "sourceUrl": "https://github.com/THU-MIG/yolov10/releases/download/v1.1/yolov10n.onnx",
+      "upstreamRevision": "799ff3be47d21173bcf29b351820d4b8e955e0fe",
+      "workspaceRelativePath": "models/YoloVision/Detection/yolov10n-thu-mig-v1.1/yolov10n.onnx",
+      "length": 9386466,
+      "sha256": "7025ea1913f9a259cf8a8465ed608e10610d1bb376db2e0348b13e3bd286e0d3",
+      "license": "AGPL-3.0-only; public model redistribution owner approval is false",
+      "trackedByGit": false
+    },
+    "labelsSha256": "4d4aaea7bee6be2f675d9b53a9195ca36dfe6429f7479f29155da522a6c85930",
+    "image": {
+      "name": "Liverpool Street Bus station 2025",
+      "descriptionUrl": "https://commons.wikimedia.org/wiki/File:Liverpool_Street_Bus_station_2025.jpg",
+      "license": "CC0 1.0",
+      "width": 1280,
+      "height": 961,
+      "jpegSha256": "52b889d4fc9baea772ba2d9bbdfdef8b70710f993d7f27d193a965b11e708bcb",
+      "ppmSha256": "80715af66669147b049fec9386152bd45505f4e494a65079fdc55404d4589b8e",
+      "publicRedistributionPermittedByLicense": true
+    },
+    "preprocessedInputTensor": {
+      "shape": [1, 3, 640, 640],
+      "elementCount": 1228800,
+      "byteLength": 4915200,
+      "sha256": "050935ebf471ec32ab4327d9f5643f0fe1a203289088895205e732e448a8d225",
+      "trackedByGit": false
+    },
+    "outputJsonSha256": "369878a520f0256000c57892f12bc72f97d8a3c2e4e6a94ed3c1fa774a35173e",
+    "visualizationSvgSha256": "4ff2a4a8881ff334d939ef39627f5786ad457d81b423418311cb752446f982b6",
+    "heavyAssetsRemainOutsideGit": true
+  },
+  "runtimeEnvironment": {
+    "os": "Microsoft Windows 10.0.26200",
+    "processArchitecture": "X64",
+    "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+    "driverVersion": "576.02",
+    "dotnetVersion": "10.0.301",
+    "tensorRtVersion": "10.11.0",
+    "cudaToolkitVersion": "12.9"
+  },
+  "modelContract": {
+    "input": {
+      "name": "images",
+      "shape": [1, 3, 640, 640],
+      "dataType": "float32",
+      "preprocess": "center letterbox to 640x640; RGB; NCHW; scale=1/255; fill=114",
+      "sourceSize": [1280, 961],
+      "resizedSize": [640, 480],
+      "padding": [0, 80],
+      "scale": [0.5, 0.5]
+    },
+    "output": {
+      "name": "output0",
+      "shape": [1, 300, 6],
+      "columns": ["x1", "y1", "x2", "y2", "score", "classId"],
+      "layout": "end-to-end",
+      "classCount": 80,
+      "hasObjectness": false,
+      "applyNms": false,
+      "nmsMode": "None",
+      "confidenceThreshold": 0.25,
+      "topK": 100
+    }
+  },
+  "runtime": {
+    "passed": true,
+    "elapsedMilliseconds": 5.596,
+    "outputValueSha256": "eeba5d300111c1d1ff2d6b725b3dfe9011f974419fb1f95f9169f69ec1e4bc0c",
+    "predictionCount": 6,
+    "topPrediction": "bus",
+    "topScore": 0.950415,
+    "classHistogram": {
+      "bus": 1,
+      "person": 5
+    },
+    "predictions": [
+      { "rank": 1, "className": "bus", "score": 0.950415 },
+      { "rank": 2, "className": "person", "score": 0.804006 },
+      { "rank": 3, "className": "person", "score": 0.775956 },
+      { "rank": 4, "className": "person", "score": 0.644469 },
+      { "rank": 5, "className": "person", "score": 0.614031 },
+      { "rank": 6, "className": "person", "score": 0.596880 }
+    ],
+    "passedMarker": "YoloVision Passed=True"
+  },
+  "validation": {
+    "realTensorRtEnqueueExecuted": true,
+    "realImagePreprocessingExecuted": true,
+    "managedEndToEndDecodeExecuted": true,
+    "applicationSideNmsDisabled": true,
+    "sourceCoordinateVisualizationGenerated": true,
+    "outputContractValidationPassed": true,
+    "independentRawTensorReferenceExecuted": false,
+    "independentPostprocessComparisonExecuted": false,
+    "boundary": "This run validates the real isolated local-package execution path, fixed output contract, preprocessing hash, and rendered detections. It does not claim independent cross-framework raw-output or postprocess parity."
+  },
+  "artifacts": {
+    "sanitizedTranscript": {
+      "path": "samples/assets/yolovision-yolov10n-local-package-consumer-tensorrt10.11.txt",
+      "length": 1829,
+      "sha256": "82a263eaa62d7e5674c7c0daa79f40d5eaa21eb9f694392c3404574401e56a8e"
+    },
+    "terminalScreenshot": {
+      "path": "docs/images/yolovision-yolov10n-local-package-consumer-terminal.png",
+      "length": 91438,
+      "sha256": "f604eac8744682e1e70468aae242fe6546e884eef03b469ccf737f348c5e10f8"
+    },
+    "annotatedResultImage": {
+      "path": "docs/images/yolovision-yolov10n-local-package-consumer-annotated-cc0.jpg",
+      "length": 414138,
+      "sha256": "0fa0819f22e9d2552f719afa667328185800e3fdeda0c3630d419c802d75d8a9"
+    }
+  },
+  "proofBoundary": {
+    "localPackageConsumerRuntimeEvidence": true,
+    "sourceTreeRuntimeProof": false,
+    "publicPackageProof": false,
+    "packagesDownloadedFromPublicFeed": false,
+    "postPublishProof": false,
+    "publicModelRedistributionOwnerApproval": false,
+    "ownerReleaseAcceptance": false,
+    "releaseProof": false,
+    "performsPublish": false,
+    "uploadsAssets": false
+  },
+  "notes": [
+    "The ONNX model, generated TensorRT assets, tensor, and full local report remain outside Git.",
+    "CUDA, cuDNN, and TensorRT are user-installed host dependencies and are absent from all three packages.",
+    "The terminal transcript is a path-sanitized projection of the hash-fixed full local report.",
+    "No independent raw tensor reference was available for this run, so no cross-framework parity claim is made.",
+    "No tag, GitHub Release, GitHub Package, or NuGet package was created or published."
+  ]
+}
