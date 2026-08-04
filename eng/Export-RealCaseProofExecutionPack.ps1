@@ -132,7 +132,7 @@ $cases = @(
     -Scenario "Semantic segmentation model with real semantic-map output evidence and class metadata." `
     -SampleProject "samples/YoloVision" `
     -ArticleIds @(75, 90) `
-    -RepoPaths @("samples/YoloVision/README.md", "docs/articles/zh-cn/yolovision-classification-semantic-tutorial.md", "docs/articles/zh-cn/yolovision-output-json-schema-guide.md") `
+    -RepoPaths @("samples/YoloVision/README.md", "samples/YoloVision/yolovision-output.schema.json", "samples/YoloVision/yolovision-task-output-contract.json", "docs/articles/zh-cn/yolovision-semantic-segmentation-lraspp-runtime.md") `
     -RequiredAssets @("semantic segmentation ONNX", "labels file", "preprocessed fp32 input tensor", "semantic output metadata", "sample-run evidence record") `
     -RequiredCommands @("dotnet run --project .\samples\YoloVision -- --model .\models\yolo-sem.onnx --labels .\models\labels.txt --input-data .\models\sem-fp32.bin --input-shape 1x3x512x512 --family custom --task sem --semantic-output semantic --class-count 21") `
     -ExpectedHashFields @("modelSha256", "labelsSha256", "inputAssetSha256", "outputArtifactSha256", "sampleRunLogSha256", "screenshotSha256") `

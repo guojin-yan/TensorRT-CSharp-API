@@ -6,9 +6,6 @@ public sealed class TechnicalArticleCampaignFifthBatchBodyTests
 {
     private static readonly string[] ArticleFiles =
     {
-        "yolovision-output-json-schema-guide.md",
-        "yolovision-real-asset-record-template-guide.md",
-        "yolovision-golden-output-validation-guide.md",
         "runtime-package-minimal-smoke-commands.md",
         "runtime-package-native-load-troubleshooting.md",
         "plugin-inventory-field-metadata-smoke-guide.md",
@@ -21,7 +18,7 @@ public sealed class TechnicalArticleCampaignFifthBatchBodyTests
     [Fact]
     public void FifthCampaignArticleBodyBatchExistsAndKeepsProofBoundaries()
     {
-        Assert.InRange(ArticleFiles.Length, 10, 15);
+        Assert.InRange(ArticleFiles.Length, 7, 12);
 
         string docsIndex = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "index.md"));
         string docsToc = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "toc.yml"));

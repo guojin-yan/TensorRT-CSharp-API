@@ -720,11 +720,8 @@ Application entry points:
 
 ## Fifth Campaign Body Batch
 
-- [YoloVision Output JSON Schema Guide](articles/zh-cn/yolovision-output-json-schema-guide.md)
-- [YoloVision Real Asset Record Template Guide](articles/zh-cn/yolovision-real-asset-record-template-guide.md)
 - [YoloVision Owner Asset Evidence Guide](articles/zh-cn/yolovision-owner-asset-evidence-guide.md)
 - [YoloVision Owner Asset Evidence Example](articles/zh-cn/yolovision-owner-asset-evidence-example.md)
-- [YoloVision Golden Output Validation Guide](articles/zh-cn/yolovision-golden-output-validation-guide.md)
 - [Runtime Package Minimal Smoke Commands](articles/zh-cn/runtime-package-minimal-smoke-commands.md)
 - [Runtime Package Native Load Troubleshooting](articles/zh-cn/runtime-package-native-load-troubleshooting.md)
 - [Plugin Inventory Field Metadata Smoke Guide](articles/zh-cn/plugin-inventory-field-metadata-smoke-guide.md)

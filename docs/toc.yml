@@ -962,18 +962,12 @@
   href: articles/zh-cn/runtime-package-installation-deep-dive.md
 - name: Deferred API Real Completion Review
   href: articles/zh-cn/deferred-api-real-completion-review.md
-- name: YoloVision Output JSON Schema Guide
-  href: articles/zh-cn/yolovision-output-json-schema-guide.md
 - name: YoloVision Family Task Real Asset Roadmap
   href: articles/zh-cn/yolovision-family-task-real-asset-roadmap.md
-- name: YoloVision Real Asset Record Template Guide
-  href: articles/zh-cn/yolovision-real-asset-record-template-guide.md
 - name: YoloVision Owner Asset Evidence Guide
   href: articles/zh-cn/yolovision-owner-asset-evidence-guide.md
 - name: YoloVision Owner Asset Evidence Example
   href: articles/zh-cn/yolovision-owner-asset-evidence-example.md
-- name: YoloVision Golden Output Validation Guide
-  href: articles/zh-cn/yolovision-golden-output-validation-guide.md
 - name: Runtime Package Minimal Smoke Commands
   href: articles/zh-cn/runtime-package-minimal-smoke-commands.md
 - name: Runtime Package Native Load Troubleshooting
