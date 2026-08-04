@@ -68,6 +68,16 @@ public sealed class TrtexecRefittedPlanPackageConsumerTests
         Assert.Contains("compact-evidence-path-free", validator, StringComparison.Ordinal);
         Assert.Contains("plan-hash-cross-check", validator, StringComparison.Ordinal);
         Assert.Contains("output-hash-cross-check", validator, StringComparison.Ordinal);
+        Assert.Contains("[IO.Directory]::EnumerateFileSystemEntries", runner, StringComparison.Ordinal);
+        Assert.Contains("$PSVersionTable.PSVersion.Major", runner, StringComparison.Ordinal);
+        Assert.Contains("[Security.Cryptography.SHA256]::Create()", runner, StringComparison.Ordinal);
+        Assert.Contains("MakeRelativeUri", runner, StringComparison.Ordinal);
+        Assert.Contains("[IO.Directory]::Delete($extendedPath, $true)", runner, StringComparison.Ordinal);
+        Assert.DoesNotContain("ConvertFrom-Json -Depth", runner, StringComparison.Ordinal);
+        Assert.DoesNotContain("[Security.Cryptography.SHA256]::HashData", runner, StringComparison.Ordinal);
+        Assert.DoesNotContain("[IO.Path]::GetRelativePath", runner, StringComparison.Ordinal);
+        Assert.DoesNotContain("ConvertFrom-Json -Depth", validator, StringComparison.Ordinal);
+        Assert.Contains("[IO.File]::WriteAllText", validator, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -200,6 +210,8 @@ public sealed class TrtexecRefittedPlanPackageConsumerTests
             article,
             StringComparison.Ordinal);
         Assert.Contains("53/53", article, StringComparison.Ordinal);
+        Assert.Contains("powershell.exe -NoProfile -ExecutionPolicy Bypass", article, StringComparison.Ordinal);
+        Assert.Contains("Windows PowerShell 5.1", article, StringComparison.Ordinal);
         Assert.Empty(Regex.Matches(article, @"(?im)[A-Z]:\\"));
     }
 
@@ -233,8 +245,16 @@ public sealed class TrtexecRefittedPlanPackageConsumerTests
         string programPath = Path.Combine(
             RepositoryPaths.Root,
             assets.GetProperty("consumerProgramPath").GetString()!.Replace('/', Path.DirectorySeparatorChar));
+        string runnerPath = Path.Combine(
+            RepositoryPaths.Root,
+            assets.GetProperty("runnerPath").GetString()!.Replace('/', Path.DirectorySeparatorChar));
+        string validatorPath = Path.Combine(
+            RepositoryPaths.Root,
+            assets.GetProperty("validatorPath").GetString()!.Replace('/', Path.DirectorySeparatorChar));
         Assert.Equal(assets.GetProperty("runtimeScreenshotSha256").GetString(), ComputeSha256(screenshotPath));
         Assert.Equal(assets.GetProperty("consumerProgramSha256").GetString(), ComputeSha256(programPath));
+        Assert.Equal(assets.GetProperty("runnerSha256").GetString(), ComputeSha256(runnerPath));
+        Assert.Equal(assets.GetProperty("validatorSha256").GetString(), ComputeSha256(validatorPath));
     }
 
     [Fact]

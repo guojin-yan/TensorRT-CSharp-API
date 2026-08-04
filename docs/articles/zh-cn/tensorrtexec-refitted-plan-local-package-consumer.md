@@ -175,7 +175,9 @@ using CudaStream stream = new CudaStream(CudaStreamCreationFlags.NonBlocking);
 $BridgeFeed = Join-Path $RepoRoot 'artifacts/runtime-split-nupkg/win-x64-trt10.11-cuda12.9-cudnn9.22'
 $ConsumerWork = Join-Path $WorkspaceRoot 'work/refitted-plan-clean-consumer'
 
-pwsh -NoProfile -ExecutionPolicy Bypass `
+$PowerShellExe = if (Get-Command pwsh -ErrorAction SilentlyContinue) { 'pwsh' } else { 'powershell.exe' }
+
+& $PowerShellExe -NoProfile -ExecutionPolicy Bypass `
   -File .\eng\Test-TrtexecRefittedPlanPackageConsumer.ps1 `
   -ManagedPackageDirectory $ManagedFeed `
   -BridgePackageDirectory $BridgeFeed `
@@ -186,11 +188,13 @@ pwsh -NoProfile -ExecutionPolicy Bypass `
   -Strict
 ```
 
-脚本内部依次执行 isolated restore、Release build、package inventory、runtime search path 配置、推理、native asset hash、path-free compact evidence、53 项严格校验和工作区清理。`JYPPX_NATIVE_BRIDGE_PATH` 与 `JYPPX_ENABLE_DEVELOPMENT_PROBING` 会在推理前清空，bridge 必须来自包的 `runtimes/<rid>/native` 资产。
+脚本同时支持 PowerShell 7 和 Windows PowerShell 5.1。脚本内部依次执行 isolated restore、Release build、package inventory、runtime search path 配置、推理、native asset hash、path-free compact evidence、53 项严格校验和工作区清理。`JYPPX_NATIVE_BRIDGE_PATH` 与 `JYPPX_ENABLE_DEVELOPMENT_PROBING` 会在推理前清空，bridge 必须来自包的 `runtimes/<rid>/native` 资产。
+
+本次实测使用 Windows PowerShell `5.1.26100.8875`，直接通过 `powershell.exe -NoProfile -ExecutionPolicy Bypass -File ... -Strict` 启动脚本，没有修改脚本源码或在内存中替换 API。
 
 ## 已验证结果
 
-下面图片由 2026-08-04 本次真实 TensorRT 运行的 stdout 脱敏排版生成。只把 `CoreAssemblyLocation` 的仓库外临时路径替换为 `<consumer-workspace>`，推理值、SHA256、通过状态和 53/53 校验结果均未修改。
+下面图片由 2026-08-05 本次 Windows PowerShell 5.1 直接运行的真实 TensorRT stdout 脱敏排版生成。截图命令行折叠了本地 feed、运行库和输出根目录参数，并把 `CoreAssemblyLocation` 的仓库外临时路径替换为 `<consumer-workspace>`；推理值、SHA256、通过状态和 53/53 校验结果均未修改。
 
 ![Refitted Plan 本地包消费者真实运行结果](../../images/tensorrtexec-refitted-plan-package-consumer-runtime.png)
 
@@ -229,7 +233,7 @@ artifacts/interface-coverage/trtexec-refitted-plan-package-consumer-validation.j
 - `Bindings are not ready`：Engine tensor、shape 或 buffer binding 不满足 enqueue 条件。
 - `Output SHA256 mismatch`：权重、输入、TensorRT 版本或执行输出与固定回归基线不同，不能降级为成功。
 - `workspaceRemovedAfterValidation=False`：仓库外消费者目录未完成精确清理，证据保持失败。
-- 本机只有 Windows PowerShell 5.1 而没有 `pwsh`：安装 PowerShell 7 后再直接运行脚本；5.1 对脚本中的现代 .NET API 和深层 JSON 序列化不兼容。
+- 本机只有 Windows PowerShell 5.1 而没有 `pwsh`：直接使用 `powershell.exe -NoProfile -ExecutionPolicy Bypass -File ... -Strict`。若旧系统仍受 `MAX_PATH` 影响，将 `OutputRoot` 指向仓库外较短的非系统盘目录；脚本会在安全边界校验后清理该目录。
 
 ## 复查与边界
 

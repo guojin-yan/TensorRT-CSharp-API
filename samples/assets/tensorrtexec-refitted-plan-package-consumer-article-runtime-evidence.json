@@ -1,10 +1,11 @@
 {
   "schemaVersion": 1,
   "recordKind": "tensorrtexec-refitted-plan-package-consumer-technical-article-runtime-evidence",
-  "recordId": "tensorrtexec-refitted-plan-local-package-consumer-win-x64-trt10.11-cuda12.9-20260804",
+  "recordId": "tensorrtexec-refitted-plan-local-package-consumer-win-x64-trt10.11-cuda12.9-20260805",
   "proofClassification": "local-package-consumer-runtime",
   "executedUtcDate": "2026-08-04",
-  "sourceBaseCommit": "c2a52ea42f63912e6af180f727c94211215e81bd",
+  "executedLocalDate": "2026-08-05",
+  "sourceBaseCommit": "99737d9b98bf6d2af345ddab6f1385e0a82c8c96",
   "runtimeEnvironment": {
     "os": "Microsoft Windows 10.0.26200",
     "processArchitecture": "X64",
@@ -12,7 +13,9 @@
     "driverVersion": "576.02",
     "cudaToolkitVersion": "12.9",
     "tensorRtVersion": "10.11.0.33",
-    "runtimeKey": "win-x64-trt10.11-cuda12.9-cudnn9.22"
+    "runtimeKey": "win-x64-trt10.11-cuda12.9-cudnn9.22",
+    "powershellVersion": "5.1.26100.8875",
+    "executionShell": "Windows PowerShell 5.1 direct -File invocation"
   },
   "model": {
     "sourceUrl": "https://github.com/onnx/models/tree/main/validated/vision/classification/mnist",
@@ -45,12 +48,12 @@
     "consumerProgramPath": "samples/RefittedPlan.PackageConsumer/Program.cs",
     "consumerProgramSha256": "f1e7960e6e7a0c50008a66eb62010e07fab0c9ae9ac31ae588f23855606c7481",
     "runnerPath": "eng/Test-TrtexecRefittedPlanPackageConsumer.ps1",
-    "runnerSha256": "147acee69b258daf138b565ca5067a46e35b8dbfeb3296d37f7d8fda73b09f37",
+    "runnerSha256": "f02ef167aa10ed82ea3cf87231d29de6a61408873e27d564293f5305a4dd99ac",
     "validatorPath": "eng/Test-TrtexecRefittedPlanPackageConsumerEvidence.ps1",
-    "validatorSha256": "2714457aa55b29c97fc0ef2235d8f508ecef80973784d55b008f8165dceed188",
+    "validatorSha256": "3649ac687650ea46e536ffddfb56eac3557737e7e88ab570e054137dfb078bef",
     "runtimeLogSha256": "77ece0695db91787005b91ca1cf8b1d06c983326d06f9a309dbebc4855004796",
     "runtimeScreenshotPath": "docs/images/tensorrtexec-refitted-plan-package-consumer-runtime.png",
-    "runtimeScreenshotSha256": "b089fde6b0077be9a53f1cfa77eb014b2778a632e9b3d3701158e7c700eb6136",
+    "runtimeScreenshotSha256": "801de7d19c2d9ae9b4c079180171a2e66d23b673d3ad8c170cd68f5b4509764f",
     "compactEvidencePath": "artifacts/interface-coverage/trtexec-refitted-plan-package-consumer-evidence.json",
     "strictValidationPath": "artifacts/interface-coverage/trtexec-refitted-plan-package-consumer-validation.json"
   },

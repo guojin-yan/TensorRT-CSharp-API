@@ -5,6 +5,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+$utf8 = [Text.UTF8Encoding]::new($false)
 if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
   $scriptRoot = if ([string]::IsNullOrWhiteSpace($PSScriptRoot)) { (Get-Location).Path } else { $PSScriptRoot }
   $RepositoryRoot = (Resolve-Path (Join-Path $scriptRoot "..")).Path
@@ -18,8 +19,8 @@ $validationMarkdownPath = Join-Path $RepositoryRoot "artifacts\interface-coverag
 if (-not (Test-Path -LiteralPath $evidencePath -PathType Leaf)) { throw "Package-consumer evidence is missing: $evidencePath" }
 if (-not (Test-Path -LiteralPath $priorEvidencePath -PathType Leaf)) { throw "Prior persistence evidence is missing: $priorEvidencePath" }
 $evidenceText = Get-Content -LiteralPath $evidencePath -Raw -Encoding utf8
-$evidence = $evidenceText | ConvertFrom-Json -Depth 100
-$prior = Get-Content -LiteralPath $priorEvidencePath -Raw -Encoding utf8 | ConvertFrom-Json -Depth 100
+$evidence = $evidenceText | ConvertFrom-Json
+$prior = Get-Content -LiteralPath $priorEvidencePath -Raw -Encoding utf8 | ConvertFrom-Json
 $checks = [Collections.Generic.List[object]]::new()
 
 function Add-Check {
@@ -117,7 +118,8 @@ $result = [ordered]@{
   failureCount = $failed.Count
   checks = @($checks)
 }
-$result | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $validationPath -Encoding utf8
+$resultJson = $result | ConvertTo-Json -Depth 8
+[IO.File]::WriteAllText($validationPath, $resultJson + [Environment]::NewLine, $utf8)
 
 $lines = @(
   "# TensorRtExec Refitted Plan Package Consumer Validation",
@@ -134,7 +136,7 @@ foreach ($check in $checks) {
   $actual = ([string]$check.actual).Replace('|', '\|').Replace("`r", ' ').Replace("`n", ' ')
   $lines += "| ``$($check.id)`` | ``$($check.passed)`` | ``$actual`` |"
 }
-$lines | Set-Content -LiteralPath $validationMarkdownPath -Encoding utf8
+[IO.File]::WriteAllLines($validationMarkdownPath, $lines, $utf8)
 
 Write-Host "TensorRtExec refitted-plan package-consumer evidence: $($checks.Count - $failed.Count)/$($checks.Count) checks passed."
 if ($Strict -and $failed.Count -gt 0) {

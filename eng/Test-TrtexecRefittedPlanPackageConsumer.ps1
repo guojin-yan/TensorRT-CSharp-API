@@ -45,12 +45,24 @@ function Get-Sha256 {
   return (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToLowerInvariant()
 }
 
+function Get-TextSha256 {
+  param([Parameter(Mandatory = $true)][string]$Text)
+  $hasher = [Security.Cryptography.SHA256]::Create()
+  try {
+    return [BitConverter]::ToString($hasher.ComputeHash($utf8.GetBytes($Text))).Replace('-', '').ToLowerInvariant()
+  }
+  finally { $hasher.Dispose() }
+}
+
 function Get-RelativePath {
   param(
     [Parameter(Mandatory = $true)][string]$Root,
     [Parameter(Mandatory = $true)][string]$Path
   )
-  return [IO.Path]::GetRelativePath([IO.Path]::GetFullPath($Root), [IO.Path]::GetFullPath($Path)).Replace('\', '/')
+  $rootPath = [IO.Path]::GetFullPath($Root).TrimEnd('\', '/') + [IO.Path]::DirectorySeparatorChar
+  $rootUri = [Uri]$rootPath
+  $pathUri = [Uri][IO.Path]::GetFullPath($Path)
+  return [Uri]::UnescapeDataString($rootUri.MakeRelativeUri($pathUri).ToString()).Replace('\', '/')
 }
 
 function Test-PathWithin {
@@ -73,8 +85,24 @@ function Remove-SafeConsumerDirectory {
   if (-not (Test-PathWithin -Path $Path -Parent $AllowedRoot)) {
     throw "Refusing to remove a consumer directory outside the allowed root: $Path"
   }
-  if (Test-Path -LiteralPath $Path) {
-    Remove-Item -LiteralPath $Path -Recurse -Force
+  $resolvedPath = [IO.Path]::GetFullPath($Path).TrimEnd('\', '/')
+  if (Test-Path -LiteralPath $resolvedPath) {
+    try {
+      Remove-Item -LiteralPath $resolvedPath -Recurse -Force -ErrorAction Stop
+    }
+    catch {
+      $isWindowsHost = [Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT
+      if (-not (Test-Path -LiteralPath $resolvedPath)) { return }
+      if (-not $isWindowsHost) { throw }
+      $extendedPath = if ($resolvedPath.StartsWith('\\')) {
+        '\\?\UNC\' + $resolvedPath.TrimStart('\')
+      }
+      else { '\\?\' + $resolvedPath }
+      [IO.Directory]::Delete($extendedPath, $true)
+    }
+    if (Test-Path -LiteralPath $resolvedPath) {
+      throw "Consumer directory still exists after cleanup: $resolvedPath"
+    }
   }
 }
 
@@ -126,7 +154,7 @@ function Find-Package {
 function Resolve-BridgePackage {
   param([Parameter(Mandatory = $true)][string]$RuntimeKey)
   $manifestPath = Join-Path $RepositoryRoot "pack\runtime-split\split-runtime-packages.manifest.json"
-  $manifest = Get-Content -LiteralPath $manifestPath -Raw -Encoding utf8 | ConvertFrom-Json -Depth 20
+  $manifest = Get-Content -LiteralPath $manifestPath -Raw -Encoding utf8 | ConvertFrom-Json
   $package = $manifest.packages |
     Where-Object { $_.sourceRuntimeKey -eq $RuntimeKey -and $_.role -eq "bridge" } |
     Select-Object -First 1
@@ -243,13 +271,17 @@ function Get-NamedCDriveArtifactMatches {
   )
   foreach ($root in $roots) {
     if (-not (Test-Path -LiteralPath $root -PathType Container)) { continue }
-    foreach ($item in Get-ChildItem -LiteralPath $root -Force -ErrorAction SilentlyContinue) {
-      if ($item.Name -match '(?i)refitted-plan-package-consumer|trtexec-refitted-plan-consumer') {
-        $matches.Add($item.FullName)
+    foreach ($pattern in @('*refitted-plan-package-consumer*', '*trtexec-refitted-plan-consumer*')) {
+      try {
+        foreach ($path in [IO.Directory]::EnumerateFileSystemEntries($root, $pattern, [IO.SearchOption]::TopDirectoryOnly)) {
+          $matches.Add([IO.Path]::GetFullPath($path))
+        }
       }
+      catch [UnauthorizedAccessException] { continue }
+      catch [IO.IOException] { continue }
     }
   }
-  return $matches.ToArray()
+  return @($matches.ToArray() | Sort-Object -Unique)
 }
 
 $bridgeDefinition = Resolve-BridgePackage -RuntimeKey $SourceRuntimeKey
@@ -311,7 +343,7 @@ $ExpectedOutputSha256 = $ExpectedOutputSha256.ToLowerInvariant()
 $sourcePlanSha256 = Get-Sha256 -Path $SourcePlanPath
 $sourceInputSha256 = Get-Sha256 -Path $SourceInputPath
 $sourceReferenceSha256 = Get-Sha256 -Path $SourceReferencePath
-$sourceReference = Get-Content -LiteralPath $SourceReferencePath -Raw -Encoding utf8 | ConvertFrom-Json -Depth 20
+$sourceReference = Get-Content -LiteralPath $SourceReferencePath -Raw -Encoding utf8 | ConvertFrom-Json
 if ([int]$sourceReference.schemaVersion -ne 1 -or
     [string]::IsNullOrWhiteSpace([string]$sourceReference.tensorName) -or
     @($sourceReference.shape).Count -eq 0 -or
@@ -412,7 +444,7 @@ try {
   if ($buildExitCode -ne 0) { throw "dotnet build failed with exit code $buildExitCode." }
 
   $assetsPath = Join-Path $consumerRoot "obj\project.assets.json"
-  $assets = Get-Content -LiteralPath $assetsPath -Raw -Encoding utf8 | ConvertFrom-Json -Depth 100
+  $assets = Get-Content -LiteralPath $assetsPath -Raw -Encoding utf8 | ConvertFrom-Json
   $libraryNames = @($assets.libraries.PSObject.Properties.Name)
   $managedLibraryKey = "$($managedPackage.Id)/$($managedPackage.Version)"
   $bridgeLibraryKey = "$($bridgePackage.Id)/$($bridgePackage.Version)"
@@ -564,7 +596,7 @@ try {
     }
     execution = [ordered]@{
       commandLine = $commandLine
-      commandSha256 = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData($utf8.GetBytes($commandLine))).ToLowerInvariant()
+      commandSha256 = Get-TextSha256 -Text $commandLine
       restoreExitCode = $restoreExitCode
       buildExitCode = $buildExitCode
       runtimeExitCode = $runtimeExitCode
@@ -604,7 +636,7 @@ try {
       predictedIndex = ConvertTo-Int32 (Get-MarkerValue -Lines $stdoutLines -Prefix "PredictedIndex=")
     }
     host = [ordered]@{
-      osDescription = [Runtime.InteropServices.RuntimeInformation]::OSDescription
+      osDescription = [Runtime.InteropServices.RuntimeInformation]::OSDescription.Trim()
       processArchitecture = [Runtime.InteropServices.RuntimeInformation]::ProcessArchitecture.ToString()
       gpuName = $nvidia.gpuName
       driverVersion = $nvidia.driverVersion
@@ -652,7 +684,9 @@ $rawEvidence["cDriveAudit"] = [ordered]@{
 
 $rawJsonPath = Join-Path $ReportDirectory "refitted-plan-package-consumer-proof.json"
 $rawMarkdownPath = Join-Path $ReportDirectory "refitted-plan-package-consumer-proof.md"
-$rawEvidence | ConvertTo-Json -Depth 15 | Set-Content -LiteralPath $rawJsonPath -Encoding utf8
+$jsonDepth = if ($PSVersionTable.PSVersion.Major -lt 6) { 6 } else { 15 }
+$rawJson = $rawEvidence | ConvertTo-Json -Depth $jsonDepth
+[IO.File]::WriteAllText($rawJsonPath, $rawJson + [Environment]::NewLine, $utf8)
 $rawLines = @(
   "# Refitted Plan Package Consumer Proof",
   "",
@@ -750,7 +784,7 @@ $compactEvidence = [ordered]@{
   proofBoundary = $rawEvidence.proofBoundary
 }
 
-$compactJson = $compactEvidence | ConvertTo-Json -Depth 15
+$compactJson = $compactEvidence | ConvertTo-Json -Depth $jsonDepth
 if ($compactJson -match '(?i)[A-Z]:\\') {
   throw "Compact package-consumer evidence contains an absolute Windows path."
 }
