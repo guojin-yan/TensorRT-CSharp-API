@@ -210,6 +210,8 @@
     href: articles/zh-cn/onnxtoengine-tensorrtexec-yolovision-evidence-ladder.md
   - name: ONNX To Engine Quickstart
     href: articles/zh-cn/onnx-to-engine-quickstart.md
+  - name: OnnxToEngine MNIST Owner-Generated Real Model
+    href: articles/zh-cn/onnxtoengine-mnist-owner-generated-tutorial.md
   - name: ONNX To Engine Dynamic Shape Profile
     href: articles/zh-cn/onnx-to-engine-dynamic-shape-profile.md
   - name: ONNX To Engine FP16 INT8 Boundary

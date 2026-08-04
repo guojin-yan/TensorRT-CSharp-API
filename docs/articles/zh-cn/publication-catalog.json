@@ -60,6 +60,40 @@
       "publicationAuthorized": false
     },
     {
+      "id": "onnxtoengine-mnist-owner-generated-real-model",
+      "path": "docs/articles/zh-cn/onnxtoengine-mnist-owner-generated-tutorial.md",
+      "classification": "complete-technical-article",
+      "status": "complete-with-runtime-screenshot-and-annotated-result",
+      "realExecutionEvidence": "samples/assets/onnxtoengine-mnist-owner-generated-runtime-evidence.json",
+      "visualAssetEvidence": "samples/assets/onnxtoengine-mnist-owner-generated-article-visual-assets.json",
+      "model": {
+        "sourceUrl": "https://github.com/onnx/models/tree/main/validated/vision/classification/mnist",
+        "pinnedRevision": "TensorRT-10.11.0.33-sample-data",
+        "license": "NVIDIA TensorRT sample-data terms; source README attributes the ONNX to ONNX Model Zoo",
+        "conversionCommand": "Copy mnist.onnx from the user-installed TensorRT data/mnist directory; no local framework-to-ONNX conversion is performed.",
+        "onnxWorkspacePath": "models/OnnxToEngine/MNIST/nvidia-tensorrt-10.11/mnist.onnx",
+        "onnxSha256": "2f06e72de813a8635c9bc0397ac447a601bdbfa7df4bebc278723b958831c9bf",
+        "trackedByGit": false,
+        "uploadsModelFiles": false
+      },
+      "resultImages": [
+        {
+          "role": "annotated-inference-result",
+          "path": "docs/images/onnxtoengine-mnist-owner-generated-result.png",
+          "sha256": "1aa64329af89c9d6d6037d173276406dff3e12cd9dce05438043b437dfc6bfd5",
+          "source": "Rendered from the SVG written by the real OnnxToEngine TensorRT run; it contains the project-generated source pixels, predicted digit, confidence, and all ten class probabilities."
+        },
+        {
+          "role": "program-runtime-screenshot",
+          "path": "docs/images/onnxtoengine-mnist-owner-generated-terminal.png",
+          "sha256": "25ff8e7196b3c6dcfddb952832254f9d488785d535b433e4b691ae448a61dac7",
+          "source": "Path-sanitized terminal rendering of selected stdout from the same TensorRT run plus its independent ONNX Runtime comparison and controlled negative."
+        }
+      ],
+      "proofBoundary": "Content-complete source-tree real-model article with independent ONNX Runtime validation, a real runtime screenshot, and a project-generated source-image classification visualization; not package-consumer, public-package, post-publish, Owner acceptance, model upload authorization, or release proof.",
+      "publicationAuthorized": false
+    },
+    {
       "id": "yolovision-yolov8n-det-local-package-consumer",
       "path": "docs/articles/zh-cn/yolovision-yolov8n-det-local-package-consumer-tutorial.md",
       "classification": "complete-technical-article",

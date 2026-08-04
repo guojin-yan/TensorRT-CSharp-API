@@ -138,6 +138,7 @@ public sealed class DemoModelInventoryTests
         string[] expectedIds =
         {
             "classification-resnet18-imagenet1k-v1",
+            "onnxtoengine-nvidia-mnist-opset8",
             "yolovision-yolov8n-instance-segmentation-v8.3.0"
         };
 
@@ -153,12 +154,20 @@ public sealed class DemoModelInventoryTests
             using JsonDocument evidenceDocument = JsonDocument.Parse(evidenceText);
             JsonElement evidence = evidenceDocument.RootElement;
             Assert.Equal("local-package-consumer-runtime", evidence.GetProperty("proofClassification").GetString());
-            Assert.False(evidence.GetProperty("proofBoundary").GetProperty("performsPublish").GetBoolean());
-            Assert.False(evidence.GetProperty("proofBoundary").GetProperty("publicPackageProof").GetBoolean());
-            Assert.False(evidence.GetProperty("proofBoundary").GetProperty("postPublishProof").GetBoolean());
+            JsonElement boundary = evidence.GetProperty("proofBoundary");
+            Assert.False(boundary.GetProperty("performsPublish").GetBoolean());
+            Assert.True(
+                TryAssertFalse(boundary, "publicPackageProof") |
+                TryAssertFalse(boundary, "publicPackageConsumerRuntime"));
+            Assert.False(boundary.GetProperty("postPublishProof").GetBoolean());
         }
 
-        JsonElement segmentation = Assert.Single(models.Where(item => item.GetProperty("id").GetString() == expectedIds[1]));
+        JsonElement mnist = Assert.Single(models.Where(item => item.GetProperty("id").GetString() == expectedIds[1]));
+        Assert.Contains(
+            mnist.GetProperty("articles").EnumerateArray(),
+            item => item.GetString() == "docs/articles/zh-cn/onnxtoengine-mnist-owner-generated-tutorial.md");
+
+        JsonElement segmentation = Assert.Single(models.Where(item => item.GetProperty("id").GetString() == expectedIds[2]));
         Assert.Contains(
             segmentation.GetProperty("articles").EnumerateArray(),
             item => item.GetString() == "docs/articles/zh-cn/yolovision-yolov8-seg-local-package-consumer-tutorial.md");
@@ -207,6 +216,27 @@ public sealed class DemoModelInventoryTests
             return;
         }
 
+        if (recordKind == "onnxtoengine-mnist-owner-generated-runtime-evidence")
+        {
+            JsonElement runtime = evidence.GetProperty("runtimeValidation");
+            Assert.Equal(0, runtime.GetProperty("exitCode").GetInt32());
+            Assert.Equal(7, runtime.GetProperty("predictedDigit").GetInt32());
+            Assert.True(runtime.GetProperty("outputMatch").GetBoolean());
+            Assert.True(runtime.GetProperty("passed").GetBoolean());
+
+            JsonElement reference = evidence.GetProperty("independentReferenceValidation");
+            Assert.Equal(10, reference.GetProperty("comparedElementCount").GetInt32());
+            Assert.Equal(0, reference.GetProperty("mismatchCount").GetInt32());
+            Assert.True(reference.GetProperty("passed").GetBoolean());
+
+            JsonElement negative = evidence.GetProperty("controlledNegative");
+            Assert.NotEqual(0, negative.GetProperty("exitCode").GetInt32());
+            Assert.False(negative.GetProperty("outputMatch").GetBoolean());
+            Assert.True(negative.GetProperty("failClosed").GetBoolean());
+            AssertNonPublishingBoundary(evidence.GetProperty("proofBoundary"));
+            return;
+        }
+
         Assert.Contains(recordKind, new[]
         {
             "yolov10-official-source-tree-runtime-proof-closure",
@@ -244,6 +274,17 @@ public sealed class DemoModelInventoryTests
                 Assert.False(value.GetBoolean());
             }
         }
+    }
+
+    private static bool TryAssertFalse(JsonElement parent, string propertyName)
+    {
+        if (!parent.TryGetProperty(propertyName, out JsonElement value))
+        {
+            return false;
+        }
+
+        Assert.False(value.GetBoolean());
+        return true;
     }
 
     private static JsonDocument LoadInventory()

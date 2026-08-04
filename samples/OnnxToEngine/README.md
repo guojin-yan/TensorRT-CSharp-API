@@ -73,7 +73,7 @@ For arbitrary external ONNX models, this stage treats the sample as build-only o
 
 ## MNIST real-model runtime
 
-The explicit `--mnist` path is a model-specific runner. It reads TensorRT's P5 PGM assets, applies the official sample preprocessing formula `1 - pixel / 255`, builds and deserializes the external MNIST ONNX model, binds the discovered input/output tensor names, enqueues inference, applies stable softmax, and verifies both the expected digit and a minimum confidence.
+The explicit `--mnist` path is a model-specific runner. It reads a 28x28 P5 PGM input, applies the model preprocessing formula `1 - pixel / 255`, builds and deserializes the external MNIST ONNX model, binds the discovered input/output tensor names, enqueues inference, applies stable softmax, and verifies both the expected digit and a minimum confidence. `--visualization` writes an SVG containing the actual input pixels, predicted digit, confidence, and all ten class probabilities.
 
 TensorRT's `data/mnist/README.md` attributes this opset 8 graph to ONNX Model Zoo. It is already an ONNX release artifact, so there
 is no framework-to-ONNX conversion step. Copy it from the user-installed TensorRT sample-data directory to
@@ -84,29 +84,30 @@ is no framework-to-ONNX conversion step. Copy it from the user-installed TensorR
 ```powershell
 $workspaceRoot = Split-Path -Parent $PWD
 $model = Join-Path $workspaceRoot 'models\OnnxToEngine\MNIST\nvidia-tensorrt-10.11\mnist.onnx'
+$assetRoot = Join-Path $workspaceRoot 'downloads\mnist-owner-generated'
+
+powershell -NoProfile -ExecutionPolicy Bypass `
+  -File .\eng\New-MnistOwnerGeneratedDigit.ps1
 
 dotnet .\samples\OnnxToEngine\bin\Release\net8.0\OnnxToEngine.dll `
   --mnist `
   --tensor-rt-line 10 `
   --onnx $model `
-  --mnistInput (Join-Path $env:JYPPX_TENSORRT_ROOT 'data\mnist\7.pgm') `
+  --mnistInput (Join-Path $assetRoot 'digit-7.pgm') `
   --expectedDigit 7 `
-  --minimumConfidence 0.9 `
-  --saveEngine ".\artifacts\real-case\onnx-to-engine-mnist-trt10-runtime\mnist-trt10.plan" `
-  --exportReport ".\artifacts\real-case\onnx-to-engine-mnist-trt10-runtime\mnist-trt10-runtime-report.json" `
-  --exportOutput ".\artifacts\real-case\onnx-to-engine-mnist-trt10-runtime\mnist-trt10-output.json" `
-  --exportPreprocessedInput ".\artifacts\real-case\onnx-to-engine-mnist-trt10-runtime\mnist-trt10-input-f32.bin"
+  --minimumConfidence 0.5 `
+  --saveEngine (Join-Path $assetRoot 'digit-7.plan') `
+  --exportReport (Join-Path $assetRoot 'digit-7-report.json') `
+  --exportOutput (Join-Path $assetRoot 'digit-7-output.json') `
+  --exportPreprocessedInput (Join-Path $assetRoot 'digit-7-input.fp32.bin') `
+  --visualization (Join-Path $assetRoot 'digit-7-result.svg')
 ```
 
-The pinned source-tree evidence is
-`samples/assets/onnxtoengine-mnist-real-model-runtime-evidence.json`. TensorRT 10.11 predicts digit 7 at confidence
-`0.99999285`; all 10 logits match the independent ONNX Runtime CPU reference within `1e-4`. A controlled run that changes only
-`--expectedDigit` to 6 exits 2 with `State=mnist-output-mismatch` and `OutputMatch=False`. The model, engine, and logs remain outside
-Git, and this is not package-consumer, public-package, post-publish, redistribution, or release proof.
+The current project-generated-input evidence is `samples/assets/onnxtoengine-mnist-owner-generated-runtime-evidence.json`. TensorRT 10.11 predicts digit 7 at confidence `0.99945575`; all 10 logits match the independent ONNX Runtime CPU reference within `1e-4`. A controlled run that changes only `--expectedDigit` to 6 exits 2 with `State=mnist-output-mismatch` and `OutputMatch=False`. The earlier TensorRT-supplied-input record remains at `samples/assets/onnxtoengine-mnist-real-model-runtime-evidence.json` for historical comparison.
 
-The complete Chinese model acquisition, Engine build, real Windows Terminal screenshot, and validation walkthrough is [使用 TensorRtSharp4.0 将 MNIST ONNX 转换为 TensorRT Engine 并推理](../../docs/articles/zh-cn/onnx-to-engine-quickstart.md).
+The complete Chinese acquisition, Engine build, project-generated input, annotated inference result, real terminal screenshot, independent reference, and controlled-negative walkthrough is [OnnxToEngine 实战：自有数字图片、TensorRT 与 ONNX Runtime 双重验证](../../docs/articles/zh-cn/onnxtoengine-mnist-owner-generated-tutorial.md).
 
-Only a completed external-model enqueue with matching digit and confidence can be classified as `real-model-runtime`. This remains a source-tree sample execution, not `package-consumer-runtime`, post-publish proof, or release authorization. Generic external ONNX execution remains build-only unless another explicit model runner defines its input and output semantics.
+The model, engine, PGM, tensors, and raw logs remain outside Git. Only a completed external-model enqueue with matching digit and confidence can be classified as `real-model-runtime`. This remains a source-tree sample execution, not package-consumer, public-package, post-publish, redistribution, or release proof. Generic external ONNX execution remains build-only unless another explicit model runner defines its input and output semantics.
 
 YoloVision model semantics are deliberately not inferred by this sample. Detection, classification, segmentation, OBB, pose, and semantic-segmentation output roles are governed by `samples/YoloVision/yolovision-task-output-contract.json`; OnnxToEngine can provide build/report artifacts for those models, but the contract plus YoloVision owner evidence is what defines output metadata and real-model-runtime promotion.
 

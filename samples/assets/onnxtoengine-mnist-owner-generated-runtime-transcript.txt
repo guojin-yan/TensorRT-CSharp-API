@@ -1,0 +1,14 @@
+OnnxToEngine MNIST owner-generated digit-7 runtime
+Source base commit: 85ee682d229df131c62618d88f3868babd8caeee
+Runtime: Windows 11; NVIDIA GeForce RTX 3060 Laptop GPU; TensorRT 10.11.0; CUDA 12.9
+
+Input: digit-7.pgm; 28x28 P5 PGM; SHA256 e2f39f47bae623e76b4a16dc4f2de66f11e3cae9b5e0eb2fa4f17858d7a3aa87
+Preprocessed input: float32[1,1,28,28]; SHA256 7f6cfd9ba7fadb5e2751bd150ea92275f90c413681fec0c74921f4b476f81f76
+Output: Plus214_Output_0:float32[1,10]
+TensorRT: expected 7; predicted 7; confidence 0.99945575; elapsed 0.971776 ms; exit 0
+ONNX Runtime 1.23.2 CPUExecutionProvider: compared 10; mismatch 0; first mismatch -1
+Maximum absolute error: 6.198883e-6; maximum relative error: 1.3311652e-6
+Controlled negative: expected 6; predicted 7; outputMatch false; exit 2
+Visualization: source pixels, predicted digit, confidence, and all ten class probabilities
+Proof classification: real-model-runtime
+PerformsPublish: false

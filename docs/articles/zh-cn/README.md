@@ -58,6 +58,7 @@
 模型转换和桌面工具文章需要真实模型构建、程序窗口、报告校验和清楚的 build/runtime 边界；只有声称完成推理的文章才必须提供输出语义校验。未经授权的输入图片不嵌入仓库：
 
 - [使用 TensorRtSharp4.0 将 MNIST ONNX 转换为 TensorRT Engine 并推理](onnx-to-engine-quickstart.md)。
+- [使用项目自有数字图片完成 MNIST TensorRT 与 ONNX Runtime 双重验证](onnxtoengine-mnist-owner-generated-tutorial.md)。
 - [使用 TensorRtExec GUI 将 ONNX 构建为 TensorRT Engine](tensorrtexec-gui-user-guide.md)。
 - [使用 TensorRtSharp4.0 从本地 NuGet 包加载 Refitted Plan 并完成 MNIST 推理](tensorrtexec-refitted-plan-local-package-consumer.md)。
 

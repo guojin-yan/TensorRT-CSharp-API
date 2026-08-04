@@ -85,6 +85,7 @@ internal static class Program
         string exportReportPath = SampleCommandLine.GetStringArgument(args, "--exportReport", string.Empty);
         string exportOutputPath = SampleCommandLine.GetStringArgument(args, "--exportOutput", string.Empty);
         string exportPreprocessedInputPath = SampleCommandLine.GetStringArgument(args, "--exportPreprocessedInput", string.Empty);
+        string visualizationPath = SampleCommandLine.GetStringArgument(args, "--visualization", string.Empty);
         int workspaceMiB = SampleCommandLine.GetPositiveIntArgument(args, "--workspace", 64);
         float minimumConfidence = GetFloatArgument(args, "--minimumConfidence", 0.9f);
         TensorRtApiLine line = ResolveLine(SampleCommandLine.GetStringArgument(args, "--tensor-rt-line", "10"));
@@ -104,6 +105,19 @@ internal static class Program
         foreach (string lineItem in result.LogLines)
         {
             Console.WriteLine(lineItem);
+        }
+
+        if (!string.IsNullOrWhiteSpace(visualizationPath))
+        {
+            if (result.InferenceRan)
+            {
+                MnistVisualizationWriter.Write(visualizationPath, result);
+                Console.WriteLine("MnistVisualization Path=" + visualizationPath);
+            }
+            else
+            {
+                Console.WriteLine("MnistVisualization=Skipped Reason=" + result.SkipReason);
+            }
         }
 
         Console.WriteLine(
@@ -165,7 +179,7 @@ internal static class Program
         Console.WriteLine("Usage:");
         Console.WriteLine("  dotnet run --project samples/OnnxToEngine -- --tensor-rt-line 10 --batch 2");
         Console.WriteLine("  dotnet run --project samples/OnnxToEngine -- --onnx model.onnx --saveEngine model.plan --minShapes input:1x3x640x640 --optShapes input:1x3x640x640 --maxShapes input:4x3x640x640 --buildOnly");
-        Console.WriteLine("  dotnet run --project samples/OnnxToEngine -- --mnist --tensor-rt-line 10 --onnx mnist.onnx --mnistInput 7.pgm --expectedDigit 7 --saveEngine mnist.plan --exportReport mnist-report.json --exportOutput mnist-output.json --exportPreprocessedInput mnist-input.bin");
+        Console.WriteLine("  dotnet run --project samples/OnnxToEngine -- --mnist --tensor-rt-line 10 --onnx mnist.onnx --mnistInput 7.pgm --expectedDigit 7 --saveEngine mnist.plan --exportReport mnist-report.json --exportOutput mnist-output.json --exportPreprocessedInput mnist-input.bin --visualization mnist-result.svg");
         Console.WriteLine("  dotnet run --project samples/OnnxToEngine -- --help-json");
         Console.WriteLine("Options:");
         Console.WriteLine("  --tensor-rt-line <8|10|11>  TensorRT adapter line. Default: 10.");
@@ -176,6 +190,7 @@ internal static class Program
         Console.WriteLine("  --expectedDigit <0..9>      Expected class; defaults to the PGM file name when it is 0.pgm through 9.pgm.");
         Console.WriteLine("  --minimumConfidence <0..1>  Required softmax confidence for real-model-runtime. Default: 0.9.");
         Console.WriteLine("  --exportPreprocessedInput   Write the float32 input tensor bytes used for enqueue.");
+        Console.WriteLine("  --visualization <path.svg>  Draw the source pixels, prediction, confidence, and ten class probabilities.");
         Console.WriteLine("  --saveEngine <path>         Save the serialized TensorRT engine.");
         Console.WriteLine("  --minShapes/--optShapes/--maxShapes input:1x3x640x640[,other:...]");
         Console.WriteLine("  --fp16 --int8 --bf16 --noTF32 --workspace <MiB>");

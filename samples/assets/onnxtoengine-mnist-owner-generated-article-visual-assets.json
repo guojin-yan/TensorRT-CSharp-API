@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "recordKind": "technical-article-visual-assets",
+  "articleId": "onnxtoengine-mnist-owner-generated-real-model",
+  "sourceImage": {
+    "title": "Project-generated geometric digit 7",
+    "artist": "TensorRtSharp4.0 deterministic asset generator",
+    "descriptionUrl": "eng/New-MnistOwnerGeneratedDigit.ps1",
+    "originalUrl": "eng/New-MnistOwnerGeneratedDigit.ps1",
+    "downloadUrl": "eng/New-MnistOwnerGeneratedDigit.ps1",
+    "downloadedWidth": 28,
+    "downloadedHeight": 28,
+    "downloadedLength": 797,
+    "downloadedSha256": "e2f39f47bae623e76b4a16dc4f2de66f11e3cae9b5e0eb2fa4f17858d7a3aa87",
+    "license": "CC0-1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "attributionRequired": false,
+    "thirdPartySourceAsset": false,
+    "publicRedistributionPermittedByLicense": true
+  },
+  "resultImages": [
+    {
+      "role": "annotated-inference-result",
+      "path": "docs/images/onnxtoengine-mnist-owner-generated-result.png",
+      "sha256": "1aa64329af89c9d6d6037d173276406dff3e12cd9dce05438043b437dfc6bfd5",
+      "source": "Rendered from the SVG written by the real OnnxToEngine TensorRT run; it contains the generated source pixels, predicted digit, confidence, and all ten class probabilities."
+    },
+    {
+      "role": "program-runtime-screenshot",
+      "path": "docs/images/onnxtoengine-mnist-owner-generated-terminal.png",
+      "sha256": "25ff8e7196b3c6dcfddb952832254f9d488785d535b433e4b691ae448a61dac7",
+      "source": "Path-sanitized terminal rendering of selected stdout from the same TensorRT run plus its independent ONNX Runtime comparison and controlled negative."
+    }
+  ],
+  "modelFilesTrackedByGit": false,
+  "uploadsModelFiles": false,
+  "performsPublish": false
+}

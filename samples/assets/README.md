@@ -6,8 +6,9 @@ This folder contains audit templates for asset-dependent samples. It does not co
 
 `demo-model-inventory.json` is the authoritative 10-model acquisition, conversion, outer `models` path, length, SHA256, article, and
 source-tree runtime-evidence catalog. Every entry has a `runtimeEvidence` path to a tracked small JSON record; none of those links
-permit model upload or public redistribution. `onnxtoengine-mnist-real-model-runtime-evidence.json` records the MNIST digit-7
-TensorRT/ONNX Runtime match and the wrong-expected-digit controlled negative.
+permit model upload or public redistribution. `onnxtoengine-mnist-owner-generated-runtime-evidence.json` records the current MNIST
+project-generated digit-7 TensorRT/ONNX Runtime match, annotated result, and wrong-expected-digit controlled negative. The older
+`onnxtoengine-mnist-real-model-runtime-evidence.json` remains as the TensorRT-supplied-input comparison record.
 `tensorrtexec-refitted-plan-package-consumer-article-runtime-evidence.json` records the separate repository-external,
 two-package local-feed run, its real stdout screenshot, the exact output hash, and the 53/53 strict validation result.
 

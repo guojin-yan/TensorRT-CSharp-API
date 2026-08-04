@@ -33,7 +33,10 @@ function Get-Sha256 {
 
 function Get-RelativePath {
   param([Parameter(Mandatory = $true)][string]$Root, [Parameter(Mandatory = $true)][string]$Path)
-  return [IO.Path]::GetRelativePath([IO.Path]::GetFullPath($Root), [IO.Path]::GetFullPath($Path)).Replace('\', '/')
+  $rootPath = [IO.Path]::GetFullPath($Root).TrimEnd('\', '/') + [IO.Path]::DirectorySeparatorChar
+  $rootUri = [Uri]$rootPath
+  $pathUri = [Uri][IO.Path]::GetFullPath($Path)
+  return [Uri]::UnescapeDataString($rootUri.MakeRelativeUri($pathUri).ToString()).Replace('\', '/')
 }
 
 function Test-PathWithin {
@@ -222,12 +225,12 @@ try {
       "DeterministicOutput=True",
       "TensorRtReferenceComparisonPassed=True",
       "PredictedIndex=7")) {
-    if (-not $stdout.Contains($marker, [StringComparison]::Ordinal)) {
+    if ($stdout.IndexOf($marker, [StringComparison]::Ordinal) -lt 0) {
       throw "ONNX Runtime reference output is missing marker '$marker'."
     }
   }
 
-  $runReport = Get-Content -LiteralPath $runReportPath -Raw -Encoding utf8 | ConvertFrom-Json -Depth 100
+  $runReport = Get-Content -LiteralPath $runReportPath -Raw -Encoding utf8 | ConvertFrom-Json
   if (-not [bool]$runReport.success -or -not [bool]$runReport.providerValidated -or
       -not [bool]$runReport.deterministicOutput -or -not [bool]$runReport.tensorRtComparison.passed) {
     throw "ONNX Runtime run report did not pass all runtime gates."
@@ -304,7 +307,7 @@ finally {
   }
 }
 
-$sidecarDocument = Get-Content -LiteralPath $sidecarPath -Raw -Encoding utf8 | ConvertFrom-Json -Depth 100
+$sidecarDocument = Get-Content -LiteralPath $sidecarPath -Raw -Encoding utf8 | ConvertFrom-Json
 $evidencePath = Join-Path $RepositoryRoot "artifacts\interface-coverage\tensorrtexec-mnist-onnxruntime-reference-evidence.json"
 $evidence = [ordered]@{
   schemaVersion = "tensorrtexec-mnist-onnxruntime-reference-evidence.v1"

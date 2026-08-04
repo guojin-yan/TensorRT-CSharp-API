@@ -65,10 +65,12 @@
       },
       "articles": [
         "docs/articles/zh-cn/demo-model-acquisition-and-onnx-conversion.md",
+        "docs/articles/zh-cn/onnxtoengine-mnist-owner-generated-tutorial.md",
         "docs/articles/zh-cn/tensorrtexec-onnx-stripped-plan-refit-lifecycle.md",
         "docs/articles/zh-cn/tensorrtexec-refitted-plan-local-package-consumer.md"
       ],
-      "runtimeEvidence": "samples/assets/onnxtoengine-mnist-real-model-runtime-evidence.json"
+      "runtimeEvidence": "samples/assets/onnxtoengine-mnist-owner-generated-runtime-evidence.json",
+      "localPackageConsumerEvidence": "samples/assets/tensorrtexec-refitted-plan-package-consumer-article-runtime-evidence.json"
     },
     {
       "id": "yolovision-yolov8n-detection-v8.3.0",

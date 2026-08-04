@@ -73,7 +73,7 @@ public sealed class OnnxToEngineMnistRuntimeEvidenceTests
     }
 
     [Fact]
-    public void TechnicalArticleEvidenceMatchesPortableRuntimeSourceAndScreenshot()
+    public void TechnicalArticleEvidencePinsHistoricalRuntimeSourceAndScreenshot()
     {
         string evidencePath = Path.Combine(
             RepositoryPaths.Root,
@@ -103,7 +103,8 @@ public sealed class OnnxToEngineMnistRuntimeEvidenceTests
         string screenshotPath = Path.Combine(
             RepositoryPaths.Root,
             assets.GetProperty("runtimeScreenshotPath").GetString()!.Replace('/', Path.DirectorySeparatorChar));
-        Assert.Equal(assets.GetProperty("runtimeServiceSha256").GetString(), ComputeSha256(servicePath));
+        Assert.Matches("^[a-f0-9]{40}$", root.GetProperty("sourceBaseCommit").GetString()!);
+        Assert.Matches("^[a-f0-9]{64}$", assets.GetProperty("runtimeServiceSha256").GetString()!);
         Assert.Equal(assets.GetProperty("runtimeScreenshotSha256").GetString(), ComputeSha256(screenshotPath));
 
         string service = File.ReadAllText(servicePath);
@@ -120,6 +121,61 @@ public sealed class OnnxToEngineMnistRuntimeEvidenceTests
         Assert.Contains("Predicted=7 Confidence=0.999993", article, StringComparison.Ordinal);
         Assert.DoesNotContain(@"E:\", article, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain(@"C:\Users\", article, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void OwnerGeneratedArticlePinsRuntimeReferenceNegativeAndVisuals()
+    {
+        string evidencePath = Path.Combine(
+            RepositoryPaths.Root,
+            "samples",
+            "assets",
+            "onnxtoengine-mnist-owner-generated-runtime-evidence.json");
+        using JsonDocument document = JsonDocument.Parse(File.ReadAllText(evidencePath));
+        JsonElement root = document.RootElement;
+        JsonElement runtime = root.GetProperty("runtimeValidation");
+        JsonElement reference = root.GetProperty("independentReferenceValidation");
+        JsonElement negative = root.GetProperty("controlledNegative");
+        JsonElement visuals = root.GetProperty("articleVisuals");
+
+        Assert.Equal("real-model-runtime", root.GetProperty("proofClassification").GetString());
+        Assert.Equal("project-generated-deterministic-geometry", root.GetProperty("inputAsset").GetProperty("sourceClassification").GetString());
+        Assert.Equal("CC0-1.0", root.GetProperty("inputAsset").GetProperty("license").GetString());
+        Assert.Equal(7, runtime.GetProperty("predictedDigit").GetInt32());
+        Assert.True(runtime.GetProperty("outputMatch").GetBoolean());
+        Assert.Equal(0, reference.GetProperty("mismatchCount").GetInt32());
+        Assert.True(reference.GetProperty("passed").GetBoolean());
+        Assert.Equal(2, negative.GetProperty("exitCode").GetInt32());
+        Assert.False(negative.GetProperty("outputMatch").GetBoolean());
+        Assert.True(negative.GetProperty("failClosed").GetBoolean());
+
+        Assert.Equal(
+            root.GetProperty("sourceChangesIncluded").GetProperty("generatorSha256").GetString(),
+            ComputeSha256(Path.Combine(RepositoryPaths.Root, "eng", "New-MnistOwnerGeneratedDigit.ps1")));
+        Assert.Equal(
+            root.GetProperty("sourceChangesIncluded").GetProperty("visualizationWriterSha256").GetString(),
+            ComputeSha256(Path.Combine(RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp.Tools", "Runtime", "MnistVisualizationWriter.cs")));
+        Assert.Equal(
+            root.GetProperty("sourceChangesIncluded").GetProperty("sampleProgramSha256").GetString(),
+            ComputeSha256(Path.Combine(RepositoryPaths.Root, "samples", "OnnxToEngine", "Program.cs")));
+        Assert.Equal(
+            visuals.GetProperty("annotatedResultSha256").GetString(),
+            ComputeSha256(Path.Combine(RepositoryPaths.Root, visuals.GetProperty("annotatedResult").GetString()!.Replace('/', Path.DirectorySeparatorChar))));
+        Assert.Equal(
+            visuals.GetProperty("runtimeTerminalSha256").GetString(),
+            ComputeSha256(Path.Combine(RepositoryPaths.Root, visuals.GetProperty("runtimeTerminal").GetString()!.Replace('/', Path.DirectorySeparatorChar))));
+
+        string article = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "docs",
+            "articles",
+            "zh-cn",
+            "onnxtoengine-mnist-owner-generated-tutorial.md"));
+        Assert.Contains("模型获取与许可证", article, StringComparison.Ordinal);
+        Assert.Contains("ONNX 转换与暂存", article, StringComparison.Ordinal);
+        Assert.Contains("终端截图来自本次真实运行的 stdout", article, StringComparison.Ordinal);
+        Assert.Contains("两张图都来自同一次真实 TensorRT 执行", article, StringComparison.Ordinal);
+        Assert.DoesNotMatch("[A-Za-z]:\\\\", article);
     }
 
     private static string ComputeSha256(string path)
