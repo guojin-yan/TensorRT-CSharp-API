@@ -123,7 +123,7 @@ dotnet test tests/JYPPX.ProjectQuality.Tests/JYPPX.ProjectQuality.Tests.csproj -
 dotnet build TensorRtSharp.sln -c Release
 pwsh -NoProfile -File eng/Test-ExternalVendorRuntimePackagePolicy.ps1
 pwsh -NoProfile -File eng/Test-ReleaseCandidateReadiness.ps1
-pwsh -NoProfile -File eng/Invoke-WindowsBridgePackageMatrix.ps1 -SkipBuild -SkipPack -SkipConsumerValidation
+pwsh -NoProfile -File eng/Invoke-WindowsBridgePackageMatrix.ps1 -SkipPack -SkipManagedPack -SkipConsumerValidation
 ```
 
 DocFX 构建、严格 output validator、真实模型专项测试和远程 Actions 仍应按改动范围补充执行。任何绿色汇总都不能自动打开发布门禁。
