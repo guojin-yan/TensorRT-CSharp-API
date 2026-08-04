@@ -1,4 +1,4 @@
-namespace JYPPX.Shared.Interop;
+namespace JYPPX.TensorRtSharp.Shared.Interop;
 
 /// <summary>
 /// Capability flags surfaced by the native bridge.

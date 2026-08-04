@@ -4,7 +4,7 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-namespace JYPPX.Shared.Interop;
+namespace JYPPX.TensorRtSharp.Shared.Interop;
 
 /// <summary>
 /// Shared native bridge loader used by managed assemblies that P/Invoke the bridge.

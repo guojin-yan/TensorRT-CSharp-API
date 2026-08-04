@@ -55,6 +55,19 @@
     "processExitCode": 0,
     "passed": true
   },
+  "maintenanceValidation": {
+    "validatedUtcDate": "2026-08-04",
+    "validationScope": "namespace-root-migration-and-host-transfer-api-maintenance",
+    "validationBaseCommit": "b930e7f2abb604bfeeab74336af15bb0d17a3351",
+    "currentSourceSha256": "e6329a5f185400782453891d48462c3d643f93468811d70a466730a59577696e",
+    "currentAssemblySha256": "d70573dc5979f17e6f8a14cb2ffa46752b34911bcf4c62d13bbb3f6571d6dd14",
+    "currentRuntimeLogSha256": "7b022a80db8df14dc68fb8eaed8fa153fc6c997b4b3a918ccfb5be9ce03bb221",
+    "elapsedMilliseconds": 1.034,
+    "outputMatch": true,
+    "processExitCode": 0,
+    "runtimeScreenshotRecaptured": false,
+    "historicalRuntimeScreenshotRetained": true
+  },
   "proofBoundary": {
     "sourceTreeRuntime": true,
     "realTensorRtEngineExecution": true,

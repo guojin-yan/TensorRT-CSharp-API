@@ -129,6 +129,7 @@ public sealed class TechnicalArticleCampaignSecondBatchBodyTests
         JsonElement root = evidence.RootElement;
         JsonElement assets = root.GetProperty("assets");
         JsonElement validation = root.GetProperty("runtimeValidation");
+        JsonElement maintenance = root.GetProperty("maintenanceValidation");
 
         Assert.Equal("dynamic-shape-technical-article-runtime-evidence", root.GetProperty("recordKind").GetString());
         Assert.False(root.GetProperty("network").GetProperty("modelOrOnnxRequired").GetBoolean());
@@ -142,7 +143,11 @@ public sealed class TechnicalArticleCampaignSecondBatchBodyTests
         string screenshotPath = Path.Combine(
             RepositoryPaths.Root,
             assets.GetProperty("runtimeScreenshotPath").GetString()!.Replace('/', Path.DirectorySeparatorChar));
-        Assert.Equal(assets.GetProperty("sampleSourceSha256").GetString(), ComputeSha256(sourcePath));
+        Assert.Equal(maintenance.GetProperty("currentSourceSha256").GetString(), ComputeSha256(sourcePath));
+        Assert.Equal(0, maintenance.GetProperty("processExitCode").GetInt32());
+        Assert.True(maintenance.GetProperty("outputMatch").GetBoolean());
+        Assert.False(maintenance.GetProperty("runtimeScreenshotRecaptured").GetBoolean());
+        Assert.True(maintenance.GetProperty("historicalRuntimeScreenshotRetained").GetBoolean());
         Assert.Equal(assets.GetProperty("runtimeScreenshotSha256").GetString(), ComputeSha256(screenshotPath));
 
         string article = File.ReadAllText(articlePath);

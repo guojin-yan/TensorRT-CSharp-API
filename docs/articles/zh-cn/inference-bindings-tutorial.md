@@ -183,7 +183,25 @@ if (!inputValues.SequenceEqual(outputValues))
 }
 ```
 
-Identity 网络应逐值返回输入。`OutputMatch=True` 因而验证了 host-to-device、tensor binding、GPU enqueue、device-to-host 和输出长度这条完整路径。
+Identity 网络应逐值返回输入。示例还调用 `ReadOutputBytes`，确认完整原始缓冲区与 FP32 输出的位模式一致；`OutputMatch=True` 因而验证了 host-to-device、tensor binding、GPU enqueue、typed readback、raw readback 和输出长度这条完整路径。
+
+### 8. 正确处理 FP16、整数和布尔输出
+
+`CopyInputFromHost(string, float[], ...)` 与 `ReadOutputSingles` 是明确的 FP32 通道。它们会检查 engine binding 的 `DataType`；如果把 Half、BFloat16、整数或布尔 tensor 误当作 FP32，API 会直接拒绝，而不是把相同的内存位模式静默解释成错误数值。
+
+非 FP32 输出应先读取完整原始缓冲区，再按照 binding metadata 解码：
+
+```csharp
+TensorRtInferenceBuffer outputBuffer = bindings.Buffers["output"];
+byte[] rawOutput = bindings.ReadOutputBytes("output");
+
+Console.WriteLine(
+    $"Type={outputBuffer.Tensor.DataType} " +
+    $"Format={outputBuffer.Tensor.Format} " +
+    $"Bytes={rawOutput.Length}");
+```
+
+`ReadOutputBytes` 使用 `TensorRtInferenceBuffer.SizeInBytes` 读取完整绑定，不猜测元素类型。调用方必须结合 `DataType`、`EffectiveBytesPerComponent`、`EffectiveComponentsPerElement`、`Format` 和 `VectorizedDimension` 解码；对于打包或向量化格式，不能只按逻辑 shape 乘标量大小。非 FP32 输入可继续使用 `CopyInputFromHost(string, byte[], ...)` 写入已经按相同 metadata 编码的字节。
 
 ## 编译并运行
 
@@ -242,6 +260,8 @@ ProcessExitCode=0
 | 进程状态 | `ProcessExitCode=0` | 示例正常退出。 |
 
 机器可读证据位于 `samples/assets/inference-bindings-article-runtime-evidence.json`。其中保存了源文件、程序集、桥接库、原始日志和截图 SHA256，测试会重新计算仓库内源文件与截图哈希。
+
+2026-08-04 将共享类型迁入 `JYPPX.TensorRtSharp.Shared` 命名空间并补充字节读回 API 后，本文命令再次在同一 TensorRT 10.11 / CUDA 12.9 环境执行，结果为 `ProcessExitCode=0`、`OutputMatch=True`，耗时 `1.034 ms`。本次还实际比较了 typed FP32 与 raw byte readback 的完整位模式。证据中的 `maintenanceValidation` 保存当前源码、程序集和运行日志 SHA256；正文图片仍保留 2026-08-03 的真实终端截图，并明确记录 `runtimeScreenshotRecaptured=false`，不把旧图冒充为本次重拍。
 
 ## 如何阅读 `bindings.Describe()`
 

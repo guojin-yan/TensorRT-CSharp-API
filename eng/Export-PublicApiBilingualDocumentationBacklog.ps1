@@ -60,7 +60,7 @@ function Get-TypeNameFromMember {
     $namespacePrefix = "JYPPX.CudaSharp."
   }
   elseif ([string]::Equals($Project, "JYPPX.Shared", [System.StringComparison]::OrdinalIgnoreCase)) {
-    $namespacePrefix = "JYPPX.Shared."
+    $namespacePrefix = "JYPPX.TensorRtSharp.Shared."
   }
 
   if ($body.StartsWith($namespacePrefix, [System.StringComparison]::Ordinal)) {

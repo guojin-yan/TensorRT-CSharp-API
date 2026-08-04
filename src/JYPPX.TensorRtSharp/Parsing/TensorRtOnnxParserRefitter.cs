@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using JYPPX.Shared.Interop;
+using JYPPX.TensorRtSharp.Shared.Interop;
 using JYPPX.TensorRtSharp.Internal;
 using JYPPX.TensorRtSharp.Internal.Handles;
 using JYPPX.TensorRtSharp.Internal.Interop;

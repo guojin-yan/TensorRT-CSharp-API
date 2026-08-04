@@ -1,8 +1,8 @@
 using System;
 using System.Runtime.InteropServices;
-using JYPPX.Shared.Interop;
+using JYPPX.TensorRtSharp.Shared.Interop;
 
-namespace JYPPX.Shared.Generated;
+namespace JYPPX.TensorRtSharp.Shared.Generated;
 
 /// <summary>
 /// Generated bridge interop declarations.

@@ -1,5 +1,5 @@
 using JYPPX.CudaSharp.Internal.Interop;
-using JYPPX.Shared.Interop;
+using JYPPX.TensorRtSharp.Shared.Interop;
 
 namespace JYPPX.CudaSharp.Internal.Handles;
 

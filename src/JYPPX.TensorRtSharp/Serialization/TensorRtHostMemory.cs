@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-using JYPPX.Shared.Interop;
+using JYPPX.TensorRtSharp.Shared.Interop;
 using JYPPX.TensorRtSharp.Internal.Handles;
 using JYPPX.TensorRtSharp.Internal.Interop;
 

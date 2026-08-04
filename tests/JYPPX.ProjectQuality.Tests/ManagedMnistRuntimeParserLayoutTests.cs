@@ -23,7 +23,7 @@ public sealed class ManagedMnistRuntimeParserLayoutTests
         "using System.Text;\n" +
         "using System.Text.Json;\n" +
         "using JYPPX.CudaSharp;\n" +
-        "using JYPPX.Shared.Interop;\n" +
+        "using JYPPX.TensorRtSharp.Shared.Interop;\n" +
         "using JYPPX.TensorRtSharp;\n\n" +
         "namespace JYPPX.TensorRtSharp.Tools;\n\n";
 

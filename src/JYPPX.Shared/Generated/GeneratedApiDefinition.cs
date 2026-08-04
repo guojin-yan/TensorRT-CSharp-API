@@ -1,4 +1,4 @@
-namespace JYPPX.Shared.Generated;
+namespace JYPPX.TensorRtSharp.Shared.Generated;
 
 /// <summary>
 /// Describes one generated API manifest entry.

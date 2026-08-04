@@ -1,6 +1,6 @@
 using System.Text.Json;
 using JYPPX.CudaSharp;
-using JYPPX.Shared.Interop;
+using JYPPX.TensorRtSharp.Shared.Interop;
 using JYPPX.TensorRtSharp;
 using Xunit;
 

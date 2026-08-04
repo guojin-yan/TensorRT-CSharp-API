@@ -1,6 +1,6 @@
 using System;
 using System.Runtime.InteropServices;
-using JYPPX.Shared.Interop;
+using JYPPX.TensorRtSharp.Shared.Interop;
 
 namespace JYPPX.TensorRtSharp.Internal.Interop;
 

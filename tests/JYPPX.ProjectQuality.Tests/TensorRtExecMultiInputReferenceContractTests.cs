@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
 using System.Text.Json;
-using JYPPX.Shared.Interop;
+using JYPPX.TensorRtSharp.Shared.Interop;
 using JYPPX.TensorRtSharp.Tools;
 using Xunit;
 

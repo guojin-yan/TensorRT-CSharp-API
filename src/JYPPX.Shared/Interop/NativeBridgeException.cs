@@ -1,6 +1,6 @@
 using System;
 
-namespace JYPPX.Shared.Interop;
+namespace JYPPX.TensorRtSharp.Shared.Interop;
 
 /// <summary>
 /// Base exception for managed wrappers around the native bridge.

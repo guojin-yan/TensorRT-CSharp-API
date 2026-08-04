@@ -8,9 +8,9 @@ namespace JYPPX.ProjectQuality.Tests;
 public sealed class ManagedParserRefitterInferenceFeatureLayoutTests
 {
     private const string ParserRefitterOriginalNormalizedSha256 =
-        "f4b7d422744849ead2bebc899000f495a2c27d96c120922228ff81451c4b88b6";
+        "f18a67b5f9660b0dde1f71288dffd177a18662fc4d7e16455c9341e27e73c35d";
     private const string InferenceBindingsOriginalNormalizedSha256 =
-        "021eb1ba7d4f1bd632a9f142adb99806ceb96c99e7895df0b1ced3125590a753";
+        "80ddd3fe4c3b391e9cd005e240feb2df71d9d1ae3b861eec119a6ecb54a5eca0";
 
     public static TheoryData<string, string[]> ParserRefitterFeatureMethods => new()
     {
@@ -67,7 +67,7 @@ public sealed class ManagedParserRefitterInferenceFeatureLayoutTests
         { "Buffers", new[] { "AllocateDeviceBuffer", "UseDeviceBuffer" } },
         {
             "HostTransfers",
-            new[] { "CopyInputFromHost", "CopyInputFromHost", "ReadOutputSingles" }
+            new[] { "CopyInputFromHost", "CopyInputFromHost", "ReadOutputSingles", "ReadOutputBytes" }
         },
         { "AddressBinding", new[] { "BindTensor", "BindAll" } },
         {
@@ -140,6 +140,18 @@ public sealed class ManagedParserRefitterInferenceFeatureLayoutTests
         Assert.Contains("private TensorRtInferenceBuffer EnsureBuffer(", buffers, StringComparison.Ordinal);
         Assert.Contains("private void RemoveOwnedBuffer(", buffers, StringComparison.Ordinal);
         Assert.Contains("private TensorRtExecutionContextReadiness PrepareForExecution(", execution, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void TensorRtInferenceBindingsKeepsTypedAndRawHostTransfersExplicit()
+    {
+        string transfers = ReadSource("Inference", "TensorRtInferenceBindings.HostTransfers.cs");
+
+        Assert.Contains("EnsureSinglePrecisionTensor(tensor, \"copied from a float array\")", transfers, StringComparison.Ordinal);
+        Assert.Contains("EnsureSinglePrecisionTensor(buffer.Tensor, \"read as a float array\")", transfers, StringComparison.Ordinal);
+        Assert.Contains("public byte[] ReadOutputBytes(string tensorName)", transfers, StringComparison.Ordinal);
+        Assert.Contains("buffer.Memory.ToArray(buffer.SizeInBytes)", transfers, StringComparison.Ordinal);
+        Assert.Contains("tensor.DataType != TensorRtDataType.Float", transfers, StringComparison.Ordinal);
     }
 
     [Fact]

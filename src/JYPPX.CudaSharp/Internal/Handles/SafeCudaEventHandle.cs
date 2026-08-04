@@ -1,4 +1,4 @@
-using JYPPX.Shared.Interop;
+using JYPPX.TensorRtSharp.Shared.Interop;
 using JYPPX.CudaSharp.Internal.Interop;
 
 namespace JYPPX.CudaSharp.Internal.Handles;

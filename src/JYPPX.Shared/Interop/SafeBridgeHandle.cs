@@ -1,6 +1,6 @@
 using Microsoft.Win32.SafeHandles;
 
-namespace JYPPX.Shared.Interop;
+namespace JYPPX.TensorRtSharp.Shared.Interop;
 
 /// <summary>
 /// Common base type for native bridge SafeHandle implementations.

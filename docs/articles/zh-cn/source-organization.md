@@ -2,6 +2,10 @@
 
 Windows API 完整化阶段已经把源码模块化作为质量门禁，而不是单纯的可读性优化。
 
+## 命名空间根规则
+
+托管源码只允许两个产品根命名空间：TensorRT、工具和共享桥接类型归入 `JYPPX.TensorRtSharp`，CUDA 类型归入 `JYPPX.CudaSharp`。内部拆分程序集 `JYPPX.Shared.dll` 的类型使用 `JYPPX.TensorRtSharp.Shared`、`JYPPX.TensorRtSharp.Shared.Interop` 和 `JYPPX.TensorRtSharp.Shared.Generated`，不再暴露第三个 `JYPPX.Shared` 根。`ManagedNamespaceRootPolicyTests` 会扫描 `src` 和生成模板，阻止游离命名空间重新进入代码库。
+
 ## 原生桥接层
 
 过大的原生桥接文件需要按部署功能区拆分，同时保持 C ABI 导出名和行为不变。
@@ -77,7 +81,7 @@ ParserRefitter 与高层 InferenceBindings 也按调用阶段拆分。`Parsing/T
 native owner、refitter/logger borrower lifetime、initializer pin lifetime、共享 model segment/stream copy helper 与 Dispose core；
 21 个 refit/model-proto/initializer/diagnostic 方法进入 4 份 feature partial。`Inference/TensorRtInferenceBindings.cs`
 现为 124 行 engine/context 引用、buffer owner、共享 tensor lookup/report refresh、Dispose 与 disposed-state core；
-14 个 geometry/buffer/host-transfer/address-binding/execution/diagnostic 方法进入 6 份 feature partial，feature 专属的
+15 个 geometry/buffer/host-transfer/address-binding/execution/diagnostic 方法进入 6 份 feature partial，feature 专属的
 size estimation、buffer replacement 与 readiness helper 跟随各自 owner。布局门禁可重组拆分前 Git blob
 `07975ca6274fb64fcce06ca6e967515f07aa734c` 与 `6257b4c8ad3c0f8c4ec349208e8583b670359d0a`。
 

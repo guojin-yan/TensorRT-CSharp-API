@@ -60,7 +60,7 @@ public sealed class AllocatorOwnerDryRunTests
         Assert.False(success.RealCallbackRuntime);
         Assert.False(success.IsRealCallbackRuntimeProof);
         Assert.Equal("sync-allocator-prototype", success.CallbackKind);
-        Assert.Equal(JYPPX.Shared.Interop.BridgeStatusCode.Ok, success.LastStatus);
+        Assert.Equal(JYPPX.TensorRtSharp.Shared.Interop.BridgeStatusCode.Ok, success.LastStatus);
         Assert.Equal(1, success.InvocationCount);
         Assert.Equal(0, success.FailureCount);
         Assert.Equal(0, success.InFlightCallbackCount);
@@ -96,7 +96,7 @@ public sealed class AllocatorOwnerDryRunTests
         TensorRtAllocatorCallbackOwnerSnapshot failure =
             throwingOwner.RunLifecycleDiagnostic(new TensorRtAllocatorDryRunRequest(8192, 512, "quality-prototype-throw"));
         Assert.False(failure.RealCallbackRuntime);
-        Assert.Equal(JYPPX.Shared.Interop.BridgeStatusCode.InvalidState, failure.LastStatus);
+        Assert.Equal(JYPPX.TensorRtSharp.Shared.Interop.BridgeStatusCode.InvalidState, failure.LastStatus);
         Assert.Equal(1, failure.InvocationCount);
         Assert.Equal(1, failure.FailureCount);
         Assert.Equal(0, failure.InFlightCallbackCount);

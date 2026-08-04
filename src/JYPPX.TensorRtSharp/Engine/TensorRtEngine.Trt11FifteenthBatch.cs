@@ -129,7 +129,7 @@ public sealed partial class TensorRtEngine
         bool hasLegacyValues = false;
         bool hasValuesV2 = false;
 
-        if (Line == JYPPX.Shared.Interop.TensorRtApiLine.TensorRt10)
+        if (Line == JYPPX.TensorRtSharp.Shared.Interop.TensorRtApiLine.TensorRt10)
         {
             try
             {

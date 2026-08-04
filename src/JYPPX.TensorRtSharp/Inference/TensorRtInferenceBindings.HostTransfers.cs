@@ -20,6 +20,9 @@ public sealed partial class TensorRtInferenceBindings
             throw new ArgumentNullException(nameof(values));
         }
 
+        TensorRtEngineTensorBinding tensor = GetTensor(tensorName);
+        EnsureSinglePrecisionTensor(tensor, "copied from a float array");
+
         TensorRtInferenceBuffer buffer = EnsureBuffer(tensorName, runtimeShape, checked(values.Length * sizeof(float)));
         if (buffer.Tensor.IOMode != TensorRtIOMode.Input)
         {
@@ -66,6 +69,34 @@ public sealed partial class TensorRtInferenceBindings
     public float[] ReadOutputSingles(string tensorName, int elementCount)
     {
         ThrowIfDisposed();
+        TensorRtInferenceBuffer buffer = GetOutputBuffer(tensorName);
+        EnsureSinglePrecisionTensor(buffer.Tensor, "read as a float array");
+        return buffer.Memory.ToSingleArray(elementCount);
+    }
+
+    /// <summary>
+    /// Copies the complete named output tensor buffer to a managed byte array.
+    /// 将指定输出 tensor 的完整缓冲区复制到托管字节数组。
+    /// </summary>
+    /// <param name="tensorName">The output tensor name. 输出 tensor 名称。</param>
+    /// <returns>
+    /// The raw output bytes in the TensorRT binding layout. TensorRT 绑定布局中的原始输出字节。
+    /// </returns>
+    /// <remarks>
+    /// Use this method for Half, BFloat16, integer, Boolean, packed, or vectorized output tensors,
+    /// then decode the bytes according to <see cref="TensorRtInferenceBuffer.Tensor"/> metadata.
+    /// 对 Half、BFloat16、整数、布尔、打包或向量化输出 tensor 使用此方法，
+    /// 并根据 <see cref="TensorRtInferenceBuffer.Tensor"/> 元数据解码字节。
+    /// </remarks>
+    public byte[] ReadOutputBytes(string tensorName)
+    {
+        ThrowIfDisposed();
+        TensorRtInferenceBuffer buffer = GetOutputBuffer(tensorName);
+        return buffer.Memory.ToArray(buffer.SizeInBytes);
+    }
+
+    private TensorRtInferenceBuffer GetOutputBuffer(string tensorName)
+    {
         if (!_buffers.TryGetValue(tensorName, out TensorRtInferenceBuffer? buffer))
         {
             throw new InvalidOperationException($"Tensor '{tensorName}' does not have an attached CUDA buffer.");
@@ -76,6 +107,16 @@ public sealed partial class TensorRtInferenceBindings
             throw new ArgumentException("Only output tensors can be read as outputs.", nameof(tensorName));
         }
 
-        return buffer.Memory.ToSingleArray(elementCount);
+        return buffer;
+    }
+
+    private static void EnsureSinglePrecisionTensor(TensorRtEngineTensorBinding tensor, string operation)
+    {
+        if (tensor.DataType != TensorRtDataType.Float)
+        {
+            throw new NotSupportedException(
+                $"Tensor '{tensor.Name}' is {tensor.DataType} and cannot be {operation}. " +
+                "Use the byte-array transfer API and decode the binding according to its tensor metadata.");
+        }
     }
 }

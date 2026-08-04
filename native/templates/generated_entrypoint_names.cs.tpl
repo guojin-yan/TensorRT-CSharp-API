@@ -1,4 +1,4 @@
-namespace JYPPX.Shared.Generated;
+namespace JYPPX.TensorRtSharp.Shared.Generated;
 
 /// <summary>
 /// Generated bridge entry point names.

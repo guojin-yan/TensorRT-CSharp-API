@@ -1,7 +1,7 @@
 using System;
 using System.Globalization;
 using JYPPX.SampleSupport;
-using JYPPX.Shared.Interop;
+using JYPPX.TensorRtSharp.Shared.Interop;
 using JYPPX.TensorRtSharp.Tools;
 
 namespace OnnxToEngineSample;

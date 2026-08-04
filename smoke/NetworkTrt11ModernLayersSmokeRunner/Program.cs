@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 using JYPPX.CudaSharp;
-using JYPPX.Shared.Interop;
+using JYPPX.TensorRtSharp.Shared.Interop;
 using JYPPX.TensorRtSharp;
 
 internal static class Program

@@ -41,7 +41,7 @@ public static class TensorRtCallbackAllocatorReadiness
         AddRange(blockers, debugListenerRuntimeProofPrecheck.BlockedPrerequisites);
 
         bool allocatorOwnerDryRunReady =
-            allocatorLedgerSafetyGate.InternalPrototypeStatus == JYPPX.Shared.Interop.BridgeStatusCode.Ok &&
+            allocatorLedgerSafetyGate.InternalPrototypeStatus == JYPPX.TensorRtSharp.Shared.Interop.BridgeStatusCode.Ok &&
             allocatorLedgerSafetyGate.InvocationCount > 0 &&
             allocatorLedgerSafetyGate.FailureCount == 0 &&
             allocatorLedgerSafetyGate.PointerFreeSurfaceReady;

@@ -878,7 +878,7 @@ function Invoke-BridgePackageConsumerValidation {
 using System;
 using System.IO;
 using JYPPX.CudaSharp;
-using JYPPX.Shared.Interop;
+using JYPPX.TensorRtSharp.Shared.Interop;
 using JYPPX.TensorRtSharp;
 
 const string Rid = "__RID__";

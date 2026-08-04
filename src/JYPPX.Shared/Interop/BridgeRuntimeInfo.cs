@@ -1,4 +1,4 @@
-namespace JYPPX.Shared.Interop;
+namespace JYPPX.TensorRtSharp.Shared.Interop;
 
 /// <summary>
 /// Runtime-facing bridge state reported by the native layer.

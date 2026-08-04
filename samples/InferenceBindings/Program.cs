@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using JYPPX.CudaSharp;
 using JYPPX.SampleSupport;
-using JYPPX.Shared.Interop;
+using JYPPX.TensorRtSharp.Shared.Interop;
 using JYPPX.TensorRtSharp;
 
 namespace InferenceBindingsSample;
@@ -100,6 +100,14 @@ internal static class Program
         if (!inputValues.SequenceEqual(outputValues))
         {
             throw new InvalidOperationException($"Inference binding output mismatch. Input=[{string.Join(", ", inputValues)}] Output=[{string.Join(", ", outputValues)}]");
+        }
+
+        byte[] rawOutput = bindings.ReadOutputBytes("output");
+        byte[] expectedRawOutput = new byte[checked(outputValues.Length * sizeof(float))];
+        Buffer.BlockCopy(outputValues, 0, expectedRawOutput, 0, expectedRawOutput.Length);
+        if (!rawOutput.SequenceEqual(expectedRawOutput))
+        {
+            throw new InvalidOperationException("Raw output readback does not match the typed FP32 output bytes.");
         }
 
         ulong profileMemory = line == TensorRtApiLine.TensorRt10 ? engine.GetDeviceMemorySizeForProfileV2(profileIndex) : engine.DeviceMemorySizeInBytes;

@@ -1,4 +1,4 @@
-namespace JYPPX.Shared;
+namespace JYPPX.TensorRtSharp.Shared;
 
 /// <summary>
 /// Shared constants that are stable across the managed surface area.

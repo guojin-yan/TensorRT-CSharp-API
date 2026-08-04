@@ -1,6 +1,6 @@
 using System;
 using System.Text;
-using JYPPX.Shared.Interop;
+using JYPPX.TensorRtSharp.Shared.Interop;
 
 namespace JYPPX.CudaSharp.Internal.Interop;
 

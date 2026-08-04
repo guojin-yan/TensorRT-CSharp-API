@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
 using JYPPX.CudaSharp.Internal.Handles;
-using JYPPX.Shared.Interop;
+using JYPPX.TensorRtSharp.Shared.Interop;
 using JYPPX.TensorRtSharp.Internal.Handles;
 
 namespace JYPPX.TensorRtSharp.Internal.Interop;

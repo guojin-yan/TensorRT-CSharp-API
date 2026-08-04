@@ -581,7 +581,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using JYPPX.CudaSharp;
-using JYPPX.Shared.Interop;
+using JYPPX.TensorRtSharp.Shared.Interop;
 using JYPPX.TensorRtSharp;
 
 static void WriteRuntimeCreateDiagnostic(TensorRtApiLine line)

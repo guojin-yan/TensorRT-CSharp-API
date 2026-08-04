@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using JYPPX.CudaSharp;
-using JYPPX.Shared.Interop;
+using JYPPX.TensorRtSharp.Shared.Interop;
 using JYPPX.TensorRtSharp;
 
 namespace JYPPX.TensorRtSharp.Tools;

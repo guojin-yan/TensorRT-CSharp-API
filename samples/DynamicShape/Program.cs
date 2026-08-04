@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using JYPPX.CudaSharp;
 using JYPPX.SampleSupport;
-using JYPPX.Shared.Interop;
+using JYPPX.TensorRtSharp.Shared.Interop;
 using JYPPX.TensorRtSharp;
 
 namespace DynamicShapeSample;

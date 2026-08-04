@@ -1,7 +1,7 @@
 using System;
 using System.Globalization;
 using System.Linq;
-using JYPPX.Shared.Interop;
+using JYPPX.TensorRtSharp.Shared.Interop;
 
 namespace JYPPX.TensorRtSharp.Tools;
 

@@ -1,4 +1,4 @@
-namespace JYPPX.Shared.Interop;
+namespace JYPPX.TensorRtSharp.Shared.Interop;
 
 /// <summary>
 /// Build-time metadata reported by the native bridge.

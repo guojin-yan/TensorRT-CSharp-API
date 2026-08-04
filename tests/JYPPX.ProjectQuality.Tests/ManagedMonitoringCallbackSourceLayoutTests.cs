@@ -16,7 +16,7 @@ public sealed class ManagedMonitoringCallbackSourceLayoutTests
         "using System.Runtime.InteropServices;\n" +
         "using System.Text;\n" +
         "using System.Threading;\n" +
-        "using JYPPX.Shared.Interop;\n" +
+        "using JYPPX.TensorRtSharp.Shared.Interop;\n" +
         "using JYPPX.TensorRtSharp.Internal.Handles;\n" +
         "using JYPPX.TensorRtSharp.Internal.Interop;\n\n" +
         "namespace JYPPX.TensorRtSharp;\n\n";

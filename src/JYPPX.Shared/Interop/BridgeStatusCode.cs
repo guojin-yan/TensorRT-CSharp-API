@@ -1,4 +1,4 @@
-namespace JYPPX.Shared.Interop;
+namespace JYPPX.TensorRtSharp.Shared.Interop;
 
 /// <summary>
 /// Status codes returned by the native bridge.

@@ -51,9 +51,9 @@ foreach ($assembly in @($sharedAssembly, $cudaAssembly, $tensorRtAssembly)) {
 }
 
 $line = switch ($TensorRtLine) {
-  "8" { [JYPPX.Shared.Interop.TensorRtApiLine]::TensorRt8 }
-  "10" { [JYPPX.Shared.Interop.TensorRtApiLine]::TensorRt10 }
-  "11" { [JYPPX.Shared.Interop.TensorRtApiLine]::TensorRt11 }
+  "8" { [JYPPX.TensorRtSharp.Shared.Interop.TensorRtApiLine]::TensorRt8 }
+  "10" { [JYPPX.TensorRtSharp.Shared.Interop.TensorRtApiLine]::TensorRt10 }
+  "11" { [JYPPX.TensorRtSharp.Shared.Interop.TensorRtApiLine]::TensorRt11 }
 }
 
 $snapshot = [JYPPX.TensorRtSharp.TensorRtEnvironmentProbe]::GetCurrent()

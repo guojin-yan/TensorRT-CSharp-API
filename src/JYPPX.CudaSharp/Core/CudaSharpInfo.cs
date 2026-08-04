@@ -10,5 +10,5 @@ public static class CudaSharpInfo
     /// The native bridge logical library name.
     /// native bridge 的逻辑库名称。
     /// </summary>
-    public static string NativeBridgeLibraryName => JYPPX.Shared.BridgeConstants.NativeBridgeLibraryName;
+    public static string NativeBridgeLibraryName => JYPPX.TensorRtSharp.Shared.BridgeConstants.NativeBridgeLibraryName;
 }

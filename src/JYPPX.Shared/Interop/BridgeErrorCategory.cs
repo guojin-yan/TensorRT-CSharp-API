@@ -1,4 +1,4 @@
-namespace JYPPX.Shared.Interop;
+namespace JYPPX.TensorRtSharp.Shared.Interop;
 
 /// <summary>
 /// Broad source categories for bridge error messages.

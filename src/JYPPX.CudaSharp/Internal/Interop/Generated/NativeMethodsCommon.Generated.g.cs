@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
-using JYPPX.Shared;
-using JYPPX.Shared.Interop;
+using JYPPX.TensorRtSharp.Shared;
+using JYPPX.TensorRtSharp.Shared.Interop;
 
 
 namespace JYPPX.CudaSharp.Internal.Interop;

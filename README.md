@@ -5,6 +5,7 @@ TensorRtSharp4.0 is the next-generation workspace for a production-oriented Tens
 ## Scope
 
 - Managed assemblies: `JYPPX.TensorRtSharp`, `JYPPX.CudaSharp`
+- Public namespace roots: `JYPPX.TensorRtSharp` and `JYPPX.CudaSharp`; shared bridge types use `JYPPX.TensorRtSharp.Shared`.
 - NuGet package: `JYPPX.TensorRT.CSharp.API`
 - Native bridge library: `jyppxtrtbridge`
 - First release targets: Windows x64 and Linux x64

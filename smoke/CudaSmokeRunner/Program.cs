@@ -3,7 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using JYPPX.CudaSharp;
-using JYPPX.Shared.Interop;
+using JYPPX.TensorRtSharp.Shared.Interop;
 
 internal static class Program
 {

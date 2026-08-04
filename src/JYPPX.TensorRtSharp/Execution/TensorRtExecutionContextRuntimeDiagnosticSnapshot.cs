@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using JYPPX.Shared.Interop;
+using JYPPX.TensorRtSharp.Shared.Interop;
 
 namespace JYPPX.TensorRtSharp;
 

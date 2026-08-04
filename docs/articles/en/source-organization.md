@@ -2,6 +2,10 @@
 
 The Windows API completion phase now treats source modularization as a quality gate, not only a readability preference.
 
+## Namespace root policy
+
+Managed source permits two product namespace roots only: TensorRT, tools, and shared bridge types live under `JYPPX.TensorRtSharp`, while CUDA types live under `JYPPX.CudaSharp`. Types in the internally split `JYPPX.Shared.dll` assembly use `JYPPX.TensorRtSharp.Shared`, `JYPPX.TensorRtSharp.Shared.Interop`, and `JYPPX.TensorRtSharp.Shared.Generated`; they no longer expose a third `JYPPX.Shared` root. `ManagedNamespaceRootPolicyTests` scans `src` and the generator templates to prevent namespace drift.
+
 ## Native bridge
 
 Large native bridge files are split by deployment area while preserving C ABI names and behavior.
@@ -88,7 +92,7 @@ ParserRefitter and high-level InferenceBindings are split by call stage as well.
 a 114-line native-owner, refitter/logger borrower lifetime, initializer-pin lifetime, shared model segment/stream copy, and
 disposal core; 21 refit/model-proto/initializer/diagnostic methods live in four feature partials.
 `Inference/TensorRtInferenceBindings.cs` is now a 124-line engine/context reference, buffer owner, shared tensor lookup/report
-refresh, disposal, and disposed-state core; 14 geometry/buffer/host-transfer/address-binding/execution/diagnostic methods live
+refresh, disposal, and disposed-state core; 15 geometry/buffer/host-transfer/address-binding/execution/diagnostic methods live
 in six feature partials. Feature-specific size-estimation, buffer-replacement, and readiness helpers stay with their owners.
 The layout gate recomposes the pre-split Git blobs `07975ca6274fb64fcce06ca6e967515f07aa734c` and
 `6257b4c8ad3c0f8c4ec349208e8583b670359d0a`.

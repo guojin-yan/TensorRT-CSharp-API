@@ -1,5 +1,5 @@
 using System.IO;
-using JYPPX.Shared.Interop;
+using JYPPX.TensorRtSharp.Shared.Interop;
 using JYPPX.TensorRtSharp;
 using Xunit;
 

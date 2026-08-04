@@ -1301,7 +1301,7 @@ $($runtimePackageReferences -join "`r`n")
 
   $program = @"
 using JYPPX.CudaSharp;
-using JYPPX.Shared.Interop;
+using JYPPX.TensorRtSharp.Shared.Interop;
 using JYPPX.TensorRtSharp;
 
 static string GetStringArgument(string[] args, string name, string defaultValue)

@@ -1,5 +1,5 @@
 using System.Reflection;
-using JYPPX.Shared.Interop;
+using JYPPX.TensorRtSharp.Shared.Interop;
 using Xunit;
 
 namespace JYPPX.ProjectQuality.Tests;

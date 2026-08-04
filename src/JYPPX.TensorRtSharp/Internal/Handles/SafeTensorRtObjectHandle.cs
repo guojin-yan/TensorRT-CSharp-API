@@ -1,5 +1,5 @@
 using System;
-using JYPPX.Shared.Interop;
+using JYPPX.TensorRtSharp.Shared.Interop;
 using JYPPX.TensorRtSharp.Internal.Interop;
 
 namespace JYPPX.TensorRtSharp.Internal.Handles;

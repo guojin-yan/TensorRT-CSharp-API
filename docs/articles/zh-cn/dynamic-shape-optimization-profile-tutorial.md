@@ -223,6 +223,8 @@ ProcessExitCode=0
 
 本次运行的机器可读记录位于 `samples/assets/dynamic-shape-article-runtime-evidence.json`。记录中保存了源文件、程序集、桥接库、原始日志和截图的 SHA256，便于确认正文、截图与运行产物是否对应。
 
+2026-08-04 完成共享命名空间迁移后再次执行同一 Release 示例，结果为 `ProcessExitCode=0`、`OutputMatch=True`，耗时 `0.724 ms`。`maintenanceValidation` 记录当前源码、程序集和运行日志 SHA256；正文继续使用 2026-08-03 的真实终端截图，并以 `runtimeScreenshotRecaptured=false` 明确它不是本次重拍图片。
+
 ## 常见问题
 
 ### Batch 超出 Profile 范围

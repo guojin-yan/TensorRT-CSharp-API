@@ -5,6 +5,7 @@ TensorRtSharp4.0 是面向生产部署的 TensorRT / CUDA .NET 桥接工程。
 ## 项目范围
 
 - 托管程序集：`JYPPX.TensorRtSharp`、`JYPPX.CudaSharp`
+- 公共命名空间根：`JYPPX.TensorRtSharp` 与 `JYPPX.CudaSharp`；共享桥接类型统一位于 `JYPPX.TensorRtSharp.Shared`。
 - NuGet 主包：`JYPPX.TensorRT.CSharp.API`
 - 原生桥接库：`jyppxtrtbridge`
 - 首批发布目标：Windows x64 和 Linux x64
