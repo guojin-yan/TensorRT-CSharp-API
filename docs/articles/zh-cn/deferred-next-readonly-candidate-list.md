@@ -22,7 +22,7 @@ Deferred API 升级容易在 callback、allocator、borrowed pointer 和 plugin 
 
 ## 已固定的 B-tier 推进队列
 
-后续阶段不要再从全量 deferred 文件重新摸底。`artifacts/interface-coverage/deferred-btier-work-item-proof-closure-ledger.json` 已把 `btier-001` 到 `btier-045` 固定为 `source-quality-proof-closed`，并由 `DeferredBTierWorkItemProofBatchTests` 与 `DeferredBTier41To45ProofClosureTests` 持续回归。
+后续阶段不要再从全量 deferred 文件重新摸底。机器工作包 `artifacts/interface-coverage/deferred-btier-implementation-work-package.json` 和闭环台账 `artifacts/interface-coverage/deferred-btier-work-item-proof-closure-ledger.json` 已把 `btier-001` 到 `btier-045` 固定为 `source-quality-proof-closed`，并由 `tests/JYPPX.ProjectQuality.Tests/DeferredBTierWorkItemProofBatchTests.cs` 与 `DeferredBTier41To45ProofClosureTests` 持续回归。
 
 | 批次 | 工作项 | 主题 | 当前处理方式 |
 |---|---|---|---|
