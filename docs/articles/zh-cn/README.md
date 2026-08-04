@@ -59,6 +59,7 @@
 
 - [使用 TensorRtSharp4.0 将 MNIST ONNX 转换为 TensorRT Engine 并推理](onnx-to-engine-quickstart.md)。
 - [使用 TensorRtExec GUI 将 ONNX 构建为 TensorRT Engine](tensorrtexec-gui-user-guide.md)。
+- [使用 TensorRtSharp4.0 从本地 NuGet 包加载 Refitted Plan 并完成 MNIST 推理](tensorrtexec-refitted-plan-local-package-consumer.md)。
 
 其余模型教程即使已有真实 TensorRT 证据，在补齐原图叠加结果和真实程序窗口截图前，也不会标记为完整技术文章。
 

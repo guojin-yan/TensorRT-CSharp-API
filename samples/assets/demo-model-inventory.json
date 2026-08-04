@@ -42,7 +42,7 @@
     },
     {
       "id": "onnxtoengine-nvidia-mnist-opset8",
-      "sampleNames": ["OnnxToEngine", "Mnist.OnnxRuntimeReference", "TensorRtExec"],
+      "sampleNames": ["OnnxToEngine", "Mnist.OnnxRuntimeReference", "TensorRtExec", "RefittedPlan.PackageConsumer"],
       "task": "digit-classification",
       "license": "NVIDIA TensorRT sample-data terms; source README attributes the ONNX to ONNX Model Zoo",
       "acquisition": {
@@ -64,7 +64,8 @@
       },
       "articles": [
         "docs/articles/zh-cn/demo-model-acquisition-and-onnx-conversion.md",
-        "docs/articles/zh-cn/tensorrtexec-onnx-stripped-plan-refit-lifecycle.md"
+        "docs/articles/zh-cn/tensorrtexec-onnx-stripped-plan-refit-lifecycle.md",
+        "docs/articles/zh-cn/tensorrtexec-refitted-plan-local-package-consumer.md"
       ],
       "runtimeEvidence": "samples/assets/onnxtoengine-mnist-real-model-runtime-evidence.json"
     },

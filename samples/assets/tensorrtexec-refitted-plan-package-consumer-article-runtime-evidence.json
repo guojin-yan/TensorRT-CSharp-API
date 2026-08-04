@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "recordKind": "tensorrtexec-refitted-plan-package-consumer-technical-article-runtime-evidence",
+  "recordId": "tensorrtexec-refitted-plan-local-package-consumer-win-x64-trt10.11-cuda12.9-20260804",
+  "proofClassification": "local-package-consumer-runtime",
+  "executedUtcDate": "2026-08-04",
+  "sourceBaseCommit": "c2a52ea42f63912e6af180f727c94211215e81bd",
+  "runtimeEnvironment": {
+    "os": "Microsoft Windows 10.0.26200",
+    "processArchitecture": "X64",
+    "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+    "driverVersion": "576.02",
+    "cudaToolkitVersion": "12.9",
+    "tensorRtVersion": "10.11.0.33",
+    "runtimeKey": "win-x64-trt10.11-cuda12.9-cudnn9.22"
+  },
+  "model": {
+    "sourceUrl": "https://github.com/onnx/models/tree/main/validated/vision/classification/mnist",
+    "pinnedRevision": "TensorRT-10.11.0.33-sample-data",
+    "license": "NVIDIA TensorRT sample-data terms; source README attributes the ONNX to ONNX Model Zoo",
+    "conversion": "upstream ONNX opset 8; copied from user-installed TensorRT sample data with no local framework-to-ONNX conversion",
+    "path": "<workspace-root>/models/OnnxToEngine/MNIST/nvidia-tensorrt-10.11/mnist.onnx",
+    "length": 26454,
+    "sha256": "2f06e72de813a8635c9bc0397ac447a601bdbfa7df4bebc278723b958831c9bf",
+    "trackedByGit": false,
+    "redistributionApproved": false
+  },
+  "packages": {
+    "managed": {
+      "id": "JYPPX.TensorRT.CSharp.API",
+      "version": "4.0.0-refit-article.20260804",
+      "length": 15332851,
+      "sha256": "9401f9cbd2c513ea5c3954e0b0895ed55e6151662e2d83488ab4b4ff58ca369f"
+    },
+    "bridge": {
+      "id": "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge",
+      "version": "4.0.0",
+      "length": 377275,
+      "sha256": "0a4cb23b0175abdde7ff7b6fe16c9094829d0b17304cc5822baf477064e9e032"
+    },
+    "publicFeedUsed": false,
+    "published": false
+  },
+  "assets": {
+    "consumerProgramPath": "samples/RefittedPlan.PackageConsumer/Program.cs",
+    "consumerProgramSha256": "f1e7960e6e7a0c50008a66eb62010e07fab0c9ae9ac31ae588f23855606c7481",
+    "runnerPath": "eng/Test-TrtexecRefittedPlanPackageConsumer.ps1",
+    "runnerSha256": "147acee69b258daf138b565ca5067a46e35b8dbfeb3296d37f7d8fda73b09f37",
+    "validatorPath": "eng/Test-TrtexecRefittedPlanPackageConsumerEvidence.ps1",
+    "validatorSha256": "2714457aa55b29c97fc0ef2235d8f508ecef80973784d55b008f8165dceed188",
+    "runtimeLogSha256": "77ece0695db91787005b91ca1cf8b1d06c983326d06f9a309dbebc4855004796",
+    "runtimeScreenshotPath": "docs/images/tensorrtexec-refitted-plan-package-consumer-runtime.png",
+    "runtimeScreenshotSha256": "b089fde6b0077be9a53f1cfa77eb014b2778a632e9b3d3701158e7c700eb6136",
+    "compactEvidencePath": "artifacts/interface-coverage/trtexec-refitted-plan-package-consumer-evidence.json",
+    "strictValidationPath": "artifacts/interface-coverage/trtexec-refitted-plan-package-consumer-validation.json"
+  },
+  "runtimeValidation": {
+    "packageReferenceOnly": true,
+    "usesProjectReference": false,
+    "manualManagedAssemblyLoad": false,
+    "consumerRootOutsideRepository": true,
+    "consumerWorkspaceRemoved": true,
+    "engineIOTensorCount": 2,
+    "engineLayerCount": 5,
+    "engineOptimizationProfileCount": 1,
+    "inputTensor": "Input3",
+    "inputShape": [1, 1, 28, 28],
+    "outputTensor": "Plus214_Output_0",
+    "outputShape": [1, 10],
+    "bindingsReadyForEnqueue": true,
+    "enqueueCompleted": true,
+    "outputSha256": "6f5771d6c5b056406c190a59e725cf9bb13c1f148c1ef06f99ed8acfb11b9041",
+    "outputExactMatch": true,
+    "predictedIndex": 7,
+    "referenceComparedElementCount": 10,
+    "referenceMismatchCount": 0,
+    "referenceMaximumAbsoluteError": 0,
+    "referenceMaximumRelativeError": 0,
+    "ownerScopeExited": true,
+    "strictCheckCount": 53,
+    "strictPassedCount": 53,
+    "processExitCode": 0,
+    "passed": true
+  },
+  "proofBoundary": {
+    "localPackageConsumerRuntime": true,
+    "publicPackageConsumerRuntime": false,
+    "packagesDownloadedFromPublicFeed": false,
+    "modelAccuracyGoldenReviewed": false,
+    "modelRedistributionApproved": false,
+    "postPublishProof": false,
+    "ownerReleaseAcceptance": false,
+    "performsPublish": false,
+    "uploadsModelFiles": false
+  }
+}

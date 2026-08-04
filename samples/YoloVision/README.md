@@ -115,13 +115,13 @@ The official YOLOX-S path is now backed by source-tree `real-model-runtime` evid
 
 ## Local PackageReference Consumer
 
-`YoloVision.csproj` also packs as `JYPPX.TensorRT.CSharp.API.YoloVision`. The package exposes the pointer-free `YoloVisionCommand.Run(string[] args)` entry so a repository-external application can reuse the same CLI, preprocessing, decode, NMS, report, and visualization path without a `ProjectReference`. The committed consumer template is `samples/YoloVision.PackageConsumer`; run the full clean E-drive restore/build/runtime validation with:
+`YoloVision.csproj` also packs as `JYPPX.TensorRT.CSharp.API.YoloVision`. The package exposes the pointer-free `YoloVisionCommand.Run(string[] args)` entry so a repository-external application can reuse the same CLI, preprocessing, decode, NMS, report, and visualization path without a `ProjectReference`. The committed consumer template is `samples/YoloVision.PackageConsumer`; run the full repository-external restore/build/runtime validation with:
 
 ```powershell
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-YoloVisionLocalPackageConsumer.ps1 -PackageVersion 4.0.0
 ```
 
-The script uses only local file feeds, puts its isolated NuGet cache and temporary project on the E drive, requires `ProjectReferenceCount=0` and `YoloVision Passed=True`, then removes the workspace. Its result is `local-package-consumer-runtime`, not public `package-consumer-runtime`, public redistribution approval, or post-publish proof. See `docs/articles/zh-cn/yolovision-yolox-local-package-consumer-tutorial.md`.
+The script uses only local file feeds, puts its isolated NuGet cache and temporary project outside the repository, requires `ProjectReferenceCount=0` and `YoloVision Passed=True`, then removes the workspace. Its result is `local-package-consumer-runtime`, not public `package-consumer-runtime`, public redistribution approval, or post-publish proof. See `docs/articles/zh-cn/yolovision-yolox-local-package-consumer-tutorial.md`.
 
 The YOLOv8n-seg clean package path has a separate strict entrypoint:
 
@@ -146,7 +146,7 @@ needs class-axis/argmax/palette/void-class rules. YoloVision `cls` is also disti
 promotion flags. The retained MNIST ONNX Runtime CPU candidate is eligible only for its MNIST task. It cannot be borrowed as a
 YoloVision golden output because its model, input, preprocessing, output tensors, labels, and task semantics do not match.
 
-For the shared classification and semantic-segmentation workflow, including E-drive asset isolation, output-layout decisions, Top-K versus pixel argmax, build/preflight/runtime commands, report validation, and proof boundaries, see `docs/articles/zh-cn/yolovision-classification-semantic-tutorial.md`. The first verified semantic case uses torchvision LRASPP MobileNetV3 Large; acquisition, ONNX export, ImageNet mean/std preprocessing, strict `--noTF32` parity, full-resolution class-index artifacts, and negative validation are documented in `docs/articles/zh-cn/yolovision-semantic-segmentation-map-guide.md`. Converted models are staged under the workspace-level `E:\GitSpace\TensorRT-CSharp-API-4.0\models` directory outside this Git repository.
+For the shared classification and semantic-segmentation workflow, including repository-external asset isolation, output-layout decisions, Top-K versus pixel argmax, build/preflight/runtime commands, report validation, and proof boundaries, see `docs/articles/zh-cn/yolovision-classification-semantic-tutorial.md`. The first verified semantic case uses torchvision LRASPP MobileNetV3 Large; acquisition, ONNX export, ImageNet mean/std preprocessing, strict `--noTF32` parity, full-resolution class-index artifacts, and negative validation are documented in `docs/articles/zh-cn/yolovision-semantic-segmentation-map-guide.md`. Converted models are staged under `<workspace-root>/models` outside this Git repository.
 
 The official Ultralytics `v8.3.0` `yolov8n.pt` detection case is audited as source-tree `real-model-runtime`. Its ONNX contract is `images:[1,3,640,640] -> output0:[1,84,8400]`: 4 box channels, 80 exact COCO class channels, no separate objectness, channels-first layout, and application-side class-aware NMS. TensorRT compared all 705,600 values against an ONNX Runtime CPU reference for the exact C# letterbox tensor. Five retained boxes (four people and one bus) independently matched the Ultralytics/PyTorch CPU decode with minimum source-space IoU `0.999841` and maximum score error `0.000103`; a mutated coordinate reference failed closed with exit code 1. See `samples/assets/yolovision-yolov8n-det-real-model-runtime-evidence.json` and `docs/articles/zh-cn/yolovision-yolov8-det-real-asset-tutorial.md`. Public redistribution, package-consumer, post-publish, and release claims remain false.
 

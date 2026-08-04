@@ -1,6 +1,6 @@
 {
   "schemaVersion": "trtexec-refitted-plan-package-consumer-evidence.v1",
-  "generatedDate": "2026-07-29",
+  "generatedDate": "2026-08-04",
   "state": "local-package-consumer-refitted-plan-runtime-passed",
   "evidenceClassification": "local-package-consumer-refitted-plan-runtime",
   "sourceRuntimeKey": "win-x64-trt10.11-cuda12.9-cudnn9.22",
@@ -17,15 +17,15 @@
   "packages": {
     "managed": {
       "id": "JYPPX.TensorRT.CSharp.API",
-      "version": "4.0.0-rtc-local.20260728",
-      "length": 15163042,
-      "sha256": "19b43a17c29b2891356de75f00ffd210355f58f74673c2d9e5435eafa9d22d9c"
+      "version": "4.0.0-refit-article.20260804",
+      "length": 15332851,
+      "sha256": "9401f9cbd2c513ea5c3954e0b0895ed55e6151662e2d83488ab4b4ff58ca369f"
     },
     "bridge": {
       "id": "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge",
       "version": "4.0.0",
-      "length": 352573,
-      "sha256": "d40bdd02a9a5011ac9b663b7e02f2b3d498e752c42c38a40cb34d61d9225b6b5"
+      "length": 377275,
+      "sha256": "0a4cb23b0175abdde7ff7b6fe16c9094829d0b17304cc5822baf477064e9e032"
     }
   },
   "consumer": {
@@ -36,8 +36,8 @@
     "managedAssemblyOutsideSourceTree": true,
     "managedAssemblyUnderConsumerRoot": true,
     "bridgeUnderConsumerRoot": true,
-    "projectSha256": "255c1cb97347c89aa8e79ee9b153f6665ecc9b7b5721f2ab645c91e4e89949f2",
-    "programSha256": "f32d639441bcdf435b14b745ec5f2b95c70d154c3860713dd9c21eedfc053236"
+    "projectSha256": "e956ed02713cde582bef68b8e27c10162ea796a5af7132bf1d75e4e7cc697c93",
+    "programSha256": "f1e7960e6e7a0c50008a66eb62010e07fab0c9ae9ac31ae588f23855606c7481"
   },
   "artifacts": {
     "sourcePlan": "artifacts/real-case/trtexec-refitted-plan-persistence/mnist-refitted-persisted.plan",
@@ -76,9 +76,9 @@
     "buildExitCode": 0,
     "runtimeExitCode": 0,
     "runtimePassed": true,
-    "stdoutSha256": "a23ca751d6b98e144ab9b16600ad8efefd2e855d9283c756757cc12164ed26ae",
+    "stdoutSha256": "77ece0695db91787005b91ca1cf8b1d06c983326d06f9a309dbebc4855004796",
     "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "combinedSha256": "a23ca751d6b98e144ab9b16600ad8efefd2e855d9283c756757cc12164ed26ae"
+    "combinedSha256": "1aa4d422d517979c617fa448bf3aa9b0f380f5305cf8fe44edc928c9fb165936"
   },
   "runtime": {
     "environment": "TRT=10.11.0 CUDA=12.9 TensorRtAvailable=True CudaAvailable=True",
@@ -117,8 +117,8 @@
     {
       "role": "bridge-package-output",
       "name": "jyppxtrtbridge.dll",
-      "length": 1068544,
-      "sha256": "932267e9fab93cac36d80ea6c186e26e2dd159ce199f75e3b8805176165d8916"
+      "length": 1143808,
+      "sha256": "0da3f8751d10f3f221fa7c4145ba8dd2927b7d98a8afdce4645531792b3b42e8"
     },
     {
       "role": "tensor-rt-runtime",

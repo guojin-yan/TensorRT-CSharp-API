@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using Xunit;
 
 namespace JYPPX.ProjectQuality.Tests;
@@ -151,6 +152,105 @@ public sealed class TrtexecRefittedPlanPackageConsumerTests
         Assert.True(root.GetProperty("checkCount").GetInt32() >= 40);
         Assert.Equal(root.GetProperty("checkCount").GetInt32(), root.GetProperty("passedCount").GetInt32());
         Assert.Equal(0, root.GetProperty("failureCount").GetInt32());
+    }
+
+    [Fact]
+    public void TechnicalArticleDocumentsTheFullModelPackageAndRuntimeFlow()
+    {
+        string article = ReadSource(
+            "docs",
+            "articles",
+            "zh-cn",
+            "tensorrtexec-refitted-plan-local-package-consumer.md");
+
+        foreach (string heading in new[]
+        {
+            "## 本文使用的项目与库",
+            "## 模型获取与许可证",
+            "## ONNX 转换与暂存",
+            "## 生成可部署的 Refitted Plan",
+            "## 创建本地包消费项目",
+            "## 编写程序入口",
+            "## 编译并运行",
+            "## 已验证结果",
+            "## 复查与边界"
+        })
+        {
+            Assert.Contains(heading, article, StringComparison.Ordinal);
+        }
+
+        Assert.Contains(
+            "https://github.com/onnx/models/tree/main/validated/vision/classification/mnist",
+            article,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "models/OnnxToEngine/MNIST/nvidia-tensorrt-10.11/mnist.onnx",
+            article,
+            StringComparison.Ordinal);
+        Assert.Contains("上游文件已经是 ONNX", article, StringComparison.Ordinal);
+        Assert.Contains("--saveRefittedEngine", article, StringComparison.Ordinal);
+        Assert.Contains("JYPPX.TensorRtSharp", article, StringComparison.Ordinal);
+        Assert.Contains("JYPPX.CudaSharp", article, StringComparison.Ordinal);
+        Assert.Contains(
+            "../../images/tensorrtexec-refitted-plan-package-consumer-runtime.png",
+            article,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "samples/assets/tensorrtexec-refitted-plan-package-consumer-article-runtime-evidence.json",
+            article,
+            StringComparison.Ordinal);
+        Assert.Contains("53/53", article, StringComparison.Ordinal);
+        Assert.Empty(Regex.Matches(article, @"(?im)[A-Z]:\\"));
+    }
+
+    [Fact]
+    public void TechnicalArticleEvidenceMatchesTheRuntimeScreenshotAndConsumerSource()
+    {
+        using JsonDocument document = ReadJson(
+            "samples",
+            "assets",
+            "tensorrtexec-refitted-plan-package-consumer-article-runtime-evidence.json");
+        JsonElement root = document.RootElement;
+        JsonElement assets = root.GetProperty("assets");
+        JsonElement runtime = root.GetProperty("runtimeValidation");
+
+        Assert.Equal(
+            "tensorrtexec-refitted-plan-package-consumer-technical-article-runtime-evidence",
+            root.GetProperty("recordKind").GetString());
+        Assert.Equal("local-package-consumer-runtime", root.GetProperty("proofClassification").GetString());
+        Assert.True(runtime.GetProperty("packageReferenceOnly").GetBoolean());
+        Assert.False(runtime.GetProperty("usesProjectReference").GetBoolean());
+        Assert.True(runtime.GetProperty("enqueueCompleted").GetBoolean());
+        Assert.Equal(7, runtime.GetProperty("predictedIndex").GetInt32());
+        Assert.Equal(0, runtime.GetProperty("referenceMismatchCount").GetInt32());
+        Assert.Equal(53, runtime.GetProperty("strictPassedCount").GetInt32());
+        Assert.True(runtime.GetProperty("passed").GetBoolean());
+        Assert.False(root.GetProperty("proofBoundary").GetProperty("performsPublish").GetBoolean());
+
+        string screenshotPath = Path.Combine(
+            RepositoryPaths.Root,
+            assets.GetProperty("runtimeScreenshotPath").GetString()!.Replace('/', Path.DirectorySeparatorChar));
+        string programPath = Path.Combine(
+            RepositoryPaths.Root,
+            assets.GetProperty("consumerProgramPath").GetString()!.Replace('/', Path.DirectorySeparatorChar));
+        Assert.Equal(assets.GetProperty("runtimeScreenshotSha256").GetString(), ComputeSha256(screenshotPath));
+        Assert.Equal(assets.GetProperty("consumerProgramSha256").GetString(), ComputeSha256(programPath));
+    }
+
+    [Fact]
+    public void ApplicationAndSampleEntryPointsAvoidDuplicateOrMachineSpecificGuidance()
+    {
+        string applications = ReadSource("applications", "README.md");
+        string samples = ReadSource("samples", "README.md");
+        string sampleAssets = ReadSource("samples", "assets", "README.md");
+        string consumer = ReadSource("samples", "RefittedPlan.PackageConsumer", "README.md");
+
+        Assert.Equal(1, applications.Split('\n').Count(line => line.TrimEnd('\r') == "# Applications"));
+        Assert.Contains("tensorrtexec-refitted-plan-local-package-consumer.md", applications, StringComparison.Ordinal);
+        Assert.Contains("<workspace-root>/models", samples, StringComparison.Ordinal);
+        Assert.Contains("<workspace-root>/models", sampleAssets, StringComparison.Ordinal);
+        Assert.Contains("repository-external workspace", consumer, StringComparison.Ordinal);
+        Assert.Empty(Regex.Matches(applications + samples + sampleAssets + consumer, @"(?im)[A-Z]:\\"));
     }
 
     private static JsonDocument ReadJson(params string[] parts)

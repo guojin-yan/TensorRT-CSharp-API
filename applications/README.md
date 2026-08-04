@@ -1,25 +1,15 @@
 # Applications
 
-This directory contains user-facing tools built on top of the TensorRtSharp libraries and shared tool services.
+This directory contains user-facing tools that are larger than a sample and represent complete deployment workflows built on TensorRtSharp libraries and shared tool services.
 
-| Directory | Purpose | Status |
+## Current application
+
+| Directory | Purpose | Current status |
 | --- | --- | --- |
-| `TensorRtExec` | trtexec-like command line and WinForms front end for ONNX-to-engine workflows, backed by `JYPPX.TensorRtSharp.Tools` | build/report capable; external-model inference still needs explicit binding semantics |
+| `TensorRtExec` | trtexec-like CLI and WinForms application for ONNX build, Engine load, refit, report export, binding, inference, and diagnostics | Release build, CLI/GUI workflow, real MNIST runtime, refitted-plan persistence/reload, and local package-consumer runtime validated on TensorRT 10.11; public package and post-publish validation remain pending |
 
-Application evidence is separate from release proof. A tool being buildable does not mean a public package was published or that asset-dependent runtime smoke passed.
-# Applications
+The GUI/CLI field contract is `TensorRtExec/tensor-rt-exec-gui-cli-field-map.json`. User-facing walkthroughs are under `docs/articles/zh-cn`, including `tensorrtexec-gui-user-guide.md` and `tensorrtexec-refitted-plan-local-package-consumer.md`.
 
-This directory is reserved for user-facing applications that are larger than a sample and closer to a product workflow.
+## Proof boundary
 
-## Current Application Tracks
-
-| Directory | Purpose | Status |
-| --- | --- | --- |
-| `TensorRtExec` | trtexec-like ONNX to TensorRT engine tool with console workflow and WinForms track | in-progress |
-
-`TensorRtExec` is the application lane for the user request to provide both command-line usage and a Windows form workflow. The roadmap lives in `docs/articles/zh-cn/tensorrtexec-console-winforms-application-roadmap.md`.
-The GUI/CLI surface contract lives in `TensorRtExec/tensor-rt-exec-gui-cli-field-map.json` and `TensorRtExec/tensor-rt-exec-gui-cli-field-map.md`; it ties WinForms fields to normalized CLI options without promoting command previews, screenshots, reports, or sidecars to runtime proof.
-
-## Proof Boundary
-
-Application reports, command previews, GUI screenshots, dry-runs, build-only reports, load-engine diagnostics, timing cache files, and sidecars are not package-consumer-runtime proof. Real release proof still requires Owner-provided public package metadata, CleanConsumer restore/build/smoke logs, PostPublish logs, host runtime metadata, rollback review, and final release close approval.
+Application reports, command previews, screenshots, dry-runs, build-only results, local-file-feed consumers, and source-tree runtime records do not prove that a public package was published. Public package restore, post-publish smoke, compatible-host metadata, rollback review, and Owner release approval remain separate release gates. No application command in this directory authorizes package push, GitHub Release creation, model upload, or NVIDIA runtime redistribution.

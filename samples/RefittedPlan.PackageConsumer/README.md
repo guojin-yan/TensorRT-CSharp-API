@@ -1,6 +1,6 @@
 # Refitted Plan Local Package Consumer
 
-This sample is copied into an isolated E-drive workspace by
+This sample is copied into an isolated repository-external workspace by
 `eng/Test-TrtexecRefittedPlanPackageConsumer.ps1`. The generated project contains only two
 `PackageReference` entries: the managed API package and the selected TRT10 bridge-only package.
 It has no `ProjectReference` and does not load managed assemblies from the source tree.

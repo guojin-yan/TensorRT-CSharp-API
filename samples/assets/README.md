@@ -8,9 +8,11 @@ This folder contains audit templates for asset-dependent samples. It does not co
 source-tree runtime-evidence catalog. Every entry has a `runtimeEvidence` path to a tracked small JSON record; none of those links
 permit model upload or public redistribution. `onnxtoengine-mnist-real-model-runtime-evidence.json` records the MNIST digit-7
 TensorRT/ONNX Runtime match and the wrong-expected-digit controlled negative.
+`tensorrtexec-refitted-plan-package-consumer-article-runtime-evidence.json` records the separate repository-external,
+two-package local-feed run, its real stdout screenshot, the exact output hash, and the 53/53 strict validation result.
 
 Run `eng/Sync-DemoOnnxModels.ps1 -VerifyOnly` to require all 10 ONNX files under
-`E:\GitSpace\TensorRT-CSharp-API-4.0\models` and verify their pinned lengths and hashes without copying or publishing anything.
+`<workspace-root>/models` and verify their pinned lengths and hashes without copying or publishing anything.
 
 ## YoloVision reference acquisition
 
@@ -26,7 +28,7 @@ The command verifies file length and SHA256 and can copy the files into a local 
 
 ## Official YOLOX acquisition
 
-`yolovision-yolox-official-assets.json` pins the official YOLOX-S 0.1.1rc0 ONNX model, Apache-2.0 license, dog image, COCO class source, and official preprocess/postprocess references. The acquisition script rejects C-drive output, defaults to the outer E-drive `downloads\yolox-apache` workspace, creates deterministic PPM/labels derivatives, and writes a machine-readable report:
+`yolovision-yolox-official-assets.json` pins the official YOLOX-S 0.1.1rc0 ONNX model, Apache-2.0 license, dog image, COCO class source, and official preprocess/postprocess references. The acquisition script uses a repository-external `downloads/yolox-apache` workspace, creates deterministic PPM/labels derivatives, and writes a machine-readable report:
 
 ```powershell
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Acquire-YoloXOfficialAssets.ps1
@@ -37,7 +39,7 @@ The corresponding strict source-tree runtime evidence is under `artifacts/yolovi
 
 ## Official YOLOv10 acquisition
 
-`yolovision-yolov10-official-assets.json` pins the official THU-MIG YOLOv10n v1.1 ONNX model and AGPL-3.0 license. The acquisition script rejects C-drive output, defaults to the outer E-drive `downloads\yolov10-agpl` workspace, verifies length and SHA256, and records whether the existing YOLOX-derived COCO labels and PPM input image are available for a source-tree runtime attempt:
+`yolovision-yolov10-official-assets.json` pins the official THU-MIG YOLOv10n v1.1 ONNX model and AGPL-3.0 license. The acquisition script uses a repository-external `downloads/yolov10-agpl` workspace, verifies length and SHA256, and records whether the existing YOLOX-derived COCO labels and PPM input image are available for a source-tree runtime attempt:
 
 ```powershell
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Acquire-YoloV10OfficialAssets.ps1
@@ -52,10 +54,10 @@ This acquisition is not runtime proof, package-consumer-runtime proof, or redist
 
 ```powershell
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Acquire-YoloV8DetectionOfficialAssets.ps1 `
-  -PythonPath C:\path\to\python.exe
+  -PythonPath <python-path>
 ```
 
-`eng/Invoke-YoloVisionDetectionReference.py` validates `images:[1,3,640,640] -> output0:[1,84,8400]`, creates the raw ONNX Runtime reference for the exact C# letterbox tensor, retains a canonical image-pipeline comparison, and independently runs the Ultralytics/PyTorch NMS path. `yolovision-yolov8n-det-real-model-runtime-evidence.json` records the source-tree TensorRT 10.11 full-tensor, five-box, and controlled-negative results. Heavy assets remain on E drive; package-consumer, public redistribution, and release claims remain false.
+`eng/Invoke-YoloVisionDetectionReference.py` validates `images:[1,3,640,640] -> output0:[1,84,8400]`, creates the raw ONNX Runtime reference for the exact C# letterbox tensor, retains a canonical image-pipeline comparison, and independently runs the Ultralytics/PyTorch NMS path. `yolovision-yolov8n-det-real-model-runtime-evidence.json` records the source-tree TensorRT 10.11 full-tensor, five-box, and controlled-negative results. Heavy assets remain in the repository-external workspace; package-consumer, public redistribution, and release claims remain false.
 
 ## Official YOLOv8n Pose acquisition
 
@@ -63,22 +65,22 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Acquire-YoloV8DetectionOffic
 
 ```powershell
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Acquire-YoloV8PoseOfficialAssets.ps1 `
-  -PythonPath C:\path\to\python.exe
+  -PythonPath <python-path>
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Acquire-YoloV8PoseOfficialAssets.ps1 `
-  -PythonPath C:\path\to\python.exe -Offline
+  -PythonPath <python-path> -Offline
 ```
 
-The source-tree runtime record is `yolovision-yolov8n-pose-real-model-runtime-evidence.json`. Models, ONNX files, images, references, tensors, SVGs, and logs stay in the outer E-drive download workspace. The record is not package-consumer proof or public redistribution approval.
+The source-tree runtime record is `yolovision-yolov8n-pose-real-model-runtime-evidence.json`. Models, ONNX files, images, references, tensors, SVGs, and logs stay in the repository-external download workspace. The record is not package-consumer proof or public redistribution approval.
 
 ## Official YOLOv8n OBB acquisition
 
-`yolovision-yolov8n-obb-official-assets.json` pins the official `yolov8n-obb.pt` Release asset ID/hash, source license, commit-pinned `boats.jpg`, deterministic P6 RGB PPM, and DOTA labels. The acquisition script keeps every heavy asset in the outer E-drive workspace and performs no export, runtime, upload, or publish operation:
+`yolovision-yolov8n-obb-official-assets.json` pins the official `yolov8n-obb.pt` Release asset ID/hash, source license, commit-pinned `boats.jpg`, deterministic P6 RGB PPM, and DOTA labels. The acquisition script keeps every heavy asset in the repository-external workspace and performs no export, runtime, upload, or publish operation:
 
 ```powershell
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Acquire-YoloV8ObbOfficialAssets.ps1 `
-  -PythonPath C:\path\to\python.exe
+  -PythonPath <python-path>
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Acquire-YoloV8ObbOfficialAssets.ps1 `
-  -PythonPath C:\path\to\python.exe -Offline
+  -PythonPath <python-path> -Offline
 ```
 
 `yolovision-yolov8n-obb-real-model-runtime-evidence.json` records the source-tree TensorRT 10.11 case for `output0:[1,20,21504]`, the 430,080-value ONNX Runtime comparison, the independent Ultralytics/PyTorch rotated-box comparison, and the controlled negative reference mutation. It does not approve asset redistribution, package publication, or release.
@@ -89,14 +91,14 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Acquire-YoloV8ObbOfficialAss
 
 ```powershell
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Acquire-YoloV8ClassificationOfficialAssets.ps1 `
-  -PythonPath C:\path\to\python.exe
+  -PythonPath <python-path>
 ```
 
-`eng/Invoke-YoloVisionClassificationReference.py` verifies the static `images:[1,3,224,224] -> output0:[1,1000]` Softmax graph, derives the authoritative Ultralytics center-crop tensor, compares PyTorch with ONNX Runtime, and writes positive plus controlled-negative structured references. `yolovision-yolov8n-cls-real-model-runtime-evidence.json` records the source-tree TensorRT 10.11 full-vector and Top-5 result. Models, ONNX, image, labels, tensors, references, SVGs, and logs stay in the outer E-drive workspace. The record is not package-consumer proof, public asset redistribution approval, or release authorization.
+`eng/Invoke-YoloVisionClassificationReference.py` verifies the static `images:[1,3,224,224] -> output0:[1,1000]` Softmax graph, derives the authoritative Ultralytics center-crop tensor, compares PyTorch with ONNX Runtime, and writes positive plus controlled-negative structured references. `yolovision-yolov8n-cls-real-model-runtime-evidence.json` records the source-tree TensorRT 10.11 full-vector and Top-5 result. Models, ONNX, image, labels, tensors, references, SVGs, and logs stay in the repository-external workspace. The record is not package-consumer proof, public asset redistribution approval, or release authorization.
 
 ## Local Asset Layout
 
-The current workspace convention is `E:\GitSpace\TensorRT-CSharp-API-4.0\models`, one level above the `TensorRtSharp4.0` Git repository. Every demo article must name the upstream acquisition method and ONNX conversion method. Converted ONNX files are staged under this outer directory until a separate Model Zoo exists; they are never committed to this repository.
+The current workspace convention is `<workspace-root>/models`, one level above the `TensorRtSharp4.0` Git repository. Every demo article must name the upstream acquisition method and ONNX conversion method. Converted ONNX files are staged under this outer directory until a separate Model Zoo exists; they are never committed to this repository.
 
 `demo-model-inventory.json` is the complete first-release inventory for actual deep-learning demo models. It maps Classification,
 OnnxToEngine/MNIST, YOLOv8 det/cls/seg/pose/OBB, YOLOv10n, YOLOX-S, and LRASPP semantic segmentation to acquisition sources,

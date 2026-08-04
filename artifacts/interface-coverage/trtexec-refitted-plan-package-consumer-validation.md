@@ -20,13 +20,13 @@
 | `target-packages-resolved` | `True` | `True/True` |
 | `managed-package-id` | `True` | `JYPPX.TensorRT.CSharp.API` |
 | `bridge-package-id` | `True` | `JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge` |
-| `package-hashes` | `True` | `19b43a17c29b2891356de75f00ffd210355f58f74673c2d9e5435eafa9d22d9c/d40bdd02a9a5011ac9b663b7e02f2b3d498e752c42c38a40cb34d61d9225b6b5` |
+| `package-hashes` | `True` | `9401f9cbd2c513ea5c3954e0b0895ed55e6151662e2d83488ab4b4ff58ca369f/0a4cb23b0175abdde7ff7b6fe16c9094829d0b17304cc5822baf477064e9e032` |
 | `consumer-outside-repository` | `True` | `True` |
 | `consumer-off-system-drive` | `True` | `False` |
 | `consumer-workspace-removed` | `True` | `True/False` |
 | `managed-assembly-isolated` | `True` | `True/True` |
 | `bridge-isolated` | `True` | `True` |
-| `consumer-source-hashes` | `True` | `255c1cb97347c89aa8e79ee9b153f6665ecc9b7b5721f2ab645c91e4e89949f2/f32d639441bcdf435b14b745ec5f2b95c70d154c3860713dd9c21eedfc053236` |
+| `consumer-source-hashes` | `True` | `e956ed02713cde582bef68b8e27c10162ea796a5af7132bf1d75e4e7cc697c93/f1e7960e6e7a0c50008a66eb62010e07fab0c9ae9ac31ae588f23855606c7481` |
 | `relative-source-artifacts` | `True` | `artifacts/real-case/trtexec-refitted-plan-persistence/mnist-refitted-persisted.plan/artifacts/real-case/onnx-to-engine-mnist-trt10-runtime/digit-7/mnist-trt10-7-input-f32.bin/artifacts/real-case/onnx-to-engine-mnist-trt10-runtime/digit-7/mnist-trt10-7.reference.json` |
 | `plan-copy-distinct` | `True` | `True` |
 | `plan-length-cross-check` | `True` | `408876` |
@@ -42,7 +42,7 @@
 | `output-exact-match` | `True` | `True` |
 | `process-exits` | `True` | `0/0/0` |
 | `runtime-passed` | `True` | `True` |
-| `execution-log-hashes` | `True` | `a23ca751d6b98e144ab9b16600ad8efefd2e855d9283c756757cc12164ed26ae/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855/a23ca751d6b98e144ab9b16600ad8efefd2e855d9283c756757cc12164ed26ae` |
+| `execution-log-hashes` | `True` | `77ece0695db91787005b91ca1cf8b1d06c983326d06f9a309dbebc4855004796/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855/1aa4d422d517979c617fa448bf3aa9b0f380f5305cf8fe44edc928c9fb165936` |
 | `command-shape` | `True` | `dotnet run --project <consumer-project> -c Release --no-build -- <copied-plan> <copied-input> <raw-output> <expected-output-sha256> <copied-reference-json> <abs-tolerance> <rel-tolerance> <nan-policy> <infinity-policy>` |
 | `full-weight-refittable-fact` | `True` | `False` |
 | `engine-metadata` | `True` | `2/5/1` |
