@@ -28,9 +28,9 @@
     },
     {
       "role": "program-runtime-screenshot",
-      "path": "docs/images/classification-resnet18-runtime-terminal.png",
-      "sha256": "68a44952b4144183f6e32334ae790f8a582d773a0d20f659bd1a43abcc295e95",
-      "source": "Captured directly from a Windows Terminal window displaying path-free selected stdout values from the same real TensorRT execution."
+      "path": "docs/images/classification-resnet18-local-package-consumer-terminal.png",
+      "sha256": "0ea60819f8b294ac6f00691000e091a95e7190bdfecdc605fe9bd45e4b05556d",
+      "source": "Path-sanitized terminal rendering of selected stdout from the same real three-package TensorRT consumer execution."
     }
   ],
   "modelFilesTrackedByGit": false,

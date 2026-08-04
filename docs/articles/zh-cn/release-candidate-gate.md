@@ -105,7 +105,7 @@ Linux Ubuntu 20.04/22.04/24.04 x64 都通过 GitHub-hosted runner 和匹配的 U
 
 在启用远端发布链前，请先确认：
 
-- `package-managed.yml` 固定打包并验证 `JYPPX.TensorRT.CSharp.API` 与 `JYPPX.TensorRT.CSharp.API.YoloVision` 两个包。发布必须同时满足 `owner_publish_approved=true`、正式仓库 owner、精确 ID/版本/source-commit allowlist；`publish_to_nuget=true` 时还要求仓库 secret `NUGET_API_KEY` 是纯文本 ASCII 的 nuget.org API key，并对两个 package ID 或其所属账号/组织拥有 push 权限。nuget.org `403` 是不可重试的权限错误，必须先替换失效、过期或 scope 不足的 key。
+- `package-managed.yml` 固定打包并验证 `JYPPX.TensorRT.CSharp.API`、`JYPPX.TensorRT.CSharp.API.YoloVision` 与 `JYPPX.TensorRT.CSharp.API.Classification` 三个 managed 包。发布必须同时满足 `owner_publish_approved=true`、正式仓库 owner、精确 ID/版本/source-commit allowlist；`publish_to_nuget=true` 时还要求仓库 secret `NUGET_API_KEY` 是纯文本 ASCII 的 nuget.org API key，并对三个 package ID 或其所属账号/组织拥有 push 权限。nuget.org `403` 是不可重试的权限错误，必须先替换失效、过期或 scope 不足的 key。
 - `runtime-windows.yml` 要求 Windows self-hosted runner 在线，并带有 `self-hosted`、`windows`、`x64` 标签。
 - `runtime-linux.yml` 可以通过 GitHub-hosted runner 和匹配的 Ubuntu job container 发布 Ubuntu 20.04、Ubuntu 22.04、Ubuntu 24.04 x64。Ubuntu 20.04 x64 使用 `runner_mode=hosted-container`，Ubuntu 24.04 x64 只覆盖现代组合，ARM/Jetson 目标需要单独建包线后才能发布。
 

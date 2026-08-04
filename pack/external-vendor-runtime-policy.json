@@ -11,7 +11,8 @@
   ],
   "managedPackageIds": [
     "JYPPX.TensorRT.CSharp.API",
-    "JYPPX.TensorRT.CSharp.API.YoloVision"
+    "JYPPX.TensorRT.CSharp.API.YoloVision",
+    "JYPPX.TensorRT.CSharp.API.Classification"
   ],
   "bridgePackageIdPattern": "^JYPPX\\.TensorRT\\.CSharp\\.API\\.Runtime\\..+\\.Bridge$",
   "allowedBridgeNativeFileNames": [

@@ -1,0 +1,127 @@
+{
+  "schemaVersion": 1,
+  "recordKind": "classification-resnet18-local-package-consumer-runtime-evidence",
+  "recordId": "classification-resnet18-local-package-consumer-win-x64-trt10.11-20260805",
+  "proofClassification": "local-package-consumer-runtime",
+  "sourceBaseCommit": "e90b51671266c3cba8cf47e8fa77554d51cbf9d1",
+  "executedUtc": "2026-08-04T20:49:44.5301232Z",
+  "runtimeEnvironment": {
+    "os": "Windows 11",
+    "rid": "win-x64",
+    "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+    "cudaVersion": "12.9",
+    "tensorRtVersion": "10.11.0",
+    "dotnetTargetFramework": "net8.0"
+  },
+  "packages": [
+    {
+      "id": "JYPPX.TensorRT.CSharp.API",
+      "version": "4.0.0",
+      "length": 15447129,
+      "sha256": "d138e08ea6c708eabb61379d68ecbf3282efb56c868c75fc41ce387c5807eea2"
+    },
+    {
+      "id": "JYPPX.TensorRT.CSharp.API.Classification",
+      "version": "4.0.0",
+      "length": 56215,
+      "sha256": "61dc5ae931f8d2401ce9f4acd62d42d5146c3de6810d450b7194f25ceec796c9"
+    },
+    {
+      "id": "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge",
+      "version": "4.0.0",
+      "length": 398657,
+      "sha256": "8d92e0ab21c18db8ef1acf14a88d094da8303cc2deaa473d6665a5506ef1d077"
+    }
+  ],
+  "consumerIsolation": {
+    "template": "samples/Classification.PackageConsumer",
+    "runner": "eng/Test-ClassificationLocalPackageConsumer.ps1",
+    "packageReferenceCount": 3,
+    "projectReferenceCount": 0,
+    "directAssemblyReferenceCount": 0,
+    "restoredProjectLibraryCount": 0,
+    "remoteSourcesCleared": true,
+    "isolatedPackageCache": true,
+    "nativeBridgeCopyCount": 1,
+    "vendorRuntimeEntryCount": 0
+  },
+  "assets": {
+    "modelStorage": "external-model-cache",
+    "modelSha256": "ead3558569edd88aa73a4eb46acbe6c38dee113933234547f04a0f6e48169903",
+    "labelsSha256": "ee4fa67b1dd46919ef87529b70e25bdd1ec9ebd350de3ad426e6640eb70320a1",
+    "imageLicense": "CC0-1.0",
+    "imageSha256": "0516933cf05213539e0a128ad5df5668acc6d32157ce50cc55c38e4125a21ead",
+    "inputTensorSha256": "43de394443f6fc3ccfd08cd9df61ee645ee5c51d1954c52267c221a438252f9e",
+    "taskReferenceSha256": "ada4ff9f3685029f552aad5b0fe004f5c5e97641a7b2e45bcbc546d819205565",
+    "rawReferenceSha256": "f7bcdf6a835b7d6d25154ea35a452375daf2af59af12fad7b6e3f5b7d98b769c"
+  },
+  "modelContract": {
+    "input": "images:float32[1,3,224,224]",
+    "preprocess": "shorter-side-256; center-crop-224x224; RGB; NCHW; scale=1/255; ImageNet mean/std",
+    "output": "logits:float32[1,1000]",
+    "postprocess": "finite logits; Softmax; stable descending Top-5"
+  },
+  "runtimeValidation": {
+    "exitCode": 0,
+    "elapsedMilliseconds": 3.06336,
+    "outputValidated": true,
+    "taskProbabilities": {
+      "sourceClassification": "independent-onnxruntime-cpu-execution-provider-from-exact-csharp-image-tensor",
+      "comparedElementCount": 1000,
+      "mismatchCount": 0,
+      "firstMismatchIndex": -1,
+      "maximumAbsoluteError": 3.874302e-7,
+      "maximumRelativeError": 7.967483e-6,
+      "passed": true
+    },
+    "rawLogits": {
+      "sourceClassification": "independent-onnxruntime-cpu-execution-provider-from-exact-csharp-image-tensor",
+      "comparedElementCount": 1000,
+      "mismatchCount": 0,
+      "firstMismatchIndex": -1,
+      "maximumAbsoluteError": 6.67572e-6,
+      "maximumRelativeError": 0.00053538417,
+      "passed": true
+    }
+  },
+  "top5": [
+    { "rank": 1, "classIndex": 200, "className": "Tibetan terrier", "score": 0.3098635 },
+    { "rank": 2, "classIndex": 194, "className": "Dandie Dinmont", "score": 0.24256468 },
+    { "rank": 3, "classIndex": 204, "className": "Lhasa", "score": 0.12485445 },
+    { "rank": 4, "classIndex": 155, "className": "Shih-Tzu", "score": 0.11975641 },
+    { "rank": 5, "classIndex": 266, "className": "miniature poodle", "score": 0.044700522 }
+  ],
+  "controlledNegative": {
+    "mutation": "task reference value index 0 plus 0.125",
+    "exitCode": 1,
+    "mismatchCount": 1,
+    "firstMismatchIndex": 0,
+    "rawReferenceStillPassed": true,
+    "failClosed": true
+  },
+  "logs": {
+    "transcript": "samples/assets/classification-resnet18-local-package-consumer-runtime-transcript.txt",
+    "runtimeStdoutSha256": "48fab339255c59ef42c4d4ecffda709bfa872d2d13dc8641e32311b8c0d9c2b7",
+    "runtimeStderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "negativeStdoutSha256": "11d53aa946ee24d98fe872700733f567471802d1a336dcdee91a07b6ab7e27ba",
+    "negativeStderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "articleVisuals": {
+    "annotatedResult": "docs/images/classification-resnet18-annotated-cc0.webp",
+    "annotatedResultSha256": "c80766d7f52264b5612a0e5088051106c07bcf24a6740befa49c7930371bbd96",
+    "runtimeTerminal": "docs/images/classification-resnet18-local-package-consumer-terminal.png",
+    "runtimeTerminalSha256": "0ea60819f8b294ac6f00691000e091a95e7190bdfecdc605fe9bd45e4b05556d"
+  },
+  "proofBoundary": {
+    "localPackageConsumerRuntimeEvidence": true,
+    "userInstalledTensorRtCudaCudnn": true,
+    "publicWeightRedistributionApproved": false,
+    "publicPackageProof": false,
+    "postPublishProof": false,
+    "ownerReleaseAcceptance": false,
+    "releaseProof": false,
+    "canPublishPublicly": false,
+    "performsPublish": false,
+    "uploadsAssets": false
+  }
+}

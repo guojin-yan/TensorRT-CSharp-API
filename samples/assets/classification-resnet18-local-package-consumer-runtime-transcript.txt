@@ -1,0 +1,18 @@
+ClassificationPackageConsumer ProjectReference=False CoreAssembly=JYPPX.TensorRtSharp
+ClassificationPackageConsumer BridgeTensorRt=10.11.0 BridgeCuda=12.9
+Classification TensorRtLine=10 Model=<models>/Classification/resnet18-imagenet1k-v1.onnx
+Input=images:[1, 3, 224, 224] Output=logits:[1, 1000]
+Execution profile=0 bound=2 ready=True ElapsedMs=3.063
+InputSource=image TensorSha256=43de394443f6fc3ccfd08cd9df61ee645ee5c51d1954c52267c221a438252f9e
+TopK Index=200 Label=Tibetan terrier Score=0.309864
+TopK Index=194 Label=Dandie Dinmont Score=0.242565
+TopK Index=204 Label=Lhasa Score=0.124855
+TopK Index=155 Label=Shih-Tzu Score=0.119756
+TopK Index=266 Label=miniature poodle Score=0.044701
+ClassificationReference Requested=True Completed=True Passed=True Compared=1000 Mismatches=0 FirstMismatch=-1
+ReferenceOutputValidation Requested=True Completed=True Passed=True Tensors=1
+OutputValidated=True
+Classification Passed=True
+ClassificationLocalPackageConsumer Passed=True PackageReferenceCount=3 ProjectReferenceCount=0
+ControlledNegativeExitCode=1 MismatchCount=1 FirstMismatchIndex=0
+PerformsPublish=False

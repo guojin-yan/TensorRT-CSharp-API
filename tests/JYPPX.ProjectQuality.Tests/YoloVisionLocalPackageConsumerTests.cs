@@ -882,14 +882,14 @@ public sealed class YoloVisionLocalPackageConsumerTests
 
         foreach (string required in new[]
         {
-            "## 1. 项目、功能与依赖库",
+            "## 本文使用的项目与库",
             "## 3. 获取模型",
-            "## 4. 从 checkpoint 转换 ONNX",
+            "## ONNX 转换与暂存",
             "model.export(format=\"onnx\"",
             "models/YoloVision/Detection/yolov10n-thu-mig-v1.1/yolov10n.onnx",
-            "## 6. 创建隔离的三包消费者",
-            "## 7. 图片预处理与输出解码",
-            "## 9. 实际运行结果",
+            "## 创建本地包消费项目",
+            "## 编写程序入口",
+            "## 已验证结果",
             "yolovision-yolov10n-local-package-consumer-annotated-cc0.jpg",
             "yolovision-yolov10n-local-package-consumer-terminal.png",
             "bus | 1 | `0.950415`",

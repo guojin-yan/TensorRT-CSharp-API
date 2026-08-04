@@ -4,7 +4,7 @@
 
 本次验证使用真实模型、CC0 图片和 TensorRT 10.11 实机执行。CUDA、cuDNN、TensorRT 由使用者按版本安装，项目包不携带 NVIDIA 厂商运行库；ONNX、engine 和预处理 tensor 暂存在仓库外层 `models` 或工作目录，不上传 GitHub。
 
-## 1. 项目、功能与依赖库
+## 本文使用的项目与库
 
 TensorRtSharp4.0 的顶层托管命名空间是 `JYPPX.TensorRtSharp` 和 `JYPPX.CudaSharp`。本案例使用四层能力：
 
@@ -23,7 +23,7 @@ x1, y1, x2, y2, score, classId
 
 模型图内已经完成候选筛选和 NMS，因此应用端必须使用 `EndToEndNms` 布局，并保持 `ApplyNms=false`、`NmsMode=None`。如果实际 ONNX 输出不是六列合同，就不能套用本文配置。
 
-## 2. 模型与输入图片
+## 模型获取与许可证
 
 ### 2.1 官方模型
 
@@ -67,7 +67,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass `
 
 脚本会下载官方 ONNX 与许可证、校验长度和 SHA256，并生成本地获取报告。将校验通过的 ONNX 暂存到上一节的 `models/YoloVision/Detection/...` 目录即可；不要把模型复制进 Git 仓库。
 
-## 4. 从 checkpoint 转换 ONNX
+## ONNX 转换与暂存
 
 本文实机数据使用官方已发布 ONNX，因此复现本次哈希不需要再次转换。如果业务模型来自 checkpoint，应固定官方源码 revision、Python、PyTorch、导出器版本、opset 和输入尺寸，再执行上游导出：
 
@@ -115,7 +115,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass `
 
 这些命令只生成本地候选包，不执行 `push`、不创建 tag、Release 或 GitHub Package。
 
-## 6. 创建隔离的三包消费者
+## 创建本地包消费项目
 
 `samples/YoloVision.PackageConsumer` 的项目文件模板只引用三个包：
 
@@ -137,7 +137,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass `
 4. 三个包内 NVIDIA 厂商运行库数量为 0，bridge native 文件数量为 1。
 5. restore、build、runtime 退出码均为 0。
 
-## 7. 图片预处理与输出解码
+## 编写程序入口
 
 输入预处理合同如下：
 
@@ -177,7 +177,7 @@ YoloVisionResult result = YoloSampleRunner.DecodeOutput(
 
 `YoloDetectionDecoder.DecodeEndToEnd` 会检查 rank、六列长度、有限坐标、`x2>x1`、`y2>y1`、score 范围、整数 class id 和 class count。检测框再按 `scale=0.5`、`padY=80` 反变换回原图坐标。
 
-## 8. 执行本地包实机验证
+## 编译并运行
 
 准备好本机 TensorRT、CUDA、cuDNN 根目录后执行：
 
@@ -205,7 +205,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass `
 --top-k 100
 ```
 
-## 9. 实际运行结果
+## 已验证结果
 
 本次运行环境为 RTX 3060 Laptop GPU、驱动 `576.02`、TensorRT `10.11.0`、CUDA Toolkit `12.9`、.NET SDK `10.0.301`。结果不是模板或 dry-run：真实执行了图片预处理、TensorRT enqueue、输出读取和托管解码。
 
@@ -214,6 +214,8 @@ pwsh -NoProfile -ExecutionPolicy Bypass `
 上图由同次 `yolovision-output.json` 中的 6 个检测框和 letterbox 参数反投影到 CC0 原图生成。编号与顶部图例对应，避免右侧密集 person 框的文字互相遮挡。
 
 ![YOLOv10n 本地三包消费实际终端窗口](../../images/yolovision-yolov10n-local-package-consumer-terminal.png)
+
+终端截图来自本次真实运行的 stdout，只移除了机器路径。两张图都来自同一次真实 TensorRT 执行，检测框、类别分布、shape、耗时和通过状态均未改写。
 
 实际结果为：
 
@@ -241,7 +243,7 @@ samples/assets/yolovision-yolov10n-local-package-consumer-tensorrt10.11.txt
 samples/assets/yolovision-yolov10n-local-package-consumer-runtime-evidence.json
 ```
 
-## 10. 证据边界与复查
+## 复查与边界
 
 这次运行证明的是当前源码对应候选包的 `local-package-consumer-runtime`：三个本地包可被隔离 restore/build，bridge 能由 NuGet 布局加载，官方 YOLOv10n 能完成真实 TensorRT 推理，并生成可复查的检测结果。
 

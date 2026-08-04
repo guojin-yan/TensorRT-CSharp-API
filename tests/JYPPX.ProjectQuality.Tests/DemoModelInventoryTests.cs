@@ -130,6 +130,40 @@ public sealed class DemoModelInventoryTests
         Assert.DoesNotContain("third_party\\nvidia", syncScript, StringComparison.OrdinalIgnoreCase);
     }
 
+    [Fact]
+    public void ImplementedLocalPackageModelCasesLinkPositiveNonPublishingEvidence()
+    {
+        using JsonDocument document = LoadInventory();
+        JsonElement[] models = document.RootElement.GetProperty("models").EnumerateArray().ToArray();
+        string[] expectedIds =
+        {
+            "classification-resnet18-imagenet1k-v1",
+            "yolovision-yolov8n-instance-segmentation-v8.3.0"
+        };
+
+        foreach (string expectedId in expectedIds)
+        {
+            JsonElement model = Assert.Single(models.Where(item => item.GetProperty("id").GetString() == expectedId));
+            string relativePath = Assert.IsType<string>(model.GetProperty("localPackageConsumerEvidence").GetString());
+            string evidencePath = Path.Combine(RepositoryPaths.Root, relativePath.Replace('/', Path.DirectorySeparatorChar));
+            Assert.True(File.Exists(evidencePath), relativePath);
+
+            string evidenceText = File.ReadAllText(evidencePath);
+            Assert.DoesNotMatch("[A-Za-z]:\\\\", evidenceText);
+            using JsonDocument evidenceDocument = JsonDocument.Parse(evidenceText);
+            JsonElement evidence = evidenceDocument.RootElement;
+            Assert.Equal("local-package-consumer-runtime", evidence.GetProperty("proofClassification").GetString());
+            Assert.False(evidence.GetProperty("proofBoundary").GetProperty("performsPublish").GetBoolean());
+            Assert.False(evidence.GetProperty("proofBoundary").GetProperty("publicPackageProof").GetBoolean());
+            Assert.False(evidence.GetProperty("proofBoundary").GetProperty("postPublishProof").GetBoolean());
+        }
+
+        JsonElement segmentation = Assert.Single(models.Where(item => item.GetProperty("id").GetString() == expectedIds[1]));
+        Assert.Contains(
+            segmentation.GetProperty("articles").EnumerateArray(),
+            item => item.GetString() == "docs/articles/zh-cn/yolovision-yolov8-seg-local-package-consumer-tutorial.md");
+    }
+
     private static void AssertRuntimeEvidenceIsPositiveAndNonPublishing(string path, JsonElement evidence)
     {
         Assert.Equal(1, evidence.GetProperty("schemaVersion").GetInt32());

@@ -5,7 +5,7 @@ param(
   [ValidateSet("auto", "user", "org")]
   [string]$PackageOwnerKind = "auto",
   [string]$ManagedPackageId = "JYPPX.TensorRT.CSharp.API",
-  [string]$ManagedExtensionPackageId = "JYPPX.TensorRT.CSharp.API.YoloVision",
+  [string[]]$ManagedExtensionPackageId = @("JYPPX.TensorRT.CSharp.API.YoloVision", "JYPPX.TensorRT.CSharp.API.Classification"),
   [string]$ManagedVersion,
   [string]$ReleaseTag,
   [string[]]$RuntimeReleaseTag = @(),
@@ -249,9 +249,7 @@ else {
   }
 }
 
-$managedPackageIds = @(@($ManagedPackageId, $ManagedExtensionPackageId) |
-    Where-Object { -not [string]::IsNullOrWhiteSpace($_) } |
-    Select-Object -Unique)
+$managedPackageIds = @(Expand-TokenList -Values @($ManagedPackageId, $ManagedExtensionPackageId))
 if (-not [string]::IsNullOrWhiteSpace($ManagedVersion)) {
   foreach ($packageId in $managedPackageIds) {
     $githubVersions = Resolve-GitHubPackageVersions -Owner $PackageOwner -OwnerKind $PackageOwnerKind -PackageId $packageId
@@ -326,7 +324,8 @@ $failed = @($checks | Where-Object { -not $_.passed })
   packageOwner = $PackageOwner
   packageOwnerKind = $PackageOwnerKind
   managedPackageId = $ManagedPackageId
-  managedExtensionPackageId = $ManagedExtensionPackageId
+  managedExtensionPackageId = @($ManagedExtensionPackageId)[0]
+  managedExtensionPackageIds = @($ManagedExtensionPackageId)
   managedPackageIds = $managedPackageIds
   managedVersion = $ManagedVersion
   releaseTag = $ReleaseTag

@@ -105,12 +105,16 @@ public sealed class ReleaseAutomationTests
     public void ReleasePublicationAuditCanSkipPrerequisiteNoiseSeparatelyFromInventory()
     {
         string workflow = File.ReadAllText(Path.Combine(RepositoryPaths.Root, ".github", "workflows", "release-publication-audit.yml"));
+        string publicationState = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "eng", "Test-ReleasePublicationState.ps1"));
 
         Assert.Contains("check_remote_release_prerequisites", workflow, StringComparison.Ordinal);
         Assert.Contains("check_runner_availability", workflow, StringComparison.Ordinal);
         Assert.Contains("if: ${{ inputs.check_remote_release_prerequisites }}", workflow, StringComparison.Ordinal);
         Assert.Contains("if: ${{ inputs.check_runner_availability }}", workflow, StringComparison.Ordinal);
         Assert.Contains("include_release_readiness", workflow, StringComparison.Ordinal);
+        Assert.Contains("JYPPX.TensorRT.CSharp.API.Classification", workflow, StringComparison.Ordinal);
+        Assert.Contains("managedExtensionPackageId =", publicationState, StringComparison.Ordinal);
+        Assert.Contains("managedExtensionPackageIds =", publicationState, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -132,11 +136,11 @@ public sealed class ReleaseAutomationTests
         string chineseGate = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "articles", "zh-cn", "release-candidate-gate.md"));
         string summaryScript = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "eng", "Export-ReleaseGateSummary.ps1"));
 
-        Assert.Contains("push permission for both `JYPPX.TensorRT.CSharp.API` and `JYPPX.TensorRT.CSharp.API.YoloVision`", englishReadme, StringComparison.Ordinal);
+        Assert.Contains("push permission for `JYPPX.TensorRT.CSharp.API`, `JYPPX.TensorRT.CSharp.API.YoloVision`, and `JYPPX.TensorRT.CSharp.API.Classification`", englishReadme, StringComparison.Ordinal);
         Assert.Contains("nuget.org `403`", englishReadme, StringComparison.Ordinal);
-        Assert.Contains("JYPPX.TensorRT.CSharp.API.YoloVision` 两个 package ID", chineseReadme, StringComparison.Ordinal);
+        Assert.Contains("JYPPX.TensorRT.CSharp.API.Classification` 三个 package ID", chineseReadme, StringComparison.Ordinal);
         Assert.Contains("nuget.org `403`", chineseReadme, StringComparison.Ordinal);
-        Assert.Contains("push permission for both package IDs", englishGate, StringComparison.Ordinal);
+        Assert.Contains("push permission for all three package IDs", englishGate, StringComparison.Ordinal);
         Assert.Contains("nuget.org `403`", chineseGate, StringComparison.Ordinal);
         Assert.Contains("NUGET_API_KEY` must be an active plain-text nuget.org key", summaryScript, StringComparison.Ordinal);
     }

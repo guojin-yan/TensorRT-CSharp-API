@@ -196,8 +196,22 @@ $selectedSplitDirectory = Join-Path $splitRuntimeRoot $RuntimePackageKey
 $outputRoot = Join-Path $RepositoryRoot "artifacts\final-release"
 New-Item -ItemType Directory -Force -Path $outputRoot | Out-Null
 
-$managedPackages = @(Get-PackagesFromDirectory -Directory $managedDirectory -RootRole "managed")
-$managedExtensionPackages = @(Get-PackagesFromDirectory -Directory $managedExtensionDirectory -RootRole "managed-extension")
+$requiredManagedExtensionPackageIds = @(
+  "JYPPX.TensorRT.CSharp.API.YoloVision",
+  "JYPPX.TensorRT.CSharp.API.Classification"
+)
+$managedDirectoryPackages = @(Get-PackagesFromDirectory -Directory $managedDirectory -RootRole "managed")
+$managedPackages = @($managedDirectoryPackages | Where-Object { $_.packageId -eq "JYPPX.TensorRT.CSharp.API" })
+$managedExtensionPackages = @($managedDirectoryPackages | Where-Object { $requiredManagedExtensionPackageIds -contains $_.packageId })
+foreach ($package in $managedExtensionPackages) { $package.role = "managed-extension" }
+if ($managedExtensionPackages.Count -lt $requiredManagedExtensionPackageIds.Count) {
+  $legacyExtensionPackages = @(Get-PackagesFromDirectory -Directory $managedExtensionDirectory -RootRole "managed-extension")
+  foreach ($packageId in $requiredManagedExtensionPackageIds) {
+    if (@($managedExtensionPackages | Where-Object { $_.packageId -eq $packageId }).Count -eq 0) {
+      $managedExtensionPackages += @($legacyExtensionPackages | Where-Object { $_.packageId -eq $packageId })
+    }
+  }
+}
 $runtimePackages = @(Get-PackagesFromDirectory -Directory $runtimeDirectory -RootRole "full-runtime" -RuntimePackageKey $RuntimePackageKey)
 $splitRuntimePackages = @(Get-PackagesFromDirectory -Directory $selectedSplitDirectory -RootRole "split-runtime" -RuntimePackageKey $RuntimePackageKey)
 $compatibleBridgeRuntimeKeys = @($CompatibleBridgeRuntimePackageKey |
@@ -251,9 +265,11 @@ $allPackages = @($managedPackages + $managedExtensionPackages + $runtimePackages
   Sort-Object role, packageId, version, fileName
 
 $managedPackageCandidates = @($allPackages | Where-Object { $_.role -eq "managed" -and $_.packageId -eq "JYPPX.TensorRT.CSharp.API" })
-$managedExtensionPackageCandidates = @($allPackages | Where-Object { $_.role -eq "managed-extension" -and $_.packageId -eq "JYPPX.TensorRT.CSharp.API.YoloVision" })
+$managedExtensionPackageCandidates = @($allPackages | Where-Object { $_.role -eq "managed-extension" -and $requiredManagedExtensionPackageIds -contains $_.packageId })
 $managedPackageReady = $managedPackageCandidates.Count -eq 1 -and $managedPackageCandidates[0].version -eq $PackageVersion
-$managedExtensionPackageReady = $managedExtensionPackageCandidates.Count -eq 1 -and $managedExtensionPackageCandidates[0].version -eq $PackageVersion
+$managedExtensionPackageReady = $managedExtensionPackageCandidates.Count -eq $requiredManagedExtensionPackageIds.Count -and
+  @($managedExtensionPackageCandidates | Where-Object { $_.version -ne $PackageVersion }).Count -eq 0 -and
+  @($managedExtensionPackageCandidates.packageId | Sort-Object -Unique).Count -eq $requiredManagedExtensionPackageIds.Count
 $fullRuntimeReady = $false
 $requiredSplitRoles = @("split-bridge")
 $presentRoles = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
@@ -265,15 +281,15 @@ $splitBridgePackageReady = $presentRoles.Contains("split-bridge")
 $splitRuntimePackagesReady = $missingSplitRoles.Count -eq 0
 $allowedPackages = @($allPackages | Where-Object {
     ($_.role -eq "managed" -and $_.packageId -eq "JYPPX.TensorRT.CSharp.API") -or
-    ($_.role -eq "managed-extension" -and $_.packageId -eq "JYPPX.TensorRT.CSharp.API.YoloVision") -or
+    ($_.role -eq "managed-extension" -and $requiredManagedExtensionPackageIds -contains $_.packageId) -or
     $_.role -eq "split-bridge"
   })
 $retiredPackageCandidates = @($allPackages | Where-Object { $_ -notin $allowedPackages })
 $sha256Ready = @($allowedPackages | Where-Object { -not $_.sha256Ready }).Count -eq 0 -and $allowedPackages.Count -gt 0
 $candidateAllowedPackages = @($allowedPackages | Where-Object { $_.version -eq $PackageVersion })
-$packageVersionsAligned = $allowedPackages.Count -ge 3 -and $candidateAllowedPackages.Count -eq $allowedPackages.Count
+$packageVersionsAligned = $allowedPackages.Count -ge 4 -and $candidateAllowedPackages.Count -eq $allowedPackages.Count
 $packageRepositoryCommits = @($allowedPackages | ForEach-Object { [string]$_.repositoryCommit } | Where-Object { $_ -match '^[a-f0-9]{40}$' } | Sort-Object -Unique)
-$packageSourceCommitsAligned = $allowedPackages.Count -ge 3 -and $packageRepositoryCommits.Count -eq 1 -and @($allowedPackages | Where-Object { [string]$_.repositoryCommit -notmatch '^[a-f0-9]{40}$' }).Count -eq 0
+$packageSourceCommitsAligned = $allowedPackages.Count -ge 4 -and $packageRepositoryCommits.Count -eq 1 -and @($allowedPackages | Where-Object { [string]$_.repositoryCommit -notmatch '^[a-f0-9]{40}$' }).Count -eq 0
 $packageSetReady = $managedPackageReady -and $managedExtensionPackageReady -and $splitBridgePackageReady -and $splitRuntimePackagesReady -and $sha256Ready -and $packageVersionsAligned -and $packageSourceCommitsAligned -and $retiredPackageCandidates.Count -eq 0
 
 $record = [pscustomobject]@{
@@ -296,6 +312,7 @@ $record = [pscustomobject]@{
   compatibleBridgeRuntimeProofReady = $compatibleBridgeRuntimeProofReady
   compatibleBridgeRuntimeProofs = $compatibleBridgeRuntimeProofs
   managedPackageReady = $managedPackageReady
+  requiredManagedExtensionPackageIds = $requiredManagedExtensionPackageIds
   managedExtensionPackageReady = $managedExtensionPackageReady
   fullRuntimePackageReady = $fullRuntimeReady
   fullRuntimePackageRequired = $false
@@ -334,7 +351,7 @@ $lines.Add("- can publish publicly: ``$($record.canPublishPublicly)``")
 $lines.Add("- can use as public package proof: ``$($record.canUseAsPublicPackageProof)``")
 $lines.Add("- can close release issue: ``$($record.canCloseReleaseIssue)``")
 $lines.Add("- managed package ready: ``$managedPackageReady``")
-$lines.Add("- YoloVision managed extension ready: ``$managedExtensionPackageReady``")
+$lines.Add("- required managed extensions ready: ``$managedExtensionPackageReady``")
 $lines.Add("- full/vendor runtime packages required: ``False``")
 $lines.Add("- retired package candidates found: ``$($retiredPackageCandidates.Count)``")
 $lines.Add("- split bridge package ready: ``$splitBridgePackageReady``")

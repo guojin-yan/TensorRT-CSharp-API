@@ -30,7 +30,7 @@
       "path": "docs/articles/zh-cn/classification-real-asset-walkthrough.md",
       "classification": "complete-technical-article",
       "status": "complete-with-runtime-screenshot-and-annotated-result",
-      "realExecutionEvidence": "samples/assets/classification-resnet18-article-runtime-evidence.json",
+      "realExecutionEvidence": "samples/assets/classification-resnet18-local-package-consumer-runtime-evidence.json",
       "visualAssetEvidence": "samples/assets/classification-resnet18-article-visual-assets.json",
       "model": {
         "sourceUrl": "https://download.pytorch.org/models/resnet18-f37072fd.pth",
@@ -51,12 +51,12 @@
         },
         {
           "role": "program-runtime-screenshot",
-          "path": "docs/images/classification-resnet18-runtime-terminal.png",
-          "sha256": "68a44952b4144183f6e32334ae790f8a582d773a0d20f659bd1a43abcc295e95",
-          "source": "Direct Windows Terminal capture showing path-free selected stdout values from the same real TensorRT execution."
+          "path": "docs/images/classification-resnet18-local-package-consumer-terminal.png",
+          "sha256": "0ea60819f8b294ac6f00691000e091a95e7190bdfecdc605fe9bd45e4b05556d",
+          "source": "Path-sanitized terminal rendering of selected stdout from the same real three-package TensorRT consumer execution."
         }
       ],
-      "proofBoundary": "Content-complete source-tree real-model article with exact-input ONNX Runtime validation, a real runtime screenshot, and a CC0 source-image Top-5 overlay; not package-consumer, public-package, post-publish, Owner acceptance, model upload authorization, or release proof.",
+      "proofBoundary": "Content-complete local-package-consumer article with exact-input ONNX Runtime validation, a real runtime screenshot, and a CC0 source-image Top-5 overlay; not public-package, post-publish, Owner acceptance, model upload authorization, or release proof.",
       "publicationAuthorized": false
     },
     {
@@ -268,7 +268,7 @@
       "path": "docs/articles/zh-cn/yolovision-yolov10n-real-asset-tutorial.md",
       "classification": "complete-technical-article",
       "status": "complete-with-runtime-screenshot-and-annotated-result",
-      "realExecutionEvidence": "samples/assets/yolovision-yolov10n-article-runtime-evidence.json",
+      "realExecutionEvidence": "samples/assets/yolovision-yolov10n-local-package-consumer-runtime-evidence.json",
       "visualAssetEvidence": "samples/assets/yolovision-yolov10n-article-visual-assets.json",
       "model": {
         "sourceUrl": "https://github.com/THU-MIG/yolov10/releases/download/v1.1/yolov10n.onnx",
@@ -283,18 +283,18 @@
       "resultImages": [
         {
           "role": "annotated-inference-result",
-          "path": "docs/images/yolovision-yolov10n-annotated-cc0.webp",
-          "sha256": "80e3ac8bf9e06e1088dcdc28634ddee7cb3a418bf3556450f819178b2f354a58",
-          "source": "Rendered from the SVG written by the real TensorRT YoloVision run; the CC0 source image is embedded and six YOLOv10 detections are mapped back to source coordinates."
+          "path": "docs/images/yolovision-yolov10n-local-package-consumer-annotated-cc0.jpg",
+          "sha256": "0fa0819f22e9d2552f719afa667328185800e3fdeda0c3630d419c802d75d8a9",
+          "source": "Rendered from the SVG written by the real local-package TensorRT YoloVision run; the CC0 source image is embedded and six YOLOv10 detections are mapped back to source coordinates."
         },
         {
           "role": "program-runtime-screenshot",
-          "path": "docs/images/yolovision-yolov10n-runtime-terminal.png",
-          "sha256": "7c10874ba5c99bb03896caf1608a6b7bc1f908a251c2099c193653db3f0c35e8",
-          "source": "Path-sanitized console rendering of selected stdout from the same real TensorRT run; input/output shapes, detections, elapsed time, and Passed=True are unchanged."
+          "path": "docs/images/yolovision-yolov10n-local-package-consumer-terminal.png",
+          "sha256": "f604eac8744682e1e70468aae242fe6546e884eef03b469ccf737f348c5e10f8",
+          "source": "Path-sanitized console rendering of selected stdout from the same real local-package TensorRT run; input/output shapes, detections, elapsed time, and Passed=True are unchanged."
         }
       ],
-      "proofBoundary": "Content-complete source-tree real-model article with a real runtime screenshot and source-image detection overlay; not package-consumer, public-package, post-publish, Owner acceptance, model upload authorization, or release proof.",
+      "proofBoundary": "Content-complete local-package-consumer article with a real runtime screenshot and source-image detection overlay; not public-package, post-publish, Owner acceptance, model upload authorization, or release proof.",
       "publicationAuthorized": false
     },
     {

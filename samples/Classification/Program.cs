@@ -8,11 +8,11 @@ using JYPPX.SampleSupport;
 
 namespace ClassificationSample;
 
-internal static class Program
+public static class ClassificationCommand
 {
     private const string DefaultInputShape = "1x3x224x224";
 
-    public static int Main(string[] args)
+    public static int Run(string[] args)
     {
         if (SampleCommandLine.HasSwitch(args, "--help"))
         {

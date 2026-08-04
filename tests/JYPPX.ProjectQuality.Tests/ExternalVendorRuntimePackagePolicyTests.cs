@@ -24,7 +24,7 @@ public sealed class ExternalVendorRuntimePackagePolicyTests
         Assert.Equal("guojin-yan", root.GetProperty("formalReleaseRepositoryOwner").GetString());
         Assert.Equal("grape-yan", root.GetProperty("validationOnlyRepositoryOwner").GetString());
         Assert.Equal(
-            new[] { "JYPPX.TensorRT.CSharp.API", "JYPPX.TensorRT.CSharp.API.YoloVision" },
+            new[] { "JYPPX.TensorRT.CSharp.API", "JYPPX.TensorRT.CSharp.API.YoloVision", "JYPPX.TensorRT.CSharp.API.Classification" },
             root.GetProperty("managedPackageIds").EnumerateArray().Select(static value => value.GetString()).ToArray());
         Assert.Contains(
             root.GetProperty("forbiddenPublicClaims").EnumerateArray(),

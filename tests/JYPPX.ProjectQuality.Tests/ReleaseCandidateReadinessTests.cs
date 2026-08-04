@@ -1431,11 +1431,11 @@ public sealed class ReleaseCandidateReadinessTests
         Assert.Contains("sample run evidence record", tensorRtExecExternalReport, StringComparison.Ordinal);
         Assert.Contains("Export-ReleaseEvidenceBundle.ps1", tensorRtExecExternalReport, StringComparison.Ordinal);
         Assert.Contains("owner-action-required", tensorRtExecExternalReport, StringComparison.Ordinal);
-        Assert.Contains("Classification 真实资产接入教程", classificationRealAssetWalkthrough, StringComparison.Ordinal);
+        Assert.Contains("Classification 本地包消费实战", classificationRealAssetWalkthrough, StringComparison.Ordinal);
         Assert.Contains("TorchVision ResNet18", classificationRealAssetWalkthrough, StringComparison.Ordinal);
-        Assert.Contains("classifier-sample-run-evidence.json", classificationRealAssetWalkthrough, StringComparison.Ordinal);
-        Assert.Contains("Test-SampleRunEvidenceRecord.ps1", classificationRealAssetWalkthrough, StringComparison.Ordinal);
-        Assert.Contains("Export-ReleaseEvidenceBundle.ps1", classificationRealAssetWalkthrough, StringComparison.Ordinal);
+        Assert.Contains("classification-resnet18-local-package-consumer-runtime-evidence.json", classificationRealAssetWalkthrough, StringComparison.Ordinal);
+        Assert.Contains("Test-ClassificationLocalPackageConsumer.ps1", classificationRealAssetWalkthrough, StringComparison.Ordinal);
+        Assert.Contains("ProjectReference=0", classificationRealAssetWalkthrough, StringComparison.Ordinal);
         Assert.Contains("package-consumer-runtime", classificationRealAssetWalkthrough, StringComparison.Ordinal);
         Assert.Contains("Deferred 人工设计分组指南", deferredManualDesignGroupsDoc, StringComparison.Ordinal);
         Assert.Contains("manual review design groups", deferredManualDesignGroupsDoc, StringComparison.Ordinal);

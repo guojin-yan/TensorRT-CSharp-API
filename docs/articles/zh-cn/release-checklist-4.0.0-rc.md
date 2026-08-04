@@ -77,9 +77,9 @@ bridge 包必须只包含一个项目自有 native bridge 文件。禁止运行�
 
 ## 发布前确认
 
-- 两个 managed 包和每个 bridge 包均通过 external vendor runtime policy，未包含 NVIDIA 厂商二进制。
+- 三个 managed 包和每个 bridge 包均通过 external vendor runtime policy，未包含 NVIDIA 厂商二进制。
 - 每个 nupkg 声明非占位的 license expression 或包含非空 license file；源码归档根目录包含 Owner 确认的许可证文件。
-- managed/YoloVision clean consumer 不包含 `ProjectReference`，包版本与 source commit 对齐。
+- managed/YoloVision/Classification clean consumer 不包含 `ProjectReference`，包版本与 source commit 对齐。
 - 第一版主要演示能构建；需要 GPU 的运行结果只按实际兼容主机证据描述。
 - 文档不得把 local build、dry run、local feed 或模板记录写成公开发布和 post-publish proof。
 - `IDebugListener::processDebugTensor` 等 deferred callback 不得宣称已有真实 runtime proof，除非存在可复核的兼容主机调用记录。

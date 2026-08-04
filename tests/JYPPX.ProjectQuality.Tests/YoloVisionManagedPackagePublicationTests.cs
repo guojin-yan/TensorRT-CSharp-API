@@ -110,11 +110,12 @@ public sealed class YoloVisionManagedPackagePublicationTests
 
         Assert.Contains("managed-extension", inventory, StringComparison.Ordinal);
         Assert.Contains("JYPPX.TensorRT.CSharp.API.YoloVision", inventory, StringComparison.Ordinal);
+        Assert.Contains("JYPPX.TensorRT.CSharp.API.Classification", inventory, StringComparison.Ordinal);
         Assert.Contains("managedExtensionPackageReady", inventory, StringComparison.Ordinal);
         Assert.Contains("packageSourceCommitsAligned", inventory, StringComparison.Ordinal);
         Assert.Contains("packageVersionsAligned", inventory, StringComparison.Ordinal);
         Assert.Contains("$candidateAllowedPackages.Count -eq $allowedPackages.Count", inventory, StringComparison.Ordinal);
-        Assert.Contains("$_.packageId -eq \"JYPPX.TensorRT.CSharp.API.YoloVision\"", inventory, StringComparison.Ordinal);
+        Assert.Contains("$requiredManagedExtensionPackageIds -contains $_.packageId", inventory, StringComparison.Ordinal);
         Assert.Contains("explicit managed extensions", inventory, StringComparison.Ordinal);
     }
 

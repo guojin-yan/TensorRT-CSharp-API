@@ -444,13 +444,13 @@ Formal releases run only from the `guojin-yan` repository. The `grape-yan` repos
 
 Current release workflows publish only:
 
-- `package-managed.yml`: `JYPPX.TensorRT.CSharp.API` and the pure managed `JYPPX.TensorRT.CSharp.API.YoloVision` extension;
+- `package-managed.yml`: `JYPPX.TensorRT.CSharp.API` plus the pure managed `JYPPX.TensorRT.CSharp.API.YoloVision` and `JYPPX.TensorRT.CSharp.API.Classification` extensions;
 - `runtime-windows.yml` / `runtime-linux.yml`: `.Bridge` packages with `split_package_roles=bridge`;
 - `package-source.yml`: a tracked-files-only source archive.
 
-Every upload path runs `eng/Test-ExternalVendorRuntimePackagePolicy.ps1`. The managed workflow requires an exact two-package ID/version allowlist, matching nuspec source commits, the YoloVision surface audit, and a repository-external managed-only consumer. `release-bundle.yml` defaults all publication/deployment inputs to `false`; any docs, package, or Release side effect additionally requires `owner_publish_approved=true` in the formal repository.
+Every upload path runs `eng/Test-ExternalVendorRuntimePackagePolicy.ps1`. The managed workflow requires an exact three-package ID/version allowlist, matching nuspec source commits, extension surface checks, and a repository-external managed-only consumer. `release-bundle.yml` defaults all publication/deployment inputs to `false`; any docs, package, or Release side effect additionally requires `owner_publish_approved=true` in the formal repository.
 
-For nuget.org publication, `NUGET_API_KEY` must be an active plain-text key with push permission for both `JYPPX.TensorRT.CSharp.API` and `JYPPX.TensorRT.CSharp.API.YoloVision`, or for their owning account/organization. A nuget.org `403` is non-retryable until the package owner supplies a valid package-scoped key.
+For nuget.org publication, `NUGET_API_KEY` must be an active plain-text key with push permission for `JYPPX.TensorRT.CSharp.API`, `JYPPX.TensorRT.CSharp.API.YoloVision`, and `JYPPX.TensorRT.CSharp.API.Classification`, or for their owning account/organization. A nuget.org `403` is non-retryable until the package owner supplies a valid package-scoped key.
 
 Public publication also requires `eng/Test-PublicationLicenseReadiness.ps1` to pass. Local pack/dry-run may continue while the license is an Owner decision, but no GitHub Release creation, Release upload, NuGet push, or GitHub Packages push may occur until every nupkg declares a non-placeholder license and the tracked source archive contains the selected root license file.
 

@@ -144,8 +144,15 @@ function Invoke-DotNetStep {
     [Parameter(Mandatory = $true)][string]$LogPath
   )
 
-  $output = @(& dotnet @Arguments 2>&1)
-  $exitCode = $LASTEXITCODE
+  $previousErrorActionPreference = $ErrorActionPreference
+  try {
+    $ErrorActionPreference = "Continue"
+    $output = @(& dotnet @Arguments 2>&1)
+    $exitCode = $LASTEXITCODE
+  }
+  finally {
+    $ErrorActionPreference = $previousErrorActionPreference
+  }
   $output | ForEach-Object { [string]$_ } | Set-Content -LiteralPath $LogPath -Encoding utf8
   if ($exitCode -ne 0) {
     throw "$Name failed with exit code $exitCode. See $LogPath"
@@ -162,7 +169,8 @@ $packageFiles = @(Get-ChildItem -LiteralPath $PackageDirectory -Filter *.nupkg -
 $packages = @($packageFiles | ForEach-Object { Get-NupkgMetadata -File $_ })
 $managed = Find-RequiredPackage -Packages $packages -PackageId "JYPPX.TensorRT.CSharp.API"
 $yoloVision = Find-RequiredPackage -Packages $packages -PackageId "JYPPX.TensorRT.CSharp.API.YoloVision"
-$selectedPackages = @($managed, $yoloVision)
+$classification = Find-RequiredPackage -Packages $packages -PackageId "JYPPX.TensorRT.CSharp.API.Classification"
+$selectedPackages = @($managed, $yoloVision, $classification)
 
 foreach ($package in $selectedPackages) {
   if (-not [string]::Equals([string]$package.repositoryUrl, "https://github.com/guojin-yan/TensorRT-CSharp-API", [StringComparison]::OrdinalIgnoreCase)) {
@@ -183,11 +191,21 @@ if ($yoloManagedDependencies.Count -ne 1 -or
     -not [string]::Equals([string]$yoloManagedDependencies[0].version, $PackageVersion, [StringComparison]::Ordinal)) {
   throw "YoloVision must declare exactly one managed API dependency at version '$PackageVersion'."
 }
+$classificationManagedDependencies = @($classification.dependencies | Where-Object {
+    [string]::Equals([string]$_.id, "JYPPX.TensorRT.CSharp.API", [StringComparison]::Ordinal)
+  })
+if ($classificationManagedDependencies.Count -ne 1 -or
+    -not [string]::Equals([string]$classificationManagedDependencies[0].version, $PackageVersion, [StringComparison]::Ordinal)) {
+  throw "Classification must declare exactly one managed API dependency at version '$PackageVersion'."
+}
+if (@($classification.entryNames | Where-Object { $_ -eq "lib/net8.0/Classification.dll" }).Count -ne 1) {
+  throw "Classification package must contain lib/net8.0/Classification.dll."
+}
 
 & (Join-Path $RepositoryRoot "eng\Test-ExternalVendorRuntimePackagePolicy.ps1") `
   -RepositoryRoot $RepositoryRoot `
   -PackagePath $PackageDirectory `
-  -ExpectedPackageId @($managed.id, $yoloVision.id) `
+  -ExpectedPackageId @($selectedPackages | ForEach-Object { $_.id }) `
   -ExpectedPackageVersion $PackageVersion `
   -RequireExactPackageSet | Out-Host
 
@@ -289,12 +307,13 @@ try {
       }
     })
     packageSet = [pscustomobject][ordered]@{
-      expectedPackageCount = 2
+      expectedPackageCount = 3
       selectedPackageCount = $selectedPackages.Count
       packageIdsExact = $true
       packageVersionsAligned = $true
       packageSourceCommitsAligned = $true
       yoloVisionManagedDependencyAligned = $true
+      classificationManagedDependencyAligned = $true
       vendorRuntimeEntryCount = 0
       nativeEntryCount = 0
     }
@@ -355,7 +374,7 @@ try {
     "This record proves a local managed-package pack/content/dependency/clean-consumer dry run. It is not TensorRT runtime, public-feed, post-publish, redistribution, Owner acceptance, or release proof."
   ) | Set-Content -LiteralPath $markdownPath -Encoding utf8
 
-  Write-Host "ValidationState=$($report.validationState) PackageCount=2 ProjectReferenceCount=0 RestoredProjectLibraryCount=$projectLibraryCount"
+  Write-Host "ValidationState=$($report.validationState) PackageCount=3 ProjectReferenceCount=0 RestoredProjectLibraryCount=$projectLibraryCount"
   Write-Host "SourceCommit=$ExpectedSourceCommit PackageSourceCommitsAligned=True PerformsPublish=False NativeRuntimeLoaded=False"
   Write-Host "Report=$jsonPath"
 }

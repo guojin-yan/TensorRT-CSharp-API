@@ -22,15 +22,15 @@
   "resultImages": [
     {
       "role": "annotated-inference-result",
-      "path": "docs/images/yolovision-yolov10n-annotated-cc0.webp",
-      "sha256": "80e3ac8bf9e06e1088dcdc28634ddee7cb3a418bf3556450f819178b2f354a58",
-      "source": "Rendered from the SVG written by the same real TensorRT YoloVision run; the CC0 source image is embedded and six YOLOv10 detections are mapped back to source coordinates."
+      "path": "docs/images/yolovision-yolov10n-local-package-consumer-annotated-cc0.jpg",
+      "sha256": "0fa0819f22e9d2552f719afa667328185800e3fdeda0c3630d419c802d75d8a9",
+      "source": "Rendered from the SVG written by the same real local-package TensorRT YoloVision run; the CC0 source image is embedded and six YOLOv10 detections are mapped back to source coordinates."
     },
     {
       "role": "program-runtime-screenshot",
-      "path": "docs/images/yolovision-yolov10n-runtime-terminal.png",
-      "sha256": "7c10874ba5c99bb03896caf1608a6b7bc1f908a251c2099c193653db3f0c35e8",
-      "source": "Rendered from path-sanitized stdout captured from the same real TensorRT execution; model, input/output shapes, detections, elapsed time, and Passed=True are unchanged."
+      "path": "docs/images/yolovision-yolov10n-local-package-consumer-terminal.png",
+      "sha256": "f604eac8744682e1e70468aae242fe6546e884eef03b469ccf737f348c5e10f8",
+      "source": "Rendered from path-sanitized stdout captured from the same real local-package TensorRT execution; model, input/output shapes, detections, elapsed time, and Passed=True are unchanged."
     }
   ],
   "modelFilesTrackedByGit": false,

@@ -26,7 +26,25 @@ The pinned source-tree runtime case is recorded in
 `eng/Invoke-ClassificationResNet18Reference.py` consumes the exact C# float32 input tensor, cross-checks PyTorch with ONNX Runtime,
 and writes both raw-logit and task-probability references plus a one-value controlled negative. TensorRT 10.11 compared 1000 raw
 logits and 1000 probabilities with zero mismatches; the negative exited 1 at first mismatch index 0. This remains source-tree
-real-model evidence, not package-consumer, public-package, redistribution, or post-publish proof.
+real-model evidence, not public-package, redistribution, or post-publish proof.
+
+The reusable entry point is `ClassificationCommand.Run(string[])`. A repository-external consumer
+template under `samples/Classification.PackageConsumer` calls it through exactly three local
+`PackageReference` entries: the managed API, this Classification extension, and a bridge-only runtime
+package. Run the official ResNet18 package case with:
+
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass `
+  -File .\eng\Test-ClassificationLocalPackageConsumer.ps1 `
+  -RuntimePackageKey win-x64-trt10.11-cuda12.9-cudnn9.22
+```
+
+That runner clears remote feeds, uses an isolated package cache, rejects project/direct assembly
+references and bundled NVIDIA runtimes, compares 1000 probabilities plus 1000 raw logits, and requires
+a one-value mutation to fail closed. Its evidence is
+`samples/assets/classification-resnet18-local-package-consumer-runtime-evidence.json`. This remains
+local-package engineering evidence, not public-feed, post-publish, or release proof, and it performs no
+publication.
 
 ```powershell
 dotnet run --project .\samples\Classification -- `

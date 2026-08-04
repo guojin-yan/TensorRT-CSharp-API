@@ -38,7 +38,8 @@
         "docs/articles/zh-cn/demo-model-acquisition-and-onnx-conversion.md",
         "docs/articles/zh-cn/classification-real-asset-walkthrough.md"
       ],
-      "runtimeEvidence": "samples/assets/classification-resnet18-real-model-runtime-evidence.json"
+      "runtimeEvidence": "samples/assets/classification-resnet18-real-model-runtime-evidence.json",
+      "localPackageConsumerEvidence": "samples/assets/classification-resnet18-local-package-consumer-runtime-evidence.json"
     },
     {
       "id": "onnxtoengine-nvidia-mnist-opset8",
@@ -213,9 +214,11 @@
       },
       "articles": [
         "docs/articles/zh-cn/demo-model-acquisition-and-onnx-conversion.md",
-        "docs/articles/zh-cn/yolovision-yolov8-seg-real-asset-tutorial.md"
+        "docs/articles/zh-cn/yolovision-yolov8-seg-real-asset-tutorial.md",
+        "docs/articles/zh-cn/yolovision-yolov8-seg-local-package-consumer-tutorial.md"
       ],
-      "runtimeEvidence": "samples/assets/yolovision-yolov8n-seg-real-model-runtime-evidence.json"
+      "runtimeEvidence": "samples/assets/yolovision-yolov8n-seg-real-model-runtime-evidence.json",
+      "localPackageConsumerEvidence": "samples/assets/yolovision-yolov8n-seg-local-package-consumer-runtime-evidence.json"
     },
     {
       "id": "yolovision-yolov8n-pose-v8.3.0",

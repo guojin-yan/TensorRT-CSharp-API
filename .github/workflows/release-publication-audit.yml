@@ -118,7 +118,7 @@ jobs:
             "-NuGetApiKeyAvailable",
             "$env:HAS_NUGET_API_KEY",
             "-ManagedExtensionPackageId",
-            "JYPPX.TensorRT.CSharp.API.YoloVision"
+            "JYPPX.TensorRT.CSharp.API.YoloVision,JYPPX.TensorRT.CSharp.API.Classification"
           )
 
           if (-not [string]::IsNullOrWhiteSpace("${{ inputs.managed_version }}")) {
