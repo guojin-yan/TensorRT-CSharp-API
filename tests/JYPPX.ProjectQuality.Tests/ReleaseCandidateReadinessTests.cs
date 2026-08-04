@@ -58,6 +58,8 @@ public sealed class ReleaseCandidateReadinessTests
         string deferredManualDesignGroupsDoc = ReadSource("docs", "articles", "zh-cn", "deferred-manual-design-groups.md");
         string userAcceptanceCatalog = ReadSource("eng", "Export-UserAcceptanceSampleCatalog.ps1");
         string staleClaims = ReadSource("eng", "Test-StaleReleaseClaims.ps1");
+        string runtimeDisclosurePolicy = ReadSource("pack", "runtime-validation-disclosure-policy.json");
+        string runtimeMatrixArticle = ReadSource("docs", "articles", "zh-cn", "runtime-package-matrix.md");
 
         Assert.Contains("local-release-candidate-feed", localFeed, StringComparison.Ordinal);
         Assert.Contains("RestoreSourceMode = \"local-feed-only\"", localFeed, StringComparison.Ordinal);
@@ -94,7 +96,7 @@ public sealed class ReleaseCandidateReadinessTests
         Assert.Contains("compatible-host-bridge-package-runtime", checklist, StringComparison.Ordinal);
         Assert.Contains("isPackageConsumerRuntimeProof=false", checklist, StringComparison.Ordinal);
         Assert.Contains("TRT10 compatible bridge package runtime proof", readiness, StringComparison.Ordinal);
-        Assert.Contains("does not clear the TRT11 public release blocker", readiness, StringComparison.Ordinal);
+        Assert.Contains("does not make TRT11/CUDA13.2 runtime validated", readiness, StringComparison.Ordinal);
         Assert.Contains("compatibleBridgeRuntimeProofStatus", readiness, StringComparison.Ordinal);
         Assert.Contains("quickStart=", checklist, StringComparison.Ordinal);
         Assert.Contains("preflight=", checklist, StringComparison.Ordinal);
@@ -150,6 +152,15 @@ public sealed class ReleaseCandidateReadinessTests
         Assert.Contains("Vendor package route retired", readiness, StringComparison.Ordinal);
         Assert.DoesNotContain("Full runtime package exists", readiness, StringComparison.Ordinal);
         Assert.Contains("runtimeProofSeverity", readiness, StringComparison.Ordinal);
+        Assert.Contains("runtimeProofReleaseDisposition", readiness, StringComparison.Ordinal);
+        Assert.Contains("runtimeLimitationDisclosureReady", readiness, StringComparison.Ordinal);
+        Assert.Contains("runtimeLimitationPolicyPath", readiness, StringComparison.Ordinal);
+        Assert.Contains("AllowRuntimeSmokeBlocked", readiness, StringComparison.Ordinal);
+        Assert.Contains("environment-limited-runtime-validation-disclosure", runtimeDisclosurePolicy, StringComparison.Ordinal);
+        Assert.Contains("allowReleaseWithDocumentedUnverifiedRuntime", runtimeDisclosurePolicy, StringComparison.Ordinal);
+        Assert.Contains("runtimeProofStatus=blocked-by-cuda-driver", runtimeMatrixArticle, StringComparison.Ordinal);
+        Assert.Contains("isRuntimeExecutionEvidence=false", runtimeMatrixArticle, StringComparison.Ordinal);
+        Assert.Contains("vendorDependencies=user-installed", runtimeMatrixArticle, StringComparison.Ordinal);
         Assert.Contains("runtime-execution-evidence", readiness, StringComparison.Ordinal);
         Assert.Contains("isRuntimeExecutionEvidence", readiness, StringComparison.Ordinal);
         Assert.Contains("isDependencyProbeOnly", readiness, StringComparison.Ordinal);
@@ -1576,6 +1587,14 @@ public sealed class ReleaseCandidateReadinessTests
         Assert.False(root.GetProperty("realCallbackRuntimeProof").GetBoolean());
         Assert.Contains(root.GetProperty("runtimeProofStatus").GetString(), new[] { "not-requested", "blocked-by-cuda-driver" });
         Assert.True(root.GetProperty("runtimeProofRequiredForRelease").GetBoolean());
+        Assert.Equal("documented-unverified-runtime", root.GetProperty("runtimeProofReleaseDisposition").GetString());
+        Assert.True(root.GetProperty("runtimeProofUsesDocumentedLimitation").GetBoolean());
+        Assert.True(root.GetProperty("runtimeLimitationDisclosureReady").GetBoolean());
+        Assert.Equal(0, root.GetProperty("blockingIssueCount").GetInt32());
+        Assert.Contains(root.GetProperty("checks").EnumerateArray(), static check =>
+            check.GetProperty("name").GetString() == "Environment-limited runtime release disclosure" &&
+            check.GetProperty("status").GetString() == "ready" &&
+            check.GetProperty("severity").GetString() == "warning");
         Assert.False(root.GetProperty("isRuntimeExecutionEvidence").GetBoolean());
         Assert.Contains(root.GetProperty("overallStatus").GetString(), new[] { "blocked", "ready-with-warnings", "ready" });
 

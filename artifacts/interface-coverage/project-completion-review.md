@@ -122,7 +122,7 @@ OBB 与实例分割文章分别使用项目所有者提供并授权用于文章�
 dotnet test tests/JYPPX.ProjectQuality.Tests/JYPPX.ProjectQuality.Tests.csproj -c Release
 dotnet build TensorRtSharp.sln -c Release
 pwsh -NoProfile -File eng/Test-ExternalVendorRuntimePackagePolicy.ps1
-pwsh -NoProfile -File eng/Test-ReleaseCandidateReadiness.ps1
+pwsh -NoProfile -File eng/Test-ReleaseCandidateReadiness.ps1 -AllowRuntimeSmokeBlocked
 pwsh -NoProfile -File eng/Invoke-WindowsBridgePackageMatrix.ps1 -SkipPack -SkipManagedPack -SkipConsumerValidation
 ```
 

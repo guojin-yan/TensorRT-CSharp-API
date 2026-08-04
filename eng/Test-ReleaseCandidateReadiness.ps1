@@ -135,6 +135,37 @@ $localFeedConsumer = Read-JsonOrNull "artifacts\local-feed-consumer\local-nuget-
 $releaseChecklist = Read-JsonOrNull "artifacts\release-candidate\release-candidate-checklist.json"
 $compatibleHostRuntimeProofCollectionBundle = Read-JsonOrNull "artifacts\final-release\compatible-host-runtime-proof-collection-bundle.json"
 $externalRuntimeProofValidation = Read-JsonOrNull "artifacts\final-release\external-runtime-proof-validation.json"
+$runtimeLimitationPolicyPath = "pack\runtime-validation-disclosure-policy.json"
+$runtimeLimitationPolicy = Read-JsonOrNull $runtimeLimitationPolicyPath
+$runtimeLimitationEntry = @(
+  if ($runtimeLimitationPolicy) {
+    $runtimeLimitationPolicy.runtimeKeys | Where-Object {
+      [string]::Equals([string]$_.runtimePackageKey, $RuntimePackageKey, [System.StringComparison]::OrdinalIgnoreCase)
+    }
+  }
+) | Select-Object -First 1
+$runtimeLimitationNoticePath = if ($runtimeLimitationPolicy) { [string]$runtimeLimitationPolicy.releaseNoticePath } else { "" }
+$runtimeLimitationNotice = if (-not [string]::IsNullOrWhiteSpace($runtimeLimitationNoticePath)) {
+  $noticePath = Join-Path $RepositoryRoot $runtimeLimitationNoticePath
+  if (Test-Path -LiteralPath $noticePath -PathType Leaf) {
+    Get-Content -LiteralPath $noticePath -Raw -Encoding utf8
+  }
+  else {
+    ""
+  }
+}
+else {
+  ""
+}
+$runtimeLimitationMissingNoticeMarkers = @(
+  if ($runtimeLimitationEntry) {
+    foreach ($marker in @($runtimeLimitationEntry.requiredNoticeMarkers)) {
+      if (-not $runtimeLimitationNotice.Contains([string]$marker, [System.StringComparison]::Ordinal)) {
+        [string]$marker
+      }
+    }
+  }
+)
 
 $checks = New-Object System.Collections.Generic.List[object]
 
@@ -158,7 +189,7 @@ $checks.Add((New-Check -Category "managed-package" -Name "Managed package exists
 $checks.Add((New-Check -Category "package-policy" -Name "Vendor package route retired" -Status "ready" -Severity "blocker" -Detail "Only managed and bridge packages are publishable; full/vendor package absence is required and not a readiness blocker." -EvidencePath "pack/external-vendor-runtime-policy.json")) | Out-Null
 $checks.Add((New-Check -Category "runtime-package" -Name "Bridge package exists" -Status $bridgePackageStatus -Severity "blocker" -Detail "bridge split package status from runtime readiness." -EvidencePath "artifacts/package-readiness/runtime-package-readiness-summary.json")) | Out-Null
 $checks.Add((New-Check -Category "consumer" -Name "Bridge package consumer" -Status $bridgeConsumerStatus -Severity "blocker" -Detail "bridge consumer validates wrapper surface and native dependency probe without claiming full runtime callback proof." -EvidencePath "artifacts/package-consumer/bridge-package-consumer-validation-summary.json")) | Out-Null
-$checks.Add((New-Check -Category "runtime-proof" -Name "TRT10 compatible bridge package runtime proof" -Status $compatibleBridgeRuntimeProofStatus -Severity "warning" -Detail "External PackageReference consumer executes identity build/serialize/deserialize/enqueue/output-compare with system TensorRT/CUDA dependencies. This is compatible-host runtime execution evidence only; it remains isPackageConsumerRuntimeProof=false and does not clear the TRT11 public release blocker." -EvidencePath $compatibleBridgeRuntimeProofPath.Replace('\', '/'))) | Out-Null
+$checks.Add((New-Check -Category "runtime-proof" -Name "TRT10 compatible bridge package runtime proof" -Status $compatibleBridgeRuntimeProofStatus -Severity "warning" -Detail "External PackageReference consumer executes identity build/serialize/deserialize/enqueue/output-compare with system TensorRT/CUDA dependencies. This is compatible-host runtime execution evidence only; it remains isPackageConsumerRuntimeProof=false and does not make TRT11/CUDA13.2 runtime validated." -EvidencePath $compatibleBridgeRuntimeProofPath.Replace('\', '/'))) | Out-Null
 $checks.Add((New-Check -Category "consumer" -Name "Historical vendor-package consumer" -Status $packageConsumerStatus -Severity "warning" -Detail "Historical vendor-package consumer records remain diagnostic inputs only and are not required by bridge-only publication." -EvidencePath "artifacts/package-consumer/package-consumer-validation-summary.json")) | Out-Null
 
 if ($packageConsumer) { $smokeStatus = [string]$packageConsumer.SmokeResult } else { $smokeStatus = "missing" }
@@ -215,6 +246,27 @@ $runtimeProofRequiredForRelease = if ($runtimeReadiness -and $runtimeReadiness.P
 else {
   -not [string]::Equals($runtimeProofStatus, "ready", [System.StringComparison]::OrdinalIgnoreCase)
 }
+$runtimeLimitationStatusEligible = $runtimeLimitationEntry -and @($runtimeLimitationEntry.eligibleRuntimeProofStatuses) -contains $runtimeProofStatus
+$runtimeLimitationDisclosureReady = $runtimeLimitationPolicy -and
+  [bool]$runtimeLimitationPolicy.allowReleaseWithDocumentedUnverifiedRuntime -and
+  $runtimeLimitationEntry -and
+  [bool]$runtimeLimitationEntry.mayDowngradeToWarning -and
+  $runtimeLimitationStatusEligible -and
+  -not [string]::IsNullOrWhiteSpace($runtimeLimitationNotice) -and
+  $runtimeLimitationMissingNoticeMarkers.Count -eq 0
+$runtimeProofUsesDocumentedLimitation = $runtimeProofRequiredForRelease -and
+  -not $isRuntimeExecutionEvidence -and
+  $AllowRuntimeSmokeBlocked.IsPresent -and
+  $runtimeLimitationDisclosureReady
+$runtimeProofReleaseDisposition = if ($isRuntimeExecutionEvidence) {
+  "runtime-validated"
+}
+elseif ($runtimeProofUsesDocumentedLimitation) {
+  "documented-unverified-runtime"
+}
+else {
+  "blocking-runtime-proof-required"
+}
 $externalRuntimeProofConsumerProjectIdentityReady = [bool](Get-PropertyOrDefault -Object $externalRuntimeProofValidation -Name "consumerProjectIdentityReady" -DefaultValue $false)
 $externalRuntimeProofSmokeCommandRuntimeKeyReady = [bool](Get-PropertyOrDefault -Object $externalRuntimeProofValidation -Name "smokeCommandRuntimeKeyReady" -DefaultValue $false)
 $externalRuntimeProofHostReady = [bool](Get-PropertyOrDefault -Object $externalRuntimeProofValidation -Name "hostReady" -DefaultValue $false)
@@ -236,12 +288,24 @@ $compatibleHostRuntimeProofCollectionBundleValidateFilledRecordCommandFallback =
 $compatibleHostRuntimeProofCollectionBundleValidateFilledRecordCommandFallback = [string](Get-PropertyOrDefault -Object $compatibleHostRuntimeProofCollectionBundle -Name "validateFilledRecordCommand" -DefaultValue $compatibleHostRuntimeProofCollectionBundleValidateFilledRecordCommandFallback)
 $compatibleHostRuntimeProofCollectionBundleValidateFilledRecordCommand = [string](Get-PropertyOrDefault -Object $compatibleHostRuntimeProofCollectionBundleCommands -Name "validateFilledRecord" -DefaultValue $compatibleHostRuntimeProofCollectionBundleValidateFilledRecordCommandFallback)
 $smokeSeverity = "warning"
-$runtimeProofSeverity = if ($runtimeProofRequiredForRelease -and -not $isRuntimeExecutionEvidence) { "blocker" } else { "warning" }
+$runtimeProofSeverity = if ($runtimeProofRequiredForRelease -and -not $isRuntimeExecutionEvidence -and -not $runtimeProofUsesDocumentedLimitation) { "blocker" } else { "warning" }
 if ($packageConsumer) { $smokeDetail = [string]$packageConsumer.SmokeDiagnostic } else { $smokeDetail = "package consumer smoke report was not found." }
 $smokeDetail = "$smokeDetail EvidenceKind=$packageConsumerEvidenceKind; RuntimeSmokeClassification=$runtimeSmokeClassification; IsRuntimeExecutionEvidence=$isRuntimeExecutionEvidence; IsDependencyProbeOnly=$isDependencyProbeOnly; IsRealCallbackRuntimeProof=$isPackageConsumerRealCallbackRuntimeProof; RuntimeProofStatus=$runtimeProofStatus; RuntimeProofRequiredForRelease=$runtimeProofRequiredForRelease."
 $checks.Add((New-Check -Category "runtime-smoke" -Name "Historical vendor-package consumer smoke" -Status $smokeStatus -Severity $smokeSeverity -Detail "$smokeDetail Historical vendor-package smoke cannot satisfy current package-consumer or post-publish proof." -EvidencePath "artifacts/package-consumer/package-consumer-validation-summary.json")) | Out-Null
-$runtimeProofDetail = "runtime proof status is separate from package/readiness overall status; release-required=$runtimeProofRequiredForRelease; runtime-execution-evidence=$isRuntimeExecutionEvidence; externalRuntimeProofConsumerProjectIdentityReady=$externalRuntimeProofConsumerProjectIdentityReady; externalRuntimeProofSmokeCommandRuntimeKeyReady=$externalRuntimeProofSmokeCommandRuntimeKeyReady; externalRuntimeProofHostReady=$externalRuntimeProofHostReady; externalRuntimeProofCommandsReady=$externalRuntimeProofCommandsReady; $runtimeProofDiagnostic Missing real external-runtime-proof-record.json remains a release blocker when runtimeProofRequiredForRelease=True; blocked-by-cuda-driver is not smoke passed; compatible-host-runtime-proof-collection-bundle is guidance only."
+$runtimeProofDetail = "runtime proof status is separate from package/readiness overall status; release-required=$runtimeProofRequiredForRelease; release-disposition=$runtimeProofReleaseDisposition; runtime-execution-evidence=$isRuntimeExecutionEvidence; externalRuntimeProofConsumerProjectIdentityReady=$externalRuntimeProofConsumerProjectIdentityReady; externalRuntimeProofSmokeCommandRuntimeKeyReady=$externalRuntimeProofSmokeCommandRuntimeKeyReady; externalRuntimeProofHostReady=$externalRuntimeProofHostReady; externalRuntimeProofCommandsReady=$externalRuntimeProofCommandsReady; $runtimeProofDiagnostic Missing real external-runtime-proof-record.json blocks a runtime-validated claim. With explicit Owner opt-in and a validated limitation notice, an environment-limited runtime key may remain an unverified warning; blocked-by-cuda-driver is never smoke passed."
 $checks.Add((New-Check -Category "runtime-proof" -Name "External bridge runtime proof" -Status $runtimeProofStatus -Severity $runtimeProofSeverity -Detail "$runtimeProofDetail Current proof must use managed plus bridge-only packages with host-installed NVIDIA dependencies." -EvidencePath "artifacts/package-readiness/runtime-package-readiness-summary.json; artifacts/final-release/external-runtime-proof-record.json")) | Out-Null
+$runtimeLimitationDisclosureStatus = if ($isRuntimeExecutionEvidence) {
+  "not-required-runtime-validated"
+}
+elseif ($runtimeLimitationDisclosureReady) {
+  "ready"
+}
+else {
+  "missing-or-invalid"
+}
+$runtimeLimitationDisclosureSeverity = if ($AllowRuntimeSmokeBlocked.IsPresent -and -not $isRuntimeExecutionEvidence -and -not $runtimeLimitationDisclosureReady) { "blocker" } else { "warning" }
+$runtimeLimitationDisclosureDetail = "Owner opt-in=$($AllowRuntimeSmokeBlocked.IsPresent); policy=$runtimeLimitationPolicyPath; releaseNotice=$runtimeLimitationNoticePath; missingMarkers=$($runtimeLimitationMissingNoticeMarkers -join ','); disposition=$runtimeProofReleaseDisposition. A ready disclosure does not create runtime execution evidence."
+$checks.Add((New-Check -Category "runtime-proof" -Name "Environment-limited runtime release disclosure" -Status $runtimeLimitationDisclosureStatus -Severity $runtimeLimitationDisclosureSeverity -Detail $runtimeLimitationDisclosureDetail -EvidencePath "$runtimeLimitationPolicyPath; $runtimeLimitationNoticePath")) | Out-Null
 $compatibleHostRuntimeProofCollectionBundleReady = $compatibleHostRuntimeProofCollectionBundle -and
   -not $compatibleHostRuntimeProofCollectionBundlePerformsPublish -and
   -not $compatibleHostRuntimeProofCollectionBundleApprovesPublicRelease -and
@@ -424,6 +488,12 @@ $summary = [pscustomobject]@{
   runtimeProofStatus = $runtimeProofStatus
   runtimeProofDiagnostic = $runtimeProofDiagnostic
   runtimeProofRequiredForRelease = $runtimeProofRequiredForRelease
+  runtimeProofReleaseDisposition = $runtimeProofReleaseDisposition
+  runtimeProofUsesDocumentedLimitation = [bool]$runtimeProofUsesDocumentedLimitation
+  runtimeLimitationDisclosureReady = [bool]$runtimeLimitationDisclosureReady
+  runtimeLimitationPolicyPath = $runtimeLimitationPolicyPath
+  runtimeLimitationNoticePath = $runtimeLimitationNoticePath
+  runtimeLimitationMissingNoticeMarkers = @($runtimeLimitationMissingNoticeMarkers)
   externalRuntimeProofConsumerProjectIdentityReady = $externalRuntimeProofConsumerProjectIdentityReady
   externalRuntimeProofSmokeCommandRuntimeKeyReady = $externalRuntimeProofSmokeCommandRuntimeKeyReady
   externalRuntimeProofHostReady = $externalRuntimeProofHostReady
@@ -469,6 +539,10 @@ $lines.Add("- package consumer evidence kind: ``$packageConsumerEvidenceKind``")
 $lines.Add("- runtime smoke classification: ``$runtimeSmokeClassification``")
 $lines.Add("- runtime proof status: ``$runtimeProofStatus``")
 $lines.Add("- runtime proof required for release: ``$runtimeProofRequiredForRelease``")
+$lines.Add("- runtime proof release disposition: ``$runtimeProofReleaseDisposition``")
+$lines.Add("- documented runtime limitation used: ``$runtimeProofUsesDocumentedLimitation``")
+$lines.Add("- runtime limitation disclosure ready: ``$runtimeLimitationDisclosureReady``")
+$lines.Add("- runtime limitation release notice: ``$runtimeLimitationNoticePath``")
 $lines.Add("- external runtime proof consumer project identity ready: ``$externalRuntimeProofConsumerProjectIdentityReady``")
 $lines.Add("- external runtime proof smoke command runtime key ready: ``$externalRuntimeProofSmokeCommandRuntimeKeyReady``")
 $lines.Add("- external runtime proof host ready: ``$externalRuntimeProofHostReady``")

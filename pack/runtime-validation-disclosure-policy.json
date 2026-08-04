@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "policyId": "environment-limited-runtime-validation-disclosure",
+  "allowReleaseWithDocumentedUnverifiedRuntime": true,
+  "ownerOptInSwitch": "-AllowRuntimeSmokeBlocked",
+  "releaseNoticePath": "docs/articles/zh-cn/runtime-package-matrix.md",
+  "runtimeKeys": [
+    {
+      "runtimePackageKey": "win-x64-trt11.0-cuda13.2-cudnn9.22",
+      "validationDisposition": "build-package-validated-runtime-unverified",
+      "eligibleRuntimeProofStatuses": [
+        "blocked-by-cuda-driver",
+        "not-requested"
+      ],
+      "mayDowngradeToWarning": true,
+      "requiredNoticeMarkers": [
+        "runtimePackageKey=win-x64-trt11.0-cuda13.2-cudnn9.22",
+        "validationDisposition=build-package-validated-runtime-unverified",
+        "runtimeProofStatus=blocked-by-cuda-driver",
+        "isRuntimeExecutionEvidence=false",
+        "isDependencyProbeOnly=true",
+        "isRealCallbackRuntimeProof=false",
+        "vendorDependencies=user-installed"
+      ]
+    }
+  ],
+  "claimRestrictions": [
+    "Do not claim TensorRT 11.0 plus CUDA 13.2 runtime validation.",
+    "Do not promote dependency-probe or native-copy evidence to runtime execution proof.",
+    "Do not bundle CUDA, cuDNN, TensorRT, or NVRTC with managed or bridge packages.",
+    "Keep the limitation visible in release notes until compatible-host runtime evidence exists."
+  ]
+}

@@ -405,7 +405,7 @@ runtime 包为一个明确 TensorRT / CUDA / cuDNN 组合承载原生部署资�
 
 - TensorRT 10 + CUDA 11.8 是稳定的真实 vendor-backed smoke 路径，已有 package-consumer smoke 证据。
 - TensorRT 10 + CUDA 12.9 和 TensorRT 11 + CUDA 12.9 已完成本地 runtime/package 验证和 package-consumer smoke。
-- TensorRT 11 + CUDA 13.2 bridge 可编译、可收集 assets、可打包，并通过 package consumer restore/build/native-copy；runtime/builder smoke 仍等待 CUDA 13-capable driver/runtime 环境。
+- TensorRT 11 + CUDA 13.2 bridge 可编译、可收集 assets、可打包，并通过 package consumer restore/build/native-copy；runtime/builder smoke 仍等待 CUDA 13-capable driver/runtime 环境。任何包含该 bridge 的发布都必须标注为 `build-package-validated-runtime-unverified`，并链接 `docs/articles/zh-cn/runtime-package-matrix.md` 中的限制说明。
 - Linux runtime 包名现在显式包含系统版本和架构。Ubuntu 22.04 x64 是默认 hosted 矩阵并覆盖 6 个组合；Ubuntu 24.04 x64 只覆盖 NVIDIA 官方仓库已提供的 TensorRT 10/11 现代组合；Ubuntu 20.04 x64 通过 hosted-container 发布线使用 `ubuntu:20.04` job container。
 
 相关文档：

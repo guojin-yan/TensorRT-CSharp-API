@@ -20,14 +20,14 @@
 - `win-x64-trt11.0-cuda12.9-cudnn9.22`：restore/build/native-copy/smoke 通过，native asset patterns 为 `19/19`，探针输出 TensorRT `11.0.0`、CUDA `12.9`。
 - `win-x64-trt11.0-cuda13.2-cudnn9.22`：2026-06-25 已完成完整 split/full 包本地打包，restore/build/native-copy 通过，native asset patterns 为 `19/19`；full package consumer smoke 已请求并启动 packaged runtime，但当前机器被 CUDA driver/runtime compatibility 阻塞为 `blocked-by-cuda-driver`，真实 callback runtime proof 仍为 `false`。
 
-当前 `win-x64-trt11.0-cuda13.2-cudnn9.22` package consumer evidence schema 必须按字段读取：
+当前 `win-x64-trt11.0-cuda13.2-cudnn9.22` package consumer evidence schema 必须按字段读取。默认严格门禁仍把缺少 runtime proof 视为 blocker；如果 Owner 明确使用 `-AllowRuntimeSmokeBlocked`，则还必须通过 `pack/runtime-validation-disclosure-policy.json` 和 `runtime-package-matrix.md` 的固定披露字段，门禁才可将它降为 `ready-with-warnings`。这只是发布限制说明，不是 runtime proof：
 
 | 字段 | 当前值 | 门禁含义 |
 | --- | --- | --- |
 | `packageConsumerEvidenceKind` | `full-runtime-package-consumer-smoke-driver-blocked` | full package consumer 已进入 smoke 路径，但被 driver/runtime compatibility 阻塞。 |
 | `runtimeSmokeClassification` | `runtime-smoke-driver-blocked` | runtime smoke 是环境阻塞分类，不是 passed。 |
 | `runtimeProofStatus` | `blocked-by-cuda-driver` | 发布运行证明仍未完成；不要被 package/readiness `overall=ready` 误导。 |
-| `runtimeProofRequiredForRelease` | `true` | 公开发布前仍需要兼容 CUDA driver/runtime 环境补齐真实 runtime proof。 |
+| `runtimeProofRequiredForRelease` | `true` | 仍未形成 runtime validated 证据；只有显式披露后才允许作为未验证环境 warning 继续候选流程。 |
 | `isRuntimeExecutionEvidence` | `false` | 不能作为 runtime execution proof。 |
 | `isDependencyProbeOnly` | `true` | 当前只能证明 dependency probe/native load 和阻塞诊断。 |
 | `isRealCallbackRuntimeProof` | `false` | 不能晋级 callback runtime proof。 |
@@ -35,6 +35,8 @@
 `runtime-package-readiness-summary.md`、`release-candidate-readiness-summary.md` 和 `runtime-package-matrix.md` 现在都会输出 runtime proof 状态。`Overall` 或 `overallStatus` 只表示 package/readiness 链条完整，`Runtime proof` / `runtimeProofStatus` 才表示 runtime execution proof；因此 `Overall=ready` 仍可以和 `Runtime proof=blocked-by-cuda-driver` 同时出现，不能把它解读为 CUDA 13.2 smoke passed。
 
 门禁中凡引用 `blocked-by-cuda-driver`，都必须同时保留上述字段语义；不能把 `isDependencyProbeOnly=true` 写成 runtime smoke passed，也不能把 `isRealCallbackRuntimeProof=false` 写成 callback 已完成。
+
+发布说明还必须直接提示使用者：TensorRT、CUDA、cuDNN 和 NVRTC 由用户自行安装；TensorRT 11.0 + CUDA 13.2 当前只完成构建、包结构、native-copy 和依赖探针验证，真实运行需要匹配的 CUDA-capable driver/runtime 环境。没有该说明时，`-AllowRuntimeSmokeBlocked` 不得打开 warning 路径。
 
 ## 本地质量门
 
@@ -92,7 +94,7 @@ cmake --build --preset win-x64-trt11-cuda13-release --parallel
 - 匹配 CMake preset 输出的 runtime asset collection。
 - 基础 managed、YoloVision 纯 managed 扩展与 matching bridge package 的 pack/hash/source-commit 对齐证据。
 - package consumer restore/build/native asset copy 验证。
-- 兼容机器上的 package consumer smoke 证据；如果被 WDAC、driver/runtime 不兼容阻塞，应记录为环境 blocker，而不是 package layout failure。
+- 兼容机器上的 package consumer smoke 证据；如果被 WDAC、driver/runtime 不兼容阻塞，应记录为环境限制，而不是 package layout failure。只有 Owner 明确 opt-in 且发布说明完成时，才可将该行保留为 warning。
 - private-feed 或 split-delivery readiness 必须要求 `local-validated`；`pending-local-validation` 不能视为 ready。
 
 CUDA `12.9` 和 TensorRT 11 Windows 组合必须使用精确 CUDA/TensorRT/cuDNN 依赖链证据。`trt11.0-cuda13.2-cudnn9.22` 可以构建并完成 package consumer native-copy；当前机器 runtime smoke 在 CUDA error 35 处被阻塞，仍需要 CUDA 13-capable driver/runtime 环境完成普通 runtime smoke。普通 smoke 通过也不能自动提升 callback proof。
