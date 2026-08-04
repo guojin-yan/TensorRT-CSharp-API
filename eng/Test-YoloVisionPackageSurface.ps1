@@ -21,6 +21,10 @@ $utf8 = [Text.UTF8Encoding]::new($false)
 $OutputEncoding = $utf8
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 
+if ($PSVersionTable.PSEdition -ne "Core") {
+  throw "YoloVision net8.0 package surface validation requires PowerShell 7 or later (pwsh)."
+}
+
 if ([string]::IsNullOrWhiteSpace($PackagePath)) {
   $PackagePath = Join-Path $RepositoryRoot "artifacts\yolovision-nupkg\JYPPX.TensorRT.CSharp.API.YoloVision.$PackageVersion.nupkg"
 }
@@ -49,7 +53,7 @@ function Get-ZipEntrySha256 {
   try {
     $sha = [Security.Cryptography.SHA256]::Create()
     try {
-      return [Convert]::ToHexString($sha.ComputeHash($stream)).ToLowerInvariant()
+      return ([BitConverter]::ToString($sha.ComputeHash($stream))).Replace("-", "").ToLowerInvariant()
     }
     finally {
       $sha.Dispose()
@@ -102,7 +106,8 @@ function Add-TypeFindings {
       [Runtime.InteropServices.SafeHandle].IsAssignableFrom($candidate)) {
     $Findings.Add([pscustomobject]@{ category = "forbidden-pointer-or-handle"; surface = $Surface; type = [string]$Type })
   }
-  if (($candidate.FullName ?? "").Contains("OnnxSampleOptions", [StringComparison]::Ordinal) -or
+  $candidateFullName = if ($null -eq $candidate.FullName) { "" } else { [string]$candidate.FullName }
+  if ($candidateFullName.Contains("OnnxSampleOptions", [StringComparison]::Ordinal) -or
       [string]::Equals($candidate.Namespace, "JYPPX.SampleSupport", [StringComparison]::Ordinal)) {
     $Findings.Add([pscustomobject]@{ category = "sample-internal-type-leak"; surface = $Surface; type = [string]$Type })
   }

@@ -145,6 +145,8 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Acquire-TorchVisionLrasppOff
 
 `eng/Test-DebugListenerLocalPackageConsumer.ps1` applies the same repository-external two-package isolation to `samples/DebugListener.PackageConsumer`. `debug-listener-local-package-consumer-tensorrt10.11-evidence.json` records package and restored bridge hashes, a real `processDebugTensor` callback, copied `[1,4]` metadata, pointer isolation, clean detach, and a controlled handler rejection. TensorRT 10.11 records the rejected callback but completes this identity enqueue, so the proof uses failure state and lifecycle invariants instead of requiring an enqueue exception. No external model or image is involved, and this is not public-package, Release, or post-publish proof.
 
+`yolovision-yolox-s-local-package-consumer-runtime-evidence.json` records the current three-package YOLOX-S TensorRT 10.11 run against a CC0 bus-station image. It fixes the official ONNX, local packages, preprocessed tensor, 1 bus plus 7 person detections, sanitized terminal transcript, terminal screenshot, and annotated result image. The heavy ONNX, engine, tensor, raw logs, and full path-bearing report remain outside Git. The run uses local file feeds and does not claim independent raw-tensor parity, public-package proof, redistribution approval, or release readiness.
+
 Recommended local names:
 
 | Sample | Local files |

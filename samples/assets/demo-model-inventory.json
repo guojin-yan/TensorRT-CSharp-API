@@ -152,9 +152,11 @@
       },
       "articles": [
         "docs/articles/zh-cn/demo-model-acquisition-and-onnx-conversion.md",
-        "docs/articles/zh-cn/yolovision-yolox-official-runtime-tutorial.md"
+        "docs/articles/zh-cn/yolovision-yolox-official-runtime-tutorial.md",
+        "docs/articles/zh-cn/yolovision-yolox-local-package-consumer-tutorial.md"
       ],
-      "runtimeEvidence": "artifacts/interface-coverage/yolox-official-runtime-proof-closure.json"
+      "runtimeEvidence": "artifacts/interface-coverage/yolox-official-runtime-proof-closure.json",
+      "localPackageConsumerEvidence": "samples/assets/yolovision-yolox-s-local-package-consumer-runtime-evidence.json"
     },
     {
       "id": "yolovision-yolov8n-classification-v8.3.0",

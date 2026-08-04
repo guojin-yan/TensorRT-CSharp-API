@@ -64,7 +64,7 @@ public sealed class YoloVisionLocalPackageConsumerTests
         Assert.Contains("__BRIDGE_PACKAGE_ID__", script, StringComparison.Ordinal);
         Assert.Contains("Bridge TensorRT build version", script, StringComparison.Ordinal);
         Assert.Contains("bridgeBuildTensorRtLineMatches = $true", script, StringComparison.Ordinal);
-        Assert.Contains("consumer-workspaces\\yolovision-yolox-local-package-trt$TensorRtLine", script, StringComparison.Ordinal);
+        Assert.Contains("consumer-workspaces\\yv-yolox-pkg-trt$TensorRtLine", script, StringComparison.Ordinal);
         Assert.Contains("Assert-NonCDrivePath", script, StringComparison.Ordinal);
         Assert.Contains("<clear />", script, StringComparison.Ordinal);
         Assert.Contains("--packages", script, StringComparison.Ordinal);
@@ -778,6 +778,71 @@ public sealed class YoloVisionLocalPackageConsumerTests
         Assert.False(boundary.GetProperty("packagesDownloadedFromPublicFeed").GetBoolean());
         Assert.False(boundary.GetProperty("canPublishPublicly").GetBoolean());
         Assert.False(boundary.GetProperty("performsPublish").GetBoolean());
+    }
+
+    [Fact]
+    public void YoloXPackageConsumerArticleAndEvidenceUseTheCurrentRealRunWithoutLocalPaths()
+    {
+        string article = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "docs",
+            "articles",
+            "zh-cn",
+            "yolovision-yolox-local-package-consumer-tutorial.md"));
+        string evidencePath = Path.Combine(
+            RepositoryPaths.Root,
+            "samples",
+            "assets",
+            "yolovision-yolox-s-local-package-consumer-runtime-evidence.json");
+        string evidenceText = File.ReadAllText(evidencePath);
+        using JsonDocument document = JsonDocument.Parse(evidenceText);
+        JsonElement root = document.RootElement;
+
+        foreach (string required in new[]
+        {
+            "## 1. 项目与功能背景",
+            "## 2. 模型、图片与许可证",
+            "## 4. ONNX 转换方式",
+            "tools/export_onnx.py",
+            "models/YoloVision/Detection/yolox-s-megvii-v0.1.1rc0/yolox_s.onnx",
+            "## 6. 仓库外消费者如何隔离",
+            "## 7. 图像预处理合同",
+            "## 8. YOLOX 输出解码",
+            "## 10. 本机执行结果",
+            "yolovision-yolox-s-local-package-consumer-terminal.png",
+            "yolovision-yolox-s-local-package-consumer-annotated-cc0.jpg",
+            "Detections=8 Top=bus Score=0.956653 Classes=bus:1,person:7",
+            "不发布新包、不创建 Release"
+        })
+        {
+            Assert.Contains(required, article, StringComparison.Ordinal);
+        }
+
+        Assert.DoesNotMatch(@"[A-Za-z]:\\", article);
+        Assert.DoesNotContain("GitSpace", article, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("yolovision-yolox-local-package-consumer-runtime-evidence", root.GetProperty("recordKind").GetString());
+        Assert.Equal("local-package-consumer-runtime", root.GetProperty("proofClassification").GetString());
+        Assert.Equal(8, root.GetProperty("runtime").GetProperty("predictionCount").GetInt32());
+        Assert.Equal("bus", root.GetProperty("runtime").GetProperty("topPrediction").GetString());
+        Assert.Equal(0.956653, root.GetProperty("runtime").GetProperty("topScore").GetDouble(), 6);
+        Assert.True(root.GetProperty("packageConsumer").GetProperty("restoredPackageHashesMatchSelected").GetBoolean());
+        Assert.Equal(0, root.GetProperty("packageConsumer").GetProperty("projectReferenceCount").GetInt32());
+        Assert.Equal(0, root.GetProperty("packageConsumer").GetProperty("vendorRuntimePackageEntryCount").GetInt32());
+        Assert.False(root.GetProperty("validation").GetProperty("independentRawTensorReferenceExecuted").GetBoolean());
+        Assert.False(root.GetProperty("proofBoundary").GetProperty("publicPackageProof").GetBoolean());
+        Assert.False(root.GetProperty("proofBoundary").GetProperty("performsPublish").GetBoolean());
+        Assert.DoesNotMatch(@"[A-Za-z]:\\", evidenceText);
+
+        foreach (JsonProperty artifact in root.GetProperty("artifacts").EnumerateObject())
+        {
+            JsonElement value = artifact.Value;
+            string relativePath = value.GetProperty("path").GetString()!;
+            string path = Path.Combine(RepositoryPaths.Root, relativePath.Replace('/', Path.DirectorySeparatorChar));
+            Assert.True(File.Exists(path), $"Missing YOLOX package-consumer artifact: {relativePath}");
+            Assert.Equal(value.GetProperty("length").GetInt64(), new FileInfo(path).Length);
+            string actualHash = Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(File.ReadAllBytes(path))).ToLowerInvariant();
+            Assert.Equal(value.GetProperty("sha256").GetString(), actualHash);
+        }
     }
 
     [Fact]

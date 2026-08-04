@@ -431,7 +431,7 @@ elseif ($isOfficialDetectionScenario) {
   Join-Path $outerRoot "consumer-workspaces\yolovision-yolov8n-det-local-package-trt$TensorRtLine"
 }
 else {
-  Join-Path $outerRoot "consumer-workspaces\yolovision-yolox-local-package-trt$TensorRtLine"
+  Join-Path $outerRoot "consumer-workspaces\yv-yolox-pkg-trt$TensorRtLine"
 }
 $OutputRoot = Resolve-PathValue -Value $OutputRoot -DefaultValue $defaultConsumerOutputRoot -RelativeRoot $outerRoot
 $ReportDirectory = Resolve-PathValue -Value $ReportDirectory -DefaultValue (Join-Path $RepositoryRoot "artifacts\yolovision\$scenarioSlug-local-package-consumer\$RuntimePackageKey") -RelativeRoot $RepositoryRoot

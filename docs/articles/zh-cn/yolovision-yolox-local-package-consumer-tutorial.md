@@ -1,275 +1,245 @@
-# YoloVision YOLOX 本地 PackageReference 消费者实战
+# 使用本地 NuGet 包运行 YOLOX-S：从官方模型到 TensorRT 检测结果
 
-上一篇教程完成了官方 YOLOX-S 在源码树中的真实运行。本篇继续回答更接近用户安装体验的问题：
-不引用仓库项目，只使用本地生成的 NuGet 包，能否在一个干净目录里恢复、编译并完成同一张
-官方图片的 TensorRT 推理？
+本文演示一个完整的应用消费流程：获取官方 YOLOX-S 模型，确认 ONNX 转换方式，在仓库外创建只含 `PackageReference` 的 .NET 应用，使用 TensorRtSharp4.0 完成 TensorRT 推理，并把检测框绘制回原始图片。
 
-答案是可以。本次验证使用三个本地包：
+演示使用真实的 TensorRT 10.11、CUDA 12.9 和 RTX 3060 Laptop GPU。最终得到 1 个 bus 和 7 个 person。模型与引擎不提交到 Git；当前阶段也不创建 tag、GitHub Release 或公开包。
 
-- `JYPPX.TensorRT.CSharp.API`：托管 TensorRT/CUDA API。
-- `JYPPX.TensorRT.CSharp.API.YoloVision`：可复用的 YOLO profile、预处理、后处理和命令入口。
-- 与 `-RuntimePackageKey` 对应的 TRT8、TRT10 或 TRT11 bridge-only 包：只包含
-  `jyppxtrtbridge.dll`。
+## 1. 项目与功能背景
 
-TensorRT/CUDA/cuDNN 由系统安装或显式选择的本地 runtime 提供。模型、图片、labels、restore
-cache 和临时工程全部位于 E 盘，没有把下载资产或 package cache 写到 C 盘。当前主机的真实
-矩阵结果是 TRT10、TRT11 通过；TRT8 因缺少 `cudnn64_8.dll`，bridge 编译时主动关闭 ONNX
-parser，因此保持受控 blocker。
+TensorRtSharp4.0 为 C# 提供 TensorRT/CUDA 托管接口，YoloVision 则在其上实现图像预处理、模型 profile、TensorRT enqueue、YOLO 后处理、JSON 报告和可视化。本案例使用三个本地候选包：
 
-本次结果是 `local-package-consumer-runtime` 工程证据。它不是从 nuget.org 或 GitHub Packages
-下载公开包得到的 `package-consumer-runtime` proof，也不代表模型资产或包已经获准公开发布。
+| 包 | 职责 |
+| --- | --- |
+| `JYPPX.TensorRT.CSharp.API` | `JYPPX.TensorRtSharp` 与 `JYPPX.CudaSharp` 托管 API |
+| `JYPPX.TensorRT.CSharp.API.YoloVision` | YOLOX profile、预处理、解码、NMS 与命令入口 |
+| `JYPPX.TensorRT.CSharp.API.Runtime.*.Bridge` | 只交付项目编译的 `jyppxtrtbridge.dll` |
 
-## 1. 三层包结构
+CUDA、cuDNN 与 TensorRT 始终由使用者自行安装。三个包都不包含 NVIDIA 原厂 DLL。
 
 ```mermaid
 flowchart LR
-    A["Clean consumer"] --> B["YoloVision package"]
-    A --> C["Managed API package"]
-    A --> D["Runtime-key-selected bridge-only package"]
+    A["仓库外 .NET 应用"] --> B["YoloVision 包"]
+    A --> C["Managed API 包"]
+    A --> D["Bridge-only 包"]
     B --> C
-    D --> E["jyppxtrtbridge.dll"]
-    E --> F["Selected TensorRT runtime"]
-    E --> G["Selected CUDA / cuDNN"]
-    A --> H["Official YOLOX assets on E drive"]
+    D --> E["用户安装的 TensorRT / CUDA / cuDNN"]
+    A --> F["外部 models 目录中的 YOLOX-S ONNX"]
 ```
 
-YoloVision 项目仍可作为命令行程序直接运行，同时公开：
+## 2. 模型、图片与许可证
 
-```csharp
-public static class YoloVisionCommand
-{
-    public static int Run(string[] args);
-}
-```
-
-原来的 `Program.Main` 只转发到这个入口。这样 CLI 和 PackageReference consumer 使用同一套
-参数解析、preprocess、TensorRT enqueue、YOLOX grid/stride decode、NMS、JSON 和 SVG 逻辑，
-不会出现“样例能跑、包内实现是另一份代码”的漂移。
-
-公开入口只接受托管字符串数组，不暴露 `IntPtr`、`nint`、`UIntPtr`、`SafeHandle`、device
-pointer 或 borrowed TensorRT 对象。
-
-## 2. 准备官方资产
-
-先按官方资产脚本下载并校验：
-
-```powershell
-pwsh -NoProfile -ExecutionPolicy Bypass `
-  -File .\eng\Acquire-YoloXOfficialAssets.ps1
-```
-
-默认目录：
+模型来自 [Megvii YOLOX 0.1.1rc0 官方发布页](https://github.com/Megvii-BaseDetection/YOLOX/releases/tag/0.1.1rc0)，上游仓库使用 Apache-2.0。本文固定提交 `e1052df71842031413f6030723c3607b839c80ce`，官方 ONNX 下载地址为：
 
 ```text
-..\downloads\yolox-apache
+https://github.com/Megvii-BaseDetection/YOLOX/releases/download/0.1.1rc0/yolox_s.onnx
 ```
-
-本次固定资产：
 
 | 资产 | SHA256 |
 | --- | --- |
-| YOLOX-S ONNX | `c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063` |
-| P6 dog image | `6cb94c9cd0781412598fe179246b09041af4303d388a5ba3c55f760dff11ec2c` |
-| COCO labels | `4d4aaea7bee6be2f675d9b53a9195ca36dfe6429f7479f29155da522a6c85930` |
+| `yolox_s.onnx` | `c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063` |
+| `coco.names` | `4d4aaea7bee6be2f675d9b53a9195ca36dfe6429f7479f29155da522a6c85930` |
+| CC0 输入图片 PPM | `80715af66669147b049fec9386152bd45505f4e494a65079fdc55404d4589b8e` |
 
-脚本会拒绝 C 盘输出。已存在资产可使用 `-Offline` 重新核验。
+演示图片是 Wikimedia Commons 的 [Liverpool Street Bus station 2025](https://commons.wikimedia.org/wiki/File:Liverpool_Street_Bus_station_2025.jpg)，许可证为 CC0 1.0，可以随文展示。模型公开再分发仍未获得项目所有者批准，因此 ONNX 只保存在工作区外：
 
-## 3. 构建三个本地包
+```text
+<workspace-root>/models/YoloVision/Detection/yolox-s-megvii-v0.1.1rc0/yolox_s.onnx
+```
 
-从仓库根目录执行。
+## 3. 获取模型并放入 models 目录
 
-主 managed 包：
+仓库脚本会从固定 URL 下载官方 ONNX、许可证、COCO 标签来源与上游参考代码，并逐项校验长度和 SHA256：
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass `
+  -File .\eng\Acquire-YoloXOfficialAssets.ps1
+```
+
+下载完成后，把 ONNX 复制到工作区外的统一模型暂存目录：
+
+```powershell
+$modelDirectory = Join-Path ..\models `
+  'YoloVision\Detection\yolox-s-megvii-v0.1.1rc0'
+New-Item -ItemType Directory -Path $modelDirectory -Force | Out-Null
+Copy-Item ..\downloads\yolox-apache\source\yolox_s.onnx $modelDirectory
+```
+
+`models` 目录不属于 Git 仓库。后续 Model Zoo 建成前，所有演示 ONNX 都按任务和来源版本暂存在这里。
+
+## 4. ONNX 转换方式
+
+本案例直接使用官方 ONNX 发布资产，因此正常使用时不需要再次转换。需要从官方 PyTorch checkpoint 复现时，可在独立 Python 环境执行上游导出器：
+
+```bash
+git clone https://github.com/Megvii-BaseDetection/YOLOX.git
+cd YOLOX
+git checkout e1052df71842031413f6030723c3607b839c80ce
+python -m pip install -v -e .
+
+python tools/export_onnx.py \
+  --output-name yolox_s.onnx \
+  -n yolox-s \
+  -c yolox_s.pth
+```
+
+`yolox_s.pth` 应从同一官方 release 获取。0.1.1rc0 发布图是 opset 11；导出后应检查输入 `images:[1,3,640,640]` 和输出 `output:[1,8400,85]`，并重新记录 ONNX SHA256。自行导出的图不应假定与本文官方 ONNX 字节一致。
+
+## 5. 构建同提交的三个候选包
+
+先构建 managed 与 YoloVision 包：
 
 ```powershell
 dotnet pack .\pack\JYPPX.TensorRT.CSharp.API\JYPPX.TensorRT.CSharp.API.csproj `
-  -c Release `
-  -o .\artifacts\managed `
+  -c Release -o .\artifacts\managed `
   -p:JYPPXPackageVersion=4.0.0
-```
 
-YoloVision 包：
-
-```powershell
 dotnet pack .\samples\YoloVision\YoloVision.csproj `
-  -c Release `
-  -o .\artifacts\yolovision-nupkg `
+  -c Release -o .\artifacts\yolovision-nupkg `
   -p:JYPPXPackageVersion=4.0.0
 ```
 
-TRT10 bridge-only 包：
+再打包匹配本机 TensorRT 10.11 的 bridge-only 包：
 
 ```powershell
-cmake --build --preset win-x64-trt10-cuda12-release
-
-pwsh -NoProfile -ExecutionPolicy Bypass `
+powershell.exe -NoProfile -ExecutionPolicy Bypass `
   -File .\eng\Invoke-LocalSplitRuntimePackage.ps1 `
   -SourceRuntimeKey win-x64-trt10.11-cuda12.9-cudnn9.22 `
-  -Version 4.0.0 `
   -SplitPackageRole bridge `
+  -Version 4.0.0 `
   -Configuration Release `
   -SkipManagedPack `
+  -SkipBaseRuntimeBuild `
   -SkipConsumerValidation
 ```
 
-`JYPPX.TensorRT.CSharp.API.YoloVision.4.0.0.nupkg` 内包含：
+本次三份包的 nuspec `repository commit` 都是 `5f5230d7406f735c478079d6ef92796f772dafa1`。验证脚本还会要求恢复后的 `.nupkg` SHA256 与所选包逐一相等，防止同版本旧包混入。
 
-```text
-lib/net8.0/YoloVision.dll
-lib/net8.0/YoloVision.xml
-README.md
+## 6. 仓库外消费者如何隔离
+
+模板位于 `samples/YoloVision.PackageConsumer`，只包含三个 `PackageReference`。脚本会在仓库外创建临时工程和独立 NuGet 缓存，并生成如下来源结构：
+
+```xml
+<packageSources>
+  <clear />
+  <add key="managed-api" value="&lt;local-managed-feed&gt;" />
+  <add key="yolovision" value="&lt;local-yolovision-feed&gt;" />
+  <add key="bridge-only" value="&lt;local-bridge-feed&gt;" />
+</packageSources>
 ```
 
-它的 nuspec 只依赖 `JYPPX.TensorRT.CSharp.API 4.0.0`。bridge 包把 DLL 放在标准 NuGet
-路径 `runtimes/win-x64/native/jyppxtrtbridge.dll`，因此 clean consumer build 会复制 native
-bridge，不需要在消费项目中写本机 DLL 路径。
+每个 feed 只放一份选定 nupkg。脚本要求 `ProjectReference=0`、直接程序集引用为 0、恢复图中的 project library 为 0，并确认消费输出中的 native bridge 确实来自所选 bridge 包。
 
-## 4. Consumer 模板
+Windows PowerShell 5.1 仍受传统长路径限制，因此 YOLOX 默认工作区使用短名 `yv-yolox-pkg-trt10`。这只影响临时目录名，不影响报告和包 identity。
 
-仓库中的模板位于：
+## 7. 图像预处理合同
 
-```text
-samples/YoloVision.PackageConsumer
-```
+YOLOX-S 与常见 YOLOv8 输入不同，本案例的配置必须保持：
 
-核心代码先记录实际 bridge build identity，再调用复用入口：
-
-```csharp
-Console.WriteLine($"YoloVisionPackageConsumer ProjectReference=False CoreAssembly={typeof(YoloModelProfile).Assembly.GetName().Name}");
-TensorRtEnvironmentSnapshot snapshot = TensorRtEnvironmentProbe.GetCurrent();
-Console.WriteLine($"YoloVisionPackageConsumer BridgeTensorRt={snapshot.BuildInfo.TensorRtVersion} BridgeCuda={snapshot.BuildInfo.CudaToolkitVersion}");
-return YoloVisionCommand.Run(args);
-```
-
-项目模板显式引用三个包，不包含 `ProjectReference`。版本占位符由验证脚本根据
-`-PackageVersion` 一次性替换，避免本地 feed 同时存在 stable 与 prerelease 包时误选版本。
-
-## 5. 一键 clean restore/build/run
-
-执行：
-
-```powershell
-pwsh -NoProfile -ExecutionPolicy Bypass `
-  -File .\eng\Test-YoloVisionLocalPackageConsumer.ps1 `
-  -RuntimePackageKey win-x64-trt10.11-cuda12.9-cudnn9.22 `
-  -PackageVersion 4.0.0
-```
-
-默认 clean workspace：
-
-```text
-..\consumer-workspaces\yolovision-yolox-local-package-trt10
-```
-
-脚本会：
-
-1. 校验 workspace、三个 package feed、模型、labels 和图片都不在 C 盘。
-2. 删除旧 workspace，复制 consumer 模板并生成只含本地 file feed 的 `NuGet.config`。
-3. 使用 `<clear />` 禁止继承用户 NuGet 源，避免意外从公开源或全局配置恢复同名包。
-4. 把 `--packages` 指向 E 盘 workspace，执行强制、无缓存 restore。
-5. 解析 `project.assets.json`，要求 project library 数为 0。
-6. 要求 consumer 输出中恰好有一个 NuGet 复制的 `jyppxtrtbridge.dll`。
-7. 使用官方 ONNX、dog image 和 labels 执行真实 TensorRT build/enqueue。
-8. 要求日志同时出现 package consumer marker、实际 bridge TensorRT/CUDA build metadata 和
-   `YoloVision Passed=True`，并校验 bridge major 与 runtime key 一致。
-9. 复制 stdout、stderr、JSON 和 SVG 到 ignored evidence 目录，计算 SHA256。
-10. 删除包含 restore cache、临时 csproj、engine build 输出和 tensor 的整个 E 盘 workspace。
-
-系统安装的 TensorRT/CUDA 根可以显式指定：
-
-```powershell
-pwsh -NoProfile -ExecutionPolicy Bypass `
-  -File .\eng\Test-YoloVisionLocalPackageConsumer.ps1 `
-  -TensorRtRoot $env:JYPPX_TENSORRT_ROOT `
-  -TensorRtRuntimeRoot $env:JYPPX_TENSORRT_ROOT `
-  -CudnnRoot $env:JYPPX_CUDNN_ROOT `
-  -CudaRoot 'C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.9'
-```
-
-这里的 C 盘 CUDA 是用户已有的系统安装，不是脚本下载的临时资产。脚本不会删除 CUDA、
-TensorRT、NuGet 全局缓存、Codex 依赖或用户文件。
-
-## 6. 三版本矩阵
-
-一次执行全部目标版本：
-
-```powershell
-pwsh -NoProfile -ExecutionPolicy Bypass `
-  -File .\eng\Test-YoloVisionLocalPackageConsumerMatrix.ps1
-```
-
-矩阵逐行创建独立 E 盘 workspace/cache，使用 split manifest 推导 bridge package ID 和
-TensorRT line。SDK 根目录与运行时 DLL 根目录分开记录；当默认 SDK 目录只有 headers/import
-libs 时，脚本只会选择满足 full-runtime manifest 全部 DLL pattern 的已有 assembled runtime。
-
-当前真实结果：
-
-| Runtime key | Bridge build | 结果 | 说明 |
-| --- | --- | --- | --- |
-| `win-x64-trt8.6-cuda12.1-cudnn8.9` | TRT 8.6.1 / CUDA 12.1 | blocked | cuDNN 根中没有 `cudnn64_8.dll`，bridge 按 CMake 安全门关闭 ONNX parser |
-| `win-x64-trt10.11-cuda12.9-cudnn9.22` | TRT 10.11.0 / CUDA 12.9 | passed | 5 detections，`14.360 ms` |
-| `win-x64-trt11.0-cuda12.9-cudnn9.22` | TRT 11.0.0 / CUDA 12.9 | passed | 使用 E 盘已校验 assembled runtime，5 detections，`11.679 ms` |
-
-TRT8 行已经完成 PackageReference restore/build、bridge load 和 build identity 查询，但没有
-ONNX parser，不能写成 runtime pass。发布 TRT8 YoloVision consumer 前，必须在具备完整 cuDNN
-8 runtime 的构建环境重新构建 bridge、重打包并重新冻结 SHA256。
-
-## 7. 本次真实结果
-
-clean consumer restore/build 均为 0 warning、0 error。运行输出：
-
-```text
-YoloVisionPackageConsumer ProjectReference=False CoreAssembly=YoloVision
-YoloVisionPackageConsumer BridgeTensorRt=10.11.0 BridgeCuda=12.9
-Input=images:[1, 3, 640, 640] Output=output:[1, 8400, 85]
-Execution ... ElapsedMs=14.238
-Detection Class=bicycle Score=0.954854 ...
-Detection Class=dog Score=0.913407 ...
-Real package-consumer run log final marker: YoloVision Passed=True
-```
-
-共得到 5 个检测。预处理 tensor 仍为：
-
-```text
-NCHW / BGR / Normalize=False / ValueScale=1
-top-left letterbox / fill 114
-SHA256=ca4e22bc6d8ebfe70f5aefeae8957d9ad15eb8d3bf99b6a42e016436dcbf1528
-```
-
-## 8. 证据与分类
-
-raw 本机证据位于 ignored 目录：
-
-```text
-artifacts/yolovision/yolox-local-package-consumer
-artifacts/yolovision/yolox-local-package-consumer-matrix
-```
-
-可提交的精简记录位于：
-
-```text
-artifacts/interface-coverage/yolox-local-package-consumer-runtime-proof-closure.json
-```
-
-证据分层必须保持：
-
-| 问题 | 本次结果 |
+| 项目 | 值 |
 | --- | --- |
-| 真实模型是否运行 | 是 |
-| 是否来自无 ProjectReference 的 PackageReference consumer | 是 |
-| 是否使用本地 file feed | 是 |
-| 是否从公开包地址下载 | 否 |
-| 是否是正式 package-consumer-runtime proof | 否 |
-| 是否批准公开再分发 | 否 |
-| 是否执行 publish | 否 |
+| 输入布局 | NCHW |
+| 颜色顺序 | BGR |
+| 数值范围 | 原始 `0..255` float，不除以 255 |
+| 目标尺寸 | `640x640` |
+| resize | 等比例 letterbox |
+| 对齐 | 左上角 |
+| 填充值 | 114 |
 
-因此通过行也只能写成 `local-package-consumer-runtime`，失败行只能写成
-`runtime-attempt-blocked`。要晋级公开 package consumer proof，仍需在仓库外 clean workspace
-中从真实公开 URL 恢复已发布包，固定公开包 hash、NuGet `.nupkg.metadata` source、host
-metadata、stdout/stderr，并由 owner 完成发布与证据审核。
+CC0 原图为 `1280x961`，本次缩放到 `640x480`，右下区域由填充值补齐。生成 tensor 共 1,228,800 个 float，SHA256 为 `d8480974ed95b20415348a8ab73f88718b87b9787c7624a889e955270b1abf74`。
 
-## 小结
+## 8. YOLOX 输出解码
 
-这条链证明 YoloVision 不再只能通过源码项目引用使用。相同的 YOLOX 预处理、raw decoder 和
-NMS 已经进入独立本地包，可被一个只有 PackageReference 的小型应用调用；bridge-only
-交付也能与系统 TensorRT/CUDA 组合完成真实推理。项目开发完成前不保留公开包 handoff
-快照，也不执行 NuGet、GitHub Packages、Release 或版本发布。
+`[1,8400,85]` 每行包含 4 个框参数、1 个 objectness 和 80 个类别分数。对于 strides 8、16、32，YoloVision 使用上游 YOLOX 公式恢复网格坐标：
+
+```text
+center = (rawXY + grid) * stride
+size   = exp(rawWH) * stride
+score  = objectness * classProbability
+```
+
+随后按 `confidence=0.3` 过滤，并执行 class-aware NMS，IoU 阈值为 `0.45`。坐标先处于 `640x640` 模型输入空间，绘图时再利用 letterbox scale 映射回原图。
+
+## 9. 执行完整验证
+
+下面命令显式传入用户安装的运行库根目录和 CC0 图片；占位符应替换为本机路径：
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass `
+  -File .\eng\Test-YoloVisionLocalPackageConsumer.ps1 `
+  -Scenario yolox-detection `
+  -RuntimePackageKey win-x64-trt10.11-cuda12.9-cudnn9.22 `
+  -ModelPath '<workspace-root>/models/YoloVision/Detection/yolox-s-megvii-v0.1.1rc0/yolox_s.onnx' `
+  -ImagePath '<asset-root>/liverpool-street-bus-station-1280.ppm' `
+  -LabelsPath '<asset-root>/coco.names' `
+  -TensorRtRoot '<tensor-rt-root>' `
+  -TensorRtRuntimeRoot '<tensor-rt-root>' `
+  -CudaRoot '<cuda-root>' `
+  -CudnnRoot '<cudnn-root>'
+```
+
+脚本依次完成本地 feed 隔离、restore、Release build、bridge 来源校验、模型构建、enqueue、解码、NMS、JSON/SVG 输出和证据边界检查。默认会在成功后删除临时工作区；只有调试时才使用 `-KeepWorkspace`。
+
+## 10. 本机执行结果
+
+本次运行环境为 TensorRT 10.11.0、CUDA 12.9、.NET SDK 10.0.301、NVIDIA GeForce RTX 3060 Laptop GPU。核心输出如下：
+
+```text
+PackageReferenceOnly=True ProjectReference=False RemotePackageSources=0
+RuntimeEnvironment TRT=10.11.0 CUDA=12.9
+Input=images:[1,3,640,640] Output=output:[1,8400,85]
+Execution ElapsedMs=7.329
+Detections=8 Top=bus Score=0.956653 Classes=bus:1,person:7
+YoloVision Passed=True
+```
+
+![YOLOX-S 本地包消费者终端结果](../../images/yolovision-yolox-s-local-package-consumer-terminal.png)
+
+同一次运行的 8 个框已经按 scale `0.5` 映射回 CC0 原图：
+
+![YOLOX-S 本地包消费者检测结果](../../images/yolovision-yolox-s-local-package-consumer-annotated-cc0.jpg)
+
+| 排名 | 类别 | 分数 |
+| ---: | --- | ---: |
+| 1 | bus | 0.956653 |
+| 2 | person | 0.852964 |
+| 3 | person | 0.835068 |
+| 4 | person | 0.828305 |
+| 5 | person | 0.826588 |
+| 6-8 | person | 0.584727 / 0.581160 / 0.369597 |
+
+## 11. 证据文件与可复核范围
+
+仓库只提交去本机路径的小型证据：
+
+```text
+samples/assets/yolovision-yolox-s-local-package-consumer-runtime-evidence.json
+samples/assets/yolovision-yolox-s-local-package-consumer-tensorrt10.11.txt
+docs/images/yolovision-yolox-s-local-package-consumer-terminal.png
+docs/images/yolovision-yolox-s-local-package-consumer-annotated-cc0.jpg
+```
+
+ONNX、TensorRT engine、输入 tensor、raw stdout、临时 NuGet 缓存和完整本机报告都留在 Git 外。精简证据固定三包哈希、模型/图片/tensor 哈希、运行环境、检测结果及两张图片哈希。
+
+本次链路证明：真实 YOLOX-S 可由仓库外、无 `ProjectReference` 的本地包消费者运行，且三个包不携带 CUDA/cuDNN/TensorRT 原厂运行库。它没有执行独立 ONNX Runtime 原始输出比对，因此不能声称跨框架逐值一致；它也不是从公开 feed 下载包得到的公开 package proof。
+
+## 12. 常见问题
+
+### 找不到 TensorRT 或 cuDNN DLL
+
+确认 runtime key 与本机安装版本一致，并显式传入四个运行库根目录。项目不会自动下载 NVIDIA 运行库。
+
+### 出现 `TensorRtApiLine` 等类型加载错误
+
+managed、YoloVision 与 bridge-only 候选包不是同一源码提交。重新执行第 5 节的三包构建，并删除旧临时工作区后再跑。
+
+### Windows PowerShell 报恢复包不存在
+
+先检查完整路径是否超过传统路径上限。当前脚本已使用短工作区名；自定义 `-OutputRoot` 时也应保持路径简短。
+
+### 检测框整体偏移
+
+检查是否错误使用了 center letterbox、RGB 或 `1/255` 归一化。YOLOX 本案例要求 BGR、左上角 letterbox 和原始 `0..255` 数值。
+
+## 13. 结论
+
+这条演示覆盖了模型来源、ONNX 转换、外部模型存放、三包构建、仓库外恢复、真实 TensorRT 推理、YOLOX 解码、检测结果绘制和证据边界。当前候选包可用于继续开发验证，但项目完成并获得明确授权前，不发布新包、不创建 Release，也不上传模型文件。

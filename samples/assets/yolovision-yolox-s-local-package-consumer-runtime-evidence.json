@@ -1,0 +1,187 @@
+{
+  "schemaVersion": 1,
+  "recordKind": "yolovision-yolox-local-package-consumer-runtime-evidence",
+  "recordName": "yolovision-yolox-s-local-package-consumer-trt10.11-cc0",
+  "generatedAtUtc": "2026-08-04T19:28:23.1770799Z",
+  "templateOnly": false,
+  "sampleName": "YoloVision.PackageConsumer",
+  "family": "yolox",
+  "task": "det",
+  "proofClassification": "local-package-consumer-runtime",
+  "repositoryHeadAtExecution": "5f5230d7406f735c478079d6ef92796f772dafa1",
+  "fullLocalReportSha256": "a10e942bacb0a6b8a87372fc0fb81b4a7689684e87e27f2184a0a3577681fe80",
+  "packageConsumer": {
+    "targetFramework": "net8.0",
+    "packageSourceKind": "local-file-feed-only",
+    "packageSourceIsolation": "one-selected-nupkg-per-feed",
+    "remotePackageSourceCount": 0,
+    "packageCount": 3,
+    "packages": [
+      {
+        "role": "managed-api",
+        "id": "JYPPX.TensorRT.CSharp.API",
+        "version": "4.0.0",
+        "length": 15447065,
+        "sha256": "d926fd21dbd7107aebe5e08d048b765bca729fea0dd5969a14d024bac54efe7e"
+      },
+      {
+        "role": "yolovision",
+        "id": "JYPPX.TensorRT.CSharp.API.YoloVision",
+        "version": "4.0.0",
+        "length": 120299,
+        "sha256": "e9b43bceaa55334eec67a00e49dd49232442c2a287c4fc18555a3d5b589144e2"
+      },
+      {
+        "role": "bridge-only",
+        "id": "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge",
+        "version": "4.0.0",
+        "length": 398654,
+        "sha256": "41fd5c0ae53ad215c29e4b05674245aa003d82942d98b53cedefa58c0b7c603c"
+      }
+    ],
+    "projectReferenceCount": 0,
+    "directAssemblyReferenceCount": 0,
+    "restoredProjectLibraryCount": 0,
+    "restoredPackageHashesMatchSelected": true,
+    "nativeBridgeCopiedByNuGet": true,
+    "nativeBridgeSha256": "297bf1f8f586dde5b64386633065d6946650d5355e43a246c5fff6b35872b03c",
+    "nativeBridgePathEnvironmentVariableSet": false,
+    "tensorRtCudaAndCudnnAreExternalDependencies": true,
+    "vendorRuntimePackageEntryCount": 0,
+    "bridgeNativePackageEntryCount": 1,
+    "workspaceOutsideRepository": true,
+    "workspaceRemovedAfterValidation": false,
+    "restoreExitCode": 0,
+    "buildExitCode": 0,
+    "runtimeExitCode": 0
+  },
+  "assets": {
+    "model": {
+      "name": "YOLOX-S 0.1.1rc0 official ONNX",
+      "sourceUrl": "https://github.com/Megvii-BaseDetection/YOLOX/releases/download/0.1.1rc0/yolox_s.onnx",
+      "workspaceRelativePath": "models/YoloVision/Detection/yolox-s-megvii-v0.1.1rc0/yolox_s.onnx",
+      "length": 35858002,
+      "sha256": "c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063",
+      "license": "Apache-2.0 upstream source; public model redistribution owner approval is false",
+      "trackedByGit": false
+    },
+    "labelsSha256": "4d4aaea7bee6be2f675d9b53a9195ca36dfe6429f7479f29155da522a6c85930",
+    "image": {
+      "name": "Liverpool Street Bus station 2025",
+      "descriptionUrl": "https://commons.wikimedia.org/wiki/File:Liverpool_Street_Bus_station_2025.jpg",
+      "license": "CC0 1.0",
+      "width": 1280,
+      "height": 961,
+      "ppmSha256": "80715af66669147b049fec9386152bd45505f4e494a65079fdc55404d4589b8e",
+      "publicRedistributionPermittedByLicense": true
+    },
+    "preprocessedInputTensor": {
+      "shape": [1, 3, 640, 640],
+      "elementCount": 1228800,
+      "byteLength": 4915200,
+      "sha256": "d8480974ed95b20415348a8ab73f88718b87b9787c7624a889e955270b1abf74",
+      "trackedByGit": false
+    },
+    "outputJsonSha256": "e76299e2ca663f76709b1cee13f8037524b04b8073b1bfc97804c1147e76e778",
+    "visualizationSvgSha256": "7266fc8a4532408ca2e8c4da0badd599ec68ce89ad4b7b4bba6576ca6f7e5691",
+    "heavyAssetsRemainOutsideGit": true
+  },
+  "runtimeEnvironment": {
+    "os": "Microsoft Windows 10.0.26200",
+    "processArchitecture": "X64",
+    "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+    "driverVersion": "576.02",
+    "dotnetVersion": "10.0.301",
+    "tensorRtVersion": "10.11.0",
+    "cudaToolkitVersion": "12.9"
+  },
+  "modelContract": {
+    "input": {
+      "name": "images",
+      "shape": [1, 3, 640, 640],
+      "dataType": "float32",
+      "preprocess": "top-left letterbox to 640x640; BGR; NCHW; raw 0..255 float values; fill=114",
+      "sourceSize": [1280, 961],
+      "resizedSize": [640, 480],
+      "scale": [0.5, 0.5]
+    },
+    "output": {
+      "name": "output",
+      "shape": [1, 8400, 85],
+      "layout": "boxes-first",
+      "classCount": 80,
+      "hasObjectness": true,
+      "decoder": "YOLOX grid/stride 8,16,32",
+      "applyNms": true,
+      "nmsMode": "ClassAware",
+      "confidenceThreshold": 0.3,
+      "iouThreshold": 0.45
+    }
+  },
+  "runtime": {
+    "passed": true,
+    "elapsedMilliseconds": 7.329,
+    "predictionCount": 8,
+    "topPrediction": "bus",
+    "topScore": 0.956653,
+    "classHistogram": {
+      "bus": 1,
+      "person": 7
+    },
+    "predictions": [
+      { "rank": 1, "className": "bus", "score": 0.956653 },
+      { "rank": 2, "className": "person", "score": 0.852964 },
+      { "rank": 3, "className": "person", "score": 0.835068 },
+      { "rank": 4, "className": "person", "score": 0.828305 },
+      { "rank": 5, "className": "person", "score": 0.826588 },
+      { "rank": 6, "className": "person", "score": 0.584727 },
+      { "rank": 7, "className": "person", "score": 0.581160 },
+      { "rank": 8, "className": "person", "score": 0.369597 }
+    ],
+    "passedMarker": "YoloVision Passed=True"
+  },
+  "validation": {
+    "realTensorRtEnqueueExecuted": true,
+    "realImagePreprocessingExecuted": true,
+    "managedYoloXDecodeAndNmsExecuted": true,
+    "sourceCoordinateVisualizationGenerated": true,
+    "independentRawTensorReferenceExecuted": false,
+    "independentPostprocessComparisonExecuted": false,
+    "boundary": "This run validates the real local-package execution path and rendered detections. It does not claim independent cross-framework raw-output or postprocess parity."
+  },
+  "artifacts": {
+    "sanitizedTranscript": {
+      "path": "samples/assets/yolovision-yolox-s-local-package-consumer-tensorrt10.11.txt",
+      "length": 959,
+      "sha256": "997a9c4bd7627d289c168267bcc581b0e5d782ec361fb5beac3fd48ab9fb38ff"
+    },
+    "terminalScreenshot": {
+      "path": "docs/images/yolovision-yolox-s-local-package-consumer-terminal.png",
+      "length": 52868,
+      "sha256": "1e0ee7d6d7d874368c29ece5a9e5bc58d220f69741b156613b54192755365a4d"
+    },
+    "annotatedResultImage": {
+      "path": "docs/images/yolovision-yolox-s-local-package-consumer-annotated-cc0.jpg",
+      "length": 393631,
+      "sha256": "b28ed42803b46dd64ac5599593508c6cd89c6302cd78bcb19b8f3aba9ea9a270"
+    }
+  },
+  "proofBoundary": {
+    "localPackageConsumerRuntimeEvidence": true,
+    "sourceTreeRuntimeProof": false,
+    "publicPackageProof": false,
+    "packagesDownloadedFromPublicFeed": false,
+    "postPublishProof": false,
+    "publicModelRedistributionOwnerApproval": false,
+    "ownerReleaseAcceptance": false,
+    "releaseProof": false,
+    "performsPublish": false,
+    "uploadsAssets": false
+  },
+  "notes": [
+    "The model and generated TensorRT assets remain in repository-external workspace directories and are not committed.",
+    "CUDA, cuDNN, and TensorRT are user-installed host dependencies and are absent from all three packages.",
+    "The terminal transcript is a path-sanitized projection of the hash-fixed full local report.",
+    "No tag, GitHub Release, GitHub Package, or NuGet package was created or published."
+  ]
+}

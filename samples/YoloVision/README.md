@@ -123,6 +123,8 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-YoloVisionLocalPackageC
 
 The script uses only local file feeds, puts its isolated NuGet cache and temporary project outside the repository, requires `ProjectReferenceCount=0` and `YoloVision Passed=True`, then removes the workspace. Its result is `local-package-consumer-runtime`, not public `package-consumer-runtime`, public redistribution approval, or post-publish proof. See `docs/articles/zh-cn/yolovision-yolox-local-package-consumer-tutorial.md`.
 
+The YOLOX package-consumer article now uses the official 0.1.1rc0 ONNX from the external `models` directory and a redistributable CC0 image. Its compact record is `samples/assets/yolovision-yolox-s-local-package-consumer-runtime-evidence.json`; the article includes the actual TensorRT terminal screenshot and the eight mapped detection boxes. It deliberately records that no independent raw-output comparison was executed.
+
 The YOLOv8n-seg clean package path has a separate strict entrypoint:
 
 ```powershell
