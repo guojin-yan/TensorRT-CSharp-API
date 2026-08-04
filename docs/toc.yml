@@ -980,8 +980,6 @@
   href: articles/zh-cn/yolovision-golden-output-validation-guide.md
 - name: TensorRtExec Report JSON Schema Snapshot
   href: articles/zh-cn/tensorrtexec-report-json-schema-snapshot.md
-- name: TensorRtExec GUI CLI Field Map
-  href: articles/zh-cn/tensorrtexec-gui-cli-field-map.md
 - name: Runtime Package Minimal Smoke Commands
   href: articles/zh-cn/runtime-package-minimal-smoke-commands.md
 - name: Runtime Package Native Load Troubleshooting

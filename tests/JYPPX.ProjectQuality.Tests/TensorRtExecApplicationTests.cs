@@ -105,7 +105,7 @@ public sealed class TensorRtExecApplicationTests
             File.ReadAllText(Path.Combine(RepositoryPaths.Root, "README.zh-CN.md")),
             File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "index.md")),
             File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "toc.yml")),
-            File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "articles", "zh-cn", "tensorrtexec-gui-cli-field-map.md")));
+            File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "TensorRtExec", "tensor-rt-exec-gui-cli-field-map.md")));
         Assert.DoesNotContain("tensorrtexec-winforms-screenshot-walkthrough.md", entrypoints, StringComparison.Ordinal);
     }
 

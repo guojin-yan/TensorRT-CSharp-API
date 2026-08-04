@@ -728,7 +728,6 @@ Application entry points:
 - [YoloVision Owner Asset Evidence Example](articles/zh-cn/yolovision-owner-asset-evidence-example.md)
 - [YoloVision Golden Output Validation Guide](articles/zh-cn/yolovision-golden-output-validation-guide.md)
 - [TensorRtExec Report JSON Schema Snapshot](articles/zh-cn/tensorrtexec-report-json-schema-snapshot.md)
-- [TensorRtExec GUI CLI Field Map](articles/zh-cn/tensorrtexec-gui-cli-field-map.md)
 - [Runtime Package Minimal Smoke Commands](articles/zh-cn/runtime-package-minimal-smoke-commands.md)
 - [Runtime Package Native Load Troubleshooting](articles/zh-cn/runtime-package-native-load-troubleshooting.md)
 - [Plugin Inventory Field Metadata Smoke Guide](articles/zh-cn/plugin-inventory-field-metadata-smoke-guide.md)
