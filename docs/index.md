@@ -78,6 +78,7 @@ Chinese articles:
 - [YoloVision All Task Overview](articles/zh-cn/yolovision-all-task-overview.md)
 - [YoloVision Detection Tutorial](articles/zh-cn/yolovision-detection-tutorial.md)
 - [YoloVision YOLOv10 End-to-End Output Guide](articles/zh-cn/yolovision-yolov10-end-to-end-output-guide.md)
+- [C# 使用 TensorRtSharp4.0 运行 YOLOv10n 目标检测](articles/zh-cn/yolovision-yolov10n-real-asset-tutorial.md)
 - [YoloVision Segmentation Tutorial](articles/zh-cn/yolovision-segmentation-tutorial.md)
 - [YoloVision Pose Tutorial](articles/zh-cn/yolovision-pose-tutorial.md)
 - [YoloVision OBB Tutorial](articles/zh-cn/yolovision-obb-tutorial.md)

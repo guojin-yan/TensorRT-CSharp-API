@@ -29,14 +29,21 @@ runtime proof。核心记录如下：
 | 许可证 | `AGPL-3.0-only`，公开再分发仍需 owner review |
 | ONNX | `yolov10n.onnx`，`9,386,466` bytes，SHA256 `7025ea1913f9a259cf8a8465ed608e10610d1bb376db2e0348b13e3bd286e0d3` |
 | TensorRT / CUDA | TensorRT `10.11.0`，CUDA Toolkit `12.9` |
-| Engine | `17,365,068` bytes，SHA256 `21891d0dcfb322069f864b5395f1653182251c35e4d822d2cc2c02635a4d2000` |
+| Engine | TensorRT 10.11 in-memory engine；本文不把机器相关的 serialized plan 当作可再分发资产 |
 | Input / Output | `images:[1,3,640,640]` -> `output0:[1,300,6]` |
 | GPU / Driver | `NVIDIA GeForce RTX 3060 Laptop GPU` / `576.02` |
-| Runtime result | `YoloVision Passed=True`，4 个 detection，top prediction `dog=0.91683036` |
-| Output evidence | output JSON SHA256 `38aaddac4e6f22f6d230d6e36c9e787c4d407508d1cb5dea768d0967827a8c4f`，run log SHA256 `bb2c5958590c4ac074b969d90af87f3aedb38991054588434133a2f620ebc43e` |
+| Runtime result | `YoloVision Passed=True`，6 个 detection，top prediction `bus=0.950402` |
+| Output evidence | output JSON SHA256 `7286d3c47270f0a3c19aaa5e28d1e8546a82ae5485076d4311aad98babdb834a`，run log SHA256 `76fdb0e23b87f412392d8480346b32568c6ea0a9b69e509cc636790d8accf424` |
 
-这些值来自 `artifacts/interface-coverage/yolov10-official-runtime-proof-closure.json` 和
-`samples/assets/yolovision-yolov10-official-assets.json`。大模型、engine、预处理 tensor 和原始日志仍留在 E 盘
+历史 closure 还保留了一次使用仓库外层 dog 输入的基线运行：serialized engine SHA256 为
+`21891d0dcfb322069f864b5395f1653182251c35e4d822d2cc2c02635a4d2000`，output JSON SHA256 为
+`38aaddac4e6f22f6d230d6e36c9e787c4d407508d1cb5dea768d0967827a8c4f`，run log SHA256 为
+`bb2c5958590c4ac074b969d90af87f3aedb38991054588434133a2f620ebc43e`，top prediction 为
+`dog=0.91683036`。这组 hash 只用于保留历史闭环的可追溯性；下文配图和结果表对应本次 CC0 巴士站重跑。
+
+这些值来自 `samples/assets/yolovision-yolov10n-article-runtime-evidence.json`、
+`artifacts/interface-coverage/yolov10-official-runtime-proof-closure.json` 和
+`samples/assets/yolovision-yolov10-official-assets.json`。大模型、engine、预处理 tensor 和原始日志仍留在仓库外层
 download workspace，不提交进仓库；文章只引用 hash-pinned evidence。这个记录可以支撑“源码树真实模型运行已经走通”，
 但不能支撑“NuGet 包已经公开可消费”“AGPL 资产可以随包再分发”或“发布 issue 可以关闭”。
 
@@ -113,7 +120,11 @@ Get-Item "$work\yolov10n.pt" | Select-Object FullName, Length, LastWriteTimeUtc
 如果官方 release 已调整，应从当前 Releases 页面取得新地址，并同时记录 release tag、Git commit、下载 URL、
 文件长度和 SHA256。文章或 evidence record 中不要只写“官方模型”。
 
-## 4. 在隔离环境导出 ONNX
+## 4. 在隔离环境转换 ONNX
+
+本教程最终使用的是官方已经发布并固定 SHA256 的 `yolov10n.onnx`，因此复现实机运行时不需要再次转换；
+如果使用者从 checkpoint 重新导出，必须把导出工具版本、opset、输入尺寸和输出 shape 一并记录。YOLOv10
+官方导出路径示例为：
 
 ```powershell
 Set-Location "$work\source"
@@ -135,6 +146,11 @@ work = Path(os.environ["YOLOV10_WORK"])
 model = YOLOv10(str(work / "yolov10n.pt"))
 model.export(format="onnx", imgsz=640, opset=13, simplify=True)
 ```
+
+这条命令是上游 checkpoint 到 ONNX 的转换示例，不代表本仓库重新生成的 ONNX 与官方 release 一定相同。
+只允许在第 5 节确认输出确实为 `[1,N,6]` 后进入 end-to-end decoder；本文真实运行使用的官方文件为
+`models/YoloVision/Detection/yolov10n-thu-mig-v1.1/yolov10n.onnx`，SHA256 为
+`7025ea1913f9a259cf8a8465ed608e10610d1bb376db2e0348b13e3bd286e0d3`。
 
 执行并记录 stdout/stderr：
 
@@ -255,7 +271,8 @@ dotnet run --project .\samples\YoloVision -- `
   --confidence 0.25 `
   --top-k 100 `
   --output "$work\yolov10n-output.json" `
-  --visualization "$work\yolov10n-output.svg" *>&1 |
+  --visualization "$work\yolov10n-output.svg" `
+  --visualization-background "$work\input.jpg" *>&1 |
   Tee-Object -FilePath "$work\yolov10n-run.log"
 ```
 
@@ -268,7 +285,29 @@ dotnet run --project .\samples\YoloVision -- `
 
 即使用户额外传入普通 NMS 配置，end-to-end layout 仍会关闭二次 NMS。这是 decoder 契约，不是性能开关。
 
-## 9. 检查结果与证据
+## 9. 实际运行结果与配图
+
+下面两张图都来自同一次真实 TensorRT 执行：第一张是程序输出 SVG 渲染后的原图叠加结果，第二张是同一份
+stdout 的脱敏终端窗口渲染。输入图片来自 Wikimedia Commons 的 `Liverpool Street Bus station 2025`，
+许可证为 [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/)，图片来源和 SHA256 记录在
+`samples/assets/yolovision-yolov10n-article-visual-assets.json`。
+
+![YOLOv10n 原图叠加检测结果](../../images/yolovision-yolov10n-annotated-cc0.webp)
+
+![YOLOv10n TensorRT 实际运行窗口](../../images/yolovision-yolov10n-runtime-terminal.png)
+
+本次运行结果为 1 个 bus 和 5 个 person：
+
+| 类别 | 数量 | 最高置信度 |
+| --- | ---: | ---: |
+| bus | 1 | 0.950402 |
+| person | 5 | 0.804005 |
+
+终端中同时可以看到 `images:[1,3,640,640] -> output0:[1,300,6]`、中心 letterbox、9.451 ms 执行耗时、
+`Nms=False` 以及 `YoloVision Passed=True`。检测框已经从 640×640 模型坐标反变换到 1280×961 原图坐标，
+公交车框覆盖车身，行人框集中在站台右侧，没有出现整图缩放偏移。
+
+## 10. 检查结果与证据
 
 ```powershell
 Get-FileHash "$work\input-yolov10n-fp32.bin" -Algorithm SHA256
@@ -289,7 +328,7 @@ Get-FileHash "$work\yolov10n-run.log" -Algorithm SHA256
 完整命令、stdout/stderr summary、owner reviewer 和审核时间。随后使用仓库的 sample-run/owner evidence validator，
 不能用 screenshot 或 build report 代替运行日志。
 
-## 10. 常见问题
+## 11. 常见问题
 
 ### 输出是 `[1,84,8400]`
 
@@ -314,7 +353,7 @@ class count、objectness 和 NMS 规则。
 
 engine 成功构建只证明 build path。还需要真实输入、正确预处理、enqueue、output JSON、可视化、hash、日志和人工审核。
 
-## 11. Proof 边界
+## 12. Proof 边界
 
 本仓库已经提供专用 managed decoder、managed smoke，以及官方 YOLOv10n v1.1 ONNX 的 source-tree
 `real-model-runtime` closure。该 closure 证明这条本地 source-tree 路径完成了真实 TensorRT enqueue、

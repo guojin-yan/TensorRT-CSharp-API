@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "recordKind": "technical-article-visual-assets",
+  "articleId": "yolovision-yolov10n-real-asset",
+  "sourceImage": {
+    "title": "Liverpool Street Bus station 2025",
+    "artist": "UK bus Image",
+    "descriptionUrl": "https://commons.wikimedia.org/wiki/File:Liverpool_Street_Bus_station_2025.jpg",
+    "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/d/d4/Liverpool_Street_Bus_station_2025.jpg",
+    "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Liverpool_Street_Bus_station_2025.jpg/1280px-Liverpool_Street_Bus_station_2025.jpg",
+    "originalMediaWikiSha1": "b513340a949880e7605438102e27dbda6438db26",
+    "downloadedWidth": 1280,
+    "downloadedHeight": 961,
+    "downloadedLength": 346914,
+    "downloadedSha256": "52b889d4fc9baea772ba2d9bbdfdef8b70710f993d7f27d193a965b11e708bcb",
+    "ppmSha256": "80715af66669147b049fec9386152bd45505f4e494a65079fdc55404d4589b8e",
+    "license": "CC0 1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "attributionRequired": false,
+    "publicRedistributionPermittedByLicense": true
+  },
+  "resultImages": [
+    {
+      "role": "annotated-inference-result",
+      "path": "docs/images/yolovision-yolov10n-annotated-cc0.webp",
+      "sha256": "80e3ac8bf9e06e1088dcdc28634ddee7cb3a418bf3556450f819178b2f354a58",
+      "source": "Rendered from the SVG written by the same real TensorRT YoloVision run; the CC0 source image is embedded and six YOLOv10 detections are mapped back to source coordinates."
+    },
+    {
+      "role": "program-runtime-screenshot",
+      "path": "docs/images/yolovision-yolov10n-runtime-terminal.png",
+      "sha256": "7c10874ba5c99bb03896caf1608a6b7bc1f908a251c2099c193653db3f0c35e8",
+      "source": "Rendered from path-sanitized stdout captured from the same real TensorRT execution; model, input/output shapes, detections, elapsed time, and Passed=True are unchanged."
+    }
+  ],
+  "modelFilesTrackedByGit": false,
+  "uploadsModelFiles": false,
+  "performsPublish": false
+}

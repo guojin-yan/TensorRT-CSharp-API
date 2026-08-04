@@ -109,6 +109,8 @@ For YOLOv10 NMS-free/end-to-end exports, pass `--layout end2end`. The managed de
 
 The official THU-MIG YOLOv10n v1.1 ONNX path is now backed by source-tree `real-model-runtime` evidence for `[1,300,6]` output. Run `eng/Acquire-YoloV10OfficialAssets.ps1` to acquire hash-pinned AGPL-3.0 assets on the E drive. The closure record is `artifacts/interface-coverage/yolov10-official-runtime-proof-closure.json`; it proves a local source-tree TensorRT enqueue and managed end-to-end decode only, not package-consumer-runtime, public redistribution approval, or publish readiness.
 
+The complete Chinese walkthrough, including model acquisition/export guidance, the exact runtime command, a path-sanitized stdout screenshot, and the annotated CC0 source image, is `docs/articles/zh-cn/yolovision-yolov10n-real-asset-tutorial.md`.
+
 The official YOLOX-S path is now backed by source-tree `real-model-runtime` evidence. `--family yolox` is detection-only and defaults to NCHW, BGR, raw `0..255` float values, fill 114, and top-left letterbox. Its `[1,8400,85]` raw output is transformed with `(xy + grid) * stride` and `exp(wh) * stride` for strides 8/16/32 before objectness scoring and NMS. Run `eng/Acquire-YoloXOfficialAssets.ps1` to acquire hash-pinned assets on the E drive, then follow `docs/articles/zh-cn/yolovision-yolox-official-runtime-tutorial.md`. This proof is not package-consumer-runtime and does not approve public asset redistribution.
 
 ## Local PackageReference Consumer

@@ -122,7 +122,8 @@
       },
       "articles": [
         "docs/articles/zh-cn/demo-model-acquisition-and-onnx-conversion.md",
-        "docs/articles/zh-cn/yolovision-yolov10-end-to-end-output-guide.md"
+        "docs/articles/zh-cn/yolovision-yolov10-end-to-end-output-guide.md",
+        "docs/articles/zh-cn/yolovision-yolov10n-real-asset-tutorial.md"
       ],
       "runtimeEvidence": "artifacts/interface-coverage/yolov10-official-runtime-proof-closure.json"
     },

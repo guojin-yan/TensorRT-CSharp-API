@@ -1,0 +1,119 @@
+{
+  "schemaVersion": 1,
+  "recordKind": "sample-run-evidence-record",
+  "recordId": "yolovision-yolov10n-cc0-bus-win-x64-trt10.11-cuda12.9-20260804",
+  "sampleName": "YoloVision",
+  "family": "yolov10",
+  "task": "det",
+  "proofClassification": "real-model-runtime",
+  "validatorState": "real-model-runtime",
+  "templateOnly": false,
+  "isSmokePassed": true,
+  "canPromoteRealModelRuntime": true,
+  "canPromotePackageConsumerRuntime": false,
+  "modelPath": "../models/YoloVision/Detection/yolov10n-thu-mig-v1.1/yolov10n.onnx",
+  "modelSha256": "7025ea1913f9a259cf8a8465ed608e10610d1bb376db2e0348b13e3bd286e0d3",
+  "modelLicense": "AGPL-3.0-only; official v1.1 asset remains outside Git and public redistribution is not approved",
+  "labelsPath": "../downloads/yolox-apache/derived/coco.names",
+  "labelsSha256": "4d4aaea7bee6be2f675d9b53a9195ca36dfe6429f7479f29155da522a6c85930",
+  "labelsLicense": "COCO labels derived from the hash-pinned YOLOX source for this local runtime case",
+  "inputAssetPath": "../downloads/article-assets/yolovision-detection-cc0-bus-station/liverpool-street-bus-station-1280.ppm",
+  "inputAssetSha256": "80715af66669147b049fec9386152bd45505f4e494a65079fdc55404d4589b8e",
+  "inputAssetLicense": "Wikimedia Commons Liverpool Street Bus station 2025; CC0 1.0",
+  "preprocessedInputTensorPath": "../downloads/article-assets/yolovision-yolov10n-cc0-bus/input-yolov10n-cc0-bus-1x3x640x640-rgb-letterbox.fp32.bin",
+  "preprocessedInputTensorSha256": "050935ebf471ec32ab4327d9f5643f0fe1a203289088895205e732e448a8d225",
+  "preprocessedInputTensorElementCount": 1228800,
+  "sampleRunCommand": "dotnet run --project ./samples/YoloVision -- --model <models-root>/YoloVision/Detection/yolov10n-thu-mig-v1.1/yolov10n.onnx --labels <asset-root>/coco.names --image <asset-root>/liverpool-street-bus-station-1280.ppm --preprocessed-output <evidence-root>/input.fp32.bin --input-shape 1x3x640x640 --tensor-rt-line 10 --family v10 --task det --layout end2end --class-count 80 --confidence 0.25 --top-k 100 --output-json <evidence-root>/output.json --visualization <evidence-root>/output.svg --visualization-background <asset-root>/liverpool-street-bus-station-1280.jpg",
+  "sampleRunLogPath": "external-evidence/yolov10n-cc0-bus-run.log",
+  "sampleRunLogSha256": "76fdb0e23b87f412392d8480346b32568c6ea0a9b69e509cc636790d8accf424",
+  "stdoutSummary": "TensorRT 10.11 executed the official YOLOv10n v1.1 ONNX with RGB centered letterbox preprocessing, consumed output0 [1,300,6] through the end-to-end decoder, returned one bus and five persons, and ended with YoloVision Passed=True and exit code 0.",
+  "expectedEvidenceLines": [
+    "Input=images:[1, 3, 640, 640] Inputs=1 Output=output0:[1, 300, 6] Outputs=1",
+    "ImagePreprocessConfig Mode=letterbox Layout=NCHW Color=RGB",
+    "Profile Family=YoloV10 Task=Detection Layout=EndToEndNms Nms=False NmsMode=None",
+    "Postprocess Task=Detection;Detections=6",
+    "Detection Class=bus Score=0.950402",
+    "YoloVision Passed=True"
+  ],
+  "executedUtcDate": "2026-08-04",
+  "sourceBaseCommit": "3c1b314bec7a51ccfc7a848f277a07dec1e06600",
+  "host": {
+    "os": "Microsoft Windows 10.0.26200",
+    "rid": "win-x64",
+    "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+    "driverVersion": "576.02",
+    "cudaVersion": "12.9",
+    "tensorRtVersion": "10.11.0.33",
+    "bridgePath": "build-out/win-x64-trt10-cuda12-release/bin/Release/jyppxtrtbridge.dll"
+  },
+  "assets": {
+    "onnx": {
+      "fileName": "yolov10n.onnx",
+      "length": 9386466,
+      "sha256": "7025ea1913f9a259cf8a8465ed608e10610d1bb376db2e0348b13e3bd286e0d3"
+    },
+    "labels": {
+      "fileName": "coco.names",
+      "classCount": 80,
+      "sha256": "4d4aaea7bee6be2f675d9b53a9195ca36dfe6429f7479f29155da522a6c85930"
+    },
+    "image": {
+      "fileName": "liverpool-street-bus-station-1280.ppm",
+      "width": 1280,
+      "height": 961,
+      "sha256": "80715af66669147b049fec9386152bd45505f4e494a65079fdc55404d4589b8e"
+    },
+    "preprocessedInputTensor": {
+      "shape": [1, 3, 640, 640],
+      "elementCount": 1228800,
+      "sha256": "050935ebf471ec32ab4327d9f5643f0fe1a203289088895205e732e448a8d225"
+    },
+    "outputJson": {
+      "fileName": "yolov10n-cc0-bus-output.json",
+      "sha256": "7286d3c47270f0a3c19aaa5e28d1e8546a82ae5485076d4311aad98babdb834a"
+    },
+    "visualization": {
+      "fileName": "yolov10n-cc0-bus-output.svg",
+      "sha256": "3d4223e23dc0ee6847913a23ca0eaf940814f862339a25fd37b02a9e04a789c3"
+    }
+  },
+  "modelContract": {
+    "input": {
+      "name": "images",
+      "shape": [1, 3, 640, 640],
+      "dataType": "float32",
+      "preprocess": "center letterbox to 640x640; RGB; NCHW; scale=1/255; fill=114"
+    },
+    "output": {
+      "name": "output0",
+      "shape": [1, 300, 6],
+      "columns": ["x1", "y1", "x2", "y2", "score", "classId"],
+      "hasObjectness": false,
+      "applyNms": false
+    }
+  },
+  "runtimeValidation": {
+    "passed": true,
+    "outputValueSha256": "d06035c834476053e10d7b8b02eac5d9cdebd02ba926bb20a098bb40d62d9ce8",
+    "detectionCount": 6,
+    "topPrediction": "bus",
+    "topScore": 0.950402,
+    "elapsedMilliseconds": 9.451,
+    "outputJsonSha256": "7286d3c47270f0a3c19aaa5e28d1e8546a82ae5485076d4311aad98babdb834a"
+  },
+  "license": {
+    "sourceCodeSpdxId": "AGPL-3.0-only",
+    "publicModelRedistributionOwnerApproval": false,
+    "publicInputImageRedistributionPermittedByLicense": true
+  },
+  "proofBoundary": {
+    "sourceTreeRealModelRuntime": true,
+    "packageConsumerRuntimeProof": false,
+    "publicPackageProof": false,
+    "postPublishProof": false,
+    "ownerReleaseAcceptance": false,
+    "releaseProof": false,
+    "performsPublish": false,
+    "uploadsAssets": false
+  }
+}

@@ -170,6 +170,8 @@
     href: articles/zh-cn/yolovision-detection-tutorial.md
   - name: YoloVision YOLOv10 End-to-End Output Guide
     href: articles/zh-cn/yolovision-yolov10-end-to-end-output-guide.md
+  - name: C# 使用 TensorRtSharp4.0 运行 YOLOv10n 目标检测
+    href: articles/zh-cn/yolovision-yolov10n-real-asset-tutorial.md
   - name: YoloVision Segmentation Tutorial
     href: articles/zh-cn/yolovision-segmentation-tutorial.md
   - name: YoloVision Pose Tutorial

@@ -262,6 +262,40 @@
       ],
       "proofBoundary": "Content-complete local-package-consumer article with a real runtime screenshot and source-image instance-mask overlay; not public-package, post-publish, Owner acceptance, model upload authorization, or release proof.",
       "publicationAuthorized": false
+    },
+    {
+      "id": "yolovision-yolov10n-real-asset",
+      "path": "docs/articles/zh-cn/yolovision-yolov10n-real-asset-tutorial.md",
+      "classification": "complete-technical-article",
+      "status": "complete-with-runtime-screenshot-and-annotated-result",
+      "realExecutionEvidence": "samples/assets/yolovision-yolov10n-article-runtime-evidence.json",
+      "visualAssetEvidence": "samples/assets/yolovision-yolov10n-article-visual-assets.json",
+      "model": {
+        "sourceUrl": "https://github.com/THU-MIG/yolov10/releases/download/v1.1/yolov10n.onnx",
+        "pinnedRevision": "yolov10-v1.1@799ff3be47d21173bcf29b351820d4b8e955e0fe",
+        "license": "AGPL-3.0-only; model files remain outside Git and public redistribution is not approved",
+        "conversionCommand": "model.export(format=\"onnx\", imgsz=640, opset=13, simplify=True)",
+        "onnxWorkspacePath": "models/YoloVision/Detection/yolov10n-thu-mig-v1.1/yolov10n.onnx",
+        "onnxSha256": "7025ea1913f9a259cf8a8465ed608e10610d1bb376db2e0348b13e3bd286e0d3",
+        "trackedByGit": false,
+        "uploadsModelFiles": false
+      },
+      "resultImages": [
+        {
+          "role": "annotated-inference-result",
+          "path": "docs/images/yolovision-yolov10n-annotated-cc0.webp",
+          "sha256": "80e3ac8bf9e06e1088dcdc28634ddee7cb3a418bf3556450f819178b2f354a58",
+          "source": "Rendered from the SVG written by the real TensorRT YoloVision run; the CC0 source image is embedded and six YOLOv10 detections are mapped back to source coordinates."
+        },
+        {
+          "role": "program-runtime-screenshot",
+          "path": "docs/images/yolovision-yolov10n-runtime-terminal.png",
+          "sha256": "7c10874ba5c99bb03896caf1608a6b7bc1f908a251c2099c193653db3f0c35e8",
+          "source": "Path-sanitized console rendering of selected stdout from the same real TensorRT run; input/output shapes, detections, elapsed time, and Passed=True are unchanged."
+        }
+      ],
+      "proofBoundary": "Content-complete source-tree real-model article with a real runtime screenshot and source-image detection overlay; not package-consumer, public-package, post-publish, Owner acceptance, model upload authorization, or release proof.",
+      "publicationAuthorized": false
     }
   ]
 }
