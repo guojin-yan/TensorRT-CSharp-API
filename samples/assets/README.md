@@ -139,6 +139,8 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Acquire-TorchVisionLrasppOff
 
 `eng/Test-YoloVisionDetectionLocalPackageConsumer.ps1` runs the official YOLOv8n detection graph through the isolated three-package path. `yolovision-yolov8n-det-local-package-consumer-runtime-evidence.json` records byte-identical C# preprocessing, all 705,600 raw comparisons, four person and one bus comparison with source-space box IoU, a fail-closed single-value negative, and restored-package hash equality. The ONNX remains in the outer `models` directory for the future Model Zoo and is not uploaded.
 
+`eng/Test-GpuAllocatorLocalPackageConsumer.ps1` copies `samples/GpuAllocator.PackageConsumer` into a repository-external workspace and restores only the managed API and matching bridge-only packages from local feeds. `gpu-allocator-local-package-consumer-tensorrt10.11-evidence.json` records package and bridge hashes, eight real builder callbacks, zero final live allocations, and fail-closed rejection and exception cases. The sample constructs an identity network in code, so model acquisition and ONNX conversion are explicitly not applicable. CUDA and TensorRT are host-installed; the record is not public-package, Release, or post-publish proof.
+
 Recommended local names:
 
 | Sample | Local files |

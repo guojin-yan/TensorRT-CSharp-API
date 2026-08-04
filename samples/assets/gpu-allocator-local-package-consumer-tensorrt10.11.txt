@@ -1,0 +1,15 @@
+PackageReferenceOnly=True
+ProjectReference=False
+SourceTreeBinary=False
+RuntimeEnvironment TRT=10.11.0 CUDA=12.9 TensorRtAvailable=True CudaAvailable=True
+GpuAllocatorRuntimeSummary
+  TensorRtLine=10 RuntimePackageKey=win-x64-trt10.11-cuda12.9-cudnn9.22
+  RuntimeAttachLifecycle=Passed Callbacks=0 LiveAllocations=0
+  BuilderCallbacks=8 Allocate=3 Reallocate=2 AllocateAsync=0
+  BuilderDeallocate=3 DeallocateAsync=0
+  PeakLiveBytes=1048576 FinalLiveAllocations=0
+  RejectionCase=Passed BuildFailed=True RejectedCount=1
+  ExceptionCase=Passed BuildFailed=True CallbackFailures=1
+  NativePointerExposed=False RealCallbackRuntime=True
+GpuAllocatorRealRuntime=Passed TensorRtLine=10 RuntimePackageKey=win-x64-trt10.11-cuda12.9-cudnn9.22 RuntimeInvocationCount=0 RuntimeAllocateCount=0 RuntimeAllocateAsyncCount=0 RuntimeDeallocateCount=0 RuntimeDeallocateAsyncCount=0 RuntimePeakLiveAllocationBytes=0 RuntimeLiveAllocationCount=0 BuilderInvocationCount=8 BuilderAllocateCount=3 BuilderReallocateCount=2 BuilderAllocateAsyncCount=0 BuilderDeallocateCount=3 BuilderDeallocateAsyncCount=0 BuilderPeakLiveAllocationBytes=1048576 BuilderLiveAllocationCount=0 RejectedBuildFailed=True RejectedCount=1 ExceptionBuildFailed=True ExceptionCallbackFailureCount=1 PointerExposed=False RuntimeAttachLifecycle=True RealCallbackRuntime=True
+GpuAllocatorPackageConsumer Passed=True Mode=GpuAllocatorRuntimeSmokeOnly

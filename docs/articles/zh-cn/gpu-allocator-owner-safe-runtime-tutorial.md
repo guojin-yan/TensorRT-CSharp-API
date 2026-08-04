@@ -200,3 +200,5 @@ GpuAllocatorRuntimeSummary
 TensorRT 8、10、11 各有 create、attach-runtime、attach-builder、detach、get-info 五个 manifest 入口。当前机器只安装了 TensorRT 10.11，因此 TRT8 与 TRT11 完成了源码、manifest、P/Invoke 与无 vendor SDK 编译验证，但没有伪造本机运行数据。
 
 本文记录的是源码树本地验证，不是 clean package consumer、公开 NuGet、GitHub Package、Release 或 post-publish 证据。项目仍在开发阶段，不创建 tag、不发布 Release、不推送任何包。
+
+在本地 managed 包与 bridge-only 包生成后，可继续执行[本地 NuGet 包独立消费者全流程](gpu-allocator-local-package-consumer-tutorial.md)。该流程会在仓库外目录中仅通过两个 `PackageReference` 重新编译并执行相同的正例与负例，不使用源码树 DLL 或开发期 bridge 探测。

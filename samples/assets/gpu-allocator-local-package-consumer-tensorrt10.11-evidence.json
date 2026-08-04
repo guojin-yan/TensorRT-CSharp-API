@@ -1,0 +1,117 @@
+{
+  "schemaVersion": 1,
+  "evidenceKind": "local-package-consumer-tensorrt-gpu-allocator-runtime",
+  "validationState": "passed-local-package-consumer-runtime",
+  "recordedAtLocal": "2026-08-05",
+  "tensorRtLine": 10,
+  "tensorRtVersion": "10.11.0",
+  "cudaToolkitVersion": "12.9",
+  "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+  "runtimePackageKey": "win-x64-trt10.11-cuda12.9-cudnn9.22",
+  "sample": "GpuAllocator.PackageConsumer",
+  "mode": "GpuAllocatorRuntimeSmokeOnly",
+  "model": {
+    "kind": "programmatically-created-identity-network",
+    "acquisition": "not-applicable",
+    "conversion": "not-applicable",
+    "externalModelRequired": false,
+    "onnxProduced": false
+  },
+  "packages": [
+    {
+      "role": "managed-api",
+      "id": "JYPPX.TensorRT.CSharp.API",
+      "version": "4.0.0",
+      "length": 15448144,
+      "sha256": "1fbf8f150ecd1e0ef79d51374aee8a5269f8b699b5e25f9f7619a4167f525499"
+    },
+    {
+      "role": "bridge-only",
+      "id": "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge",
+      "version": "4.0.0",
+      "length": 398656,
+      "sha256": "b0a4287428e39e8ee25749de19d3591b5071b02cafc121193098038880f19bfa",
+      "nativeEntry": "runtimes/win-x64/native/jyppxtrtbridge.dll",
+      "nativeEntrySha256": "297bf1f8f586dde5b64386633065d6946650d5355e43a246c5fff6b35872b03c"
+    }
+  ],
+  "isolation": {
+    "workspaceOutsideRepository": true,
+    "packageReferenceOnly": true,
+    "projectReference": false,
+    "hintPath": false,
+    "sourceTreeBinary": false,
+    "developmentBridgePathRemoved": true,
+    "developmentProbingRemoved": true,
+    "consumerBridgeMatchesPackage": true,
+    "vendorRuntimeBinaryCountInPackages": 0,
+    "vendorRuntimeBinaryCountInConsumerOutput": 0,
+    "vendorDependenciesProvidedByHost": true
+  },
+  "runtimeAttachment": {
+    "passed": true,
+    "attachTarget": "Runtime",
+    "callbackInvocationCount": 0,
+    "callbackInvocationClaimed": false,
+    "liveAllocationCountAfterEngineDispose": 0,
+    "note": "The minimal serialized identity plan did not request GPU allocation during deserialization; this path proves package-based attachment and lifecycle only."
+  },
+  "builderPositive": {
+    "passed": true,
+    "attachTarget": "Builder",
+    "invocationCount": 8,
+    "allocateCount": 3,
+    "reallocateCount": 2,
+    "deallocateCount": 3,
+    "allocateAsyncCount": 0,
+    "deallocateAsyncCount": 0,
+    "peakLiveAllocationBytes": 1048576,
+    "liveAllocationCountAfterEngineDispose": 0,
+    "nativePointerExposed": false,
+    "realCallbackRuntime": true
+  },
+  "rejectionNegative": {
+    "passed": true,
+    "buildFailed": true,
+    "rejectedCount": 1,
+    "liveAllocationCount": 0
+  },
+  "exceptionNegative": {
+    "passed": true,
+    "buildFailed": true,
+    "callbackFailureCount": 1,
+    "liveAllocationCount": 0
+  },
+  "artifacts": {
+    "consumerSource": {
+      "path": "samples/GpuAllocator.PackageConsumer/Program.cs",
+      "sha256": "25baec7433d6278db413cbabe3454816ace5bae49d4b395141f818488399201a",
+      "length": 14031
+    },
+    "projectTemplate": {
+      "path": "samples/GpuAllocator.PackageConsumer/GpuAllocator.PackageConsumer.csproj.template",
+      "sha256": "14459d08ff40d4df87364d973684dda5a9fad1892145df09e279c2b3a2739c6a",
+      "length": 550
+    },
+    "stdout": {
+      "path": "samples/assets/gpu-allocator-local-package-consumer-tensorrt10.11.txt",
+      "sha256": "0dbcfb8564e31ab7fb46bdd1804f5339ea9eb107d9caf193962630b273941268",
+      "length": 1398,
+      "source": "Line-ending-normalized copy of the captured package-consumer stdout; result values are unchanged."
+    },
+    "runtimeResultImage": {
+      "path": "docs/images/gpu-allocator-local-package-consumer-terminal.png",
+      "sha256": "9d34dafebf8cc59fb9c21ac5ebaa2e75095cf5c311b1315d8efc41c51f285420",
+      "length": 53916,
+      "source": "Rendered from the same captured stdout without changing result values."
+    }
+  },
+  "boundary": {
+    "isLocalPackageConsumerRuntimeEvidence": true,
+    "isPublicPackageConsumerProof": false,
+    "isReleaseProof": false,
+    "isPostPublishProof": false,
+    "performsPublish": false,
+    "statement": "Repository-external local-feed proof for the managed and bridge-only packages. CUDA and TensorRT are host-installed. No public package, tag, Release, or package publication was created."
+  }
+}

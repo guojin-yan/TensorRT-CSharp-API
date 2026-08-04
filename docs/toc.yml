@@ -372,6 +372,8 @@
     href: articles/zh-cn/output-allocator-callback-owner-design.md
   - name: IGpuAllocator Owner-Safe Runtime
     href: articles/zh-cn/gpu-allocator-owner-safe-runtime-tutorial.md
+  - name: IGpuAllocator Local Package Consumer
+    href: articles/zh-cn/gpu-allocator-local-package-consumer-tutorial.md
   - name: OutputAllocator Attach/Detach Design Gate
     href: articles/zh-cn/output-allocator-attach-detach-design-gate.md
   - name: OutputBuffer Ownership Safety Gate
