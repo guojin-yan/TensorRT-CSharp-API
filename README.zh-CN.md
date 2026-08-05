@@ -67,24 +67,35 @@ dotnet add package JYPPX.TensorRT.CSharp.API.Bridge.win-x64-trt10.11-cuda12.9-cu
 | 包 | 内容 |
 | --- | --- |
 | JYPPX.TensorRT.CSharp.API | TensorRT/CUDA 托管 API |
-| JYPPX.TensorRT.CSharp.API.YoloVision | YOLO 解码和图像流程 |
-| JYPPX.TensorRT.CSharp.API.Classification | 分类辅助和示例契约 |
 | JYPPX.TensorRT.CSharp.API.Bridge.* | 仅项目自有原生桥接库 |
+
+`samples/YoloVision` 和 `samples/Classification` 是可运行演示。它们的项目文件和本地 package-consumer 验证脚本保留在源码中用于开发检查，但对应的示例包 ID 明确不进入任何公开包源和 Release 资产。
 
 ## 公开包与 Release 资产
 
-首个公开候选版本为 <code>4.0.0-preview.1</code>。NuGet 包 README 使用根目录英文 README，包图标固定为 <code>nuget/logo.jpg</code>，三个托管包均使用 Apache-2.0 SPDX 许可证表达式。
+首个公开候选版本为 <code>4.0.0-preview.1</code>。NuGet 包 README 使用根目录英文 README，包图标固定为 <code>nuget/logo.jpg</code>，核心托管包使用 Apache-2.0 SPDX 许可证表达式。
 
 | 包 | 版本 | NuGet.org | GitHub Packages | 用途 |
 | --- | --- | --- | --- | --- |
 | <code>JYPPX.TensorRT.CSharp.API</code> | [![版本](https://img.shields.io/nuget/vpre/JYPPX.TensorRT.CSharp.API.svg?label=4.0.0-preview.1)](https://www.nuget.org/packages/JYPPX.TensorRT.CSharp.API/) | [包页面](https://www.nuget.org/packages/JYPPX.TensorRT.CSharp.API/) | [包源](https://github.com/users/guojin-yan/packages/nuget/package/jyppx.tensorrt.csharp.api) | 核心 TensorRT/CUDA 托管 API |
-| <code>JYPPX.TensorRT.CSharp.API.YoloVision</code> | [![版本](https://img.shields.io/nuget/vpre/JYPPX.TensorRT.CSharp.API.YoloVision.svg?label=4.0.0-preview.1)](https://www.nuget.org/packages/JYPPX.TensorRT.CSharp.API.YoloVision/) | [包页面](https://www.nuget.org/packages/JYPPX.TensorRT.CSharp.API.YoloVision/) | [包源](https://github.com/users/guojin-yan/packages/nuget/package/jyppx.tensorrt.csharp.api.yolovision) | YOLO 解码、预处理和图像示例 |
-| <code>JYPPX.TensorRT.CSharp.API.Classification</code> | [![版本](https://img.shields.io/nuget/vpre/JYPPX.TensorRT.CSharp.API.Classification.svg?label=4.0.0-preview.1)](https://www.nuget.org/packages/JYPPX.TensorRT.CSharp.API.Classification/) | [包页面](https://www.nuget.org/packages/JYPPX.TensorRT.CSharp.API.Classification/) | [包源](https://github.com/users/guojin-yan/packages/nuget/package/jyppx.tensorrt.csharp.api.classification) | 分类示例契约 |
 
 | 发布渠道 | 链接 | 资产 |
 | --- | --- | --- |
-| GitHub Release | [TensorRtSharp4.0 Releases](https://github.com/guojin-yan/TensorRT-CSharp-API/releases) | 源码压缩包和三个托管 <code>.nupkg</code> 包 |
-| GitHub Packages | [NuGet 包源](https://github.com/users/guojin-yan/packages?repo_name=TensorRT-CSharp-API) | 托管包以及明确批准的项目自有桥接包 |
+| GitHub Release | [TensorRtSharp4.0 Releases](https://github.com/guojin-yan/TensorRT-CSharp-API/releases) | 源码压缩包和核心托管 <code>.nupkg</code> 包 |
+| GitHub Packages | [NuGet 包源](https://github.com/users/guojin-yan/packages?repo_name=TensorRT-CSharp-API) | 核心托管包以及明确批准的项目自有桥接包 |
+
+### Bridge 包矩阵
+
+下面列出每个公开 bridge 包及其匹配的用户自装 CUDA、cuDNN、TensorRT 版本。`.Bridge` 包只包含 `jyppxtrtbridge`，不会携带 NVIDIA 厂商运行库。
+
+| 包 ID | Runtime key | CUDA | cuDNN | TensorRT | 本地状态 |
+| --- | --- | --- | --- | --- | --- |
+| `JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt8.6.cuda11.8.cudnn8.9.Bridge` | `win-x64-trt8.6-cuda11.8-cudnn8.9` | 11.8 | 8.9 | 8.6 | local-validated |
+| `JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt8.6.cuda12.1.cudnn8.9.Bridge` | `win-x64-trt8.6-cuda12.1-cudnn8.9` | 12.1 | 8.9 | 8.6 | local-validated |
+| `JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda11.8.cudnn8.9.Bridge` | `win-x64-trt10.11-cuda11.8-cudnn8.9` | 11.8 | 8.9 | 10.11 | local-validated |
+| `JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge` | `win-x64-trt10.11-cuda12.9-cudnn9.22` | 12.9 | 9.22 | 10.11 | local-validated |
+| `JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.Bridge` | `win-x64-trt11.0-cuda12.9-cudnn9.22` | 12.9 | 9.22 | 11.0 | local-validated |
+| `JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda13.2.cudnn9.22.Bridge` | `win-x64-trt11.0-cuda13.2-cudnn9.22` | 13.2 | 9.22 | 11.0 | pending local validation |
 
 ## 模型获取与 ONNX 转换
 
@@ -100,17 +111,6 @@ dotnet add package JYPPX.TensorRT.CSharp.API.Bridge.win-x64-trt10.11-cuda12.9-cu
 | LRASPP MobileNetV3 Large | 获取 torchvision v0.25.0 官方权重，使用 mean/std 导出到 [1,21,320,320] 并比较逐像素 argmax。 |
 
 详见 [演示模型清单](samples/assets/demo-model-inventory.json)、[模型获取与 ONNX 转换文章](docs/articles/zh-cn/demo-model-acquisition-and-onnx-conversion.md) 和 eng/Sync-DemoOnnxModels.ps1。后续模型会迁移到 ModelZoo。
-
-## 演示与结果配图
-
-完整的图像识别文章必须包含程序运行结果、原图叠加识别结果和终端或软件页面截图：
-
-| 演示 | 结果图 |
-| --- | --- |
-| YOLOv8n 检测 | ![YOLOv8n 检测](docs/images/yolovision-yolov8n-det-annotated-cc0.webp) |
-| ResNet18 分类 | ![ResNet18 分类](docs/images/classification-resnet18-annotated-cc0.webp) |
-| LRASPP 语义分割 | ![语义分割](docs/images/yolovision-lraspp-semantic-annotated-cc0.webp) |
-| TensorRtExec 软件页面 | ![GUI 配置](docs/images/tensorrtexec-gui-runtime-config.png) ![GUI 结果](docs/images/tensorrtexec-gui-runtime-result.png) |
 
 ## 文档入口
 
@@ -150,7 +150,7 @@ dotnet test tests/JYPPX.ProjectQuality.Tests/JYPPX.ProjectQuality.Tests.csproj -
 
 在正式流程完成前，发布状态保持 blocked，状态为 owner-action-required。clean-consumer-proof-execution-bundle 和 clean-consumer-external-proof-closure-pack 属于 non-proof 的 Owner action，不会运行 runtime smoke，也不是 runtime proof 或 post-publish proof。build-only、local feed、ProjectReference、dry-run、template 和 dashboard 都不能晋级为发布证明或 issue close；FailOnNotProof 会拒绝这些替代物。
 
-NuGet 发布需要三个 package ID 的 push 权限：`JYPPX.TensorRT.CSharp.API`、`JYPPX.TensorRT.CSharp.API.YoloVision` 和 `JYPPX.TensorRT.CSharp.API.Classification`。nuget.org `403` 表示授权失败，不应重复上传。
+NuGet 发布只需要核心 package ID `JYPPX.TensorRT.CSharp.API` 的 push 权限。`JYPPX.TensorRT.CSharp.API.YoloVision` 和 `JYPPX.TensorRT.CSharp.API.Classification` 是仅供 samples 使用的 ID，严禁上传。nuget.org `403` 表示授权失败，不应重复上传。
 
 ## 目录结构
 

@@ -69,24 +69,35 @@ Then create a runtime, load an engine, bind input/output tensors, execute, and r
 | Package | Contents |
 | --- | --- |
 | <code>JYPPX.TensorRT.CSharp.API</code> | Managed TensorRT and CUDA-facing C# API |
-| <code>JYPPX.TensorRT.CSharp.API.YoloVision</code> | Managed YOLO output decoders and image pipeline |
-| <code>JYPPX.TensorRT.CSharp.API.Classification</code> | Classification helpers and sample contracts |
 | <code>JYPPX.TensorRT.CSharp.API.Bridge.*</code> | Project-owned native bridge only, selected by installed CUDA/TensorRT versions |
+
+`samples/YoloVision` and `samples/Classification` are runnable demonstrations. Their project files and local package-consumer harnesses remain in the source tree for development checks, but their sample package IDs are deliberately excluded from all public package feeds and Release assets.
 
 ## Public Packages And Release Assets
 
-The first public candidate is <code>4.0.0-preview.1</code>. Package README content is the English root README, package branding uses <code>nuget/logo.jpg</code>, and all three managed packages use the Apache-2.0 SPDX license expression.
+The first public candidate is <code>4.0.0-preview.1</code>. Package README content is the English root README, package branding uses <code>nuget/logo.jpg</code>, and the core managed package uses the Apache-2.0 SPDX license expression.
 
 | Package | Version | NuGet.org | GitHub Packages | Purpose |
 | --- | --- | --- | --- | --- |
 | <code>JYPPX.TensorRT.CSharp.API</code> | [![version](https://img.shields.io/nuget/vpre/JYPPX.TensorRT.CSharp.API.svg?label=4.0.0-preview.1)](https://www.nuget.org/packages/JYPPX.TensorRT.CSharp.API/) | [Gallery](https://www.nuget.org/packages/JYPPX.TensorRT.CSharp.API/) | [Package feed](https://github.com/users/guojin-yan/packages/nuget/package/jyppx.tensorrt.csharp.api) | Core managed TensorRT/CUDA API |
-| <code>JYPPX.TensorRT.CSharp.API.YoloVision</code> | [![version](https://img.shields.io/nuget/vpre/JYPPX.TensorRT.CSharp.API.YoloVision.svg?label=4.0.0-preview.1)](https://www.nuget.org/packages/JYPPX.TensorRT.CSharp.API.YoloVision/) | [Gallery](https://www.nuget.org/packages/JYPPX.TensorRT.CSharp.API.YoloVision/) | [Package feed](https://github.com/users/guojin-yan/packages/nuget/package/jyppx.tensorrt.csharp.api.yolovision) | YOLO decoders, preprocessing, and image samples |
-| <code>JYPPX.TensorRT.CSharp.API.Classification</code> | [![version](https://img.shields.io/nuget/vpre/JYPPX.TensorRT.CSharp.API.Classification.svg?label=4.0.0-preview.1)](https://www.nuget.org/packages/JYPPX.TensorRT.CSharp.API.Classification/) | [Gallery](https://www.nuget.org/packages/JYPPX.TensorRT.CSharp.API.Classification/) | [Package feed](https://github.com/users/guojin-yan/packages/nuget/package/jyppx.tensorrt.csharp.api.classification) | Classification sample contracts |
 
 | Release channel | Link | Assets |
 | --- | --- | --- |
-| GitHub Release | [TensorRtSharp4.0 releases](https://github.com/guojin-yan/TensorRT-CSharp-API/releases) | Source archive plus the three managed <code>.nupkg</code> files |
-| GitHub Packages | [NuGet package feed](https://github.com/users/guojin-yan/packages?repo_name=TensorRT-CSharp-API) | Managed packages and explicitly approved project-owned bridge packages |
+| GitHub Release | [TensorRtSharp4.0 releases](https://github.com/guojin-yan/TensorRT-CSharp-API/releases) | Source archive plus the core managed <code>.nupkg</code> file |
+| GitHub Packages | [NuGet package feed](https://github.com/users/guojin-yan/packages?repo_name=TensorRT-CSharp-API) | Core managed package and explicitly approved project-owned bridge packages |
+
+### Bridge package matrix
+
+Every public bridge package is listed below. CUDA, cuDNN, and TensorRT are prerequisites installed by the consumer; the `.Bridge` package contains only `jyppxtrtbridge`.
+
+| Package ID | Runtime key | CUDA | cuDNN | TensorRT | Local state |
+| --- | --- | --- | --- | --- | --- |
+| `JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt8.6.cuda11.8.cudnn8.9.Bridge` | `win-x64-trt8.6-cuda11.8-cudnn8.9` | 11.8 | 8.9 | 8.6 | local-validated |
+| `JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt8.6.cuda12.1.cudnn8.9.Bridge` | `win-x64-trt8.6-cuda12.1-cudnn8.9` | 12.1 | 8.9 | 8.6 | local-validated |
+| `JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda11.8.cudnn8.9.Bridge` | `win-x64-trt10.11-cuda11.8-cudnn8.9` | 11.8 | 8.9 | 10.11 | local-validated |
+| `JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge` | `win-x64-trt10.11-cuda12.9-cudnn9.22` | 12.9 | 9.22 | 10.11 | local-validated |
+| `JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.Bridge` | `win-x64-trt11.0-cuda12.9-cudnn9.22` | 12.9 | 9.22 | 11.0 | local-validated |
+| `JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda13.2.cudnn9.22.Bridge` | `win-x64-trt11.0-cuda13.2-cudnn9.22` | 13.2 | 9.22 | 11.0 | pending local validation |
 
 Runtime packages do not bundle NVIDIA libraries. For local source builds, use the scripts in <code>eng</code> only through the documented entry points; most exporter and owner-proof scripts are internal engineering tools.
 
@@ -115,17 +126,6 @@ Demo models are staged outside Git in the sibling <code>models</code> directory 
 | LRASPP MobileNetV3 Large | torchvision v0.25.0 official weights; export to <code>[1,21,320,320]</code> with ImageNet mean/std and compare argmax maps. |
 
 See the [demo model inventory](samples/assets/demo-model-inventory.json), [acquisition and conversion guide](docs/articles/zh-cn/demo-model-acquisition-and-onnx-conversion.md), and <code>eng/Sync-DemoOnnxModels.ps1</code>. Model files stay in the external model store until ModelZoo is available.
-
-## Samples And Visual Results
-
-Every complete image article includes a real program result, an annotated image, and a terminal or GUI capture:
-
-| Sample | Result |
-| --- | --- |
-| YOLOv8n detection | ![YOLOv8n detection](docs/images/yolovision-yolov8n-det-annotated-cc0.webp) |
-| ResNet18 classification | ![ResNet18 classification](docs/images/classification-resnet18-annotated-cc0.webp) |
-| LRASPP semantic segmentation | ![Semantic segmentation](docs/images/yolovision-lraspp-semantic-annotated-cc0.webp) |
-| TensorRtExec GUI | ![GUI configuration](docs/images/tensorrtexec-gui-runtime-config.png) ![GUI result](docs/images/tensorrtexec-gui-runtime-result.png) |
 
 ## Documentation
 
@@ -165,7 +165,7 @@ Workflows are manual-only to conserve Actions quota. The <code>grape-yan</code> 
 
 Until that run completes, release artifacts remain <code>blocked</code>. The state is <code>owner-action-required</code>. <code>clean-consumer-proof-execution-bundle</code> and <code>clean-consumer-external-proof-closure-pack</code> are <code>non-proof</code> Owner actions; they do not run runtime smoke, are not runtime proof, and are not post-publish proof. Build-only output, local feeds, ProjectReference, dry-runs, templates, and dashboards are rejected by <code>FailOnNotProof</code> and cannot be promoted to publication or issue close.
 
-NuGet publication requires push permission for `JYPPX.TensorRT.CSharp.API`, `JYPPX.TensorRT.CSharp.API.YoloVision`, and `JYPPX.TensorRT.CSharp.API.Classification`. A nuget.org `403` is an authorization failure, not a retryable build failure.
+NuGet publication requires push permission for `JYPPX.TensorRT.CSharp.API` only. `JYPPX.TensorRT.CSharp.API.YoloVision` and `JYPPX.TensorRT.CSharp.API.Classification` are sample-only IDs and must never be uploaded. A nuget.org `403` is an authorization failure, not a retryable build failure.
 
 ## Repository Layout
 

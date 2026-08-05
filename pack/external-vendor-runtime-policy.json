@@ -10,7 +10,9 @@
     "bridge"
   ],
   "managedPackageIds": [
-    "JYPPX.TensorRT.CSharp.API",
+    "JYPPX.TensorRT.CSharp.API"
+  ],
+  "nonPublicSamplePackageIds": [
     "JYPPX.TensorRT.CSharp.API.YoloVision",
     "JYPPX.TensorRT.CSharp.API.Classification"
   ],

@@ -47,8 +47,8 @@ public sealed class ClassificationLocalPackageConsumerTests
         Assert.Contains("performsPublish = $false", runner, StringComparison.Ordinal);
         Assert.DoesNotContain("dotnet nuget push", runner, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("gh release", runner, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("Pack Classification managed extension", workflow, StringComparison.Ordinal);
-        Assert.Contains("JYPPX.TensorRT.CSharp.API.Classification", workflow, StringComparison.Ordinal);
+        Assert.DoesNotContain("Pack Classification managed extension", workflow, StringComparison.Ordinal);
+        Assert.DoesNotContain("JYPPX.TensorRT.CSharp.API.Classification", workflow, StringComparison.Ordinal);
     }
 
     private static string ReadSource(params string[] parts)

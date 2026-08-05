@@ -127,9 +127,9 @@ $packageManagedDryRunReady = Test-ContainsAll -Text $packageWorkflow -Needles @(
   "publish_to_github_packages",
   "dotnet test .\tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj",
   "dotnet pack .\pack\JYPPX.TensorRT.CSharp.API\JYPPX.TensorRT.CSharp.API.csproj",
-  "dotnet pack .\samples\YoloVision\YoloVision.csproj",
   "Test-ManagedPackageContent.ps1",
-  "Test-YoloVisionManagedPackageDryRun.ps1",
+  "Test-ExternalVendorRuntimePackagePolicy.ps1",
+  "ExpectedPackageId 'JYPPX.TensorRT.CSharp.API'",
   "actions/upload-artifact"
 )
 
@@ -271,7 +271,7 @@ $record = [pscustomobject]@{
     "整理工作区并提交所有应进入发布候选的源码、workflow、脚本、文档和测试改动。",
     "推送到 GitHub 分支或 PR，确保当前 HEAD 可由 GitHub Actions 检出。",
     "运行 release-quality-gate.yml，先保持 run_package_managed_dry_run=true、run_split_package_build=false、run_release_artifact_audit=false。",
-    "确认 package-managed.yml 以 owner_publish_approved=false、publish_to_nuget=false、publish_to_github_packages=false 完成基础 managed + YoloVision 双包 pack、surface、clean consumer 和 artifact 上传。",
+    "确认 package-managed.yml 以 owner_publish_approved=false、publish_to_nuget=false、publish_to_github_packages=false 只完成核心 managed 包 pack、内容校验和 artifact 上传；YoloVision 与 Classification 样例不上传。",
     "在自托管 runner 上按 runtime key 运行 split/runtime workflow，保持 publish=false，取得 package-consumer smoke artifact。",
     "只有在 public package source、downloaded nupkg SHA256、clean consumer stdout/stderr 和 post-publish proof 都齐备后，才允许进入 Owner 授权发布。"
   )

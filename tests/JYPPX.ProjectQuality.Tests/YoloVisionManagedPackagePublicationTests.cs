@@ -15,15 +15,15 @@ public sealed class YoloVisionManagedPackagePublicationTests
         Assert.Contains("permissions:\n  contents: read", normalized, StringComparison.Ordinal);
         Assert.Contains("owner_publish_approved", workflow, StringComparison.Ordinal);
         Assert.Contains("Package or Release publication requires owner_publish_approved=true", workflow, StringComparison.Ordinal);
-        Assert.Contains("Pack YoloVision managed extension", workflow, StringComparison.Ordinal);
-        Assert.Contains("samples\\YoloVision\\YoloVision.csproj", workflow, StringComparison.Ordinal);
-        Assert.Contains("JYPPX.TensorRT.CSharp.API.YoloVision", workflow, StringComparison.Ordinal);
-        Assert.Contains("Test-YoloVisionPackageSurface.ps1", workflow, StringComparison.Ordinal);
-        Assert.Contains("Test-YoloVisionManagedPackageDryRun.ps1", workflow, StringComparison.Ordinal);
+        Assert.Contains("Pack managed package", workflow, StringComparison.Ordinal);
+        Assert.Contains("JYPPX.TensorRT.CSharp.API", workflow, StringComparison.Ordinal);
+        Assert.DoesNotContain("Pack YoloVision managed extension", workflow, StringComparison.Ordinal);
+        Assert.DoesNotContain("Pack Classification managed extension", workflow, StringComparison.Ordinal);
+        Assert.DoesNotContain("Test-YoloVisionPackageSurface.ps1", workflow, StringComparison.Ordinal);
+        Assert.DoesNotContain("Test-YoloVisionManagedPackageDryRun.ps1", workflow, StringComparison.Ordinal);
         Assert.Contains("FullyQualifiedName~YoloVisionManagedPackagePublicationTests", workflow, StringComparison.Ordinal);
-        Assert.Contains("-ExpectedSourceCommit '${{ github.sha }}'", workflow, StringComparison.Ordinal);
         Assert.Contains("-RequireExactPackageSet", workflow, StringComparison.Ordinal);
-        Assert.Contains("artifacts/yolovision/managed-package-dry-run/**", workflow, StringComparison.Ordinal);
+        Assert.Contains("Expected exactly one core managed", workflow, StringComparison.Ordinal);
         Assert.Contains("attach-github-release:", workflow, StringComparison.Ordinal);
         Assert.Contains("inputs.attach_to_github_release && inputs.release_tag != '' && inputs.owner_publish_approved && github.repository_owner == 'guojin-yan'", workflow, StringComparison.Ordinal);
         Assert.Contains("Failed to create GitHub Release", workflow, StringComparison.Ordinal);
@@ -127,15 +127,15 @@ public sealed class YoloVisionManagedPackagePublicationTests
         try
         {
             string managed = Path.Combine(tempRoot, "managed.nupkg");
-            string yolo = Path.Combine(tempRoot, "yolo.nupkg");
+            string bridge = Path.Combine(tempRoot, "bridge.nupkg");
             CreatePackage(managed, "JYPPX.TensorRT.CSharp.API", "4.0.0");
-            CreatePackage(yolo, "JYPPX.TensorRT.CSharp.API.YoloVision", "4.0.0");
+            CreatePackage(bridge, "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge", "4.0.0", "runtimes/win-x64/native/jyppxtrtbridge.dll");
 
             string policy = Path.Combine(RepositoryPaths.Root, "eng", "Test-ExternalVendorRuntimePackagePolicy.ps1");
             string[] common =
             [
                 "-PackagePath", tempRoot,
-                "-ExpectedPackageId", "JYPPX.TensorRT.CSharp.API,JYPPX.TensorRT.CSharp.API.YoloVision",
+                "-ExpectedPackageId", "JYPPX.TensorRT.CSharp.API,JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge",
                 "-ExpectedPackageVersion", "4.0.0",
                 "-RequireExactPackageSet",
             ];
@@ -143,18 +143,19 @@ public sealed class YoloVisionManagedPackagePublicationTests
             Assert.Equal(0, validExit);
             Assert.Contains("\"requireExactPackageSet\":  true", validOutput, StringComparison.Ordinal);
 
-            File.Delete(yolo);
+            File.Delete(bridge);
             (int missingExit, string missingOutput) = RunPowerShell(policy, common);
             Assert.NotEqual(0, missingExit);
             Assert.Contains("Expected package set contains 2 package(s), but inspected 1", missingOutput, StringComparison.Ordinal);
 
-            CreatePackage(yolo, "JYPPX.TensorRT.CSharp.API.YoloVision", "4.0.1");
+            CreatePackage(bridge, "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge", "4.0.1", "runtimes/win-x64/native/jyppxtrtbridge.dll");
             (int wrongVersionExit, string wrongVersionOutput) = RunPowerShell(policy, common);
             Assert.NotEqual(0, wrongVersionExit);
-            Assert.Contains("does not match expected version '4.0.0'", wrongVersionOutput, StringComparison.Ordinal);
+            Assert.Contains("4.0.1", wrongVersionOutput, StringComparison.Ordinal);
+            Assert.Contains("4.0.0", wrongVersionOutput, StringComparison.Ordinal);
 
-            File.Delete(yolo);
-            CreatePackage(yolo, "Forbidden.Package", "4.0.0");
+            File.Delete(bridge);
+            CreatePackage(bridge, "Forbidden.Package", "4.0.0");
             (int unexpectedExit, string unexpectedOutput) = RunPowerShell(policy, common);
             Assert.NotEqual(0, unexpectedExit);
             Assert.Contains("outside the expected publication allowlist", unexpectedOutput, StringComparison.OrdinalIgnoreCase);
@@ -182,12 +183,22 @@ public sealed class YoloVisionManagedPackagePublicationTests
         return count;
     }
 
-    private static void CreatePackage(string path, string packageId, string version)
+    private static void CreatePackage(string path, string packageId, string version, params string[] nativeEntries)
     {
         using ZipArchive archive = ZipFile.Open(path, ZipArchiveMode.Create);
         ZipArchiveEntry entry = archive.CreateEntry($"{packageId}.nuspec");
-        using StreamWriter writer = new(entry.Open());
-        writer.Write($"<package><metadata><id>{packageId}</id><version>{version}</version></metadata></package>");
+        using (StreamWriter writer = new(entry.Open()))
+        {
+            writer.Write($"<package><metadata><id>{packageId}</id><version>{version}</version></metadata></package>");
+        }
+        foreach (string nativeEntry in nativeEntries)
+        {
+            ZipArchiveEntry native = archive.CreateEntry(nativeEntry);
+            using (StreamWriter nativeWriter = new(native.Open()))
+            {
+                nativeWriter.Write("bridge");
+            }
+        }
     }
 
     private static (int ExitCode, string Output) RunPowerShell(string scriptPath, params string[] arguments)

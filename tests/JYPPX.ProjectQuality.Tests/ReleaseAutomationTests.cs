@@ -112,7 +112,8 @@ public sealed class ReleaseAutomationTests
         Assert.Contains("if: ${{ inputs.check_remote_release_prerequisites }}", workflow, StringComparison.Ordinal);
         Assert.Contains("if: ${{ inputs.check_runner_availability }}", workflow, StringComparison.Ordinal);
         Assert.Contains("include_release_readiness", workflow, StringComparison.Ordinal);
-        Assert.Contains("JYPPX.TensorRT.CSharp.API.Classification", workflow, StringComparison.Ordinal);
+        Assert.Contains("managed_version", workflow, StringComparison.Ordinal);
+        Assert.DoesNotContain("JYPPX.TensorRT.CSharp.API.Classification", workflow, StringComparison.Ordinal);
         Assert.Contains("managedExtensionPackageId =", publicationState, StringComparison.Ordinal);
         Assert.Contains("managedExtensionPackageIds =", publicationState, StringComparison.Ordinal);
     }
@@ -136,12 +137,12 @@ public sealed class ReleaseAutomationTests
         string chineseGate = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "articles", "zh-cn", "release-candidate-gate.md"));
         string summaryScript = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "eng", "Export-ReleaseGateSummary.ps1"));
 
-        Assert.Contains("push permission for `JYPPX.TensorRT.CSharp.API`, `JYPPX.TensorRT.CSharp.API.YoloVision`, and `JYPPX.TensorRT.CSharp.API.Classification`", englishReadme, StringComparison.Ordinal);
+        Assert.Contains("push permission for `JYPPX.TensorRT.CSharp.API` only", englishReadme, StringComparison.Ordinal);
         Assert.Contains("nuget.org `403`", englishReadme, StringComparison.Ordinal);
-        Assert.Contains("三个 package ID", chineseReadme, StringComparison.Ordinal);
-        Assert.Contains("JYPPX.TensorRT.CSharp.API.Classification", chineseReadme, StringComparison.Ordinal);
+        Assert.Contains("只需要核心 package ID", chineseReadme, StringComparison.Ordinal);
+        Assert.Contains("严禁上传", chineseReadme, StringComparison.Ordinal);
         Assert.Contains("nuget.org `403`", chineseReadme, StringComparison.Ordinal);
-        Assert.Contains("push permission for all three package IDs", englishGate, StringComparison.Ordinal);
+        Assert.Contains("push permission for the managed package ID", englishGate, StringComparison.Ordinal);
         Assert.Contains("nuget.org `403`", chineseGate, StringComparison.Ordinal);
         Assert.Contains("NUGET_API_KEY` must be an active plain-text nuget.org key", summaryScript, StringComparison.Ordinal);
     }

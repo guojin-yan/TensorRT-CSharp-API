@@ -4,24 +4,24 @@ on:
   workflow_dispatch:
     inputs:
       managed_version:
-        description: Optional managed API and YoloVision package version to audit
+        description: Optional core managed API package version to audit
         required: false
-        default: "4.0.6170"
+        default: "4.0.0-preview.1"
         type: string
       release_tag:
         description: Optional managed bundle GitHub Release tag to audit
         required: false
-        default: "v4.0.6170"
+        default: "v4.0.0-preview.1"
         type: string
       runtime_release_tags:
         description: Comma-separated runtime Release tags to audit
         required: false
-        default: "v4.0.6156,v4.0.6167,v4.0.6169,v4.0.6171"
+        default: ""
         type: string
       expected_release_tags:
         description: Comma-separated GitHub Release tags expected to remain published
         required: false
-        default: "v4.0.6170,v4.0.6156,v4.0.6167,v4.0.6169,v4.0.6171"
+        default: "v4.0.0-preview.1"
         type: string
       require_nuget_api_key:
         description: Fail when NUGET_API_KEY is missing
@@ -117,8 +117,6 @@ jobs:
             "$env:GH_REPO",
             "-NuGetApiKeyAvailable",
             "$env:HAS_NUGET_API_KEY",
-            "-ManagedExtensionPackageId",
-            "JYPPX.TensorRT.CSharp.API.YoloVision,JYPPX.TensorRT.CSharp.API.Classification"
           )
 
           if (-not [string]::IsNullOrWhiteSpace("${{ inputs.managed_version }}")) {

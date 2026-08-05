@@ -5,7 +5,7 @@ param(
   [ValidateSet("auto", "user", "org")]
   [string]$PackageOwnerKind = "auto",
   [string]$ManagedPackageId = "JYPPX.TensorRT.CSharp.API",
-  [string[]]$ManagedExtensionPackageId = @("JYPPX.TensorRT.CSharp.API.YoloVision", "JYPPX.TensorRT.CSharp.API.Classification"),
+  [string[]]$ManagedExtensionPackageId = @(),
   [string]$ManagedVersion,
   [string]$ReleaseTag,
   [string[]]$RuntimeReleaseTag = @(),

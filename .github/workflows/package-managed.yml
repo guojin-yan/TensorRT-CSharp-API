@@ -160,58 +160,23 @@ jobs:
       - name: Pack managed package
         run: dotnet pack .\pack\JYPPX.TensorRT.CSharp.API\JYPPX.TensorRT.CSharp.API.csproj -c "${{ inputs.configuration }}" -o .\artifacts\managed -p:JYPPXPackageVersion=${{ steps.version.outputs.package_version }} -p:RepositoryCommit=${{ github.sha }} -p:ContinuousIntegrationBuild=true
 
-      - name: Pack YoloVision managed extension
-        run: dotnet pack .\samples\YoloVision\YoloVision.csproj -c "${{ inputs.configuration }}" -o .\artifacts\managed -p:JYPPXPackageVersion=${{ steps.version.outputs.package_version }} -p:RepositoryCommit=${{ github.sha }} -p:ContinuousIntegrationBuild=true
-
-      - name: Pack Classification managed extension
-        run: dotnet pack .\samples\Classification\Classification.csproj -c "${{ inputs.configuration }}" -o .\artifacts\managed -p:JYPPXPackageVersion=${{ steps.version.outputs.package_version }} -p:RepositoryCommit=${{ github.sha }} -p:ContinuousIntegrationBuild=true
-
       - name: Validate exact managed package set
         shell: pwsh
         run: |
           $version = '${{ steps.version.outputs.package_version }}'
           $managedPath = ".\artifacts\managed\JYPPX.TensorRT.CSharp.API.$version.nupkg"
-          $yoloVisionPath = ".\artifacts\managed\JYPPX.TensorRT.CSharp.API.YoloVision.$version.nupkg"
-          $classificationPath = ".\artifacts\managed\JYPPX.TensorRT.CSharp.API.Classification.$version.nupkg"
           pwsh -NoProfile -File .\eng\Test-ManagedPackageContent.ps1 -PackagePath $managedPath
           pwsh -NoProfile -File .\eng\Test-ExternalVendorRuntimePackagePolicy.ps1 `
             -PackagePath .\artifacts\managed `
-            -ExpectedPackageId 'JYPPX.TensorRT.CSharp.API,JYPPX.TensorRT.CSharp.API.YoloVision,JYPPX.TensorRT.CSharp.API.Classification' `
+            -ExpectedPackageId 'JYPPX.TensorRT.CSharp.API' `
             -ExpectedPackageVersion $version `
             -RequireExactPackageSet
-          if (-not (Test-Path -LiteralPath $classificationPath -PathType Leaf)) {
-            throw "Classification managed extension package is missing: $classificationPath"
-          }
-          pwsh -NoProfile -File .\eng\Test-YoloVisionPackageSurface.ps1 `
-            -PackagePath $yoloVisionPath `
-            -BuiltOutputDirectory ".\samples\YoloVision\bin\${{ inputs.configuration }}\net8.0" `
-            -ReportDirectory .\artifacts\yolovision\package-surface-audit `
-            -PackageVersion $version
-
-      - name: Run YoloVision managed package clean consumer
-        shell: pwsh
-        run: |
-          pwsh -NoProfile -File .\eng\Test-YoloVisionManagedPackageDryRun.ps1 `
-            -PackageDirectory .\artifacts\managed `
-            -PackageVersion '${{ steps.version.outputs.package_version }}' `
-            -ExpectedSourceCommit '${{ github.sha }}' `
-            -Configuration '${{ inputs.configuration }}' `
-            -OutputRoot (Join-Path $env:RUNNER_TEMP 'yolovision-managed-package-dry-run') `
-            -ReportDirectory .\artifacts\yolovision\managed-package-dry-run
 
       - name: Upload managed artifacts
         uses: actions/upload-artifact@v7
         with:
           name: ${{ inputs.artifact_name }}
           path: artifacts/managed/*.nupkg
-
-      - name: Upload managed validation reports
-        uses: actions/upload-artifact@v7
-        with:
-          name: ${{ inputs.artifact_name }}-reports
-          path: |
-            artifacts/yolovision/package-surface-audit/**
-            artifacts/yolovision/managed-package-dry-run/**
 
   attach-github-release:
     if: ${{ inputs.attach_to_github_release && inputs.release_tag != '' && inputs.owner_publish_approved && github.repository_owner == 'guojin-yan' }}
@@ -234,7 +199,7 @@ jobs:
         run: |
           pwsh -NoProfile -File .\eng\Test-ExternalVendorRuntimePackagePolicy.ps1 `
             -PackagePath .\artifacts\managed `
-            -ExpectedPackageId 'JYPPX.TensorRT.CSharp.API,JYPPX.TensorRT.CSharp.API.YoloVision,JYPPX.TensorRT.CSharp.API.Classification' `
+            -ExpectedPackageId 'JYPPX.TensorRT.CSharp.API' `
             -ExpectedPackageVersion '${{ needs.pack.outputs.package_version }}' `
             -RequireExactPackageSet
           pwsh -NoProfile -File .\eng\Test-PublicationLicenseReadiness.ps1 `
@@ -248,8 +213,8 @@ jobs:
         run: |
           $releaseTag = "${{ inputs.release_tag }}"
           $packages = @(Get-ChildItem -LiteralPath .\artifacts\managed -Filter *.nupkg -File)
-          if ($packages.Count -ne 3) {
-            throw "Expected exactly three managed .nupkg files, found $($packages.Count)."
+          if ($packages.Count -ne 1 -or $packages[0].BaseName -notlike 'JYPPX.TensorRT.CSharp.API.*') {
+            throw "Expected exactly one core managed .nupkg file, found $($packages.Name -join ', ')."
           }
           gh release view $releaseTag --repo "$env:GH_REPO" *> $null
           if ($LASTEXITCODE -ne 0) {
@@ -287,7 +252,7 @@ jobs:
         run: |
           pwsh -NoProfile -File .\eng\Test-ExternalVendorRuntimePackagePolicy.ps1 `
             -PackagePath .\artifacts\managed `
-            -ExpectedPackageId 'JYPPX.TensorRT.CSharp.API,JYPPX.TensorRT.CSharp.API.YoloVision,JYPPX.TensorRT.CSharp.API.Classification' `
+            -ExpectedPackageId 'JYPPX.TensorRT.CSharp.API' `
             -ExpectedPackageVersion '${{ needs.pack.outputs.package_version }}' `
             -RequireExactPackageSet
 
@@ -339,7 +304,7 @@ jobs:
         run: |
           pwsh -NoProfile -File .\eng\Test-ExternalVendorRuntimePackagePolicy.ps1 `
             -PackagePath .\artifacts\managed `
-            -ExpectedPackageId 'JYPPX.TensorRT.CSharp.API,JYPPX.TensorRT.CSharp.API.YoloVision,JYPPX.TensorRT.CSharp.API.Classification' `
+            -ExpectedPackageId 'JYPPX.TensorRT.CSharp.API' `
             -ExpectedPackageVersion '${{ needs.pack.outputs.package_version }}' `
             -RequireExactPackageSet
 
