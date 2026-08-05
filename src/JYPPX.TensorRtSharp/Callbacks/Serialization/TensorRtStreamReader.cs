@@ -7,10 +7,11 @@ using JYPPX.TensorRtSharp.Shared.Interop;
 
 namespace JYPPX.TensorRtSharp;
 
-/// <summary>Owns an immutable native TensorRT IStreamReaderV2 data source.</summary>
+/// <summary>Owns an immutable native TensorRT IStreamReaderV2 data source. 拥有不可变的原生 TensorRT IStreamReaderV2 数据源。</summary>
 /// <remarks>
 /// Input bytes are copied into native immutable storage. TensorRT callback destinations and CUDA stream values never
 /// cross the public managed boundary. Dispose is deferred while a deserialize call or returned engine retains the owner.
+/// 输入字节会复制到原生不可变存储中，回调目标与 CUDA stream 不跨越公开托管边界；借用期间的释放请求会被延迟。
 /// </remarks>
 public sealed class TensorRtStreamReader : IDisposable
 {
@@ -21,9 +22,9 @@ public sealed class TensorRtStreamReader : IDisposable
     private int _borrowerCount;
     private int _activeDeserializeCount;
 
-    /// <summary>Creates a native IStreamReaderV2 owner from serialized engine bytes.</summary>
-    /// <param name="line">TensorRT 10 or TensorRT 11.</param>
-    /// <param name="serializedEngine">Serialized engine bytes copied into native immutable storage.</param>
+    /// <summary>Creates a native IStreamReaderV2 owner from serialized engine bytes. 从序列化引擎字节创建原生 IStreamReaderV2 所有者。</summary>
+    /// <param name="line">TensorRT 10 or TensorRT 11. TensorRT 10 或 TensorRT 11。</param>
+    /// <param name="serializedEngine">Serialized engine bytes copied into native immutable storage. 将被复制到原生不可变存储的序列化引擎字节。</param>
     public TensorRtStreamReader(TensorRtApiLine line, byte[] serializedEngine)
     {
         if (line != TensorRtApiLine.TensorRt10 && line != TensorRtApiLine.TensorRt11)
@@ -45,33 +46,33 @@ public sealed class TensorRtStreamReader : IDisposable
         _nativeHandle = NativeBridgeApi.CreateStreamReaderV2Owner(line, serializedEngine);
     }
 
-    /// <summary>Creates a native IStreamReaderV2 owner by copying a readable managed stream.</summary>
-    /// <param name="line">TensorRT 10 or TensorRT 11.</param>
-    /// <param name="serializedEngineStream">Readable stream copied from its current position to the end.</param>
+    /// <summary>Creates a native IStreamReaderV2 owner by copying a readable managed stream. 通过复制可读托管流创建原生 IStreamReaderV2 所有者。</summary>
+    /// <param name="line">TensorRT 10 or TensorRT 11. TensorRT 10 或 TensorRT 11。</param>
+    /// <param name="serializedEngineStream">Readable stream copied from its current position to the end. 从当前位置复制到末尾的可读流。</param>
     public TensorRtStreamReader(TensorRtApiLine line, Stream serializedEngineStream)
         : this(line, CopyReadableStream(serializedEngineStream))
     {
     }
 
-    /// <summary>Releases the owner if it was abandoned without an explicit Dispose call.</summary>
+    /// <summary>Releases the owner if it was abandoned without an explicit Dispose call. 在未显式调用 Dispose 而对象被遗弃时释放所有者。</summary>
     ~TensorRtStreamReader()
     {
         Dispose();
     }
 
-    /// <summary>Gets the TensorRT API line.</summary>
+    /// <summary>Gets the TensorRT API line. 获取 TensorRT API 版本线。</summary>
     public TensorRtApiLine Line { get; }
 
-    /// <summary>Gets the immutable native source length in bytes.</summary>
+    /// <summary>Gets the immutable native source length in bytes. 获取不可变原生数据源的字节长度。</summary>
     public ulong Length { get; }
 
-    /// <summary>Gets whether Dispose has been requested.</summary>
+    /// <summary>Gets whether Dispose has been requested. 获取是否已请求释放。</summary>
     public bool IsDisposed
     {
         get { lock (_gate) { return _disposeRequested; } }
     }
 
-    /// <summary>Gets a copied, pointer-free native callback snapshot.</summary>
+    /// <summary>Gets a copied, pointer-free native callback snapshot. 获取复制后的无指针原生回调快照。</summary>
     public TensorRtStreamReaderRuntimeSnapshot GetRuntimeSnapshot()
     {
         lock (_gate)
@@ -112,7 +113,7 @@ public sealed class TensorRtStreamReader : IDisposable
         }
     }
 
-    /// <summary>Requests release after all active deserialize and engine borrowers are gone.</summary>
+    /// <summary>Requests release after all active deserialize and engine borrowers are gone. 请求在所有反序列化与引擎借用者退出后释放资源。</summary>
     public void Dispose()
     {
         bool releaseNow;

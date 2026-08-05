@@ -157,12 +157,13 @@ public sealed partial class TensorRtRuntime : IDisposable
         return Deserialize(copy.ToArray());
     }
 
-    /// <summary>Deserializes an engine through a real native TensorRT IStreamReaderV2 callback owner.</summary>
-    /// <param name="streamReader">The owner-safe reader retained by the returned engine.</param>
-    /// <returns>A TensorRT engine wrapper.</returns>
+    /// <summary>Deserializes an engine through a real native TensorRT IStreamReaderV2 callback owner. 通过真实原生 TensorRT IStreamReaderV2 回调所有者反序列化引擎。</summary>
+    /// <param name="streamReader">The owner-safe reader retained by the returned engine. 由返回引擎保持存活的所有权安全 reader。</param>
+    /// <returns>A TensorRT engine wrapper. TensorRT 引擎包装对象。</returns>
     /// <remarks>
     /// TensorRT 10 and 11 may request host or device destinations and may seek within the immutable source. The reader
     /// owner remains alive until the returned engine is disposed, even when the caller requests reader disposal earlier.
+    /// TensorRT 10 与 11 可请求主机或设备目标并在不可变数据源中定位；即使提前请求释放，reader 所有者也会存活到返回的引擎释放。
     /// </remarks>
     public TensorRtEngine Deserialize(TensorRtStreamReader streamReader)
     {
