@@ -20,6 +20,7 @@
     <Title>JYPPX TensorRT C# API YoloVision</Title>
     <Description>Reusable pointer-free YOLO profile, preprocessing, postprocessing, reporting, and command runner for TensorRtSharp4.0.</Description>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageIcon>logo.jpg</PackageIcon>
     <PackageProjectUrl>$(RepositoryUrl)</PackageProjectUrl>
     <PackageTags>TensorRT;CUDA;YOLO;YOLOX;computer-vision</PackageTags>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
@@ -27,6 +28,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\JYPPX.TensorRtSharp\JYPPX.TensorRtSharp.csproj" />
-    <None Include="README.md" Pack="true" PackagePath="\" />
+    <None Include="..\..\README.md" Link="README.md" Pack="true" PackagePath="\" />
+    <None Include="..\..\nuget\logo.jpg" Link="logo.jpg" Pack="true" PackagePath="\" />
   </ItemGroup>
 </Project>

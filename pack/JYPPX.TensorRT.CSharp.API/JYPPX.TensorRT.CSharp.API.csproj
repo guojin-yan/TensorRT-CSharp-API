@@ -7,6 +7,7 @@
     <Title>JYPPX.TensorRT.CSharp.API</Title>
     <Description>Managed TensorRT and CUDA bridge assemblies for TensorRtSharp4.0.</Description>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageIcon>logo.jpg</PackageIcon>
     <PackageProjectUrl>$(RepositoryUrl)</PackageProjectUrl>
     <RepositoryUrl>$(RepositoryUrl)</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
@@ -15,7 +16,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="README.md" Pack="true" PackagePath="\" />
+    <None Include="..\..\README.md" Link="README.md" Pack="true" PackagePath="\" />
+    <None Include="..\..\nuget\logo.jpg" Link="logo.jpg" Pack="true" PackagePath="\" />
     <ProjectReference Include="..\\..\\src\\JYPPX.TensorRtSharp\\JYPPX.TensorRtSharp.csproj" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\\..\\src\\JYPPX.CudaSharp\\JYPPX.CudaSharp.csproj" ReferenceOutputAssembly="false" />
   </ItemGroup>

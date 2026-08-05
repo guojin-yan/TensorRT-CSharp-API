@@ -7,6 +7,7 @@
     <IsPackable>false</IsPackable>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageIcon>logo.jpg</PackageIcon>
     <PackageProjectUrl>$(RepositoryUrl)</PackageProjectUrl>
     <RepositoryUrl>$(RepositoryUrl)</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
@@ -21,6 +22,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="..\README.md" Link="README.md" Pack="true" PackagePath="\" />
+    <None Include="..\..\README.md" Link="README.md" Pack="true" PackagePath="\" />
+    <None Include="..\..\nuget\logo.jpg" Link="logo.jpg" Pack="true" PackagePath="\" />
   </ItemGroup>
 </Project>
