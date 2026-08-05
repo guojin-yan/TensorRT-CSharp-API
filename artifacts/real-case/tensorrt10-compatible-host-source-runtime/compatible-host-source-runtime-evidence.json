@@ -1,0 +1,92 @@
+{
+    "recordKind":  "compatible-host-source-runtime",
+    "generatedAtUtc":  "2026-08-05T02:21:48.1768767+00:00",
+    "validationState":  "passed-compatible-host-source-runtime",
+    "sourceCommit":  "1062d45693b9724332e306db49eeb0507036e419",
+    "preset":  "win-x64-trt10-cuda11-release",
+    "tensorRtLine":  10,
+    "tensorRtVersion":  "10.13.0",
+    "cudaToolkitVersion":  "11.8",
+    "tensorRtSdkLabel":  "TensorRT-10.13.0.35-cu11",
+    "cudaSdkLabel":  "v11.8",
+    "host":  {
+                 "operatingSystem":  "Microsoft Windows NT 10.0.26200.0",
+                 "gpuName":  "NVIDIA GeForce RTX 3060 Laptop GPU",
+                 "driverVersion":  "576.02"
+             },
+    "build":  {
+                  "configured":  true,
+                  "built":  true,
+                  "importLibrariesInsideSelectedTensorRtRoot":  true,
+                  "importLibraries":  [
+                                          {
+                                              "cacheName":  "TensorRT_NVINFER_LIBRARY",
+                                              "fileName":  "nvinfer_10.lib",
+                                              "sha256":  "d316aab732d7fcf238b0e202ff8a16e919953a8cff0088de12cc896df4f2da07"
+                                          },
+                                          {
+                                              "cacheName":  "TensorRT_NVINFER_PLUGIN_LIBRARY",
+                                              "fileName":  "nvinfer_plugin_10.lib",
+                                              "sha256":  "dd2fa9de941aa0f2dc8703f445fcfacd7497e30d374213cd81785aa12015fbf8"
+                                          },
+                                          {
+                                              "cacheName":  "TensorRT_NVONNXPARSER_LIBRARY",
+                                              "fileName":  "nvonnxparser_10.lib",
+                                              "sha256":  "9641836c844b4904c6500c315bbf6198ea270cc53f683e9188e167e723278c1c"
+                                          }
+                                      ],
+                  "bridgeFileName":  "jyppxtrtbridge.dll",
+                  "bridgeSha256":  "ab99da598130d5d11added18a4b410403e6d8c1f4103ab40ab9a9fbe20cb2196"
+              },
+    "runtime":  {
+                    "runtimeCreated":  true,
+                    "builderCreated":  true,
+                    "serializedNetworkBuilt":  true,
+                    "minimalBuildChainCompleted":  true,
+                    "highLevelChainCompleted":  true,
+                    "enqueueCompleted":  true,
+                    "requiredMarkers":  [
+                                            "TryCreateRuntime10=True:",
+                                            "TryCreateBuilder10=True:",
+                                            "TryBuildSerializedNetwork10=True:",
+                                            "TryRunMinimalBuildChain10=True:",
+                                            "HighLevelChain10=True:"
+                                        ],
+                    "missingMarkers":  [
+
+                                       ]
+                },
+    "model":  {
+                  "name":  "in-process TensorRT identity network",
+                  "acquisition":  "not-applicable",
+                  "conversion":  "not-applicable",
+                  "onnxRequired":  false,
+                  "externalModelRequired":  false,
+                  "outerModelsDirectoryUsed":  false
+              },
+    "artifacts":  {
+                      "transcript":  {
+                                         "path":  "artifacts/real-case/tensorrt10-compatible-host-source-runtime/tensorrt-smoke-transcript.txt",
+                                         "length":  3557,
+                                         "sha256":  "b0d4e23855cf5a27ed5214ec6ae4951e26d9f4e9ba07847ef4fcb1e086c4bce2"
+                                     },
+                      "screenshot":  {
+                                         "path":  "docs/images/tensorrt10-compatible-host-source-runtime-terminal.png",
+                                         "length":  72107,
+                                         "sha256":  "ee74f783034eef610564d179a2ddd0b59329b9cb4bc4002c3136dd721b04e0c2"
+                                     }
+                  },
+    "boundary":  {
+                     "isCurrentSourceBridgeRuntimeEvidence":  true,
+                     "isSameMajorCompatibleHostEvidence":  true,
+                     "isExactPackageMatrixEvidence":  false,
+                     "isPackageConsumerRuntimeProof":  false,
+                     "isPublicPackageProof":  false,
+                     "isReleaseProof":  false,
+                     "performsPack":  false,
+                     "performsPublish":  false,
+                     "createsTag":  false,
+                     "createsRelease":  false,
+                     "statement":  "This proves the current source bridge on one TensorRT same-major compatible host. It does not prove an exact release package key, a package consumer, a public package, a release, or permission to publish."
+                 }
+}

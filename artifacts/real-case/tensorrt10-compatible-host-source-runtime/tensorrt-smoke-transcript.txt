@@ -1,0 +1,25 @@
+TensorRtSmokeRunner TensorRtLineRequest=10 DependencyProbeOnly=False
+Bridge=jyppxtrtbridge TRT=10.13.0 CUDA=11.8
+TRT8 Vendor=True Runtime=False Message=TensorRT vendor dependency was detected, but it does not match this adapter line.
+TRT10 Vendor=True Runtime=True Builder=True Message=TensorRT vendor dependency is available for this adapter line.
+TRT11 Vendor=True Runtime=False Builder=False Message=TensorRT 11 adapter exports are only available when the bridge is built against TensorRT 11.
+TryCreateRuntime8=False:TensorRT vendor dependency was detected, but it does not match this adapter line.
+TryCreateBuilder8=False:TensorRT vendor dependency was detected, but it does not match this adapter line.
+TryBuildSerializedNetwork8=False:TensorRT vendor dependency was detected, but it does not match this adapter line.
+TryRunMinimalBuildChain8=False:TensorRT vendor dependency was detected, but it does not match this adapter line.
+HighLevelChain8=False:TensorRT vendor dependency was detected, but it does not match this adapter line.
+TryCreateRuntime10=True:Runtime handle created successfully.
+TryCreateBuilder10=True:Builder handle created successfully.
+TryBuildSerializedNetwork10=True:TensorRT 10 serialized network build completed successfully.
+TryRunMinimalBuildChain10=True:TensorRT 10 minimal build chain completed successfully.
+HighLevelChain10=True:HostMemory=2860/Int8 EngineSerialized=2860/Int8 RuntimeSerialization=[ConfigPlan=2860/Int8 Flags=ExcludeLeanRuntime RuntimeStrategy=Static->Static RuntimeContext=True Streamable=0 MinimumBudget=0 Budget=-1/Auto=-1 Scratch=0 Hardware=None] Parser=Available ErrorCount=0 SupportsIdentity=True NativeInstanceNorm=True BuilderCaps=[FastFp16=True FastInt8=True Tf32=True DlaCores=0] BuilderConfig=[ProfileStream=True ProfileCount=0 Capability=Standard HardwareCompatibility=None PreviewFeature=FasterDynamicShapes0805:True RuntimePlatform=SameAsBuild DeploymentSnapshot=0/0/0/2 BuilderConfigDeploymentSummary=[profiles=0 flags=Refit, Tf32 capability=Standard workspace=6441926656 opt=3 aux=0 plugins=0/0/0 diagnostics=2 RuntimeProof=False]] InspectorContext=True InspectorBytes=94 InspectorLayer=Bytes=30 Enqueue=True InferShapesMissing=0 Readiness=[Ready=True Profile=0 Bound=True Tensors=2] OutputSizing=[(Unnamed Layer* 0) [Identity]_output:512] TensorDebug=Skipped:IExecutionContext::setTensorDebugState returned false. Refitter=Created All=0/0 Missing=0/0 AllPreview=[] MissingPreview=[] Refit=True IOTensors=2 [0:input_0:Input:Float:[1, 1, 1, 1]; 1:(Unnamed Layer* 0) [Identity]_output:Output:Float:[1, 1, 1, 1]]
+TryCreateRuntime11=False:TensorRT 11 adapter exports are only available when the bridge is built against TensorRT 11.
+TryCreateBuilder11=False:TensorRT 11 adapter exports are only available when the bridge is built against TensorRT 11.
+TryBuildSerializedNetwork11=False:TensorRT 11 adapter exports are only available when the bridge is built against TensorRT 11.
+TryRunMinimalBuildChain11=False:TensorRT 11 adapter exports are only available when the bridge is built against TensorRT 11.
+HighLevelChain11=False:TensorRT 11 adapter exports are only available when the bridge is built against TensorRT 11.
+CompatibleHostSourceRuntime Passed=True
+ImportLibrariesInsideTensorRtRoot=True
+TensorRtLine=10 TensorRtVersion=10.13.0 CudaVersion=11.8
+RuntimeCreate=True BuilderCreate=True SerializedNetwork=True MinimalBuildChain=True HighLevelChain=True Enqueue=True
+Boundary=SourceRuntimeOnly ExactPackageMatrix=False PackageConsumer=False PerformsPublish=False

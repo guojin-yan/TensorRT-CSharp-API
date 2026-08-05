@@ -645,6 +645,10 @@ Recommended smoke order:
 5. `NetworkBuilderSmokeRunner`
 6. Layer-specific network runners
 
+Compatible-host source validation:
+
+- [TensorRT 10 同主版本兼容宿主源码运行验证](articles/zh-cn/tensorrt10-compatible-host-source-runtime.md) shows how to rebuild the current bridge against another TensorRT 10.x SDK, reject stale CMake import-library caches, and execute a real runtime/builder/enqueue chain without packing or publishing.
+
 See [Sample Runners](articles/en/sample-runners.md), `samples/README.md`, and `smoke/README.md` for commands and expected evidence lines.
 
 Application entry points:

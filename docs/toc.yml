@@ -454,6 +454,8 @@
     href: articles/zh-cn/logger-local-package-consumer-tutorial.md
   - name: IStreamReaderV2 Local Package Consumer Tutorial
     href: articles/zh-cn/stream-reader-local-package-consumer-tutorial.md
+  - name: TensorRT 10 Compatible Host Source Runtime
+    href: articles/zh-cn/tensorrt10-compatible-host-source-runtime.md
   - name: DebugListener Callback Proof Gap Report
     href: articles/zh-cn/debug-listener-callback-proof-gap-report.md
   - name: Real Callback Runtime Evidence Schema

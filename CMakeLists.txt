@@ -142,6 +142,33 @@ if(_jyppx_resolved_tensorrt_root)
   set(TensorRT_ROOT "${_jyppx_resolved_tensorrt_root}" CACHE PATH "Selected TensorRT package root" FORCE)
 endif()
 
+function(jyppx_invalidate_stale_tensorrt_library_cache cache_var)
+  if(NOT DEFINED TensorRT_ROOT OR TensorRT_ROOT STREQUAL "" OR NOT DEFINED ${cache_var})
+    return()
+  endif()
+
+  set(_jyppx_cached_library "${${cache_var}}")
+  if(_jyppx_cached_library STREQUAL "" OR _jyppx_cached_library MATCHES "-NOTFOUND$")
+    return()
+  endif()
+
+  cmake_path(CONVERT "${TensorRT_ROOT}" TO_CMAKE_PATH_LIST _jyppx_normalized_tensorrt_root NORMALIZE)
+  cmake_path(CONVERT "${_jyppx_cached_library}" TO_CMAKE_PATH_LIST _jyppx_normalized_cached_library NORMALIZE)
+  cmake_path(IS_PREFIX _jyppx_normalized_tensorrt_root "${_jyppx_normalized_cached_library}" NORMALIZE _jyppx_library_matches_root)
+  if(NOT _jyppx_library_matches_root)
+    message(STATUS "Clearing stale ${cache_var} after TensorRT_ROOT changed: ${_jyppx_cached_library}")
+    unset(${cache_var} CACHE)
+  endif()
+endfunction()
+
+foreach(_jyppx_tensorrt_library_cache_var
+    TensorRT_NVINFER_LIBRARY
+    TensorRT_NVINFER_PLUGIN_LIBRARY
+    TensorRT_NVONNXPARSER_LIBRARY
+    TensorRT_NVPARSERS_LIBRARY)
+  jyppx_invalidate_stale_tensorrt_library_cache(${_jyppx_tensorrt_library_cache_var})
+endforeach()
+
 jyppx_resolve_local_cuda_root(_jyppx_resolved_cuda_root)
 if(_jyppx_resolved_cuda_root)
   set(CUDAToolkit_ROOT "${_jyppx_resolved_cuda_root}" CACHE PATH "Selected CUDA toolkit root" FORCE)

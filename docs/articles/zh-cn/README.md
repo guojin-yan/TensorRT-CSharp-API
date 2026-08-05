@@ -8,7 +8,7 @@
 - Owner 输入、候选 proof 和 post-publish 模板；
 - `publishing` 子目录中的文章规划与发布治理材料。
 
-2026-08-05 盘点到 489 个 Markdown 文件。严格发布目录当前收录 10 篇文章，这 10 篇都具备真实程序运行窗口截图和原图叠加识别结果，并由外层 `models` 目录中的 10 个 ONNX 对应支撑；其余 479 篇仍是项目文档、内部记录、非视觉实机教程或待完善稿。数量代表项目过程材料多，不代表有 489 篇完整成稿。
+2026-08-05 盘点到 490 个 Markdown 文件。严格发布目录当前收录 10 篇文章，这 10 篇都具备真实程序运行窗口截图和原图叠加识别结果，并由外层 `models` 目录中的 10 个 ONNX 对应支撑；其余 480 篇仍是项目文档、内部记录、非视觉实机教程或待完善稿。数量代表项目过程材料多，不代表有 490 篇完整成稿。
 
 ## 完整文章标准
 
@@ -59,6 +59,7 @@
 - [用本地 NuGet 包验证 TensorRT IProfiler：即时计时、延迟上报与异常隔离](profiler-local-package-consumer-tutorial.md)。
 - [用本地 NuGet 包验证 TensorRT ILogger：真实日志、生命周期与异常隔离](logger-local-package-consumer-tutorial.md)。
 - [用本地 NuGet 包验证 TensorRT IStreamReaderV2：安全所有权、真实读取与失败闭环](stream-reader-local-package-consumer-tutorial.md)。
+- [使用 TensorRtSharp4.0 验证 TensorRT 10 同主版本兼容宿主](tensorrt10-compatible-host-source-runtime.md)。
 
 模型转换和桌面工具文章需要真实模型构建、程序窗口、报告校验和清楚的 build/runtime 边界；只有声称完成推理的文章才必须提供输出语义校验。未经授权的输入图片不嵌入仓库：
 
