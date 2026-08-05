@@ -249,6 +249,43 @@ function Add-NvidiaCudaRepository {
   Invoke-CheckedNativeCommand -FilePath "sudo" -ArgumentList @("dpkg", "-i", $keyringDeb)
 }
 
+function Invoke-AptInstallWithRetry {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string[]]$Packages,
+    [int]$MaxAttempts = 3
+  )
+
+  for ($attempt = 1; $attempt -le $MaxAttempts; $attempt++) {
+    Write-Host "Installing Linux NVIDIA dependencies (attempt $attempt/$MaxAttempts)."
+    & sudo rm -rf /var/lib/apt/lists/*
+    if ($LASTEXITCODE -ne 0) {
+      throw "Command failed with exit code ${LASTEXITCODE}: sudo rm -rf /var/lib/apt/lists/*"
+    }
+
+    & sudo apt-get -o Acquire::Retries=5 update
+    $updateExitCode = $LASTEXITCODE
+    if ($updateExitCode -eq 0) {
+      & sudo apt-get -o Acquire::Retries=5 install -y --no-install-recommends @Packages
+      $installExitCode = $LASTEXITCODE
+      if ($installExitCode -eq 0) {
+        return
+      }
+    }
+    else {
+      $installExitCode = $null
+    }
+
+    if ($attempt -lt $MaxAttempts) {
+      Write-Warning "apt dependency installation failed (update=$updateExitCode, install=$installExitCode); refreshing package indexes before retry."
+      Start-Sleep -Seconds ($attempt * 10)
+    }
+    else {
+      throw "Linux NVIDIA dependency installation failed after $MaxAttempts attempts (update=$updateExitCode, install=$installExitCode)."
+    }
+  }
+}
+
 function Resolve-ExistingPath {
   param(
     [string[]]$Candidates
@@ -426,8 +463,7 @@ if (-not $SkipAptInstall.IsPresent) {
   }
 
   Add-NvidiaCudaRepository -DistributionId $distributionId -Architecture $repoArchitecture
-  Invoke-CheckedNativeCommand -FilePath "sudo" -ArgumentList @("apt-get", "update")
-  Invoke-CheckedNativeCommand -FilePath "sudo" -ArgumentList (@("apt-get", "install", "-y", "--no-install-recommends") + $dependencyPlan.aptPackages)
+  Invoke-AptInstallWithRetry -Packages $dependencyPlan.aptPackages
 }
 
 $cudaRoot = Resolve-ExistingPath -Candidates @(
