@@ -143,9 +143,7 @@ $packageManagedPublishGuarded = Test-ContainsAll -Text $packageWorkflow -Needles
   "grape-yan repository is validation-only"
 )
 
-$releaseQualityHasSourceGate = Test-ContainsAll -Text $releaseQualityWorkflow -Needles @(
-  "pull_request:",
-  "push:",
+$releaseQualityHasSourceGate = (Test-ContainsAll -Text $releaseQualityWorkflow -Needles @(
   "workflow_dispatch:",
   "Test-ReleaseQualityGate.ps1 -Strict",
   "Generate-Bindings.ps1",
@@ -153,7 +151,9 @@ $releaseQualityHasSourceGate = Test-ContainsAll -Text $releaseQualityWorkflow -N
   "Export-InterfaceCoverageMatrix.ps1",
   "dotnet build TensorRtSharp.sln",
   "dotnet test .\tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj"
-)
+)) -and
+  -not $releaseQualityWorkflow.Contains("push:", [StringComparison]::Ordinal) -and
+  -not $releaseQualityWorkflow.Contains("pull_request:", [StringComparison]::Ordinal)
 $releaseQualitySourceOnlyFilterClean =
   (Test-ContainsAll -Text $releaseQualityWorkflow -Needles @(
     "Run source-only release quality tests",
