@@ -343,7 +343,15 @@ public sealed class BridgePackageConsumerTests
         string collectScript = ReadSource("eng", "Collect-SplitRuntimeAssets.ps1");
 
         Assert.Contains("bridgeOnlySplitSet", script);
-        Assert.Contains("Skipping full base runtime build for bridge-only split packaging", script);
+        Assert.Contains("Invoke-BridgeOnlyNativeBuild", script);
+        Assert.Contains("Resolve-RuntimeRoots.ps1", script);
+        Assert.Contains("Validate-WindowsRuntimeInputs.ps1", script);
+        Assert.Contains("Validate-LinuxRuntimeInputs.ps1", script);
+        Assert.Contains("Native bridge build roots are not configured", script);
+        Assert.Contains("--build", script);
+        Assert.Contains("--parallel", script);
+        Assert.Contains("--clean-first", script);
+        Assert.Contains("Native bridge build completed without the expected artifact", script);
         Assert.Contains("eng\\Test-BridgePackageConsumer.ps1", script);
         Assert.Contains("-BridgePackageDirectory", script);
         Assert.Contains("-SplitPackageKey", script);

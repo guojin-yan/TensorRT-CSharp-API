@@ -249,6 +249,84 @@ function Invoke-CheckedCommand {
   }
 }
 
+function Invoke-BridgeOnlyNativeBuild {
+  param(
+    [Parameter(Mandatory = $true)]
+    [object]$RuntimePackage
+  )
+
+  $runtimeKey = [string]$RuntimePackage.key
+  $rootJson = & $powerShellCommand `
+    -NoProfile `
+    -ExecutionPolicy Bypass `
+    -File (Join-Path $RepositoryRoot "eng\Resolve-RuntimeRoots.ps1") `
+    -RuntimePackageKey $runtimeKey `
+    -RepositoryRoot $RepositoryRoot
+  if ($LASTEXITCODE -ne 0) {
+    throw "Failed to resolve native build roots for runtime key '$runtimeKey'."
+  }
+
+  $resolvedRoots = $rootJson | ConvertFrom-Json
+  $missingRoots = New-Object System.Collections.Generic.List[string]
+  if ([string]::IsNullOrWhiteSpace([string]$resolvedRoots.tensorRtRoot)) {
+    $missingRoots.Add("TensorRT")
+  }
+  if ([string]::IsNullOrWhiteSpace([string]$resolvedRoots.cudaRoot)) {
+    $missingRoots.Add("CUDA")
+  }
+  if (@($RuntimePackage.cudnnFiles).Count -gt 0 -and [string]::IsNullOrWhiteSpace([string]$resolvedRoots.cudnnRoot)) {
+    $missingRoots.Add("cuDNN")
+  }
+  if ($missingRoots.Count -gt 0) {
+    throw "Native bridge build roots are not configured for '$runtimeKey': $($missingRoots -join ', '). Configure pack/runtime/runtime-packages.local.json or JYPPX_RUNTIME_PACKAGE_ROOTS_FILE."
+  }
+
+  $validationScript = if ([string]$RuntimePackage.platform -eq "windows") {
+    "Validate-WindowsRuntimeInputs.ps1"
+  }
+  elseif ([string]$RuntimePackage.platform -eq "linux") {
+    "Validate-LinuxRuntimeInputs.ps1"
+  }
+  else {
+    throw "Bridge-only native build is not supported for platform '$($RuntimePackage.platform)'."
+  }
+
+  $validationArguments = @(
+    "-NoProfile",
+    "-ExecutionPolicy", "Bypass",
+    "-File", (Join-Path $RepositoryRoot "eng\$validationScript"),
+    "-RuntimePackageKey", $runtimeKey,
+    "-TensorRtRoot", [string]$resolvedRoots.tensorRtRoot,
+    "-CudaRoot", [string]$resolvedRoots.cudaRoot,
+    "-RepositoryRoot", $RepositoryRoot
+  )
+  if (-not [string]::IsNullOrWhiteSpace([string]$resolvedRoots.cudnnRoot)) {
+    $validationArguments += @("-CudnnRoot", [string]$resolvedRoots.cudnnRoot)
+  }
+  Invoke-CheckedCommand -FilePath $powerShellCommand -ArgumentList $validationArguments
+
+  $configureArguments = @(
+    "--preset", [string]$RuntimePackage.buildPreset,
+    "-DJYPPX_TENSORRT_ROOT=$([string]$resolvedRoots.tensorRtRoot)",
+    "-DCUDAToolkit_ROOT=$([string]$resolvedRoots.cudaRoot)",
+    "-DJYPPX_CUDA_ROOT=$([string]$resolvedRoots.cudaRoot)"
+  )
+  if (-not [string]::IsNullOrWhiteSpace([string]$resolvedRoots.cudnnRoot)) {
+    $configureArguments += "-DJYPPX_CUDNN_ROOT=$([string]$resolvedRoots.cudnnRoot)"
+  }
+
+  Invoke-CheckedCommand -FilePath "cmake" -ArgumentList $configureArguments
+  Invoke-CheckedCommand -FilePath "cmake" -ArgumentList @(
+    "--build", "--preset", [string]$RuntimePackage.buildPreset, "--parallel", "--clean-first"
+  )
+
+  $bridgePath = Join-Path $RepositoryRoot "build-out\$($RuntimePackage.buildPreset)\bin\$Configuration\$($RuntimePackage.bridgeFile)"
+  if (-not (Test-Path -LiteralPath $bridgePath -PathType Leaf)) {
+    throw "Native bridge build completed without the expected artifact: $bridgePath"
+  }
+  Write-Host "Native bridge is ready for '$runtimeKey': $bridgePath"
+}
+
 function Remove-OptionalPath {
   param(
     [Parameter(Mandatory = $true)]
@@ -655,7 +733,11 @@ if ($shouldPackMetaPackage) {
 
 $shouldRunBaseRuntimeBuild = (-not $SkipBaseRuntimeBuild.IsPresent) -and ($splitPackages.Count -gt 0) -and (-not $bridgeOnlySplitSet)
 if ($bridgeOnlySplitSet -and -not $SkipBaseRuntimeBuild.IsPresent) {
-  Write-Host "Skipping full base runtime build for bridge-only split packaging. The bridge asset will be collected from build-out."
+  Write-Host "Building the native bridge for bridge-only split packaging."
+  Invoke-BridgeOnlyNativeBuild -RuntimePackage $sourcePackage
+}
+elseif ($bridgeOnlySplitSet) {
+  Write-Host "Using the prebuilt native bridge because SkipBaseRuntimeBuild was requested."
 }
 
 if ($bridgeOnlySplitSet -and -not $SkipManagedPack.IsPresent) {
@@ -701,7 +783,7 @@ if ($shouldRunBaseRuntimeBuild) {
   Invoke-CheckedCommand -FilePath $powerShellCommand -ArgumentList $baseArguments
 }
 elseif ($bridgeOnlySplitSet) {
-  Write-Host "Skipping base runtime build because bridge-only split packaging uses the existing bridge build output."
+  Write-Host "Full base runtime packaging is not used for bridge-only split packaging."
 }
 elseif (-not $SkipBaseRuntimeBuild.IsPresent) {
   Write-Host "Skipping base runtime build because only the split meta package is being produced."
