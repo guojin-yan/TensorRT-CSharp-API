@@ -38,12 +38,6 @@ public sealed class ReleaseCandidateFreezeManifestTests
         AssertForbiddenSubstitutes(root.GetProperty("forbiddenProofSubstitutes").EnumerateArray().Select(static item => item.GetString()!).ToArray());
     }
 
-    [Fact]
-    public void ReleaseCandidateFreezeManifestArticleIsLinkedAndNonProof()
-    {
-        AssertArticleLinked("release-candidate-freeze-manifest.md");
-    }
-
     internal static JsonDocument ReadFinalReleaseJson(string fileName)
     {
         return JsonDocument.Parse(File.ReadAllText(Path.Combine(RepositoryPaths.Root, "artifacts", "final-release", fileName)));

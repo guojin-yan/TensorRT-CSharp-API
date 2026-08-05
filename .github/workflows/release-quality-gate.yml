@@ -1,35 +1,13 @@
 name: release-quality-gate
 
 on:
-  pull_request:
-    paths:
-      - ".github/workflows/**"
-      - "eng/**"
-      - "native/**"
-      - "src/**"
-      - "tests/**"
-      - "samples/**"
-      - "applications/**"
-      - "pack/**"
-      - "docs/**"
-      - "TensorRtSharp.sln"
-  push:
-    branches:
-      - main
-      - TensorRtSharp4.0
-    paths:
-      - ".github/workflows/**"
-      - "eng/**"
-      - "native/**"
-      - "src/**"
-      - "tests/**"
-      - "samples/**"
-      - "applications/**"
-      - "pack/**"
-      - "docs/**"
-      - "TensorRtSharp.sln"
   workflow_dispatch:
     inputs:
+      candidate_version:
+        description: Candidate package version used by optional pack jobs
+        required: false
+        default: 4.0.0-preview.1
+        type: string
       runtime_package_key:
         description: Runtime key used by optional package gates
         required: false
@@ -171,7 +149,7 @@ jobs:
       contents: write
       packages: write
     with:
-      version: 4.0.0
+      version: ${{ inputs.candidate_version }}
       configuration: Release
       owner_publish_approved: false
       publish_to_nuget: false
@@ -221,7 +199,7 @@ jobs:
         run: |
           pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Invoke-LocalSplitRuntimePackage.ps1 `
             -SourceRuntimeKey "${{ inputs.runtime_package_key }}" `
-            -Version 4.0.0 `
+            -Version "${{ inputs.candidate_version }}" `
             -SplitPackageRole bridge `
             -Configuration Release
 

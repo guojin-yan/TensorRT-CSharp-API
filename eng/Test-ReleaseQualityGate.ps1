@@ -98,10 +98,11 @@ else {
 
 Add-Check -Id "workflow-present" -Passed (-not [string]::IsNullOrWhiteSpace($workflow)) -Required $true -Detail $workflowPath
 Add-Check -Id "workflow-read-only-permissions" -Passed ($workflow -match "permissions:\s*\r?\n\s+contents:\s+read") -Required $true -Detail "Workflow must use contents: read."
-Add-Check -Id "workflow-push-current-branch" -Passed (
-  $workflow.Contains("push:", [StringComparison]::Ordinal) -and
-  $workflow.Contains("- TensorRtSharp4.0", [StringComparison]::Ordinal)
-) -Required $true -Detail "Workflow must run automatically on push to the TensorRtSharp4.0 release branch."
+Add-Check -Id "workflow-manual-dispatch-budget" -Passed (
+  $workflow.Contains("workflow_dispatch:", [StringComparison]::Ordinal) -and
+  -not $workflow.Contains("push:", [StringComparison]::Ordinal) -and
+  -not $workflow.Contains("pull_request:", [StringComparison]::Ordinal)
+) -Required $true -Detail "Workflow is manual-only so validation does not consume Actions quota on every push."
 Add-Check -Id "workflow-source-gate" -Passed ($workflow.Contains("Test-ReleaseQualityGate.ps1 -Strict", [StringComparison]::Ordinal)) -Required $true -Detail "Source gate must execute the strict quality summary."
 Add-Check -Id "workflow-bindings-and-coverage" -Passed (
   $workflow.Contains("Generate-Bindings.ps1", [StringComparison]::Ordinal) -and

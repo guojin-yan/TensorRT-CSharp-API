@@ -8,7 +8,7 @@ namespace JYPPX.ProjectQuality.Tests;
 public sealed class PublicationLicenseReadinessTests
 {
     [Fact]
-    public void StaticPolicyKeepsAllPublicationPathsFailClosed()
+    public void StaticPolicyRecordsOwnerLicenseAndKeepsPublicationExplicit()
     {
         string script = Path.Combine(RepositoryPaths.Root, "eng", "Test-PublicationLicenseReadiness.ps1");
         (int exitCode, string output) = RunPowerShell(script, "-StaticOnly");
@@ -16,7 +16,10 @@ public sealed class PublicationLicenseReadinessTests
         Assert.Equal(0, exitCode);
         using JsonDocument document = JsonDocument.Parse(ExtractJson(output));
         Assert.True(document.RootElement.GetProperty("passed").GetBoolean());
-        Assert.Equal("required", document.RootElement.GetProperty("ownerDecisionState").GetString());
+        Assert.Equal("approved", document.RootElement.GetProperty("ownerDecisionState").GetString());
+        Assert.Equal("expression", document.RootElement.GetProperty("selectedPackageLicenseType").GetString());
+        Assert.Equal("Apache-2.0", document.RootElement.GetProperty("selectedPackageLicenseValue").GetString());
+        Assert.Equal("LICENSE", document.RootElement.GetProperty("selectedSourceArchiveLicenseFileName").GetString());
         Assert.False(document.RootElement.GetProperty("performsPublish").GetBoolean());
 
         string pushScript = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "eng", "Push-NuGetPackages.ps1"));
@@ -77,7 +80,7 @@ public sealed class PublicationLicenseReadinessTests
     }
 
     [Fact]
-    public void ValidArtifactsRemainRejectedUntilOwnerLicenseDecisionIsApproved()
+    public void ArtifactsWithADifferentLicenseThanOwnerSelectionAreRejected()
     {
         string tempRoot = CreateTempRoot();
         try
@@ -90,7 +93,7 @@ public sealed class PublicationLicenseReadinessTests
             Assert.NotEqual(0, exitCode);
             Assert.Contains(
                 ReadFailures(output),
-                static failure => failure.Contains("Owner license decision remains required", StringComparison.Ordinal));
+                static failure => failure.Contains("does not match the Owner-selected license", StringComparison.Ordinal));
         }
         finally
         {

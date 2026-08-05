@@ -77,7 +77,7 @@ public sealed class ReleaseAutomationTests
         Assert.Contains("NVIDIA runtime redistribution is retired", english, StringComparison.Ordinal);
         Assert.Contains("`.Bridge` packages with `split_package_roles=bridge`", english, StringComparison.Ordinal);
         Assert.Contains("windows_split_package_roles=bridge", chinese, StringComparison.Ordinal);
-        Assert.Contains("不传 `windows_runtime_keys`，使用默认 Windows 6 组合矩阵", chinese, StringComparison.Ordinal);
+        Assert.Contains("不重新分发 CUDA、cuDNN、TensorRT 厂商运行库", chinese, StringComparison.Ordinal);
         Assert.DoesNotContain("windows_split_package_roles=bridge,collection", chinese, StringComparison.Ordinal);
         Assert.DoesNotContain("windows_cuda_cudnn_package_version", chinese, StringComparison.Ordinal);
         Assert.DoesNotContain("windows_tensorrt_package_version", chinese, StringComparison.Ordinal);
@@ -138,7 +138,8 @@ public sealed class ReleaseAutomationTests
 
         Assert.Contains("push permission for `JYPPX.TensorRT.CSharp.API`, `JYPPX.TensorRT.CSharp.API.YoloVision`, and `JYPPX.TensorRT.CSharp.API.Classification`", englishReadme, StringComparison.Ordinal);
         Assert.Contains("nuget.org `403`", englishReadme, StringComparison.Ordinal);
-        Assert.Contains("JYPPX.TensorRT.CSharp.API.Classification` 三个 package ID", chineseReadme, StringComparison.Ordinal);
+        Assert.Contains("三个 package ID", chineseReadme, StringComparison.Ordinal);
+        Assert.Contains("JYPPX.TensorRT.CSharp.API.Classification", chineseReadme, StringComparison.Ordinal);
         Assert.Contains("nuget.org `403`", chineseReadme, StringComparison.Ordinal);
         Assert.Contains("push permission for all three package IDs", englishGate, StringComparison.Ordinal);
         Assert.Contains("nuget.org `403`", chineseGate, StringComparison.Ordinal);

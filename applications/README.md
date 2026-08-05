@@ -12,4 +12,4 @@ The GUI/CLI field contract is `TensorRtExec/tensor-rt-exec-gui-cli-field-map.jso
 
 ## Proof boundary
 
-Application reports, command previews, screenshots, dry-runs, build-only results, local-file-feed consumers, and source-tree runtime records do not prove that a public package was published. Public package restore, post-publish smoke, compatible-host metadata, rollback review, and Owner release approval remain separate release gates. No application command in this directory authorizes package push, GitHub Release creation, model upload, or NVIDIA runtime redistribution.
+Application reports, command previews, screenshots, dry-runs, build-only results, local-file-feed consumers, and source-tree runtime records are not package-consumer-runtime proof and do not prove that a public package was published. Public package restore, post-publish smoke, compatible-host metadata, rollback review, and Owner release approval remain separate release gates. No application command in this directory authorizes package push, GitHub Release creation, model upload, or NVIDIA runtime redistribution.

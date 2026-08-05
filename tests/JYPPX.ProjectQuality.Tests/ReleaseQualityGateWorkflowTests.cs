@@ -13,8 +13,10 @@ public sealed class ReleaseQualityGateWorkflowTests
         string workflow = ReadSource(".github", "workflows", "release-quality-gate.yml");
 
         Assert.Contains("permissions:\n  contents: read", Normalize(workflow), StringComparison.Ordinal);
-        Assert.Contains("push:", workflow, StringComparison.Ordinal);
-        Assert.Contains("- TensorRtSharp4.0", workflow, StringComparison.Ordinal);
+        Assert.Contains("workflow_dispatch:", workflow, StringComparison.Ordinal);
+        Assert.DoesNotContain("push:", workflow, StringComparison.Ordinal);
+        Assert.DoesNotContain("pull_request:", workflow, StringComparison.Ordinal);
+        Assert.Contains("default: 4.0.0-preview.1", workflow, StringComparison.Ordinal);
         Assert.Contains("source-quality:", workflow, StringComparison.Ordinal);
         Assert.Contains("run_release_artifact_audit", workflow, StringComparison.Ordinal);
         Assert.Contains("run_split_package_build", workflow, StringComparison.Ordinal);
@@ -146,7 +148,7 @@ public sealed class ReleaseQualityGateWorkflowTests
             check.GetProperty("id").GetString() == "workflow-no-publish-side-effects" &&
             check.GetProperty("passed").GetBoolean());
         Assert.Contains(checks, static check =>
-            check.GetProperty("id").GetString() == "workflow-push-current-branch" &&
+            check.GetProperty("id").GetString() == "workflow-manual-dispatch-budget" &&
             check.GetProperty("passed").GetBoolean());
         Assert.Contains(checks, static check =>
             check.GetProperty("id").GetString() == "workflow-project-quality-shard-smoke" &&

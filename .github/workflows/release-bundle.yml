@@ -6,7 +6,7 @@ on:
       version:
         description: Release version (must start with 4.0.x)
         required: false
-        default: 4.0.0
+        default: 4.0.0-preview.1
         type: string
       configuration:
         description: Build configuration

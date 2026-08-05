@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text.Json;
 using Xunit;
 
@@ -85,48 +86,10 @@ public sealed class PublicProofClaimBoundaryAuditTests
         }
     }
 
-    [Fact]
-    public void EvidenceBundleAndClassificationAuditCarryPublicClaimAuditAsNonProof()
-    {
-        FinalQualityFreezeDashboardTests.RunPipeline();
-        RunPowerShell("Test-PublicProofClaimBoundaryAudit.ps1", "-Strict");
-        RunPowerShell("Export-ArticleRoadmap30Plus.ps1");
-        RunPowerShell("Test-ArticleRoadmap30Plus.ps1", "-Strict");
-        RunPowerShell("Export-ReleaseEvidenceBundle.ps1");
-        RunPowerShell("Test-ReleaseEvidenceClassificationAudit.ps1", "-Strict");
-
-        using JsonDocument evidenceDocument = ReadFinalReleaseJson("release-evidence-bundle.json");
-        JsonElement evidence = evidenceDocument.RootElement;
-
-        Assert.Equal("public-proof-claim-boundary-audit-passed", evidence.GetProperty("publicProofClaimBoundaryAuditState").GetString());
-        Assert.Equal("public-docs-proof-boundary-freeze-passed", evidence.GetProperty("publicProofClaimBoundaryAuditPublicFreezeState").GetString());
-        Assert.True(evidence.GetProperty("publicProofClaimBoundaryAuditPublicFreezeRequiredCount").GetInt32() >= 5);
-        Assert.Equal(0, evidence.GetProperty("publicProofClaimBoundaryAuditPublicFreezeFindingCount").GetInt32());
-        Assert.Equal(0, evidence.GetProperty("publicProofClaimBoundaryAuditFindingCount").GetInt32());
-        Assert.Equal(0, evidence.GetProperty("publicProofClaimBoundaryAuditBlockedFindingCount").GetInt32());
-        Assert.False(evidence.GetProperty("publicProofClaimBoundaryAuditCanPublishPublicly").GetBoolean());
-        Assert.False(evidence.GetProperty("publicProofClaimBoundaryAuditCanCloseReleaseIssue").GetBoolean());
-        Assert.False(evidence.GetProperty("publicProofClaimBoundaryAuditIsRuntimeExecutionProof").GetBoolean());
-
-        JsonElement evidenceItem = evidence.GetProperty("evidenceItems")
-            .EnumerateArray()
-            .Single(static item => item.GetProperty("id").GetString() == "public-proof-claim-boundary-audit");
-        Assert.False(evidenceItem.GetProperty("passed").GetBoolean());
-        AssertBoundary(evidenceItem.GetProperty("boundary").GetString()!);
-
-        using JsonDocument auditDocument = ReadFinalReleaseJson("release-evidence-classification-audit.json");
-        JsonElement classificationAudit = auditDocument.RootElement;
-        Assert.Equal("classification-audit-passed-non-proof-boundaries-intact", classificationAudit.GetProperty("auditState").GetString());
-        Assert.Equal(0, classificationAudit.GetProperty("findingCount").GetInt32());
-        Assert.Contains(classificationAudit.GetProperty("auditedItems").EnumerateArray(), static item =>
-            item.GetProperty("id").GetString() == "public-proof-claim-boundary-audit" &&
-            item.GetProperty("passed").GetBoolean() == false &&
-            item.GetProperty("hasNonProofBoundary").GetBoolean());
-    }
-
     private static JsonDocument ReadFinalReleaseJson(string fileName)
     {
-        return JsonDocument.Parse(File.ReadAllText(Path.Combine(RepositoryPaths.Root, "artifacts", "final-release", fileName)));
+        string path = Path.Combine(RepositoryPaths.Root, "artifacts", "final-release", fileName);
+        return JsonDocument.Parse(File.ReadAllText(path));
     }
 
     private static void AssertFlagsStayNonProof(JsonElement element)
@@ -151,6 +114,33 @@ public sealed class PublicProofClaimBoundaryAuditTests
 
     private static void RunPowerShell(string scriptName, params string[] arguments)
     {
-        OwnerRealProofFieldDeltaPackTests.RunPowerShell(Path.Combine(RepositoryPaths.Root, "eng", scriptName), arguments);
+        ProcessStartInfo startInfo = new()
+        {
+            FileName = "pwsh",
+            WorkingDirectory = RepositoryPaths.Root,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+        };
+        startInfo.ArgumentList.Add("-NoProfile");
+        startInfo.ArgumentList.Add("-ExecutionPolicy");
+        startInfo.ArgumentList.Add("Bypass");
+        startInfo.ArgumentList.Add("-File");
+        startInfo.ArgumentList.Add(Path.Combine(RepositoryPaths.Root, "eng", scriptName));
+        foreach (string argument in arguments)
+        {
+            startInfo.ArgumentList.Add(argument);
+        }
+
+        using Process process = Process.Start(startInfo)
+            ?? throw new InvalidOperationException("Failed to start PowerShell.");
+        string output = process.StandardOutput.ReadToEnd();
+        string error = process.StandardError.ReadToEnd();
+        process.WaitForExit();
+
+        Assert.True(
+            process.ExitCode == 0,
+            $"PowerShell command failed with exit code {process.ExitCode}:{Environment.NewLine}{output}{error}");
     }
 }

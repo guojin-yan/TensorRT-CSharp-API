@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "policyId": "declared-license-required-before-publication",
-  "ownerDecisionState": "required",
+  "ownerDecisionState": "approved",
   "publicationRequiresDeclaredLicense": true,
   "dryRunMayProceedWithoutDeclaredLicense": true,
   "acceptedPackageLicenseTypes": [
@@ -25,8 +25,8 @@
     "COPYING.md"
   ],
   "selectedPackageLicense": {
-    "type": "",
-    "value": ""
+    "type": "expression",
+    "value": "Apache-2.0"
   },
-  "selectedSourceArchiveLicenseFileName": ""
+  "selectedSourceArchiveLicenseFileName": "LICENSE"
 }
