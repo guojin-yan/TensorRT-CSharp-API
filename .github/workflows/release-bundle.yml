@@ -188,6 +188,7 @@ jobs:
             '${{ inputs.publish_managed_to_nuget }}' -eq 'true' -or
             '${{ inputs.publish_managed_to_github_packages }}' -eq 'true' -or
             '${{ inputs.publish_runtime_to_github_packages }}' -eq 'true' -or
+            '${{ inputs.publish_runtime_to_nuget }}' -eq 'true' -or
             '${{ inputs.attach_runtime_to_github_release }}' -eq 'true'
           if ($hasPublicationSideEffect -and '${{ inputs.owner_publish_approved }}' -ne 'true') {
             throw "Release publication side effects require owner_publish_approved=true."
@@ -213,8 +214,8 @@ jobs:
         run: |
           set -euo pipefail
 
-          if [ "$PUBLISH_MANAGED_TO_NUGET" = "true" ] && [ "$HAS_NUGET_API_KEY" != "true" ]; then
-            echo "publish_managed_to_nuget=true requires the repository secret NUGET_API_KEY. Add a valid nuget.org API key secret, then rerun with a new version." >&2
+          if { [ "$PUBLISH_MANAGED_TO_NUGET" = "true" ] || [ "$PUBLISH_RUNTIME_TO_NUGET" = "true" ]; } && [ "$HAS_NUGET_API_KEY" != "true" ]; then
+            echo "Publishing managed or Bridge packages to nuget.org requires the repository secret NUGET_API_KEY. Add a valid nuget.org API key secret before dispatching child workflows." >&2
             exit 1
           fi
 
@@ -428,6 +429,7 @@ jobs:
             dispatch_workflow "runtime-windows" \
               -f "version=$runtime_version" \
               -f "configuration=$RELEASE_CONFIGURATION" \
+              -f "owner_publish_approved=$OWNER_PUBLISH_APPROVED" \
               -f "runtime_keys=$WINDOWS_RUNTIME_KEYS" \
               -f "runtime_delivery_mode=$WINDOWS_RUNTIME_DELIVERY_MODE" \
               -f "split_package_roles=$WINDOWS_SPLIT_PACKAGE_ROLES" \
@@ -455,6 +457,7 @@ jobs:
             dispatch_workflow "runtime-linux" --label "runtime-linux-hosted" \
               -f "version=$runtime_version" \
               -f "configuration=$RELEASE_CONFIGURATION" \
+              -f "owner_publish_approved=$OWNER_PUBLISH_APPROVED" \
               -f "runtime_keys=$LINUX_RUNTIME_KEYS" \
               -f "runtime_key_set=$LINUX_RUNTIME_KEY_SET" \
               -f "runner_mode=$LINUX_RUNNER_MODE" \
@@ -483,6 +486,7 @@ jobs:
             dispatch_workflow "runtime-linux" --label "runtime-linux-hosted-container-ubuntu20" \
               -f "version=$runtime_version" \
               -f "configuration=$RELEASE_CONFIGURATION" \
+              -f "owner_publish_approved=$OWNER_PUBLISH_APPROVED" \
               -f "runtime_keys=$LINUX_UBUNTU20_RUNTIME_KEYS" \
               -f "runtime_key_set=$LINUX_UBUNTU20_RUNTIME_KEY_SET" \
               -f "runner_mode=hosted-container" \

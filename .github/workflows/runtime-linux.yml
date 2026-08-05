@@ -13,6 +13,11 @@ on:
         required: false
         default: Release
         type: string
+      owner_publish_approved:
+        description: Explicit Owner approval for package or Release publication side effects
+        required: false
+        default: false
+        type: boolean
       runtime_keys:
         description: Optional comma-separated Linux runtime keys
         required: false
@@ -121,7 +126,7 @@ on:
       attach_to_github_release:
         description: Upload bridge packages as GitHub Release assets
         required: false
-        default: true
+        default: false
         type: boolean
   workflow_call:
     inputs:
@@ -135,6 +140,11 @@ on:
         required: false
         default: Release
         type: string
+      owner_publish_approved:
+        description: Explicit Owner approval for package or Release publication side effects
+        required: false
+        default: false
+        type: boolean
       runtime_keys:
         description: Optional comma-separated Linux runtime keys
         required: false
@@ -243,7 +253,7 @@ on:
       attach_to_github_release:
         description: Upload bridge packages as GitHub Release assets
         required: false
-        default: true
+        default: false
         type: boolean
     secrets:
       NUGET_API_KEY:
@@ -294,9 +304,15 @@ jobs:
               ('${{ inputs.publish_to_nuget }}' -eq 'true' -or '${{ inputs.publish_to_github_packages }}' -eq 'true' -or '${{ inputs.attach_to_github_release }}' -eq 'true')) {
             throw "The grape-yan repository is validation-only and cannot publish packages or Release assets."
           }
+          $hasPublicationSideEffect = '${{ inputs.publish_to_nuget }}' -eq 'true' -or
+            '${{ inputs.publish_to_github_packages }}' -eq 'true' -or
+            ('${{ inputs.attach_to_github_release }}' -eq 'true' -and -not [string]::IsNullOrWhiteSpace('${{ inputs.release_tag }}'))
+          if ($hasPublicationSideEffect -and '${{ inputs.owner_publish_approved }}' -ne 'true') {
+            throw "Package or Release publication requires owner_publish_approved=true."
+          }
 
       - name: Validate nuget.org publication prerequisites
-        if: ${{ inputs.publish_to_nuget }}
+        if: ${{ inputs.publish_to_nuget && inputs.owner_publish_approved && github.repository_owner == 'guojin-yan' }}
         shell: pwsh
         env:
           NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
@@ -713,7 +729,7 @@ jobs:
             artifacts/linux-dry-run/${{ matrix.key }}/**
 
       - name: Upload Linux bridge package to GitHub Release
-        if: ${{ inputs.attach_to_github_release && inputs.release_tag != '' && inputs.runtime_delivery_mode == 'split' }}
+        if: ${{ inputs.attach_to_github_release && inputs.release_tag != '' && inputs.owner_publish_approved && inputs.runtime_delivery_mode == 'split' && github.repository_owner == 'guojin-yan' }}
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
@@ -752,7 +768,7 @@ jobs:
           }
 
       - name: Publish Linux bridge package to GitHub Packages
-        if: ${{ inputs.publish_to_github_packages && inputs.runtime_delivery_mode == 'split' }}
+        if: ${{ inputs.publish_to_github_packages && inputs.owner_publish_approved && inputs.runtime_delivery_mode == 'split' && github.repository_owner == 'guojin-yan' }}
         shell: pwsh
         env:
           GITHUB_PACKAGES_TOKEN: ${{ github.token }}
@@ -777,7 +793,7 @@ jobs:
             -SortMode size-ascending
 
       - name: Publish Linux bridge packages to nuget.org
-        if: ${{ inputs.publish_to_nuget && inputs.runtime_delivery_mode == 'split' && github.repository_owner == 'guojin-yan' }}
+        if: ${{ inputs.publish_to_nuget && inputs.owner_publish_approved && inputs.runtime_delivery_mode == 'split' && github.repository_owner == 'guojin-yan' }}
         shell: pwsh
         env:
           NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}

@@ -40,6 +40,32 @@ public sealed class ReleaseAutomationTests
     }
 
     [Fact]
+    public void RuntimePublicationRequiresExplicitOwnerApprovalAndNuGetSecretPreflight()
+    {
+        string releaseBundle = File.ReadAllText(Path.Combine(RepositoryPaths.Root, ".github", "workflows", "release-bundle.yml"));
+        string runtimeWindows = File.ReadAllText(Path.Combine(RepositoryPaths.Root, ".github", "workflows", "runtime-windows.yml"));
+        string runtimeLinux = File.ReadAllText(Path.Combine(RepositoryPaths.Root, ".github", "workflows", "runtime-linux.yml"));
+
+        Assert.Contains("'${{ inputs.publish_runtime_to_nuget }}' -eq 'true'", releaseBundle, StringComparison.Ordinal);
+        Assert.Contains("[ \"$PUBLISH_RUNTIME_TO_NUGET\" = \"true\" ]", releaseBundle, StringComparison.Ordinal);
+        Assert.Contains("Publishing managed or Bridge packages to nuget.org requires the repository secret NUGET_API_KEY", releaseBundle, StringComparison.Ordinal);
+        Assert.Equal(
+            5,
+            System.Text.RegularExpressions.Regex.Matches(
+                releaseBundle,
+                "owner_publish_approved=\\$OWNER_PUBLISH_APPROVED").Count);
+
+        foreach (string workflow in new[] { runtimeWindows, runtimeLinux })
+        {
+            Assert.Matches("owner_publish_approved:[\\s\\S]*?default: false", workflow);
+            Assert.Contains("Package or Release publication requires owner_publish_approved=true", workflow, StringComparison.Ordinal);
+            Assert.Contains("inputs.publish_to_nuget && inputs.owner_publish_approved", workflow, StringComparison.Ordinal);
+            Assert.Contains("inputs.publish_to_github_packages && inputs.owner_publish_approved", workflow, StringComparison.Ordinal);
+            Assert.Matches("attach_to_github_release:[\\s\\S]*?default: false", workflow);
+        }
+    }
+
+    [Fact]
     public void RuntimeWorkflowsUseBoundedFirstReleasePackageContractTests()
     {
         string[] workflows =
