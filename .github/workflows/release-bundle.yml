@@ -640,7 +640,11 @@ jobs:
           notes="Automated release for $tag"
 
           if ! gh release view "$tag" --repo "$GH_REPO" >/dev/null 2>&1; then
-            if ! gh release create "$tag" --title "$title" --notes "$notes" --repo "$GH_REPO"; then
+            release_args=(release create "$tag" --title "$title" --notes "$notes" --repo "$GH_REPO")
+            if [[ "$tag" == *-* ]]; then
+              release_args+=(--prerelease)
+            fi
+            if ! gh "${release_args[@]}"; then
               gh release view "$tag" --repo "$GH_REPO" >/dev/null 2>&1
             fi
           fi

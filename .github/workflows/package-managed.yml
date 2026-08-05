@@ -218,7 +218,16 @@ jobs:
           }
           gh release view $releaseTag --repo "$env:GH_REPO" *> $null
           if ($LASTEXITCODE -ne 0) {
-            gh release create $releaseTag --title $releaseTag --notes "Automated release for $releaseTag" --repo "$env:GH_REPO"
+            $releaseArguments = @(
+              "release", "create", $releaseTag,
+              "--title", $releaseTag,
+              "--notes", "Automated release for $releaseTag",
+              "--repo", "$env:GH_REPO"
+            )
+            if ($releaseTag.Contains("-")) {
+              $releaseArguments += "--prerelease"
+            }
+            gh @releaseArguments
             if ($LASTEXITCODE -ne 0) {
               throw "Failed to create GitHub Release '$releaseTag'."
             }
