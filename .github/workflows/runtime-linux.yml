@@ -367,7 +367,17 @@ jobs:
         run: |
           set -euo pipefail
           export DEBIAN_FRONTEND=noninteractive
-          apt-get update
+          apt_update_with_retry() {
+            for attempt in 1 2 3; do
+              rm -rf /var/lib/apt/lists/*
+              if apt-get -o Acquire::Retries=5 update; then
+                return 0
+              fi
+              sleep $((attempt * 10))
+            done
+            return 1
+          }
+          apt_update_with_retry
           apt-get install -y --no-install-recommends ca-certificates curl wget gnupg apt-transport-https sudo git jq unzip zip tar gzip xz-utils
           . /etc/os-release
           wget -q "https://packages.microsoft.com/config/ubuntu/${VERSION_ID}/packages-microsoft-prod.deb" -O /tmp/packages-microsoft-prod.deb
@@ -377,7 +387,7 @@ jobs:
           wget -qO /etc/apt/keyrings/githubcli-archive-keyring.gpg https://cli.github.com/packages/githubcli-archive-keyring.gpg
           chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg
           echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" > /etc/apt/sources.list.d/github-cli.list
-          apt-get update
+          apt_update_with_retry
           apt-get install -y --no-install-recommends powershell gh
 
       - name: Checkout
@@ -414,7 +424,8 @@ jobs:
           CMAKE_URL="https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/${CMAKE_ARCHIVE}"
           CMAKE_ROOT="/opt/cmake-${CMAKE_VERSION}"
 
-          sudo apt-get update
+          sudo rm -rf /var/lib/apt/lists/*
+          sudo apt-get -o Acquire::Retries=5 update
           sudo apt-get install -y --no-install-recommends ninja-build wget ca-certificates curl tar gzip
 
           curl --fail --location --retry 5 --retry-delay 5 "$CMAKE_URL" --output "/tmp/${CMAKE_ARCHIVE}"
