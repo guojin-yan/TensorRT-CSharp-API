@@ -46,7 +46,7 @@ public sealed class UpdatedObjectiveRoadmapTests
     }
 
     [Fact]
-    public void RoadmapCapturesSourceBuildDualPackageSamplesAppsAndArticleObjectives()
+    public void RoadmapCapturesSourceBuildExternalRuntimeChannelsSamplesAppsAndArticleObjectives()
     {
         string roadmap = File.ReadAllText(Path.Combine(
             RepositoryPaths.Root,
@@ -65,10 +65,11 @@ public sealed class UpdatedObjectiveRoadmapTests
             "Test-BindingGeneratorOutputs.ps1",
             "JYPPX_TENSORRT_ROOT",
             "JYPPX_CUDA_ROOT",
-            "GitHub 全依赖包",
-            "NuGet 小包",
+            "两个渠道都禁止捆绑 NVIDIA 原厂运行库",
+            "GitHub Release | GitHub Releases | managed API、YoloVision、按版本编译的项目自有 C++ bridge、源码与文档",
+            "NuGet | nuget.org | C# 核心 API、YoloVision 与按版本拆分的项目自有 C++ bridge",
             "C# 核心 API",
-            "中间 C++ bridge",
+            "TensorRT、CUDA、cuDNN、NVRTC、parser、plugin 和 builder-resource 均不进入发布包",
             "用户自行安装 CUDA / TensorRT / cuDNN",
             "samples/YoloVision",
             "YOLO v5/v6/v7/v8/v9/v10/v11/v26/custom",
@@ -84,7 +85,15 @@ public sealed class UpdatedObjectiveRoadmapTests
             Assert.Contains(marker, roadmap, StringComparison.Ordinal);
         }
 
-        Assert.DoesNotContain("samples/YoloDet", roadmap, StringComparison.OrdinalIgnoreCase);
+        foreach (string forbidden in new[]
+        {
+            "samples/YoloDet",
+            "GitHub 全依赖包",
+            "NuGet 小包"
+        })
+        {
+            Assert.DoesNotContain(forbidden, roadmap, StringComparison.OrdinalIgnoreCase);
+        }
     }
 
     [Fact]
