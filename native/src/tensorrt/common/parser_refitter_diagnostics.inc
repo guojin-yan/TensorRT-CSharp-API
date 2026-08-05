@@ -6,7 +6,7 @@
 #error "JYPPX_TRT_EXPECTED_MAJOR must be defined before including parser_refitter_diagnostics.inc."
 #endif
 
-#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNXPARSER
+#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNXPARSER && JYPPX_TENSORRT_VERSION_MAJOR_NUM >= 10
 static void fill_parser_refitter_error(const nvonnxparser::IParserError* parser_error, const int32_t index, JYPPX_TensorRtParserErrorInfo* out_error)
 {
     std::memset(out_error, 0, sizeof(*out_error));
@@ -190,7 +190,7 @@ JYPPX_StatusCode JYPPX_TRT_PARSER_REFITTER_API(create)(
 
     *out_parser_refitter = nullptr;
 
-#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNXPARSER
+#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNXPARSER && JYPPX_TENSORRT_VERSION_MAJOR_NUM >= 10
     if (JYPPX_TENSORRT_VERSION_MAJOR_NUM != JYPPX_TRT_EXPECTED_MAJOR)
     {
         return jyppx::tensorrt::report_vendor_mismatch(kLine, JYPPX_TENSORRT_VERSION_MAJOR_NUM, "ONNX parser refitter creation");
@@ -241,7 +241,7 @@ JYPPX_StatusCode JYPPX_TRT_PARSER_REFITTER_API(get_error_count)(JYPPX_TensorRtOn
 
     *out_count = 0;
 
-#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNXPARSER
+#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNXPARSER && JYPPX_TENSORRT_VERSION_MAJOR_NUM >= 10
     nvonnxparser::IParserRefitter* payload = nullptr;
     status = get_parser_refitter_payload(parser_refitter, &payload, "ONNX parser refitter error count query");
     if (status != JYPPX_STATUS_OK)
@@ -274,7 +274,7 @@ JYPPX_StatusCode JYPPX_TRT_PARSER_REFITTER_API(get_error)(
 
     std::memset(out_error, 0, sizeof(*out_error));
 
-#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNXPARSER
+#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNXPARSER && JYPPX_TENSORRT_VERSION_MAJOR_NUM >= 10
     const nvonnxparser::IParserError* parser_error = nullptr;
     status = get_parser_refitter_error_for_diagnostic(parser_refitter, index, &parser_error, "ONNX parser refitter error query");
     if (status != JYPPX_STATUS_OK)
@@ -303,7 +303,7 @@ JYPPX_StatusCode JYPPX_TRT_PARSER_REFITTER_API(error_get_description)(
     size_t output_buffer_size,
     size_t* out_required_size)
 {
-#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNXPARSER
+#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNXPARSER && JYPPX_TENSORRT_VERSION_MAJOR_NUM >= 10
     return get_parser_refitter_diagnostic_string(parser_refitter, index, 0, output_buffer, output_buffer_size, out_required_size, "ONNX parser refitter error description query");
 #elif JYPPX_HAS_TENSORRT
     (void)parser_refitter;
@@ -336,7 +336,7 @@ JYPPX_StatusCode JYPPX_TRT_PARSER_REFITTER_API(error_get_file)(
     size_t output_buffer_size,
     size_t* out_required_size)
 {
-#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNXPARSER
+#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNXPARSER && JYPPX_TENSORRT_VERSION_MAJOR_NUM >= 10
     return get_parser_refitter_diagnostic_string(parser_refitter, index, 1, output_buffer, output_buffer_size, out_required_size, "ONNX parser refitter error file query");
 #elif JYPPX_HAS_TENSORRT
     (void)parser_refitter;
@@ -369,7 +369,7 @@ JYPPX_StatusCode JYPPX_TRT_PARSER_REFITTER_API(error_get_function)(
     size_t output_buffer_size,
     size_t* out_required_size)
 {
-#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNXPARSER
+#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNXPARSER && JYPPX_TENSORRT_VERSION_MAJOR_NUM >= 10
     return get_parser_refitter_diagnostic_string(parser_refitter, index, 2, output_buffer, output_buffer_size, out_required_size, "ONNX parser refitter error function query");
 #elif JYPPX_HAS_TENSORRT
     (void)parser_refitter;
@@ -402,7 +402,7 @@ JYPPX_StatusCode JYPPX_TRT_PARSER_REFITTER_API(error_get_node_name)(
     size_t output_buffer_size,
     size_t* out_required_size)
 {
-#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNXPARSER
+#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNXPARSER && JYPPX_TENSORRT_VERSION_MAJOR_NUM >= 10
     return get_parser_refitter_diagnostic_string(parser_refitter, index, 3, output_buffer, output_buffer_size, out_required_size, "ONNX parser refitter error node name query");
 #elif JYPPX_HAS_TENSORRT
     (void)parser_refitter;
@@ -435,7 +435,7 @@ JYPPX_StatusCode JYPPX_TRT_PARSER_REFITTER_API(error_get_node_operator)(
     size_t output_buffer_size,
     size_t* out_required_size)
 {
-#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNXPARSER
+#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNXPARSER && JYPPX_TENSORRT_VERSION_MAJOR_NUM >= 10
     return get_parser_refitter_diagnostic_string(parser_refitter, index, 4, output_buffer, output_buffer_size, out_required_size, "ONNX parser refitter error node operator query");
 #elif JYPPX_HAS_TENSORRT
     (void)parser_refitter;
@@ -474,7 +474,7 @@ JYPPX_StatusCode JYPPX_TRT_PARSER_REFITTER_API(error_get_local_function_stack_si
 
     *out_count = 0;
 
-#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNXPARSER
+#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNXPARSER && JYPPX_TENSORRT_VERSION_MAJOR_NUM >= 10
     const nvonnxparser::IParserError* parser_error = nullptr;
     status = get_parser_refitter_error_for_diagnostic(parser_refitter, index, &parser_error, "ONNX parser refitter local function stack size query");
     if (status != JYPPX_STATUS_OK)
@@ -518,7 +518,7 @@ JYPPX_StatusCode JYPPX_TRT_PARSER_REFITTER_API(error_get_local_function_stack_en
         return JYPPX_STATUS_INVALID_ARGUMENT;
     }
 
-#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNXPARSER
+#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNXPARSER && JYPPX_TENSORRT_VERSION_MAJOR_NUM >= 10
     const nvonnxparser::IParserError* parser_error = nullptr;
     status = get_parser_refitter_error_for_diagnostic(parser_refitter, index, &parser_error, "ONNX parser refitter local function stack entry query");
     if (status != JYPPX_STATUS_OK)
@@ -554,7 +554,7 @@ JYPPX_StatusCode JYPPX_TRT_PARSER_REFITTER_API(error_get_local_function_stack_en
 
 JYPPX_StatusCode JYPPX_TRT_PARSER_REFITTER_API(clear_errors)(JYPPX_TensorRtOnnxParserRefitter* parser_refitter)
 {
-#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNXPARSER
+#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNXPARSER && JYPPX_TENSORRT_VERSION_MAJOR_NUM >= 10
     nvonnxparser::IParserRefitter* payload = nullptr;
     auto status = get_parser_refitter_payload(parser_refitter, &payload, "ONNX parser refitter error clear");
     if (status != JYPPX_STATUS_OK)
@@ -595,7 +595,7 @@ JYPPX_StatusCode JYPPX_TRT_PARSER_REFITTER_API(refit_from_bytes)(
 
     *out_refitted = JYPPX_FALSE;
 
-#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNXPARSER
+#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNXPARSER && JYPPX_TENSORRT_VERSION_MAJOR_NUM >= 10
     nvonnxparser::IParserRefitter* payload = nullptr;
     status = get_parser_refitter_payload(parser_refitter, &payload, "ONNX parser refitter refit from bytes");
     if (status != JYPPX_STATUS_OK)
@@ -647,7 +647,7 @@ JYPPX_StatusCode JYPPX_TRT_PARSER_REFITTER_API(refit_from_file)(
 
     *out_refitted = JYPPX_FALSE;
 
-#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNXPARSER
+#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNXPARSER && JYPPX_TENSORRT_VERSION_MAJOR_NUM >= 10
     nvonnxparser::IParserRefitter* payload = nullptr;
     status = get_parser_refitter_payload(parser_refitter, &payload, "ONNX parser refitter refit from file");
     if (status != JYPPX_STATUS_OK)
@@ -700,7 +700,7 @@ JYPPX_StatusCode JYPPX_TRT_PARSER_REFITTER_API(load_model_proto)(
 
     *out_loaded = JYPPX_FALSE;
 
-#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNXPARSER
+#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNXPARSER && JYPPX_TENSORRT_VERSION_MAJOR_NUM >= 10
     nvonnxparser::IParserRefitter* payload = nullptr;
     status = get_parser_refitter_payload(parser_refitter, &payload, "ONNX parser refitter model proto load");
     if (status != JYPPX_STATUS_OK)
@@ -760,7 +760,7 @@ JYPPX_StatusCode JYPPX_TRT_PARSER_REFITTER_API(load_initializer)(
 
     *out_loaded = JYPPX_FALSE;
 
-#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNXPARSER
+#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNXPARSER && JYPPX_TENSORRT_VERSION_MAJOR_NUM >= 10
     nvonnxparser::IParserRefitter* payload = nullptr;
     status = get_parser_refitter_payload(parser_refitter, &payload, "ONNX parser refitter initializer load");
     if (status != JYPPX_STATUS_OK)
@@ -803,7 +803,7 @@ JYPPX_StatusCode JYPPX_TRT_PARSER_REFITTER_API(refit_model_proto)(
 
     *out_refitted = JYPPX_FALSE;
 
-#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNXPARSER
+#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNXPARSER && JYPPX_TENSORRT_VERSION_MAJOR_NUM >= 10
     nvonnxparser::IParserRefitter* payload = nullptr;
     status = get_parser_refitter_payload(parser_refitter, &payload, "ONNX parser refitter model proto refit");
     if (status != JYPPX_STATUS_OK)

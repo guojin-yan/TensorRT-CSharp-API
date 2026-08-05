@@ -53,6 +53,7 @@ public sealed class ParserRefitterBoundaryTests
 
         Assert.Contains("nvonnxparser::createParserRefitter", nativeSource);
         Assert.Contains("JYPPX_TENSORRT_OBJECT_KIND_ONNX_PARSER_REFITTER", nativeSource);
+        Assert.Contains("JYPPX_HAS_TENSORRT_ONNXPARSER && JYPPX_TENSORRT_VERSION_MAJOR_NUM >= 10", nativeSource);
         Assert.Contains("copy_string_to_buffer", nativeSource);
         Assert.Contains("JYPPX_TensorRtParserErrorInfo", nativeSource);
         Assert.Contains("fill_parser_refitter_error(parser_error, index, out_error);", nativeSource);
