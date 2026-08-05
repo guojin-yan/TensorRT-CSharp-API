@@ -146,6 +146,7 @@ $commands = @(
     "-f", "runtime_delivery_mode=split",
     "-f", "split_package_roles=bridge",
     "-f", "include_meta_package=false",
+    "-f", "publish_to_nuget=false",
     "-f", "publish_to_github_packages=false",
     "-f", "attach_to_github_release=false"
   )
@@ -155,6 +156,7 @@ $commands = @(
     "-f", "runtime_delivery_mode=split",
     "-f", "split_package_roles=bridge",
     "-f", "include_meta_package=false",
+    "-f", "publish_to_nuget=false",
     "-f", "publish_to_github_packages=false",
     "-f", "attach_to_github_release=false"
   )
@@ -165,6 +167,7 @@ $commands = @(
     "-f", "runtime_delivery_mode=split",
     "-f", "split_package_roles=bridge",
     "-f", "include_meta_package=false",
+    "-f", "publish_to_nuget=false",
     "-f", "publish_to_github_packages=false",
     "-f", "attach_to_github_release=false"
   )

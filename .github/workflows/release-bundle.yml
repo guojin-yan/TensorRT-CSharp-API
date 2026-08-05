@@ -113,6 +113,11 @@ on:
         required: false
         default: false
         type: boolean
+      publish_runtime_to_nuget:
+        description: Publish project-owned bridge packages to nuget.org
+        required: false
+        default: false
+        type: boolean
       attach_runtime_to_github_release:
         description: Upload the core managed, source, and project-owned Bridge artifacts to GitHub Release
         required: false
@@ -162,6 +167,7 @@ jobs:
       PUBLISH_MANAGED_TO_NUGET: ${{ inputs.publish_managed_to_nuget }}
       PUBLISH_MANAGED_TO_GITHUB_PACKAGES: ${{ inputs.publish_managed_to_github_packages }}
       PUBLISH_RUNTIME_TO_GITHUB_PACKAGES: ${{ inputs.publish_runtime_to_github_packages }}
+      PUBLISH_RUNTIME_TO_NUGET: ${{ inputs.publish_runtime_to_nuget }}
       ATTACH_RUNTIME_TO_GITHUB_RELEASE: ${{ inputs.attach_runtime_to_github_release }}
       RELEASE_CONFIG_JSON: ${{ inputs.release_config_json }}
       RELEASE_TAG: v${{ inputs.version }}
@@ -440,6 +446,7 @@ jobs:
               -f "run_smoke=$RUN_WINDOWS_SMOKE" \
               -f "sign_consumer_output=$SIGN_WINDOWS_CONSUMER_OUTPUT" \
               -f "publish_to_github_packages=$PUBLISH_RUNTIME_TO_GITHUB_PACKAGES" \
+              -f "publish_to_nuget=$PUBLISH_RUNTIME_TO_NUGET" \
               -f "release_tag=$RELEASE_TAG" \
               -f "attach_to_github_release=$ATTACH_RUNTIME_TO_GITHUB_RELEASE"
           fi
@@ -467,6 +474,7 @@ jobs:
               -f "skip_consumer_validation=$LINUX_SKIP_CONSUMER_VALIDATION" \
               -f "run_smoke=$RUN_LINUX_SMOKE" \
               -f "publish_to_github_packages=$PUBLISH_RUNTIME_TO_GITHUB_PACKAGES" \
+              -f "publish_to_nuget=$PUBLISH_RUNTIME_TO_NUGET" \
               -f "release_tag=$RELEASE_TAG" \
               -f "attach_to_github_release=$ATTACH_RUNTIME_TO_GITHUB_RELEASE"
           fi
@@ -494,6 +502,7 @@ jobs:
               -f "skip_consumer_validation=$LINUX_SKIP_CONSUMER_VALIDATION" \
               -f "run_smoke=$RUN_LINUX_SMOKE" \
               -f "publish_to_github_packages=$PUBLISH_RUNTIME_TO_GITHUB_PACKAGES" \
+              -f "publish_to_nuget=$PUBLISH_RUNTIME_TO_NUGET" \
               -f "release_tag=$RELEASE_TAG" \
               -f "attach_to_github_release=$ATTACH_RUNTIME_TO_GITHUB_RELEASE"
           fi

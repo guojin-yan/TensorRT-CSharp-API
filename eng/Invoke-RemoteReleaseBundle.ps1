@@ -55,6 +55,7 @@ param(
   [object]$PublishManagedToNuGet = $false,
   [object]$PublishManagedToGitHubPackages = $false,
   [object]$PublishRuntimeToGitHubPackages = $false,
+  [object]$PublishRuntimeToNuGet = $false,
   [object]$AttachRuntimeToGitHubRelease = $false,
   [switch]$DryRun
 )
@@ -232,11 +233,13 @@ $runLinuxSmokeValue = ConvertFrom-BooleanInput -Value $RunLinuxSmoke -DefaultVal
 $publishManagedToNuGetValue = ConvertFrom-BooleanInput -Value $PublishManagedToNuGet -DefaultValue $false
 $publishManagedToGitHubPackagesValue = ConvertFrom-BooleanInput -Value $PublishManagedToGitHubPackages -DefaultValue $false
 $publishRuntimeToGitHubPackagesValue = ConvertFrom-BooleanInput -Value $PublishRuntimeToGitHubPackages -DefaultValue $false
+$publishRuntimeToNuGetValue = ConvertFrom-BooleanInput -Value $PublishRuntimeToNuGet -DefaultValue $false
 $attachRuntimeToGitHubReleaseValue = ConvertFrom-BooleanInput -Value $AttachRuntimeToGitHubRelease -DefaultValue $false
 $hasPublicationSideEffect = $runDocsReleaseValue -or
   $publishManagedToNuGetValue -or
   $publishManagedToGitHubPackagesValue -or
   $publishRuntimeToGitHubPackagesValue -or
+  $publishRuntimeToNuGetValue -or
   $attachRuntimeToGitHubReleaseValue
 if ($hasPublicationSideEffect -and -not $ownerPublishApprovedValue) {
   throw "Remote release publication side effects require -OwnerPublishApproved true."
@@ -301,6 +304,7 @@ Add-WorkflowInput -ArgumentList $arguments -Name "run_linux_smoke" -Value (Conve
 Add-WorkflowInput -ArgumentList $arguments -Name "publish_managed_to_nuget" -Value (ConvertTo-WorkflowBoolean -Value $publishManagedToNuGetValue)
 Add-WorkflowInput -ArgumentList $arguments -Name "publish_managed_to_github_packages" -Value (ConvertTo-WorkflowBoolean -Value $publishManagedToGitHubPackagesValue)
 Add-WorkflowInput -ArgumentList $arguments -Name "publish_runtime_to_github_packages" -Value (ConvertTo-WorkflowBoolean -Value $publishRuntimeToGitHubPackagesValue)
+Add-WorkflowInput -ArgumentList $arguments -Name "publish_runtime_to_nuget" -Value (ConvertTo-WorkflowBoolean -Value $publishRuntimeToNuGetValue)
 Add-WorkflowInput -ArgumentList $arguments -Name "attach_runtime_to_github_release" -Value (ConvertTo-WorkflowBoolean -Value $attachRuntimeToGitHubReleaseValue)
 Add-WorkflowInput -ArgumentList $arguments -Name "release_config_json" -Value $releaseConfigJson
 

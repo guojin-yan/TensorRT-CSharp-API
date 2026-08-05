@@ -34,6 +34,9 @@ public sealed class ReleaseAutomationTests
         Assert.Contains("runtime_key_set", runtimeLinux, StringComparison.Ordinal);
         Assert.Contains("runner_mode", runtimeLinux, StringComparison.Ordinal);
         Assert.Contains("fromJson(matrix.runsOnJson)", runtimeLinux, StringComparison.Ordinal);
+        Assert.Contains("publish_runtime_to_nuget", releaseBundle, StringComparison.Ordinal);
+        Assert.Contains("publish_to_nuget=$PUBLISH_RUNTIME_TO_NUGET", releaseBundle, StringComparison.Ordinal);
+        Assert.Contains("inputs.publish_to_github_packages }}' -ne 'true' -and '${{ inputs.publish_to_nuget }}' -ne 'true'", runtimeWindows, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -59,6 +62,10 @@ public sealed class ReleaseAutomationTests
         {
             Assert.Contains("Test first release core package contracts", workflow, StringComparison.Ordinal);
             Assert.Contains("--no-build --filter", workflow, StringComparison.Ordinal);
+            Assert.Contains("publish_to_nuget", workflow, StringComparison.Ordinal);
+            Assert.Contains("Publish", workflow, StringComparison.Ordinal);
+            Assert.Contains("api.nuget.org/v3/index.json", workflow, StringComparison.Ordinal);
+            Assert.Contains("Push-NuGetPackages.ps1", workflow, StringComparison.Ordinal);
             Assert.DoesNotContain("--no-build\n", workflow.Replace("\r\n", "\n", StringComparison.Ordinal), StringComparison.Ordinal);
             foreach (string testClass in requiredTestClasses)
             {
@@ -82,6 +89,10 @@ public sealed class ReleaseAutomationTests
         Assert.DoesNotContain("windows_cuda_cudnn_package_version", chinese, StringComparison.Ordinal);
         Assert.DoesNotContain("windows_tensorrt_package_version", chinese, StringComparison.Ordinal);
         Assert.Contains("-WindowsRuntimeKeys <runtime-key>", samples, StringComparison.Ordinal);
+        Assert.Contains("img.shields.io/nuget/vpre/JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge.svg?label=version", english, StringComparison.Ordinal);
+        Assert.Contains("img.shields.io/nuget/vpre/JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge.svg?label=version", chinese, StringComparison.Ordinal);
+        Assert.Contains("NuGet.org", english, StringComparison.Ordinal);
+        Assert.Contains("NuGet.org", chinese, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -137,9 +148,11 @@ public sealed class ReleaseAutomationTests
         string chineseGate = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "articles", "zh-cn", "release-candidate-gate.md"));
         string summaryScript = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "eng", "Export-ReleaseGateSummary.ps1"));
 
-        Assert.Contains("push permission for `JYPPX.TensorRT.CSharp.API` only", englishReadme, StringComparison.Ordinal);
+        Assert.Contains("core package permission plus package-scoped push permission", englishReadme, StringComparison.Ordinal);
+        Assert.Contains("each project-owned `.Bridge` ID", englishReadme, StringComparison.Ordinal);
         Assert.Contains("nuget.org `403`", englishReadme, StringComparison.Ordinal);
-        Assert.Contains("只需要核心 package ID", chineseReadme, StringComparison.Ordinal);
+        Assert.Contains("`.Bridge` ID", chineseReadme, StringComparison.Ordinal);
+        Assert.Contains("JYPPX.TensorRT.CSharp.API.YoloVision", chineseReadme, StringComparison.Ordinal);
         Assert.Contains("严禁上传", chineseReadme, StringComparison.Ordinal);
         Assert.Contains("nuget.org `403`", chineseReadme, StringComparison.Ordinal);
         Assert.Contains("push permission for the managed package ID", englishGate, StringComparison.Ordinal);
@@ -284,13 +297,19 @@ public sealed class ReleaseAutomationTests
     {
         ProcessStartInfo startInfo = new()
         {
-            FileName = "pwsh",
+            FileName = OperatingSystem.IsWindows() ? "powershell.exe" : "pwsh",
             WorkingDirectory = RepositoryPaths.Root,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
         };
 
         startInfo.ArgumentList.Add("-NoProfile");
+        if (OperatingSystem.IsWindows())
+        {
+            startInfo.ArgumentList.Add("-ExecutionPolicy");
+            startInfo.ArgumentList.Add("Bypass");
+        }
+
         startInfo.ArgumentList.Add("-File");
         startInfo.ArgumentList.Add(scriptPath);
 
