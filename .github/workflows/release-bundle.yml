@@ -29,7 +29,7 @@ on:
         default: ""
         type: string
       run_windows_runtime_packaging:
-        description: Build and publish Windows runtime packages
+        description: Build the six Windows project-owned Bridge packages
         required: false
         default: false
         type: boolean
@@ -44,7 +44,7 @@ on:
         default: "bridge"
         type: string
       run_linux_runtime_packaging:
-        description: Build and publish hosted Linux runtime packages
+        description: Build the nine hosted Ubuntu 22.04/24.04 project-owned Bridge packages
         required: false
         default: false
         type: boolean
@@ -79,7 +79,7 @@ on:
         default: ""
         type: string
       run_linux_ubuntu20_runtime_packaging:
-        description: Build and publish Ubuntu 20.04 Linux runtime packages through a hosted container lane
+        description: Build the three Ubuntu 20.04 project-owned Bridge packages through a hosted container lane
         required: false
         default: false
         type: boolean
@@ -99,12 +99,12 @@ on:
         default: false
         type: boolean
       publish_managed_to_nuget:
-        description: Publish the managed API and YoloVision packages to nuget.org
+        description: Publish only the core managed API package to nuget.org
         required: false
         default: false
         type: boolean
       publish_managed_to_github_packages:
-        description: Publish the managed API and YoloVision packages to GitHub Packages
+        description: Publish only the core managed API package to GitHub Packages
         required: false
         default: false
         type: boolean
@@ -114,7 +114,7 @@ on:
         default: false
         type: boolean
       attach_runtime_to_github_release:
-        description: Upload package artifacts as GitHub Release assets
+        description: Upload the core managed, source, and project-owned Bridge artifacts to GitHub Release
         required: false
         default: false
         type: boolean

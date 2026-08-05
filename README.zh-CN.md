@@ -57,7 +57,7 @@ CUDA、cuDNN、TensorRT 和 NVRTC 由使用者自行安装。仓库不重新分�
 dotnet new console -n TrtQuickstart
 cd TrtQuickstart
 dotnet add package JYPPX.TensorRT.CSharp.API --version 4.0.0-preview.1
-dotnet add package JYPPX.TensorRT.CSharp.API.Bridge.win-x64-trt10.11-cuda12.9-cudnn9.22 --version 4.0.0-preview.1
+dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --version 4.0.0-preview.1
 ~~~
 
 程序创建 runtime、加载 engine、绑定输入输出并执行推理。bridge 包不包含 CUDA、cuDNN 或 TensorRT。请先阅读 [推理绑定教程](docs/articles/zh-cn/inference-bindings-tutorial.md) 和 [Windows 安装排错](docs/articles/zh-cn/windows-installation-and-troubleshooting-guide.md)。
@@ -81,8 +81,8 @@ dotnet add package JYPPX.TensorRT.CSharp.API.Bridge.win-x64-trt10.11-cuda12.9-cu
 
 | 发布渠道 | 链接 | 资产 |
 | --- | --- | --- |
-| GitHub Release | [TensorRtSharp4.0 Releases](https://github.com/guojin-yan/TensorRT-CSharp-API/releases) | 源码压缩包和核心托管 <code>.nupkg</code> 包 |
-| GitHub Packages | [NuGet 包源](https://github.com/users/guojin-yan/packages?repo_name=TensorRT-CSharp-API) | 核心托管包以及明确批准的项目自有桥接包 |
+| GitHub Release | [TensorRtSharp4.0 Releases](https://github.com/guojin-yan/TensorRT-CSharp-API/releases) | 源码压缩包、核心托管 <code>.nupkg</code> 和项目自有 Bridge <code>.nupkg</code> 包 |
+| GitHub Packages | [NuGet 包源](https://github.com/users/guojin-yan/packages?repo_name=TensorRT-CSharp-API) | 核心托管包以及已发布的项目自有 Bridge 矩阵 |
 
 ### Bridge 包矩阵
 
@@ -96,6 +96,18 @@ dotnet add package JYPPX.TensorRT.CSharp.API.Bridge.win-x64-trt10.11-cuda12.9-cu
 | `JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge` | `win-x64-trt10.11-cuda12.9-cudnn9.22` | 12.9 | 9.22 | 10.11 | local-validated |
 | `JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda12.9.cudnn9.22.Bridge` | `win-x64-trt11.0-cuda12.9-cudnn9.22` | 12.9 | 9.22 | 11.0 | local-validated |
 | `JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt11.0.cuda13.2.cudnn9.22.Bridge` | `win-x64-trt11.0-cuda13.2-cudnn9.22` | 13.2 | 9.22 | 11.0 | pending local validation |
+| `JYPPX.TensorRT.CSharp.API.Runtime.linux-x64.ubuntu20.04.trt8.6.cuda11.8.cudnn8.9.Bridge` | `linux-x64-ubuntu20.04-trt8.6-cuda11.8-cudnn8.9` | 11.8 | 8.9 | 8.6 | dry-run-only |
+| `JYPPX.TensorRT.CSharp.API.Runtime.linux-x64.ubuntu20.04.trt8.6.cuda12.1.cudnn8.9.Bridge` | `linux-x64-ubuntu20.04-trt8.6-cuda12.1-cudnn8.9` | 12.1 | 8.9 | 8.6 | dry-run-only |
+| `JYPPX.TensorRT.CSharp.API.Runtime.linux-x64.ubuntu20.04.trt10.11.cuda11.8.cudnn8.9.Bridge` | `linux-x64-ubuntu20.04-trt10.11-cuda11.8-cudnn8.9` | 11.8 | 8.9 | 10.11 | dry-run-only |
+| `JYPPX.TensorRT.CSharp.API.Runtime.linux-x64.ubuntu22.04.trt8.6.cuda11.8.cudnn8.9.Bridge` | `linux-x64-ubuntu22.04-trt8.6-cuda11.8-cudnn8.9` | 11.8 | 8.9 | 8.6 | dry-run-only |
+| `JYPPX.TensorRT.CSharp.API.Runtime.linux-x64.ubuntu22.04.trt8.6.cuda12.1.cudnn8.9.Bridge` | `linux-x64-ubuntu22.04-trt8.6-cuda12.1-cudnn8.9` | 12.1 | 8.9 | 8.6 | dry-run-only |
+| `JYPPX.TensorRT.CSharp.API.Runtime.linux-x64.ubuntu22.04.trt10.11.cuda11.8.cudnn8.9.Bridge` | `linux-x64-ubuntu22.04-trt10.11-cuda11.8-cudnn8.9` | 11.8 | 8.9 | 10.11 | dry-run-only |
+| `JYPPX.TensorRT.CSharp.API.Runtime.linux-x64.ubuntu22.04.trt10.11.cuda12.9.cudnn9.22.Bridge` | `linux-x64-ubuntu22.04-trt10.11-cuda12.9-cudnn9.22` | 12.9 | 9.22 | 10.11 | dry-run-only |
+| `JYPPX.TensorRT.CSharp.API.Runtime.linux-x64.ubuntu22.04.trt11.0.cuda12.9.cudnn9.22.Bridge` | `linux-x64-ubuntu22.04-trt11.0-cuda12.9-cudnn9.22` | 12.9 | 9.22 | 11.0 | dry-run-only |
+| `JYPPX.TensorRT.CSharp.API.Runtime.linux-x64.ubuntu22.04.trt11.0.cuda13.2.cudnn9.22.Bridge` | `linux-x64-ubuntu22.04-trt11.0-cuda13.2-cudnn9.22` | 13.2 | 9.22 | 11.0 | dry-run-only |
+| `JYPPX.TensorRT.CSharp.API.Runtime.linux-x64.ubuntu24.04.trt10.11.cuda12.9.cudnn9.22.Bridge` | `linux-x64-ubuntu24.04-trt10.11-cuda12.9-cudnn9.22` | 12.9 | 9.22 | 10.11 | dry-run-only |
+| `JYPPX.TensorRT.CSharp.API.Runtime.linux-x64.ubuntu24.04.trt11.0.cuda12.9.cudnn9.22.Bridge` | `linux-x64-ubuntu24.04-trt11.0-cuda12.9-cudnn9.22` | 12.9 | 9.22 | 11.0 | dry-run-only |
+| `JYPPX.TensorRT.CSharp.API.Runtime.linux-x64.ubuntu24.04.trt11.0.cuda13.2.cudnn9.22.Bridge` | `linux-x64-ubuntu24.04-trt11.0-cuda13.2-cudnn9.22` | 13.2 | 9.22 | 11.0 | dry-run-only |
 
 ## 模型获取与 ONNX 转换
 

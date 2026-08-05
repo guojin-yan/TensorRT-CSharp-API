@@ -63,6 +63,46 @@ public sealed class RuntimeManifestTests
     }
 
     [Fact]
+    public void EveryModeledRuntimeHasOneBridgePublicationIdentity()
+    {
+        string runtimeManifestPath = Path.Combine(RepositoryPaths.Root, "pack", "runtime", "runtime-packages.manifest.json");
+        string splitManifestPath = Path.Combine(RepositoryPaths.Root, "pack", "runtime-split", "split-runtime-packages.manifest.json");
+        string englishReadmePath = Path.Combine(RepositoryPaths.Root, "README.md");
+        string chineseReadmePath = Path.Combine(RepositoryPaths.Root, "README.zh-CN.md");
+
+        using JsonDocument runtimeManifest = JsonDocument.Parse(File.ReadAllText(runtimeManifestPath));
+        using JsonDocument splitManifest = JsonDocument.Parse(File.ReadAllText(splitManifestPath));
+
+        Dictionary<string, string> explicitBridgeIds = splitManifest.RootElement.GetProperty("packages")
+            .EnumerateArray()
+            .Where(static package => package.GetProperty("role").GetString() == "bridge")
+            .ToDictionary(
+                static package => package.GetProperty("sourceRuntimeKey").GetString()!,
+                static package => package.GetProperty("packageId").GetString()!,
+                StringComparer.Ordinal);
+
+        string englishReadme = File.ReadAllText(englishReadmePath);
+        string chineseReadme = File.ReadAllText(chineseReadmePath);
+        JsonElement[] modeledPackages = runtimeManifest.RootElement.GetProperty("packages").EnumerateArray().ToArray();
+
+        Assert.Equal(18, modeledPackages.Length);
+        Assert.Equal(6, modeledPackages.Count(static package => package.GetProperty("platform").GetString() == "windows"));
+        Assert.Equal(12, modeledPackages.Count(static package => package.GetProperty("platform").GetString() == "linux"));
+
+        foreach (JsonElement package in modeledPackages)
+        {
+            string sourceRuntimeKey = package.GetProperty("key").GetString()!;
+            string packageId = explicitBridgeIds.TryGetValue(sourceRuntimeKey, out string? explicitBridgeId)
+                ? explicitBridgeId
+                : package.GetProperty("packageId").GetString() + ".Bridge";
+
+            Assert.EndsWith(".Bridge", packageId, StringComparison.Ordinal);
+            Assert.Contains(packageId, englishReadme, StringComparison.Ordinal);
+            Assert.Contains(packageId, chineseReadme, StringComparison.Ordinal);
+        }
+    }
+
+    [Fact]
     public void Ubuntu2204LinuxRuntimeMatrixCoversAllConfiguredDependencyCombinations()
     {
         string path = Path.Combine(RepositoryPaths.Root, "pack", "runtime", "runtime-packages.manifest.json");

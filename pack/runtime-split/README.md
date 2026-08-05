@@ -29,7 +29,9 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Invoke-WindowsBridgePackageM
   -Version 4.0.0
 ```
 
-The matrix runner derives the six Windows bridge combinations from the manifest, creates one report directory per runtime key, checks the exact package allowlist, and rejects any NVIDIA vendor runtime entry. Its output is local candidate evidence only: `IsRuntimeExecutionProof=False`, `IsPackageConsumerRuntimeProof=False`, `CanPublishPublicly=False`, and `PublicationExecuted=False`. Use `-RunDependencyProbe` only for dependency diagnostics; it still does not execute TensorRT inference or publish a package.
+The matrix runner derives the six Windows bridge combinations from the manifest, creates one report directory per runtime key, checks the exact package allowlist, and rejects any NVIDIA vendor runtime entry. The Linux workflow uses the same bridge-only contract for all modeled Linux keys: nine hosted Ubuntu 22.04/24.04 keys (`runtime_key_set=hosted-all`) and three Ubuntu 20.04 container keys (`runtime_key_set=hosted-container-ubuntu20`). A mixed Linux dispatch may pass all twelve keys explicitly with `runner_mode=any`. Its output is local candidate evidence only: `IsRuntimeExecutionProof=False`, `IsPackageConsumerRuntimeProof=False`, `CanPublishPublicly=False`, and `PublicationExecuted=False`. Use `-RunDependencyProbe` only for dependency diagnostics; it still does not execute TensorRT inference or publish a package.
+
+For the first public candidate, the formal `runtime-windows` workflow publishes six `.Bridge.nupkg` files and one mixed `runtime-linux` workflow publishes twelve Linux `.Bridge.nupkg` files. They are uploaded to the GitHub Packages NuGet feed and attached to the matching GitHub Release. No runtime package is pushed to nuget.org, and no CUDA, cuDNN, TensorRT, NVRTC, parser, plugin, or builder-resource library is included.
 
 Validate package contents before any upload:
 
