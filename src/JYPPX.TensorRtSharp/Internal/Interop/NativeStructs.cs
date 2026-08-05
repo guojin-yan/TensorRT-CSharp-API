@@ -293,6 +293,35 @@ internal struct NativeTensorRtGpuAllocatorOwnerInfo
 }
 
 [StructLayout(LayoutKind.Sequential)]
+internal struct NativeTensorRtStreamReaderOwnerInfo
+{
+    public uint Line;
+    public ulong OwnerId;
+    public ulong Length;
+    public ulong Position;
+    public ulong DeserializeAttemptCount;
+    public ulong SuccessfulDeserializeCount;
+    public ulong FailedDeserializeCount;
+    public ulong ReadCount;
+    public ulong SeekCount;
+    public ulong HostReadCount;
+    public ulong DeviceReadCount;
+    public ulong BytesRead;
+    public ulong RequestedBytes;
+    public ulong FailureCount;
+    public ulong InFlightCallbackCount;
+    public ulong MaxInFlightCallbackCount;
+    public int LastStatus;
+    public int LastSeekPosition;
+    public int LastHadCudaStream;
+    public int LastReadToDevice;
+    public int LastOperationSucceeded;
+    public int IsDeserializing;
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 1024)]
+    public byte[] LastDiagnostic;
+}
+
+[StructLayout(LayoutKind.Sequential)]
 internal struct NativeTensorRtRuntimeCreateDiagnosticInfo
 {
     public uint Line;

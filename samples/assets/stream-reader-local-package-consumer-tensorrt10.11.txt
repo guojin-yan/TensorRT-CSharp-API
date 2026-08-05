@@ -1,0 +1,13 @@
+PackageReferenceOnly=True
+ProjectReference=False
+SourceTreeBinary=False
+RuntimeEnvironment TRT=10.11.0 CUDA=12.9 TensorRtAvailable=True CudaAvailable=True
+StreamReaderRuntimeSummary
+  TensorRtLine=10 RuntimePackageKey=win-x64-trt10.11-cuda12.9-cudnn9.22
+  PlanBytes=2692 PlanSha256=e10a5b5cbac5d1a882067cbcfcb4b5d86dd641e60bd4e0fb12313642d8169db7
+  Attempts=2 Success=2 Reads=10 Seeks=10
+  HostReads=6 DeviceReads=0 BytesRead=5368 Failures=0
+  DeferredDispose=True RejectsNewDeserialize=True ReleasedAfterEngine=True
+  TruncatedInput=Passed DeserializeFailed=True Attempts=1 Failures=2
+StreamReaderRealRuntime=Passed TensorRtLine=10 RuntimePackageKey=win-x64-trt10.11-cuda12.9-cudnn9.22 PlanBytes=2692 PlanSha256=e10a5b5cbac5d1a882067cbcfcb4b5d86dd641e60bd4e0fb12313642d8169db7 AttemptCount=2 SuccessfulDeserializeCount=2 FailedDeserializeCount=0 ReadCount=10 SeekCount=10 HostReadCount=6 DeviceReadCount=0 BytesRead=5368 FailureCount=0 InFlightCallbackCount=0 MetadataMatched=True SourceCopied=True Reusable=True LifecycleDisposeDeferred=True LifecycleRejectsNewDeserialize=True LifecycleReleasedAfterEngine=True TruncatedDeserializeFailed=True TruncatedAttemptCount=1 TruncatedFailedCount=1 TruncatedFailureCount=2 Trt8Rejected=True PointerExposed=False RealCallbackRuntime=True LegacyStreamReaderDeferred=True StreamWriterVerified=False
+StreamReaderPackageConsumer Passed=True Mode=StreamReaderRuntimeSmokeOnly

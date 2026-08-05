@@ -1671,6 +1671,7 @@ internal static class GeneratedEntryPointNames
     public const string Trt10RuntimeDeserializeCudaEngineV2Deferred = "jyppx_trt10_runtime_deserialize_cuda_engine_v2_deferred";
     public const string Trt10RuntimeDeserializeEngine = "jyppx_trt10_runtime_deserialize_engine";
     public const string Trt10RuntimeDeserializeHostMemory = "jyppx_trt10_runtime_deserialize_host_memory";
+    public const string Trt10RuntimeDeserializeStreamReaderV2 = "jyppx_trt10_runtime_deserialize_stream_reader_v2";
     public const string Trt10RuntimeGetErrorRecorderVersionedMetadata = "jyppx_trt10_runtime_get_error_recorder_versioned_metadata";
     public const string Trt10RuntimeGetLoggerDeferred = "jyppx_trt10_runtime_get_logger_deferred";
     public const string Trt10RuntimeGetPluginRegistryDeferred = "jyppx_trt10_runtime_get_plugin_registry_deferred";
@@ -1733,6 +1734,8 @@ internal static class GeneratedEntryPointNames
     public const string Trt10StreamReaderGetInterfaceInfoDeferred = "jyppx_trt10_stream_reader_get_interface_info_deferred";
     public const string Trt10StreamReaderReadDeferred = "jyppx_trt10_stream_reader_read_deferred";
     public const string Trt10StreamReaderV2GetInterfaceInfoDeferred = "jyppx_trt10_stream_reader_v2_get_interface_info_deferred";
+    public const string Trt10StreamReaderV2OwnerCreate = "jyppx_trt10_stream_reader_v2_owner_create";
+    public const string Trt10StreamReaderV2OwnerGetInfo = "jyppx_trt10_stream_reader_v2_owner_get_info";
     public const string Trt10StreamReaderV2ReadDeferred = "jyppx_trt10_stream_reader_v2_read_deferred";
     public const string Trt10StreamReaderV2SeekDeferred = "jyppx_trt10_stream_reader_v2_seek_deferred";
     public const string Trt10TensorClearDimensionName = "jyppx_trt10_tensor_clear_dimension_name";
@@ -2917,6 +2920,7 @@ internal static class GeneratedEntryPointNames
     public const string Trt11RuntimeDeserializeCudaEngineV2Deferred = "jyppx_trt11_runtime_deserialize_cuda_engine_v2_deferred";
     public const string Trt11RuntimeDeserializeEngine = "jyppx_trt11_runtime_deserialize_engine";
     public const string Trt11RuntimeDeserializeHostMemory = "jyppx_trt11_runtime_deserialize_host_memory";
+    public const string Trt11RuntimeDeserializeStreamReaderV2 = "jyppx_trt11_runtime_deserialize_stream_reader_v2";
     public const string Trt11RuntimeGetErrorRecorderVersionedMetadata = "jyppx_trt11_runtime_get_error_recorder_versioned_metadata";
     public const string Trt11RuntimeGetLoggerDeferred = "jyppx_trt11_runtime_get_logger_deferred";
     public const string Trt11RuntimeGetPluginRegistryDeferred = "jyppx_trt11_runtime_get_plugin_registry_deferred";
@@ -2974,6 +2978,8 @@ internal static class GeneratedEntryPointNames
     public const string Trt11StreamReaderGetInterfaceInfoDeferred = "jyppx_trt11_stream_reader_get_interface_info_deferred";
     public const string Trt11StreamReaderReadDeferred = "jyppx_trt11_stream_reader_read_deferred";
     public const string Trt11StreamReaderV2GetInterfaceInfoDeferred = "jyppx_trt11_stream_reader_v2_get_interface_info_deferred";
+    public const string Trt11StreamReaderV2OwnerCreate = "jyppx_trt11_stream_reader_v2_owner_create";
+    public const string Trt11StreamReaderV2OwnerGetInfo = "jyppx_trt11_stream_reader_v2_owner_get_info";
     public const string Trt11StreamReaderV2ReadDeferred = "jyppx_trt11_stream_reader_v2_read_deferred";
     public const string Trt11StreamReaderV2SeekDeferred = "jyppx_trt11_stream_reader_v2_seek_deferred";
     public const string Trt11StreamWriterGetInterfaceInfoDeferred = "jyppx_trt11_stream_writer_get_interface_info_deferred";

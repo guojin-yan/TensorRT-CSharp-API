@@ -35,6 +35,7 @@
 | ProgressMonitor 本地两包验证 | `Test-ProgressMonitorLocalPackageConsumer.ps1` | 隔离 managed 与 bridge-only 包，执行真实构建进度、线程安全状态、主动取消和 detach 负例；不发布包 |
 | Profiler 本地两包验证 | `Test-ProfilerLocalPackageConsumer.ps1` | 隔离 managed 与 bridge-only 包，执行即时/延迟 layer timing、异常记录和 detach；不发布包 |
 | Logger 本地两包验证 | `Test-LoggerLocalPackageConsumer.ps1` | 隔离 managed 与 bridge-only 包，执行真实 TensorRT 日志、延迟释放、异常隔离和 detach；不发布包 |
+| IStreamReaderV2 本地两包验证 | `Test-StreamReaderLocalPackageConsumer.ps1` | 隔离 managed 与 bridge-only 包，执行真实 read/seek、顺序复用、延迟释放和截断 plan 负例；不发布包 |
 | 通用 YoloVision 三包验证器 | `Test-YoloVisionLocalPackageConsumer.ps1` | 被各任务专用入口调用；不建议手工拼接参数 |
 | 文章完整性门禁 | `Test-TechnicalArticleCompleteness.ps1` | 检查发布目录中的真实结果、配图、模型获取/转换和边界 |
 

@@ -1,0 +1,121 @@
+{
+  "schemaVersion": 1,
+  "evidenceKind": "local-package-consumer-tensorrt-stream-reader-v2-runtime",
+  "validationState": "passed-local-package-consumer-runtime",
+  "recordedAtLocal": "2026-08-05",
+  "tensorRtLine": 10,
+  "tensorRtVersion": "10.11.0",
+  "cudaToolkitVersion": "12.9",
+  "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+  "gpuDriverVersion": "576.02",
+  "runtimePackageKey": "win-x64-trt10.11-cuda12.9-cudnn9.22",
+  "sample": "StreamReader.PackageConsumer",
+  "mode": "StreamReaderRuntimeSmokeOnly",
+  "model": {
+    "kind": "programmatically-created-identity-network",
+    "description": "The consumer creates a [1,4] FP32 identity network through the TensorRT network API and serializes it only in memory.",
+    "acquisition": "not-applicable",
+    "conversion": "not-applicable",
+    "externalModelRequired": false,
+    "onnxProduced": false,
+    "outerModelsDirectoryUsed": false,
+    "visionResultImageRequired": false
+  },
+  "packages": [
+    {
+      "role": "managed-api",
+      "id": "JYPPX.TensorRT.CSharp.API",
+      "version": "4.0.0",
+      "length": 15507667,
+      "sha256": "68eb64efb30a643e8aaaa547b68906cf9bf5ba165fc911c3a9f1703b203345c0"
+    },
+    {
+      "role": "bridge-only",
+      "id": "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge",
+      "version": "4.0.0",
+      "length": 401870,
+      "sha256": "df3f13e953e073623a6d6a975e2fa31b6d2cb92fc576eabe52214ebd5538e9c7",
+      "nativeEntry": "runtimes/win-x64/native/jyppxtrtbridge.dll",
+      "nativeEntrySha256": "466fdc90b9e069df3648a90b57a63570dce31d9b06715175beb1b1f5757486d7"
+    }
+  ],
+  "isolation": {
+    "workspaceOutsideRepository": true,
+    "packageReferenceOnly": true,
+    "projectReference": false,
+    "hintPath": false,
+    "sourceTreeBinary": false,
+    "developmentBridgePathRemoved": true,
+    "developmentProbingRemoved": true,
+    "consumerBridgeMatchesPackage": true,
+    "vendorRuntimeBinaryCountInPackages": 0,
+    "vendorRuntimeBinaryCountInConsumerOutput": 0,
+    "vendorDependenciesProvidedByHost": true
+  },
+  "positive": {
+    "passed": true,
+    "planBytes": 2692,
+    "planSha256": "e10a5b5cbac5d1a882067cbcfcb4b5d86dd641e60bd4e0fb12313642d8169db7",
+    "deserializeAttemptCount": 2,
+    "successfulDeserializeCount": 2,
+    "failedDeserializeCount": 0,
+    "readCount": 10,
+    "seekCount": 10,
+    "hostReadCount": 6,
+    "deviceReadCount": 0,
+    "bytesRead": 5368,
+    "failureCount": 0,
+    "inFlightCallbackCount": 0,
+    "metadataMatched": true,
+    "sourceCopied": true,
+    "reusable": true,
+    "nativePointerExposed": false,
+    "realCallbackRuntime": true
+  },
+  "deferredDispose": {
+    "passed": true,
+    "disposeDeferred": true,
+    "rejectsNewDeserialize": true,
+    "releasedAfterEngine": true
+  },
+  "truncatedInputNegative": {
+    "passed": true,
+    "deserializeFailed": true,
+    "attemptCount": 1,
+    "failedCount": 1,
+    "failureCount": 2
+  },
+  "versionBoundary": {
+    "tensorRt10Verified": true,
+    "tensorRt11SourceAndManifestReady": true,
+    "tensorRt11RuntimeVerified": false,
+    "tensorRt8Rejected": true,
+    "legacyStreamReaderDeferred": true,
+    "streamWriterVerified": false
+  },
+  "artifacts": {
+    "sampleSource": {
+      "path": "samples/StreamReader.PackageConsumer/Program.cs",
+      "length": 15392,
+      "sha256": "ad2ae8f582bc445525e417cd9749d798628b6a1397334af5ee6e144dfa0c47c8"
+    },
+    "runtimeTranscript": {
+      "path": "samples/assets/stream-reader-local-package-consumer-tensorrt10.11.txt",
+      "length": 1414,
+      "sha256": "537979724feab23c66715554ac4ab2ea8e0488b528614076819773a42f8e2c21"
+    },
+    "runtimeScreenshot": {
+      "path": "docs/images/stream-reader-local-package-consumer-terminal.png",
+      "length": 46927,
+      "sha256": "d4b48b7c8ca0a8c13acee58e366f1b02750a6d034059b5206f7b62145d220352"
+    }
+  },
+  "boundary": {
+    "isLocalPackageConsumerRuntimeEvidence": true,
+    "isPublicPackageConsumerProof": false,
+    "isReleaseProof": false,
+    "isPostPublishProof": false,
+    "performsPublish": false,
+    "statement": "Repository-external local-feed proof for the managed and bridge-only packages. CUDA and TensorRT are host-installed. No package, tag, Release, or model is published."
+  }
+}

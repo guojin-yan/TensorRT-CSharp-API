@@ -82,6 +82,8 @@ const char* kind_to_name(const JYPPX_TensorRtObjectKind kind)
         return "output-allocator-callback-owner";
     case JYPPX_TENSORRT_OBJECT_KIND_GPU_ALLOCATOR_CALLBACK_OWNER:
         return "gpu-allocator-callback-owner";
+    case JYPPX_TENSORRT_OBJECT_KIND_STREAM_READER_CALLBACK_OWNER:
+        return "stream-reader-callback-owner";
     default:
         return "unknown";
     }

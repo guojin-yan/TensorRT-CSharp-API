@@ -11,7 +11,7 @@ readiness marker：`callback-owner-closure-matrix`
 - `TensorRtCallbackOwnerClosureMatrixResult`
 - `TensorRtCallbackOwnerClosureMatrixRow`
 
-该矩阵用于把 callback owner 的真实闭环状态按 family 汇总到一个 pointer-free 结果中。它消费已有的 copied gate / precheck evidence，不调用 TensorRT，不安装 native vtable，不 attach non-null callback owner，不运行 allocator / debug listener / stream callback，也不返回 `IntPtr`、`nint`、native owner pointer、vtable pointer、device pointer、stream pointer 或 borrowed tensor pointer。
+该矩阵用于把 callback owner 的设计门和历史 deferred 状态按 family 汇总到一个 pointer-free 结果中。它消费已有的 copied gate / precheck evidence，不调用 TensorRT，不安装 native vtable，不 attach non-null callback owner，不运行 allocator / debug listener / stream callback，也不返回 `IntPtr`、`nint`、native owner pointer、vtable pointer、device pointer、stream pointer 或 borrowed tensor pointer。各 family 后续捕获的独立 package-consumer runtime evidence 不会自动回写这份旧聚合器，因此必须同时查看对应的真实运行记录。
 
 因此它是 owner 闭环矩阵，not proof。当前必须保持：
 
@@ -31,7 +31,7 @@ readiness marker：`callback-owner-closure-matrix`
 | `GpuAsyncAllocator` | `IGpuAsyncAllocator::allocateAsync/deallocateAsync` | 复用 allocator ledger evidence，但 CUDA stream lifetime 与 async ordering 未闭合。 |
 | `OutputAllocator` | `IOutputAllocator::notifyShape/reallocateOutput` | owner design、detach clear、borrowed pointer blocker 已有 copied gate；non-null attach、native vtable、device pointer ownership、真实 runtime invocation 未完成。 |
 | `DebugListener` | `IDebugListener::processDebugTensor` | native owner / no-copy / no-throw destructor / borrowed pointer blocker 等 gate 已接入矩阵；non-null attach 仍 disabled，package-consumer invocation proof 未完成。 |
-| `StreamReaderWriter` | `IStreamReader::read`、`IStreamReaderV2::read/seek`、`IStreamWriter::write` | 只有 interface-info / owner ledger design gate；managed stream owner、native create/destroy、no-throw read/write/seek vtable、exception mapping 均未完成。 |
+| `StreamReaderWriter` | `IStreamReader::read`、`IStreamReaderV2::read/seek`、`IStreamWriter::write` | `IStreamReaderV2::read/seek` 已有 immutable native owner、no-throw vtable、pointer-free snapshot、borrower ledger 和 TensorRT 10.11 仓库外双包实机证明；legacy `IStreamReader`、`IStreamWriter` 与 TRT11 实机证明仍未完成，所以合并 family 继续 blocked。 |
 
 每行都包含以下闭环列：
 
@@ -51,7 +51,7 @@ readiness marker：`callback-owner-closure-matrix`
 - `PackageConsumerRuntimeProofRequired`
 - `PackageConsumerRuntimeProofReady`
 
-`PackageConsumerRuntimeProofRequired=True` 只是说明提升真实 callback runtime proof 前必须有 package-consumer 证据；`PackageConsumerRuntimeProofReady=False` 表示当前还没有捕获到真实 invocation、detach、release、failure/in-flight 归零和公开包消费运行证据。
+`PackageConsumerRuntimeProofRequired=True` 只是说明提升真实 callback runtime proof 前必须有 package-consumer 证据。聚合器中的 `PackageConsumerRuntimeProofReady=False` 是 family 级旧门禁值，不得用它否定后来独立捕获的子接口证据，也不得用单个子接口证据把整个 family 晋级完成。`IStreamReaderV2` 的当前证据入口是 `stream-reader-local-package-consumer-tutorial.md`；该证据仍是本地包结果，不是公开包 proof。
 
 ## Smoke Marker
 
@@ -61,7 +61,7 @@ readiness marker：`callback-owner-closure-matrix`
 CallbackOwnerClosureMatrix=callback-owner-closure-matrix;EvidenceKind=callback-owner-closure-matrix;RuntimeEvidenceKind=closure-matrix;RealCallbackRuntime=False;IsRealCallbackRuntimeProof=False;FamilyCount=5;...
 ```
 
-该 smoke marker 可以帮助下一阶段快速定位 owner family 的缺口，但不能作为真实 TensorRT callback runtime proof，也不能解除这些 direct callback deferred rows：
+该 smoke marker 可以帮助下一阶段快速定位 owner family 的缺口，但不能作为真实 TensorRT callback runtime proof。以下 direct callback deferred rows 作为历史覆盖记录继续保留；保留记录不表示对应接口没有独立的新实现或实机证据：
 
 - `IGpuAllocator::allocate`
 - `IGpuAllocator::free`
@@ -92,4 +92,4 @@ CallbackOwnerClosureMatrix=callback-owner-closure-matrix;EvidenceKind=callback-o
 1. DebugListener：先把 non-null attach 的 enable guard、native vtable install、真实 `processDebugTensor` invocation、detach/release 顺序和 package-consumer proof 串成一个 opt-in 路径。
 2. OutputAllocator：补 native stable owner、no-throw vtable、device pointer ledger、CUDA stream / current memory policy，再做真实 `notifyShape/reallocateOutput` proof。
 3. GpuAllocator / GpuAsyncAllocator：先补 line-specific attach/detach 和 device pointer / stream lifetime ledger，不直接启用分配接管。
-4. StreamReaderWriter：先做 owner create/destroy dry-run 和 no-throw read/seek/write vtable scaffold，不启用真实 stream callback。
+4. StreamReaderWriter：`IStreamReaderV2` 已完成 TensorRT 10.11 owner-safe runtime 与本地双包证明；下一步只处理 TRT11 实机验证，并在能建立真实使用路径后分别评估 legacy `IStreamReader` 和 `IStreamWriter`，不得由 v2 结果外推。

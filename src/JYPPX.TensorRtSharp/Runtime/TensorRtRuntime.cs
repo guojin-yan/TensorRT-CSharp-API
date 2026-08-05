@@ -157,6 +157,42 @@ public sealed partial class TensorRtRuntime : IDisposable
         return Deserialize(copy.ToArray());
     }
 
+    /// <summary>Deserializes an engine through a real native TensorRT IStreamReaderV2 callback owner.</summary>
+    /// <param name="streamReader">The owner-safe reader retained by the returned engine.</param>
+    /// <returns>A TensorRT engine wrapper.</returns>
+    /// <remarks>
+    /// TensorRT 10 and 11 may request host or device destinations and may seek within the immutable source. The reader
+    /// owner remains alive until the returned engine is disposed, even when the caller requests reader disposal earlier.
+    /// </remarks>
+    public TensorRtEngine Deserialize(TensorRtStreamReader streamReader)
+    {
+        if (streamReader == null)
+        {
+            throw new ArgumentNullException(nameof(streamReader));
+        }
+        if (Line != TensorRtApiLine.TensorRt10 && Line != TensorRtApiLine.TensorRt11)
+        {
+            throw new NotSupportedException("IStreamReaderV2 requires TensorRT 10 or TensorRT 11.");
+        }
+        if (streamReader.Line != Line)
+        {
+            throw new ArgumentException("Stream reader and runtime must use the same TensorRT API line.", nameof(streamReader));
+        }
+
+        streamReader.BeginDeserializeBorrower(Line);
+        try
+        {
+            return DeserializeWithGpuAllocatorLease(
+                () => NativeBridgeApi.DeserializeEngineFromStreamReaderV2(Line, _handle, streamReader.NativeHandle),
+                streamReader);
+        }
+        finally
+        {
+            GC.KeepAlive(streamReader);
+            streamReader.EndDeserializeBorrower();
+        }
+    }
+
     /// <summary>
     /// Deserializes an engine from a serialized engine file.
     /// 从序列化 engine 文件中反序列化一个 engine。

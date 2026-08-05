@@ -2949,6 +2949,9 @@ internal static partial class GeneratedTensorRtManifestNativeMethods
     internal static extern BridgeStatusCode jyppx_trt10_runtime_deserialize_host_memory(SafeTensorRtObjectHandle runtime, SafeTensorRtObjectHandle host_memory, out SafeTensorRtObjectHandle out_engine);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt10_runtime_deserialize_stream_reader_v2(SafeTensorRtObjectHandle runtime, SafeTensorRtObjectHandle owner, out SafeTensorRtObjectHandle out_engine);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt10_runtime_get_error_recorder_versioned_metadata(SafeTensorRtObjectHandle runtime, byte[] output_buffer, UIntPtr output_buffer_size, out UIntPtr out_required_size, out int out_major, out int out_minor, out int out_api_language);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
@@ -3133,6 +3136,12 @@ internal static partial class GeneratedTensorRtManifestNativeMethods
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt10_stream_reader_v2_get_interface_info_deferred();
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt10_stream_reader_v2_owner_create(IntPtr data, UIntPtr size, out SafeTensorRtObjectHandle out_owner);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt10_stream_reader_v2_owner_get_info(SafeTensorRtObjectHandle owner, out NativeTensorRtStreamReaderOwnerInfo out_info);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt10_stream_reader_v2_read_deferred();
@@ -6687,6 +6696,9 @@ internal static partial class GeneratedTensorRtManifestNativeMethods
     internal static extern BridgeStatusCode jyppx_trt11_runtime_deserialize_host_memory(SafeTensorRtObjectHandle runtime, SafeTensorRtObjectHandle host_memory, out SafeTensorRtObjectHandle out_engine);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt11_runtime_deserialize_stream_reader_v2(SafeTensorRtObjectHandle runtime, SafeTensorRtObjectHandle owner, out SafeTensorRtObjectHandle out_engine);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt11_runtime_get_error_recorder_versioned_metadata(SafeTensorRtObjectHandle runtime, byte[] output_buffer, UIntPtr output_buffer_size, out UIntPtr out_required_size, out int out_major, out int out_minor, out int out_api_language);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
@@ -6856,6 +6868,12 @@ internal static partial class GeneratedTensorRtManifestNativeMethods
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt11_stream_reader_v2_get_interface_info_deferred();
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt11_stream_reader_v2_owner_create(IntPtr data, UIntPtr size, out SafeTensorRtObjectHandle out_owner);
+
+    [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern BridgeStatusCode jyppx_trt11_stream_reader_v2_owner_get_info(SafeTensorRtObjectHandle owner, out NativeTensorRtStreamReaderOwnerInfo out_info);
 
     [DllImport(BridgeConstants.NativeBridgeLibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern BridgeStatusCode jyppx_trt11_stream_reader_v2_read_deferred();

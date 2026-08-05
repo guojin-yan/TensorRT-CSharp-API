@@ -44,7 +44,8 @@ typedef enum JYPPX_TensorRtObjectKind
     JYPPX_TENSORRT_OBJECT_KIND_ONNX_CONFIG = 25,
     JYPPX_TENSORRT_OBJECT_KIND_DEBUG_LISTENER_CALLBACK_OWNER = 26,
     JYPPX_TENSORRT_OBJECT_KIND_OUTPUT_ALLOCATOR_CALLBACK_OWNER = 27,
-    JYPPX_TENSORRT_OBJECT_KIND_GPU_ALLOCATOR_CALLBACK_OWNER = 28
+    JYPPX_TENSORRT_OBJECT_KIND_GPU_ALLOCATOR_CALLBACK_OWNER = 28,
+    JYPPX_TENSORRT_OBJECT_KIND_STREAM_READER_CALLBACK_OWNER = 29
 } JYPPX_TensorRtObjectKind;
 
 typedef enum JYPPX_TensorRtProgressMonitorEventKind
@@ -88,6 +89,7 @@ typedef JYPPX_TensorRtObjectBase JYPPX_TensorRtProfiler;
 typedef JYPPX_TensorRtObjectBase JYPPX_TensorRtOnnxParserRefitter;
 typedef JYPPX_TensorRtObjectBase JYPPX_TensorRtAllocatorOwner;
 typedef JYPPX_TensorRtObjectBase JYPPX_TensorRtOnnxConfig;
+typedef JYPPX_TensorRtObjectBase JYPPX_TensorRtStreamReaderOwner;
 typedef JYPPX_TensorRtObjectBase JYPPX_TensorRtDebugListenerOwner;
 typedef JYPPX_TensorRtObjectBase JYPPX_TensorRtOutputAllocatorOwner;
 typedef JYPPX_TensorRtObjectBase JYPPX_TensorRtGpuAllocatorOwner;
@@ -385,6 +387,33 @@ typedef struct JYPPX_TensorRtGpuAllocatorOwnerInfo
     JYPPX_Boolean last_had_stream;
     char last_diagnostic[1024];
 } JYPPX_TensorRtGpuAllocatorOwnerInfo;
+
+typedef struct JYPPX_TensorRtStreamReaderOwnerInfo
+{
+    uint32_t line;
+    uint64_t owner_id;
+    uint64_t length;
+    uint64_t position;
+    uint64_t deserialize_attempt_count;
+    uint64_t successful_deserialize_count;
+    uint64_t failed_deserialize_count;
+    uint64_t read_count;
+    uint64_t seek_count;
+    uint64_t host_read_count;
+    uint64_t device_read_count;
+    uint64_t bytes_read;
+    uint64_t requested_bytes;
+    uint64_t failure_count;
+    uint64_t in_flight_callback_count;
+    uint64_t max_in_flight_callback_count;
+    int32_t last_status;
+    int32_t last_seek_position;
+    JYPPX_Boolean last_had_cuda_stream;
+    JYPPX_Boolean last_read_to_device;
+    JYPPX_Boolean last_operation_succeeded;
+    JYPPX_Boolean is_deserializing;
+    char last_diagnostic[1024];
+} JYPPX_TensorRtStreamReaderOwnerInfo;
 
 typedef struct JYPPX_TensorRtRuntimeCreateDiagnosticInfo
 {

@@ -8379,6 +8379,12 @@ JYPPX_StatusCode jyppx_trt11_tensor_reset_dynamic_range(JYPPX_TensorRtTensor*)
 #include "../common/gpu_allocator_callback_owner.inc"
 #undef JYPPX_TRT_GPU_ALLOCATOR_OWNER_API
 
+#define JYPPX_TRT_STREAM_READER_OWNER_API(name) jyppx_trt11_##name
+#define JYPPX_TRT_STREAM_READER_EXPECTED_MAJOR 11
+#include "../common/stream_reader_callback_owner.inc"
+#undef JYPPX_TRT_STREAM_READER_EXPECTED_MAJOR
+#undef JYPPX_TRT_STREAM_READER_OWNER_API
+
 #define jyppx_trt10_network_add_convolution_nd jyppx_trt11_network_add_convolution_nd
 #define jyppx_trt10_network_add_scale_nd jyppx_trt11_network_add_scale_nd
 #define jyppx_trt10_network_add_padding_nd jyppx_trt11_network_add_padding_nd

@@ -4999,6 +4999,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt10_runtime_deserialize_engine(JYPPX_Tenso
 // generated from manifest id=trt10-runtime-deserialize-host-memory
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_runtime_deserialize_host_memory(JYPPX_TensorRtRuntime* runtime, JYPPX_TensorRtHostMemory* host_memory, JYPPX_TensorRtCudaEngine** out_engine);
 
+// generated from manifest id=trt10-runtime-deserialize-stream-reader-v2
+JYPPX_C_API(BridgeStatusCode) jyppx_trt10_runtime_deserialize_stream_reader_v2(JYPPX_TensorRtRuntime* runtime, JYPPX_TensorRtStreamReaderOwner* owner, JYPPX_TensorRtCudaEngine** out_engine);
+
 // generated from manifest id=trt10-runtime-get-error-recorder-versioned-metadata
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_runtime_get_error_recorder_versioned_metadata(JYPPX_TensorRtRuntime* runtime, char* output_buffer, size_t output_buffer_size, size_t* out_required_size, int32_t* out_major, int32_t* out_minor, int32_t* out_api_language);
 
@@ -5184,6 +5187,12 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt10_stream_reader_read_deferred(void);
 
 // generated from manifest id=trt10-stream-reader-v2-get-interface-info-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_stream_reader_v2_get_interface_info_deferred(void);
+
+// generated from manifest id=trt10-stream-reader-v2-owner-create
+JYPPX_C_API(BridgeStatusCode) jyppx_trt10_stream_reader_v2_owner_create(const void* data, size_t size, JYPPX_TensorRtStreamReaderOwner** out_owner);
+
+// generated from manifest id=trt10-stream-reader-v2-owner-get-info
+JYPPX_C_API(BridgeStatusCode) jyppx_trt10_stream_reader_v2_owner_get_info(JYPPX_TensorRtStreamReaderOwner* owner, JYPPX_TensorRtStreamReaderOwnerInfo* out_info);
 
 // generated from manifest id=trt10-stream-reader-v2-read-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt10_stream_reader_v2_read_deferred(void);
@@ -8737,6 +8746,9 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt11_runtime_deserialize_engine(JYPPX_Tenso
 // generated from manifest id=trt11-runtime-deserialize-host-memory
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_runtime_deserialize_host_memory(JYPPX_TensorRtRuntime* runtime, JYPPX_TensorRtHostMemory* host_memory, JYPPX_TensorRtCudaEngine** out_engine);
 
+// generated from manifest id=trt11-runtime-deserialize-stream-reader-v2
+JYPPX_C_API(BridgeStatusCode) jyppx_trt11_runtime_deserialize_stream_reader_v2(JYPPX_TensorRtRuntime* runtime, JYPPX_TensorRtStreamReaderOwner* owner, JYPPX_TensorRtCudaEngine** out_engine);
+
 // generated from manifest id=trt11-runtime-get-error-recorder-versioned-metadata
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_runtime_get_error_recorder_versioned_metadata(JYPPX_TensorRtRuntime* runtime, char* output_buffer, size_t output_buffer_size, size_t* out_required_size, int32_t* out_major, int32_t* out_minor, int32_t* out_api_language);
 
@@ -8907,6 +8919,12 @@ JYPPX_C_API(BridgeStatusCode) jyppx_trt11_stream_reader_read_deferred(void);
 
 // generated from manifest id=trt11-stream-reader-v2-get-interface-info-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_stream_reader_v2_get_interface_info_deferred(void);
+
+// generated from manifest id=trt11-stream-reader-v2-owner-create
+JYPPX_C_API(BridgeStatusCode) jyppx_trt11_stream_reader_v2_owner_create(const void* data, size_t size, JYPPX_TensorRtStreamReaderOwner** out_owner);
+
+// generated from manifest id=trt11-stream-reader-v2-owner-get-info
+JYPPX_C_API(BridgeStatusCode) jyppx_trt11_stream_reader_v2_owner_get_info(JYPPX_TensorRtStreamReaderOwner* owner, JYPPX_TensorRtStreamReaderOwnerInfo* out_info);
 
 // generated from manifest id=trt11-stream-reader-v2-read-deferred
 JYPPX_C_API(BridgeStatusCode) jyppx_trt11_stream_reader_v2_read_deferred(void);

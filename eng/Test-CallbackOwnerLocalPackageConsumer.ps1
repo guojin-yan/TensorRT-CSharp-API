@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-  [ValidateSet("GpuAllocator", "OutputAllocator", "DebugListener", "ProgressMonitor", "Profiler", "Logger")][string]$Scenario = "GpuAllocator",
+  [ValidateSet("GpuAllocator", "OutputAllocator", "DebugListener", "ProgressMonitor", "Profiler", "Logger", "StreamReader")][string]$Scenario = "GpuAllocator",
   [string]$RepositoryRoot,
   [string]$OutputRoot,
   [string]$ReportDirectory,
@@ -132,6 +132,23 @@ $scenarioConfig = switch ($Scenario) {
         "CallbackFailureCount",
         "LastCallbackException",
         "IsAttached"
+      )
+    }
+  }
+  "StreamReader" {
+    [pscustomobject][ordered]@{
+      slug = "stream-reader"
+      sampleDirectory = "StreamReader.PackageConsumer"
+      projectFileName = "StreamReaderPackageConsumer.csproj"
+      projectTemplateFileName = "StreamReader.PackageConsumer.csproj.template"
+      runtimeSwitch = "--stream-reader-runtime-smoke-only"
+      runtimeMarkerPrefix = "StreamReaderRealRuntime=Passed "
+      finalMarker = "StreamReaderPackageConsumer Passed=True Mode=StreamReaderRuntimeSmokeOnly"
+      publicSurfaceMarkers = @(
+        "TensorRtStreamReader",
+        "TensorRtStreamReaderRuntimeSnapshot",
+        "TensorRtStreamSeekPosition",
+        "Deserialize(JYPPX.TensorRtSharp.TensorRtStreamReader)"
       )
     }
   }
@@ -858,6 +875,92 @@ switch ($Scenario) {
       "Callbacks=$positiveInvocationCount Severities=$positiveSeverityCount Failures=$positiveFailureCount",
       "BuilderAttached=$builderAttached BuilderDetached=$builderDetached RuntimeAttached=$runtimeAttached RuntimeDetached=$runtimeDetached",
       "DeferredDisposeCallbacks=$lifecyclePostDisposeCallbacks NegativeOperationFailed=$negativeOperationFailed NegativeFailures=$negativeFailureCount"
+    )
+  }
+  "StreamReader" {
+    $planBytes = [uint64](Get-MarkerField -Line $marker -Name "PlanBytes")
+    $planSha256 = Get-MarkerField -Line $marker -Name "PlanSha256"
+    $attemptCount = [uint64](Get-MarkerField -Line $marker -Name "AttemptCount")
+    $successfulDeserializeCount = [uint64](Get-MarkerField -Line $marker -Name "SuccessfulDeserializeCount")
+    $failedDeserializeCount = [uint64](Get-MarkerField -Line $marker -Name "FailedDeserializeCount")
+    $readCount = [uint64](Get-MarkerField -Line $marker -Name "ReadCount")
+    $seekCount = [uint64](Get-MarkerField -Line $marker -Name "SeekCount")
+    $hostReadCount = [uint64](Get-MarkerField -Line $marker -Name "HostReadCount")
+    $deviceReadCount = [uint64](Get-MarkerField -Line $marker -Name "DeviceReadCount")
+    $bytesRead = [uint64](Get-MarkerField -Line $marker -Name "BytesRead")
+    $failureCount = [uint64](Get-MarkerField -Line $marker -Name "FailureCount")
+    $inFlightCallbackCount = [uint64](Get-MarkerField -Line $marker -Name "InFlightCallbackCount")
+    $metadataMatched = [bool]::Parse((Get-MarkerField -Line $marker -Name "MetadataMatched"))
+    $sourceCopied = [bool]::Parse((Get-MarkerField -Line $marker -Name "SourceCopied"))
+    $reusable = [bool]::Parse((Get-MarkerField -Line $marker -Name "Reusable"))
+    $lifecycleDisposeDeferred = [bool]::Parse((Get-MarkerField -Line $marker -Name "LifecycleDisposeDeferred"))
+    $lifecycleRejectsNewDeserialize = [bool]::Parse((Get-MarkerField -Line $marker -Name "LifecycleRejectsNewDeserialize"))
+    $lifecycleReleasedAfterEngine = [bool]::Parse((Get-MarkerField -Line $marker -Name "LifecycleReleasedAfterEngine"))
+    $truncatedDeserializeFailed = [bool]::Parse((Get-MarkerField -Line $marker -Name "TruncatedDeserializeFailed"))
+    $truncatedAttemptCount = [uint64](Get-MarkerField -Line $marker -Name "TruncatedAttemptCount")
+    $truncatedFailedCount = [uint64](Get-MarkerField -Line $marker -Name "TruncatedFailedCount")
+    $truncatedFailureCount = [uint64](Get-MarkerField -Line $marker -Name "TruncatedFailureCount")
+    $trt8Rejected = [bool]::Parse((Get-MarkerField -Line $marker -Name "Trt8Rejected"))
+    $pointerExposed = [bool]::Parse((Get-MarkerField -Line $marker -Name "PointerExposed"))
+    $realCallbackRuntime = [bool]::Parse((Get-MarkerField -Line $marker -Name "RealCallbackRuntime"))
+    $legacyStreamReaderDeferred = [bool]::Parse((Get-MarkerField -Line $marker -Name "LegacyStreamReaderDeferred"))
+    $streamWriterVerified = [bool]::Parse((Get-MarkerField -Line $marker -Name "StreamWriterVerified"))
+    if ($planBytes -eq 0 -or $planSha256 -notmatch '^[0-9a-f]{64}$' -or
+        $attemptCount -ne 2 -or $successfulDeserializeCount -ne 2 -or $failedDeserializeCount -ne 0 -or
+        $readCount -eq 0 -or ($hostReadCount + $deviceReadCount) -eq 0 -or $bytesRead -eq 0 -or
+        $failureCount -ne 0 -or $inFlightCallbackCount -ne 0 -or
+        -not $metadataMatched -or -not $sourceCopied -or -not $reusable -or
+        -not $lifecycleDisposeDeferred -or -not $lifecycleRejectsNewDeserialize -or -not $lifecycleReleasedAfterEngine -or
+        -not $truncatedDeserializeFailed -or $truncatedAttemptCount -ne 1 -or $truncatedFailedCount -ne 1 -or $truncatedFailureCount -eq 0 -or
+        -not $trt8Rejected -or $pointerExposed -or -not $realCallbackRuntime -or
+        -not $legacyStreamReaderDeferred -or $streamWriterVerified) {
+      throw "External stream reader marker did not satisfy real callback, immutable-source, lifecycle, fail-closed, and version-boundary invariants: $marker"
+    }
+
+    $scenarioRuntime = [pscustomobject][ordered]@{
+      passed = $true
+      planBytes = $planBytes
+      planSha256 = $planSha256
+      deserializeAttemptCount = $attemptCount
+      successfulDeserializeCount = $successfulDeserializeCount
+      readCount = $readCount
+      seekCount = $seekCount
+      hostReadCount = $hostReadCount
+      deviceReadCount = $deviceReadCount
+      bytesRead = $bytesRead
+      failureCount = $failureCount
+      inFlightCallbackCount = $inFlightCallbackCount
+      metadataMatched = $metadataMatched
+      sourceCopied = $sourceCopied
+      reusable = $reusable
+      nativePointerExposed = $pointerExposed
+      realCallbackRuntime = $realCallbackRuntime
+    }
+    $scenarioNegatives = [pscustomobject][ordered]@{
+      deferredDispose = [pscustomobject][ordered]@{
+        passed = $true
+        disposeDeferred = $lifecycleDisposeDeferred
+        rejectsNewDeserialize = $lifecycleRejectsNewDeserialize
+        releasedAfterEngine = $lifecycleReleasedAfterEngine
+      }
+      truncatedInput = [pscustomobject][ordered]@{
+        passed = $true
+        deserializeFailed = $truncatedDeserializeFailed
+        attemptCount = $truncatedAttemptCount
+        failedCount = $truncatedFailedCount
+        failureCount = $truncatedFailureCount
+      }
+      versionBoundary = [pscustomobject][ordered]@{
+        passed = $true
+        tensorRt8Rejected = $trt8Rejected
+        legacyStreamReaderDeferred = $legacyStreamReaderDeferred
+        streamWriterVerified = $streamWriterVerified
+      }
+    }
+    $resultSummary = @(
+      "Attempts=$attemptCount Success=$successfulDeserializeCount Reads=$readCount Seeks=$seekCount Bytes=$bytesRead",
+      "HostReads=$hostReadCount DeviceReads=$deviceReadCount Failures=$failureCount InFlight=$inFlightCallbackCount",
+      "DeferredDispose=$lifecycleDisposeDeferred TruncatedFailed=$truncatedDeserializeFailed PointerExposed=$pointerExposed"
     )
   }
 }

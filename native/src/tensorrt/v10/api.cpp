@@ -10661,6 +10661,12 @@ JYPPX_StatusCode jyppx_trt10_resize_layer_set_resize_mode(JYPPX_TensorRtLayer* l
 #include "../common/gpu_allocator_callback_owner.inc"
 #undef JYPPX_TRT_GPU_ALLOCATOR_OWNER_API
 
+#define JYPPX_TRT_STREAM_READER_OWNER_API(name) jyppx_trt10_##name
+#define JYPPX_TRT_STREAM_READER_EXPECTED_MAJOR 10
+#include "../common/stream_reader_callback_owner.inc"
+#undef JYPPX_TRT_STREAM_READER_EXPECTED_MAJOR
+#undef JYPPX_TRT_STREAM_READER_OWNER_API
+
 #include "modules/layers/convolution_scale_padding.inc"
 #include "modules/layers/deconvolution.inc"
 #include "modules/layers/lrn.inc"

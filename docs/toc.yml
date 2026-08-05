@@ -452,6 +452,8 @@
     href: articles/zh-cn/profiler-local-package-consumer-tutorial.md
   - name: Logger Local Package Consumer Tutorial
     href: articles/zh-cn/logger-local-package-consumer-tutorial.md
+  - name: IStreamReaderV2 Local Package Consumer Tutorial
+    href: articles/zh-cn/stream-reader-local-package-consumer-tutorial.md
   - name: DebugListener Callback Proof Gap Report
     href: articles/zh-cn/debug-listener-callback-proof-gap-report.md
   - name: Real Callback Runtime Evidence Schema

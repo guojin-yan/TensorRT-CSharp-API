@@ -211,7 +211,8 @@ public sealed class ManagedSourceModuleLayoutTests
                 "NativeBridgeApi.EngineDeserialization.cs",
                 "NativeBridgeApi.EngineSerialization.cs",
                 "NativeBridgeApi.HostMemoryBuffer.cs",
-                "NativeBridgeApi.HostMemoryMetadata.cs"
+                "NativeBridgeApi.HostMemoryMetadata.cs",
+                "NativeBridgeApi.StreamReaderOwner.cs"
             }
         },
         { "Weights", new[] { "NativeBridgeApi.LayerWeightsInfo.cs" } }

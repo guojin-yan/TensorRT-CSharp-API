@@ -669,6 +669,9 @@ JYPPX_C_API(JYPPX_StatusCode) jyppx_trt10_host_memory_get_size(JYPPX_TensorRtHos
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt10_host_memory_copy_to_buffer(JYPPX_TensorRtHostMemory* host_memory, void* destination, size_t destination_size, size_t* out_bytes_written);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt10_runtime_deserialize_engine(JYPPX_TensorRtRuntime* runtime, const void* engine_data, size_t engine_size, JYPPX_TensorRtCudaEngine** out_engine);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt10_runtime_deserialize_host_memory(JYPPX_TensorRtRuntime* runtime, JYPPX_TensorRtHostMemory* host_memory, JYPPX_TensorRtCudaEngine** out_engine);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt10_stream_reader_v2_owner_create(const void* data, size_t size, JYPPX_TensorRtStreamReaderOwner** out_owner);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt10_stream_reader_v2_owner_get_info(JYPPX_TensorRtStreamReaderOwner* owner, JYPPX_TensorRtStreamReaderOwnerInfo* out_info);
+JYPPX_C_API(JYPPX_StatusCode) jyppx_trt10_runtime_deserialize_stream_reader_v2(JYPPX_TensorRtRuntime* runtime, JYPPX_TensorRtStreamReaderOwner* owner, JYPPX_TensorRtCudaEngine** out_engine);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt10_engine_serialize(JYPPX_TensorRtCudaEngine* engine, JYPPX_TensorRtHostMemory** out_host_memory);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt10_engine_create_serialization_config(JYPPX_TensorRtCudaEngine* engine, JYPPX_TensorRtSerializationConfig** out_config);
 JYPPX_C_API(JYPPX_StatusCode) jyppx_trt10_engine_serialize_with_config(JYPPX_TensorRtCudaEngine* engine, JYPPX_TensorRtSerializationConfig* config, JYPPX_TensorRtHostMemory** out_host_memory);

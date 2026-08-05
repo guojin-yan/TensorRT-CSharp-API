@@ -15,10 +15,11 @@ public sealed partial class TensorRtEngine : IDisposable
 {
     private readonly SafeTensorRtObjectHandle _handle;
     private readonly TensorRtGpuAllocatorCallbackOwner? _gpuAllocatorKeepAlive;
+    private readonly TensorRtStreamReader? _streamReaderKeepAlive;
     private bool _disposed;
 
     internal TensorRtEngine(TensorRtApiLine line, SafeTensorRtObjectHandle handle)
-        : this(line, handle, null)
+        : this(line, handle, null, null)
     {
     }
 
@@ -26,11 +27,30 @@ public sealed partial class TensorRtEngine : IDisposable
         TensorRtApiLine line,
         SafeTensorRtObjectHandle handle,
         TensorRtGpuAllocatorCallbackOwner? gpuAllocatorKeepAlive)
+        : this(line, handle, gpuAllocatorKeepAlive, null)
+    {
+    }
+
+    internal TensorRtEngine(
+        TensorRtApiLine line,
+        SafeTensorRtObjectHandle handle,
+        TensorRtGpuAllocatorCallbackOwner? gpuAllocatorKeepAlive,
+        TensorRtStreamReader? streamReaderKeepAlive)
     {
         Line = line;
         _handle = handle;
         _gpuAllocatorKeepAlive = gpuAllocatorKeepAlive;
+        _streamReaderKeepAlive = streamReaderKeepAlive;
         _gpuAllocatorKeepAlive?.AttachEngineBorrower(line);
+        try
+        {
+            _streamReaderKeepAlive?.RetainEngineBorrower(line);
+        }
+        catch
+        {
+            _gpuAllocatorKeepAlive?.DetachEngineBorrower();
+            throw;
+        }
     }
 
     internal SafeTensorRtObjectHandle Handle => _handle;
@@ -141,7 +161,14 @@ public sealed partial class TensorRtEngine : IDisposable
         }
         finally
         {
-            _gpuAllocatorKeepAlive?.DetachEngineBorrower();
+            try
+            {
+                _streamReaderKeepAlive?.ReleaseEngineBorrower();
+            }
+            finally
+            {
+                _gpuAllocatorKeepAlive?.DetachEngineBorrower();
+            }
         }
         GC.SuppressFinalize(this);
     }

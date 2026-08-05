@@ -8,7 +8,7 @@ namespace JYPPX.ProjectQuality.Tests;
 public sealed class ManagedEngineParserFeatureLayoutTests
 {
     private const string EngineOriginalNormalizedSha256 =
-        "2f96a53b0b3c0f5032b0108d684c8a6377e02d6d59923a24ad74ec953334dab3";
+        "6bf5e8e5cec6c5e164a98cdb3577fb202da2ad1b1dd4dfc400926ba150f552cb";
     private const string ParserOriginalNormalizedSha256 =
         "3bce180397b2eb158c2fe1a6c79d16807d77e9eb3ba0ef8d169247b9a0f7897e";
 

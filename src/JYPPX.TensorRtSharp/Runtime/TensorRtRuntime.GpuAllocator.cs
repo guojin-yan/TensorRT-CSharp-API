@@ -61,13 +61,20 @@ public sealed partial class TensorRtRuntime
 
     private TensorRtEngine DeserializeWithGpuAllocatorLease(Func<SafeTensorRtObjectHandle> deserialize)
     {
+        return DeserializeWithGpuAllocatorLease(deserialize, null);
+    }
+
+    private TensorRtEngine DeserializeWithGpuAllocatorLease(
+        Func<SafeTensorRtObjectHandle> deserialize,
+        TensorRtStreamReader? streamReaderKeepAlive)
+    {
         lock (_gpuAllocatorLeaseLock)
         {
             ThrowIfRuntimeDisposedForGpuAllocator();
             SafeTensorRtObjectHandle engineHandle = deserialize();
             try
             {
-                return new TensorRtEngine(Line, engineHandle, _gpuAllocatorKeepAlive);
+                return new TensorRtEngine(Line, engineHandle, _gpuAllocatorKeepAlive, streamReaderKeepAlive);
             }
             catch
             {

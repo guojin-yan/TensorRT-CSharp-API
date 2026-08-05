@@ -1666,6 +1666,7 @@
 #define JYPPX_API_TRT10_RUNTIME_DESERIALIZE_CUDA_ENGINE_V2_DEFERRED "jyppx_trt10_runtime_deserialize_cuda_engine_v2_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_RUNTIME_DESERIALIZE_ENGINE "jyppx_trt10_runtime_deserialize_engine" // module=tensorrt; line=10; ownership=caller-destroys; manualOverride=false
 #define JYPPX_API_TRT10_RUNTIME_DESERIALIZE_HOST_MEMORY "jyppx_trt10_runtime_deserialize_host_memory" // module=tensorrt; line=10; ownership=caller-destroys; manualOverride=false
+#define JYPPX_API_TRT10_RUNTIME_DESERIALIZE_STREAM_READER_V2 "jyppx_trt10_runtime_deserialize_stream_reader_v2" // module=tensorrt; line=10; ownership=caller-destroys-returned-engine; manualOverride=false
 #define JYPPX_API_TRT10_RUNTIME_GET_ERROR_RECORDER_VERSIONED_METADATA "jyppx_trt10_runtime_get_error_recorder_versioned_metadata" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_RUNTIME_GET_LOGGER_DEFERRED "jyppx_trt10_runtime_get_logger_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_RUNTIME_GET_PLUGIN_REGISTRY_DEFERRED "jyppx_trt10_runtime_get_plugin_registry_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
@@ -1728,6 +1729,8 @@
 #define JYPPX_API_TRT10_STREAM_READER_GET_INTERFACE_INFO_DEFERRED "jyppx_trt10_stream_reader_get_interface_info_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_STREAM_READER_READ_DEFERRED "jyppx_trt10_stream_reader_read_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_STREAM_READER_V2_GET_INTERFACE_INFO_DEFERRED "jyppx_trt10_stream_reader_v2_get_interface_info_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_TRT10_STREAM_READER_V2_OWNER_CREATE "jyppx_trt10_stream_reader_v2_owner_create" // module=tensorrt; line=10; ownership=caller-destroys; manualOverride=false
+#define JYPPX_API_TRT10_STREAM_READER_V2_OWNER_GET_INFO "jyppx_trt10_stream_reader_v2_owner_get_info" // module=tensorrt; line=10; ownership=caller-owned-copied-snapshot; manualOverride=false
 #define JYPPX_API_TRT10_STREAM_READER_V2_READ_DEFERRED "jyppx_trt10_stream_reader_v2_read_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_STREAM_READER_V2_SEEK_DEFERRED "jyppx_trt10_stream_reader_v2_seek_deferred" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT10_TENSOR_CLEAR_DIMENSION_NAME "jyppx_trt10_tensor_clear_dimension_name" // module=tensorrt; line=10; ownership=caller-owned; manualOverride=false
@@ -2912,6 +2915,7 @@
 #define JYPPX_API_TRT11_RUNTIME_DESERIALIZE_CUDA_ENGINE_V2_DEFERRED "jyppx_trt11_runtime_deserialize_cuda_engine_v2_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_RUNTIME_DESERIALIZE_ENGINE "jyppx_trt11_runtime_deserialize_engine" // module=tensorrt; line=11; ownership=caller-destroys; manualOverride=true
 #define JYPPX_API_TRT11_RUNTIME_DESERIALIZE_HOST_MEMORY "jyppx_trt11_runtime_deserialize_host_memory" // module=tensorrt; line=11; ownership=caller-destroys; manualOverride=false
+#define JYPPX_API_TRT11_RUNTIME_DESERIALIZE_STREAM_READER_V2 "jyppx_trt11_runtime_deserialize_stream_reader_v2" // module=tensorrt; line=11; ownership=caller-destroys-returned-engine; manualOverride=false
 #define JYPPX_API_TRT11_RUNTIME_GET_ERROR_RECORDER_VERSIONED_METADATA "jyppx_trt11_runtime_get_error_recorder_versioned_metadata" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_RUNTIME_GET_LOGGER_DEFERRED "jyppx_trt11_runtime_get_logger_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_RUNTIME_GET_PLUGIN_REGISTRY_DEFERRED "jyppx_trt11_runtime_get_plugin_registry_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
@@ -2969,6 +2973,8 @@
 #define JYPPX_API_TRT11_STREAM_READER_GET_INTERFACE_INFO_DEFERRED "jyppx_trt11_stream_reader_get_interface_info_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_STREAM_READER_READ_DEFERRED "jyppx_trt11_stream_reader_read_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_STREAM_READER_V2_GET_INTERFACE_INFO_DEFERRED "jyppx_trt11_stream_reader_v2_get_interface_info_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
+#define JYPPX_API_TRT11_STREAM_READER_V2_OWNER_CREATE "jyppx_trt11_stream_reader_v2_owner_create" // module=tensorrt; line=11; ownership=caller-destroys; manualOverride=false
+#define JYPPX_API_TRT11_STREAM_READER_V2_OWNER_GET_INFO "jyppx_trt11_stream_reader_v2_owner_get_info" // module=tensorrt; line=11; ownership=caller-owned-copied-snapshot; manualOverride=false
 #define JYPPX_API_TRT11_STREAM_READER_V2_READ_DEFERRED "jyppx_trt11_stream_reader_v2_read_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_STREAM_READER_V2_SEEK_DEFERRED "jyppx_trt11_stream_reader_v2_seek_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false
 #define JYPPX_API_TRT11_STREAM_WRITER_GET_INTERFACE_INFO_DEFERRED "jyppx_trt11_stream_writer_get_interface_info_deferred" // module=tensorrt; line=11; ownership=caller-owned; manualOverride=false

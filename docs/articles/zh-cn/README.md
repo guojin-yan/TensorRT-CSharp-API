@@ -57,6 +57,7 @@
 - [用本地 NuGet 包验证 TensorRT IProgressMonitor：真实构建进度与安全取消](progress-monitor-local-package-consumer-tutorial.md)。
 - [用本地 NuGet 包验证 TensorRT IProfiler：即时计时、延迟上报与异常隔离](profiler-local-package-consumer-tutorial.md)。
 - [用本地 NuGet 包验证 TensorRT ILogger：真实日志、生命周期与异常隔离](logger-local-package-consumer-tutorial.md)。
+- [用本地 NuGet 包验证 TensorRT IStreamReaderV2：安全所有权、真实读取与失败闭环](stream-reader-local-package-consumer-tutorial.md)。
 
 模型转换和桌面工具文章需要真实模型构建、程序窗口、报告校验和清楚的 build/runtime 边界；只有声称完成推理的文章才必须提供输出语义校验。未经授权的输入图片不嵌入仓库：
 
