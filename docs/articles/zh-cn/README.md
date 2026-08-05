@@ -8,7 +8,7 @@
 - Owner 输入、候选 proof 和 post-publish 模板；
 - `publishing` 子目录中的文章规划与发布治理材料。
 
-2026-08-05 盘点到 488 个 Markdown 文件。当前有 9 篇文章同时具备真实程序运行窗口截图和原图叠加识别结果；其余文件仍以项目文档、内部记录或待完善稿为主。数量代表项目过程材料多，不代表有 488 篇完整成稿。
+2026-08-05 盘点到 489 个 Markdown 文件。严格发布目录当前收录 10 篇文章，这 10 篇都具备真实程序运行窗口截图和原图叠加识别结果，并由外层 `models` 目录中的 10 个 ONNX 对应支撑；其余 479 篇仍是项目文档、内部记录、非视觉实机教程或待完善稿。数量代表项目过程材料多，不代表有 489 篇完整成稿。
 
 ## 完整文章标准
 
@@ -36,9 +36,10 @@
 
 机器可读发布目录位于 `publication-catalog.json`。只有被显式列入 `articles` 且通过严格门禁的文件，才算内容完整；所有未列入文件默认是 `project-documentation-not-publication-ready`。
 
-当前完成门禁的文章有：
+当前严格目录 10/10 通过的文章有：
 
 - [使用 TensorRtSharp4.0 在 C# 中运行 ResNet18 图像分类](classification-real-asset-walkthrough.md)。
+- [使用项目自有数字图片完成 MNIST TensorRT 与 ONNX Runtime 双重验证](onnxtoengine-mnist-owner-generated-tutorial.md)。
 - [使用 TensorRtSharp4.0 在 C# 中运行 YOLOv8n 目标检测](yolovision-yolov8n-det-local-package-consumer-tutorial.md)。
 - [使用 TensorRtSharp4.0 在 C# 中运行 LRASPP 语义分割](yolovision-lraspp-semantic-local-package-consumer-tutorial.md)。
 - [使用 TensorRtSharp4.0 在 C# 中运行 YOLOv8n 图像分类](yolovision-yolov8n-cls-local-package-consumer-tutorial.md)。

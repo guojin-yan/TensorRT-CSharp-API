@@ -37,6 +37,13 @@ public sealed class EngineeringAndArticleCatalogTests
 
         JsonElement[] articles = root.GetProperty("articles").EnumerateArray().ToArray();
         Assert.NotEmpty(articles);
+        string articleReadme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "articles", "zh-cn", "README.md"));
+        int markdownCount = Directory.GetFiles(
+            Path.Combine(RepositoryPaths.Root, "docs", "articles", "zh-cn"),
+            "*.md",
+            SearchOption.AllDirectories).Length;
+        Assert.Contains($"盘点到 {markdownCount} 个 Markdown 文件", articleReadme, StringComparison.Ordinal);
+        Assert.Contains($"严格目录 {articles.Length}/{articles.Length} 通过", articleReadme, StringComparison.Ordinal);
         foreach (JsonElement article in articles)
         {
             Assert.Equal("complete-technical-article", article.GetProperty("classification").GetString());
@@ -136,6 +143,11 @@ public sealed class EngineeringAndArticleCatalogTests
     public void EngineeringReadmeSeparatesSupportedEntrypointsFromInternalEvidencePipelines()
     {
         string readme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "eng", "README.md"));
+        int powershellScriptCount = Directory.GetFiles(
+            Path.Combine(RepositoryPaths.Root, "eng"),
+            "*.ps1",
+            SearchOption.TopDirectoryOnly).Length;
+        Assert.Contains($"保留 {powershellScriptCount} 个 PowerShell 脚本", readme, StringComparison.Ordinal);
         foreach (string entrypoint in new[]
         {
             "Invoke-LocalReleaseBundle.ps1",
