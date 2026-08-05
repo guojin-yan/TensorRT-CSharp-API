@@ -1,3 +1,30 @@
+<p align="center">
+  <img src="https://socialify.git.ci/guojin-yan/TensorRT-CSharp-API/image?description=1&descriptionEditable=TensorRT%20and%20CUDA%20bindings%20for%20C%23%20and%20.NET&forks=1&issues=1&name=1&owner=1&pattern=Circuit%20Board&pulls=1&stargazers=1&theme=Light" alt="TensorRtSharp4.0" width="100%" />
+</p>
+
+<h1 align="center">TensorRtSharp4.0</h1>
+
+<p align="center">
+  TensorRT and CUDA bindings for C# and .NET, with managed APIs, project-owned bridge packages, runnable vision samples, and a TensorRtExec desktop workflow.
+</p>
+
+<p align="center">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="Apache-2.0 License" /></a>
+  <a href="https://www.nuget.org/packages/JYPPX.TensorRT.CSharp.API/"><img src="https://img.shields.io/nuget/vpre/JYPPX.TensorRT.CSharp.API.svg" alt="NuGet prerelease version" /></a>
+  <a href="https://www.nuget.org/packages/JYPPX.TensorRT.CSharp.API/"><img src="https://img.shields.io/nuget/dt/JYPPX.TensorRT.CSharp.API.svg" alt="NuGet downloads" /></a>
+  <a href="https://github.com/users/guojin-yan/packages/nuget/package/jyppx.tensorrt.csharp.api"><img src="https://img.shields.io/badge/GitHub%20Packages-package%20feed-24292f" alt="GitHub Packages feed" /></a>
+  <a href="https://github.com/guojin-yan/TensorRT-CSharp-API/releases"><img src="https://img.shields.io/github/v/release/guojin-yan/TensorRT-CSharp-API?include_prereleases&label=Release" alt="GitHub Release" /></a>
+  <a href="https://dotnet.microsoft.com/"><img src="https://img.shields.io/badge/.NET-Framework%204.6--4.8.1%20%7C%20Core%203.1%20%7C%205--10-512BD4" alt="Supported .NET versions" /></a>
+  <a href="https://developer.nvidia.com/tensorrt"><img src="https://img.shields.io/badge/TensorRT-user%20installed-76B900" alt="TensorRT is user installed" /></a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/guojin-yan/TensorRT-CSharp-API/actions/workflows/ci-validation.yml"><img src="https://github.com/guojin-yan/TensorRT-CSharp-API/actions/workflows/ci-validation.yml/badge.svg?branch=TensorRtSharp4.0" alt="Managed CI" /></a>
+  <a href="https://github.com/guojin-yan/TensorRT-CSharp-API/actions/workflows/release-quality-gate.yml"><img src="https://github.com/guojin-yan/TensorRT-CSharp-API/actions/workflows/release-quality-gate.yml/badge.svg?branch=TensorRtSharp4.0" alt="Release quality gate" /></a>
+</p>
+
+<p align="center"><strong>English</strong> | <a href="README.zh-CN.md">简体中文</a></p>
+
 # TensorRtSharp4.0
 
 [![Build](https://github.com/guojin-yan/TensorRT-CSharp-API/actions/workflows/ci-validation.yml/badge.svg)](https://github.com/guojin-yan/TensorRT-CSharp-API/actions/workflows/ci-validation.yml)
@@ -45,6 +72,21 @@ Then create a runtime, load an engine, bind input/output tensors, execute, and r
 | <code>JYPPX.TensorRT.CSharp.API.YoloVision</code> | Managed YOLO output decoders and image pipeline |
 | <code>JYPPX.TensorRT.CSharp.API.Classification</code> | Classification helpers and sample contracts |
 | <code>JYPPX.TensorRT.CSharp.API.Bridge.*</code> | Project-owned native bridge only, selected by installed CUDA/TensorRT versions |
+
+## Public Packages And Release Assets
+
+The first public candidate is <code>4.0.0-preview.1</code>. Package README content is the English root README, package branding uses <code>nuget/logo.jpg</code>, and all three managed packages use the Apache-2.0 SPDX license expression.
+
+| Package | Version | NuGet.org | GitHub Packages | Purpose |
+| --- | --- | --- | --- | --- |
+| <code>JYPPX.TensorRT.CSharp.API</code> | [![version](https://img.shields.io/nuget/vpre/JYPPX.TensorRT.CSharp.API.svg?label=4.0.0-preview.1)](https://www.nuget.org/packages/JYPPX.TensorRT.CSharp.API/) | [Gallery](https://www.nuget.org/packages/JYPPX.TensorRT.CSharp.API/) | [Package feed](https://github.com/users/guojin-yan/packages/nuget/package/jyppx.tensorrt.csharp.api) | Core managed TensorRT/CUDA API |
+| <code>JYPPX.TensorRT.CSharp.API.YoloVision</code> | [![version](https://img.shields.io/nuget/vpre/JYPPX.TensorRT.CSharp.API.YoloVision.svg?label=4.0.0-preview.1)](https://www.nuget.org/packages/JYPPX.TensorRT.CSharp.API.YoloVision/) | [Gallery](https://www.nuget.org/packages/JYPPX.TensorRT.CSharp.API.YoloVision/) | [Package feed](https://github.com/users/guojin-yan/packages/nuget/package/jyppx.tensorrt.csharp.api.yolovision) | YOLO decoders, preprocessing, and image samples |
+| <code>JYPPX.TensorRT.CSharp.API.Classification</code> | [![version](https://img.shields.io/nuget/vpre/JYPPX.TensorRT.CSharp.API.Classification.svg?label=4.0.0-preview.1)](https://www.nuget.org/packages/JYPPX.TensorRT.CSharp.API.Classification/) | [Gallery](https://www.nuget.org/packages/JYPPX.TensorRT.CSharp.API.Classification/) | [Package feed](https://github.com/users/guojin-yan/packages/nuget/package/jyppx.tensorrt.csharp.api.classification) | Classification sample contracts |
+
+| Release channel | Link | Assets |
+| --- | --- | --- |
+| GitHub Release | [TensorRtSharp4.0 releases](https://github.com/guojin-yan/TensorRT-CSharp-API/releases) | Source archive plus the three managed <code>.nupkg</code> files |
+| GitHub Packages | [NuGet package feed](https://github.com/users/guojin-yan/packages?repo_name=TensorRT-CSharp-API) | Managed packages and explicitly approved project-owned bridge packages |
 
 Runtime packages do not bundle NVIDIA libraries. For local source builds, use the scripts in <code>eng</code> only through the documented entry points; most exporter and owner-proof scripts are internal engineering tools.
 

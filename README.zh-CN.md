@@ -1,3 +1,30 @@
+<p align="center">
+  <img src="https://socialify.git.ci/guojin-yan/TensorRT-CSharp-API/image?description=1&descriptionEditable=TensorRT%20and%20CUDA%20bindings%20for%20C%23%20and%20.NET&forks=1&issues=1&name=1&owner=1&pattern=Circuit%20Board&pulls=1&stargazers=1&theme=Light" alt="TensorRtSharp4.0" width="100%" />
+</p>
+
+<h1 align="center">TensorRtSharp4.0</h1>
+
+<p align="center">
+  面向 C# 与 .NET 的 TensorRT、CUDA 托管接口、项目自有桥接包、可运行视觉示例和 TensorRtExec 桌面工具。
+</p>
+
+<p align="center">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="Apache-2.0 许可证" /></a>
+  <a href="https://www.nuget.org/packages/JYPPX.TensorRT.CSharp.API/"><img src="https://img.shields.io/nuget/vpre/JYPPX.TensorRT.CSharp.API.svg" alt="NuGet 预览版本" /></a>
+  <a href="https://www.nuget.org/packages/JYPPX.TensorRT.CSharp.API/"><img src="https://img.shields.io/nuget/dt/JYPPX.TensorRT.CSharp.API.svg" alt="NuGet 下载量" /></a>
+  <a href="https://github.com/users/guojin-yan/packages/nuget/package/jyppx.tensorrt.csharp.api"><img src="https://img.shields.io/badge/GitHub%20Packages-package%20feed-24292f" alt="GitHub Packages 源" /></a>
+  <a href="https://github.com/guojin-yan/TensorRT-CSharp-API/releases"><img src="https://img.shields.io/github/v/release/guojin-yan/TensorRT-CSharp-API?include_prereleases&label=Release" alt="GitHub Release" /></a>
+  <a href="https://dotnet.microsoft.com/"><img src="https://img.shields.io/badge/.NET-Framework%204.6--4.8.1%20%7C%20Core%203.1%20%7C%205--10-512BD4" alt="支持的 .NET 版本" /></a>
+  <a href="https://developer.nvidia.com/tensorrt"><img src="https://img.shields.io/badge/TensorRT-%E7%94%A8%E6%88%B7%E8%87%AA%E8%A1%8C%E5%AE%89%E8%A3%85-76B900" alt="TensorRT 由用户安装" /></a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/guojin-yan/TensorRT-CSharp-API/actions/workflows/ci-validation.yml"><img src="https://github.com/guojin-yan/TensorRT-CSharp-API/actions/workflows/ci-validation.yml/badge.svg?branch=TensorRtSharp4.0" alt="托管代码检查" /></a>
+  <a href="https://github.com/guojin-yan/TensorRT-CSharp-API/actions/workflows/release-quality-gate.yml"><img src="https://github.com/guojin-yan/TensorRT-CSharp-API/actions/workflows/release-quality-gate.yml/badge.svg?branch=TensorRtSharp4.0" alt="发布质量门禁" /></a>
+</p>
+
+<p align="center"><a href="README.md">English</a> | <strong>简体中文</strong></p>
+
 # TensorRtSharp4.0
 
 [![构建](https://github.com/guojin-yan/TensorRT-CSharp-API/actions/workflows/ci-validation.yml/badge.svg)](https://github.com/guojin-yan/TensorRT-CSharp-API/actions/workflows/ci-validation.yml)
@@ -43,6 +70,21 @@ dotnet add package JYPPX.TensorRT.CSharp.API.Bridge.win-x64-trt10.11-cuda12.9-cu
 | JYPPX.TensorRT.CSharp.API.YoloVision | YOLO 解码和图像流程 |
 | JYPPX.TensorRT.CSharp.API.Classification | 分类辅助和示例契约 |
 | JYPPX.TensorRT.CSharp.API.Bridge.* | 仅项目自有原生桥接库 |
+
+## 公开包与 Release 资产
+
+首个公开候选版本为 <code>4.0.0-preview.1</code>。NuGet 包 README 使用根目录英文 README，包图标固定为 <code>nuget/logo.jpg</code>，三个托管包均使用 Apache-2.0 SPDX 许可证表达式。
+
+| 包 | 版本 | NuGet.org | GitHub Packages | 用途 |
+| --- | --- | --- | --- | --- |
+| <code>JYPPX.TensorRT.CSharp.API</code> | [![版本](https://img.shields.io/nuget/vpre/JYPPX.TensorRT.CSharp.API.svg?label=4.0.0-preview.1)](https://www.nuget.org/packages/JYPPX.TensorRT.CSharp.API/) | [包页面](https://www.nuget.org/packages/JYPPX.TensorRT.CSharp.API/) | [包源](https://github.com/users/guojin-yan/packages/nuget/package/jyppx.tensorrt.csharp.api) | 核心 TensorRT/CUDA 托管 API |
+| <code>JYPPX.TensorRT.CSharp.API.YoloVision</code> | [![版本](https://img.shields.io/nuget/vpre/JYPPX.TensorRT.CSharp.API.YoloVision.svg?label=4.0.0-preview.1)](https://www.nuget.org/packages/JYPPX.TensorRT.CSharp.API.YoloVision/) | [包页面](https://www.nuget.org/packages/JYPPX.TensorRT.CSharp.API.YoloVision/) | [包源](https://github.com/users/guojin-yan/packages/nuget/package/jyppx.tensorrt.csharp.api.yolovision) | YOLO 解码、预处理和图像示例 |
+| <code>JYPPX.TensorRT.CSharp.API.Classification</code> | [![版本](https://img.shields.io/nuget/vpre/JYPPX.TensorRT.CSharp.API.Classification.svg?label=4.0.0-preview.1)](https://www.nuget.org/packages/JYPPX.TensorRT.CSharp.API.Classification/) | [包页面](https://www.nuget.org/packages/JYPPX.TensorRT.CSharp.API.Classification/) | [包源](https://github.com/users/guojin-yan/packages/nuget/package/jyppx.tensorrt.csharp.api.classification) | 分类示例契约 |
+
+| 发布渠道 | 链接 | 资产 |
+| --- | --- | --- |
+| GitHub Release | [TensorRtSharp4.0 Releases](https://github.com/guojin-yan/TensorRT-CSharp-API/releases) | 源码压缩包和三个托管 <code>.nupkg</code> 包 |
+| GitHub Packages | [NuGet 包源](https://github.com/users/guojin-yan/packages?repo_name=TensorRT-CSharp-API) | 托管包以及明确批准的项目自有桥接包 |
 
 ## 模型获取与 ONNX 转换
 
