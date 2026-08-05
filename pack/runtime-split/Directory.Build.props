@@ -22,7 +22,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="..\..\README.md" Link="README.md" Pack="true" PackagePath="\" />
-    <None Include="..\..\nuget\logo.jpg" Link="logo.jpg" Pack="true" PackagePath="\" />
+    <None Include="$(MSBuildThisFileDirectory)..\..\README.md" Link="README.md" Pack="true" PackagePath="\" />
+    <None Include="$(MSBuildThisFileDirectory)..\..\nuget\logo.jpg" Link="logo.jpg" Pack="true" PackagePath="\" />
   </ItemGroup>
 </Project>

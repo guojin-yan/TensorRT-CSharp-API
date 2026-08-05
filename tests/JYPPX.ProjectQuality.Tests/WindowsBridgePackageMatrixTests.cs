@@ -68,6 +68,17 @@ public sealed class WindowsBridgePackageMatrixTests
     }
 
     [Fact]
+    public void SplitRuntimePackagePropsResolveSharedReadmeAndLogoFromRepositoryRoot()
+    {
+        string props = ReadSource("pack", "runtime-split", "Directory.Build.props");
+
+        Assert.Contains("$(MSBuildThisFileDirectory)..\\..\\README.md", props, StringComparison.Ordinal);
+        Assert.Contains("$(MSBuildThisFileDirectory)..\\..\\nuget\\logo.jpg", props, StringComparison.Ordinal);
+        Assert.DoesNotContain("Include=\"..\\..\\README.md\"", props, StringComparison.Ordinal);
+        Assert.DoesNotContain("Include=\"..\\..\\nuget\\logo.jpg\"", props, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void EngineeringDocsClassifyMatrixRunnerAsSupportedLocalOnlyEntrypoint()
     {
         string engineeringReadme = ReadSource("eng", "README.md");
