@@ -1469,6 +1469,8 @@ function Get-CudaRuntimeInterfaces {
 }
 
 $manifestApis = @(Get-ManifestApis $RepositoryRoot)
+$manifestFileCount = @(Get-ChildItem -LiteralPath (Join-Path $RepositoryRoot "native\manifests") -Recurse -Filter *.json -File |
+    Where-Object { $_.Name -ne "bridge-api.schema.json" }).Count
 $nativeExports = Get-NativeExportNames $RepositoryRoot
 $tensorRtSourceText = Get-ManagedSourceText $RepositoryRoot "src\JYPPX.TensorRtSharp"
 $cudaSourceText = Get-ManagedSourceText $RepositoryRoot "src\JYPPX.CudaSharp"
@@ -1615,9 +1617,11 @@ $summary = [System.Text.StringBuilder]::new()
 [void]$summary.AppendLine()
 [void]$summary.AppendLine("## Inputs")
 [void]$summary.AppendLine()
-[void]$summary.AppendLine("- TensorRT package root: ``$TensorRtPackageRoot``")
-[void]$summary.AppendLine("- CUDA toolkit root: ``$CudaToolkitRoot``")
+[void]$summary.AppendLine("- TensorRT package roots: configured host inputs; machine-specific paths omitted")
+[void]$summary.AppendLine("- CUDA toolkit roots: configured host inputs; machine-specific paths omitted")
 [void]$summary.AppendLine("- Manifest API count: $($manifestApis.Count)")
+[void]$summary.AppendLine("- Manifest file count: $manifestFileCount")
+[void]$summary.AppendLine("- Snapshot boundary: per-version rows describe only the vendor headers available to this run; an empty or partial host SDK matrix is not a complete release scan")
 [void]$summary.AppendLine()
 [void]$summary.AppendLine("## TensorRT Packages")
 [void]$summary.AppendLine()

@@ -17,7 +17,11 @@ CUDA、cuDNN、TensorRT 和 NVRTC 由用户自行安装，不进入项目包或 
 
 ## 接口覆盖
 
-当前 manifest 共 `4013` 条 API 记录。最新覆盖摘要为：
+当前 Git 跟踪 `214` 个 manifest 文件，共 `4046` 条 API 记录。其中 `common=11`、`cuda=675`、`tensorrt=3360`。
+
+最近一次具备完整 TensorRT 8/10/11 与 CUDA toolkit 输入的 vendor-header 覆盖扫描基线为 `4013` 条，生成于 2026-08-03。此后新增的 `33` 条 manifest API 已进入源码和绑定生成验证，但尚未回填到该次逐版本 header-scan 行。因此下表是完整 SDK 矩阵扫描基线，不冒充当前 4046 条的重新扫描结果；正式候选冻结前要在完整 SDK 主机上重建覆盖摘要。
+
+完整 SDK 扫描基线为：
 
 | TensorRT 版本线 | 扫描 / 匹配 / 源码存在 | 已实现 | 仅 deferred |
 | --- | ---: | ---: | ---: |

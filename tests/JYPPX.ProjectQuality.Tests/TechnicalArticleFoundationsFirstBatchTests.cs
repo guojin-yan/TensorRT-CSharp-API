@@ -113,11 +113,30 @@ public sealed class TechnicalArticleFoundationsFirstBatchTests
     [Fact]
     public void ArchitectureVersionAndPackageFactsTrackAuthoritativeSources()
     {
+        string coverageExporter = ReadSource("eng", "Export-InterfaceCoverageMatrix.ps1");
+        Assert.Contains("machine-specific paths omitted", coverageExporter, StringComparison.Ordinal);
+        Assert.Contains("Manifest file count: $manifestFileCount", coverageExporter, StringComparison.Ordinal);
+        Assert.DoesNotContain("TensorRT package root: ``$TensorRtPackageRoot``", coverageExporter, StringComparison.Ordinal);
+        Assert.DoesNotContain("CUDA toolkit root: ``$CudaToolkitRoot``", coverageExporter, StringComparison.Ordinal);
+
         string coverage = ReadSource("artifacts", "interface-coverage", "interface-coverage-summary.md");
         string interfaceArticle = ReadSource("docs", "articles", "zh-cn", "interface-zero-to-deferred-boundary.md");
         Match manifestCount = Regex.Match(coverage, @"Manifest API count:\s*(?<count>\d+)", RegexOptions.CultureInvariant);
         Assert.True(manifestCount.Success);
-        Assert.Contains(manifestCount.Groups["count"].Value, interfaceArticle, StringComparison.Ordinal);
+        string[] currentManifestPaths = Directory.GetFiles(
+            Path.Combine(RepositoryPaths.Root, "native", "manifests"),
+            "*.manifest.json",
+            SearchOption.AllDirectories);
+        int currentManifestApiCount = 0;
+        foreach (string manifestPath in currentManifestPaths)
+        {
+            using JsonDocument manifest = JsonDocument.Parse(File.ReadAllText(manifestPath));
+            currentManifestApiCount += manifest.RootElement.GetProperty("apis").GetArrayLength();
+        }
+        Assert.Contains($"{currentManifestPaths.Length} 个 manifest 文件", interfaceArticle, StringComparison.Ordinal);
+        Assert.Contains($"{currentManifestApiCount} 条 API", interfaceArticle, StringComparison.Ordinal);
+        Assert.Contains("逐版本 coverage summary 只代表生成时实际可见的", interfaceArticle, StringComparison.Ordinal);
+        Assert.Contains("完整 SDK 矩阵主机仍需", interfaceArticle, StringComparison.Ordinal);
 
         foreach (string line in new[] { "8.6", "10.11", "11.0" })
         {

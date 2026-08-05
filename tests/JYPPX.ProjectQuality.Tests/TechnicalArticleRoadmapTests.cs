@@ -588,10 +588,28 @@ public sealed class TechnicalArticleRoadmapTests
             @"Manifest API count:\s*(?<count>\d+)",
             RegexOptions.CultureInvariant);
         Assert.True(manifestCount.Success, "The generated coverage summary must expose its manifest API count.");
+
+        string[] currentManifestPaths = Directory.GetFiles(
+            Path.Combine(RepositoryPaths.Root, "native", "manifests"),
+            "*.manifest.json",
+            SearchOption.AllDirectories);
+        int currentManifestApiCount = 0;
+        foreach (string manifestPath in currentManifestPaths)
+        {
+            using JsonDocument manifest = JsonDocument.Parse(File.ReadAllText(manifestPath));
+            currentManifestApiCount += manifest.RootElement.GetProperty("apis").GetArrayLength();
+        }
+
         Assert.Contains(
-            $"manifest API count：{manifestCount.Groups["count"].Value}",
+            $"当前 tracked manifest API count：{currentManifestApiCount}",
             article,
             StringComparison.Ordinal);
+        Assert.Contains(
+            $"当前 tracked manifest file count：{currentManifestPaths.Length}",
+            article,
+            StringComparison.Ordinal);
+        Assert.Contains("完整 vendor-header scan 的逐版本行需要在正式候选冻结前由完整 SDK 矩阵重建", article, StringComparison.Ordinal);
+        Assert.Contains("当前 manifest 数量不能替代 vendor-header scan、runtime 和 package-consumer 证明", article, StringComparison.Ordinal);
 
         MatchCollection tensorRtSummaries = Regex.Matches(
             coverage,

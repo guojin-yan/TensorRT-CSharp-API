@@ -43,14 +43,17 @@ flowchart LR
 - `artifacts/interface-coverage/tensorrt-interface-comparison.csv`
 - `artifacts/interface-coverage/cuda-runtime-interface-comparison.csv`
 
-当前 summary 记录 4009 条 manifest API。本地可用的六个 TensorRT package 组合中，官方接口均能
-匹配 manifest 和 native source：
+当前 Git 跟踪的 214 个 manifest 文件合计 4046 条 API。逐版本 coverage summary 只代表生成时实际可见的
+vendor headers，不能用一个较早或 SDK 不完整的 summary 冒充当前清单的完整扫描。完整 SDK 矩阵主机仍需
+在 release candidate 冻结前重建 summary。
+
+在该次基线扫描的六个 TensorRT package 组合中，官方接口均能匹配 manifest 和 native source：
 
 | API line | 官方接口 | implemented | deferred-only |
 | --- | ---: | ---: | ---: |
 | TensorRT 8.6 | 880 | 760 | 120 |
-| TensorRT 10.11 | 879 | 761 | 118 |
-| TensorRT 11.0 | 901 | 814 | 87 |
+| TensorRT 10.11 | 879 | 762 | 117 |
+| TensorRT 11.0 | 901 | 815 | 86 |
 
 CUDA 11.6 到 13.2 同样全部进入账本，但 implemented/deferred 数会随 toolkit API 面增长。数字必须从
 当前 summary 重新读取，不应复制一篇旧文章的快照当永久事实。
