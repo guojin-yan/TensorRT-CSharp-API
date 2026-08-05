@@ -37,7 +37,13 @@ public sealed class NuGetPackageBrandingTests
     public void NativePackageFamiliesUseRootEnglishReadmeAndCanonicalLogo(string propsPath)
     {
         XDocument project = XDocument.Load(Path.Combine(RepositoryPaths.Root, propsPath));
-        AssertPackageMetadata(project, "../../README.md", "../../nuget/logo.jpg");
+        string includePrefix = propsPath.Contains("runtime-split", StringComparison.Ordinal)
+            ? "$(MSBuildThisFileDirectory)"
+            : string.Empty;
+        AssertPackageMetadata(
+            project,
+            $"{includePrefix}../../README.md",
+            $"{includePrefix}../../nuget/logo.jpg");
     }
 
     private static void AssertPackageMetadata(XDocument project, string expectedReadme, string expectedLogo)
