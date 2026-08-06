@@ -139,7 +139,10 @@ public sealed class ExternalVendorRuntimePackagePolicyTests
             string gate = Path.Combine(RepositoryPaths.Root, "eng", "Test-ExternalVendorRuntimePackagePolicy.ps1");
             (int bridgeExitCode, string bridgeOutput) = RunPowerShell(gate, "-PackagePath", bridgePackage);
             Assert.Equal(0, bridgeExitCode);
-            Assert.Contains("\"passed\":  true", bridgeOutput, StringComparison.Ordinal);
+            using (JsonDocument bridgeDocument = JsonDocument.Parse(ExtractJson(bridgeOutput)))
+            {
+                Assert.True(bridgeDocument.RootElement.GetProperty("passed").GetBoolean());
+            }
 
             string invalidYoloVisionPackage = Path.Combine(tempRoot, "yolovision-native.nupkg");
             CreatePackage(
@@ -336,7 +339,7 @@ public sealed class ExternalVendorRuntimePackagePolicyTests
     {
         ProcessStartInfo startInfo = new()
         {
-            FileName = OperatingSystem.IsWindows() ? "powershell" : "pwsh",
+            FileName = "pwsh",
             WorkingDirectory = RepositoryPaths.Root,
             RedirectStandardOutput = true,
             RedirectStandardError = true,

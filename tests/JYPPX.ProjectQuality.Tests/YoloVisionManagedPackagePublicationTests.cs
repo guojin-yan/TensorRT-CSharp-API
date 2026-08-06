@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.IO.Compression;
+using System.Text.Json;
 using Xunit;
 
 namespace JYPPX.ProjectQuality.Tests;
@@ -141,7 +142,10 @@ public sealed class YoloVisionManagedPackagePublicationTests
             ];
             (int validExit, string validOutput) = RunPowerShell(policy, common);
             Assert.Equal(0, validExit);
-            Assert.Contains("\"requireExactPackageSet\":  true", validOutput, StringComparison.Ordinal);
+            using (JsonDocument validDocument = JsonDocument.Parse(ExtractJson(validOutput)))
+            {
+                Assert.True(validDocument.RootElement.GetProperty("requireExactPackageSet").GetBoolean());
+            }
 
             File.Delete(bridge);
             (int missingExit, string missingOutput) = RunPowerShell(policy, common);
@@ -205,7 +209,7 @@ public sealed class YoloVisionManagedPackagePublicationTests
     {
         ProcessStartInfo startInfo = new()
         {
-            FileName = OperatingSystem.IsWindows() ? "powershell" : "pwsh",
+            FileName = "pwsh",
             WorkingDirectory = RepositoryPaths.Root,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
@@ -226,5 +230,13 @@ public sealed class YoloVisionManagedPackagePublicationTests
         string stderr = process.StandardError.ReadToEnd();
         process.WaitForExit();
         return (process.ExitCode, stdout + stderr);
+    }
+
+    private static string ExtractJson(string output)
+    {
+        int start = output.IndexOf('{', StringComparison.Ordinal);
+        int end = output.LastIndexOf('}');
+        Assert.True(start >= 0 && end >= start, $"PowerShell output did not contain JSON:{Environment.NewLine}{output}");
+        return output[start..(end + 1)];
     }
 }
