@@ -752,6 +752,27 @@ function Remove-ConsumerDirectory {
   }
 }
 
+function New-LinuxDynamicBridgeSplitPackage {
+  param(
+    [Parameter(Mandatory = $true)]
+    [object]$SourcePackage
+  )
+
+  return [pscustomobject]@{
+    key = "$($SourcePackage.key)-bridge"
+    sourceRuntimeKey = $SourcePackage.key
+    packageId = "$($SourcePackage.packageId).Bridge"
+    rid = $SourcePackage.rid
+    platform = $SourcePackage.platform
+    tensorRtLine = $SourcePackage.tensorRtLine
+    cudaLine = $SourcePackage.cudaLine
+    role = "bridge"
+    prototypeState = $SourcePackage.validationState
+    assets = @([string]$SourcePackage.bridgeFile)
+    generated = $true
+  }
+}
+
 function Resolve-BridgeSplitPackage {
   param(
     [string]$SourceKey,
@@ -766,6 +787,13 @@ function Resolve-BridgeSplitPackage {
   $splitPackage = $null
   if (-not [string]::IsNullOrWhiteSpace($SplitKey)) {
     $splitPackage = $splitManifest.packages | Where-Object { $_.key -eq $SplitKey } | Select-Object -First 1
+    if (-not $splitPackage -and $SplitKey -like '*-bridge') {
+      $dynamicSourceKey = $SplitKey.Substring(0, $SplitKey.Length - '-bridge'.Length)
+      $dynamicSourcePackage = $runtimeManifest.packages | Where-Object { $_.key -eq $dynamicSourceKey } | Select-Object -First 1
+      if ($dynamicSourcePackage -and [string]$dynamicSourcePackage.platform -eq 'linux') {
+        $splitPackage = New-LinuxDynamicBridgeSplitPackage -SourcePackage $dynamicSourcePackage
+      }
+    }
     if (-not $splitPackage) {
       throw "Bridge split package key '$SplitKey' was not found."
     }
@@ -790,6 +818,9 @@ function Resolve-BridgeSplitPackage {
 
   if (-not $splitPackage) {
     $bridgeMatches = @($splitManifest.packages | Where-Object { $_.sourceRuntimeKey -eq $SourceKey -and $_.role -eq "bridge" })
+    if ($bridgeMatches.Count -eq 0 -and [string]$sourcePackage.platform -eq 'linux') {
+      $bridgeMatches = @(New-LinuxDynamicBridgeSplitPackage -SourcePackage $sourcePackage)
+    }
     if ($bridgeMatches.Count -ne 1) {
       throw "Expected one bridge split package for '$SourceKey', found $($bridgeMatches.Count)."
     }

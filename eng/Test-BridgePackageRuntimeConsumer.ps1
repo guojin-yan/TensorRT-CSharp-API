@@ -134,14 +134,46 @@ function Find-Package {
   return @($matches | Sort-Object LastWriteTime, Version -Descending)[0]
 }
 
+function New-LinuxDynamicBridgePackage {
+  param(
+    [Parameter(Mandatory = $true)]
+    [object]$SourcePackage
+  )
+
+  return [pscustomobject]@{
+    key = "$($SourcePackage.key)-bridge"
+    sourceRuntimeKey = $SourcePackage.key
+    packageId = "$($SourcePackage.packageId).Bridge"
+    rid = $SourcePackage.rid
+    platform = $SourcePackage.platform
+    tensorRtLine = $SourcePackage.tensorRtLine
+    cudaLine = $SourcePackage.cudaLine
+    role = "bridge"
+    prototypeState = $SourcePackage.validationState
+    assets = @([string]$SourcePackage.bridgeFile)
+    generated = $true
+  }
+}
+
 function Resolve-BridgePackage {
   param([Parameter(Mandatory = $true)][string]$RuntimeKey)
 
   $manifestPath = Join-Path $RepositoryRoot "pack\runtime-split\split-runtime-packages.manifest.json"
+  $runtimeManifestPath = Join-Path $RepositoryRoot "pack\runtime\runtime-packages.manifest.json"
   $manifest = Get-Content -LiteralPath $manifestPath -Raw -Encoding utf8 | ConvertFrom-Json
+  $runtimeManifest = Get-Content -LiteralPath $runtimeManifestPath -Raw -Encoding utf8 | ConvertFrom-Json
+  $sourcePackage = $runtimeManifest.packages |
+    Where-Object { $_.key -eq $RuntimeKey } |
+    Select-Object -First 1
+  if (-not $sourcePackage) {
+    throw "Runtime package '$RuntimeKey' was not found in $runtimeManifestPath."
+  }
   $package = $manifest.packages |
     Where-Object { $_.sourceRuntimeKey -eq $RuntimeKey -and $_.role -eq "bridge" } |
     Select-Object -First 1
+  if (-not $package -and [string]$sourcePackage.platform -eq "linux") {
+    $package = New-LinuxDynamicBridgePackage -SourcePackage $sourcePackage
+  }
   if (-not $package) {
     throw "Bridge split package for '$RuntimeKey' was not found in $manifestPath."
   }
