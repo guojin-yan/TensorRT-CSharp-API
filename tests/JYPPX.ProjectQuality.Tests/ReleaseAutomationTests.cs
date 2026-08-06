@@ -30,6 +30,9 @@ public sealed class ReleaseAutomationTests
         }
 
         Assert.Contains("git config --global http.version HTTP/1.1", runtimeWindows, StringComparison.Ordinal);
+        Assert.Contains("JYPPX_LOCAL_SOURCE_ROOT", runtimeWindows, StringComparison.Ordinal);
+        Assert.Contains("Local source HEAD '$sourceCommit' does not match workflow commit '$expectedCommit'", runtimeWindows, StringComparison.Ordinal);
+        Assert.Contains("steps.checkout-mode.outputs.use_local_source != 'true'", runtimeWindows, StringComparison.Ordinal);
         Assert.Contains("default: hosted-all", releaseBundle, StringComparison.Ordinal);
         Assert.Contains("default: auto", runtimeLinux, StringComparison.Ordinal);
         Assert.Contains("runtime_key_set", runtimeLinux, StringComparison.Ordinal);

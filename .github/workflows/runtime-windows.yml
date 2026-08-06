@@ -304,7 +304,54 @@ jobs:
             Select-Object Name,Root,@{Name='FreeGB';Expression={[math]::Round($_.Free/1GB,2)}} |
             Format-Table -AutoSize
 
+      - name: Resolve Windows checkout mode
+        id: checkout-mode
+        shell: pwsh
+        run: |
+          $useLocalSource = -not [string]::IsNullOrWhiteSpace($env:JYPPX_LOCAL_SOURCE_ROOT)
+          "use_local_source=$($useLocalSource.ToString().ToLowerInvariant())" >> $env:GITHUB_OUTPUT
+
+      - name: Hydrate workspace from local committed source
+        if: ${{ steps.checkout-mode.outputs.use_local_source == 'true' }}
+        shell: pwsh
+        run: |
+          $sourceRoot = [System.IO.Path]::GetFullPath($env:JYPPX_LOCAL_SOURCE_ROOT)
+          $workspace = [System.IO.Path]::GetFullPath($env:GITHUB_WORKSPACE)
+          $runnerWorkspace = [System.IO.Path]::GetFullPath($env:RUNNER_WORKSPACE)
+          $relativeWorkspace = [System.IO.Path]::GetRelativePath($runnerWorkspace, $workspace)
+          if ($relativeWorkspace -eq '.' -or
+              $relativeWorkspace.StartsWith('..', [System.StringComparison]::Ordinal) -or
+              [System.IO.Path]::IsPathRooted($relativeWorkspace)) {
+            throw "GITHUB_WORKSPACE '$workspace' must remain inside RUNNER_WORKSPACE '$runnerWorkspace'."
+          }
+          if (-not (Test-Path -LiteralPath (Join-Path $sourceRoot '.git'))) {
+            throw "JYPPX_LOCAL_SOURCE_ROOT '$sourceRoot' is not a Git repository."
+          }
+
+          $expectedCommit = '${{ github.sha }}'
+          $sourceCommit = (git -C $sourceRoot rev-parse HEAD).Trim()
+          if ($LASTEXITCODE -ne 0 -or $sourceCommit -ne $expectedCommit) {
+            throw "Local source HEAD '$sourceCommit' does not match workflow commit '$expectedCommit'."
+          }
+
+          New-Item -ItemType Directory -Path $workspace -Force | Out-Null
+          Get-ChildItem -LiteralPath $workspace -Force -ErrorAction SilentlyContinue |
+            Remove-Item -Recurse -Force
+          git clone --local --no-hardlinks --no-checkout -- $sourceRoot $workspace
+          if ($LASTEXITCODE -ne 0) {
+            throw "Local source clone failed with exit code $LASTEXITCODE."
+          }
+          git -C $workspace checkout --detach $expectedCommit
+          if ($LASTEXITCODE -ne 0) {
+            throw "Local source checkout failed with exit code $LASTEXITCODE."
+          }
+          $workspaceCommit = (git -C $workspace rev-parse HEAD).Trim()
+          if ($workspaceCommit -ne $expectedCommit) {
+            throw "Hydrated workspace commit '$workspaceCommit' does not match '$expectedCommit'."
+          }
+
       - name: Checkout
+        if: ${{ steps.checkout-mode.outputs.use_local_source != 'true' }}
         uses: actions/checkout@v6
 
       - name: Enforce bridge-only packaging policy
