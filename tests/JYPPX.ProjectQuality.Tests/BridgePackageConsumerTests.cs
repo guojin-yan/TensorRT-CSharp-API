@@ -12,6 +12,9 @@ public sealed class BridgePackageConsumerTests
         Assert.Contains("[string]$SourceRuntimeKey = \"win-x64-trt11.0-cuda13.2-cudnn9.22\"", script);
         Assert.Contains("BridgePackageDirectory", script);
         Assert.Contains("Resolve-BridgeSplitPackage", script);
+        Assert.Contains("New-LinuxDynamicBridgeSplitPackage", script);
+        Assert.Contains("runtime-packages.manifest.json", script);
+        Assert.Contains("$bridgeMatches.Count -eq 0", script);
         Assert.Contains("Test-NupkgContainsBridgeAsset", script);
         Assert.Contains("LastWriteTime", script);
         Assert.Contains("Sort-Object LastWriteTime, Version -Descending", script);
@@ -341,6 +344,7 @@ public sealed class BridgePackageConsumerTests
     {
         string script = ReadSource("eng", "Invoke-LocalSplitRuntimePackage.ps1");
         string collectScript = ReadSource("eng", "Collect-SplitRuntimeAssets.ps1");
+        string runtimeConsumerScript = ReadSource("eng", "Test-BridgePackageRuntimeConsumer.ps1");
 
         Assert.Contains("bridgeOnlySplitSet", script);
         Assert.Contains("Invoke-BridgeOnlyNativeBuild", script);
@@ -366,6 +370,8 @@ public sealed class BridgePackageConsumerTests
         Assert.Contains("-CudaRoot", script);
         Assert.Contains("-CudnnRoot", script);
         Assert.Contains("-OutputRoot", script);
+        Assert.Contains("New-LinuxDynamicBridgePackage", runtimeConsumerScript);
+        Assert.Contains("runtime-packages.manifest.json", runtimeConsumerScript);
     }
 
     [Fact]
