@@ -291,6 +291,27 @@ jobs:
             }
           }
 
+          # Self-hosted Windows runners are not guaranteed to have GitHub CLI installed.
+          # Keep the release upload path deterministic and make it available to every later step.
+          $ghVersion = '2.77.0'
+          $ghRoot = Join-Path $env:RUNNER_TEMP "jyppx-gh-$ghVersion"
+          $ghBin = Join-Path $ghRoot 'bin'
+          $ghExecutable = Join-Path $ghBin 'gh.exe'
+          if (-not (Test-Path -LiteralPath $ghExecutable -PathType Leaf)) {
+            $ghArchive = Join-Path $env:RUNNER_TEMP "gh_$ghVersion_windows_amd64.zip"
+            $ghUrl = "https://github.com/cli/cli/releases/download/v$ghVersion/gh_${ghVersion}_windows_amd64.zip"
+            Remove-Item -LiteralPath $ghRoot -Recurse -Force -ErrorAction SilentlyContinue
+            Remove-Item -LiteralPath $ghArchive -Force -ErrorAction SilentlyContinue
+            Invoke-WebRequest -Uri $ghUrl -OutFile $ghArchive -UseBasicParsing
+            Expand-Archive -LiteralPath $ghArchive -DestinationPath $ghRoot -Force
+          }
+          if (-not (Test-Path -LiteralPath $ghExecutable -PathType Leaf)) {
+            throw "GitHub CLI executable was not found after bootstrap: $ghExecutable"
+          }
+          $ghBin | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          $env:PATH = "$ghBin;$env:PATH"
+          & $ghExecutable --version
+
           $globalPackages = dotnet nuget locals global-packages --list |
             ForEach-Object { ($_ -split ':', 2)[1].Trim() } |
             Select-Object -First 1

@@ -51,6 +51,14 @@ CUDA, cuDNN, TensorRT, and NVRTC are user-installed prerequisites. NVIDIA runtim
 - NuGet branding is fixed: <code>nuget/logo.jpg</code> is the package logo and the English root README is embedded as the package README.
 - The release license is Apache-2.0.
 
+## Latest Update: 4.0.0-preview.1
+
+- Establishes the stable `JYPPX.TensorRtSharp` and `JYPPX.CudaSharp` namespace roots and the first preview managed API surface.
+- Provides the managed package plus versioned Windows/Linux bridge-only packages; consumers install the matching NVIDIA runtime themselves.
+- Adds reproducible sample model acquisition and ONNX conversion records while keeping model binaries outside Git.
+
+Read the [detailed 4.0.0-preview.1 notes](docs/releases/4.0.0-preview.1.md) or browse the [complete version index](docs/releases/README.md).
+
 ## Get Started In 30 Seconds
 
 Create a console project, reference the managed package, and install the bridge package that matches the CUDA/TensorRT installation on the target machine:

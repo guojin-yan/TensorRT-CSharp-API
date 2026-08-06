@@ -1,5 +1,7 @@
 - name: Home
   href: index.md
+- name: Release notes
+  href: releases/README.md
 - name: English user guides
   items:
 - name: Chinese user guides and samples

@@ -30,6 +30,11 @@ public sealed class ReleaseAutomationTests
         }
 
         Assert.Contains("git config --global http.version HTTP/1.1", runtimeWindows, StringComparison.Ordinal);
+        Assert.Contains("GITHUB_PATH", runtimeWindows, StringComparison.Ordinal);
+        Assert.Contains("$ghVersion = '2.77.0'", runtimeWindows, StringComparison.Ordinal);
+        Assert.Contains("gh_${ghVersion}_windows_amd64.zip", runtimeWindows, StringComparison.Ordinal);
+        Assert.Contains("$ghBin = Join-Path $ghRoot 'bin'", runtimeWindows, StringComparison.Ordinal);
+        Assert.Contains("gh.exe", runtimeWindows, StringComparison.Ordinal);
         Assert.Contains("JYPPX_LOCAL_SOURCE_ROOT", runtimeWindows, StringComparison.Ordinal);
         Assert.Contains("Local source HEAD '$sourceCommit' does not match workflow commit '$expectedCommit'", runtimeWindows, StringComparison.Ordinal);
         Assert.Contains("steps.checkout-mode.outputs.use_local_source != 'true'", runtimeWindows, StringComparison.Ordinal);
@@ -41,6 +46,24 @@ public sealed class ReleaseAutomationTests
         Assert.Contains("publish_runtime_to_nuget", releaseBundle, StringComparison.Ordinal);
         Assert.Contains("publish_to_nuget=$PUBLISH_RUNTIME_TO_NUGET", releaseBundle, StringComparison.Ordinal);
         Assert.Contains("inputs.publish_to_github_packages }}' -ne 'true' -and '${{ inputs.publish_to_nuget }}' -ne 'true'", runtimeWindows, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ReleaseNotesKeepReadmeSummaryVersionIndexAndDetailedRecordAligned()
+    {
+        string english = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "README.md"));
+        string chinese = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "README.zh-CN.md"));
+        string index = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "releases", "README.md"));
+        string details = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "releases", "4.0.0-preview.1.md"));
+
+        Assert.Contains("## Latest Update: 4.0.0-preview.1", english, StringComparison.Ordinal);
+        Assert.Contains("## 本次更新：4.0.0-preview.1", chinese, StringComparison.Ordinal);
+        Assert.Contains("docs/releases/4.0.0-preview.1.md", english, StringComparison.Ordinal);
+        Assert.Contains("docs/releases/4.0.0-preview.1.md", chinese, StringComparison.Ordinal);
+        Assert.Contains("[4.0.0-preview.1](4.0.0-preview.1.md)", index, StringComparison.Ordinal);
+        Assert.Contains("## 兼容性与环境要求", details, StringComparison.Ordinal);
+        Assert.Contains("## 验证范围与已知限制", details, StringComparison.Ordinal);
+        Assert.Contains("不包含 CUDA、cuDNN、TensorRT 或 NVRTC", details, StringComparison.Ordinal);
     }
 
     [Fact]

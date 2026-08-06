@@ -49,6 +49,7 @@
         "files": [
           "index.md",
           "toc.yml",
+          "releases/**/*.md",
           "articles/**/*.md"
         ]
       },
