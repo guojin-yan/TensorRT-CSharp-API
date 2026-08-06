@@ -274,6 +274,7 @@ jobs:
         shell: pwsh
         run: |
           git config --global core.longpaths true
+          git config --global http.version HTTP/1.1
           $workspace = if ([string]::IsNullOrWhiteSpace($env:GITHUB_WORKSPACE)) { (Get-Location).Path } else { $env:GITHUB_WORKSPACE }
           $stalePaths = @(
             (Join-Path $workspace 'artifacts\runtime'),

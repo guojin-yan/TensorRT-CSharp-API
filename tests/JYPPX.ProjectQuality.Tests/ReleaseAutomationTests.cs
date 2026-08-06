@@ -29,6 +29,7 @@ public sealed class ReleaseAutomationTests
             Assert.Contains(key, runtimeWindows, StringComparison.Ordinal);
         }
 
+        Assert.Contains("git config --global http.version HTTP/1.1", runtimeWindows, StringComparison.Ordinal);
         Assert.Contains("default: hosted-all", releaseBundle, StringComparison.Ordinal);
         Assert.Contains("default: auto", runtimeLinux, StringComparison.Ordinal);
         Assert.Contains("runtime_key_set", runtimeLinux, StringComparison.Ordinal);
