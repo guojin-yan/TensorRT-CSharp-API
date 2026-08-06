@@ -350,8 +350,8 @@ $sampleCatalog = @(
   New-SampleStatus -Name "TensorRtSmokeRunner" -RelativePath "smoke\TensorRtSmokeRunner" -Kind "smoke"
   New-SampleStatus -Name "CudaSmokeRunner" -RelativePath "smoke\CudaSmokeRunner" -Kind "smoke"
   New-SampleStatus -Name "OnnxToEngineSmokeRunner" -RelativePath "smoke\OnnxToEngineSmokeRunner" -Kind "smoke"
-  New-SampleStatus -Name "DynamicShape" -RelativePath "samples\DynamicShape" -Kind "sample"
-  New-SampleStatus -Name "MultiStream" -RelativePath "samples\MultiStream" -Kind "sample"
+  New-SampleStatus -Name "DynamicShape" -RelativePath "samples\Inference\02.DynamicShapes" -Kind "sample"
+  New-SampleStatus -Name "MultiStream" -RelativePath "samples\Performance\01.MultiStream" -Kind "sample"
 )
 
 $sampleMissing = @($sampleCatalog | Where-Object { $_.status -eq "missing" })

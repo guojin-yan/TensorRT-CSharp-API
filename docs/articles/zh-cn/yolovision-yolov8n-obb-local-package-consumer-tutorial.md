@@ -11,7 +11,7 @@ TensorRtSharp4.0 把示例拆为三个职责清晰的包：
 | 包 | 职责 |
 | --- | --- |
 | `JYPPX.TensorRT.CSharp.API` | TensorRT/CUDA 托管接口、ONNX 解析、binding 与执行。 |
-| `JYPPX.TensorRT.CSharp.API.YoloVision` | RGB letterbox、YOLOv8 OBB 解码、旋转 NMS、JSON 和 SVG 可视化。 |
+| `applications/YoloVision` | RGB letterbox、YOLOv8 OBB 解码、旋转 NMS、JSON 和 SVG 可视化。 |
 | `JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge` | 只携带项目自己的 `jyppxtrtbridge.dll`，不携带 NVIDIA 运行库。 |
 
 示例使用 `.NET 8`。本次验证环境为 NVIDIA GeForce RTX 3060 Laptop GPU、驱动 `576.02`、TensorRT `10.11.0`、CUDA Toolkit `12.9` 和 .NET SDK `10.0.301`。实际选择 Bridge 包时，TensorRT/CUDA/cuDNN 版本必须与宿主机一致。
@@ -118,28 +118,23 @@ $tensor = Join-Path $artifactRoot 'obb-csharp-input.fp32.bin'
 
 脚本输出 ONNX Runtime CPU 的 430,080 值 raw reference，以及 Ultralytics/PyTorch CPU 的旋转框参考。
 
-## 创建本地包消费项目
+## 使用公开包准备应用
 
-验证项目位于仓库外，确保它不能通过源码 `ProjectReference` 偷渡依赖：
+`applications/YoloVision` 是完整应用并设置为 `IsPackable=false`。它通过共享 props 引用已发布的
+`JYPPX.TensorRT.CSharp.API` 4 系列包，以及作者维护的
+[OpenCV-CSharp-API](https://github.com/guojin-yan/OpenCV-CSharp-API)。应用本身不发布 YoloVision 案例 NuGet 包。
+
+新建仓库外项目时，可以让 NuGet 获取当前公开预览版，而不在文章中写死具体版本：
 
 ```powershell
-$consumerRoot = Join-Path $workspaceRoot 'consumer-workspaces/yolov8n-obb'
-New-Item -ItemType Directory -Force $consumerRoot | Out-Null
-Set-Location $consumerRoot
-dotnet new console --framework net8.0
+dotnet add package JYPPX.TensorRT.CSharp.API --prerelease
+dotnet add package JYPPX.OpenCV.CSharp.API --prerelease
+dotnet add package JYPPX.OpenCV.runtime.win-x64 --prerelease
+dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --prerelease
 ```
 
-项目文件只引用当前源码生成的三个本地包：
-
-```xml
-<ItemGroup>
-  <PackageReference Include="JYPPX.TensorRT.CSharp.API" Version="4.0.0" />
-  <PackageReference Include="JYPPX.TensorRT.CSharp.API.YoloVision" Version="4.0.0" />
-  <PackageReference Include="JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge" Version="4.0.0" />
-</ItemGroup>
-```
-
-当前验证包来自本地 feed，不表示它们已经发布。三个包的 SHA256 分别为 `139696bd79be6469d26747b7a3da7ba82e8279c69a9b42e2bf4f5a1ade607898`、`c563713e05b76764bcaf1a729f3338e807f940fa3ab81eb02570b9e056c0d3a7` 和 `296eac2d6376cf3c6eaeb9394c662d71b2d838ad7e339cd75587ef7040ebcb2c`。
+最后一个包 ID 必须按目标机器环境替换。它只包含项目自有 bridge；CUDA、cuDNN、TensorRT 和 NVRTC
+继续由用户安装。仓库中的 YoloVision 项目直接运行当前源码，但 TensorRT/CUDA API 来自公开 NuGet 包。
 
 ## 编写程序入口
 
@@ -155,13 +150,11 @@ return YoloVisionCommand.Run(args);
 
 ## 编译并运行
 
-先从隔离的本地 feed restore，再编译：
+还原并编译使用公开包的 YoloVision 应用：
 
 ```powershell
-$feed = Join-Path $repoRoot 'artifacts/article-obb-packages'
-$packages = Join-Path $consumerRoot '.packages'
-dotnet restore --source $feed --packages $packages --force --no-cache
-dotnet build -c Release --no-restore
+dotnet restore ./applications/YoloVision/YoloVision.csproj
+dotnet build ./applications/YoloVision/YoloVision.csproj -c Release --no-restore
 ```
 
 执行真实 TensorRT 推理和全量输出验证：
@@ -173,7 +166,7 @@ $resultJson = Join-Path $artifactRoot 'obb-output.json'
 $resultSvg = Join-Path $artifactRoot 'obb-annotated.svg'
 $env:JYPPX_TENSORRT_ROOT = $env:TENSORRT_PATH
 
-dotnet run -c Release --no-build -- `
+dotnet run --project ./applications/YoloVision -c Release --no-build -- `
   --model $model --labels $labels --image $inputPpm `
   --preprocessed-output $tensor --input-shape 1x3x1024x1024 `
   --tensor-rt-line 10 --family v8 --task obb `

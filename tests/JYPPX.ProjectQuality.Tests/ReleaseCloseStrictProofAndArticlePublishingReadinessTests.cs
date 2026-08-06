@@ -183,7 +183,7 @@ public sealed class ReleaseCloseStrictProofAndArticlePublishingReadinessTests
         Assert.False(sampleReadiness.GetProperty("legacyDirectoryExists").GetBoolean());
 
         string raw = plan.GetRawText();
-        foreach (string marker in new[] { "Owner public publish result", "Public package download proof", "Repository-external clean consumer", "final-public-release-closure-bridge.json", "strict-close-ready-convergence-dashboard.json", "release-issue-close-owner-decision-input.json", "samples/YoloVision/YoloVision.csproj" })
+        foreach (string marker in new[] { "Owner public publish result", "Public package download proof", "Repository-external clean consumer", "final-public-release-closure-bridge.json", "strict-close-ready-convergence-dashboard.json", "release-issue-close-owner-decision-input.json", "applications/YoloVision/YoloVision.csproj" })
         {
             Assert.Contains(marker, raw, StringComparison.Ordinal);
         }

@@ -29,7 +29,7 @@ The matching `cuda.h` and `cuda.lib` Driver surface is audited by `eng/Export-Cu
 - The ABI covers capability and dependency diagnostics, retained source/program names, virtual headers, name expressions, compile, logs, copied PTX/CUBIN/LTO IR, and copied lowered names. UTF-8, embedded NUL, duplicate, count, and byte limits are enforced, and C++ exceptions plus Windows SEH stay inside the bridge.
 - Managed code now exposes `CudaRtcCompiler`, `CudaRtcProgram`, `CudaRtcProgramSource`, `CudaRtcCompileOptions`, `CudaRtcCompilationResult`, and `CudaRtcArtifact` without public `IntPtr`, `SafeHandle`, or vendor program/kernel handles.
 - Native code now also provides an optional dynamic CUDA Driver loader, retained-primary-context `JYPPX_CudaDriverModule`, typed launch storage, and Driver event completion ownership through 9 ABI entry points. Managed code exposes `CudaDriver`, `CudaDriverModule`, and `CudaDriverKernelLaunch` without raw Driver handles.
-- `samples/CudaRuntimeCompilation` exercises virtual headers, a template lowered name, PTX, `sm_75` CUBIN, LTO IR where supported, repeated PTX SHA256 determinism, and an intentional compiler-failure log.
+- `samples/Cuda/01.RuntimeCompilation` exercises virtual headers, a template lowered name, PTX, `sm_75` CUBIN, LTO IR where supported, repeated PTX SHA256 determinism, and an intentional compiler-failure log.
 - All four local compilers complete the compile smoke. PTX from 11.8, 12.1, and 12.9 loads through both the current CUDA 12.9 `CudaKernelLibrary` and the current system Driver 12090, launches by name, and reads back 257 validated floats with the same output SHA256; 13.2 PTX is rejected with the corresponding unsupported-PTX-version diagnostic, so 13.2 remains compile-only/load-rejected proof.
 - `eng/Test-CudaRtcBridgePackageConsumer.ps1` creates a repository-external consumer with a cleared, local-only NuGet source and only managed/bridge `PackageReference` entries. It verifies that the bridge package contains only `jyppxtrtbridge.dll`, copies the exact packaged bridge without `JYPPX_NATIVE_BRIDGE_PATH`, diagnoses missing NVRTC while Driver 12090 remains available, and then uses the installed NVRTC 12.9 library for compile, intentional-failure log capture, and Runtime-library/Driver launch/readback/correctness with matching output hashes.
 - Evidence is stored in `artifacts/cuda-runtime-compilation/capability-matrix.json`, `driver-capability-matrix.json`, `local-smoke.json`, `native-abi-surface.json`, `kernel-launch-native-abi-surface.json`, and `driver-native-abi-surface.json`. The first three smoke records have Runtime-library and Driver launch/readback/correctness/owner-retention fields set to true; 13.2 explicitly retains them as false.
@@ -96,7 +96,7 @@ PTX, CUBIN, and LTO IR are option- and target-dependent. The API must represent 
 
 ### E. Samples and Runtime Proof (local Windows complete)
 
-Add `samples/CudaRuntimeCompilation` with a vector-add/elementwise compile-load-launch-readback check, an intentional compiler-error log check, a C++ name-expression/lowered-name check, and artifact metadata/hash export.
+Add `samples/Cuda/01.RuntimeCompilation` with a vector-add/elementwise compile-load-launch-readback check, an intentional compiler-error log check, a C++ name-expression/lowered-name check, and artifact metadata/hash export.
 
 The sample also releases the participating owners before synchronization and validates every readback value. Its classification remains local Toolkit runtime proof.
 

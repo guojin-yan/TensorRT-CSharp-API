@@ -1,6 +1,6 @@
 # OnnxToEngine 与 trtexec-like 转换能力路线图
 
-`samples/OnnxToEngine` 是用户友好的 ONNX 到 TensorRT engine walkthrough。它正在向官方 `trtexec` 的模型转换能力靠拢，但当前不能宣称全量等价。本文记录目标能力、已覆盖边界和后续实装路线。
+`applications/OnnxToEngine` 是用户友好的 ONNX 到 TensorRT engine walkthrough。它正在向官方 `trtexec` 的模型转换能力靠拢，但当前不能宣称全量等价。本文记录目标能力、已覆盖边界和后续实装路线。
 
 ## 当前目标
 
@@ -37,7 +37,7 @@
 ## 示例命令
 
 ```powershell
-dotnet run --project .\samples\OnnxToEngine -- `
+dotnet run --project .\applications\OnnxToEngine -- `
   --onnx .\models\model.onnx `
   --saveEngine .\models\model.plan `
   --minShapes input:1x3x640x640 `

@@ -96,7 +96,7 @@ stripped plan 在推理前必须重新提供权重。当前批次只实现 build
 以下命令使用内置 dynamic identity model，验证 config flag、host-code runtime policy、engine refittable readback、deserialize、enqueue 和 output match：
 
 ```powershell
-dotnet .\samples\OnnxToEngine\bin\Debug\net8.0\OnnxToEngine.dll `
+dotnet .\applications\OnnxToEngine\bin\Debug\net8.0\OnnxToEngine.dll `
   --tensor-rt-line 10 `
   --versionCompatible `
   --refit `
@@ -145,7 +145,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass `
 $onnx = '..\downloads\yolox-apache\source\yolox_s.onnx'
 $input = '..\downloads\yolox-apache\derived\dog-yolox-s-1x3x640x640-bgr-top-left.fp32.bin'
 
-dotnet .\samples\OnnxToEngine\bin\Debug\net8.0\OnnxToEngine.dll `
+dotnet .\applications\OnnxToEngine\bin\Debug\net8.0\OnnxToEngine.dll `
   --tensor-rt-line 10 `
   --onnx $onnx `
   --saveEngine .\artifacts\real-case\trtexec-engine-packaging-policy\yolox-weight-streaming.plan `
@@ -178,7 +178,7 @@ dotnet .\samples\OnnxToEngine\bin\Debug\net8.0\OnnxToEngine.dll `
 对已经按 weight-streaming flag 构建的 engine，可直接使用：
 
 ```powershell
-dotnet .\samples\OnnxToEngine\bin\Debug\net8.0\OnnxToEngine.dll `
+dotnet .\applications\OnnxToEngine\bin\Debug\net8.0\OnnxToEngine.dll `
   --tensor-rt-line 10 `
   --loadEngine .\artifacts\real-case\trtexec-engine-packaging-policy\yolox-weight-streaming.plan `
   --weightStreamingBudget -1 `

@@ -30,9 +30,9 @@ cmake --build --preset win-x64-trt11-cuda13-release --parallel
 发布前至少确认这些入口文档是可发现的：
 
 - `samples/README.md`
-- `samples/OnnxToEngine/README.md`
-- `samples/Classification/README.md`
-- `samples/YoloVision/README.md`
+- `applications/OnnxToEngine/README.md`
+- `samples/ComputerVision/01.Classification/README.md`
+- `applications/YoloVision/README.md`
 - `applications/README.md`
 - `applications/TensorRtExec/README.md`
 

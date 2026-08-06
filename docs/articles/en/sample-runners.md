@@ -113,7 +113,7 @@ Purpose:
 Run:
 
 ```powershell
-dotnet .\samples\MultiStream\bin\Debug\net8.0\MultiStream.dll
+dotnet .\samples\Performance\01.MultiStream\bin\Debug\net8.0\MultiStream.dll
 ```
 
 Expected signals:
@@ -135,7 +135,7 @@ Purpose:
 Run:
 
 ```powershell
-dotnet .\samples\DynamicShape\bin\Debug\net8.0\DynamicShape.dll --tensor-rt-line 10 --batch 3
+dotnet .\samples\Inference\02.DynamicShapes\bin\Debug\net8.0\DynamicShape.dll --tensor-rt-line 10 --batch 3
 ```
 
 Expected signals:
@@ -159,7 +159,7 @@ Purpose:
 Run:
 
 ```powershell
-dotnet .\samples\InferenceBindings\bin\Debug\net8.0\InferenceBindings.dll --tensor-rt-line 10 --batch 2
+dotnet .\samples\Inference\01.Bindings\bin\Debug\net8.0\InferenceBindings.dll --tensor-rt-line 10 --batch 2
 ```
 
 Expected signals:
@@ -272,23 +272,23 @@ Expected signals:
 
 The repository keeps real user-facing sample projects for common model workflows. Model and image assets are not bundled, because those files have licensing and size constraints that are separate from API validation.
 
-- `samples/Classification`: executable ONNX classifier pipeline. Provide `--model`, optional `--labels`, and `--input-shape`; the sample builds a TensorRT engine, runs synthetic float input, and prints Top-K scores.
-- `samples/YoloVision`: executable YOLO-family ONNX vision sample. Provide `--model`, optional `--labels`, and `--input-shape`; the sample includes family/task profiles plus managed helpers for detection, classification, segmentation, pose, OBB, and semantic outputs.
-- `samples/InferenceBindings`: user-facing tensor-binding workflow example.
-- `samples/OnnxToEngine`: user-facing ONNX-to-engine example with an embedded tiny identity ONNX graph.
+- `samples/ComputerVision/01.Classification`: executable ONNX classifier pipeline. Provide `--model`, optional `--labels`, and `--input-shape`; the sample builds a TensorRT engine, runs synthetic float input, and prints Top-K scores.
+- `applications/YoloVision`: executable YOLO-family ONNX vision sample. Provide `--model`, optional `--labels`, and `--input-shape`; the sample includes family/task profiles plus managed helpers for detection, classification, segmentation, pose, OBB, and semantic outputs.
+- `samples/Inference/01.Bindings`: user-facing tensor-binding workflow example.
+- `applications/OnnxToEngine`: user-facing ONNX-to-engine example with an embedded tiny identity ONNX graph.
 
-CUDA custom-kernel preprocessing remains a documentation roadmap item until safe public CUDA module/kernel wrappers are available. Use `samples/MultiStream` for the current memory/stream preprocessing primitives.
+CUDA custom-kernel preprocessing remains a documentation roadmap item until safe public CUDA module/kernel wrappers are available. Use `samples/Performance/01.MultiStream` for the current memory/stream preprocessing primitives.
 
 Classification:
 
 ```powershell
-dotnet run --project .\samples\Classification -- --model .\models\classifier.onnx --labels .\models\labels.txt --input-shape 1x3x224x224 --tensor-rt-line 10
+dotnet run --project .\samples\ComputerVision\01.Classification -- --model .\models\classifier.onnx --labels .\models\labels.txt --input-shape 1x3x224x224 --tensor-rt-line 10
 ```
 
 YOLO detection:
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- --model .\models\yolo.onnx --labels .\models\coco.names --input-shape 1x3x640x640 --tensor-rt-line 10
+dotnet run --project .\applications\YoloVision -- --model .\models\yolo.onnx --labels .\models\coco.names --input-shape 1x3x640x640 --tensor-rt-line 10
 ```
 
 ## NetworkBuilderSmokeRunner

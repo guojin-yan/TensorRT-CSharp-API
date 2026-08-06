@@ -6,7 +6,7 @@
 
 ## 解决问题
 
-很多团队使用 TensorRT 时会遇到三个断点：C++ API 与 C# 业务代码之间的 ABI 边界、CUDA/TensorRT/cuDNN 版本组合带来的部署复杂度，以及“能 build”与“能在真实 consumer 中运行”之间的证据差距。TensorRtSharp 4.0 的目标是把这些断点拆开：底层用稳定 C ABI 桥接 TensorRT/CUDA，托管侧提供 SafeHandle 和高层 wrapper，样例侧提供 `samples/OnnxToEngine`、`samples/YoloVision`、`applications/TensorRtExec` 这类可学习入口，发布侧用 final-release artifact 记录真实 proof 边界。
+很多团队使用 TensorRT 时会遇到三个断点：C++ API 与 C# 业务代码之间的 ABI 边界、CUDA/TensorRT/cuDNN 版本组合带来的部署复杂度，以及“能 build”与“能在真实 consumer 中运行”之间的证据差距。TensorRtSharp 4.0 的目标是把这些断点拆开：底层用稳定 C ABI 桥接 TensorRT/CUDA，托管侧提供 SafeHandle 和高层 wrapper，样例侧提供 `applications/OnnxToEngine`、`applications/YoloVision`、`applications/TensorRtExec` 这类可学习入口，发布侧用 final-release artifact 记录真实 proof 边界。
 
 ## 项目主线
 
@@ -16,20 +16,20 @@
 
 - Native bridge：`native/src/tensorrt` 和 `native/manifests/tensorrt` 负责把不同 TensorRT 版本的能力落到可审计 C ABI。
 - Managed wrapper：`src/JYPPX.TensorRtSharp`、`src/JYPPX.CudaSharp`、`src/JYPPX.TensorRtSharp.Tools` 负责把底层能力变成 C# 可读语义。
-- Samples and apps：`samples/OnnxToEngine`、`samples/YoloVision`、`applications/TensorRtExec` 负责给真实使用路径。
+- Samples and apps：`applications/OnnxToEngine`、`applications/YoloVision`、`applications/TensorRtExec` 负责给真实使用路径。
 - Release proof：`artifacts/final-release` 下的 checklist、handoff、dashboard 和 validation 负责说明哪些可以宣传、哪些仍必须等待 owner proof。
 
 ## 当前用户入口
 
-入门建议从 `README.zh-CN.md`、`docs/index.md` 和 `docs/articles/zh-cn/getting-started.md` 开始。模型转换用户可以阅读 `samples/OnnxToEngine/README.md` 和 `applications/TensorRtExec/README.md`；视觉模型用户从 `samples/YoloVision/README.md` 进入，它统一覆盖 YOLO v5/v6/v7/v8/v9/v10/v11/v26/custom，以及 det、cls、seg、obb、pose、sem 等任务。发布和 proof 相关内容则以 `artifacts/final-release/clean-consumer-proof-owner-execution-pack.md`、`artifacts/final-release/final-release-close-blocker-dashboard.md` 为准。
+入门建议从 `README.zh-CN.md`、`docs/index.md` 和 `docs/articles/zh-cn/getting-started.md` 开始。模型转换用户可以阅读 `applications/OnnxToEngine/README.md` 和 `applications/TensorRtExec/README.md`；视觉模型用户从 `applications/YoloVision/README.md` 进入，它统一覆盖 YOLO v5/v6/v7/v8/v9/v10/v11/v26/custom，以及 det、cls、seg、obb、pose、sem 等任务。发布和 proof 相关内容则以 `artifacts/final-release/clean-consumer-proof-owner-execution-pack.md`、`artifacts/final-release/final-release-close-blocker-dashboard.md` 为准。
 
 ## 示例命令
 
 ```powershell
 dotnet build .\TensorRtSharp.sln -c Debug --no-restore
 dotnet run --project .\applications\TensorRtExec -- --help
-dotnet run --project .\samples\OnnxToEngine -- --help
-dotnet run --project .\samples\YoloVision -- --help
+dotnet run --project .\applications\OnnxToEngine -- --help
+dotnet run --project .\applications\YoloVision -- --help
 ```
 
 这些命令能帮助读者理解项目入口，但它们本身不是 release runtime proof。真正的 package-consumer-runtime proof 需要仓库外 clean consumer、public package source、真实 smoke 日志、hash、host metadata、package metadata 和 strict validator。

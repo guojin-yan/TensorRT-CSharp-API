@@ -6,8 +6,8 @@
 
 | 层级 | 目录 | 定位 |
 | --- | --- | --- |
-| 教学 sample | `samples/OnnxToEngine` | 讲清楚 ONNX 到 engine 的最小转换路径 |
-| 视觉 sample | `samples/YoloVision` | 讲清楚真实视觉模型推理和后处理 |
+| 教学 sample | `applications/OnnxToEngine` | 讲清楚 ONNX 到 engine 的最小转换路径 |
+| 视觉 sample | `applications/YoloVision` | 讲清楚真实视觉模型推理和后处理 |
 | 用户应用 | `applications/TensorRtExec` | 提供 trtexec-like console/WinForms 工具体验 |
 
 TensorRtExec 应用不应该只是一层 README。它需要逐步承载：

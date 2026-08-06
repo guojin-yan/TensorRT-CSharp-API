@@ -20,12 +20,12 @@
 
 | 仓库路径 | 当前状态 | 可支撑文章 |
 | --- | --- | --- |
-| `samples/MultiStream` | 可运行，已补 README | CUDA stream/event、跨 stream ordering、内存 copy 教程 |
-| `samples/DynamicShape` | 可运行，已补 README | TensorRT dynamic shape、optimization profile、binding 教程 |
-| `samples/InferenceBindings` | 可运行，已有 README | `TensorRtInferenceBindings` 输入输出、enqueue、readback 教程 |
-| `samples/OnnxToEngine` | 可运行，已有 README，已补 trtexec-like 参数模型；构建服务已抽到 `src/JYPPX.TensorRtSharp.Tools` | ONNX parser、engine build、deserialize、round-trip、shape profile、precision/workspace 参数教程 |
-| `samples/Classification` | 需要用户提供 ONNX/labels/image 资产 | 分类模型完整教程，需先选定可再分发模型和预处理说明 |
-| `samples/YoloVision` | 需要用户提供 ONNX/labels/image 资产，已补 family/task/profile、layout、score filtering、class-aware/class-agnostic NMS、seg/pose/OBB/sem 托管辅助底座，并新增 YOLOX-S 候选资产示例 | YOLO 检测完整教程，需先选定 YOLO-family ONNX 和 COCO labels |
+| `samples/Performance/01.MultiStream` | 可运行，已补 README | CUDA stream/event、跨 stream ordering、内存 copy 教程 |
+| `samples/Inference/02.DynamicShapes` | 可运行，已补 README | TensorRT dynamic shape、optimization profile、binding 教程 |
+| `samples/Inference/01.Bindings` | 可运行，已有 README | `TensorRtInferenceBindings` 输入输出、enqueue、readback 教程 |
+| `applications/OnnxToEngine` | 可运行，已有 README，已补 trtexec-like 参数模型；构建服务已抽到 `src/JYPPX.TensorRtSharp.Tools` | ONNX parser、engine build、deserialize、round-trip、shape profile、precision/workspace 参数教程 |
+| `samples/ComputerVision/01.Classification` | 需要用户提供 ONNX/labels/image 资产 | 分类模型完整教程，需先选定可再分发模型和预处理说明 |
+| `applications/YoloVision` | 需要用户提供 ONNX/labels/image 资产，已补 family/task/profile、layout、score filtering、class-aware/class-agnostic NMS、seg/pose/OBB/sem 托管辅助底座，并新增 YOLOX-S 候选资产示例 | YOLO 检测完整教程，需先选定 YOLO-family ONNX 和 COCO labels |
 | `applications/TensorRtExec` | trtexec-like CLI + WinForms 工具，直接引用 `JYPPX.TensorRtSharp.Tools` 生成 build/report 证据，外部模型推理仍需显式 binding/output 语义 | ONNX 转 engine 工具教程、桌面部署工作流、参数排障 |
 | `smoke/*` | 28 个验证 runner | 发布门禁、API 完成度、layer coverage、排障文章 |
 | `artifacts/package-readiness/runtime-package-readiness-summary.md` | 当前 readiness evidence | package readiness、runtime smoke、blocked evidence 文章 |
@@ -41,7 +41,7 @@
 | article id | 使用连续编号，不能重复，不能跳过当前矩阵主线。 |
 | 标题 | 与正文文件、docs index、toc 和发布索引保持一致。 |
 | 类型 | 标明项目总览、接口体系、样例教程、应用教程、发布证据、安全边界或宣发素材。 |
-| 对应 sample/application | 明确链接 `samples/OnnxToEngine`、`samples/YoloVision`、`applications/TensorRtExec`、`smoke/*` 或无样例依赖。 |
+| 对应 sample/application | 明确链接 `applications/OnnxToEngine`、`applications/YoloVision`、`applications/TensorRtExec`、`smoke/*` 或无样例依赖。 |
 | 模型/资产 | 写明是否需要 ONNX、labels、输入图片、sidecar、sample-run-evidence 或无外部资产。 |
 | 模型获取方式 | 外部模型必须说明 owner 自备、公开下载、export 步骤或不能再分发的边界。 |
 | license/hash 要求 | 外部资产必须记录 license notes、model SHA256、labels SHA256、image SHA256 和日志 SHA256。 |
@@ -70,7 +70,7 @@
 - 第一批基础文章审计：`docs/articles/zh-cn/publishing/technical-article-foundations-first-batch-audit.md`
 - 第一批审计 exporter：`eng/Export-TechnicalArticleFoundationsFirstBatchAudit.ps1`
 
-矩阵中已废弃的旧检测专用样例名不得重新作为文章、样例或发布 proof 入口出现；统一入口是 `samples/YoloVision`。`applications/TensorRtExec` 与 `samples/OnnxToEngine` 可以产生 build/report/sidecar 证据，但不能替代 Classification/YoloVision 真实模型 runner，也不能替代 release proof record。
+矩阵中已废弃的旧检测专用样例名不得重新作为文章、样例或发布 proof 入口出现；统一入口是 `applications/YoloVision`。`applications/TensorRtExec` 与 `applications/OnnxToEngine` 可以产生 build/report/sidecar 证据，但不能替代 Classification/YoloVision 真实模型 runner，也不能替代 release proof record。
 
 | 编号 | 系列 | 标题 | 主要内容 | 样例/证据 | 资产要求 | 状态 |
 | ---: | --- | --- | --- | --- | --- | --- |
@@ -97,10 +97,10 @@
 | 20 | 案例教程 | 最小 identity network 推理 | 不依赖外部模型的端到端 inference | `docs/articles/zh-cn/inference-bindings-tutorial.md` | 无 | 正文已起草 |
 | 21 | 案例教程 | Dynamic batch 推理教程 | batch 1..4、profile 校验、输出一致性 | `docs/articles/zh-cn/dynamic-shape-optimization-profile-tutorial.md` | 无 | 正文已起草 |
 | 22 | 案例教程 | ONNX 转 TensorRT engine 教程 | 内置 identity ONNX、engine file round-trip | `docs/articles/zh-cn/onnx-parser-to-serialized-engine-tutorial.md` | 无 | 正文已起草 |
-| 23 | 案例教程 | 分类模型部署教程 | 模型获取、labels、预处理、Top-K 输出 | `docs/articles/zh-cn/classification-real-asset-walkthrough.md`、`samples/Classification` | 用户自备分类 ONNX/labels/image | 正文已起草 |
+| 23 | 案例教程 | 分类模型部署教程 | 模型获取、labels、预处理、Top-K 输出 | `docs/articles/zh-cn/classification-real-asset-walkthrough.md`、`samples/ComputerVision/01.Classification` | 用户自备分类 ONNX/labels/image | 正文已起草 |
 | 24 | 案例教程 | ResNet/MobileNet 分类实战 | 选一个公开模型，说明下载、转换、运行、验证 | `docs/articles/zh-cn/classification-real-asset-walkthrough.md`、`samples/assets/classification-assets.template.json` | 用户自备模型 URL、labels、测试图 | 正文已起草 |
-| 25 | 案例教程 | YOLO 检测部署教程 | YOLO ONNX、COCO labels、layout、confidence、NMS 边界 | `docs/articles/zh-cn/yolovision-detection-tutorial.md`、`samples/YoloVision` | 需 YOLO-family ONNX 与图片 | 完整教程已由 74 收口 |
-| 26 | 案例教程 | YOLO 输出布局排查 | `[1,84,8400]` 与 `[1,8400,84]`、objectness、threshold | `docs/articles/zh-cn/yolovision-detection-tutorial.md`、`samples/YoloVision` | 需示例输出或模型 | 完整教程已由 74 收口 |
+| 25 | 案例教程 | YOLO 检测部署教程 | YOLO ONNX、COCO labels、layout、confidence、NMS 边界 | `docs/articles/zh-cn/yolovision-detection-tutorial.md`、`applications/YoloVision` | 需 YOLO-family ONNX 与图片 | 完整教程已由 74 收口 |
+| 26 | 案例教程 | YOLO 输出布局排查 | `[1,84,8400]` 与 `[1,8400,84]`、objectness、threshold | `docs/articles/zh-cn/yolovision-detection-tutorial.md`、`applications/YoloVision` | 需示例输出或模型 | 完整教程已由 74 收口 |
 | 27 | 案例教程 | 多 stream 预处理管线雏形 | 使用 CUDA stream/event 支撑未来图像预处理 | `docs/articles/zh-cn/cuda-stream-event-multistream-tutorial.md` | CUDA runtime | 正文已起草 |
 | 28 | 案例教程 | Refit weights 使用场景 | refitter inspector、权重更新、限制 | `docs/articles/zh-cn/refit-weights-guide.md`、`docs/articles/zh-cn/blog-refit-weights-guide.md`、`smoke/RefitWeightsSmokeRunner` | 无 | 完整教程已收口 |
 | 29 | 高级主题 | TensorRT 11 modern layers | TRT11 专属 layer、metadata、guard | `docs/articles/zh-cn/trt11-modern-layers-guide.md`、`smoke/NetworkTrt11ModernLayersSmokeRunner` | TRT11 | 完整教程已收口 |
@@ -112,26 +112,26 @@
 | 35 | 边界专题 | Real callback runtime proof 准入条件 | required markers、package consumer smoke、proof 语义 | `real-callback-runtime-evidence-schema.md` | 驱动兼容环境 | 可立即撰写规划，正文待 proof |
 | 36 | 发布排障 | 常见问题排查总表 | DLL missing、PATH、application control、CUDA error 35、NuGet restore | `docs/articles/zh-cn/troubleshooting-index.md` | 无 | 正文已起草 |
 | 37 | 发布证据 | Linux Runner Evidence 回填指南 | handoff/template、record validator、真实 Linux x64 runner proof 晋级条件 | `docs/articles/zh-cn/blog-linux-runner-evidence-guide.md` | Linux runner 回填 JSON | 博客长文初稿已补 |
-| 38 | 样例博客 | Dynamic Shape 博客版 | dynamic batch、optimization profile、runtime shape、binding readiness | `docs/articles/zh-cn/blog-dynamic-shape-optimization-profile.md`、`samples/DynamicShape` | 无 | 完整教程已收口 |
-| 39 | 样例博客 | InferenceBindings Identity Network 博客版 | tensor address binding、device buffer、readiness、readback | `docs/articles/zh-cn/blog-inference-bindings-identity-network.md`、`samples/InferenceBindings` | 无 | 完整教程已收口 |
-| 40 | 样例博客 | ONNX Parser Engine RoundTrip 博客版 | 内置 ONNX、parser、serialized engine、deserialize、output match | `docs/articles/zh-cn/blog-onnx-parser-engine-roundtrip.md`、`samples/OnnxToEngine` | 无 | 完整教程已收口 |
-| 41 | 样例博客 | MultiStream CUDA Stream/Event 博客版 | non-blocking stream、event record/wait、跨 stream ordering | `docs/articles/zh-cn/blog-multistream-cuda-stream-event.md`、`samples/MultiStream` | CUDA runtime | 完整教程已收口 |
+| 38 | 样例博客 | Dynamic Shape 博客版 | dynamic batch、optimization profile、runtime shape、binding readiness | `docs/articles/zh-cn/blog-dynamic-shape-optimization-profile.md`、`samples/Inference/02.DynamicShapes` | 无 | 完整教程已收口 |
+| 39 | 样例博客 | InferenceBindings Identity Network 博客版 | tensor address binding、device buffer、readiness、readback | `docs/articles/zh-cn/blog-inference-bindings-identity-network.md`、`samples/Inference/01.Bindings` | 无 | 完整教程已收口 |
+| 40 | 样例博客 | ONNX Parser Engine RoundTrip 博客版 | 内置 ONNX、parser、serialized engine、deserialize、output match | `docs/articles/zh-cn/blog-onnx-parser-engine-roundtrip.md`、`applications/OnnxToEngine` | 无 | 完整教程已收口 |
+| 41 | 样例博客 | MultiStream CUDA Stream/Event 博客版 | non-blocking stream、event record/wait、跨 stream ordering | `docs/articles/zh-cn/blog-multistream-cuda-stream-event.md`、`samples/Performance/01.MultiStream` | CUDA runtime | 完整教程已收口 |
 | 42 | 接口博客 | Plugin Inventory 只读 API 博客版 | registry exists、creator metadata、lookup、无 borrowed pointer | `docs/articles/zh-cn/blog-plugin-inventory-readonly-api.md`、`smoke/PluginRegistryInventorySmokeRunner` | TensorRT runtime | 完整教程已收口 |
 | 43 | CUDA 博客 | CUDA Memory Wrapper 博客版 | device/pinned/managed/pitched memory、copy/readback、owner 边界 | `docs/articles/zh-cn/blog-cuda-memory-wrapper.md`、`smoke/CudaSmokeRunner` | CUDA runtime | 完整教程已收口 |
 | 44 | 高级博客 | Refit Weights 博客版 | refitter entries、set weights、refit engine、before/after evidence | `docs/articles/zh-cn/blog-refit-weights-guide.md`、`smoke/RefitWeightsSmokeRunner` | TensorRT runtime | 完整教程已收口 |
 | 45 | 覆盖博客 | Network Layer Coverage 博客版 | Network smoke runner 家族、layer coverage 读法、模型精度边界 | `docs/articles/zh-cn/blog-network-layer-coverage-guide.md`、`smoke/Network*SmokeRunner` | TensorRT runtime | 完整教程已收口 |
-| 46 | 应用教程 | TensorRtExec 工具入门 | CLI/WinForms 双入口、ONNX、engine、precision、shape profile、workspace、build-only 边界 | `docs/articles/zh-cn/tensorrtexec-tool-getting-started.md`、`applications/TensorRtExec`、`samples/OnnxToEngine`、`src/JYPPX.TensorRtSharp.Tools` | 用户自备 ONNX，可先用 build-only | 正文已起草 |
-| 47 | 样例教程 | YOLO 全系列配置底座 | v5-v26 family、det/cls/seg/obb/pose/sem task、layout/objectness/NMS、资产清单 | `docs/articles/zh-cn/yolo-family-profile-and-postprocess-guide.md`、`samples/YoloVision`、`samples/assets/yolovision-assets.template.json` | 用户自备 YOLO ONNX/labels/image | 正文已起草 |
+| 46 | 应用教程 | TensorRtExec 工具入门 | CLI/WinForms 双入口、ONNX、engine、precision、shape profile、workspace、build-only 边界 | `docs/articles/zh-cn/tensorrtexec-tool-getting-started.md`、`applications/TensorRtExec`、`applications/OnnxToEngine`、`src/JYPPX.TensorRtSharp.Tools` | 用户自备 ONNX，可先用 build-only | 正文已起草 |
+| 47 | 样例教程 | YOLO 全系列配置底座 | v5-v26 family、det/cls/seg/obb/pose/sem task、layout/objectness/NMS、资产清单 | `docs/articles/zh-cn/yolo-family-profile-and-postprocess-guide.md`、`applications/YoloVision`、`samples/assets/yolovision-assets.template.json` | 用户自备 YOLO ONNX/labels/image | 正文已起草 |
 | 48 | 案例教程 | YoloVision 真实资产接入 | YOLOX-S 候选、ONNX export、hash、manifest、TensorRtExec build-only、YoloVision 运行日志 | `docs/articles/zh-cn/yolovision-real-asset-walkthrough.md`、`samples/assets/yolovision-yolox-s-example.json` | 用户自备 YOLOX 权重、labels、图片 | 正文已起草 |
 | 49 | 应用教程 | TensorRtExec 外部 ONNX 构建报告 | report 字段、build evidence、runtime proof 边界、plugin/timing cache 诊断 | `docs/articles/zh-cn/tensorrtexec-external-onnx-build-report.md`、`applications/TensorRtExec`、`src/JYPPX.TensorRtSharp.Tools` | 用户自备 ONNX | 正文已起草 |
-| 50 | 样例教程 | YoloVision 多输出 Metadata 指南 | seg/pose/obb 多输出 tensor role、metadata、asset manifest、真实 smoke 边界 | `docs/articles/zh-cn/yolovision-multi-output-metadata-guide.md`、`samples/YoloVision`、`samples/assets/yolovision-assets.template.json` | 用户自备 YOLO ONNX/labels/image | 正文已起草 |
-| 51 | 应用教程 | ONNX 到 TensorRT Engine 转换指南 | OnnxToEngine、TensorRtExec、trtexec-like 参数、build-only report、runtime proof 边界 | `docs/articles/zh-cn/onnx-to-engine-trtexec-conversion-guide.md`、`samples/OnnxToEngine`、`applications/TensorRtExec` | 用户自备 ONNX，可先用内置 identity | 正文已起草 |
+| 50 | 样例教程 | YoloVision 多输出 Metadata 指南 | seg/pose/obb 多输出 tensor role、metadata、asset manifest、真实 smoke 边界 | `docs/articles/zh-cn/yolovision-multi-output-metadata-guide.md`、`applications/YoloVision`、`samples/assets/yolovision-assets.template.json` | 用户自备 YOLO ONNX/labels/image | 正文已起草 |
+| 51 | 应用教程 | ONNX 到 TensorRT Engine 转换指南 | OnnxToEngine、TensorRtExec、trtexec-like 参数、build-only report、runtime proof 边界 | `docs/articles/zh-cn/onnx-to-engine-trtexec-conversion-guide.md`、`applications/OnnxToEngine`、`applications/TensorRtExec` | 用户自备 ONNX，可先用内置 identity | 正文已起草 |
 | 52 | 发布证据 | 真实模型 Owner 回填 Checklist | Classification/YoloVision/YOLOX-S 资产、hash、license、sidecar、sample run evidence、release bundle | `docs/articles/zh-cn/real-model-owner-backfill-checklist.md`、`samples/assets/README.md`、`eng/Test-SampleAssetManifest.ps1` | 用户或 release owner 自备真实资产 | 正文已起草 |
 | 53 | 应用教程 | TensorRtExec GUI 使用教程 | WinForms 字段、command preview、report、plugin/timing cache 诊断边界 | `docs/articles/zh-cn/tensorrtexec-gui-user-guide.md`、`applications/TensorRtExec` | 用户自备 ONNX | 正文已起草 |
 | 54 | 样例发布化 | 样例证据分层：precheck/build/runtime/proof | `precheck`、`build-only`、`synthetic-input-runtime`、`real-model-runtime`、`package-consumer-runtime` 的边界和晋级条件 | `docs/articles/zh-cn/sample-evidence-ladder.md`、`samples/README.md`、`applications/TensorRtExec/README.md`、`src/JYPPX.TensorRtSharp.Tools` | 无 | 正文已起草 |
-| 55 | 样例发布化 | Classification 真实模型证据链 | 分类模型资产、labels、input image、sidecar、sample-run-evidence、Top-K 输出和 manifest audit | `samples/Classification`、`samples/assets/classification-assets.template.json`、`docs/articles/zh-cn/classification-real-asset-walkthrough.md` | 用户自备分类模型 | 规划稿 |
-| 56 | 样例发布化 | YoloVision 真实模型证据链 | YOLO-family 资产、layout、后处理 metadata、TensorRtExec build-only、真实 `YoloVision Passed=True` 日志和证据回填 | `samples/YoloVision`、`samples/assets/yolovision-assets.template.json`、`docs/articles/zh-cn/yolovision-multi-output-metadata-guide.md` | 用户自备 YOLO 资产 | 规划稿 |
-| 57 | 应用教程 | OnnxToEngine 与 TensorRtExec 如何分工 | identity round-trip 样例、外部 ONNX build/report 工具、何时需要 sample runner 补真实输出语义 | `docs/articles/zh-cn/onnxtoengine-and-tensorrtexec-boundary.md`、`samples/OnnxToEngine`、`applications/TensorRtExec`、`docs/articles/zh-cn/onnx-to-engine-trtexec-conversion-guide.md` | 可先无外部资产 | 正文已起草 |
+| 55 | 样例发布化 | Classification 真实模型证据链 | 分类模型资产、labels、input image、sidecar、sample-run-evidence、Top-K 输出和 manifest audit | `samples/ComputerVision/01.Classification`、`samples/assets/classification-assets.template.json`、`docs/articles/zh-cn/classification-real-asset-walkthrough.md` | 用户自备分类模型 | 规划稿 |
+| 56 | 样例发布化 | YoloVision 真实模型证据链 | YOLO-family 资产、layout、后处理 metadata、TensorRtExec build-only、真实 `YoloVision Passed=True` 日志和证据回填 | `applications/YoloVision`、`samples/assets/yolovision-assets.template.json`、`docs/articles/zh-cn/yolovision-multi-output-metadata-guide.md` | 用户自备 YOLO 资产 | 规划稿 |
+| 57 | 应用教程 | OnnxToEngine 与 TensorRtExec 如何分工 | identity round-trip 样例、外部 ONNX build/report 工具、何时需要 sample runner 补真实输出语义 | `docs/articles/zh-cn/onnxtoengine-and-tensorrtexec-boundary.md`、`applications/OnnxToEngine`、`applications/TensorRtExec`、`docs/articles/zh-cn/onnx-to-engine-trtexec-conversion-guide.md` | 可先无外部资产 | 正文已起草 |
 | 58 | 发布证据 | 从工具报告到 release proof record | 为什么 build report、sidecar、manifest、runbook、collection bundle 都不能代替 `external-runtime-proof-record.json` | `docs/articles/zh-cn/tool-report-to-release-proof-record.md`、`docs/articles/zh-cn/external-runtime-proof-record.md`、`docs/articles/zh-cn/compatible-host-runtime-proof-collection-bundle.md` | 兼容主机 smoke 日志 | 正文已起草 |
 | 59 | 排障专题 | 发布前 stale claim 自查 | 搜索 `package-consumer-runtime`、`blocked-by-cuda-driver`、`Passed=True`、`ready-needs-manual-approval` 等过度声明 | `docs/articles/zh-cn/stale-claim-prepublish-audit.md`、`eng/Test-StaleReleaseClaims.ps1`、`artifacts/final-release/stale-release-claims-audit.md` | 无 | 正文已起草 |
 | 60 | 发布专题 | 完整项目发布前最后一公里 | API 完成度、deferred 边界、样例证据、runtime package、release owner approval、post-publish verification 的串联检查 | `docs/articles/zh-cn/publish-final-mile-checklist.md`、`docs/articles/zh-cn/release-publish-execution-checklist.md`、`docs/articles/zh-cn/post-publish-verification-record.md` | owner approval + proof record | 正文已起草 |
@@ -147,12 +147,12 @@
 | 70 | 证据教程 | Post Publish Verification Proof Playbook | 真实渠道 package identity、downloaded hash、clean consumer restore/build/smoke、post-publish validator | `docs/articles/zh-cn/post-publish-verification-proof-playbook.md`、`docs/articles/zh-cn/post-publish-verification-record.md`、`docs/articles/zh-cn/post-publish-clean-consumer-project-scan.md` | owner 完成真实渠道发布后 | 完整教程已收口 |
 | 71 | 样例教程 | Real Model Evidence Backfill Playbook | Classification/YoloVision 模型、labels、input、license、hash、TensorRtExec sidecar、sample-run-evidence | `docs/articles/zh-cn/external-model-evidence-case-study.md`、`docs/articles/zh-cn/real-model-evidence-backfill-playbook.md`、`docs/articles/zh-cn/real-model-owner-backfill-checklist.md` | owner 提供真实模型资产 | 完整教程已由 80 收口 |
 | 72 | 应用教程 | TensorRtExec 参数分层深挖 | implemented、parse/report-only、OptionImplementationStatus、TrtexecAlignmentStatus=parse-only、build-only/report 边界 | `docs/articles/zh-cn/tensorrtexec-option-layering-deep-dive.md`、`applications/TensorRtExec`、`artifacts/user-acceptance/trtexec-option-coverage.md` | 用户自备 ONNX | 完整教程已收口 |
-| 73 | 样例教程 | YoloVision 全任务系列总览 | v5/v6/v7/v8/v9/v10/v11/v26、custom、det/cls/seg/obb/pose/sem、support matrix 与 real-model-runtime 边界 | `docs/articles/zh-cn/yolovision-all-task-overview.md`、`samples/YoloVision`、`docs/articles/zh-cn/real-model-evidence-backfill-playbook.md` | 用户自备 YOLO-family ONNX | 完整教程已收口 |
-| 74 | 样例教程 | YoloVision Detection 教程 | detection layout、objectness、NMS、TensorRtExec build-only、sample-run-evidence | `docs/articles/zh-cn/yolovision-detection-tutorial.md`、`samples/YoloVision` | 用户自备检测模型 | 完整教程已收口 |
-| 75 | 样例教程 | YoloVision Segmentation 教程 | mask prototype、coefficients、多输出 metadata、sidecar-only 与 real-model-runtime | `docs/articles/zh-cn/yolovision-segmentation-tutorial.md`、`samples/YoloVision` | 用户自备分割模型 | 完整教程已收口 |
-| 76 | 样例教程 | YoloVision Pose 教程 | keypoint metadata、SourceIndex、output layout、坐标边界、sample-run-evidence | `docs/articles/zh-cn/yolovision-pose-tutorial.md`、`samples/YoloVision` | 用户自备姿态模型 | 完整教程已收口 |
-| 77 | 样例教程 | YoloVision OBB 教程 | angle unit/range、SourceIndex、axis-aligned 与 rotated NMS 边界、真实 evidence | `docs/articles/zh-cn/yolovision-obb-tutorial.md`、`samples/YoloVision` | 用户自备 OBB 模型 | 完整教程已收口 |
-| 78 | 样例教程 | YoloVision Classification 与 Semantic Segmentation 教程 | labels、Top-K、semantic output layout、argmax、真实资产需求 | `docs/articles/zh-cn/yolovision-classification-semantic-tutorial.md`、`samples/YoloVision` | 用户自备 cls/sem 模型 | 完整教程已收口 |
+| 73 | 样例教程 | YoloVision 全任务系列总览 | v5/v6/v7/v8/v9/v10/v11/v26、custom、det/cls/seg/obb/pose/sem、support matrix 与 real-model-runtime 边界 | `docs/articles/zh-cn/yolovision-all-task-overview.md`、`applications/YoloVision`、`docs/articles/zh-cn/real-model-evidence-backfill-playbook.md` | 用户自备 YOLO-family ONNX | 完整教程已收口 |
+| 74 | 样例教程 | YoloVision Detection 教程 | detection layout、objectness、NMS、TensorRtExec build-only、sample-run-evidence | `docs/articles/zh-cn/yolovision-detection-tutorial.md`、`applications/YoloVision` | 用户自备检测模型 | 完整教程已收口 |
+| 75 | 样例教程 | YoloVision Segmentation 教程 | mask prototype、coefficients、多输出 metadata、sidecar-only 与 real-model-runtime | `docs/articles/zh-cn/yolovision-segmentation-tutorial.md`、`applications/YoloVision` | 用户自备分割模型 | 完整教程已收口 |
+| 76 | 样例教程 | YoloVision Pose 教程 | keypoint metadata、SourceIndex、output layout、坐标边界、sample-run-evidence | `docs/articles/zh-cn/yolovision-pose-tutorial.md`、`applications/YoloVision` | 用户自备姿态模型 | 完整教程已收口 |
+| 77 | 样例教程 | YoloVision OBB 教程 | angle unit/range、SourceIndex、axis-aligned 与 rotated NMS 边界、真实 evidence | `docs/articles/zh-cn/yolovision-obb-tutorial.md`、`applications/YoloVision` | 用户自备 OBB 模型 | 完整教程已收口 |
+| 78 | 样例教程 | YoloVision Classification 与 Semantic Segmentation 教程 | labels、Top-K、semantic output layout、argmax、真实资产需求 | `docs/articles/zh-cn/yolovision-classification-semantic-tutorial.md`、`applications/YoloVision` | 用户自备 cls/sem 模型 | 完整教程已收口 |
 | 79 | 安全边界 | Callback 与 Allocator 安全桥接路线 | owner ledger、borrowed pointer、nothrow callback、real callback runtime proof、deferred boundary | `docs/articles/zh-cn/callback-allocator-safety-bridge-roadmap.md`、`docs/articles/zh-cn/real-callback-runtime-evidence-schema.md` | 真实 callback runtime proof | 完整教程已收口 |
 | 80 | 证据教程 | 外部模型 Evidence 回填案例总览 | build-only、sidecar-only、sample-run-evidence、real-model-runtime、package-consumer-runtime、post publish verification | `docs/articles/zh-cn/external-model-evidence-case-study.md`、`docs/articles/zh-cn/real-model-evidence-backfill-playbook.md` | owner 提供真实模型和 proof | 完整教程已收口 |
 | 81 | 宣发总览 | TensorRtSharp4.0 项目能力与发布边界 | 项目价值、接口覆盖、C# wrapper、samples、TensorRtExec、YoloVision、release proof 边界 | `docs/articles/zh-cn/project-release-story-and-boundaries.md`、`docs/articles/zh-cn/project-overview.md` | 无 | 完整教程已收口 |

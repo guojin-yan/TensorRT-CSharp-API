@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <AssemblyName>JYPPX.TensorRtSharp.ApplicationTools</AssemblyName>
+    <RootNamespace>JYPPX.TensorRtSharp.Tools</RootNamespace>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+
+  <Import Project="..\..\..\build\JYPPX.PublicSamplePackages.props" />
+
+  <ItemGroup>
+    <Compile Include="..\..\..\src\JYPPX.TensorRtSharp.Tools\**\*.cs"
+             Exclude="..\..\..\src\JYPPX.TensorRtSharp.Tools\bin\**\*;..\..\..\src\JYPPX.TensorRtSharp.Tools\obj\**\*">
+      <Link>Tools\%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </Compile>
+  </ItemGroup>
+</Project>

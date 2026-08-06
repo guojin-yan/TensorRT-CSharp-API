@@ -47,7 +47,7 @@
     "format": "float32-bin",
     "elementCount": "1228800",
     "elementCountNumeric": 1228800,
-    "command": "dotnet run --project .\\samples\\YoloVision -- --family yolox --task det --image ..\\downloads\\yolox-apache\\derived\\dog.ppm --preprocessed-output ..\\downloads\\yolox-apache\\derived\\dog-yolox-s-1x3x640x640-bgr-top-left.fp32.bin --input-shape 1x3x640x640 --preprocess-only",
+    "command": "dotnet run --project .\\applications\\YoloVision -- --family yolox --task det --image ..\\downloads\\yolox-apache\\derived\\dog.ppm --preprocessed-output ..\\downloads\\yolox-apache\\derived\\dog-yolox-s-1x3x640x640-bgr-top-left.fp32.bin --input-shape 1x3x640x640 --preprocess-only",
     "notes": "Generated on E drive by the built-in YOLOX profile; model/image/tensor are not committed."
   },
   "tensor": {
@@ -89,8 +89,8 @@
     "sampleRunEvidenceCanPromoteRealModelRuntime": true,
     "sampleRunEvidenceFailureReasons": [],
     "buildOnlyCommand": "D:\\Program Files\\TensorRT-10.11.0.33-cu12\\bin\\trtexec.exe --onnx=E:\\GitSpace\\TensorRT-CSharp-API-4.0\\downloads\\yolox-apache\\source\\yolox_s.onnx --saveEngine=E:\\GitSpace\\TensorRT-CSharp-API-4.0\\downloads\\yolox-apache\\derived\\yolox_s-trt10.11-fp32.engine --skipInference --memPoolSize=workspace:1024 --profilingVerbosity=detailed",
-    "runCommand": "dotnet run --project .\\samples\\YoloVision -- --model ..\\downloads\\yolox-apache\\source\\yolox_s.onnx --labels ..\\downloads\\yolox-apache\\derived\\coco.names --image ..\\downloads\\yolox-apache\\derived\\dog.ppm --preprocessed-output ..\\downloads\\yolox-apache\\derived\\dog-yolox-s-1x3x640x640-bgr-top-left.fp32.bin --output-json .\\artifacts\\yolovision\\yolox-official-runtime\\yolovision-output.json --visualization .\\artifacts\\yolovision\\yolox-official-runtime\\yolovision-output.svg --input-shape 1x3x640x640 --tensor-rt-line 10 --family yolox --task det --layout boxes-first --has-objectness true --nms-mode class-aware --confidence 0.3 --iou-threshold 0.45 --top-k 20",
-    "sampleRunCommand": "dotnet run --project .\\samples\\YoloVision -- --model ..\\downloads\\yolox-apache\\source\\yolox_s.onnx --labels ..\\downloads\\yolox-apache\\derived\\coco.names --image ..\\downloads\\yolox-apache\\derived\\dog.ppm --input-shape 1x3x640x640 --tensor-rt-line 10 --family yolox --task det --layout boxes-first --has-objectness true --confidence 0.3 --iou-threshold 0.45",
+    "runCommand": "dotnet run --project .\\applications\\YoloVision -- --model ..\\downloads\\yolox-apache\\source\\yolox_s.onnx --labels ..\\downloads\\yolox-apache\\derived\\coco.names --image ..\\downloads\\yolox-apache\\derived\\dog.ppm --preprocessed-output ..\\downloads\\yolox-apache\\derived\\dog-yolox-s-1x3x640x640-bgr-top-left.fp32.bin --output-json .\\artifacts\\yolovision\\yolox-official-runtime\\yolovision-output.json --visualization .\\artifacts\\yolovision\\yolox-official-runtime\\yolovision-output.svg --input-shape 1x3x640x640 --tensor-rt-line 10 --family yolox --task det --layout boxes-first --has-objectness true --nms-mode class-aware --confidence 0.3 --iou-threshold 0.45 --top-k 20",
+    "sampleRunCommand": "dotnet run --project .\\applications\\YoloVision -- --model ..\\downloads\\yolox-apache\\source\\yolox_s.onnx --labels ..\\downloads\\yolox-apache\\derived\\coco.names --image ..\\downloads\\yolox-apache\\derived\\dog.ppm --input-shape 1x3x640x640 --tensor-rt-line 10 --family yolox --task det --layout boxes-first --has-objectness true --confidence 0.3 --iou-threshold 0.45",
     "expectedEvidenceLines": [
       "YoloVision TensorRtLine=10",
       "Profile Family=YoloX Task=Detection Layout=BoxesFirst",

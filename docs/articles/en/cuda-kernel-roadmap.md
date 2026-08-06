@@ -11,7 +11,7 @@ For the complete CUDA C++ source-to-PTX/CUBIN/LTO IR and owner-safe load/launch 
 Use this runnable sample first:
 
 ```powershell
-dotnet run --project .\samples\MultiStream
+dotnet run --project .\samples\Performance\01.MultiStream
 ```
 
 It validates the CUDA memory and stream primitives that a future GPU preprocessing demo will build on.

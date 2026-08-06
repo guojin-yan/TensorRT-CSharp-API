@@ -222,8 +222,8 @@ $tracks = @(
     ) `
     -RequiredCommands @(
       "pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Export-RealModelOwnerHandoff.ps1",
-      "dotnet run --project .\samples\Classification\Classification.csproj -- --runtime-package-key <key>",
-      "dotnet run --project .\samples\YoloVision\YoloVision.csproj -- --runtime-package-key <key>"
+      "dotnet run --project .\samples\ComputerVision\01.Classification\Classification.csproj -- --runtime-package-key <key>",
+      "dotnet run --project .\applications\YoloVision\YoloVision.csproj -- --runtime-package-key <key>"
     ) `
     -RequiredLogs @("sample runtime log", "model acquisition log", "sidecar audit log") `
     -RequiredHashes @("model file SHA256", "input file SHA256", "sample runtime log SHA256", "sidecar SHA256") `

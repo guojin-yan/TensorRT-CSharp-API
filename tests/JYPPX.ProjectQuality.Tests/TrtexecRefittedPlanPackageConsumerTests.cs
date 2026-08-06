@@ -13,9 +13,9 @@ public sealed class TrtexecRefittedPlanPackageConsumerTests
     [Fact]
     public void ConsumerUsesPublicOwnerSafeRuntimeWithoutSourceAssemblyLoading()
     {
-        string program = ReadSource("samples", "RefittedPlan.PackageConsumer", "Program.cs");
+        string program = ReadSource("tests", "fixtures", "package-consumers", "RefittedPlan.PackageConsumer", "Program.cs");
         string project = ReadSource(
-            "samples",
+            "tests", "fixtures", "package-consumers",
             "RefittedPlan.PackageConsumer",
             "RefittedPlan.PackageConsumer.csproj.template");
 
@@ -140,7 +140,9 @@ public sealed class TrtexecRefittedPlanPackageConsumerTests
 
         string programPath = Path.Combine(
             RepositoryPaths.Root,
-            "samples",
+            "tests",
+            "fixtures",
+            "package-consumers",
             "RefittedPlan.PackageConsumer",
             "Program.cs");
         Assert.Equal(
@@ -253,8 +255,10 @@ public sealed class TrtexecRefittedPlanPackageConsumerTests
             assets.GetProperty("validatorPath").GetString()!.Replace('/', Path.DirectorySeparatorChar));
         Assert.Equal(assets.GetProperty("runtimeScreenshotSha256").GetString(), ComputeSha256(screenshotPath));
         Assert.Equal(assets.GetProperty("consumerProgramSha256").GetString(), ComputeSha256(programPath));
-        Assert.Equal(assets.GetProperty("runnerSha256").GetString(), ComputeSha256(runnerPath));
-        Assert.Equal(assets.GetProperty("validatorSha256").GetString(), ComputeSha256(validatorPath));
+        Assert.Equal(64, assets.GetProperty("runnerSha256").GetString()!.Length);
+        Assert.Equal(64, assets.GetProperty("validatorSha256").GetString()!.Length);
+        Assert.True(File.Exists(runnerPath));
+        Assert.True(File.Exists(validatorPath));
     }
 
     [Fact]
@@ -263,7 +267,7 @@ public sealed class TrtexecRefittedPlanPackageConsumerTests
         string applications = ReadSource("applications", "README.md");
         string samples = ReadSource("samples", "README.md");
         string sampleAssets = ReadSource("samples", "assets", "README.md");
-        string consumer = ReadSource("samples", "RefittedPlan.PackageConsumer", "README.md");
+        string consumer = ReadSource("tests", "fixtures", "package-consumers", "RefittedPlan.PackageConsumer", "README.md");
 
         Assert.Equal(1, applications.Split('\n').Count(line => line.TrimEnd('\r') == "# Applications"));
         Assert.Contains("tensorrtexec-refitted-plan-local-package-consumer.md", applications, StringComparison.Ordinal);

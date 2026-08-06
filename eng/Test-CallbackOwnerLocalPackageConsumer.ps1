@@ -470,7 +470,7 @@ $nugetConfig = @"
   </packageSources>
 </configuration>
 "@
-$sampleRoot = Join-Path $RepositoryRoot "samples\$($scenarioConfig.sampleDirectory)"
+$sampleRoot = Join-Path $RepositoryRoot "tests\fixtures\package-consumers\$($scenarioConfig.sampleDirectory)"
 $project = Get-Content -LiteralPath (Join-Path $sampleRoot $scenarioConfig.projectTemplateFileName) -Raw
 $project = $project.
   Replace("__MANAGED_PACKAGE_ID__", $managedPackage.id).

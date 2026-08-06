@@ -2,7 +2,7 @@
 
 在源码树里完成一次 TensorRT 推理，只能证明当前项目引用和开发探测路径可用。真正准备给使用者安装时，还要验证一个仓库外项目能否只通过 `PackageReference` 恢复 managed API 与 bridge-only 包，并使用用户自行安装的 TensorRT/CUDA 加载 Engine、绑定显存、执行 enqueue 和读回结果。
 
-本文使用 TensorRtSharp4.0 的 `samples/RefittedPlan.PackageConsumer`，运行一个由 TensorRT MNIST ONNX 生成并持久化的 full-weight refitted plan。验证器会创建隔离项目、关闭 nuget.org、清除源码开发探测变量、执行数字 7 推理、逐元素比较 10 个输出，并在结束后删除消费者工作区。
+本文使用 TensorRtSharp4.0 的 `tests/fixtures/package-consumers/RefittedPlan.PackageConsumer`，运行一个由 TensorRT MNIST ONNX 生成并持久化的 full-weight refitted plan。验证器会创建隔离项目、关闭 nuget.org、清除源码开发探测变量、执行数字 7 推理、逐元素比较 10 个输出，并在结束后删除消费者工作区。
 
 ## 目标读者
 
@@ -15,7 +15,7 @@
 | 组件 | 本文中的职责 |
 | --- | --- |
 | TensorRtSharp4.0 | 提供 managed API、bridge-only 打包脚本、证据验证器和示例。 |
-| `samples/RefittedPlan.PackageConsumer` | 仓库外消费者的 `Program.cs` 与项目模板。 |
+| `tests/fixtures/package-consumers/RefittedPlan.PackageConsumer` | 仓库外消费者的 `Program.cs` 与项目模板。 |
 | `applications/TensorRtExec` | 从 ONNX 构建 stripped plan、refit 权重并持久化 full-weight plan。 |
 | `JYPPX.TensorRtSharp` | 管理 Runtime、Engine、ExecutionContext 和推理绑定。 |
 | `JYPPX.CudaSharp` | 管理 CUDA stream 与 GPU buffer 生命周期。 |
@@ -72,7 +72,7 @@ $WorkRoot = Join-Path $WorkspaceRoot 'work/refitted-plan-package-consumer'
 $InputTensor = Join-Path $WorkRoot 'digit-7-input-f32.bin'
 New-Item -ItemType Directory -Force -Path $WorkRoot | Out-Null
 
-dotnet .\samples\OnnxToEngine\bin\Release\net8.0\OnnxToEngine.dll `
+dotnet .\applications\OnnxToEngine\bin\Release\net8.0\OnnxToEngine.dll `
   --mnist --tensor-rt-line 10 `
   --onnx $ModelPath `
   --mnistInput (Join-Path $TensorRtData '7.pgm') `
@@ -130,7 +130,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass `
   -SkipConsumerValidation
 ```
 
-验证器会把 `samples/RefittedPlan.PackageConsumer` 复制到仓库外，只声明两个本地 source，并生成如下项目：
+验证器会把 `tests/fixtures/package-consumers/RefittedPlan.PackageConsumer` 复制到仓库外，只声明两个本地 source，并生成如下项目：
 
 ```xml
 <PackageReference Include="JYPPX.TensorRT.CSharp.API" Version="4.0.0-local" />

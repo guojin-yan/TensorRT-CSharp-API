@@ -1,6 +1,6 @@
 # 使用 TensorRtSharp4.0 在 C# 中运行官方 YOLOX-S 目标检测
 
-本文使用 Megvii 官方 YOLOX-S ONNX，完整演示 `samples/YoloVision` 如何准备模型与图片、执行 YOLOX 专用预处理、调用 TensorRT、解码 `[1,8400,85]` raw head，并把检测框绘制到原图。示例通过 `JYPPX.TensorRtSharp` 使用 TensorRT 托管接口，通过 `JYPPX.CudaSharp` 管理 CUDA 资源；CUDA、cuDNN、TensorRT 和 native bridge 均由使用者自行安装，不随项目打包。
+本文使用 Megvii 官方 YOLOX-S ONNX，完整演示 `applications/YoloVision` 如何准备模型与图片、执行 YOLOX 专用预处理、调用 TensorRT、解码 `[1,8400,85]` raw head，并把检测框绘制到原图。示例通过 `JYPPX.TensorRtSharp` 使用 TensorRT 托管接口，通过 `JYPPX.CudaSharp` 管理 CUDA 资源；CUDA、cuDNN、TensorRT 和 native bridge 均由使用者自行安装，不随项目打包。
 
 本文只把代码、证据 JSON 和允许再分发的 CC0 结果图提交到仓库。ONNX、输入图片、预处理 tensor、engine 与原始日志保存在仓库外层工作目录，后续可迁移到独立 Model Zoo。
 
@@ -12,7 +12,7 @@
 | --- | --- | --- |
 | 托管 TensorRT | `src/JYPPX.TensorRtSharp` | 解析 ONNX、创建 execution context、绑定输入输出并读取 TensorRT 结果 |
 | 托管 CUDA | `src/JYPPX.CudaSharp` | 提供 CUDA context、stream 与 device memory 的安全封装 |
-| 用户示例 | `samples/YoloVision` | 完成图片预处理、YOLOX grid/stride 解码、NMS、JSON 报告和 SVG 可视化 |
+| 用户示例 | `applications/YoloVision` | 完成图片预处理、YOLOX grid/stride 解码、NMS、JSON 报告和 SVG 可视化 |
 
 YOLOX 与常见 YOLOv8 raw head 的差异不只在 family 名称。官方 YOLOX-S 输出需要先依据 stride 和 grid 还原中心点、宽高，再计算 `objectness * classScore` 并执行 NMS。本项目把这套语义限定在 detection；`cls/seg/obb/pose/sem` 会明确返回不支持，不会落入错误的通用 decoder。
 
@@ -65,15 +65,27 @@ output:[1,8400,85]
 
 输出的 8400 行来自 `80*80 + 40*40 + 20*20`，每行包含 `cx,cy,w,h,objectness` 和 80 个类别分数。若名称、shape 或列语义不同，应先调整 metadata 与 decoder，不能强行套用本文参数。
 
-## 创建本地包消费项目
+## 使用公开包准备应用
 
-本篇的证明目标是源码树真实模型运行，不把临时 `.nupkg` 或 `ProjectReference` 描述成公开包。仓库提供 `samples/YoloVision.PackageConsumer` 和 `eng/Test-YoloVisionManagedPackageDryRun.ps1`，可在发布前验证托管包布局和入口兼容性；当前未获得发布授权，因此本节不执行 NuGet/GitHub Packages 推送，也不把源码树运行提升为 `package-consumer-runtime`。
+`applications/YoloVision` 是完整应用并设置为 `IsPackable=false`。它通过共享 props 引用已发布的
+`JYPPX.TensorRT.CSharp.API` 4 系列包，以及作者维护的
+[OpenCV-CSharp-API](https://github.com/guojin-yan/OpenCV-CSharp-API)。应用本身不发布 YoloVision 案例 NuGet 包。
 
-需要单独验证消费方式时，应在仓库外创建控制台项目，通过本地 feed 引用 dry-run 生成的 `JYPPX.TensorRT.CSharp.API` 与 `JYPPX.TensorRT.CSharp.API.YoloVision`，然后调用公开的 `YoloVisionCommand.Run(args)`。这条流程与本文的模型、预处理和结果合同相同，但证据分类必须分别记录。
+新建仓库外项目时，可以让 NuGet 获取当前公开预览版，而不在文章中写死具体版本：
+
+```powershell
+dotnet add package JYPPX.TensorRT.CSharp.API --prerelease
+dotnet add package JYPPX.OpenCV.CSharp.API --prerelease
+dotnet add package JYPPX.OpenCV.runtime.win-x64 --prerelease
+dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --prerelease
+```
+
+最后一个包 ID 必须按目标机器环境替换。它只包含项目自有 bridge；CUDA、cuDNN、TensorRT 和 NVRTC
+继续由用户安装。仓库中的 YoloVision 项目直接运行当前源码，但 TensorRT/CUDA API 来自公开 NuGet 包。
 
 ## 编写程序入口
 
-`samples/YoloVision/Program.cs` 直接调用托管 TensorRT API，不通过 Python 或 `trtexec` 代跑推理。主链路可以归纳为：
+`applications/YoloVision/Program.cs` 直接调用托管 TensorRT API，不通过 Python 或 `trtexec` 代跑推理。主链路可以归纳为：
 
 ```csharp
 YoloImagePreprocessResult imagePreprocess = YoloImagePreprocessor.Preprocess(
@@ -132,7 +144,7 @@ score   = objectness * bestClassScore
 坐标还原后再执行 class-aware NMS。程序入口显式写出所有影响结果的参数：
 
 ```powershell
-dotnet run --project ./samples/YoloVision -- `
+dotnet run --project ./applications/YoloVision -- `
   --model <models-root>/YoloVision/Detection/yolox-s-megvii-v0.1.1rc0/yolox_s.onnx `
   --labels <asset-root>/coco.names `
   --image <asset-root>/liverpool-street-bus-station-1280.ppm `

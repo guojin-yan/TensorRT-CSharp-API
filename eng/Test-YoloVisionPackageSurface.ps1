@@ -29,7 +29,7 @@ if ([string]::IsNullOrWhiteSpace($PackagePath)) {
   $PackagePath = Join-Path $RepositoryRoot "artifacts\yolovision-nupkg\JYPPX.TensorRT.CSharp.API.YoloVision.$PackageVersion.nupkg"
 }
 if ([string]::IsNullOrWhiteSpace($BuiltOutputDirectory)) {
-  $BuiltOutputDirectory = Join-Path $RepositoryRoot "samples\YoloVision\bin\Release\net8.0"
+  $BuiltOutputDirectory = Join-Path $RepositoryRoot "applications\YoloVision\bin\Release\net8.0"
 }
 if ([string]::IsNullOrWhiteSpace($ReportDirectory)) {
   $ReportDirectory = Join-Path $RepositoryRoot "artifacts\yolovision\package-surface-audit"

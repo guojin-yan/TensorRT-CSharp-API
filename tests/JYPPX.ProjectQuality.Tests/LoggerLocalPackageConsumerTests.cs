@@ -10,8 +10,8 @@ public sealed class LoggerLocalPackageConsumerTests
     [Fact]
     public void ConsumerUsesOnlyPackagesAndReceivesRealTensorRtMessages()
     {
-        string template = ReadSource("samples", "Logger.PackageConsumer", "Logger.PackageConsumer.csproj.template");
-        string program = ReadSource("samples", "Logger.PackageConsumer", "Program.cs");
+        string template = ReadSource("tests", "fixtures", "package-consumers", "Logger.PackageConsumer", "Logger.PackageConsumer.csproj.template");
+        string program = ReadSource("tests", "fixtures", "package-consumers", "Logger.PackageConsumer", "Program.cs");
 
         Assert.Equal(2, Regex.Matches(template, "<PackageReference ").Count);
         Assert.DoesNotContain("ProjectReference", template, StringComparison.Ordinal);

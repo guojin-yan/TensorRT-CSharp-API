@@ -1,6 +1,6 @@
 # ONNX 到 Engine：把模型转换做成可审计流程
 
-ONNX 到 TensorRT engine 的转换是 TensorRtSharp4.0 最容易被用户感知的能力。`samples/OnnxToEngine/Program.cs` 提供了面向样例和文章教程的转换入口，`applications/TensorRtExec` 则承担更完整的 trtexec-like 参数、CLI/WinForms 双入口、报告和 evidence sidecar。
+ONNX 到 TensorRT engine 的转换是 TensorRtSharp4.0 最容易被用户感知的能力。`applications/OnnxToEngine/Program.cs` 提供了面向样例和文章教程的转换入口，`applications/TensorRtExec` 则承担更完整的 trtexec-like 参数、CLI/WinForms 双入口、报告和 evidence sidecar。
 
 这条链路要说清楚两件事：第一，ONNX parse、builder config、engine serialization、load-engine readonly diagnostics 和 report JSON 都可以做成可审计证据；第二，转换成功不是 package-consumer-runtime proof，也不等于模型语义正确。build-only、dry-run、dependency-probe-only、local feed、ProjectReference 和 direct `.nupkg` install 只能放在证据梯子的低层。
 
@@ -13,7 +13,7 @@ ONNX 到 TensorRT engine 的转换是 TensorRtSharp4.0 最容易被用户感知�
 
 ## 关键路径
 
-- 样例入口：`samples/OnnxToEngine/Program.cs`。
+- 样例入口：`applications/OnnxToEngine/Program.cs`。
 - 共享参数解析：`src/JYPPX.TensorRtSharp.Tools/Trtexec/TrtexecLikeParser.cs`、`TrtexecLikeParser.Arguments.cs`、
   `TrtexecLikeParser.ScalarParsing.cs`、`TrtexecLikeParser.BuildOptionValues.cs`、`TrtexecLikeParser.MemoryUnits.cs`。
 - 参数模型：`src/JYPPX.TensorRtSharp.Tools/Trtexec/TrtexecLikeOptions.cs`、`OnnxEngineBuildOptions.cs`。
@@ -35,7 +35,7 @@ ONNX 到 TensorRT engine 的转换是 TensorRtSharp4.0 最容易被用户感知�
 ```powershell
 $assetRoot = "..\downloads\onnx-to-engine"
 
-dotnet run --project .\samples\OnnxToEngine\OnnxToEngine.csproj -- `
+dotnet run --project .\applications\OnnxToEngine\OnnxToEngine.csproj -- `
   --onnx "$assetRoot\models\model.onnx" `
   --saveEngine "$assetRoot\engines\model.plan" `
   --minShapes images:1x3x640x640 `
@@ -135,10 +135,10 @@ EvidenceSidecar
 
 ## MNIST 路径和真实模型边界
 
-`samples/OnnxToEngine/Program.cs` 还有一个 `--mnist` 路径，走 `MnistOnnxRuntimeService`：
+`applications/OnnxToEngine/Program.cs` 还有一个 `--mnist` 路径，走 `MnistOnnxRuntimeService`：
 
 ```powershell
-dotnet run --project .\samples\OnnxToEngine\OnnxToEngine.csproj -- `
+dotnet run --project .\applications\OnnxToEngine\OnnxToEngine.csproj -- `
   --mnist `
   --tensor-rt-line 10 `
   --onnx "$assetRoot\models\mnist.onnx" `
@@ -156,7 +156,7 @@ dotnet run --project .\samples\OnnxToEngine\OnnxToEngine.csproj -- `
 
 YoloVision 负责把真实模型资产、输入样例、输出 schema 和任务 metadata 组织起来。OnnxToEngine 负责转换，TensorRtExec 负责更接近 `trtexec` 的参数和报告，YoloVision 则把 detection、classification、segmentation、OBB、pose、semantic segmentation 等任务串成可复核案例。
 
-公开文章应使用 `samples/YoloVision` 和 `samples/assets/yolovision-article-case-pack.json` 的口径，覆盖 YOLOv5、YOLOv6、YOLOv7、YOLOv8、YOLOv9、YOLOv10、YOLO11、YOLO26 等系列的候选路线，不得退回早期过窄的 detection-only 样例命名。模型获取、license、ONNX export、engine build、YoloVision run、output schema 和 SHA256 都要由 owner evidence 补齐。
+公开文章应使用 `applications/YoloVision` 和 `samples/assets/yolovision-article-case-pack.json` 的口径，覆盖 YOLOv5、YOLOv6、YOLOv7、YOLOv8、YOLOv9、YOLOv10、YOLO11、YOLO26 等系列的候选路线，不得退回早期过窄的 detection-only 样例命名。模型获取、license、ONNX export、engine build、YoloVision run、output schema 和 SHA256 都要由 owner evidence 补齐。
 
 ## proof 边界
 

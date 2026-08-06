@@ -3,7 +3,7 @@
 > 文章类型：样例教程长文
 > 适合发布：微信公众号、技术博客、用户入门材料
 > 配图建议：从 host input 到 device buffer、tensor address binding、enqueue、host output 的闭环图。
-> 发布摘要：通过 `samples/InferenceBindings` 展示 TensorRtSharp4.0 如何把 execution context 的 shape、device buffer、tensor address、readiness 和 readback 收敛成 C# 高层工作流。
+> 发布摘要：通过 `samples/Inference/01.Bindings` 展示 TensorRtSharp4.0 如何把 execution context 的 shape、device buffer、tensor address、readiness 和 readback 收敛成 C# 高层工作流。
 
 ## 真正的难点在 engine 之后
 
@@ -33,8 +33,8 @@ flowchart LR
 对应文件：
 
 ```text
-samples/InferenceBindings/Program.cs
-samples/InferenceBindings/README.md
+samples/Inference/01.Bindings/Program.cs
+samples/Inference/01.Bindings/README.md
 docs/articles/zh-cn/inference-bindings-tutorial.md
 ```
 
@@ -43,7 +43,7 @@ docs/articles/zh-cn/inference-bindings-tutorial.md
 ```powershell
 dotnet build .\TensorRtSharp.sln -c Debug --no-restore /p:UseSharedCompilation=false
 $env:JYPPX_ENABLE_DEVELOPMENT_PROBING = "1"
-dotnet .\samples\InferenceBindings\bin\Debug\net8.0\InferenceBindings.dll --tensor-rt-line 10 --batch 2
+dotnet .\samples\Inference\01.Bindings\bin\Debug\net8.0\InferenceBindings.dll --tensor-rt-line 10 --batch 2
 ```
 
 如果你正在验证 package consumer，不要把这个样例的本地运行结果直接等同于 NuGet 包消费端结果。包消费端仍应使用 `eng\Test-PackageConsumer.ps1` 生成独立 evidence。
@@ -148,9 +148,9 @@ $case = "..\downloads\cases\inference-bindings-identity"
 New-Item -ItemType Directory -Force -Path "$case\logs" | Out-Null
 Set-Location $repo
 
-dotnet build .\samples\InferenceBindings\InferenceBindings.csproj -c Debug --no-restore --nologo
+dotnet build .\samples\Inference\01.Bindings\InferenceBindings.csproj -c Debug --no-restore --nologo
 $env:JYPPX_ENABLE_DEVELOPMENT_PROBING = "1"
-dotnet .\samples\InferenceBindings\bin\Debug\net8.0\InferenceBindings.dll `
+dotnet .\samples\Inference\01.Bindings\bin\Debug\net8.0\InferenceBindings.dll `
   --tensor-rt-line 10 --batch 2 2>&1 |
   Tee-Object "$case\logs\trt10-batch2.log"
 ```

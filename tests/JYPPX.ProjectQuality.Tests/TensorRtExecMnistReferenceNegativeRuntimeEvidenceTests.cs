@@ -104,7 +104,7 @@ public sealed class TensorRtExecMnistReferenceNegativeRuntimeEvidenceTests
         Assert.Equal(validation.RootElement.GetProperty("checkCount").GetInt32(), validation.RootElement.GetProperty("passedCount").GetInt32());
         Assert.Equal(0, validation.RootElement.GetProperty("failureCount").GetInt32());
 
-        string program = File.ReadAllText(RepositoryPath("samples", "RefittedPlan.PackageConsumer", "Program.cs"));
+        string program = File.ReadAllText(RepositoryPath("tests", "fixtures", "package-consumers", "RefittedPlan.PackageConsumer", "Program.cs"));
         string runner = File.ReadAllText(RepositoryPath("eng", "Test-TensorRtExecMnistReferenceNegativeRuntime.ps1"));
         string validator = File.ReadAllText(RepositoryPath("eng", "Test-TensorRtExecMnistReferenceNegativeRuntimeEvidence.ps1"));
         Assert.Contains("OutputValidated=", program, StringComparison.Ordinal);

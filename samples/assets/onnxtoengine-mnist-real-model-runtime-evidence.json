@@ -92,7 +92,7 @@
     "sourceTreeFailClosedCount": 5
   },
   "commands": {
-    "positive": "dotnet ./samples/OnnxToEngine/bin/Release/net8.0/OnnxToEngine.dll --mnist --tensor-rt-line 10 --onnx <models>/OnnxToEngine/MNIST/nvidia-tensorrt-10.11/mnist.onnx --mnistInput <TensorRT>/data/mnist/7.pgm --expectedDigit 7 --minimumConfidence 0.9 --saveEngine <artifacts>/mnist-positive.plan --exportReport <artifacts>/mnist-positive-report.json --exportOutput <artifacts>/mnist-positive-output.json --exportPreprocessedInput <artifacts>/mnist-input-f32.bin",
+    "positive": "dotnet ./applications/OnnxToEngine/bin/Release/net8.0/OnnxToEngine.dll --mnist --tensor-rt-line 10 --onnx <models>/OnnxToEngine/MNIST/nvidia-tensorrt-10.11/mnist.onnx --mnistInput <TensorRT>/data/mnist/7.pgm --expectedDigit 7 --minimumConfidence 0.9 --saveEngine <artifacts>/mnist-positive.plan --exportReport <artifacts>/mnist-positive-report.json --exportOutput <artifacts>/mnist-positive-output.json --exportPreprocessedInput <artifacts>/mnist-input-f32.bin",
     "negative": "repeat the positive command with --expectedDigit 6 and separate output paths"
   },
   "proofBoundary": {

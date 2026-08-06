@@ -26,12 +26,12 @@ TensorRtSharp4.0 是面向 .NET 的 TensorRT / CUDA 高层封装项目。它的�
 
 当前仓库中更适合作为入门路径的样例包括：
 
-- `samples/MultiStream`：CUDA stream/event 和跨 stream ordering。
-- `samples/DynamicShape`：TensorRT dynamic shape、optimization profile 和 inference binding。
-- `samples/InferenceBindings`：最小 identity network 的输入输出绑定和 enqueue。
-- `samples/OnnxToEngine`：ONNX parser、serialized engine build、deserialize 和 round-trip。
+- `samples/Performance/01.MultiStream`：CUDA stream/event 和跨 stream ordering。
+- `samples/Inference/02.DynamicShapes`：TensorRT dynamic shape、optimization profile 和 inference binding。
+- `samples/Inference/01.Bindings`：最小 identity network 的输入输出绑定和 enqueue。
+- `applications/OnnxToEngine`：ONNX parser、serialized engine build、deserialize 和 round-trip。
 
-`samples/Classification` 与 `samples/YoloVision` 是面向真实模型的用户侧样例，但模型、labels、图片不随仓库分发，需要用户自行准备可再分发资产。
+`samples/ComputerVision/01.Classification` 与 `applications/YoloVision` 是面向真实模型的用户侧样例，但模型、labels、图片不随仓库分发，需要用户自行准备可再分发资产。
 
 更多发布前完成度请查看 `artifacts/interface-coverage/release-api-readiness-audit.json`。它会明确 safe read-only candidates、blocked ownership risk APIs 和跨版本 guard，而不是只看 manifest/source 是否匹配。
 
@@ -46,8 +46,8 @@ dotnet test .\tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj
 
 如果要从用户路径试用，优先读这些入口：
 
-- `samples/OnnxToEngine`
-- `samples/YoloVision`
+- `applications/OnnxToEngine`
+- `applications/YoloVision`
 - `applications/TensorRtExec`
 - `src/JYPPX.TensorRtSharp`
 - `src/JYPPX.CudaSharp`
@@ -92,12 +92,12 @@ TensorRtSharp4.0 适合：
 
 - 架构图：`native bridge -> generated interop -> high-level wrapper -> samples/smoke/package gates`。
 - 完成度漏斗图：manifest/source match、non-deferred implementation、C# wrapper、smoke、package-consumer proof、post-publish proof。
-- 用户路径图：`samples/OnnxToEngine`、`samples/YoloVision`、`applications/TensorRtExec`、`docs/articles/zh-cn`。
+- 用户路径图：`applications/OnnxToEngine`、`applications/YoloVision`、`applications/TensorRtExec`、`docs/articles/zh-cn`。
 
 ## 下一步
 
-- 模型用户从 `samples/OnnxToEngine` 和 `applications/TensorRtExec` 开始，先完成 ONNX build/report。
-- 视觉用户从 `samples/YoloVision` 开始，准备模型、labels、输入资产、license 和 SHA256。
+- 模型用户从 `applications/OnnxToEngine` 和 `applications/TensorRtExec` 开始，先完成 ONNX build/report。
+- 视觉用户从 `applications/YoloVision` 开始，准备模型、labels、输入资产、license 和 SHA256。
 - 维护者继续按 `artifacts/interface-coverage/tensorrt-interface-comparison.csv` 筛选安全只读 deferred API，优先完成 manifest/source/interop/wrapper/smoke 闭环。
 
 Boundary keywords: not public package proof, not post-publish proof, not package push, not release close approval.

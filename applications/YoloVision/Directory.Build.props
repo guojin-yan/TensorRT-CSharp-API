@@ -1,0 +1,8 @@
+<Project>
+  <PropertyGroup>
+    <JYPPXIncludeOpenCvSampleSupport>true</JYPPXIncludeOpenCvSampleSupport>
+  </PropertyGroup>
+  <Import Project="..\..\build\JYPPX.SampleSupport.props" />
+  <Import Project="..\..\build\JYPPX.PublicSamplePackages.props" />
+  <Import Project="..\..\build\JYPPX.OpenCvSamplePackages.props" />
+</Project>

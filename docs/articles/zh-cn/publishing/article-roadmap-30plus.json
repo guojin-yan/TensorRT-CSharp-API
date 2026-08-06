@@ -313,14 +313,14 @@
         "engine 保存",
         "report 输出"
       ],
-      "sampleOrCodePath": "samples/OnnxToEngine",
+      "sampleOrCodePath": "applications/OnnxToEngine",
       "visualAssets": [
         "命令输出截图"
       ],
       "status": "ready",
       "targetPath": "docs/articles/zh-cn/publishing/onnxtoengine-快速入门-从-onnx-到-tensorrt-engine.md",
       "sourceArtifacts": [
-        "samples/OnnxToEngine"
+        "applications/OnnxToEngine"
       ],
       "proofBoundary": "Article planning/content is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push.",
       "mustAvoidClaims": [
@@ -345,14 +345,14 @@
         "timing cache",
         "proof 边界"
       ],
-      "sampleOrCodePath": "samples/OnnxToEngine/trtexec-parity-matrix.json",
+      "sampleOrCodePath": "applications/OnnxToEngine/trtexec-parity-matrix.json",
       "visualAssets": [
         "参数对照表"
       ],
       "status": "ready",
       "targetPath": "docs/articles/zh-cn/publishing/onnxtoengine-与官方-trtexec-参数对照.md",
       "sourceArtifacts": [
-        "samples/OnnxToEngine/trtexec-parity-matrix.json"
+        "applications/OnnxToEngine/trtexec-parity-matrix.json"
       ],
       "proofBoundary": "Article planning/content is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push.",
       "mustAvoidClaims": [
@@ -470,14 +470,14 @@
         "det/cls/seg/obb/pose/sem",
         "证据边界"
       ],
-      "sampleOrCodePath": "samples/YoloVision/yolo-model-matrix.json",
+      "sampleOrCodePath": "applications/YoloVision/yolo-model-matrix.json",
       "visualAssets": [
         "YOLO family/task 矩阵图"
       ],
       "status": "ready",
       "targetPath": "docs/articles/zh-cn/publishing/yolovision-总览-一个样例覆盖-yolo-全系列.md",
       "sourceArtifacts": [
-        "samples/YoloVision/yolo-model-matrix.json"
+        "applications/YoloVision/yolo-model-matrix.json"
       ],
       "proofBoundary": "Article planning/content is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push.",
       "mustAvoidClaims": [
@@ -724,14 +724,14 @@
         "运行命令",
         "evidence"
       ],
-      "sampleOrCodePath": "samples/Classification",
+      "sampleOrCodePath": "samples/ComputerVision/01.Classification",
       "visualAssets": [
         "分类结果截图"
       ],
       "status": "needs sample",
       "targetPath": "docs/articles/zh-cn/publishing/classification-样例-自备-onnx-分类模型接入.md",
       "sourceArtifacts": [
-        "samples/Classification"
+        "samples/ComputerVision/01.Classification"
       ],
       "proofBoundary": "Article planning/content is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push.",
       "mustAvoidClaims": [
@@ -755,14 +755,14 @@
         "runtime shape",
         "binding readiness"
       ],
-      "sampleOrCodePath": "samples/DynamicShape",
+      "sampleOrCodePath": "samples/Inference/02.DynamicShapes",
       "visualAssets": [
         "shape profile 图"
       ],
       "status": "ready",
       "targetPath": "docs/articles/zh-cn/publishing/dynamic-shape-与-optimization-profile-实战.md",
       "sourceArtifacts": [
-        "samples/DynamicShape"
+        "samples/Inference/02.DynamicShapes"
       ],
       "proofBoundary": "Article planning/content is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push.",
       "mustAvoidClaims": [
@@ -786,14 +786,14 @@
         "enqueue",
         "readback"
       ],
-      "sampleOrCodePath": "samples/InferenceBindings",
+      "sampleOrCodePath": "samples/Inference/01.Bindings",
       "visualAssets": [
         "绑定流程图"
       ],
       "status": "ready",
       "targetPath": "docs/articles/zh-cn/publishing/inferencebindings-让-tensorrt-输入输出绑定更像-c.md",
       "sourceArtifacts": [
-        "samples/InferenceBindings"
+        "samples/Inference/01.Bindings"
       ],
       "proofBoundary": "Article planning/content is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push.",
       "mustAvoidClaims": [
@@ -818,14 +818,14 @@
         "copy",
         "ordering"
       ],
-      "sampleOrCodePath": "samples/MultiStream",
+      "sampleOrCodePath": "samples/Performance/01.MultiStream",
       "visualAssets": [
         "stream timeline 图"
       ],
       "status": "ready",
       "targetPath": "docs/articles/zh-cn/publishing/multistream-cuda-stream-event-入门.md",
       "sourceArtifacts": [
-        "samples/MultiStream"
+        "samples/Performance/01.MultiStream"
       ],
       "proofBoundary": "Article planning/content is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push.",
       "mustAvoidClaims": [
@@ -1274,7 +1274,7 @@
       "status": "near-ready-owner-proof-input",
       "targetPath": "docs/articles/zh-cn/publishing/yolovision-真实资产证据链-从样例矩阵到-owner-proof.md",
       "sourceArtifacts": [
-        "samples/YoloVision/yolo-model-matrix.json",
+        "applications/YoloVision/yolo-model-matrix.json",
         "docs/articles/zh-cn/yolovision-owner-asset-evidence-guide.md"
       ],
       "proofBoundary": "Article body and owner proof input are near-ready guidance only: Article planning/content is not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push. Owner proof input still requires real assets, host/package metadata, stdout/stderr logs, hashes, and validators.",
@@ -1367,7 +1367,7 @@
         "official YOLOX TensorRT runtime",
         "local-package-consumer-runtime proof boundary"
       ],
-      "sampleOrCodePath": "samples/YoloVision.PackageConsumer",
+      "sampleOrCodePath": "tests/fixtures/legacy-package-consumers/YoloVision.PackageConsumer",
       "visualAssets": [
         "managed/YoloVision/bridge package dependency diagram",
         "local package consumer evidence ladder"
@@ -1375,7 +1375,7 @@
       "status": "ready",
       "targetPath": "docs/articles/zh-cn/yolovision-yolox-local-package-consumer-tutorial.md",
       "sourceArtifacts": [
-        "samples/YoloVision.PackageConsumer/Program.cs",
+        "tests/fixtures/legacy-package-consumers/YoloVision.PackageConsumer/Program.cs",
         "eng/Test-YoloVisionLocalPackageConsumer.ps1",
         "artifacts/interface-coverage/yolox-local-package-consumer-runtime-proof-closure.json"
       ],
@@ -1403,7 +1403,7 @@
         "no-second-NMS contract and troubleshooting",
         "runtime evidence and publication boundary"
       ],
-      "sampleOrCodePath": "samples/YoloVision/YoloEndToEndOutput.cs",
+      "sampleOrCodePath": "applications/YoloVision/YoloEndToEndOutput.cs",
       "visualAssets": [
         "checkpoint-to-owner-evidence Mermaid flow",
         "end-to-end six-column contract table",
@@ -1412,10 +1412,10 @@
       "status": "ready",
       "targetPath": "docs/articles/zh-cn/yolovision-yolov10-end-to-end-output-guide.md",
       "sourceArtifacts": [
-        "samples/YoloVision/YoloEndToEndOutput.cs",
-        "samples/YoloVision/Program.cs",
+        "applications/YoloVision/YoloEndToEndOutput.cs",
+        "applications/YoloVision/Program.cs",
         "tests/JYPPX.ProjectQuality.Tests/YoloVisionManagedPipelineTests.cs",
-        "samples/YoloVision/yolo-model-matrix.json"
+        "applications/YoloVision/yolo-model-matrix.json"
       ],
       "proofBoundary": "Article and managed decoder smoke are guidance and local managed evidence only: not runtime proof, not package-consumer-runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push.",
       "mustAvoidClaims": [

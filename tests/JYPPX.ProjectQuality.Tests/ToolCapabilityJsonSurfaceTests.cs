@@ -124,8 +124,8 @@ public sealed class ToolCapabilityJsonSurfaceTests
     public void CliEntrypointsExposeMachineReadableCapabilitySwitches()
     {
         string tensorRtExecCommand = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "TensorRtExec", "Console", "TensorRtExecCommand.cs"));
-        string onnxToEngineProgram = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "OnnxToEngine", "Program.cs"));
-        string onnxReadme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "OnnxToEngine", "README.md"));
+        string onnxToEngineProgram = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "OnnxToEngine", "Program.cs"));
+        string onnxReadme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "OnnxToEngine", "README.md"));
 
         Assert.Contains("--help-json", tensorRtExecCommand, StringComparison.Ordinal);
         Assert.Contains("TrtexecLikeOptionCapabilities.FormatJson(\"TensorRtExec\")", tensorRtExecCommand, StringComparison.Ordinal);
@@ -162,7 +162,7 @@ public sealed class ToolCapabilityJsonSurfaceTests
         Assert.Contains("IsRuntimeProof=False", output, StringComparison.Ordinal);
         Assert.Contains("IsPackageConsumerRuntimeProof=False", output, StringComparison.Ordinal);
 
-        string yoloReadme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "YoloVision", "README.md"));
+        string yoloReadme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "YoloVision", "README.md"));
         Assert.Contains("--self-test-capabilities", yoloReadme, StringComparison.Ordinal);
     }
 }

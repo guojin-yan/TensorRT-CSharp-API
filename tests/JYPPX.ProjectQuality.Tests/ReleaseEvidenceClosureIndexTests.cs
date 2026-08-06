@@ -32,9 +32,9 @@ public sealed class ReleaseEvidenceClosureIndexTests
 
         foreach (string required in new[]
         {
-            "samples/YoloVision/yolo-model-matrix.json",
-            "samples/YoloVision/yolovision-output.schema.json",
-            "samples/OnnxToEngine/trtexec-parity-matrix.json",
+            "applications/YoloVision/yolo-model-matrix.json",
+            "applications/YoloVision/yolovision-output.schema.json",
+            "applications/OnnxToEngine/trtexec-parity-matrix.json",
             "applications/TensorRtExec/tensor-rt-exec-trtexec-parity-matrix.json",
             "applications/TensorRtExec/tensor-rt-exec-release-candidate-gap-list.json",
             "applications/TensorRtExec/tensor-rt-exec-report.schema.json",

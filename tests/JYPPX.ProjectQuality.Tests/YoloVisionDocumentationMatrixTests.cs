@@ -20,10 +20,10 @@ public sealed class YoloVisionDocumentationMatrixTests
             "articles",
             "zh-cn",
             "yolovision-segmentation-mask-postprocess-guide.md"));
-        string readme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "YoloVision", "README.md"));
+        string readme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "YoloVision", "README.md"));
         string roadmap = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "articles", "zh-cn", "technical-article-roadmap.md"));
-        string schema = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "YoloVision", "yolovision-output.schema.json"));
-        string example = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "YoloVision", "examples", "yolovision-output-seg.example.json"));
+        string schema = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "YoloVision", "yolovision-output.schema.json"));
+        string example = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "YoloVision", "examples", "yolovision-output-seg.example.json"));
         string validator = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "eng", "Test-YoloVisionOutputReport.ps1"));
         string articleCasePack = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "assets", "yolovision-article-case-pack.json"));
         string ownerBackfillPack = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "assets", "yolovision-real-asset-owner-backfill-pack.json"));
@@ -126,13 +126,12 @@ public sealed class YoloVisionDocumentationMatrixTests
             "articles",
             "zh-cn",
             "yolovision-detection-tutorial.md"));
-        string readme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "YoloVision", "README.md"));
+        string readme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "YoloVision", "README.md"));
         string roadmap = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "articles", "zh-cn", "technical-article-roadmap.md"));
         string candidate = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "assets", "yolovision-yolov8-det-candidate.template.json"));
         string articlePack = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "assets", "yolovision-article-case-pack.json"));
         string ownerPack = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "assets", "yolovision-real-asset-owner-backfill-pack.json"));
         string generatedOwnerPack = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "assets", "yolovision-real-asset-owner-backfill-pack.generated.json"));
-        string ownerPackExporter = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "eng", "Export-YoloVisionRealAssetOwnerBackfillPack.ps1"));
 
         Assert.True(overview.Length >= 12000, $"All-task overview is too short: {overview.Length} characters.");
         Assert.True(detection.Length >= 12000, $"Detection tutorial is too short: {detection.Length} characters.");
@@ -243,8 +242,11 @@ public sealed class YoloVisionDocumentationMatrixTests
             Assert.Contains("yolov8n-det.ppm", pack, StringComparison.Ordinal);
         }
 
-        Assert.Contains("model-input-pixels-or-owner-confirmed", ownerPackExporter, StringComparison.Ordinal);
-        Assert.Contains("not-automatic-owner-transform-required", ownerPackExporter, StringComparison.Ordinal);
+        foreach (string pack in new[] { articlePack, ownerPack, generatedOwnerPack })
+        {
+            Assert.Contains("model-input-pixels-or-owner-confirmed", pack, StringComparison.Ordinal);
+            Assert.Contains("not-automatic-owner-transform-required", pack, StringComparison.Ordinal);
+        }
     }
 
     [Fact]
@@ -375,7 +377,7 @@ public sealed class YoloVisionDocumentationMatrixTests
             "zh-cn",
             "yolovision-classification-semantic-tutorial.md");
         string article = File.ReadAllText(articlePath);
-        string readme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "YoloVision", "README.md"));
+        string readme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "YoloVision", "README.md"));
         string roadmap = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "articles", "zh-cn", "technical-article-roadmap.md"));
 
         Assert.True(File.Exists(articlePath));
@@ -404,7 +406,7 @@ public sealed class YoloVisionDocumentationMatrixTests
             "--visualization-svg",
             "yolovision-output-cls.example.json",
             "yolovision-output-sem.example.json",
-            "samples/YoloVision/yolovision-task-output-contract.json",
+            "applications/YoloVision/yolovision-task-output-contract.json",
             "samples/assets/yolovision-article-case-pack.json",
             "Test-YoloVisionOutputReport.ps1",
             "Test-YoloVisionRealAssetOwnerProofInput.ps1 -Strict",
@@ -445,7 +447,7 @@ public sealed class YoloVisionDocumentationMatrixTests
             "## 六任务接入矩阵",
             "## 每个任务的命令骨架",
             "TensorRtExec build-only",
-            "samples/YoloVision/yolovision-task-output-contract.json",
+            "applications/YoloVision/yolovision-task-output-contract.json",
             "samples/assets/yolovision-assets.template.json",
             "--task cls",
             "--task seg",
@@ -479,7 +481,7 @@ public sealed class YoloVisionDocumentationMatrixTests
     {
         string articlePath = Path.Combine(RepositoryPaths.Root, "docs", "articles", "zh-cn", "yolo-vision-model-matrix.md");
         string article = File.ReadAllText(articlePath);
-        string readme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "YoloVision", "README.md"));
+        string readme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "YoloVision", "README.md"));
         string docsIndex = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "index.md"));
         string docsToc = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "toc.yml"));
 
@@ -527,9 +529,9 @@ public sealed class YoloVisionDocumentationMatrixTests
     [Fact]
     public void YoloVisionTaskOutputContractKeepsTasksDocsAndOwnerPacksAligned()
     {
-        string contractPath = Path.Combine(RepositoryPaths.Root, "samples", "YoloVision", "yolovision-task-output-contract.json");
-        string matrixPath = Path.Combine(RepositoryPaths.Root, "samples", "YoloVision", "yolo-model-matrix.json");
-        string readme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "YoloVision", "README.md"));
+        string contractPath = Path.Combine(RepositoryPaths.Root, "applications", "YoloVision", "yolovision-task-output-contract.json");
+        string matrixPath = Path.Combine(RepositoryPaths.Root, "applications", "YoloVision", "yolo-model-matrix.json");
+        string readme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "YoloVision", "README.md"));
         string article = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "articles", "zh-cn", "yolo-vision-model-matrix.md"));
         string ownerBackfillPack = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "assets", "yolovision-real-asset-owner-backfill-pack.json"));
         string articleCasePack = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "assets", "yolovision-article-case-pack.json"));
@@ -587,8 +589,8 @@ public sealed class YoloVisionDocumentationMatrixTests
         string relativeArticlePath = "articles/zh-cn/yolovision-yolov10-end-to-end-output-guide.md";
         string articlePath = Path.Combine(RepositoryPaths.Root, "docs", "articles", "zh-cn", "yolovision-yolov10-end-to-end-output-guide.md");
         string article = File.ReadAllText(articlePath);
-        string readme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "YoloVision", "README.md"));
-        string decoder = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "YoloVision", "YoloDetectionDecoder.cs"));
+        string readme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "YoloVision", "README.md"));
+        string decoder = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "YoloVision", "YoloDetectionDecoder.cs"));
         string docsIndex = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "index.md"));
         string docsToc = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "toc.yml"));
 
@@ -625,8 +627,7 @@ public sealed class YoloVisionDocumentationMatrixTests
 
         using JsonDocument matrix = JsonDocument.Parse(File.ReadAllText(Path.Combine(
             RepositoryPaths.Root,
-            "samples",
-            "YoloVision",
+            "applications", "YoloVision",
             "yolo-model-matrix.json")));
         JsonElement yoloV10 = matrix.RootElement.GetProperty("entries").EnumerateArray()
             .Single(static entry => entry.GetProperty("family").GetString() == "yolov10");

@@ -1,6 +1,6 @@
 # 在 C# 中使用 TensorRtSharp4.0 动态编译并运行 CUDA Kernel
 
-本文从 `samples/CudaRuntimeCompilation` 出发，演示如何在 C# 中调用 NVRTC 编译 CUDA C++ 源码，取得 PTX、CUBIN、LTO IR 和模板函数 lowered name，再分别通过 CUDA Runtime library 与 CUDA Driver module 启动同一个 `vector_add` kernel。最后读取 257 个结果并逐值校验，同时保留一次故意编译失败的真实日志。
+本文从 `samples/Cuda/01.RuntimeCompilation` 出发，演示如何在 C# 中调用 NVRTC 编译 CUDA C++ 源码，取得 PTX、CUBIN、LTO IR 和模板函数 lowered name，再分别通过 CUDA Runtime library 与 CUDA Driver module 启动同一个 `vector_add` kernel。最后读取 257 个结果并逐值校验，同时保留一次故意编译失败的真实日志。
 
 本例面向需要在运行时生成或调整 CUDA kernel、但不希望在 C# public API 中操作裸 native handle 和参数指针的开发者。文中的命令只构建和运行当前源码，不创建 Tag、GitHub Release，也不发布任何包。
 
@@ -129,8 +129,8 @@ $env:JYPPX_NVRTC_LIBRARY = $nvrtcPath
 $env:JYPPX_CUDA_ROOT = $cudaRoot
 $env:JYPPX_TENSORRT_ROOT = $tensorRtRoot
 
-dotnet build ./samples/CudaRuntimeCompilation/CudaRuntimeCompilation.csproj -c Debug
-dotnet run --project ./samples/CudaRuntimeCompilation --no-build
+dotnet build ./samples/Cuda/01.RuntimeCompilation/CudaRuntimeCompilation.csproj -c Debug
+dotnet run --project ./samples/Cuda/01.RuntimeCompilation --no-build
 ```
 
 也可以使用仓库脚本生成机器可读 smoke 记录：

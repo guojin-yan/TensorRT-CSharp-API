@@ -1,6 +1,6 @@
 # ONNX 到 Engine 动态 Shape Profile
 
-TensorRT 动态 shape 需要 min/opt/max profile。`samples/OnnxToEngine` 用内置 identity ONNX 演示 profile 绑定，`applications/TensorRtExec` 则用 trtexec-like 参数处理外部 ONNX。
+TensorRT 动态 shape 需要 min/opt/max profile。`applications/OnnxToEngine` 用内置 identity ONNX 演示 profile 绑定，`applications/TensorRtExec` 则用 trtexec-like 参数处理外部 ONNX。
 
 ## 参数格式
 
@@ -42,10 +42,10 @@ dotnet run --project .\applications\TensorRtExec -- `
 
 ## 与样例的关系
 
-- `samples/DynamicShape` 用于理解 profile 和 binding；
-- `samples/OnnxToEngine` 用于最小 ONNX round-trip；
+- `samples/Inference/02.DynamicShapes` 用于理解 profile 和 binding；
+- `applications/OnnxToEngine` 用于最小 ONNX round-trip；
 - `applications/TensorRtExec` 用于外部模型 build/report；
-- `samples/YoloVision` 和 `samples/Classification` 用于模型任务语义和真实输入。
+- `applications/YoloVision` 和 `samples/ComputerVision/01.Classification` 用于模型任务语义和真实输入。
 
 ## 边界说明
 

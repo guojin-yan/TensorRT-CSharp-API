@@ -89,8 +89,8 @@ public sealed class StreamReaderLocalPackageConsumerTests
     public void ExternalConsumerAndHarnessEnforceRealRuntimeAndPackageIsolation()
     {
         string template = ReadSource(
-            "samples", "StreamReader.PackageConsumer", "StreamReader.PackageConsumer.csproj.template");
-        string program = ReadSource("samples", "StreamReader.PackageConsumer", "Program.cs");
+            "tests", "fixtures", "package-consumers", "StreamReader.PackageConsumer", "StreamReader.PackageConsumer.csproj.template");
+        string program = ReadSource("tests", "fixtures", "package-consumers", "StreamReader.PackageConsumer", "Program.cs");
         string wrapper = ReadSource("eng", "Test-StreamReaderLocalPackageConsumer.ps1");
         string harness = ReadSource("eng", "Test-CallbackOwnerLocalPackageConsumer.ps1");
 

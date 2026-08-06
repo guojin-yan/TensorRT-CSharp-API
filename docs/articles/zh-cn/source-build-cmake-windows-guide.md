@@ -104,7 +104,7 @@ dotnet build .\tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.cspro
 - 新增 public API 没有同步 XML 注释或测试断言。
 - generated P/Invoke 签名与 C# wrapper 期望不一致。
 - 使用了错误属性名或旧类型名，例如 interface metadata 应读取 `TensorRtInterfaceInfo.Kind`。
-- samples 或 applications 引用了旧项目名；当前 live sample path 应使用 `samples/YoloVision`。
+- samples 或 applications 引用了旧项目名；当前 live sample path 应使用 `applications/YoloVision`。
 
 ## 第三步：配置 CMake
 
@@ -266,7 +266,7 @@ CUDA error 35 通常表示 driver/runtime 不兼容。处理顺序：
 - project-quality tests 通过或有明确 owner 输入项。
 - native bridge 使用目标 preset 成功 configure/build。
 - GitHub Release 与 NuGet 两个 bridge-only 渠道都能解释清楚。
-- `samples/YoloVision`、`samples/OnnxToEngine`、`applications/TensorRtExec` 的文档不再回流旧命名。
+- `applications/YoloVision`、`applications/OnnxToEngine`、`applications/TensorRtExec` 的文档不再回流旧命名。
 - 技术文章不是碎片式 API 文档，而是有背景、环境、步骤、代码、验证和排障的完整文章。
 
 ## 下一步

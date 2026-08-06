@@ -1,0 +1,28 @@
+<Project>
+  <PropertyGroup>
+    <JYPPXSampleSupportDirectory>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\samples\_shared\JYPPX.SampleSupport'))</JYPPXSampleSupportDirectory>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(MSBuildProjectExtension)' == '.csproj'">
+    <Compile Include="$(JYPPXSampleSupportDirectory)\SampleCommandLine.cs"
+             Link="JYPPX.SampleSupport\SampleCommandLine.cs" />
+    <Compile Include="$(JYPPXSampleSupportDirectory)\TensorRtSampleSupport.cs"
+             Link="JYPPX.SampleSupport\TensorRtSampleSupport.cs"
+             Condition="'$(JYPPXIncludeTensorRtSampleSupport)' == 'true' or '$(JYPPXIncludeTensorRtOnnxSampleSupport)' == 'true'" />
+    <Compile Include="$(JYPPXSampleSupportDirectory)\TensorRtOnnxSample.cs"
+             Link="JYPPX.SampleSupport\TensorRtOnnxSample.cs"
+             Condition="'$(JYPPXIncludeTensorRtOnnxSampleSupport)' == 'true'" />
+    <Compile Include="$(JYPPXSampleSupportDirectory)\TensorRtOnnxSample.Inputs.cs"
+             Link="JYPPX.SampleSupport\TensorRtOnnxSample.Inputs.cs"
+             Condition="'$(JYPPXIncludeTensorRtOnnxSampleSupport)' == 'true'" />
+    <Compile Include="$(JYPPXSampleSupportDirectory)\TensorRtOnnxSample.References.cs"
+             Link="JYPPX.SampleSupport\TensorRtOnnxSample.References.cs"
+             Condition="'$(JYPPXIncludeTensorRtOnnxSampleSupport)' == 'true'" />
+    <Compile Include="$(JYPPXSampleSupportDirectory)\SampleRgbImage.cs"
+             Link="JYPPX.SampleSupport\SampleRgbImage.cs"
+             Condition="'$(JYPPXIncludeTensorRtOnnxSampleSupport)' == 'true'" />
+    <Compile Include="$(JYPPXSampleSupportDirectory)\OpenCvSampleRgbImageDecoder.cs"
+             Link="JYPPX.SampleSupport\OpenCvSampleRgbImageDecoder.cs"
+             Condition="'$(JYPPXIncludeOpenCvSampleSupport)' == 'true'" />
+  </ItemGroup>
+</Project>

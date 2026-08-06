@@ -86,7 +86,7 @@ public sealed class PublishingRoadmapDocsTests
         string onnx = ReadDoc("onnx-to-engine-trtexec-parity-roadmap.md");
         string app = ReadDoc("tensorrtexec-console-winforms-application-roadmap.md");
         string samplesReadme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "README.md"));
-        string onnxReadme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "OnnxToEngine", "README.md"));
+        string onnxReadme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "OnnxToEngine", "README.md"));
         string applicationsReadme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "README.md"));
 
         foreach (string marker in new[]
@@ -113,11 +113,11 @@ public sealed class PublishingRoadmapDocsTests
         Assert.Contains("旧 detection-only 样例目录已经被 YoloVision 取代", yolo, StringComparison.Ordinal);
         Assert.DoesNotContain("YoloDet", yolo, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("YoloDet", samplesReadme, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("samples\\YoloVision", yolo, StringComparison.Ordinal);
+        Assert.Contains("applications\\YoloVision", yolo, StringComparison.Ordinal);
         Assert.Contains("package-consumer-runtime", yolo, StringComparison.Ordinal);
         Assert.Contains("not runtime proof", onnx, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("parse-only", onnx, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("implementationClass", File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "OnnxToEngine", "trtexec-parity-matrix.json")), StringComparison.Ordinal);
+        Assert.Contains("implementationClass", File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "OnnxToEngine", "trtexec-parity-matrix.json")), StringComparison.Ordinal);
         Assert.Contains("ownerEvidenceRequiredForPromotion", File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "TensorRtExec", "tensor-rt-exec-gui-cli-field-map.json")), StringComparison.Ordinal);
         Assert.Contains("trtexec", onnx + onnxReadme, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("Console", app, StringComparison.Ordinal);

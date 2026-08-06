@@ -194,7 +194,7 @@
   "commands": {
     "acquisition": "pwsh -NoProfile -ExecutionPolicy Bypass -File ./eng/Acquire-YoloV8DetectionOfficialAssets.ps1 -AssetRoot <E-drive-root> -PythonPath <python>",
     "reference": "python ./eng/Invoke-YoloVisionDetectionReference.py --weights <pt> --coco-yaml <yaml> --image <jpg> --onnx <onnx> --output-directory <reference-dir> --csharp-tensor <tensor> --actual-output <output-json>",
-    "runtime": "dotnet ./samples/YoloVision/bin/Release/net8.0/YoloVision.dll --model <onnx> --labels <labels> --image <ppm> --preprocessed-output <tensor> --input-shape 1x3x640x640 --tensor-rt-line 10 --family v8 --task det --layout channels-first --has-objectness false --class-count 80 --confidence 0.25 --iou-threshold 0.45 --top-k 10 --nms-mode class-aware --reference-outputs output0:<reference> --reference-abs-tolerance 0.02 --reference-rel-tolerance 0.05 --output-json <json> --visualization <svg>"
+    "runtime": "dotnet ./applications/YoloVision/bin/Release/net8.0/YoloVision.dll --model <onnx> --labels <labels> --image <ppm> --preprocessed-output <tensor> --input-shape 1x3x640x640 --tensor-rt-line 10 --family v8 --task det --layout channels-first --has-objectness false --class-count 80 --confidence 0.25 --iou-threshold 0.45 --top-k 10 --nms-mode class-aware --reference-outputs output0:<reference> --reference-abs-tolerance 0.02 --reference-rel-tolerance 0.05 --output-json <json> --visualization <svg>"
   },
   "proofBoundary": {
     "sourceTreeRealModelRuntime": true,

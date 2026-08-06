@@ -378,8 +378,8 @@ New-Item -ItemType Directory -Path $consumerRoot -Force | Out-Null
 New-Item -ItemType Directory -Path $ReportDirectory -Force | Out-Null
 New-Item -ItemType Directory -Path $CompactOutputDirectory -Force | Out-Null
 
-$programSourcePath = Join-Path $RepositoryRoot "samples\RefittedPlan.PackageConsumer\Program.cs"
-$projectTemplatePath = Join-Path $RepositoryRoot "samples\RefittedPlan.PackageConsumer\RefittedPlan.PackageConsumer.csproj.template"
+$programSourcePath = Join-Path $RepositoryRoot "tests\fixtures\package-consumers\RefittedPlan.PackageConsumer\Program.cs"
+$projectTemplatePath = Join-Path $RepositoryRoot "tests\fixtures\package-consumers\RefittedPlan.PackageConsumer\RefittedPlan.PackageConsumer.csproj.template"
 $programPath = Join-Path $consumerRoot "Program.cs"
 $projectPath = Join-Path $consumerRoot "RefittedPlan.PackageConsumer.csproj"
 $nugetConfigPath = Join-Path $consumerRoot "NuGet.config"

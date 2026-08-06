@@ -31,7 +31,7 @@
 [![文档](https://img.shields.io/badge/docs-DocFX-2f80ed)](https://guojin-yan.github.io/TensorRT-CSharp-API/)
 [![许可证](https://img.shields.io/badge/license-Apache--2.0-green)](LICENSE)
 
-TensorRtSharp4.0 是面向 .NET 的 TensorRT / CUDA 桥接项目，包含推理执行、CUDA 运行时编译、显存、流与事件、回调、分配器以及 TensorRtExec 桌面工具。首个公开候选版本按 4.0.0-preview.1 规划；它是源码和包的候选版本，不代表所有 TensorRT 功能都已经完成真实运行时验证。
+TensorRtSharp4.0 是面向 .NET 的 TensorRT / CUDA 桥接项目，包含推理执行、CUDA 运行时编译、显存、流与事件、回调、分配器以及 TensorRtExec 桌面工具。首个 4 系列预览版已经发布，当前开发重点转向使用公开包的系列案例、完整应用和配套技术文章。
 
 ## 项目简介
 
@@ -64,8 +64,8 @@ CUDA、cuDNN、TensorRT 和 NVRTC 由使用者自行安装。仓库不重新分�
 ~~~powershell
 dotnet new console -n TrtQuickstart
 cd TrtQuickstart
-dotnet add package JYPPX.TensorRT.CSharp.API --version 4.0.0-preview.1
-dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --version 4.0.0-preview.1
+dotnet add package JYPPX.TensorRT.CSharp.API --prerelease
+dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --prerelease
 ~~~
 
 程序创建 runtime、加载 engine、绑定输入输出并执行推理。bridge 包不包含 CUDA、cuDNN 或 TensorRT。请先阅读 [推理绑定教程](docs/articles/zh-cn/inference-bindings-tutorial.md) 和 [Windows 安装排错](docs/articles/zh-cn/windows-installation-and-troubleshooting-guide.md)。
@@ -77,11 +77,25 @@ dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.c
 | JYPPX.TensorRT.CSharp.API | TensorRT/CUDA 托管 API |
 | JYPPX.TensorRT.CSharp.API.Bridge.* | 仅项目自有原生桥接库 |
 
-`samples/YoloVision` 和 `samples/Classification` 是可运行演示。它们的项目文件和本地 package-consumer 验证脚本保留在源码中用于开发检查，但对应的示例包 ID 明确不进入任何公开包源和 Release 资产。
+位于 `samples/ComputerVision/01.Classification` 的 `Classification` 和位于 `applications/YoloVision` 的 `YoloVision` 都是可运行案例。它们使用已发布的 4 系列托管包，但自身不进入任何公开包源或 Release 资产。
+
+## 系列案例
+
+| 系列 | 项目 | 主要内容 |
+| --- | --- | --- |
+| CUDA | `Cuda/01.RuntimeCompilation` | CUDA RTC 编译、模块加载、kernel 启动与结果回读 |
+| 推理基础 | `Inference/01.Bindings`、`Inference/02.DynamicShapes` | binding、显存归属和动态 profile |
+| 性能 | `Performance/01.MultiStream` | CUDA stream、event 与跨流顺序 |
+| 计算机视觉 | `Classification` | 图像预处理、Top-K、JSON 和识别结果图 |
+| 完整应用 | `YoloVision`、`OnnxToEngine`、`TensorRtExec` | 多步骤工作流与高级用法 |
+
+可运行命令和对应文章见 [系列案例目录](samples/README.md) 与 [完整应用目录](applications/README.md)。
+
+CUDA RTC 路线图：[English](docs/articles/en/cuda-runtime-compilation-roadmap.md) | [简体中文](docs/articles/zh-cn/cuda-runtime-compilation-roadmap.md) | [技术文章](docs/articles/zh-cn/cuda-runtime-compilation-technical-article.md)
 
 ## 公开包与 Release 资产
 
-首个公开候选版本为 <code>4.0.0-preview.1</code>。NuGet 包 README 使用根目录英文 README，包图标固定为 <code>nuget/logo.jpg</code>，核心托管包使用 Apache-2.0 SPDX 许可证表达式。
+首个 4 系列公开预览版已经可用。NuGet 包 README 使用根目录英文 README，包图标固定为 <code>nuget/logo.jpg</code>，核心托管包使用 Apache-2.0 SPDX 许可证表达式。
 
 | 包 | 版本 | NuGet.org | GitHub Packages | 用途 |
 | --- | --- | --- | --- | --- |
@@ -143,17 +157,17 @@ dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.c
 - [推理绑定教程](docs/articles/zh-cn/inference-bindings-tutorial.md)
 - [TensorRtExec GUI 使用](docs/articles/zh-cn/tensorrtexec-gui-user-guide.md)
 - [候选发布门禁](docs/articles/zh-cn/release-candidate-gate.md)
-- [发布证明示例文章](docs/articles/zh-cn/release-proof-sample-article-closure.md)
-- [Owner 输入看板](docs/articles/zh-cn/release-proof-owner-input-dashboard.md)
+- [发布证明与发布后验证指南](docs/articles/zh-cn/release-proof-and-post-publish-verification-guide.md)
+- [Owner 输入交叉哈希审计](docs/articles/zh-cn/owner-input-cross-hash-audit.md)
 - [TensorRtExec 报告边界](docs/articles/zh-cn/tensorrtexec-report-proof-boundary.md)
 - [ONNX 转 engine 报告边界](docs/articles/zh-cn/onnx-to-engine-trtexec-proof-boundary.md)
 - [YOLOVision 资产证据指南](docs/articles/zh-cn/yolovision-owner-asset-evidence-guide.md)
 - [回调和分配器安全门](docs/articles/zh-cn/callback-allocator-listener-readonly-safety-gates.md)
 - [API readiness audit](artifacts/interface-coverage/release-api-readiness-audit.json)
-- [YOLOVision 模型矩阵](samples/YoloVision/yolo-model-matrix.json)
+- [YOLOVision 模型矩阵](applications/YoloVision/yolo-model-matrix.json)
 - [TensorRtExec 功能矩阵](applications/TensorRtExec/tensor-rt-exec-feature-matrix.json)
-- [ONNX 转换 parity 矩阵](samples/OnnxToEngine/trtexec-parity-matrix.json)
-- [article-roadmap-30plus](docs/articles/zh-cn/article-roadmap-30plus.md)
+- [ONNX 转换 parity 矩阵](applications/OnnxToEngine/trtexec-parity-matrix.json)
+- [article-roadmap-30plus](docs/articles/zh-cn/publishing/article-roadmap-30plus.md)
 
 ## 源码构建
 
@@ -163,13 +177,11 @@ dotnet build TensorRtSharp.sln -c Release
 dotnet test tests/JYPPX.ProjectQuality.Tests/JYPPX.ProjectQuality.Tests.csproj -c Release --no-restore
 ~~~
 
-本地打包时使用 JYPPXPackageVersion=4.0.0-preview.1。上传前检查 nupkg 必须包含 README 和 logo.jpg，不能包含 CUDA、cuDNN、TensorRT 厂商二进制。
+后续发布时将 JYPPXPackageVersion 设置为批准的 4 系列版本。上传前必须检查每个 nupkg：包含 README 和 logo.jpg，且不包含 CUDA、cuDNN、TensorRT 厂商二进制。
 
 ## 发布与 Action 规则
 
-所有 workflow 仅手工触发，用于节省 Action 额度。grape-yan 仓库只做候选验证，不发布任何包；本地门禁通过后最多执行一次候选 Action。正式 guojin-yan 仓库在 Owner 明确批准后只执行一次正式发布流程，版本固定为 4.0.0-preview.1。
-
-在正式流程完成前，发布状态保持 blocked，状态为 owner-action-required。clean-consumer-proof-execution-bundle 和 clean-consumer-external-proof-closure-pack 属于 non-proof 的 Owner action，不会运行 runtime smoke，也不是 runtime proof 或 post-publish proof。build-only、local feed、ProjectReference、dry-run、template 和 dashboard 都不能晋级为发布证明或 issue close；FailOnNotProof 会拒绝这些替代物。
+所有 workflow 仅手工触发，用于节省 Action 额度。grape-yan 仓库只做验证，不发布任何包。先在本地完成 restore、build、定向测试、包内容检查和干净消费者验证，只有 Owner 批准后才触发远程验证或正式发布。
 
 NuGet 发布需要核心包权限，以及每个项目自有 `.Bridge` ID 的按包 push 权限。`JYPPX.TensorRT.CSharp.API.YoloVision` 和 `JYPPX.TensorRT.CSharp.API.Classification` 是仅供 samples 使用的 ID，严禁上传。nuget.org `403` 表示授权失败，不应重复上传。
 
@@ -190,4 +202,3 @@ NuGet 发布需要核心包权限，以及每个项目自有 `.Bridge` ID 的按
 ## 问题反馈
 
 请附上包版本、CUDA/cuDNN/TensorRT 版本、GPU、操作系统和失败命令。不要上传有再分发限制的模型权重或 NVIDIA 运行库。
-*** End Patch

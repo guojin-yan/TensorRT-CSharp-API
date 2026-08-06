@@ -57,9 +57,9 @@ public sealed class TensorRtExecReleaseCandidateGapTests
             item.GetProperty("id").GetString() == "package-consumer-runtime-proof-boundary" &&
             item.GetProperty("currentStatus").GetString() == "local-refitted-plan-package-consumer-runtime-public-proof-owner-action-required" &&
             !item.GetProperty("isPackageConsumerRuntimeProof").GetBoolean() &&
-            item.GetProperty("nextImplementationPaths").EnumerateArray().Any(path => path.GetString() == "samples/RefittedPlan.PackageConsumer"));
-        Assert.Contains(items, static item => item.GetProperty("id").GetString() == "dynamic-shape" && item.GetProperty("nextImplementationPaths").EnumerateArray().Any(path => path.GetString() == "samples/YoloVision/yolovision-task-output-contract.json"));
-        Assert.Contains(items, static item => item.GetProperty("id").GetString() == "binding-metadata" && item.GetProperty("nextImplementationPaths").EnumerateArray().Any(path => path.GetString() == "samples/YoloVision/yolovision-task-output-contract.json"));
+            item.GetProperty("nextImplementationPaths").EnumerateArray().Any(path => path.GetString() == "tests/fixtures/package-consumers/RefittedPlan.PackageConsumer"));
+        Assert.Contains(items, static item => item.GetProperty("id").GetString() == "dynamic-shape" && item.GetProperty("nextImplementationPaths").EnumerateArray().Any(path => path.GetString() == "applications/YoloVision/yolovision-task-output-contract.json"));
+        Assert.Contains(items, static item => item.GetProperty("id").GetString() == "binding-metadata" && item.GetProperty("nextImplementationPaths").EnumerateArray().Any(path => path.GetString() == "applications/YoloVision/yolovision-task-output-contract.json"));
 
         string markdown = File.ReadAllText(markdownPath);
         string article = File.ReadAllText(articlePath);
@@ -76,7 +76,7 @@ public sealed class TensorRtExecReleaseCandidateGapTests
         Assert.Contains("winforms-command-surface", markdown, StringComparison.Ordinal);
         Assert.Contains("checklist-and-real-gui-build-backed", markdown, StringComparison.Ordinal);
         Assert.Contains("implemented-pointer-free-multi-input-binding-multi-output-artifacts-and-reference-validation", markdown, StringComparison.Ordinal);
-        Assert.Contains("samples/YoloVision/yolovision-task-output-contract.json", markdown, StringComparison.Ordinal);
+        Assert.Contains("applications/YoloVision/yolovision-task-output-contract.json", markdown, StringComparison.Ordinal);
 
         Assert.Contains("applications/TensorRtExec/tensor-rt-exec-release-candidate-gap-list.json", article, StringComparison.Ordinal);
         Assert.Contains("package-consumer-runtime proof", article, StringComparison.Ordinal);

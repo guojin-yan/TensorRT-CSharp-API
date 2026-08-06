@@ -79,45 +79,36 @@ public sealed class YoloVisionManagedPackagePublicationTests
     }
 
     [Fact]
-    public void ManagedDryRunAndThreePackageHandoffKeepProofBoundariesExplicit()
+    public void SampleApplicationsStayOutsideTheManagedPublicationSurface()
     {
-        string dryRun = ReadSource("eng", "Test-YoloVisionManagedPackageDryRun.ps1");
-        string handoff = ReadSource("eng", "Export-YoloVisionPackagePublicationHandoff.ps1");
-        string project = ReadSource("samples", "YoloVision.ManagedPackageConsumer", "YoloVision.ManagedPackageConsumer.csproj.template");
-        string program = ReadSource("samples", "YoloVision.ManagedPackageConsumer", "Program.cs");
+        string yoloVision = ReadSource("applications", "YoloVision", "YoloVision.csproj");
+        string classification = ReadSource("samples", "ComputerVision", "01.Classification", "Classification.csproj");
+        string packageWorkflow = ReadSource(".github", "workflows", "package-managed.yml");
 
-        Assert.Equal(2, CountOccurrences(project, "<PackageReference"));
-        Assert.DoesNotContain("ProjectReference", project, StringComparison.Ordinal);
-        Assert.Contains("Process.GetCurrentProcess().Modules", program, StringComparison.Ordinal);
-        Assert.Contains("jyppxtrtbridge", program, StringComparison.Ordinal);
-        Assert.Contains("NativeRuntimeLoaded={nativeRuntimeLoaded}", program, StringComparison.Ordinal);
-        Assert.Contains("recordKind = \"yolovision-managed-package-dry-run\"", dryRun, StringComparison.Ordinal);
-        Assert.Contains("OutputRoot must be outside the repository", dryRun, StringComparison.Ordinal);
-        Assert.Contains("-PackagePath $PackageDirectory", dryRun, StringComparison.Ordinal);
-        Assert.Contains("restoredProjectLibraryCount = $projectLibraryCount", dryRun, StringComparison.Ordinal);
-        Assert.Contains("packageSourceCommitsAligned = $true", dryRun, StringComparison.Ordinal);
-        Assert.Contains("isTensorRtRuntimeProof = $false", dryRun, StringComparison.Ordinal);
-        Assert.Contains("recordKind = \"yolovision-package-publication-handoff\"", handoff, StringComparison.Ordinal);
-        Assert.Contains("ready-local-three-package-handoff", handoff, StringComparison.Ordinal);
-        Assert.Contains("packageSourceCommitsAligned = $true", handoff, StringComparison.Ordinal);
-        Assert.Contains("postPublishCleanConsumerRequired = $true", handoff, StringComparison.Ordinal);
-        Assert.Contains("performsPublish = $false", handoff, StringComparison.Ordinal);
+        foreach (string project in new[] { yoloVision, classification })
+        {
+            Assert.Contains("<IsPackable>false</IsPackable>", project, StringComparison.Ordinal);
+            Assert.DoesNotContain("<PackageId>", project, StringComparison.Ordinal);
+            Assert.DoesNotContain("<PackageReadmeFile>", project, StringComparison.Ordinal);
+        }
+
+        Assert.DoesNotContain("JYPPX.TensorRT.CSharp.API.YoloVision", packageWorkflow, StringComparison.Ordinal);
+        Assert.DoesNotContain("JYPPX.TensorRT.CSharp.API.Classification", packageWorkflow, StringComparison.Ordinal);
     }
 
     [Fact]
-    public void ReleaseCandidateInventoryRequiresYoloVisionManagedExtension()
+    public void ReleaseCandidateInventoryRejectsSampleApplicationPackages()
     {
         string inventory = ReadSource("eng", "Export-ReleaseCandidatePackageInventory.ps1");
 
-        Assert.Contains("managed-extension", inventory, StringComparison.Ordinal);
-        Assert.Contains("JYPPX.TensorRT.CSharp.API.YoloVision", inventory, StringComparison.Ordinal);
-        Assert.Contains("JYPPX.TensorRT.CSharp.API.Classification", inventory, StringComparison.Ordinal);
+        Assert.Contains("$requiredManagedExtensionPackageIds = @()", inventory, StringComparison.Ordinal);
+        Assert.Contains("retired-managed-extension", inventory, StringComparison.Ordinal);
         Assert.Contains("managedExtensionPackageReady", inventory, StringComparison.Ordinal);
         Assert.Contains("packageSourceCommitsAligned", inventory, StringComparison.Ordinal);
         Assert.Contains("packageVersionsAligned", inventory, StringComparison.Ordinal);
-        Assert.Contains("$candidateAllowedPackages.Count -eq $allowedPackages.Count", inventory, StringComparison.Ordinal);
-        Assert.Contains("$requiredManagedExtensionPackageIds -contains $_.packageId", inventory, StringComparison.Ordinal);
-        Assert.Contains("explicit managed extensions", inventory, StringComparison.Ordinal);
+        Assert.Contains("$managedExtensionPackages.Count -eq 0", inventory, StringComparison.Ordinal);
+        Assert.Contains("sample/application package candidates absent", inventory, StringComparison.Ordinal);
+        Assert.DoesNotContain("$requiredManagedExtensionPackageIds -contains $_.packageId", inventory, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -175,18 +166,6 @@ public sealed class YoloVisionManagedPackagePublicationTests
         return File.ReadAllText(Path.Combine(new[] { RepositoryPaths.Root }.Concat(parts).ToArray()));
     }
 
-    private static int CountOccurrences(string text, string value)
-    {
-        int count = 0;
-        int index = 0;
-        while ((index = text.IndexOf(value, index, StringComparison.Ordinal)) >= 0)
-        {
-            count++;
-            index += value.Length;
-        }
-        return count;
-    }
-
     private static void CreatePackage(string path, string packageId, string version, params string[] nativeEntries)
     {
         using ZipArchive archive = ZipFile.Open(path, ZipArchiveMode.Create);
@@ -209,7 +188,7 @@ public sealed class YoloVisionManagedPackagePublicationTests
     {
         ProcessStartInfo startInfo = new()
         {
-            FileName = "pwsh",
+            FileName = OperatingSystem.IsWindows() ? "powershell.exe" : "pwsh",
             WorkingDirectory = RepositoryPaths.Root,
             RedirectStandardOutput = true,
             RedirectStandardError = true,

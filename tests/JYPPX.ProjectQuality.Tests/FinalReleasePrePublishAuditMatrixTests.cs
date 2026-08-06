@@ -57,10 +57,10 @@ public sealed class FinalReleasePrePublishAuditMatrixTests
         Assert.Contains("applications/TensorRtExec/tensor-rt-exec-feature-matrix.json", sourceArtifacts);
         Assert.Contains("applications/TensorRtExec/tensor-rt-exec-release-candidate-gap-list.json", sourceArtifacts);
         Assert.Contains("applications/TensorRtExec/tensor-rt-exec-trtexec-parity-matrix.json", sourceArtifacts);
-        Assert.Contains("samples/YoloVision/yolo-model-matrix.json", sourceArtifacts);
-        Assert.Contains("samples/YoloVision/README.md", sourceArtifacts);
-        Assert.Contains("samples/OnnxToEngine/trtexec-parity-matrix.json", sourceArtifacts);
-        Assert.Contains("samples/OnnxToEngine/README.md", sourceArtifacts);
+        Assert.Contains("applications/YoloVision/yolo-model-matrix.json", sourceArtifacts);
+        Assert.Contains("applications/YoloVision/README.md", sourceArtifacts);
+        Assert.Contains("applications/OnnxToEngine/trtexec-parity-matrix.json", sourceArtifacts);
+        Assert.Contains("applications/OnnxToEngine/README.md", sourceArtifacts);
         Assert.Contains("artifacts/final-release/package-consumer-owner-runtime-smoke-field-alignment.json", sourceArtifacts);
         Assert.Contains("artifacts/final-release/package-consumer-owner-runtime-smoke-field-alignment-validation.json", sourceArtifacts);
 

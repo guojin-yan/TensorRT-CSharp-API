@@ -468,9 +468,9 @@ $consumerPlanPath = Join-Path $inputRoot "mnist.plan"
 $consumerInputPath = Join-Path $inputRoot "input-f32.bin"
 Copy-Item -LiteralPath $SourcePlanPath -Destination $consumerPlanPath -Force
 Copy-Item -LiteralPath $SourceInputPath -Destination $consumerInputPath -Force
-Copy-Item -LiteralPath (Join-Path $RepositoryRoot "samples\RefittedPlan.PackageConsumer\Program.cs") -Destination $programPath -Force
+Copy-Item -LiteralPath (Join-Path $RepositoryRoot "tests\fixtures\package-consumers\RefittedPlan.PackageConsumer\Program.cs") -Destination $programPath -Force
 
-$template = Get-Content -LiteralPath (Join-Path $RepositoryRoot "samples\RefittedPlan.PackageConsumer\RefittedPlan.PackageConsumer.csproj.template") -Raw -Encoding utf8
+$template = Get-Content -LiteralPath (Join-Path $RepositoryRoot "tests\fixtures\package-consumers\RefittedPlan.PackageConsumer\RefittedPlan.PackageConsumer.csproj.template") -Raw -Encoding utf8
 $project = $template.Replace("__TARGET_FRAMEWORK__", "net8.0")
 $project = $project.Replace("__RUNTIME_IDENTIFIER__", [string]$bridgeDefinition.rid)
 $project = $project.Replace("__RESTORE_PACKAGES_PATH__", (ConvertTo-XmlAttributeValue $restorePath))
@@ -609,7 +609,7 @@ $evidence = [ordered]@{
     workspaceRemovedAfterValidation = $workspaceRemoved
     managedPackage = [ordered]@{ id = $managedPackage.Id; version = $managedPackage.Version; length = $managedPackage.Length; sha256 = $managedPackage.Sha256 }
     bridgePackage = [ordered]@{ id = $bridgePackage.Id; version = $bridgePackage.Version; length = $bridgePackage.Length; sha256 = $bridgePackage.Sha256 }
-    programSha256 = Get-Sha256 -Path (Join-Path $RepositoryRoot "samples\RefittedPlan.PackageConsumer\Program.cs")
+    programSha256 = Get-Sha256 -Path (Join-Path $RepositoryRoot "tests\fixtures\package-consumers\RefittedPlan.PackageConsumer\Program.cs")
   }
   caseCount = $records.Count
   sourceTreeFailClosedCount = @($records | Where-Object { $_.sourceTree.inferenceRan -and -not $_.sourceTree.outputValidated -and $_.sourceTree.exitCode -eq 2 }).Count

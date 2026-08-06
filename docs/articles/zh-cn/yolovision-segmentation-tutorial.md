@@ -2,7 +2,7 @@
 
 YOLO instance segmentation（`--task seg`）在 detection 的 box/class/score 之外，还需要让每个保留框携带 mask coefficients，并与独立的 prototype tensor 组合。真正容易出错的不是 engine 能否生成，而是输出 role、channel layout、NMS 后的 source index、sigmoid、阈值、letterbox crop 和原图 resize-back 是否使用同一份模型契约。
 
-本文绑定 `samples/YoloVision` 当前真实实现，从 E 盘资产准备、TensorRtExec build-only、YoloVision preflight/runtime、managed mask compose、JSON/SVG 到 owner evidence 验证形成一条完整路径。
+本文绑定 `applications/YoloVision` 当前真实实现，从 E 盘资产准备、TensorRtExec build-only、YoloVision preflight/runtime、managed mask compose、JSON/SVG 到 owner evidence 验证形成一条完整路径。
 
 ## Seg 与 Sem 不同
 
@@ -172,7 +172,7 @@ sigmoid 对正负输入使用分支计算，避免大幅值指数溢出。`--mas
 先固定输入 tensor：
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- `
+dotnet run --project .\applications\YoloVision -- `
   --preprocess-only `
   --image ..\downloads\cases\yolov8n-seg\images\input.ppm `
   --preprocessed-output ..\downloads\cases\yolov8n-seg\tensors\input-fp32.bin `
@@ -204,7 +204,7 @@ dotnet run --project .\applications\TensorRtExec -- `
 ## YoloVision Preflight
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- `
+dotnet run --project .\applications\YoloVision -- `
   --preflight `
   --model ..\downloads\cases\yolov8n-seg\models\yolov8n-seg.onnx `
   --labels ..\downloads\cases\yolov8n-seg\labels\coco.names `
@@ -227,7 +227,7 @@ dotnet run --project .\samples\YoloVision -- `
 ## YoloVision Runtime
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- `
+dotnet run --project .\applications\YoloVision -- `
   --model ..\downloads\cases\yolov8n-seg\models\yolov8n-seg.onnx `
   --labels ..\downloads\cases\yolov8n-seg\labels\coco.names `
   --image ..\downloads\cases\yolov8n-seg\images\input.ppm `
@@ -263,7 +263,7 @@ dotnet run --project .\samples\YoloVision -- `
 
 原始 prototype-grid 字段不会被 source-image 字段覆盖。两层统计同时存在，便于定位问题发生在 compose 阶段还是 inverse-transform/crop 阶段。`spatialTransform.finalMaskScope` 固定为 `source-image-after-explicit-preprocess-inverse-and-optional-box-crop`。
 
-示例位于 `samples/YoloVision/examples/yolovision-output-seg.example.json`，schema 位于 `samples/YoloVision/yolovision-output.schema.json`。output report 还复制 output tensor shape/value SHA256 和 pointer-free binding metadata，但示例中的 synthetic input 与空 hash 仍不是 runtime proof。
+示例位于 `applications/YoloVision/examples/yolovision-output-seg.example.json`，schema 位于 `applications/YoloVision/yolovision-output.schema.json`。output report 还复制 output tensor shape/value SHA256 和 pointer-free binding metadata，但示例中的 synthetic input 与空 hash 仍不是 runtime proof。
 
 ## SVG 预览语义
 
@@ -312,13 +312,13 @@ validator 会检查：
 
 ## 代码入口
 
-- `samples/YoloVision/YoloSampleRunner.cs`：runtime role 路由、coefficient slice、prototype shape 与 mask compose。
-- `samples/YoloVision/YoloMaskComposer.cs`：raw linear API、稳定 sigmoid 和 probability compose。
-- `samples/YoloVision/YoloSegmentationMask.cs`：value kind、threshold、active pixel count。
-- `samples/YoloVision/YoloSegmentationSpatialTransform.cs`：显式 coordinate space、bilinear inverse、半开 box crop 和 source mask。
-- `samples/YoloVision/YoloRuntimeOutputRoleResolver.cs`：output role、aux metadata 和 `--mask-threshold`。
-- `samples/YoloVision/YoloVisionOutputReport.cs`：prototype 与 source-image spatial mask report 字段。
-- `samples/YoloVision/YoloVisionVisualizationWriter.cs`：有界 prototype/source-image 概率网格 SVG。
+- `applications/YoloVision/YoloSampleRunner.cs`：runtime role 路由、coefficient slice、prototype shape 与 mask compose。
+- `applications/YoloVision/YoloMaskComposer.cs`：raw linear API、稳定 sigmoid 和 probability compose。
+- `applications/YoloVision/YoloSegmentationMask.cs`：value kind、threshold、active pixel count。
+- `applications/YoloVision/YoloSegmentationSpatialTransform.cs`：显式 coordinate space、bilinear inverse、半开 box crop 和 source mask。
+- `applications/YoloVision/YoloRuntimeOutputRoleResolver.cs`：output role、aux metadata 和 `--mask-threshold`。
+- `applications/YoloVision/YoloVisionOutputReport.cs`：prototype 与 source-image spatial mask report 字段。
+- `applications/YoloVision/YoloVisionVisualizationWriter.cs`：有界 prototype/source-image 概率网格 SVG。
 - `eng/Test-YoloVisionOutputReport.ps1`：结构和数值一致性 validator。
 
 ## Proof Boundary

@@ -4,7 +4,7 @@ YoloVision 故意不把某一个 YOLO 导出脚本的图像预处理写死为全
 
 ## 预处理输入
 
-`samples/YoloVision` 当前支持两类明确输入：
+`applications/YoloVision` 当前支持两类明确输入：
 
 | 参数 | 输入内容 | 适用场景 |
 | --- | --- | --- |
@@ -14,7 +14,7 @@ YoloVision 故意不把某一个 YOLO 导出脚本的图像预处理写死为全
 `--input-data` 应与 `--input-shape` 元素数量完全一致。例如 `1x3x640x640` 需要 `1*3*640*640` 个 float32。
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- `
+dotnet run --project .\applications\YoloVision -- `
   --model .\models\yolo.onnx `
   --labels .\models\labels.txt `
   --input-data .\models\input-fp32.bin `

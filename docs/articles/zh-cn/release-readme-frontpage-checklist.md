@@ -37,7 +37,7 @@ README / README.zh-CN 至少应能引导到：
 
 允许出现：
 
-- `samples/YoloVision`
+- `applications/YoloVision`
 - `YoloVision`
 - “统一 YOLO-family 样例”
 

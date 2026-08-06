@@ -2,18 +2,18 @@
 
 `eng` 不是面向最终用户的命令集合。它同时承载构建编排、资产获取、CI 验证、证据导出、Owner 回填模板和发布前只读门禁，因此文件数量很大。不能因为脚本存在，就认为它是日常支持入口，也不能直接批量删除或移动，否则会破坏 workflow、测试、文章和脚本之间的调用关系。
 
-2026-08-05 清理后目录保留 614 个 PowerShell 脚本、9 个 Python 辅助脚本和 1 个 Shell 脚本。已删除确认重复、失效或与当前交付边界冲突的入口，并移除了退役 full-runtime/vendor 包项目。最新字面引用图没有发现可直接删除的孤立脚本；`New-SourceArchive.ps1` 由 `package-source.yml` 调用，不能按普通文档引用统计误判。这里记录的是保留下来的工程资产，不是对外命令数量。
+2026-08-06 复查时目录保留 616 个 PowerShell 脚本、9 个 Python 辅助脚本和 1 个 Shell 脚本。已删除确认重复、失效或与当前交付边界冲突的入口，并移除了退役 full-runtime/vendor 包项目。`New-SourceArchive.ps1` 等脚本由 workflow 调用，不能只按普通文档引用统计误判。这里记录的是工程资产，不是对外命令数量。
 
 | PowerShell 类型 | 数量 | 定位 |
 | --- | ---: | --- |
 | `Test-*` | 295 | CI、合同、证据和 fail-closed 验证器 |
-| `Export-*` | 238 | 生成机器可读报告、候选包和内部审计材料；多数不执行发布 |
+| `Export-*` | 240 | 生成机器可读报告、候选包和内部审计材料；多数不执行发布 |
 | `Acquire-*` | 10 | 固定来源和 SHA 的模型/资产获取入口 |
 | `Sync-*` | 2 | 本地资产同步和校验入口 |
 | `Invoke-*` | 13 | 组合编排或本机 smoke 入口 |
 | `Import-*` | 22 | 导入 Owner 或外部运行证据 |
 | `New-*` / `Collect-*` | 5 | 脚手架、源码归档和收集器 |
-| 其他 | 34 | 公共函数、验证、签名、归档工具和人工入口等 |
+| 其他 | 29 | 公共函数、验证、签名、归档工具和人工入口等 |
 
 剩余脚本大多能在源码、workflow、测试或文档中找到调用关系。少数没有字面引用的是本机 CUDA/TensorRT smoke、原生 ABI 诊断和 Windows 开发证书入口，属于明确保留的人工工具；公共函数也可能通过 dot-source 间接加载。因此不能仅凭“没有字面引用”判定无用。9 个 Python 辅助脚本用于模型转换、独立 reference 和受控变异，不执行模型上传。
 
@@ -28,7 +28,6 @@
 | runtime 包就绪检查 | `Test-RuntimePackageReadiness.ps1` | 验证 managed + bridge-only 边界和 runtime matrix |
 | 演示 ONNX 暂存同步 | `Sync-DemoOnnxModels.ps1` | 把固定 ONNX 同步到外层 `models`；不上传模型 |
 | YOLOv8n Detection 资产 | `Acquire-YoloV8DetectionOfficialAssets.ps1` | 下载并校验固定权重、labels、许可证与图片 |
-| YOLOv8n Detection 本地三包验证 | `Test-YoloVisionDetectionLocalPackageConsumer.ps1` | 隔离三个本地包，执行真实 TensorRT 正例、独立对照和负例 |
 | GPU allocator 本地两包验证 | `Test-GpuAllocatorLocalPackageConsumer.ps1` | 隔离 managed 与 bridge-only 包，执行真实回调、零泄漏、拒绝和异常负例；不发布包 |
 | OutputAllocator 本地两包验证 | `Test-OutputAllocatorLocalPackageConsumer.ps1` | 隔离 managed 与 bridge-only 包，执行动态输出分配、释放、detach 和拒绝负例；不发布包 |
 | DebugListener 本地两包验证 | `Test-DebugListenerLocalPackageConsumer.ps1` | 隔离 managed 与 bridge-only 包，执行真实调试张量回调、复制元数据、detach 和拒绝负例；不发布包 |
@@ -36,10 +35,19 @@
 | Profiler 本地两包验证 | `Test-ProfilerLocalPackageConsumer.ps1` | 隔离 managed 与 bridge-only 包，执行即时/延迟 layer timing、异常记录和 detach；不发布包 |
 | Logger 本地两包验证 | `Test-LoggerLocalPackageConsumer.ps1` | 隔离 managed 与 bridge-only 包，执行真实 TensorRT 日志、延迟释放、异常隔离和 detach；不发布包 |
 | IStreamReaderV2 本地两包验证 | `Test-StreamReaderLocalPackageConsumer.ps1` | 隔离 managed 与 bridge-only 包，执行真实 read/seek、顺序复用、延迟释放和截断 plan 负例；不发布包 |
-| 通用 YoloVision 三包验证器 | `Test-YoloVisionLocalPackageConsumer.ps1` | 被各任务专用入口调用；不建议手工拼接参数 |
 | 文章完整性门禁 | `Test-TechnicalArticleCompleteness.ps1` | 检查发布目录中的真实结果、配图、模型获取/转换和边界 |
 
 每个支持入口必须同时具备：明确文档、失败即非零退出、ProjectQuality 测试或 CI 调用、禁止隐式发布、重资产不进入 Git。没有满足这些条件的脚本一律按内部工程脚本处理。
+
+## 已退役的案例包工具
+
+`Test-ClassificationLocalPackageConsumer.ps1`、`Test-YoloVisionLocalPackageConsumer.ps1`、各任务 wrapper、
+`Test-YoloVisionManagedPackageDryRun.ps1` 和对应 `tests/fixtures/legacy-package-consumers` 模板属于首版发布前的历史方案。
+Classification 与 YoloVision 现在是 `IsPackable=false` 的案例，不再发布或消费案例扩展包，因此这些脚本不再是支持入口，
+也不得用于生成新的公共包证明。
+
+现阶段只在测试夹具目录保留它们，让已提交的历史证据 JSON、哈希和质量测试仍可复核，不再占用 `samples` 用户入口。
+待历史验证逻辑迁移到只读 schema 检查后，将按 [KI-004](../docs/releases/known-issues.md) 一并删除；新案例不得引用这些模板或脚本。
 
 ## 内部脚本
 

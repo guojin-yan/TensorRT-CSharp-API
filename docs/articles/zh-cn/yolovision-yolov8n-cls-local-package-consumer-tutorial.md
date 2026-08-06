@@ -18,7 +18,7 @@
 本地消费项目只引用以下三个包：
 
 1. `JYPPX.TensorRT.CSharp.API`
-2. `JYPPX.TensorRT.CSharp.API.YoloVision`
+2. `applications/YoloVision`
 3. `JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge`
 
 第三个包只包含 `jyppxtrtbridge.dll`。CUDA、cuDNN、TensorRT 和 NVRTC 不会被打进 NuGet 包。
@@ -157,55 +157,23 @@ Get-FileHash $inputJpg, $inputPpm -Algorithm SHA256
 
 PPM 提供推理像素，JPEG 嵌入 SVG 结果图。YoloVision 会校验两者与预处理源图尺寸一致。
 
-## 创建本地包消费项目
+## 使用公开包准备应用
 
-第一版尚未执行公共 NuGet 发布，所以先从当前源码构建 managed API、YoloVision 和 bridge-only 包：
+`applications/YoloVision` 是完整应用并设置为 `IsPackable=false`。它通过共享 props 引用已发布的
+`JYPPX.TensorRT.CSharp.API` 4 系列包，以及作者维护的
+[OpenCV-CSharp-API](https://github.com/guojin-yan/OpenCV-CSharp-API)。应用本身不发布 YoloVision 案例 NuGet 包。
 
-```powershell
-$packageVersion = '4.0.0'
-$packageRoot = Join-Path $repoRoot 'artifacts/article-classification-packages'
-$feed = Join-Path $workspaceRoot 'local-feed/tensorrtsharp4-classification'
-
-New-Item -ItemType Directory -Force -Path $packageRoot, $feed | Out-Null
-
-dotnet pack (Join-Path $repoRoot 'pack/JYPPX.TensorRT.CSharp.API/JYPPX.TensorRT.CSharp.API.csproj') `
-  -c Release -o $packageRoot `
-  -p:JYPPXPackageVersion=$packageVersion
-
-dotnet pack (Join-Path $repoRoot 'samples/YoloVision/YoloVision.csproj') `
-  -c Release -o $packageRoot `
-  -p:JYPPXPackageVersion=$packageVersion
-
-pwsh -NoProfile -ExecutionPolicy Bypass `
-  -File (Join-Path $repoRoot 'eng/Invoke-LocalSplitRuntimePackage.ps1') `
-  -SourceRuntimeKey win-x64-trt10.11-cuda12.9-cudnn9.22 `
-  -Version $packageVersion `
-  -SplitPackageRole bridge `
-  -SkipManagedPack `
-  -SkipConsumerValidation
-
-Copy-Item `
-  -LiteralPath (Join-Path $repoRoot 'artifacts/runtime-split-nupkg/win-x64-trt10.11-cuda12.9-cudnn9.22/JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge.4.0.0.nupkg') `
-  -Destination $packageRoot `
-  -Force
-Copy-Item -Path (Join-Path $packageRoot '*.nupkg') -Destination $feed -Force
-```
-
-创建仓库外控制台项目：
+新建仓库外项目时，可以让 NuGet 获取当前公开预览版，而不在文章中写死具体版本：
 
 ```powershell
-dotnet new console --framework net8.0 --force --output $demoRoot
-Set-Location $demoRoot
-
-dotnet add package JYPPX.TensorRT.CSharp.API `
-  --version $packageVersion --source $feed
-dotnet add package JYPPX.TensorRT.CSharp.API.YoloVision `
-  --version $packageVersion --source $feed
-dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge `
-  --version $packageVersion --source $feed
+dotnet add package JYPPX.TensorRT.CSharp.API --prerelease
+dotnet add package JYPPX.OpenCV.CSharp.API --prerelease
+dotnet add package JYPPX.OpenCV.runtime.win-x64 --prerelease
+dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --prerelease
 ```
 
-检查 `.csproj` 和 `obj/project.assets.json`：必须恰好有 3 个 `PackageReference`，不得出现 `ProjectReference` 或手工程序集引用。
+最后一个包 ID 必须按目标机器环境替换。它只包含项目自有 bridge；CUDA、cuDNN、TensorRT 和 NVRTC
+继续由用户安装。仓库中的 YoloVision 项目直接运行当前源码，但 TensorRT/CUDA API 来自公开 NuGet 包。
 
 ## 编写程序入口
 
@@ -221,11 +189,11 @@ return YoloVisionCommand.Run(args);
 
 ## 编译并运行
 
-先还原并编译外部项目：
+还原并编译使用公开包的 YoloVision 应用：
 
 ```powershell
-dotnet restore
-dotnet build -c Release --no-restore
+dotnet restore ./applications/YoloVision/YoloVision.csproj
+dotnet build ./applications/YoloVision/YoloVision.csproj -c Release --no-restore
 ```
 
 ### 1. 生成 C# 实际输入 tensor
@@ -235,7 +203,7 @@ YOLOv8n-cls 使用 `shorter-side-center-crop`，不是 detection 的 letterbox�
 ```powershell
 $inputTensor = Join-Path $artifactRoot 'classification-csharp-input.fp32.bin'
 
-dotnet run -c Release --no-build -- `
+dotnet run --project ./applications/YoloVision -c Release --no-build -- `
   --task cls `
   --family v8 `
   --image $inputPpm `
@@ -293,7 +261,7 @@ $reference = Join-Path $referenceRoot 'output0-csharp-input.reference.json'
 $outputJson = Join-Path $artifactRoot 'classification-output.json'
 $outputSvg = Join-Path $artifactRoot 'classification-annotated.svg'
 
-dotnet run -c Release --no-build -- `
+dotnet run --project ./applications/YoloVision -c Release --no-build -- `
   --model $onnx `
   --labels $labels `
   --image $inputPpm `

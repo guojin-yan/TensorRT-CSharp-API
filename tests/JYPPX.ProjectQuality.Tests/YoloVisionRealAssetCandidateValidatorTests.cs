@@ -138,7 +138,7 @@ public sealed class YoloVisionRealAssetCandidateValidatorTests
         Assert.False(root.GetProperty("canPromotePackageConsumerRuntime").GetBoolean());
         Assert.Equal("owner-action-required", root.GetProperty("validationState").GetString());
         Assert.Equal(0, root.GetProperty("failedBlockerCount").GetInt32());
-        Assert.Equal("samples/YoloVision/yolovision-task-output-contract.json", root.GetProperty("contractPath").GetString());
+        Assert.Equal("applications/YoloVision/yolovision-task-output-contract.json", root.GetProperty("contractPath").GetString());
         Assert.Equal(6, root.GetProperty("contractTaskCount").GetInt32());
         Assert.Equal(6, root.GetProperty("articleCaseTaskCount").GetInt32());
         foreach (string family in new[] { "yolov5", "yolov6", "yolov7", "yolov8", "yolov9", "yolov10", "yolov11", "yolov26", "custom" })
@@ -196,7 +196,7 @@ public sealed class YoloVisionRealAssetCandidateValidatorTests
         string exporter = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "eng", "Export-YoloVisionRealAssetOwnerBackfillPack.ps1"));
         string article = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "articles", "zh-cn", "yolovision-real-asset-owner-backfill-pack.md"));
         string assetsReadme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "assets", "README.md"));
-        string yoloReadme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "YoloVision", "README.md"));
+        string yoloReadme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "YoloVision", "README.md"));
         string docsIndex = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "index.md"));
         string docsToc = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "toc.yml"));
 

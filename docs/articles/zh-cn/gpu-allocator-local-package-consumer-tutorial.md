@@ -4,7 +4,7 @@
 >
 > 主要库：`JYPPX.TensorRtSharp`、`JYPPX.CudaSharp`、`jyppxtrtbridge`
 >
-> 示例：`samples/GpuAllocator.PackageConsumer`
+> 示例：`tests/fixtures/package-consumers/GpuAllocator.PackageConsumer`
 >
 > 本机结果：TensorRT 10.11、CUDA 12.9、NVIDIA GeForce RTX 3060 Laptop GPU
 >
@@ -78,7 +78,7 @@ powershell -NoProfile -ExecutionPolicy Bypass `
 </ItemGroup>
 ```
 
-验证脚本把 `samples/GpuAllocator.PackageConsumer/Program.cs` 复制到仓库外的新目录，并生成只包含两个本地 package source 的 `NuGet.config`。还原时使用独立 package cache，项目没有 `ProjectReference`、`HintPath` 或源码树 DLL。
+验证脚本把 `tests/fixtures/package-consumers/GpuAllocator.PackageConsumer/Program.cs` 复制到仓库外的新目录，并生成只包含两个本地 package source 的 `NuGet.config`。还原时使用独立 package cache，项目没有 `ProjectReference`、`HintPath` 或源码树 DLL。
 
 脚本主动移除以下开发期环境变量：
 

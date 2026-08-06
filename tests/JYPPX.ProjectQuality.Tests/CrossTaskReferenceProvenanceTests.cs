@@ -123,8 +123,8 @@ public sealed class CrossTaskReferenceProvenanceTests
     [Fact]
     public void SampleDocumentationNamesFingerprintAndTaskSemanticBoundaries()
     {
-        string classification = File.ReadAllText(RepositoryPath("samples", "Classification", "README.md"));
-        string yolo = File.ReadAllText(RepositoryPath("samples", "YoloVision", "README.md"));
+        string classification = File.ReadAllText(RepositoryPath("samples", "ComputerVision", "01.Classification", "README.md"));
+        string yolo = File.ReadAllText(RepositoryPath("applications", "YoloVision", "README.md"));
         string assets = File.ReadAllText(RepositoryPath("samples", "assets", "README.md"));
 
         Assert.Contains("cross-task-reference-provenance-contract.json", classification, StringComparison.Ordinal);

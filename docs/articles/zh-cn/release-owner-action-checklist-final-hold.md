@@ -182,7 +182,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-ExternalRuntimeProofRec
 - labels 或类别映射。
 - 模型 license / redistribution 说明。
 - 模型 SHA256。
-- 目标 sample，例如 `samples\Classification` 或 `samples\YoloVision`。
+- 目标 sample，例如 `samples\ComputerVision\01.Classification` 或 `applications\YoloVision`。
 
 ### 执行
 

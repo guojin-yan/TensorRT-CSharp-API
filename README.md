@@ -31,7 +31,7 @@
 [![Documentation](https://img.shields.io/badge/docs-DocFX-2f80ed)](https://guojin-yan.github.io/TensorRT-CSharp-API/)
 [![License](https://img.shields.io/badge/license-Apache--2.0-green)](LICENSE)
 
-TensorRtSharp4.0 provides a .NET API for TensorRT inference, CUDA runtime compilation, memory, streams, callbacks, and the TensorRtExec desktop workflow. The first public candidate is planned as <code>4.0.0-preview.1</code>; it is a source and package candidate, not a claim that every TensorRT feature has completed runtime validation.
+TensorRtSharp4.0 provides a .NET API for TensorRT inference, CUDA runtime compilation, memory, streams, callbacks, and the TensorRtExec desktop workflow. The first 4-series preview is published; development now focuses on package-consuming examples, applications, and complete technical articles.
 
 ## Introduction
 
@@ -66,8 +66,8 @@ Create a console project, reference the managed package, and install the bridge 
 ~~~powershell
 dotnet new console -n TrtQuickstart
 cd TrtQuickstart
-dotnet add package JYPPX.TensorRT.CSharp.API --version 4.0.0-preview.1
-dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --version 4.0.0-preview.1
+dotnet add package JYPPX.TensorRT.CSharp.API --prerelease
+dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --prerelease
 ~~~
 
 Then create a runtime, load an engine, bind input/output tensors, execute, and read the result. The bridge package is not a replacement for the user-installed NVIDIA runtime. See the [inference bindings tutorial](docs/articles/zh-cn/inference-bindings-tutorial.md) and [Windows installation guide](docs/articles/zh-cn/windows-installation-and-troubleshooting-guide.md).
@@ -79,11 +79,25 @@ Then create a runtime, load an engine, bind input/output tensors, execute, and r
 | <code>JYPPX.TensorRT.CSharp.API</code> | Managed TensorRT and CUDA-facing C# API |
 | <code>JYPPX.TensorRT.CSharp.API.Bridge.*</code> | Project-owned native bridge only, selected by installed CUDA/TensorRT versions |
 
-`samples/YoloVision` and `samples/Classification` are runnable demonstrations. Their project files and local package-consumer harnesses remain in the source tree for development checks, but their sample package IDs are deliberately excluded from all public package feeds and Release assets.
+`Classification` at `samples/ComputerVision/01.Classification` and `YoloVision` at `applications/YoloVision` are runnable examples. They consume the public 4-series managed package and are deliberately excluded from all public package feeds and Release assets.
+
+## Example Series
+
+| Series | Project | Focus |
+| --- | --- | --- |
+| CUDA | `Cuda/01.RuntimeCompilation` | CUDA RTC compilation, module loading, launch, and readback |
+| Inference | `Inference/01.Bindings`, `Inference/02.DynamicShapes` | Bindings, memory ownership, and dynamic profiles |
+| Performance | `Performance/01.MultiStream` | CUDA streams, events, and ordering |
+| Computer vision | `Classification` | Image preprocessing, Top-K output, JSON, and annotated results |
+| Applications | `YoloVision`, `OnnxToEngine`, `TensorRtExec` | Complete multi-step workflows and advanced usage |
+
+See the [sample series](samples/README.md) and [applications](applications/README.md) for runnable commands and matching articles.
+
+CUDA RTC roadmap: [English](docs/articles/en/cuda-runtime-compilation-roadmap.md) | [简体中文](docs/articles/zh-cn/cuda-runtime-compilation-roadmap.md) | [technical article](docs/articles/zh-cn/cuda-runtime-compilation-technical-article.md)
 
 ## Public Packages And Release Assets
 
-The first public candidate is <code>4.0.0-preview.1</code>. Package README content is the English root README, package branding uses <code>nuget/logo.jpg</code>, and the core managed package uses the Apache-2.0 SPDX license expression.
+The first public 4-series preview is available. Package README content is the English root README, package branding uses <code>nuget/logo.jpg</code>, and the core managed package uses the Apache-2.0 SPDX license expression.
 
 | Package | Version | NuGet.org | GitHub Packages | Purpose |
 | --- | --- | --- | --- | --- |
@@ -158,17 +172,17 @@ See the [demo model inventory](samples/assets/demo-model-inventory.json), [acqui
 - [Inference bindings](docs/articles/zh-cn/inference-bindings-tutorial.md)
 - [TensorRtExec GUI](docs/articles/zh-cn/tensorrtexec-gui-user-guide.md)
 - [Release candidate gate](docs/articles/zh-cn/release-candidate-gate.md)
-- [Release proof sample article](docs/articles/zh-cn/release-proof-sample-article-closure.md)
-- [Release proof owner dashboard](docs/articles/zh-cn/release-proof-owner-input-dashboard.md)
+- [Release proof and post-publish verification](docs/articles/zh-cn/release-proof-and-post-publish-verification-guide.md)
+- [Owner input cross-hash audit](docs/articles/zh-cn/owner-input-cross-hash-audit.md)
 - [TensorRtExec report boundary](docs/articles/zh-cn/tensorrtexec-report-proof-boundary.md)
 - [ONNX to engine report boundary](docs/articles/zh-cn/onnx-to-engine-trtexec-proof-boundary.md)
 - [YOLOVision asset evidence guide](docs/articles/zh-cn/yolovision-owner-asset-evidence-guide.md)
 - [Callback/allocator safety gates](docs/articles/zh-cn/callback-allocator-listener-readonly-safety-gates.md)
 - [API readiness audit](artifacts/interface-coverage/release-api-readiness-audit.json)
-- [YOLOVision model matrix](samples/YoloVision/yolo-model-matrix.json)
+- [YOLOVision model matrix](applications/YoloVision/yolo-model-matrix.json)
 - [TensorRtExec feature matrix](applications/TensorRtExec/tensor-rt-exec-feature-matrix.json)
-- [ONNX-to-engine parity matrix](samples/OnnxToEngine/trtexec-parity-matrix.json)
-- [Article roadmap 30-plus](docs/articles/zh-cn/article-roadmap-30plus.md)
+- [ONNX-to-engine parity matrix](applications/OnnxToEngine/trtexec-parity-matrix.json)
+- [Article roadmap 30-plus](docs/articles/zh-cn/publishing/article-roadmap-30plus.md)
 
 ## Build From Source
 
@@ -178,13 +192,11 @@ dotnet build TensorRtSharp.sln -c Release
 dotnet test tests/JYPPX.ProjectQuality.Tests/JYPPX.ProjectQuality.Tests.csproj -c Release --no-restore
 ~~~
 
-Pack locally with <code>JYPPXPackageVersion=4.0.0-preview.1</code>. Inspect the generated nupkg before any upload; it must contain the package README and <code>logo.jpg</code> and must not contain CUDA, cuDNN, or TensorRT vendor binaries.
+For a future release, set <code>JYPPXPackageVersion</code> to the approved 4-series version. Inspect every generated nupkg before upload; it must contain the package README and <code>logo.jpg</code> and must not contain CUDA, cuDNN, or TensorRT vendor binaries.
 
 ## Release And Action Policy
 
-Workflows are manual-only to conserve Actions quota. The <code>grape-yan</code> repository is validation-only: it may receive one candidate Action after local checks pass and never publishes. The formal <code>guojin-yan</code> workflow is dispatched once, with explicit Owner approval, for the fixed first version <code>4.0.0-preview.1</code>.
-
-Until that run completes, release artifacts remain <code>blocked</code>. The state is <code>owner-action-required</code>. <code>clean-consumer-proof-execution-bundle</code> and <code>clean-consumer-external-proof-closure-pack</code> are <code>non-proof</code> Owner actions; they do not run runtime smoke, are not runtime proof, and are not post-publish proof. Build-only output, local feeds, ProjectReference, dry-runs, templates, and dashboards are rejected by <code>FailOnNotProof</code> and cannot be promoted to publication or issue close.
+Workflows are manual-only to conserve Actions quota. The <code>grape-yan</code> repository is validation-only and never publishes. Run local restore, build, focused tests, package inspection, and clean-consumer checks first; dispatch a remote validation or formal release only after the Owner approves it.
 
 NuGet publication requires the core package permission plus package-scoped push permission for each project-owned `.Bridge` ID. `JYPPX.TensorRT.CSharp.API.YoloVision` and `JYPPX.TensorRT.CSharp.API.Classification` are sample-only IDs and must never be uploaded. A nuget.org `403` is an authorization failure, not a retryable build failure.
 
@@ -205,4 +217,3 @@ Licensed under Apache-2.0. See [LICENSE](LICENSE).
 ## Support
 
 Please include the package version, CUDA/cuDNN/TensorRT versions, GPU model, operating system, and the failing command when opening an issue. Do not upload proprietary model weights or NVIDIA runtime archives.
-*** End Patch

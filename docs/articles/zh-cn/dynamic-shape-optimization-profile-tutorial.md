@@ -51,7 +51,7 @@ $env:JYPPX_ENABLE_DEVELOPMENT_PROBING = 'true'
 
 ## 理解示例网络
 
-示例源文件位于 `samples/DynamicShape/Program.cs`，网络结构如下：
+示例源文件位于 `samples/Inference/02.DynamicShapes/Program.cs`，网络结构如下：
 
 ```text
 input [-1, 3, 4] -> Identity -> output [-1, 3, 4]
@@ -170,7 +170,7 @@ Identity 网络的输出应该与输入逐值相等，所以 `OutputMatch=True` 
 从仓库根目录执行 Release 编译：
 
 ```powershell
-dotnet build .\samples\DynamicShape\DynamicShape.csproj `
+dotnet build .\samples\Inference\02.DynamicShapes\DynamicShape.csproj `
   -c Release `
   --no-restore `
   /p:UseSharedCompilation=false
@@ -179,7 +179,7 @@ dotnet build .\samples\DynamicShape\DynamicShape.csproj `
 运行 batch 3：
 
 ```powershell
-dotnet .\samples\DynamicShape\bin\Release\net8.0\DynamicShape.dll `
+dotnet .\samples\Inference\02.DynamicShapes\bin\Release\net8.0\DynamicShape.dll `
   --tensor-rt-line 10 `
   --batch 3
 ```

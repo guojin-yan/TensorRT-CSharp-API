@@ -21,7 +21,7 @@
       "isPackageConsumerRuntimeProof": false,
       "cliSupported": true,
       "winFormsSupported": true,
-      "nextImplementationPaths": ["applications/TensorRtExec", "samples/OnnxToEngine", "samples/YoloVision"],
+      "nextImplementationPaths": ["applications/TensorRtExec", "applications/OnnxToEngine", "applications/YoloVision"],
       "nextStep": "Cross-link build reports to real model candidate records and require owner hashes before proof promotion."
     },
     {
@@ -54,7 +54,7 @@
       "isPackageConsumerRuntimeProof": false,
       "cliSupported": true,
       "winFormsSupported": true,
-      "nextImplementationPaths": ["applications/TensorRtExec", "samples/YoloVision", "samples/YoloVision/yolovision-task-output-contract.json", "samples/OnnxToEngine"],
+      "nextImplementationPaths": ["applications/TensorRtExec", "applications/YoloVision", "applications/YoloVision/yolovision-task-output-contract.json", "applications/OnnxToEngine"],
       "nextStep": "Tie each model candidate to explicit profile metadata from yolovision-task-output-contract.json and real run logs."
     },
     {
@@ -121,7 +121,7 @@
       "isPackageConsumerRuntimeProof": false,
       "cliSupported": true,
       "winFormsSupported": true,
-      "nextImplementationPaths": ["src/JYPPX.TensorRtSharp.Tools/Trtexec/TrtexecLikeWeightStreamingBudget.cs", "src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildService.cs", "applications/TensorRtExec", "samples/RefittedPlan.PackageConsumer", "eng/Test-TrtexecRefittedPlanPackageConsumer.ps1"],
+      "nextImplementationPaths": ["src/JYPPX.TensorRtSharp.Tools/Trtexec/TrtexecLikeWeightStreamingBudget.cs", "src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildService.cs", "applications/TensorRtExec", "tests/fixtures/package-consumers/RefittedPlan.PackageConsumer", "eng/Test-TrtexecRefittedPlanPackageConsumer.ps1"],
       "nextStep": "Keep TRT8 guards and the TRT11 dependency boundary; retain TRT10 parser-load, engine-commit, persisted reload, baseline comparison, and local-feed PackageReference consumer evidence. External lean-runtime, public-feed and post-publish proof remain separate Owner work."
     },
     {
@@ -143,7 +143,7 @@
       "isPackageConsumerRuntimeProof": false,
       "cliSupported": true,
       "winFormsSupported": true,
-      "nextImplementationPaths": ["src/JYPPX.CudaSharp/Streams/CudaStream.Synchronization.cs", "native/src/cuda/api.cpp", "src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildService.Benchmarking.cs", "applications/TensorRtExec", "samples/OnnxToEngine"],
+      "nextImplementationPaths": ["src/JYPPX.CudaSharp/Streams/CudaStream.Synchronization.cs", "native/src/cuda/api.cpp", "src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildService.Benchmarking.cs", "applications/TensorRtExec", "applications/OnnxToEngine"],
       "nextStep": "Retain scheduler and stream-delay runtime evidence separately from model correctness; carry requested/applied sleepTime fields into future real-model and package-consumer records."
     },
     {
@@ -209,7 +209,7 @@
       "isPackageConsumerRuntimeProof": false,
       "cliSupported": true,
       "winFormsSupported": true,
-      "nextImplementationPaths": ["src/JYPPX.TensorRtSharp.Tools/Artifacts/OnnxEngineRuntimeArtifactWriter.cs", "src/JYPPX.TensorRtSharp.Tools/Artifacts/OnnxEngineRuntimeValidationArtifacts.cs", "samples/YoloVision", "samples/YoloVision/yolovision-task-output-contract.json", "eng/Test-YoloVisionRealAssetCandidate.ps1", "eng/Test-YoloVisionRealAssetOwnerBackfillPack.ps1"],
+      "nextImplementationPaths": ["src/JYPPX.TensorRtSharp.Tools/Artifacts/OnnxEngineRuntimeArtifactWriter.cs", "src/JYPPX.TensorRtSharp.Tools/Artifacts/OnnxEngineRuntimeValidationArtifacts.cs", "applications/YoloVision", "applications/YoloVision/yolovision-task-output-contract.json", "eng/Test-YoloVisionRealAssetCandidate.ps1", "eng/Test-YoloVisionRealAssetOwnerBackfillPack.ps1"],
       "nextStep": "Retain engine-order input/output metadata, reference comparison diagnostics, per-tensor hashes, and deterministic raw offsets; owner must still supply reviewed real-model reference sources, model/engine/input/log hashes, task roles, and public consumer evidence before promotion."
     },
     {
@@ -231,7 +231,7 @@
       "isPackageConsumerRuntimeProof": false,
       "cliSupported": false,
       "winFormsSupported": false,
-      "nextImplementationPaths": ["samples/RefittedPlan.PackageConsumer", "eng/Test-TrtexecRefittedPlanPackageConsumer.ps1", "eng/Test-TrtexecRefittedPlanPackageConsumerEvidence.ps1", "eng/Test-PackageConsumerRuntimeProofRecord.ps1", "docs/articles/zh-cn/publishing/package-consumer-proof-public-article.md"],
+      "nextImplementationPaths": ["tests/fixtures/package-consumers/RefittedPlan.PackageConsumer", "eng/Test-TrtexecRefittedPlanPackageConsumer.ps1", "eng/Test-TrtexecRefittedPlanPackageConsumerEvidence.ps1", "eng/Test-PackageConsumerRuntimeProofRecord.ps1", "docs/articles/zh-cn/publishing/package-consumer-proof-public-article.md"],
       "nextStep": "Retain the completed local-file-feed refitted-plan runtime as local engineering evidence. Wait for an external consumer using a public package source plus post-publish strict validators before setting isPackageConsumerRuntimeProof=true."
     }
   ]

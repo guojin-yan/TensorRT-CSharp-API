@@ -34,7 +34,7 @@
     }
   ],
   "consumerIsolation": {
-    "template": "samples/Classification.PackageConsumer",
+    "template": "tests/fixtures/legacy-package-consumers/Classification.PackageConsumer",
     "runner": "eng/Test-ClassificationLocalPackageConsumer.ps1",
     "packageReferenceCount": 3,
     "projectReferenceCount": 0,

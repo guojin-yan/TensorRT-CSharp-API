@@ -27,7 +27,7 @@ TensorRtExec 的目标是提供一个 .NET 生态里的 trtexec-like 应用：�
 - `applications/TensorRtExec/README.md`
 - `applications/TensorRtExec/tensor-rt-exec-feature-matrix.json`
 - `src/JYPPX.TensorRtSharp.Tools`
-- `samples/OnnxToEngine/trtexec-parity-matrix.json`
+- `applications/OnnxToEngine/trtexec-parity-matrix.json`
 - `tests/JYPPX.ProjectQuality.Tests/TensorRtExecApplicationTests.cs`
 
 ## 边界说明

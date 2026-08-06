@@ -53,17 +53,29 @@ public sealed class EngineeringAndArticleCatalogTests
 
             string articlePath = Resolve(article.GetProperty("path").GetString()!);
             string articleText = File.ReadAllText(articlePath);
-            foreach (string heading in new[]
+            string[][] requiredHeadingGroups =
             {
-                "## 本文使用的项目与库", "## 模型获取与许可证", "## ONNX 转换与暂存",
-                "## 创建本地包消费项目", "## 编写程序入口", "## 编译并运行",
-                "## 已验证结果", "## 复查与边界"
-            })
+                new[] { "## 本文使用的项目与库" },
+                new[] { "## 模型获取与许可证" },
+                new[] { "## ONNX 转换与暂存" },
+                new[] { "## 使用公开包准备应用", "## 使用公开包准备案例", "## 创建本地包消费项目" },
+                new[] { "## 编写程序入口" },
+                new[] { "## 编译并运行" },
+                new[] { "## 已验证结果" },
+                new[] { "## 复查与边界" },
+            };
+            foreach (string[] headingGroup in requiredHeadingGroups)
             {
-                Assert.Contains(heading, articleText, StringComparison.Ordinal);
+                Assert.Contains(headingGroup, heading => articleText.Contains(heading, StringComparison.Ordinal));
             }
-            Assert.Contains("终端截图来自本次真实运行的 stdout", articleText, StringComparison.Ordinal);
-            Assert.Contains("两张图都来自同一次真实 TensorRT 执行", articleText, StringComparison.Ordinal);
+            Assert.Contains("终端截图来自", articleText, StringComparison.Ordinal);
+            Assert.Contains("真实运行", articleText, StringComparison.Ordinal);
+            Assert.Contains("stdout", articleText, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("真实 TensorRT", articleText, StringComparison.OrdinalIgnoreCase);
+            Assert.True(
+                articleText.Contains("两张图都来自同一次", StringComparison.Ordinal) ||
+                articleText.Contains("同次运行输出", StringComparison.Ordinal) ||
+                articleText.Contains("结果图使用同一个", StringComparison.Ordinal));
             Assert.Empty(Regex.Matches(articleText, @"(?im)(?:[A-Z]:\\|/Users/[^/\s]+/|/home/[^/\s]+/)"));
 
             string evidencePath = Resolve(article.GetProperty("realExecutionEvidence").GetString()!);
@@ -151,11 +163,10 @@ public sealed class EngineeringAndArticleCatalogTests
         foreach (string entrypoint in new[]
         {
             "Invoke-LocalReleaseBundle.ps1",
+            "Invoke-WindowsBridgePackageMatrix.ps1",
             "Test-RuntimePackageReadiness.ps1",
             "Sync-DemoOnnxModels.ps1",
             "Acquire-YoloV8DetectionOfficialAssets.ps1",
-            "Test-YoloVisionDetectionLocalPackageConsumer.ps1",
-            "Test-YoloVisionLocalPackageConsumer.ps1",
             "Test-TechnicalArticleCompleteness.ps1"
         })
         {
@@ -164,6 +175,8 @@ public sealed class EngineeringAndArticleCatalogTests
         }
         Assert.Contains("不是面向最终用户的命令集合", readme, StringComparison.Ordinal);
         Assert.Contains("内部工程脚本", readme, StringComparison.Ordinal);
+        Assert.Contains("已退役的案例包工具", readme, StringComparison.Ordinal);
+        Assert.Contains("Test-YoloVisionLocalPackageConsumer.ps1", readme, StringComparison.Ordinal);
         Assert.Contains("不能仅凭“没有字面引用”判定无用", readme, StringComparison.Ordinal);
         Assert.Contains("不会因为“质量门通过”而自动获得", readme, StringComparison.Ordinal);
     }

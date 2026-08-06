@@ -14,7 +14,7 @@
     "dotnetSdkVersion": "10.0.301"
   },
   "assets": {
-    "sampleSourcePath": "samples/InferenceBindings/Program.cs",
+    "sampleSourcePath": "samples/Inference/01.Bindings/Program.cs",
     "sampleSourceSha256": "58776f73b35f9b321fa905adcd4770bdabac8745ef956be044c3438633fe4a3e",
     "sampleAssemblySha256": "06e0412c2f828e6ceca791c77f7d7736f0e79aae34caae6ab2920b8519c90689",
     "nativeBridgeSha256": "0576f191617dcdad46fd40e238f61cf22b9fb04826b70c1c47993b7944bd26a0",

@@ -21,7 +21,7 @@ YoloVision 涉及模型导出、TensorRT 构建、输入预处理、输出 layou
 1. 离线能力矩阵：
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- --list-capabilities
+dotnet run --project .\applications\YoloVision -- --list-capabilities
 ```
 
 2. TensorRtExec dry-run：
@@ -47,7 +47,7 @@ dotnet run --project .\applications\TensorRtExec -- `
 4. YoloVision sample run：
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- `
+dotnet run --project .\applications\YoloVision -- `
   --model .\models\model.onnx `
   --labels .\models\labels.txt `
   --input-data .\models\input-fp32.bin `

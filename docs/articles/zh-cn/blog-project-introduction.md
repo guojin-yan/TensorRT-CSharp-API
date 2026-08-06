@@ -46,22 +46,22 @@ flowchart LR
 
 当前更适合作为入门体验的路径包括：
 
-1. `samples/InferenceBindings`
+1. `samples/Inference/01.Bindings`
    - 构建一个最小 identity network。
    - 设置 tensor address。
    - enqueue 并读取输出。
 
-2. `samples/DynamicShape`
+2. `samples/Inference/02.DynamicShapes`
    - 创建 optimization profile。
    - 设置 runtime shape。
    - 验证 dynamic batch 的输入输出。
 
-3. `samples/OnnxToEngine`
+3. `applications/OnnxToEngine`
    - 使用 ONNX parser。
    - 构建 serialized engine。
    - 反序列化并进行 round-trip。
 
-4. `samples/MultiStream`
+4. `samples/Performance/01.MultiStream`
    - 使用 CUDA stream/event。
    - 演示跨 stream ordering。
 
@@ -107,9 +107,9 @@ realCallbackRuntimeProof=False
 
 ```powershell
 dotnet build .\TensorRtSharp.sln -c Debug --no-restore
-dotnet run --project .\samples\InferenceBindings\InferenceBindings.csproj -c Debug
-dotnet run --project .\samples\DynamicShape\DynamicShape.csproj -c Debug
-dotnet run --project .\samples\OnnxToEngine\OnnxToEngine.csproj -c Debug
+dotnet run --project .\samples\Inference\01.Bindings\InferenceBindings.csproj -c Debug
+dotnet run --project .\samples\Inference\02.DynamicShapes\DynamicShape.csproj -c Debug
+dotnet run --project .\applications\OnnxToEngine\OnnxToEngine.csproj -c Debug
 ```
 
 如果你在评估 NuGet/runtime package，则优先看：

@@ -13,7 +13,7 @@ public sealed class YoloVisionManagedPipelineTests
     [Fact]
     public void ProgramEmitsPointerFreeBindingMetadataSummary()
     {
-        string program = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "YoloVision", "Program.cs"));
+        string program = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "YoloVision", "Program.cs"));
         Assert.Contains("BindingReport Ready=", program, StringComparison.Ordinal);
         Assert.Contains("BindingMetadata Index=", program, StringComparison.Ordinal);
         Assert.Contains("TensorRtEngineBindingReport", program, StringComparison.Ordinal);
@@ -1106,7 +1106,7 @@ public sealed class YoloVisionManagedPipelineTests
         Assert.Contains("yolox | cls | Classification | unsupported-family-task", table, StringComparison.Ordinal);
         Assert.Contains("managed-metadata-ready", table, StringComparison.Ordinal);
 
-        string program = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "YoloVision", "Program.cs"));
+        string program = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "YoloVision", "Program.cs"));
         Assert.Contains("--list-capabilities", program, StringComparison.Ordinal);
         Assert.Contains("YoloCapabilityMatrix.FormatConsoleTable()", program, StringComparison.Ordinal);
         Assert.Contains("--preprocess-only", program, StringComparison.Ordinal);
@@ -1114,8 +1114,8 @@ public sealed class YoloVisionManagedPipelineTests
         Assert.Contains("ImagePreprocessConfig", program, StringComparison.Ordinal);
         Assert.Contains("--preflight", program, StringComparison.Ordinal);
         Assert.Contains("YoloVisionPreflightReport.Create", program, StringComparison.Ordinal);
-        string readme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "YoloVision", "README.md"));
-        string schema = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "YoloVision", "yolovision-preflight.schema.json"));
+        string readme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "YoloVision", "README.md"));
+        string schema = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "YoloVision", "yolovision-preflight.schema.json"));
         Assert.Contains("yolovision-preflight.v1", readme, StringComparison.Ordinal);
         Assert.Contains("isRuntimeProof=false", readme, StringComparison.Ordinal);
         Assert.Contains("\"schemaVersion\": { \"const\": \"yolovision-preflight.v1\" }", schema, StringComparison.Ordinal);

@@ -1,6 +1,6 @@
 <Project>
   <ItemGroup Condition="'$(MSBuildProjectExtension)' == '.csproj'">
-    <Compile Include="$(MSBuildThisFileDirectory)..\samples\JYPPX.SampleSupport\SampleCommandLine.cs"
+    <Compile Include="$(MSBuildThisFileDirectory)..\samples\_shared\JYPPX.SampleSupport\SampleCommandLine.cs"
              Link="JYPPX.SampleSupport\SampleCommandLine.cs" />
   </ItemGroup>
 </Project>

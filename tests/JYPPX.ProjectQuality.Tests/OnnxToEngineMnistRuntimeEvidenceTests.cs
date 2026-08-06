@@ -59,8 +59,7 @@ public sealed class OnnxToEngineMnistRuntimeEvidenceTests
     {
         string readme = File.ReadAllText(Path.Combine(
             RepositoryPaths.Root,
-            "samples",
-            "OnnxToEngine",
+            "applications", "OnnxToEngine",
             "README.md"));
 
         Assert.Contains("<workspace>\\models\\OnnxToEngine\\MNIST", readme, StringComparison.Ordinal);
@@ -157,7 +156,7 @@ public sealed class OnnxToEngineMnistRuntimeEvidenceTests
             ComputeSha256(Path.Combine(RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp.Tools", "Runtime", "MnistVisualizationWriter.cs")));
         Assert.Equal(
             root.GetProperty("sourceChangesIncluded").GetProperty("sampleProgramSha256").GetString(),
-            ComputeSha256(Path.Combine(RepositoryPaths.Root, "samples", "OnnxToEngine", "Program.cs")));
+            ComputeSha256(Path.Combine(RepositoryPaths.Root, "applications", "OnnxToEngine", "Program.cs")));
         Assert.Equal(
             visuals.GetProperty("annotatedResultSha256").GetString(),
             ComputeSha256(Path.Combine(RepositoryPaths.Root, visuals.GetProperty("annotatedResult").GetString()!.Replace('/', Path.DirectorySeparatorChar))));

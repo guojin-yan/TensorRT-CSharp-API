@@ -45,7 +45,7 @@ $env:JYPPX_ENABLE_DEVELOPMENT_PROBING = 'true'
 
 ## 示例网络与数据
 
-示例源文件位于 `samples/InferenceBindings/Program.cs`。网络只有一个 Identity layer：
+示例源文件位于 `samples/Inference/01.Bindings/Program.cs`。网络只有一个 Identity layer：
 
 ```text
 input [-1, 4] -> Identity -> output [-1, 4]
@@ -208,7 +208,7 @@ Console.WriteLine(
 从仓库根目录编译 Release 示例：
 
 ```powershell
-dotnet build .\samples\InferenceBindings\InferenceBindings.csproj `
+dotnet build .\samples\Inference\01.Bindings\InferenceBindings.csproj `
   -c Release `
   --no-restore `
   /p:UseSharedCompilation=false
@@ -217,7 +217,7 @@ dotnet build .\samples\InferenceBindings\InferenceBindings.csproj `
 运行 TensorRT 10、batch 2：
 
 ```powershell
-dotnet .\samples\InferenceBindings\bin\Release\net8.0\InferenceBindings.dll `
+dotnet .\samples\Inference\01.Bindings\bin\Release\net8.0\InferenceBindings.dll `
   --tensor-rt-line 10 `
   --batch 2
 ```

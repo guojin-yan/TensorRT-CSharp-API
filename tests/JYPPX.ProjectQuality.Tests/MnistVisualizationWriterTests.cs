@@ -79,7 +79,7 @@ public sealed class MnistVisualizationWriterTests
     [Fact]
     public void CommandLineDocumentsAndCallsTheVisualizationWriter()
     {
-        string program = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "OnnxToEngine", "Program.cs"));
+        string program = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "OnnxToEngine", "Program.cs"));
         Assert.Contains("--visualization", program, StringComparison.Ordinal);
         Assert.Contains("MnistVisualizationWriter.Write", program, StringComparison.Ordinal);
     }

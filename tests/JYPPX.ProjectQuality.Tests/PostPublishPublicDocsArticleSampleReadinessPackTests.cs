@@ -83,7 +83,7 @@ public sealed class PostPublishPublicDocsArticleSampleReadinessPackTests
         }
 
         JsonElement yoloVision = pack.GetProperty("yoloVision");
-        Assert.Equal("samples/YoloVision", yoloVision.GetProperty("samplePath").GetString());
+        Assert.Equal("applications/YoloVision", yoloVision.GetProperty("samplePath").GetString());
         Assert.False(yoloVision.GetProperty("legacyYoloDetPathExists").GetBoolean());
         Assert.Equal(0, yoloVision.GetProperty("legacyYoloDetPublicPathMatchCount").GetInt32());
         Assert.False(Directory.Exists(Path.Combine(RepositoryPaths.Root, "samples", "YoloDet")));

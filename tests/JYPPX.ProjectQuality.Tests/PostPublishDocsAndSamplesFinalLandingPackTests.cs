@@ -77,7 +77,7 @@ public sealed class PostPublishDocsAndSamplesFinalLandingPackTests
             "release-evidence-bundle.json",
             "strict-close-ready-convergence-dashboard.json",
             "final-public-release-closure-bridge.json",
-            "samples/YoloVision/README.md",
+            "applications/YoloVision/README.md",
             "samples/assets/yolovision-article-case-pack.json",
             "package-consumer-runtime-proof-clean-consumer-guide.md",
             "Owner public publish result",

@@ -11,26 +11,24 @@ public sealed class ClassificationLocalPackageConsumerTests
         Assert.True(typeof(ClassificationCommand).IsPublic);
         Assert.NotNull(typeof(ClassificationCommand).GetMethod(nameof(ClassificationCommand.Run)));
 
-        string entryPoint = ReadSource("samples", "Classification", "EntryPoint.cs");
+        string entryPoint = ReadSource("samples", "ComputerVision", "01.Classification", "EntryPoint.cs");
         Assert.Contains("public static int Main(string[] args)", entryPoint, StringComparison.Ordinal);
         Assert.Contains("return ClassificationCommand.Run(args);", entryPoint, StringComparison.Ordinal);
     }
 
     [Fact]
-    public void ClassificationPackageAndConsumerKeepTheThreePackageBoundary()
+    public void ClassificationIsANonPackablePublishedPackageConsumer()
     {
-        string project = ReadSource("samples", "Classification", "Classification.csproj");
-        string template = ReadSource("samples", "Classification.PackageConsumer", "Classification.PackageConsumer.csproj.template");
-        string program = ReadSource("samples", "Classification.PackageConsumer", "Program.cs");
+        string project = ReadSource("samples", "ComputerVision", "01.Classification", "Classification.csproj");
+        string packages = ReadSource("build", "JYPPX.PublicSamplePackages.props");
+        string openCvPackages = ReadSource("build", "JYPPX.OpenCvSamplePackages.props");
 
-        Assert.Contains("<PackageId>JYPPX.TensorRT.CSharp.API.Classification</PackageId>", project, StringComparison.Ordinal);
-        Assert.Contains("<IsPackable>true</IsPackable>", project, StringComparison.Ordinal);
-        Assert.DoesNotContain("JYPPX.CudaSharp.csproj", project, StringComparison.Ordinal);
-        Assert.Equal(3, CountOccurrences(template, "<PackageReference"));
-        Assert.DoesNotContain("ProjectReference", template, StringComparison.Ordinal);
-        Assert.DoesNotContain("<Reference ", template, StringComparison.Ordinal);
-        Assert.Contains("ClassificationCommand.Run(args)", program, StringComparison.Ordinal);
-        Assert.Contains("ClassificationPackageConsumer ProjectReference=False", program, StringComparison.Ordinal);
+        Assert.Contains("<IsPackable>false</IsPackable>", project, StringComparison.Ordinal);
+        Assert.DoesNotContain("<PackageId>", project, StringComparison.Ordinal);
+        Assert.DoesNotContain("ProjectReference", project, StringComparison.Ordinal);
+        Assert.Contains("JYPPX.TensorRT.CSharp.API", packages, StringComparison.Ordinal);
+        Assert.Contains("JYPPX.OpenCV.CSharp.API", openCvPackages, StringComparison.Ordinal);
+        Assert.DoesNotContain("JYPPX.TensorRT.CSharp.API.Classification", packages, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -56,15 +54,4 @@ public sealed class ClassificationLocalPackageConsumerTests
         return File.ReadAllText(Path.Combine(new[] { RepositoryPaths.Root }.Concat(parts).ToArray()));
     }
 
-    private static int CountOccurrences(string text, string value)
-    {
-        int count = 0;
-        int offset = 0;
-        while ((offset = text.IndexOf(value, offset, StringComparison.Ordinal)) >= 0)
-        {
-            count++;
-            offset += value.Length;
-        }
-        return count;
-    }
 }

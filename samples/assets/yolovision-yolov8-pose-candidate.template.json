@@ -7,7 +7,7 @@
   "proofClassification": "template-only",
   "canPromoteRealModelRuntime": false,
   "canPromotePackageConsumerRuntime": false,
-  "taskOutputContract": "samples/YoloVision/yolovision-task-output-contract.json",
+  "taskOutputContract": "applications/YoloVision/yolovision-task-output-contract.json",
   "family": "YOLOv8",
   "task": "pose",
   "model": {
@@ -61,7 +61,7 @@
   },
   "commands": {
     "tensorRtExecBuildCommand": "dotnet run --project .\\applications\\TensorRtExec -- --onnx .\\models\\yolov8-pose.onnx --saveEngine .\\models\\yolov8-pose.plan --minShapes images:1x3x640x640 --optShapes images:1x3x640x640 --maxShapes images:4x3x640x640 --fp16 --workspace 1024 --buildOnly --exportReport .\\models\\yolov8-pose-build-report.json --evidenceSidecar .\\models\\yolov8-pose-evidence.sidecar.json",
-    "yoloVisionRunCommand": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8-pose.onnx --labels .\\models\\coco-pose.names --input-data .\\models\\yolov8-pose-fp32.bin --input-shape 1x3x640x640 --tensor-rt-line 10 --family v8 --task pose --keypoint-count 17 --keypoint-layout x,y,confidence --layout auto --has-objectness auto --nms-mode class-aware --confidence 0.25 --iou-threshold 0.45"
+    "yoloVisionRunCommand": "dotnet run --project .\\applications\\YoloVision -- --model .\\models\\yolov8-pose.onnx --labels .\\models\\coco-pose.names --input-data .\\models\\yolov8-pose-fp32.bin --input-shape 1x3x640x640 --tensor-rt-line 10 --family v8 --task pose --keypoint-count 17 --keypoint-layout x,y,confidence --layout auto --has-objectness auto --nms-mode class-aware --confidence 0.25 --iou-threshold 0.45"
   },
   "proofChecklist": {
     "requiredEvidenceLines": [

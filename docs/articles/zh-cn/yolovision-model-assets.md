@@ -1,6 +1,6 @@
 # YoloVision Model Assets
 
-`samples/YoloVision` 面向用户提供的 YOLO-family ONNX。仓库不内置 detector、COCO labels 或图片资产。本文记录完整检测 demo 的资产要求和验证边界。
+`applications/YoloVision` 面向用户提供的 YOLO-family ONNX。仓库不内置 detector、COCO labels 或图片资产。本文记录完整检测 demo 的资产要求和验证边界。
 
 ## 需要的文件
 
@@ -21,7 +21,7 @@
 ## 运行命令
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- `
+dotnet run --project .\applications\YoloVision -- `
   --model .\models\yolo.onnx `
   --labels .\models\coco.names `
   --input-shape 1x3x640x640 `

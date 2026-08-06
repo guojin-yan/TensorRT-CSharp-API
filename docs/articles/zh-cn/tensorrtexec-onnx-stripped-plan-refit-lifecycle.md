@@ -5,7 +5,7 @@
 ## 参数契约
 
 ```powershell
-dotnet .\samples\OnnxToEngine\bin\Debug\net8.0\OnnxToEngine.dll `
+dotnet .\applications\OnnxToEngine\bin\Debug\net8.0\OnnxToEngine.dll `
   --tensor-rt-line 10 `
   --onnx .\models\model.onnx `
   --saveEngine .\artifacts\model-stripped.plan `

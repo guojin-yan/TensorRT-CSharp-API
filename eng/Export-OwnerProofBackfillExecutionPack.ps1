@@ -270,8 +270,8 @@ $backfillItems = @(
     -SourceArtifacts @(
       "artifacts/user-acceptance/sample-asset-manifest-audit.json",
       "artifacts/user-acceptance/sample-run-evidence-record-validation.json",
-      "samples/YoloVision/README.md",
-      "samples/Classification/README.md"
+      "applications/YoloVision/README.md",
+      "samples/ComputerVision/01.Classification/README.md"
     ) `
     -BlockerReason "Real-model-runtime requires real assets and logs; build-only sidecars and synthetic examples do not promote release proof."
 

@@ -164,7 +164,7 @@
   "commands": {
     "acquisition": "pwsh -NoProfile -ExecutionPolicy Bypass -File ./eng/Acquire-YoloV8ClassificationOfficialAssets.ps1 -AssetRoot <E-drive-root> -PythonPath <python>",
     "reference": "python ./eng/Invoke-YoloVisionClassificationReference.py --weights <pt> --imagenet-yaml <yaml> --image <jpg> --onnx <onnx> --output-directory <reference-dir> --csharp-tensor <tensor>",
-    "runtime": "dotnet run --project ./samples/YoloVision -c Release --no-build -- --model <onnx> --labels <labels> --input-data <authoritative-tensor> --family v8 --task cls --classification-output output0 --class-count 1000 --classification-score-mode probabilities --confidence 0 --top-k 5 --reference-outputs output0:<reference> --reference-abs-tolerance 0.001 --reference-rel-tolerance 0.001 --output-json <json> --visualization-svg <svg>"
+    "runtime": "dotnet run --project ./applications/YoloVision -c Release --no-build -- --model <onnx> --labels <labels> --input-data <authoritative-tensor> --family v8 --task cls --classification-output output0 --class-count 1000 --classification-score-mode probabilities --confidence 0 --top-k 5 --reference-outputs output0:<reference> --reference-abs-tolerance 0.001 --reference-rel-tolerance 0.001 --output-json <json> --visualization-svg <svg>"
   },
   "proofBoundary": {
     "sourceTreeRealModelRuntime": true,

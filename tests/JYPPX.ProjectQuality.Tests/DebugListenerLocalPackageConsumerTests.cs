@@ -11,10 +11,10 @@ public sealed class DebugListenerLocalPackageConsumerTests
     public void ConsumerUsesOnlyPackageReferencesAndExercisesAcceptedAndRejectedCallbacks()
     {
         string template = ReadSource(
-            "samples",
+            "tests", "fixtures", "package-consumers",
             "DebugListener.PackageConsumer",
             "DebugListener.PackageConsumer.csproj.template");
-        string program = ReadSource("samples", "DebugListener.PackageConsumer", "Program.cs");
+        string program = ReadSource("tests", "fixtures", "package-consumers", "DebugListener.PackageConsumer", "Program.cs");
 
         Assert.Equal(2, Regex.Matches(template, "<PackageReference ").Count);
         Assert.DoesNotContain("ProjectReference", template, StringComparison.Ordinal);

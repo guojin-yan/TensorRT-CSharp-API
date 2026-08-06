@@ -95,8 +95,8 @@ public sealed class TechnicalArticleRoadmapTests
 
         foreach (string requiredBoundary in new[]
         {
-            "samples/OnnxToEngine",
-            "samples/YoloVision",
+            "applications/OnnxToEngine",
+            "applications/YoloVision",
             "applications/TensorRtExec",
             "tensorrtsharp-source-build-cpp-guide.md",
             "source-build-windows-cpp-bridge.md",
@@ -175,7 +175,7 @@ public sealed class TechnicalArticleRoadmapTests
             "eng/Test-PackageConsumer.ps1",
             "pack/runtime-split/README.md",
             "docs/articles/zh-cn/publishing/article-roadmap-30plus.json",
-            "samples/YoloVision/YoloVision.csproj",
+            "applications/YoloVision/YoloVision.csproj",
             "artifacts/final-release/real-external-proof-record-import-validator.json",
         })
         {
@@ -243,7 +243,7 @@ public sealed class TechnicalArticleRoadmapTests
             .ToArray();
         Assert.True(yoloArticles.Length >= 7);
         Assert.Contains(yoloArticles, static article => article.GetProperty("qualityNotes").EnumerateArray().Any(static note => note.GetString()!.Contains("YOLO v5/v6/v7/v8/v9/v10/v11/v26/custom", StringComparison.Ordinal)));
-        Assert.Contains(yoloArticles, static article => article.GetProperty("commands").EnumerateArray().Any(static command => command.GetString()!.Contains(@".\samples\YoloVision", StringComparison.Ordinal)));
+        Assert.Contains(yoloArticles, static article => article.GetProperty("commands").EnumerateArray().Any(static command => command.GetString()!.Contains(@".\applications\YoloVision", StringComparison.Ordinal)));
 
         JsonElement[] toolArticles = articles
             .Where(static article =>

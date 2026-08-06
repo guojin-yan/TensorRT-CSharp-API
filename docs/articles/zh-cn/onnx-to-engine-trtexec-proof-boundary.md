@@ -1,6 +1,6 @@
 # OnnxToEngine 与 trtexec-like 转换：能力、报告和 Proof 边界
 
-`samples/OnnxToEngine` 是最小 ONNX 到 TensorRT engine 样例，`applications/TensorRtExec` 是面向用户的 trtexec-like 工具。两者共同帮助用户理解转换链路，但 `OnnxToEngine report` 和 shape profile matrix 不能替代 runtime proof。
+`applications/OnnxToEngine` 是最小 ONNX 到 TensorRT engine 样例，`applications/TensorRtExec` 是面向用户的 trtexec-like 工具。两者共同帮助用户理解转换链路，但 `OnnxToEngine report` 和 shape profile matrix 不能替代 runtime proof。
 
 ## 适用读者
 
@@ -12,9 +12,9 @@
 
 OnnxToEngine 适合验证最小链路：
 
-- `samples/OnnxToEngine/Program.cs`
-- `samples/OnnxToEngine/trtexec-parity-matrix.json`
-- `samples/OnnxToEngine/trtexec-parity-matrix.md`
+- `applications/OnnxToEngine/Program.cs`
+- `applications/OnnxToEngine/trtexec-parity-matrix.json`
+- `applications/OnnxToEngine/trtexec-parity-matrix.md`
 - `tests/JYPPX.ProjectQuality.Tests/OnnxToEngineTrtexecLikeTests.cs`
 
 它可以覆盖 ONNX input、engine output、min/opt/max shape profile、FP16/INT8 boundary、workspace / memory pool intent、timing cache intent、verbose diagnostics 和 report output。
@@ -54,7 +54,7 @@ OnnxToEngine 可以证明“转换路径可以被描述和验证”，但不能�
 最小样例命令：
 
 ```powershell
-dotnet run --project samples\OnnxToEngine -- --tensor-rt-line 10 --batch 2
+dotnet run --project applications\OnnxToEngine -- --tensor-rt-line 10 --batch 2
 ```
 
 trtexec-like 外部模型预检应转到 TensorRtExec：

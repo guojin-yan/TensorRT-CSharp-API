@@ -7,7 +7,7 @@
   "proofClassification": "template-only",
   "canPromoteRealModelRuntime": false,
   "canPromotePackageConsumerRuntime": false,
-  "taskOutputContract": "samples/YoloVision/yolovision-task-output-contract.json",
+  "taskOutputContract": "applications/YoloVision/yolovision-task-output-contract.json",
   "family": "YOLOv8",
   "task": "sem",
   "model": {
@@ -61,7 +61,7 @@
   },
   "commands": {
     "tensorRtExecBuildCommand": "dotnet run --project .\\applications\\TensorRtExec -- --onnx .\\models\\yolov8-sem.onnx --saveEngine .\\models\\yolov8-sem.plan --minShapes images:1x3x512x512 --optShapes images:1x3x512x512 --maxShapes images:2x3x512x512 --fp16 --workspace 1024 --buildOnly --exportReport .\\models\\yolov8-sem-build-report.json --evidenceSidecar .\\models\\yolov8-sem-evidence.sidecar.json",
-    "yoloVisionRunCommand": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8-sem.onnx --labels .\\models\\semantic-classes.names --input-data .\\models\\yolov8-sem-fp32.bin --input-shape 1x3x512x512 --tensor-rt-line 10 --family custom --task sem --semantic-output semantic --class-count 21 --output-json .\\models\\yolov8-sem-output.json --visualization-svg .\\models\\yolov8-sem-output.svg"
+    "yoloVisionRunCommand": "dotnet run --project .\\applications\\YoloVision -- --model .\\models\\yolov8-sem.onnx --labels .\\models\\semantic-classes.names --input-data .\\models\\yolov8-sem-fp32.bin --input-shape 1x3x512x512 --tensor-rt-line 10 --family custom --task sem --semantic-output semantic --class-count 21 --output-json .\\models\\yolov8-sem-output.json --visualization-svg .\\models\\yolov8-sem-output.svg"
   },
   "proofChecklist": {
     "requiredEvidenceLines": [

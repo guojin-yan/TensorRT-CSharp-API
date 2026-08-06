@@ -11,7 +11,7 @@ public sealed class YoloVisionRealAssetCandidatePackTests
         string roadmapPath = Path.Combine(RepositoryPaths.Root, "samples", "assets", "yolovision-family-task-real-asset-roadmap.json");
         string articlePath = Path.Combine(RepositoryPaths.Root, "docs", "articles", "zh-cn", "yolovision-family-task-real-asset-roadmap.md");
         string assetsReadme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "assets", "README.md"));
-        string yoloReadme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "YoloVision", "README.md"));
+        string yoloReadme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "YoloVision", "README.md"));
         string docsIndex = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "index.md"));
         string docsToc = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "toc.yml"));
 
@@ -37,7 +37,7 @@ public sealed class YoloVisionRealAssetCandidatePackTests
             Assert.Equal("owner-action-required", entry.GetProperty("runtimeProofState").GetString());
             Assert.True(entry.GetProperty("primaryTasks").GetArrayLength() >= 1);
             Assert.Contains("TensorRtExec", entry.GetProperty("tensorRtExecBuildCommandTemplate").GetString(), StringComparison.Ordinal);
-            Assert.Contains("samples\\YoloVision", entry.GetProperty("yoloVisionRunCommandTemplate").GetString(), StringComparison.Ordinal);
+            Assert.Contains("applications\\YoloVision", entry.GetProperty("yoloVisionRunCommandTemplate").GetString(), StringComparison.Ordinal);
             Assert.Contains("owner", entry.GetProperty("exportCommandTemplate").GetString(), StringComparison.OrdinalIgnoreCase);
             Assert.True(entry.GetProperty("requiredOutputMetadata").GetArrayLength() >= 1);
             Assert.True(entry.GetProperty("articleAngles").GetArrayLength() >= 1);
@@ -120,10 +120,10 @@ public sealed class YoloVisionRealAssetCandidatePackTests
 
             JsonElement commands = root.GetProperty("commands");
             Assert.Contains("applications\\TensorRtExec", commands.GetProperty("tensorRtExecBuildCommand").GetString(), StringComparison.Ordinal);
-            Assert.Contains("samples\\YoloVision", commands.GetProperty("yoloVisionRunCommand").GetString(), StringComparison.Ordinal);
+            Assert.Contains("applications\\YoloVision", commands.GetProperty("yoloVisionRunCommand").GetString(), StringComparison.Ordinal);
             Assert.Contains("--buildOnly", commands.GetProperty("tensorRtExecBuildCommand").GetString(), StringComparison.Ordinal);
             Assert.Contains("--task " + task, commands.GetProperty("yoloVisionRunCommand").GetString(), StringComparison.Ordinal);
-            Assert.Equal("samples/YoloVision/yolovision-task-output-contract.json", root.GetProperty("taskOutputContract").GetString());
+            Assert.Equal("applications/YoloVision/yolovision-task-output-contract.json", root.GetProperty("taskOutputContract").GetString());
 
             JsonElement outputMetadata = root.GetProperty("outputMetadata");
             if (task == "pose")
@@ -215,7 +215,7 @@ public sealed class YoloVisionRealAssetCandidatePackTests
     {
         string packPath = Path.Combine(RepositoryPaths.Root, "samples", "assets", "yolovision-article-case-pack.json");
         string assetsReadme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "assets", "README.md"));
-        string yoloReadme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "YoloVision", "README.md"));
+        string yoloReadme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "YoloVision", "README.md"));
         string docsIndex = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "index.md"));
         string docsToc = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "toc.yml"));
 
@@ -233,7 +233,7 @@ public sealed class YoloVisionRealAssetCandidatePackTests
         Assert.False(root.GetProperty("canPromoteRealModelRuntime").GetBoolean());
         Assert.False(root.GetProperty("canPromotePackageConsumerRuntime").GetBoolean());
         Assert.Contains("not real-model-runtime proof", root.GetProperty("proofBoundary").GetString(), StringComparison.Ordinal);
-        Assert.Equal("samples/YoloVision/yolovision-preflight.schema.json", root.GetProperty("preflightSchema").GetString());
+        Assert.Equal("applications/YoloVision/yolovision-preflight.schema.json", root.GetProperty("preflightSchema").GetString());
         Assert.Equal("yolovision-preflight.v1", root.GetProperty("preflightSchemaVersion").GetString());
         Assert.Equal("precheck", root.GetProperty("preflightProofClassification").GetString());
 
@@ -271,7 +271,7 @@ public sealed class YoloVisionRealAssetCandidatePackTests
             Assert.Contains(href, docsToc, StringComparison.Ordinal);
             Assert.Contains("TensorRtExec", caseEntry.GetProperty("tensorRtExecBuildCommand").GetString(), StringComparison.Ordinal);
             Assert.Contains("--buildOnly", caseEntry.GetProperty("tensorRtExecBuildCommand").GetString(), StringComparison.Ordinal);
-            Assert.Contains("samples\\YoloVision", caseEntry.GetProperty("yoloVisionRunCommand").GetString(), StringComparison.Ordinal);
+            Assert.Contains("applications\\YoloVision", caseEntry.GetProperty("yoloVisionRunCommand").GetString(), StringComparison.Ordinal);
             Assert.Contains("--task " + task, caseEntry.GetProperty("yoloVisionRunCommand").GetString(), StringComparison.Ordinal);
             Assert.Equal(task == "sem" ? "custom" : "v8", caseEntry.GetProperty("family").GetString());
             Assert.Contains("--preflight", caseEntry.GetProperty("yoloVisionPreflightCommand").GetString(), StringComparison.Ordinal);

@@ -1,12 +1,12 @@
 # YoloVision 模型系列与任务矩阵
 
-`samples/YoloVision` 是项目统一的 YOLO-family 样例入口，当前定位已经从单一检测样例扩展为覆盖 detection、classification、segmentation、OBB、pose 和 semantic segmentation 的综合样例。它不再使用早期过窄的检测样例语义作为当前项目名。
+`applications/YoloVision` 是项目统一的 YOLO-family 样例入口，当前定位已经从单一检测样例扩展为覆盖 detection、classification、segmentation、OBB、pose 和 semantic segmentation 的综合样例。它不再使用早期过窄的检测样例语义作为当前项目名。
 
-机器可读任务输出契约位于 `samples/YoloVision/yolovision-task-output-contract.json`。该契约把 `det`、`cls`、`seg`、`obb`、`pose`、`sem` 的输出角色、必填 metadata、TensorRtExec shape profile 建议、文章入口和 proof 边界集中维护，避免 README、asset pack、文章和测试各写一份后发生漂移。它只是 support/planning evidence：不能替代真实模型、真实输入、输出 JSON、日志 SHA256 和 owner review。
+机器可读任务输出契约位于 `applications/YoloVision/yolovision-task-output-contract.json`。该契约把 `det`、`cls`、`seg`、`obb`、`pose`、`sem` 的输出角色、必填 metadata、TensorRtExec shape profile 建议、文章入口和 proof 边界集中维护，避免 README、asset pack、文章和测试各写一份后发生漂移。它只是 support/planning evidence：不能替代真实模型、真实输入、输出 JSON、日志 SHA256 和 owner review。
 
 本文面向后续技术文章、微信公众号教程和真实案例 proof backfill：它说明每个 YOLO 系列和任务类型应该如何准备模型、导出 ONNX、记录输入输出 metadata、选择后处理路径，并明确当前是否已经具备 runtime proof。
 
-> 证据边界：本文和 `samples/YoloVision/README.md` 是模型矩阵与教程规划，不是 runtime proof。没有真实模型、许可证、输入资产、运行日志、SHA256、stdout/stderr summary 和 owner review 时，只能标记为 `planned` / `documented` / `not-proof`。
+> 证据边界：本文和 `applications/YoloVision/README.md` 是模型矩阵与教程规划，不是 runtime proof。没有真实模型、许可证、输入资产、运行日志、SHA256、stdout/stderr summary 和 owner review 时，只能标记为 `planned` / `documented` / `not-proof`。
 
 ## 支持范围总览
 
@@ -77,7 +77,7 @@ nmsMode: class-aware / class-agnostic
 Detection：
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- `
+dotnet run --project .\applications\YoloVision -- `
   --model .\models\yolo-det.onnx `
   --labels .\models\coco.names `
   --input-data .\models\det-fp32.bin `
@@ -92,7 +92,7 @@ dotnet run --project .\samples\YoloVision -- `
 Segmentation：
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- `
+dotnet run --project .\applications\YoloVision -- `
   --model .\models\yolo-seg.onnx `
   --labels .\models\coco.names `
   --input-data .\models\seg-fp32.bin `
@@ -106,7 +106,7 @@ dotnet run --project .\samples\YoloVision -- `
 Pose：
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- `
+dotnet run --project .\applications\YoloVision -- `
   --model .\models\yolov8n-pose.onnx `
   --labels .\models\coco.names `
   --image .\models\person.ppm `
@@ -123,7 +123,7 @@ dotnet run --project .\samples\YoloVision -- `
 OBB：
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- `
+dotnet run --project .\applications\YoloVision -- `
   --model .\models\yolo-obb.onnx `
   --labels .\models\labels.txt `
   --input-data .\models\obb-fp32.bin `
@@ -137,9 +137,9 @@ dotnet run --project .\samples\YoloVision -- `
 Classification / Semantic：
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- --model .\models\yolov8n-cls.onnx --labels .\models\imagenet-yolov8n-cls.names --image .\models\bus.ppm --family v8 --task cls --classification-output output0 --classification-score-mode probabilities --confidence 0 --top-k 5
+dotnet run --project .\applications\YoloVision -- --model .\models\yolov8n-cls.onnx --labels .\models\imagenet-yolov8n-cls.names --image .\models\bus.ppm --family v8 --task cls --classification-output output0 --classification-score-mode probabilities --confidence 0 --top-k 5
 
-dotnet run --project .\samples\YoloVision -- --model .\models\yolo-sem.onnx --labels .\models\labels.txt --input-data .\models\sem-fp32.bin --input-shape 1x3x512x512 --family custom --task sem --semantic-output semantic --class-count 21
+dotnet run --project .\applications\YoloVision -- --model .\models\yolo-sem.onnx --labels .\models\labels.txt --input-data .\models\sem-fp32.bin --input-shape 1x3x512x512 --family custom --task sem --semantic-output semantic --class-count 21
 ```
 
 这些命令是可复制教程骨架，不代表仓库已经携带真实模型 proof。

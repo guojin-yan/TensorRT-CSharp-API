@@ -205,7 +205,7 @@ if (-not $SkipSampleSpecific.IsPresent) {
       inputAssetName = ".\models\image.jpg"
       preprocessedInputTensorName = ""
       buildCommand = "dotnet run --project .\applications\TensorRtExec -- --onnx .\models\classifier.onnx --saveEngine .\models\classifier.plan --minShapes input:1x3x224x224 --optShapes input:1x3x224x224 --maxShapes input:1x3x224x224 --buildOnly --exportReport .\models\classifier-build-report.json --evidenceSidecar .\models\classifier-evidence.sidecar.json"
-      runCommand = "dotnet run --project .\samples\Classification -- --model .\models\classifier.onnx --labels .\models\labels.txt --input .\models\image.jpg --input-shape 1x3x224x224 --tensor-rt-line 10 --top-k 5"
+      runCommand = "dotnet run --project .\samples\ComputerVision\01.Classification -- --model .\models\classifier.onnx --labels .\models\labels.txt --input .\models\image.jpg --input-shape 1x3x224x224 --tensor-rt-line 10 --top-k 5"
       manifestPath = "samples/assets/classification-assets.template.json"
     },
     [pscustomobject]@{
@@ -217,7 +217,7 @@ if (-not $SkipSampleSpecific.IsPresent) {
       inputAssetName = ".\models\image.jpg"
       preprocessedInputTensorName = ".\models\yolo-preprocessed-fp32.bin"
       buildCommand = "dotnet run --project .\applications\TensorRtExec -- --onnx .\models\yolo.onnx --saveEngine .\models\yolo.plan --minShapes images:1x3x640x640 --optShapes images:1x3x640x640 --maxShapes images:1x3x640x640 --buildOnly --exportReport .\models\yolo-build-report.json --evidenceSidecar .\models\yolo-evidence.sidecar.json"
-      runCommand = "dotnet run --project .\samples\YoloVision -- --model .\models\yolo.onnx --labels .\models\coco.names --input-data .\models\yolo-preprocessed-fp32.bin --input-shape 1x3x640x640 --tensor-rt-line 10 --layout auto --has-objectness auto --nms-mode class-aware --confidence 0.25"
+      runCommand = "dotnet run --project .\applications\YoloVision -- --model .\models\yolo.onnx --labels .\models\coco.names --input-data .\models\yolo-preprocessed-fp32.bin --input-shape 1x3x640x640 --tensor-rt-line 10 --layout auto --has-objectness auto --nms-mode class-aware --confidence 0.25"
       manifestPath = "samples/assets/yolovision-assets.template.json"
     },
     [pscustomobject]@{
@@ -229,7 +229,7 @@ if (-not $SkipSampleSpecific.IsPresent) {
       inputAssetName = ".\models\yolox-test.jpg"
       preprocessedInputTensorName = ".\models\yolox_s-preprocessed-fp32.bin"
       buildCommand = "dotnet run --project .\applications\TensorRtExec -- --onnx .\models\yolox_s.onnx --saveEngine .\models\yolox_s.plan --minShapes images:1x3x640x640 --optShapes images:1x3x640x640 --maxShapes images:1x3x640x640 --fp16 --workspace 512 --buildOnly --exportReport .\models\yolox_s-build-report.json --evidenceSidecar .\models\yolox_s-evidence.sidecar.json"
-      runCommand = "dotnet run --project .\samples\YoloVision -- --model .\models\yolox_s.onnx --labels .\models\coco.names --input-data .\models\yolox_s-preprocessed-fp32.bin --input-shape 1x3x640x640 --tensor-rt-line 10 --family custom --task det --layout auto --has-objectness auto --nms-mode class-aware --confidence 0.25 --iou-threshold 0.45"
+      runCommand = "dotnet run --project .\applications\YoloVision -- --model .\models\yolox_s.onnx --labels .\models\coco.names --input-data .\models\yolox_s-preprocessed-fp32.bin --input-shape 1x3x640x640 --tensor-rt-line 10 --family custom --task det --layout auto --has-objectness auto --nms-mode class-aware --confidence 0.25 --iou-threshold 0.45"
       manifestPath = "samples/assets/yolovision-yolox-s-example.json"
     }
   )

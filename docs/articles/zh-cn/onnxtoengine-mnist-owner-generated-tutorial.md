@@ -1,6 +1,6 @@
 # OnnxToEngine 实战：自有数字图片、TensorRT 与 ONNX Runtime 双重验证
 
-本文从模型取得开始，完整演示如何用 TensorRtSharp4.0 的 `samples/OnnxToEngine` 运行 MNIST ONNX、生成项目自有的数字 7 输入、构建 TensorRT engine、执行推理、导出结构化结果，并把实际像素、预测数字、置信度和十类概率绘制到结果图。最后再用 ONNX Runtime CPU 对同一个 float32 tensor 建立独立参考，并用错误期望数字验证失败关闭。
+本文从模型取得开始，完整演示如何用 TensorRtSharp4.0 的 `applications/OnnxToEngine` 运行 MNIST ONNX、生成项目自有的数字 7 输入、构建 TensorRT engine、执行推理、导出结构化结果，并把实际像素、预测数字、置信度和十类概率绘制到结果图。最后再用 ONNX Runtime CPU 对同一个 float32 tensor 建立独立参考，并用错误期望数字验证失败关闭。
 
 模型、engine、PGM、tensor 和原始日志都留在 Git 仓库外。仓库只保存代码、脱敏证据与允许再分发的项目自有配图；CUDA、cuDNN、TensorRT 和 NVRTC 继续由用户按版本安装。
 
@@ -11,8 +11,8 @@
 | `JYPPX.TensorRtSharp` | 解析 ONNX、构建 engine、绑定 tensor 并执行 enqueue |
 | `JYPPX.CudaSharp` | 管理 CUDA 设备、stream 和显存生命周期 |
 | `JYPPX.TensorRtSharp.Tools` | 实现 MNIST PGM 读取、预处理、结果验证和 SVG 可视化 |
-| `samples/OnnxToEngine` | 提供 `--mnist` 命令入口与 JSON、tensor、engine、结果图导出 |
-| `samples/Mnist.OnnxRuntimeReference` | 在隔离项目中使用 ONNX Runtime CPUExecutionProvider 生成独立参考 |
+| `applications/OnnxToEngine` | 提供 `--mnist` 命令入口与 JSON、tensor、engine、结果图导出 |
+| `tests/fixtures/mnist-onnx-runtime-reference` | 在隔离项目中使用 ONNX Runtime CPUExecutionProvider 生成独立参考 |
 | TensorRT `10.11` | 本次真实 GPU 推理后端 |
 | ONNX Runtime `1.23.2` | 同一输入 tensor 的独立 CPU 对照 |
 
@@ -71,7 +71,7 @@ PGM 像素按 `tensor[index] = 1 - pixel[index] / 255` 转换。本次 784 个 f
 
 ## 创建本地包消费项目
 
-MNIST 的低层持久化 plan 消费已经由 `samples/RefittedPlan.PackageConsumer` 覆盖。它只引用主 API 和匹配的 bridge-only 两个本地候选包，隔离 restore graph 中 `ProjectReference=0`，CUDA、cuDNN 与 TensorRT 继续来自用户安装目录。对应完整文章为 `tensorrtexec-refitted-plan-local-package-consumer.md`。
+MNIST 的低层持久化 plan 消费已经由 `tests/fixtures/package-consumers/RefittedPlan.PackageConsumer` 覆盖。它只引用主 API 和匹配的 bridge-only 两个本地候选包，隔离 restore graph 中 `ProjectReference=0`，CUDA、cuDNN 与 TensorRT 继续来自用户安装目录。对应完整文章为 `tensorrtexec-refitted-plan-local-package-consumer.md`。
 
 本文新增的是 `OnnxToEngine` 源码树真实模型与可视化证明，不把两种证据混写。正式发布前可先本地打包：
 
@@ -102,7 +102,7 @@ if (!string.IsNullOrWhiteSpace(visualizationPath))
 先构建样例：
 
 ```powershell
-dotnet build ./samples/OnnxToEngine/OnnxToEngine.csproj -c Release
+dotnet build ./applications/OnnxToEngine/OnnxToEngine.csproj -c Release
 ```
 
 再设置用户安装的 TensorRT 根目录和项目自己编译的 bridge。下面只使用变量，不绑定任何机器盘符：
@@ -110,7 +110,7 @@ dotnet build ./samples/OnnxToEngine/OnnxToEngine.csproj -c Release
 ```powershell
 $AssetRoot = Join-Path $WorkspaceRoot 'downloads/mnist-owner-generated'
 $ModelPath = Join-Path $ModelRoot 'mnist.onnx'
-$App = './samples/OnnxToEngine/bin/Release/net8.0/OnnxToEngine.dll'
+$App = './applications/OnnxToEngine/bin/Release/net8.0/OnnxToEngine.dll'
 
 $env:JYPPX_TENSORRT_ROOT = $env:TENSORRT_PATH
 $env:JYPPX_NATIVE_BRIDGE_PATH = '<bridge-build>/jyppxtrtbridge.dll'

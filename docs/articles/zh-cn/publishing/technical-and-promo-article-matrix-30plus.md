@@ -24,20 +24,20 @@
 | 9 | Plugin Registry Inventory 只读 API | plugin 用户 | 接口介绍 | `TensorRtPluginRegistryInventory.cs` | 否 | copied metadata diagnostic | P1 |
 | 10 | ErrorRecorder Snapshot 与 InterfaceInfo | 调试用户 | 接口介绍 | `TensorRtErrorRecorderSnapshot.cs` | 否 | copied snapshot diagnostic | P1 |
 | 11 | Engine 与 ExecutionContext 部署诊断 | 推理服务开发者 | 接口介绍 | `TensorRtEngineDeploymentSnapshot` | 否 | 诊断不是输出 proof | P1 |
-| 12 | OnnxToEngine 快速入门 | 模型部署工程师 | 教程 | `samples/OnnxToEngine` | 否 | build-only | P0 |
-| 13 | OnnxToEngine 与官方 trtexec 参数对照 | trtexec 用户 | 深度解析 | `samples/OnnxToEngine/trtexec-parity-matrix.json` | 否 | parity 不是 runtime proof | P0 |
+| 12 | OnnxToEngine 快速入门 | 模型部署工程师 | 教程 | `applications/OnnxToEngine` | 否 | build-only | P0 |
+| 13 | OnnxToEngine 与官方 trtexec 参数对照 | trtexec 用户 | 深度解析 | `applications/OnnxToEngine/trtexec-parity-matrix.json` | 否 | parity 不是 runtime proof | P0 |
 | 14 | TensorRtExec CLI：C# 版 trtexec-like 工具 | 工具用户 | 教程 | `applications/TensorRtExec` | 否 | build/report 不是 proof | P0 |
 | 15 | TensorRtExec WinForms 图形界面教程 | Windows 桌面用户 | 教程 | `applications/TensorRtExec/WinForms` | 截图 | GUI 截图不是 proof | P1 |
 | 16 | TensorRtExec parity matrix 解读 | 工具用户 | 深度解析 | `tensor-rt-exec-trtexec-parity-matrix.json` | 否 | parse-only 不晋级 | P0 |
-| 17 | YoloVision 总览：统一 YOLO 系列样例 | CV 开发者 | 宣发+教程 | `samples/YoloVision` | 否 | README 不是 proof | P0 |
+| 17 | YoloVision 总览：统一 YOLO 系列样例 | CV 开发者 | 宣发+教程 | `applications/YoloVision` | 否 | README 不是 proof | P0 |
 | 18 | YOLOv8 Detection 真实资产教程 | CV 开发者 | 案例 | `samples/assets/yolovision-yolov8-det-candidate.template.json` | 是 | owner-action-required | P0 |
 | 19 | YOLOv8 Segmentation 真实资产教程 | CV 开发者 | 案例 | `samples/assets/yolovision-yolov8-seg-candidate.template.json` | 是 | owner-action-required | P0 |
 | 20 | YOLO Pose 输出与 keypoint metadata | CV 开发者 | 案例 | `YoloPoseDecoder.cs` | 是 | real-model-runtime 需 log/hash | P1 |
 | 21 | YOLO OBB 旋转框与 angle tensor | CV 开发者 | 案例 | `YoloObbDecoder.cs` | 是 | real-model-runtime 需 log/hash | P1 |
 | 22 | YOLO Classification 与 Semantic Segmentation | CV 开发者 | 案例 | `YoloSemanticMap.cs` | 是 | real-model-runtime 需 log/hash | P1 |
-| 23 | Classification 样例真实资产 walkthrough | 分类模型用户 | 案例 | `samples/Classification` | 是 | sample proof，不是 package proof | P1 |
-| 24 | Dynamic shape profile 最佳实践 | 推理服务开发者 | 教程 | `samples/DynamicShape` | 可选 | profile 配置不是 proof | P1 |
-| 25 | MultiStream CUDA stream/event 教程 | 性能用户 | 教程 | `samples/MultiStream` | 否 | smoke 需单独记录 | P1 |
+| 23 | Classification 样例真实资产 walkthrough | 分类模型用户 | 案例 | `samples/ComputerVision/01.Classification` | 是 | sample proof，不是 package proof | P1 |
+| 24 | Dynamic shape profile 最佳实践 | 推理服务开发者 | 教程 | `samples/Inference/02.DynamicShapes` | 可选 | profile 配置不是 proof | P1 |
+| 25 | MultiStream CUDA stream/event 教程 | 性能用户 | 教程 | `samples/Performance/01.MultiStream` | 否 | smoke 需单独记录 | P1 |
 | 26 | CUDA Graph 能力与边界 | 性能用户 | 深度解析 | `smoke/CudaGraphSmokeRunner` | 否 | graph smoke 不等于模型质量 | P2 |
 | 27 | EngineInspector 与 layer dump | 调试用户 | 教程 | `TensorRtEngineInspector` | 否 | layer dump 是 diagnostic | P2 |
 | 28 | Refit weights 使用指南 | 模型维护者 | 教程 | `smoke/RefitWeightsSmokeRunner` | 可选 | refit proof 需具体模型 | P2 |

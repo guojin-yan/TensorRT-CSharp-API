@@ -155,7 +155,7 @@ owner checklist 是执行清单，不是 proof。只有真实日志、真实输�
 YOLO family 样例统一命名为：
 
 ```text
-samples/YoloVision
+applications/YoloVision
 ```
 
 它覆盖 YOLO v5/v6/v7/v8/v9/v10/v11/v26/custom 与 det、cls、seg、obb、pose、sem 的说明边界。不能回退到旧的检测样例目录名，也不能恢复旧的检测样例项目文件名。

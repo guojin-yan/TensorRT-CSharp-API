@@ -1,5 +1,7 @@
 # 使用本地 NuGet 包运行 YOLOX-S：从官方模型到 TensorRT 检测结果
 
+> 历史文章：本文记录首版发布前的本地案例包验证，当前不可作为公开技术文章发布，也不得继续执行其中的 YoloVision 案例包命令。当前公开包与应用流程请阅读[官方 YOLOX-S 实机教程](yolovision-yolox-official-runtime-tutorial.md)。
+
 本文演示一个完整的应用消费流程：获取官方 YOLOX-S 模型，确认 ONNX 转换方式，在仓库外创建只含 `PackageReference` 的 .NET 应用，使用 TensorRtSharp4.0 完成 TensorRT 推理，并把检测框绘制回原始图片。
 
 演示使用真实的 TensorRT 10.11、CUDA 12.9 和 RTX 3060 Laptop GPU。最终得到 1 个 bus 和 7 个 person。模型与引擎不提交到 Git；当前阶段也不创建 tag、GitHub Release 或公开包。
@@ -11,7 +13,7 @@ TensorRtSharp4.0 为 C# 提供 TensorRT/CUDA 托管接口，YoloVision 则在其
 | 包 | 职责 |
 | --- | --- |
 | `JYPPX.TensorRT.CSharp.API` | `JYPPX.TensorRtSharp` 与 `JYPPX.CudaSharp` 托管 API |
-| `JYPPX.TensorRT.CSharp.API.YoloVision` | YOLOX profile、预处理、解码、NMS 与命令入口 |
+| `applications/YoloVision` | 使用公开核心包完成 YOLOX profile、预处理、解码、NMS 与命令入口；应用自身不发布 NuGet 包 |
 | `JYPPX.TensorRT.CSharp.API.Runtime.*.Bridge` | 只交付项目编译的 `jyppxtrtbridge.dll` |
 
 CUDA、cuDNN 与 TensorRT 始终由使用者自行安装。三个包都不包含 NVIDIA 原厂 DLL。
@@ -93,7 +95,7 @@ dotnet pack .\pack\JYPPX.TensorRT.CSharp.API\JYPPX.TensorRT.CSharp.API.csproj `
   -c Release -o .\artifacts\managed `
   -p:JYPPXPackageVersion=4.0.0
 
-dotnet pack .\samples\YoloVision\YoloVision.csproj `
+dotnet pack .\applications\YoloVision\YoloVision.csproj `
   -c Release -o .\artifacts\yolovision-nupkg `
   -p:JYPPXPackageVersion=4.0.0
 ```
@@ -116,7 +118,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass `
 
 ## 6. 仓库外消费者如何隔离
 
-模板位于 `samples/YoloVision.PackageConsumer`，只包含三个 `PackageReference`。脚本会在仓库外创建临时工程和独立 NuGet 缓存，并生成如下来源结构：
+模板位于 `tests/fixtures/legacy-package-consumers/YoloVision.PackageConsumer`，只包含三个 `PackageReference`。脚本会在仓库外创建临时工程和独立 NuGet 缓存，并生成如下来源结构：
 
 ```xml
 <packageSources>

@@ -243,7 +243,7 @@ if (-not $SkipSampleSpecific.IsPresent) {
       preprocessedInputTensorPath = ""
       evidenceSidecarPath = ".\models\classifier-evidence.sidecar.json"
       buildReportPath = ".\models\classifier-build-report.json"
-      sampleRunCommand = "dotnet run --project .\samples\Classification -- --model .\models\classifier.onnx --labels .\models\labels.txt --input .\models\image.jpg --input-shape 1x3x224x224 --tensor-rt-line 10 --top-k 5"
+      sampleRunCommand = "dotnet run --project .\samples\ComputerVision\01.Classification -- --model .\models\classifier.onnx --labels .\models\labels.txt --input .\models\image.jpg --input-shape 1x3x224x224 --tensor-rt-line 10 --top-k 5"
       sampleRunLogPath = ".\models\classifier-sample-run.log"
       expectedEvidenceLines = @("Classification TensorRtLine=...", "TopK Index=... Label=... Score=...", "Classification Passed=True")
     },
@@ -259,7 +259,7 @@ if (-not $SkipSampleSpecific.IsPresent) {
       preprocessedInputTensorPath = ".\models\yolo-preprocessed-fp32.bin"
       evidenceSidecarPath = ".\models\yolo-evidence.sidecar.json"
       buildReportPath = ".\models\yolo-build-report.json"
-      sampleRunCommand = "dotnet run --project .\samples\YoloVision -- --model .\models\yolo.onnx --labels .\models\coco.names --input-data .\models\yolo-preprocessed-fp32.bin --input-shape 1x3x640x640 --tensor-rt-line 10 --layout auto --has-objectness auto --nms-mode class-aware --confidence 0.25"
+      sampleRunCommand = "dotnet run --project .\applications\YoloVision -- --model .\models\yolo.onnx --labels .\models\coco.names --input-data .\models\yolo-preprocessed-fp32.bin --input-shape 1x3x640x640 --tensor-rt-line 10 --layout auto --has-objectness auto --nms-mode class-aware --confidence 0.25"
       sampleRunLogPath = ".\models\yolo-sample-run.log"
       expectedEvidenceLines = @("YoloVision TensorRtLine=...", "Profile Family=... Task=... Layout=... Nms=... NmsMode=...", "InputSource=external InputFile=...", "Postprocess Task=...", "YoloVision Passed=True")
     },
@@ -275,7 +275,7 @@ if (-not $SkipSampleSpecific.IsPresent) {
       preprocessedInputTensorPath = ".\models\yolox_s-preprocessed-fp32.bin"
       evidenceSidecarPath = ".\models\yolox_s-evidence.sidecar.json"
       buildReportPath = ".\models\yolox_s-build-report.json"
-      sampleRunCommand = "dotnet run --project .\samples\YoloVision -- --model .\models\yolox_s.onnx --labels .\models\coco.names --input-data .\models\yolox_s-preprocessed-fp32.bin --input-shape 1x3x640x640 --tensor-rt-line 10 --family custom --task det --layout auto --has-objectness auto --nms-mode class-aware --confidence 0.25 --iou-threshold 0.45"
+      sampleRunCommand = "dotnet run --project .\applications\YoloVision -- --model .\models\yolox_s.onnx --labels .\models\coco.names --input-data .\models\yolox_s-preprocessed-fp32.bin --input-shape 1x3x640x640 --tensor-rt-line 10 --family custom --task det --layout auto --has-objectness auto --nms-mode class-aware --confidence 0.25 --iou-threshold 0.45"
       sampleRunLogPath = ".\models\yolox_s-sample-run.log"
       expectedEvidenceLines = @("YoloVision TensorRtLine=...", "Profile Family=... Task=... Layout=... Nms=... NmsMode=...", "InputSource=external InputFile=...", "Detection Class=... Score=... BoxCxCyWh=...", "YoloVision Passed=True")
     }

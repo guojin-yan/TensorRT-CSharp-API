@@ -67,7 +67,7 @@ public sealed class TensorRtExecMultiOutputArtifactContractTests
         string featureMatrix = Read("applications", "TensorRtExec", "tensor-rt-exec-feature-matrix.json");
         string parityMatrix = Read("applications", "TensorRtExec", "tensor-rt-exec-trtexec-parity-matrix.json");
         string fieldMap = Read("applications", "TensorRtExec", "tensor-rt-exec-gui-cli-field-map.json");
-        string sampleMatrix = Read("samples", "OnnxToEngine", "trtexec-parity-matrix.json");
+        string sampleMatrix = Read("applications", "OnnxToEngine", "trtexec-parity-matrix.json");
 
         Assert.Contains("CreateRuntimeEvidence", service, StringComparison.Ordinal);
         Assert.Contains("options.RuntimeOptions.RequestsOutputCapture", service, StringComparison.Ordinal);

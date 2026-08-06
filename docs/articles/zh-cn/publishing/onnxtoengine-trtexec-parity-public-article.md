@@ -1,6 +1,6 @@
 # OnnxToEngine 与 trtexec parity：把模型转换做成可审计流程
 
-`samples/OnnxToEngine` 的目标不是做一个最小 demo，而是把 ONNX 到 TensorRT engine 的转换流程做清楚。对于熟悉 NVIDIA 官方 `trtexec` 的用户来说，它应该尽量贴近模型转换、shape profile、精度、timing cache、engine packaging、profiling 和 runtime artifact 的常用工作流；对于 .NET 用户来说，它又要比直接调用外部命令更容易集成、记录和排障。
+`applications/OnnxToEngine` 的目标不是做一个最小 demo，而是把 ONNX 到 TensorRT engine 的转换流程做清楚。对于熟悉 NVIDIA 官方 `trtexec` 的用户来说，它应该尽量贴近模型转换、shape profile、精度、timing cache、engine packaging、profiling 和 runtime artifact 的常用工作流；对于 .NET 用户来说，它又要比直接调用外部命令更容易集成、记录和排障。
 
 但 parity 文章不能写成“已经完全复刻官方 trtexec”。当前项目用 `applications/TensorRtExec/tensor-rt-exec-trtexec-parity-matrix.json` 和 `applications/TensorRtExec/tensor-rt-exec-release-candidate-gap-list.json` 把能力分层：implemented、implemented-report、implemented-build-readback、implemented-bounded-runtime、parse-report-only、diagnostic-alias-compatible、checklist-backed-command-preview。任何 report、dry-run、GUI screenshot、sidecar 或 matrix 都不是 package-consumer-runtime proof。
 
@@ -15,7 +15,7 @@
 
 项目中有两条相关路径：
 
-- `samples/OnnxToEngine`：偏教程和样例，适合新用户理解模型转换。
+- `applications/OnnxToEngine`：偏教程和样例，适合新用户理解模型转换。
 - `applications/TensorRtExec`：偏正式工具，目标是 CLI + WinForms 复刻官方 `trtexec` 的主要能力。
 
 两者共享 `TrtexecLikeParser`、`TrtexecLikeOptions`、`OnnxEngineBuildOptions.FromTrtexecLikeOptions` 和 `OnnxEngineBuildService`。这意味着 CLI、WinForms 和样例入口应该生成同一类 normalized command、report schema 和 proof boundary。
@@ -23,7 +23,7 @@
 关键代码路径：
 
 ```text
-samples/OnnxToEngine/Program.cs
+applications/OnnxToEngine/Program.cs
 applications/TensorRtExec/Core/TensorRtExecOptions.cs
 applications/TensorRtExec/Core/TensorRtExecService.cs
 applications/TensorRtExec/Core/TensorRtExecReport.cs
@@ -46,7 +46,7 @@ src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildDiagnostics.OptionStatus.cs
 OnnxToEngine 教程入口：
 
 ```powershell
-dotnet run --project .\samples\OnnxToEngine\OnnxToEngine.csproj -- `
+dotnet run --project .\applications\OnnxToEngine\OnnxToEngine.csproj -- `
   --onnx ..\downloads\models\model.onnx `
   --saveEngine ..\downloads\engines\model.plan `
   --minShapes images:1x3x640x640 `
@@ -231,7 +231,7 @@ ReportBoundary
 TensorRtExec/OnnxToEngine 负责 build/report 和通用 bounded runtime，YoloVision 负责 model-specific sample run。对于 YOLOv5、YOLOv6、YOLOv7、YOLOv8、YOLOv9、YOLOv10、YOLO11、YOLO26 以及 det/cls/seg/obb/pose/sem，真正能晋级 real-model-runtime 的证据必须来自：
 
 ```text
-samples/YoloVision/yolovision-task-output-contract.json
+applications/YoloVision/yolovision-task-output-contract.json
 samples/assets/yolovision-real-asset-owner-backfill-pack.json
 samples/assets/yolovision-article-case-pack.json
 eng/Test-YoloVisionRealAssetCandidate.ps1

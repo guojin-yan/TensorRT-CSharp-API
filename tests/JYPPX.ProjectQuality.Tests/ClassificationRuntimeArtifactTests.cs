@@ -258,7 +258,7 @@ public sealed class ClassificationRuntimeArtifactTests
     [Fact]
     public void ClassificationSchemasAndCliKeepTheProofBoundaryVisible()
     {
-        string sampleDirectory = Path.Combine(RepositoryPaths.Root, "samples", "Classification");
+        string sampleDirectory = Path.Combine(RepositoryPaths.Root, "samples", "ComputerVision", "01.Classification");
         string outputSchema = File.ReadAllText(Path.Combine(sampleDirectory, "classification-output.schema.json"));
         string referenceSchema = File.ReadAllText(Path.Combine(sampleDirectory, "classification-reference.schema.json"));
         string program = File.ReadAllText(Path.Combine(sampleDirectory, "Program.cs"));

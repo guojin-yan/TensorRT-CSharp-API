@@ -105,9 +105,9 @@ public sealed class TensorRtExecMnistOnnxRuntimeReferenceEvidenceTests
     [Fact]
     public void ProducerAndValidatorKeepOfflineRestoreCpuProfilingAndCleanCloneBoundariesExplicit()
     {
-        string program = File.ReadAllText(RepositoryPath("samples", "Mnist.OnnxRuntimeReference", "Program.cs"));
-        string project = File.ReadAllText(RepositoryPath("samples", "Mnist.OnnxRuntimeReference", "Mnist.OnnxRuntimeReference.csproj.template"));
-        string readme = File.ReadAllText(RepositoryPath("samples", "Mnist.OnnxRuntimeReference", "README.md"));
+        string program = File.ReadAllText(RepositoryPath("tests", "fixtures", "mnist-onnx-runtime-reference", "Program.cs"));
+        string project = File.ReadAllText(RepositoryPath("tests", "fixtures", "mnist-onnx-runtime-reference", "Mnist.OnnxRuntimeReference.csproj.template"));
+        string readme = File.ReadAllText(RepositoryPath("tests", "fixtures", "mnist-onnx-runtime-reference", "README.md"));
         string runner = File.ReadAllText(RepositoryPath("eng", "Test-TensorRtExecMnistOnnxRuntimeReference.ps1"));
         string validator = File.ReadAllText(RepositoryPath("eng", "Test-TensorRtExecMnistOnnxRuntimeReferenceEvidence.ps1"));
         string solution = File.ReadAllText(RepositoryPath("TensorRtSharp.sln"));

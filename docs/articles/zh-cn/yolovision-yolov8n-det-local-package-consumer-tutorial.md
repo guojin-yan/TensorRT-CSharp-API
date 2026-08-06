@@ -1,6 +1,6 @@
 # 使用 TensorRtSharp4.0 在 C# 中运行 YOLOv8n 目标检测
 
-本文从一个空的 .NET 控制台项目开始，完成 YOLOv8n 权重获取、ONNX 转换、本地 NuGet 包引用、图像预处理、TensorRT 推理、后处理和结果可视化。最终程序会把检测框绘制回输入图片，并输出一份 JSON 结果和一张 SVG 可视化图。
+本文从已发布的 TensorRtSharp4.0 与 OpenCV NuGet 包开始，完成 YOLOv8n 权重获取、ONNX 转换、图像预处理、TensorRT 推理、后处理和结果可视化。最终程序会把检测框绘制回输入图片，并输出一份 JSON 结果和一张 SVG 可视化图。
 
 本文使用真实模型和真实 TensorRT 运行结果。模型不随 Git 仓库发布；转换后的 ONNX 统一暂存在工作区外层的 `models` 目录，等待后续 Model Zoo 接管。
 
@@ -11,7 +11,8 @@
 | 包 | 作用 |
 | --- | --- |
 | `JYPPX.TensorRT.CSharp.API` | TensorRT managed API、环境探测和通用 ONNX 推理支持。 |
-| `JYPPX.TensorRT.CSharp.API.YoloVision` | 图像预处理、YOLO 解码、NMS、报告和可视化。 |
+| `applications/YoloVision` | 使用公开核心包完成图像预处理、YOLO 解码、NMS、报告和可视化；该应用不发布 NuGet 包。 |
+| `JYPPX.OpenCV.CSharp.API` | 由项目作者维护，负责 JPEG/PNG/BMP 图片解码。 |
 | `JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge` | 只包含项目编译的 native bridge，不包含 NVIDIA 运行库。 |
 
 CUDA、cuDNN 和 TensorRT 必须由使用者自行安装。项目不会再把这些第三方运行库打包进 NuGet 或 GitHub Release。
@@ -142,74 +143,27 @@ Get-FileHash $jpgPath, $ppmPath -Algorithm SHA256
 | JPEG | `52b889d4fc9baea772ba2d9bbdfdef8b70710f993d7f27d193a965b11e708bcb` |
 | PPM | `80715af66669147b049fec9386152bd45505f4e494a65079fdc55404d4589b8e` |
 
-## 创建本地包消费项目
+## 使用公开包准备应用
 
-第一版尚未执行公共 NuGet 发布，因此这里使用仓库本地打包产物。先按仓库发布构建流程生成三个版本一致的 `.nupkg`，再把选中的包放进一个本地 feed：
+`applications/YoloVision` 是完整应用并设置为 `IsPackable=false`。它通过共享 props 引用已发布的
+`JYPPX.TensorRT.CSharp.API` 4 系列包，以及作者维护的
+[OpenCV-CSharp-API](https://github.com/guojin-yan/OpenCV-CSharp-API)。应用本身不再生成或引用
+`JYPPX.TensorRT.CSharp.API.YoloVision` 包。
 
-```powershell
-$packageVersion = '4.0.0'
-$feed = Join-Path $workspaceRoot 'local-feed/tensorrtsharp4'
-New-Item -ItemType Directory -Force -Path $feed | Out-Null
-
-# 只生成 managed 包和当前环境的 bridge-only 包，不打包 CUDA、cuDNN 或 TensorRT。
-pwsh -NoProfile -ExecutionPolicy Bypass -File (Join-Path $repoRoot 'eng/Invoke-LocalReleaseBundle.ps1') `
-  -Version $packageVersion `
-  -WindowsRuntimeKeys 'win-x64-trt10.11-cuda12.9-cudnn9.22' `
-  -WindowsRuntimeDeliveryMode split `
-  -WindowsSplitPackageRoles bridge `
-  -SkipDocs
-
-dotnet pack (Join-Path $repoRoot 'samples/YoloVision/YoloVision.csproj') `
-  -c Release `
-  -o (Join-Path $repoRoot 'artifacts/yolovision-nupkg') `
-  -p:JYPPXPackageVersion=$packageVersion
-
-# 从 artifacts 中各选一个 4.0.0 包：managed API、YoloVision、当前运行时对应的 bridge-only 包。
-Get-ChildItem (Join-Path $repoRoot 'artifacts') -Recurse -Filter '*.nupkg' |
-  Where-Object Name -Match '4\.0\.0' |
-  Select-Object FullName
-
-$managedPackage = Get-ChildItem (Join-Path $repoRoot 'artifacts') -Recurse -Filter 'JYPPX.TensorRT.CSharp.API.4.0.0.nupkg' |
-  Select-Object -First 1
-$yoloVisionPackage = Get-ChildItem (Join-Path $repoRoot 'artifacts') -Recurse -Filter 'JYPPX.TensorRT.CSharp.API.YoloVision.4.0.0.nupkg' |
-  Select-Object -First 1
-$bridgePackage = Get-ChildItem (Join-Path $repoRoot 'artifacts') -Recurse -Filter 'JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge.4.0.0.nupkg' |
-  Select-Object -First 1
-
-@($managedPackage, $yoloVisionPackage, $bridgePackage) |
-  ForEach-Object {
-    if ($null -eq $_) { throw '缺少本地 4.0.0 包，请先执行仓库发布构建流程。' }
-    Copy-Item $_.FullName $feed -Force
-  }
-```
-
-创建控制台项目：
+新建仓库外项目时，可以让 NuGet 获取当前公开预览版，而不在文章中写死版本：
 
 ```powershell
-dotnet new console --framework net8.0 --force --output $demoRoot
-Set-Location $demoRoot
-
-dotnet add package JYPPX.TensorRT.CSharp.API `
-  --version $packageVersion --source $feed
-dotnet add package JYPPX.TensorRT.CSharp.API.YoloVision `
-  --version $packageVersion --source $feed
-dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge `
-  --version $packageVersion --source $feed
+dotnet add package JYPPX.TensorRT.CSharp.API --prerelease
+dotnet add package JYPPX.OpenCV.CSharp.API --prerelease
+dotnet add package JYPPX.OpenCV.runtime.win-x64 --prerelease
+dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --prerelease
 ```
 
-项目文件的核心依赖应为：
-
-```xml
-<ItemGroup>
-  <PackageReference Include="JYPPX.TensorRT.CSharp.API" Version="4.0.0" />
-  <PackageReference Include="JYPPX.TensorRT.CSharp.API.YoloVision" Version="4.0.0" />
-  <PackageReference Include="JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge" Version="4.0.0" />
-</ItemGroup>
-```
+最后一个包必须按目标机器环境替换。它只包含项目自有 bridge，不包含 CUDA、cuDNN 或 TensorRT。
 
 ## 编写程序入口
 
-`YoloVisionCommand` 已经封装命令行解析、图像预处理、TensorRT 执行、YOLO 解码、NMS、JSON 报告和 SVG 可视化。`Program.cs` 只需要把参数交给它：
+`YoloVisionCommand` 已经封装命令行解析、图像预处理、TensorRT 执行、YOLO 解码、NMS、JSON 报告和 SVG 可视化。应用入口只需要把参数交给它：
 
 ```csharp
 using System;
@@ -220,8 +174,6 @@ internal static class Program
 {
     public static int Main(string[] args)
     {
-        TensorRtEnvironmentSnapshot environment = TensorRtEnvironmentProbe.GetCurrent();
-        Console.WriteLine($"Bridge TensorRT={environment.BuildInfo.TensorRtVersion}");
         return YoloVisionCommand.Run(args);
     }
 }
@@ -240,8 +192,9 @@ $jsonPath = Join-Path $resultRoot 'detection.json'
 $svgPath = Join-Path $resultRoot 'detection.svg'
 $tensorPath = Join-Path $resultRoot 'input.bin'
 
-dotnet build -c Release
-dotnet run -c Release --no-build -- `
+dotnet restore ./applications/YoloVision/YoloVision.csproj
+dotnet build ./applications/YoloVision/YoloVision.csproj -c Release --no-restore
+dotnet run --project ./applications/YoloVision -c Release --no-build -- `
   --model $onnxPath `
   --labels $labelsPath `
   --image $ppmPath `
@@ -344,4 +297,4 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File ./eng/Test-YoloVisionDetectionLoca
 4. 图片是否按 RGB、NCHW、1/255 和 center-letterbox 预处理。
 5. 是否同时传入 `--image` 与 `--visualization-background`，确保可视化能做 source-space 反变换。
 
-本文证明源码和本地三包可以完成真实 YOLOv8n TensorRT 推理，也给出了可公开展示的程序截图和原图叠加结果。它不代表公共 NuGet feed 下载证明，不授权上传模型，不替代 post-publish 验证，也不创建 tag、GitHub Release 或发布包。
+本文证明使用公开核心包构建的 YoloVision 应用可以完成真实 YOLOv8n TensorRT 推理，也给出了可公开展示的程序截图和原图叠加结果。历史证据文件仍保留发布前分类，不应改写成新的 post-publish 证明；本文也不授权上传模型。

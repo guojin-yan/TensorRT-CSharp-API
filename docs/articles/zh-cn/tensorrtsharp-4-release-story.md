@@ -14,7 +14,7 @@
 
 ## 从样例到应用
 
-`samples/OnnxToEngine` 负责 ONNX-to-engine 常用路径，目标是尽量贴近官方 trtexec 的模型转换能力。`samples/YoloVision` 替代早期过窄的检测样例命名，统一承载 YOLO 多 family、多 task 教程。`applications/TensorRtExec` 则把 trtexec 风格能力做成 CLI 和 WinForms 双入口，适合演示、排查和 build report。
+`applications/OnnxToEngine` 负责 ONNX-to-engine 常用路径，目标是尽量贴近官方 trtexec 的模型转换能力。`applications/YoloVision` 替代早期过窄的检测样例命名，统一承载 YOLO 多 family、多 task 教程。`applications/TensorRtExec` 则把 trtexec 风格能力做成 CLI 和 WinForms 双入口，适合演示、排查和 build report。
 
 ## 从 Build 到 Proof
 

@@ -1,6 +1,6 @@
 # YOLOv8n Detection 官方模型 TensorRT + C# 完整验证
 
-本文记录 `samples/YoloVision` 对 Ultralytics 官方 `v8.3.0` `yolov8n.pt` 的真实执行结果。模型、ONNX、图片、tensor、reference、SVG 和日志全部保存在 E 盘；仓库只提交可重复获取脚本、来源清单、短证据记录和教程。
+本文记录 `applications/YoloVision` 对 Ultralytics 官方 `v8.3.0` `yolov8n.pt` 的真实执行结果。模型、ONNX、图片、tensor、reference、SVG 和日志全部保存在 E 盘；仓库只提交可重复获取脚本、来源清单、短证据记录和教程。
 
 这不是仅能截图的演示。验证同时覆盖：
 
@@ -100,7 +100,7 @@ output0 float32 [1,84,8400]
 ## C# 预处理
 
 ```powershell
-dotnet .\samples\YoloVision\bin\Release\net8.0\YoloVision.dll `
+dotnet .\applications\YoloVision\bin\Release\net8.0\YoloVision.dll `
   --preprocess-only `
   --image "$root\derived\bus.ppm" `
   --preprocessed-output "$root\runtime\bus-csharp-letterbox-1x3x640x640.fp32.bin" `
@@ -135,7 +135,7 @@ reference 工具因此保留两层对照：
 ## TensorRT 正例
 
 ```powershell
-dotnet .\samples\YoloVision\bin\Release\net8.0\YoloVision.dll `
+dotnet .\applications\YoloVision\bin\Release\net8.0\YoloVision.dll `
   --model "$root\source\yolov8n.onnx" `
   --labels "$root\derived\coco.names" `
   --image "$root\derived\bus.ppm" `

@@ -1,6 +1,8 @@
 # TensorRtExec
 
-`applications/TensorRtExec` 是面向最终用户的 ONNX 到 TensorRT engine 工具，提供命令行和 WinForms 两个入口。它复用 `src/JYPPX.TensorRtSharp.Tools` 中的 trtexec-like 参数模型和 build/report 服务，目标是把模型转换、构建参数、报告导出和证据边界做成可重复的发布前工作流。
+[English](README.en.md) | 简体中文
+
+`applications/TensorRtExec` 是面向最终用户的 ONNX 到 TensorRT engine 工具，提供命令行和 WinForms 两个入口。它通过不可打包的应用共享 Tools 项目复用 trtexec-like 参数模型和 build/report 服务；该共享项目使用已发布的 4 系列托管包编译，因此应用不再引用核心 TensorRT/CUDA 源码项目。
 
 ## 当前定位
 
@@ -51,7 +53,7 @@ dotnet run --project .\applications\TensorRtExec -- `
 
 ## trtexec-like 兼容入口
 
-`TensorRtExec` 与 `samples/OnnxToEngine` 共享同一个 `TrtexecLikeParser`，本阶段补齐了更贴近官方 `trtexec` 的常用别名和 runtime/output 诊断参数：
+`TensorRtExec` 与 `applications/OnnxToEngine` 共享同一个 `TrtexecLikeParser`，本阶段补齐了更贴近官方 `trtexec` 的常用别名和 runtime/output 诊断参数：
 
 | 功能 | 推荐参数 | 兼容别名 | 当前状态 |
 | --- | --- | --- | --- |
@@ -150,7 +152,7 @@ YoloVision owner backfill profiles should be copied into TensorRtExec commands r
 | YOLOv8n pose | `--minShapes images:1x3x640x640 --optShapes images:1x3x640x640 --maxShapes images:4x3x640x640` | Keypoint metadata candidate |
 | YOLOv8n OBB | `--minShapes images:1x3x1024x1024 --optShapes images:1x3x1024x1024 --maxShapes images:2x3x1024x1024` | Angle/rotated box metadata candidate |
 
-These profiles are deliberately recorded in `samples/assets/yolovision-real-asset-owner-backfill-pack.json` and are cross-checked against `samples/YoloVision/yolovision-task-output-contract.json`. The contract is the source for task names, output roles, required metadata, and TensorRtExec profile hints across det/cls/seg/obb/pose/sem. They are build/report configuration only. `TensorRtExec` can preserve `--dumpLayerInfo`, `--exportLayerInfo`, `--dumpProfile`, `--separateProfileRun`, `--exportProfile` and `--saveProfile`, but profile dumps become proof only when a model-specific sample runner, such as YoloVision, records real input execution, output JSON, log SHA256 and owner review.
+These profiles are deliberately recorded in `samples/assets/yolovision-real-asset-owner-backfill-pack.json` and are cross-checked against `applications/YoloVision/yolovision-task-output-contract.json`. The contract is the source for task names, output roles, required metadata, and TensorRtExec profile hints across det/cls/seg/obb/pose/sem. They are build/report configuration only. `TensorRtExec` can preserve `--dumpLayerInfo`, `--exportLayerInfo`, `--dumpProfile`, `--separateProfileRun`, `--exportProfile` and `--saveProfile`, but profile dumps become proof only when a model-specific sample runner, such as YoloVision, records real input execution, output JSON, log SHA256 and owner review.
 
 For the six YOLOv8n task/article cases, run `eng/Export-YoloVisionRealAssetOwnerBackfillPack.ps1` to generate `artifacts/user-acceptance/yolovision-real-asset-owner-backfill-sample-run-evidence.template.json` and the projection report. That template carries TensorRtExec report/engine hash slots into sample-run evidence, but it remains `template-only` until owner-filled logs and hashes pass `eng/Test-SampleRunEvidenceRecord.ps1 -RequireExistingLog`.
 
@@ -181,13 +183,13 @@ TrtexecAlignmentStatus=parse-only 是当前高级 trtexec-like 参数的默认�
 
 ## 与样例的关系
 
-- `samples/OnnxToEngine`：最小 identity ONNX round-trip 样例，适合证明 parser、profile、serialized engine、deserialize、binding 和 readback。
-- `samples/Classification`：用户自备分类 ONNX、labels 和输入图片后，可形成真实分类模型运行证据。
-- `samples/YoloVision`：用户自备 YOLO-family ONNX、labels、图片和后处理 metadata 后，可形成检测、分类、分割、OBB、Pose 或语义分割样例证据。
+- `applications/OnnxToEngine`：最小 identity ONNX round-trip 样例，适合证明 parser、profile、serialized engine、deserialize、binding 和 readback。
+- `samples/ComputerVision/01.Classification`：用户自备分类 ONNX、labels 和输入图片后，可形成真实分类模型运行证据。
+- `applications/YoloVision`：用户自备 YOLO-family ONNX、labels、图片和后处理 metadata 后，可形成检测、分类、分割、OBB、Pose 或语义分割样例证据。
 
 推荐路径是先用 TensorRtExec 做 build-only 报告，再用具体 sample runner 补真实模型运行日志和 sample-run-evidence record。两类证据互相补充，但不能互相替代。
 
-`samples/RefittedPlan.PackageConsumer` 提供更窄但更强的本地包验证：它从两个声明的本地 NuGet source restore
+`tests/fixtures/package-consumers/RefittedPlan.PackageConsumer` 提供更窄但更强的本地包验证：它从两个声明的本地 NuGet source restore
 managed 与 TRT10 bridge 包，复制 `--saveRefittedEngine` 生成的完整权重 plan 和输入到仓库外 E 盘工作区，独立
 deserialize/enqueue/readback，并把 raw output SHA 与 same-process、second-process、baseline 三路证据精确比对。
 该结果分类为 `local-package-consumer-refitted-plan-runtime`，仍不是公开 feed 或 post-publish proof。

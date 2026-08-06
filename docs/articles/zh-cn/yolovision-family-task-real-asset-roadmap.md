@@ -1,6 +1,6 @@
 # YoloVision 跨家族真实资产路线图
 
-`samples/YoloVision` 的目标是成为统一的 YOLO-family 示例入口：同一个 runner 覆盖 YOLOv5/v6/v7/v8/v9/v10/v11/v26/custom，并覆盖 det、cls、seg、obb、pose、sem 等任务。
+`applications/YoloVision` 的目标是成为统一的 YOLO-family 示例入口：同一个 runner 覆盖 YOLOv5/v6/v7/v8/v9/v10/v11/v26/custom，并覆盖 det、cls、seg、obb、pose、sem 等任务。
 
 本路线图对应 `samples/assets/yolovision-family-task-real-asset-roadmap.json`。它是案例素材和 owner backfill 工作表，不是 `real-model-runtime` proof，不是 `package-consumer-runtime` proof，也不是 post-publish proof。
 
@@ -11,7 +11,7 @@
 1. 模型来源：source URL、license、export command、opset、ONNX SHA256。
 2. 输入来源：labels、class count、input image 或 fp32 tensor、preprocess contract、SHA256。
 3. 构建报告：`applications/TensorRtExec` build-only report、engine path、report SHA256。
-4. 运行证据：`samples/YoloVision` run command、stdout/stderr summary、run log SHA256、`YoloVision Passed=True`、输出 tensor roles、阈值和 owner review。
+4. 运行证据：`applications/YoloVision` run command、stdout/stderr summary、run log SHA256、`YoloVision Passed=True`、输出 tensor roles、阈值和 owner review。
 
 `TensorRtExec` report、YoloVision matrix、文章、截图、sidecar-only report 都只能作为辅助材料。没有真实模型、真实输入、日志、hash 和 validator 输出时，不能写成 real runtime proof。
 
@@ -48,7 +48,7 @@ dotnet run --project .\applications\TensorRtExec -- `
 运行阶段使用 `YoloVision`：
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- `
+dotnet run --project .\applications\YoloVision -- `
   --model .\models\<model>.onnx `
   --labels .\models\labels.txt `
   --input-data .\models\<model>-fp32.bin `
@@ -63,7 +63,7 @@ dotnet run --project .\samples\YoloVision -- `
 多输出任务必须显式记录 output role map。例如 segmentation、pose、OBB：
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- `
+dotnet run --project .\applications\YoloVision -- `
   --model .\models\yolov8n-seg.onnx `
   --labels .\models\coco.names `
   --input-data .\models\yolov8n-seg-fp32.bin `

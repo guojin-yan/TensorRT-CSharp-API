@@ -2,14 +2,14 @@
   "schemaVersion": 1,
   "recordKind": "yolovision-local-package-consumer-runtime-evidence",
   "recordName": "yolovision-yolov8n-pose-local-package-consumer-trt10.11",
-  "generatedAtUtc": "2026-08-02T15:16:22.0000000+00:00",
+  "generatedAtUtc": "2026-08-02T18:19:04.0000000+00:00",
   "templateOnly": false,
   "sampleName": "YoloVision.PackageConsumer",
   "family": "yolov8",
   "task": "pose",
   "proofClassification": "local-package-consumer-runtime",
-  "repositoryHeadAtExecution": "6ff805109f925d45abe816f854f400d5ad114ede",
-  "fullLocalReportSha256": "6e6de913f8c4ca42e6b43505ef3decde7f8b4412658825733b389aa06ecdb558",
+  "repositoryHeadAtExecution": "a1621942b89ca601caa221c29477097f491ae5a9",
+  "fullLocalReportSha256": "abf3235f8c494e15ac26571e3d302dc6a9521767338c8ba29a640c059c36ef99",
   "packageConsumer": {
     "targetFramework": "net8.0",
     "packageSourceKind": "local-file-feed-only",
@@ -28,8 +28,8 @@
         "role": "yolovision",
         "id": "JYPPX.TensorRT.CSharp.API.YoloVision",
         "version": "4.0.0",
-        "length": 114425,
-        "sha256": "7c8149e2a285b3dcef15891c767d51854e8b7ca9299401c6b26a6a02add4f25d"
+        "length": 114405,
+        "sha256": "12510a46182cb0680564c125591eaa6ce21b7902d5edd0e5229a99dda787e6de"
       },
       {
         "role": "bridge-only",
@@ -141,8 +141,8 @@
         56,
         8400
       ],
-      "maximumAbsoluteError": 1.3926392,
-      "maximumRelativeError": 1.4067397,
+      "maximumAbsoluteError": 1.4110107,
+      "maximumRelativeError": 1.4126993,
       "referenceSha256": "73752d18797b5c9336359b99eef4cadfb8d263e5925fd489648ce3072ef440f1"
     },
     "completed": true,
@@ -154,7 +154,7 @@
     "ultralyticsVersion": "8.4.21",
     "torchVersion": "2.10.0+cpu",
     "referenceSha256": "771f90902bc7b16acaef8b029035c9d4f4a8981526bed278cdc114e2e6872192",
-    "comparisonSha256": "76f5515b970620c2ce6b8b8ca40a07c4b628080450f945cfa67ef4050d2e8d40",
+    "comparisonSha256": "15090cafc8c891df8ba4aa08e1afbdd1662ff941758d58ec552cb72cdd4e5fd6",
     "thresholds": {
       "minimumBoxIoU": 0.98,
       "maximumScoreError": 0.03,
@@ -163,21 +163,21 @@
       "maximumKeypointScoreError": 0.03
     },
     "predictionCount": 4,
-    "minimumObservedBoxIoU": 0.9989076628439788,
-    "maximumObservedScoreError": 0.00026234246139528183,
-    "maximumObservedKeypointCoordinateError": 3.927415882646295,
-    "maximumObservedKeypointScoreError": 0.005011144805145307,
+    "minimumObservedBoxIoU": 0.9988104115770777,
+    "maximumObservedScoreError": 0.0002906624613952524,
+    "maximumObservedKeypointCoordinateError": 4.050438410134846,
+    "maximumObservedKeypointScoreError": 0.005074394805145266,
     "comparisons": [
       {
         "referenceIndex": 0,
         "actualIndex": 0,
         "classId": 0,
         "className": "person",
-        "boxIoU": 0.9996320382397956,
-        "scoreAbsoluteError": 3.7036149597158285E-05,
+        "boxIoU": 0.9996303643493275,
+        "scoreAbsoluteError": 3.206614959716525E-05,
         "visibleKeypointCount": 17,
-        "maximumKeypointCoordinateError": 1.0454817707130255,
-        "maximumKeypointScoreError": 0.0006203016432190234,
+        "maximumKeypointCoordinateError": 1.0513041041304358,
+        "maximumKeypointScoreError": 0.0006470616432190379,
         "passed": true
       },
       {
@@ -185,11 +185,11 @@
         "actualIndex": 1,
         "classId": 0,
         "className": "person",
-        "boxIoU": 0.9992584914123812,
-        "scoreAbsoluteError": 0.0001156909696959918,
+        "boxIoU": 0.9992564100373088,
+        "scoreAbsoluteError": 0.00014275096969607048,
         "visibleKeypointCount": 17,
-        "maximumKeypointCoordinateError": 0.5554869876612059,
-        "maximumKeypointScoreError": 0.0008884576286315449,
+        "maximumKeypointCoordinateError": 0.5510361719515512,
+        "maximumKeypointScoreError": 0.0008544576286315664,
         "passed": true
       },
       {
@@ -197,11 +197,11 @@
         "actualIndex": 2,
         "classId": 0,
         "className": "person",
-        "boxIoU": 0.999653628535682,
-        "scoreAbsoluteError": 0.00011172941970827299,
+        "boxIoU": 0.9996843392553264,
+        "scoreAbsoluteError": 9.876941970821118E-05,
         "visibleKeypointCount": 12,
-        "maximumKeypointCoordinateError": 3.927415882646295,
-        "maximumKeypointScoreError": 0.005011144805145307,
+        "maximumKeypointCoordinateError": 4.050438410134846,
+        "maximumKeypointScoreError": 0.005074394805145266,
         "passed": true
       },
       {
@@ -209,11 +209,11 @@
         "actualIndex": 3,
         "classId": 0,
         "className": "person",
-        "boxIoU": 0.9989076628439788,
-        "scoreAbsoluteError": 0.00026234246139528183,
+        "boxIoU": 0.9988104115770777,
+        "scoreAbsoluteError": 0.0002906624613952524,
         "visibleKeypointCount": 9,
-        "maximumKeypointCoordinateError": 0.20647905920888956,
-        "maximumKeypointScoreError": 0.0010462961087036038,
+        "maximumKeypointCoordinateError": 0.20274586085423005,
+        "maximumKeypointScoreError": 0.0011145461087035957,
         "passed": true
       }
     ],

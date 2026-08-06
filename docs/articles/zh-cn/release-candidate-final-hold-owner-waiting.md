@@ -74,7 +74,7 @@ CanCloseReleaseIssue=False
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-ExternalRuntimeProofRecord.ps1 -RequireExistingLog -FailOnNotProof
 ```
 
-3. 回填 real-model-runtime，优先选择 `samples\Classification` 或 `samples\YoloVision`，并运行：
+3. 回填 real-model-runtime，优先选择 `samples\ComputerVision\01.Classification` 或 `applications\YoloVision`，并运行：
 
 ```powershell
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-SampleAssetManifest.ps1

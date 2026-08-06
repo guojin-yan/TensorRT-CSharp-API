@@ -270,4 +270,4 @@ Engine 构建只需要网络与 Builder 配置；推理还需要模型专用输�
 
 ## 下一步
 
-构建自己的模型时，下一步是根据任务类型进入 `samples/Classification`、`samples/YoloVision` 或基于 `TensorRtInferenceBindings` 编写模型专用推理代码，并为输入、输出、参考结果和失败条件建立明确合同。首版开发完成前仍保持所有发布门禁关闭。
+构建自己的模型时，下一步是根据任务类型进入 `samples/ComputerVision/01.Classification`、`applications/YoloVision` 或基于 `TensorRtInferenceBindings` 编写模型专用推理代码，并为输入、输出、参考结果和失败条件建立明确合同。首版开发完成前仍保持所有发布门禁关闭。

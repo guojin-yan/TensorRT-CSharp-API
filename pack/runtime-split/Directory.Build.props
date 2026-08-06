@@ -13,7 +13,9 @@
     <RepositoryType>git</RepositoryType>
     <Description>Project-owned native bridge package for TensorRtSharp4.0. Requires user-installed matching CUDA, cuDNN, and TensorRT runtime libraries.</Description>
     <!-- Bridge projects explicitly override IsPackable. Vendor and meta projects remain disabled. -->
-    <NoWarn>$(NoWarn);NU5123;NU5128</NoWarn>
+    <!-- Bridge DLLs are intentionally packaged as root content for the native
+         loader/probing contract, so NuGet's lib-folder warning is expected. -->
+    <NoWarn>$(NoWarn);NU5100;NU5123;NU5128</NoWarn>
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
     <JYPPXRuntimeAssetsDir Condition="'$(JYPPXRuntimeAssetsDir)' == ''">$(MSBuildProjectDirectory)\assets</JYPPXRuntimeAssetsDir>
     <JYPPXBridgePackageVersion Condition="'$(JYPPXBridgePackageVersion)' == ''">$(Version)</JYPPXBridgePackageVersion>

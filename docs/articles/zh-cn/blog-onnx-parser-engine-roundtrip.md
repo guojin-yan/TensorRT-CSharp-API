@@ -3,11 +3,11 @@
 > 文章类型：样例教程长文
 > 适合发布：微信公众号、技术博客、模型部署入门材料
 > 配图建议：一个 `.onnx` 内存模型转换为 TensorRT network、serialized engine 文件、runtime deserialize、inference output 的流程图。
-> 发布摘要：用 `samples/OnnxToEngine` 演示不依赖外部模型资产的 ONNX parser、engine build、plan 文件 round-trip 和推理读回闭环。
+> 发布摘要：用 `applications/OnnxToEngine` 演示不依赖外部模型资产的 ONNX parser、engine build、plan 文件 round-trip 和推理读回闭环。
 
 ## 为什么先不用外部模型
 
-外部 ONNX 模型会带来许可证、opset、输入 layout、预处理、labels 和测试图片等变量。它们很重要，但不适合放在第一条链路里。`samples/OnnxToEngine` 通过进程内生成最小 identity ONNX，让验证目标集中在 parser、builder、serialized engine 和 inference binding 本身。
+外部 ONNX 模型会带来许可证、opset、输入 layout、预处理、labels 和测试图片等变量。它们很重要，但不适合放在第一条链路里。`applications/OnnxToEngine` 通过进程内生成最小 identity ONNX，让验证目标集中在 parser、builder、serialized engine 和 inference binding 本身。
 
 ## 端到端流程
 
@@ -26,8 +26,8 @@ flowchart LR
 对应文件：
 
 ```text
-samples/OnnxToEngine/Program.cs
-samples/OnnxToEngine/README.md
+applications/OnnxToEngine/Program.cs
+applications/OnnxToEngine/README.md
 docs/articles/zh-cn/onnx-parser-to-serialized-engine-tutorial.md
 ```
 
@@ -36,7 +36,7 @@ docs/articles/zh-cn/onnx-parser-to-serialized-engine-tutorial.md
 ```powershell
 dotnet build .\TensorRtSharp.sln -c Debug --no-restore /p:UseSharedCompilation=false
 $env:JYPPX_ENABLE_DEVELOPMENT_PROBING = "1"
-dotnet .\samples\OnnxToEngine\bin\Debug\net8.0\OnnxToEngine.dll --tensor-rt-line 10 --batch 2
+dotnet .\applications\OnnxToEngine\bin\Debug\net8.0\OnnxToEngine.dll --tensor-rt-line 10 --batch 2
 ```
 
 ## 成功输出怎么读
@@ -68,11 +68,11 @@ OnnxToEngine Passed=True
 
 ## CTA
 
-接下来可以把这条最小 round-trip 路径迁移到 `samples/Classification` 或 `samples/YoloVision`，但在写模型案例前，先补模型资产清单和许可证说明。
+接下来可以把这条最小 round-trip 路径迁移到 `samples/ComputerVision/01.Classification` 或 `applications/YoloVision`，但在写模型案例前，先补模型资产清单和许可证说明。
 
 ## 先分清三种运行模式
 
-当前 `samples/OnnxToEngine` 已承载 trtexec-like options，因此同一程序会产生不同证据等级：
+当前 `applications/OnnxToEngine` 已承载 trtexec-like options，因此同一程序会产生不同证据等级：
 
 | 模式 | 是否要求 ONNX | 是否 build | 是否 enqueue | 合理分类 |
 | --- | --- | --- | --- | --- |
@@ -87,7 +87,7 @@ scalar parsing、build option value normalization 与 memory unit parsing 分别
 `TrtexecLikeParser.BuildOptionValues.cs`、`TrtexecLikeParser.MemoryUnits.cs`。build orchestration 位于
 `src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildService.cs`，deployment 与 runtime 投影分别位于
 `OnnxEngineBuildService.DeploymentConfiguration.cs`、`OnnxEngineBuildService.RuntimeExecution.cs`。
-`samples/OnnxToEngine/trtexec-parity-matrix.json` 记录每个参数是 applied、diagnostic 还是 parse-only；不能只因 CLI
+`applications/OnnxToEngine/trtexec-parity-matrix.json` 记录每个参数是 applied、diagnostic 还是 parse-only；不能只因 CLI
 接受参数就声称与官方 trtexec 行为等价。
 
 ```mermaid
@@ -117,9 +117,9 @@ $case = "..\downloads\cases\onnx-identity-roundtrip"
 New-Item -ItemType Directory -Force -Path "$case\engines","$case\reports","$case\logs" | Out-Null
 Set-Location $repo
 
-dotnet build .\samples\OnnxToEngine\OnnxToEngine.csproj -c Debug --no-restore --nologo
+dotnet build .\applications\OnnxToEngine\OnnxToEngine.csproj -c Debug --no-restore --nologo
 $env:JYPPX_ENABLE_DEVELOPMENT_PROBING = "1"
-dotnet .\samples\OnnxToEngine\bin\Debug\net8.0\OnnxToEngine.dll `
+dotnet .\applications\OnnxToEngine\bin\Debug\net8.0\OnnxToEngine.dll `
   --tensor-rt-line 10 --batch 2 `
   --saveEngine "$case\engines\identity-trt10.plan" `
   --exportReport "$case\reports\identity-trt10.json" `
@@ -132,7 +132,7 @@ engine SHA256、runtime line、build info 和输入 shape。
 ## 外部模型 build-only
 
 ```powershell
-dotnet .\samples\OnnxToEngine\bin\Debug\net8.0\OnnxToEngine.dll `
+dotnet .\applications\OnnxToEngine\bin\Debug\net8.0\OnnxToEngine.dll `
   --tensor-rt-line 10 `
   --onnx "..\downloads\cases\external-model\models\model.onnx" `
   --saveEngine "..\downloads\cases\external-model\engines\model.plan" `

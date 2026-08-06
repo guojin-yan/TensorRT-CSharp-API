@@ -5,7 +5,7 @@ TensorRtSharp 4.0.0 RC 是第一版公开发布候选。本版优先保证稳定
 ## 第一版范围
 
 - C# 主包 `JYPPX.TensorRT.CSharp.API`，包含 managed wrapper，不包含厂商 native runtime。
-- YoloVision 扩展包 `JYPPX.TensorRT.CSharp.API.YoloVision`，提供无裸指针泄漏的配置、预处理、后处理、报告和命令入口。
+- `applications/YoloVision` 完整应用，使用公开核心包提供无裸指针泄漏的配置、预处理、后处理、报告和命令入口；应用自身不发布 NuGet 包。
 - 按 TensorRT/CUDA 组合编译的 `.Bridge` 包；每个包只允许包含项目自有的 `jyppxtrtbridge.dll` 或 `libjyppxtrtbridge.so`。
 - Git 跟踪的源码、演示和文档。源码归档不得混入 CUDA、cuDNN、TensorRT 或 NVRTC 二进制。
 - CUDA、cuDNN、TensorRT、NVRTC 和兼容驱动由用户自行安装，并与所选 bridge key 对齐。
@@ -21,7 +21,7 @@ TensorRtSharp 4.0.0 RC 是第一版公开发布候选。本版优先保证稳定
 ## 候选交付物
 
 - `JYPPX.TensorRT.CSharp.API 4.0.0`
-- `JYPPX.TensorRT.CSharp.API.YoloVision 4.0.0`
+- `applications/YoloVision`（示例应用，不是发布包）
 - `JYPPX.TensorRT.CSharp.API.Runtime.<rid>.<trt>.<cuda>.<cudnn>.Bridge 4.0.0`
 - GitHub 自动生成的源码归档和仓库文档
 

@@ -146,7 +146,7 @@ public sealed class YoloVisionReferenceAssetAcquisitionTests
             Assert.False(boundary.GetProperty(name).GetBoolean(), name);
         }
 
-        string readme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "YoloVision", "README.md"));
+        string readme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "YoloVision", "README.md"));
         string tutorial = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "articles", "zh-cn", "yolovision-pose-tutorial.md"));
         foreach (string text in new[] { readme, tutorial })
         {
@@ -566,7 +566,7 @@ public sealed class YoloVisionReferenceAssetAcquisitionTests
             Assert.False(boundary.GetProperty(name).GetBoolean(), name);
         }
 
-        string readme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "YoloVision", "README.md"));
+        string readme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "YoloVision", "README.md"));
         string tutorial = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "articles", "zh-cn", "yolovision-yolov8-seg-real-asset-tutorial.md"));
         string maskGuide = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "articles", "zh-cn", "yolovision-segmentation-mask-postprocess-guide.md"));
         foreach (string text in new[] { readme, tutorial, maskGuide })
@@ -812,7 +812,7 @@ public sealed class YoloVisionReferenceAssetAcquisitionTests
             Assert.False(boundary.GetProperty(name).GetBoolean(), name);
         }
 
-        string readme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "YoloVision", "README.md"));
+        string readme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "YoloVision", "README.md"));
         string tutorial = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "articles", "zh-cn", "yolovision-yolov8-det-real-asset-tutorial.md"));
         foreach (string text in new[] { readme, tutorial })
         {

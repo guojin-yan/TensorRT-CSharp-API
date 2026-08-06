@@ -11,10 +11,10 @@ public sealed class OutputAllocatorLocalPackageConsumerTests
     public void ConsumerUsesOnlyPackageReferencesAndExercisesPositiveAndRejectedAllocation()
     {
         string template = ReadSource(
-            "samples",
+            "tests", "fixtures", "package-consumers",
             "OutputAllocator.PackageConsumer",
             "OutputAllocator.PackageConsumer.csproj.template");
-        string program = ReadSource("samples", "OutputAllocator.PackageConsumer", "Program.cs");
+        string program = ReadSource("tests", "fixtures", "package-consumers", "OutputAllocator.PackageConsumer", "Program.cs");
 
         Assert.Equal(2, Regex.Matches(template, "<PackageReference ").Count);
         Assert.DoesNotContain("ProjectReference", template, StringComparison.Ordinal);

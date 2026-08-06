@@ -1,7 +1,7 @@
 {
   "recordKind": "yolovision-family-task-real-asset-roadmap",
   "sampleName": "YoloVision",
-  "samplePath": "samples/YoloVision",
+  "samplePath": "applications/YoloVision",
   "roadmapState": "owner-action-required",
   "proofBoundary": "real asset roadmap only; not real-model-runtime proof; not package-consumer-runtime proof; not post-publish proof",
   "performsPublish": false,
@@ -17,7 +17,7 @@
       "inputShapeHints": ["1x3x640x640"],
       "exportCommandTemplate": "python export.py --weights <owner-model>.pt --include onnx --opset 12 --img 640",
       "tensorRtExecBuildCommandTemplate": "dotnet run --project .\\applications\\TensorRtExec -- --onnx .\\models\\<model>.onnx --saveEngine .\\models\\<model>.plan --minShapes input:1x3x640x640 --optShapes input:1x3x640x640 --maxShapes input:4x3x640x640 --fp16 --buildOnly --exportReport .\\models\\<model>-build-report.json",
-      "yoloVisionRunCommandTemplate": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\<model>.onnx --labels .\\models\\coco.names --input-data .\\models\\<model>-fp32.bin --input-shape 1x3x640x640 --family v5 --task det --layout auto --has-objectness auto --nms-mode class-aware",
+      "yoloVisionRunCommandTemplate": "dotnet run --project .\\applications\\YoloVision -- --model .\\models\\<model>.onnx --labels .\\models\\coco.names --input-data .\\models\\<model>-fp32.bin --input-shape 1x3x640x640 --family v5 --task det --layout auto --has-objectness auto --nms-mode class-aware",
       "requiredOutputMetadata": ["classCount", "outputLayout", "hasObjectness", "nmsMode"],
       "articleAngles": ["YOLOv5 detection migration", "YOLOv5 segmentation mask metadata"],
       "runtimeProofState": "owner-action-required"
@@ -31,7 +31,7 @@
       "inputShapeHints": ["1x3x640x640"],
       "exportCommandTemplate": "python deploy/ONNX/export_onnx.py --weights <owner-model>.pt --img 640 --batch 1",
       "tensorRtExecBuildCommandTemplate": "dotnet run --project .\\applications\\TensorRtExec -- --onnx .\\models\\<model>.onnx --saveEngine .\\models\\<model>.plan --minShapes images:1x3x640x640 --optShapes images:1x3x640x640 --maxShapes images:4x3x640x640 --buildOnly --exportReport .\\models\\<model>-build-report.json",
-      "yoloVisionRunCommandTemplate": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\<model>.onnx --labels .\\models\\coco.names --input-data .\\models\\<model>-fp32.bin --input-shape 1x3x640x640 --family v6 --task det --layout auto --has-objectness auto --nms-mode class-aware",
+      "yoloVisionRunCommandTemplate": "dotnet run --project .\\applications\\YoloVision -- --model .\\models\\<model>.onnx --labels .\\models\\coco.names --input-data .\\models\\<model>-fp32.bin --input-shape 1x3x640x640 --family v6 --task det --layout auto --has-objectness auto --nms-mode class-aware",
       "requiredOutputMetadata": ["inputTensorName", "classCount", "outputLayout", "graphSideNms"],
       "articleAngles": ["YOLOv6 detector export", "YOLOv6 objectness and output layout notes"],
       "runtimeProofState": "owner-action-required"
@@ -45,7 +45,7 @@
       "inputShapeHints": ["1x3x640x640"],
       "exportCommandTemplate": "python export.py --weights <owner-model>.pt --grid --end2end --simplify --topk-all 100 --iou-thres 0.65 --conf-thres 0.25 --img-size 640 640 --max-wh 640",
       "tensorRtExecBuildCommandTemplate": "dotnet run --project .\\applications\\TensorRtExec -- --onnx .\\models\\<model>.onnx --saveEngine .\\models\\<model>.plan --minShapes images:1x3x640x640 --optShapes images:1x3x640x640 --maxShapes images:4x3x640x640 --buildOnly --exportReport .\\models\\<model>-build-report.json",
-      "yoloVisionRunCommandTemplate": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\<model>.onnx --labels .\\models\\coco.names --input-data .\\models\\<model>-fp32.bin --input-shape 1x3x640x640 --family v7 --task det --layout auto --has-objectness auto --nms-mode class-aware",
+      "yoloVisionRunCommandTemplate": "dotnet run --project .\\applications\\YoloVision -- --model .\\models\\<model>.onnx --labels .\\models\\coco.names --input-data .\\models\\<model>-fp32.bin --input-shape 1x3x640x640 --family v7 --task det --layout auto --has-objectness auto --nms-mode class-aware",
       "requiredOutputMetadata": ["classCount", "outputLayout", "keypointCount for pose", "keypointStride for pose"],
       "articleAngles": ["YOLOv7 detection export", "YOLOv7 pose keypoint metadata"],
       "runtimeProofState": "owner-action-required"
@@ -59,7 +59,7 @@
       "inputShapeHints": ["1x3x640x640", "1x3x224x224 for cls"],
       "exportCommandTemplate": "yolo export model=<owner-model>.pt format=onnx opset=12 dynamic=True simplify=True",
       "tensorRtExecBuildCommandTemplate": "dotnet run --project .\\applications\\TensorRtExec -- --onnx .\\models\\<model>.onnx --saveEngine .\\models\\<model>.plan --minShapes images:1x3x640x640 --optShapes images:1x3x640x640 --maxShapes images:4x3x640x640 --fp16 --buildOnly --exportReport .\\models\\<model>-build-report.json",
-      "yoloVisionRunCommandTemplate": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\<model>.onnx --labels .\\models\\labels.txt --input-data .\\models\\<model>-fp32.bin --input-shape 1x3x640x640 --family v8 --task <det|cls|seg|obb|pose|sem> --layout auto --output-role-map <owner-filled>",
+      "yoloVisionRunCommandTemplate": "dotnet run --project .\\applications\\YoloVision -- --model .\\models\\<model>.onnx --labels .\\models\\labels.txt --input-data .\\models\\<model>-fp32.bin --input-shape 1x3x640x640 --family v8 --task <det|cls|seg|obb|pose|sem> --layout auto --output-role-map <owner-filled>",
       "requiredOutputMetadata": ["task", "classCount", "outputRoleMap", "maskCoefficientCount for seg", "keypointCount for pose", "angleUnit for obb", "semanticMapShape for sem"],
       "articleAngles": ["YOLOv8 all-task tutorial series", "YOLOv8n detection/segmentation/pose/OBB/classification walkthroughs"],
       "runtimeProofState": "owner-action-required"
@@ -73,7 +73,7 @@
       "inputShapeHints": ["1x3x640x640"],
       "exportCommandTemplate": "use owner-approved YOLOv9 export script; record repository commit, checkpoint URL, opset, and license",
       "tensorRtExecBuildCommandTemplate": "dotnet run --project .\\applications\\TensorRtExec -- --onnx .\\models\\<model>.onnx --saveEngine .\\models\\<model>.plan --minShapes images:1x3x640x640 --optShapes images:1x3x640x640 --maxShapes images:4x3x640x640 --buildOnly --exportReport .\\models\\<model>-build-report.json",
-      "yoloVisionRunCommandTemplate": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\<model>.onnx --labels .\\models\\labels.txt --input-data .\\models\\<model>-fp32.bin --input-shape 1x3x640x640 --family v9 --task det --layout auto --has-objectness auto",
+      "yoloVisionRunCommandTemplate": "dotnet run --project .\\applications\\YoloVision -- --model .\\models\\<model>.onnx --labels .\\models\\labels.txt --input-data .\\models\\<model>-fp32.bin --input-shape 1x3x640x640 --family v9 --task det --layout auto --has-objectness auto",
       "requiredOutputMetadata": ["exportBranch", "opset", "classCount", "outputLayout", "graphSidePostprocess"],
       "articleAngles": ["YOLOv9 export compatibility", "YOLOv9 segmentation metadata checklist"],
       "runtimeProofState": "owner-action-required"
@@ -87,7 +87,7 @@
       "inputShapeHints": ["1x3x640x640"],
       "exportCommandTemplate": "use owner-approved YOLOv10 export; verify batch-1 [1,N,6] x1,y1,x2,y2,score,classId output before selecting the built-in end-to-end decoder",
       "tensorRtExecBuildCommandTemplate": "dotnet run --project .\\applications\\TensorRtExec -- --onnx .\\models\\<model>.onnx --saveEngine .\\models\\<model>.plan --minShapes images:1x3x640x640 --optShapes images:1x3x640x640 --maxShapes images:4x3x640x640 --buildOnly --exportReport .\\models\\<model>-build-report.json",
-      "yoloVisionRunCommandTemplate": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\<model>.onnx --labels .\\models\\labels.txt --input-data .\\models\\<model>-fp32.bin --input-shape 1x3x640x640 --family v10 --task det --layout end2end --class-count <owner-filled> --confidence 0.25 --output .\\artifacts\\yolovision\\<model>-output.json",
+      "yoloVisionRunCommandTemplate": "dotnet run --project .\\applications\\YoloVision -- --model .\\models\\<model>.onnx --labels .\\models\\labels.txt --input-data .\\models\\<model>-fp32.bin --input-shape 1x3x640x640 --family v10 --task det --layout end2end --class-count <owner-filled> --confidence 0.25 --output .\\artifacts\\yolovision\\<model>-output.json",
       "requiredOutputMetadata": ["batch-1 [1,N,6] shape", "x1,y1,x2,y2,score,classId column order", "classCount", "confidenceThreshold", "noSecondNms"],
       "articleAngles": ["YOLOv10 end-to-end output boundary", "YOLOv10 detector deployment notes", "official model to TensorRT end-to-end tutorial"],
       "runtimeProofState": "owner-action-required"
@@ -101,7 +101,7 @@
       "inputShapeHints": ["1x3x640x640", "1x3x224x224 for cls"],
       "exportCommandTemplate": "yolo export model=<owner-model>.pt format=onnx opset=12 dynamic=True simplify=True",
       "tensorRtExecBuildCommandTemplate": "dotnet run --project .\\applications\\TensorRtExec -- --onnx .\\models\\<model>.onnx --saveEngine .\\models\\<model>.plan --minShapes images:1x3x640x640 --optShapes images:1x3x640x640 --maxShapes images:4x3x640x640 --buildOnly --exportReport .\\models\\<model>-build-report.json",
-      "yoloVisionRunCommandTemplate": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\<model>.onnx --labels .\\models\\labels.txt --input-data .\\models\\<model>-fp32.bin --input-shape 1x3x640x640 --family v11 --task <det|cls|seg|obb|pose> --layout auto --output-role-map <owner-filled>",
+      "yoloVisionRunCommandTemplate": "dotnet run --project .\\applications\\YoloVision -- --model .\\models\\<model>.onnx --labels .\\models\\labels.txt --input-data .\\models\\<model>-fp32.bin --input-shape 1x3x640x640 --family v11 --task <det|cls|seg|obb|pose> --layout auto --output-role-map <owner-filled>",
       "requiredOutputMetadata": ["task", "classCount", "outputTensorRoles", "profileShapes", "taskSpecificAuxMetadata"],
       "articleAngles": ["YOLO11 deployment guide", "YOLO11 task matrix and output roles"],
       "runtimeProofState": "owner-action-required"
@@ -115,7 +115,7 @@
       "inputShapeHints": ["owner-provided"],
       "exportCommandTemplate": "owner provides concrete export command, commit, release tag, license, opset, and output tensor contract",
       "tensorRtExecBuildCommandTemplate": "dotnet run --project .\\applications\\TensorRtExec -- --onnx .\\models\\<model>.onnx --saveEngine .\\models\\<model>.plan --minShapes <owner-filled> --optShapes <owner-filled> --maxShapes <owner-filled> --buildOnly --exportReport .\\models\\<model>-build-report.json",
-      "yoloVisionRunCommandTemplate": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\<model>.onnx --labels .\\models\\labels.txt --input-data .\\models\\<model>-fp32.bin --input-shape <owner-filled> --family v26 --task <owner-filled> --output-role-map <owner-filled>",
+      "yoloVisionRunCommandTemplate": "dotnet run --project .\\applications\\YoloVision -- --model .\\models\\<model>.onnx --labels .\\models\\labels.txt --input-data .\\models\\<model>-fp32.bin --input-shape <owner-filled> --family v26 --task <owner-filled> --output-role-map <owner-filled>",
       "requiredOutputMetadata": ["tensorNames", "tensorShapes", "task", "outputRoles", "preprocessContract", "postprocessContract"],
       "articleAngles": ["Future YOLO family onboarding checklist", "Metadata-driven custom YOLO deployment"],
       "runtimeProofState": "owner-action-required"
@@ -129,7 +129,7 @@
       "inputShapeHints": ["owner-provided"],
       "exportCommandTemplate": "owner supplies model export command, source URL, commit, license, and SHA256 values",
       "tensorRtExecBuildCommandTemplate": "dotnet run --project .\\applications\\TensorRtExec -- --onnx .\\models\\<model>.onnx --saveEngine .\\models\\<model>.plan --minShapes <owner-filled> --optShapes <owner-filled> --maxShapes <owner-filled> --buildOnly --exportReport .\\models\\<model>-build-report.json",
-      "yoloVisionRunCommandTemplate": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\<model>.onnx --labels .\\models\\labels.txt --input-data .\\models\\<model>-fp32.bin --input-shape <owner-filled> --family custom --task <owner-filled> --output-role-map <owner-filled>",
+      "yoloVisionRunCommandTemplate": "dotnet run --project .\\applications\\YoloVision -- --model .\\models\\<model>.onnx --labels .\\models\\labels.txt --input-data .\\models\\<model>-fp32.bin --input-shape <owner-filled> --family custom --task <owner-filled> --output-role-map <owner-filled>",
       "requiredOutputMetadata": ["modelSha256", "labelsSha256", "inputSha256", "outputRoleMap", "expectedEvidenceLines", "runLogSha256"],
       "articleAngles": ["Custom YOLO model onboarding", "Owner proof template for private YOLO assets"],
       "runtimeProofState": "owner-action-required"

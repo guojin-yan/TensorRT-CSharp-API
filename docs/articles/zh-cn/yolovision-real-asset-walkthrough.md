@@ -2,7 +2,7 @@
 
 > 2026-07-19 状态更新：官方 YOLOX-S 0.1.1rc0 已完成 E 盘 hash 固定获取、内置预处理、TRT10 build、真实图片 enqueue、raw grid/stride 解码和严格 `real-model-runtime` 校验。当前可直接复现的完整流程见 [YoloVision 官方 YOLOX-S 下载、构建与真实图片运行教程](yolovision-yolox-official-runtime-tutorial.md)。本文后续内容继续保留为其他 YOLO family、自定义模型和 owner 自备资产的通用回填方法。
 
-本文把 `samples/YoloVision` 从“synthetic input 管线样例”推进到“可接真实模型的操作流程”。仓库不会直接打包 YOLO 权重、COCO labels 或测试图片；这些资产有独立许可证、体积和再分发要求。正确做法是把资产选择、下载、hash、转换、构建和运行日志全部记录在 manifest 和报告里。
+本文把 `applications/YoloVision` 从“synthetic input 管线样例”推进到“可接真实模型的操作流程”。仓库不会直接打包 YOLO 权重、COCO labels 或测试图片；这些资产有独立许可证、体积和再分发要求。正确做法是把资产选择、下载、hash、转换、构建和运行日志全部记录在 manifest 和报告里。
 
 读完本文后，你应该能得到三类材料：
 
@@ -165,7 +165,7 @@ python .\tools\preprocess_yolox_input.py `
 确认 input/output 名称、shape、layout 后运行：
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- `
+dotnet run --project .\applications\YoloVision -- `
   --model .\models\yolox_s.onnx `
   --labels .\models\coco.names `
   --input-data .\models\yolox_s-preprocessed-fp32.bin `
@@ -185,7 +185,7 @@ dotnet run --project .\samples\YoloVision -- `
 建议把运行输出保存成日志：
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- `
+dotnet run --project .\applications\YoloVision -- `
   --model .\models\yolox_s.onnx `
   --labels .\models\coco.names `
   --input-data .\models\yolox_s-preprocessed-fp32.bin `

@@ -3,11 +3,11 @@
 > 文章类型：样例教程长文
 > 适合发布：微信公众号、技术博客、CUDA wrapper 使用导览
 > 配图建议：两条 CUDA stream 并行填充 device memory，随后通过 event wait 建立跨 stream ordering 的流程图。
-> 发布摘要：基于 `samples/MultiStream` 说明 TensorRtSharp4.0 如何用 C# wrapper 管理 CUDA stream、event、device memory 和 pinned host memory，并用 evidence markers 判断并发与同步是否真实发生。
+> 发布摘要：基于 `samples/Performance/01.MultiStream` 说明 TensorRtSharp4.0 如何用 C# wrapper 管理 CUDA stream、event、device memory 和 pinned host memory，并用 evidence markers 判断并发与同步是否真实发生。
 
 ## 为什么先讲 MultiStream
 
-真实推理服务很少只有一条同步调用链。图像预处理、host-to-device copy、TensorRT enqueue、device-to-host readback 都可能分布在不同 stream 上。TensorRtSharp4.0 的 `samples/MultiStream` 不试图做完整推理服务，而是先证明 CUDA stream/event wrapper 能表达两个关键能力：
+真实推理服务很少只有一条同步调用链。图像预处理、host-to-device copy、TensorRT enqueue、device-to-host readback 都可能分布在不同 stream 上。TensorRtSharp4.0 的 `samples/Performance/01.MultiStream` 不试图做完整推理服务，而是先证明 CUDA stream/event wrapper 能表达两个关键能力：
 
 - 两条 non-blocking stream 可以独立执行异步填充和拷贝。
 - 一个 stream 可以等待另一个 stream 上记录的 event，从而建立跨 stream 顺序。
@@ -33,8 +33,8 @@ flowchart LR
 对应文件：
 
 ```text
-samples/MultiStream/Program.cs
-samples/MultiStream/README.md
+samples/Performance/01.MultiStream/Program.cs
+samples/Performance/01.MultiStream/README.md
 docs/articles/zh-cn/cuda-stream-event-multistream-tutorial.md
 ```
 
@@ -43,7 +43,7 @@ docs/articles/zh-cn/cuda-stream-event-multistream-tutorial.md
 ```powershell
 dotnet build .\TensorRtSharp.sln -c Debug --no-restore /p:UseSharedCompilation=false
 $env:JYPPX_ENABLE_DEVELOPMENT_PROBING = "1"
-dotnet .\samples\MultiStream\bin\Debug\net8.0\MultiStream.dll
+dotnet .\samples\Performance\01.MultiStream\bin\Debug\net8.0\MultiStream.dll
 ```
 
 ## 成功输出怎么读
@@ -136,10 +136,10 @@ $case = "..\downloads\cases\cuda-multistream"
 New-Item -ItemType Directory -Force -Path "$case\logs" | Out-Null
 Set-Location $repo
 
-dotnet build .\samples\MultiStream\MultiStream.csproj -c Debug --no-restore --nologo
+dotnet build .\samples\Performance\01.MultiStream\MultiStream.csproj -c Debug --no-restore --nologo
 $env:JYPPX_ENABLE_DEVELOPMENT_PROBING = "1"
 1..3 | ForEach-Object {
-  dotnet .\samples\MultiStream\bin\Debug\net8.0\MultiStream.dll `
+  dotnet .\samples\Performance\01.MultiStream\bin\Debug\net8.0\MultiStream.dll `
     2>&1 | Tee-Object "$case\logs\run-$_.log"
   if ($LASTEXITCODE -ne 0) { throw "MultiStream run $_ failed" }
 }

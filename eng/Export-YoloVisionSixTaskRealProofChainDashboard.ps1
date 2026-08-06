@@ -67,7 +67,7 @@ function ConvertTo-MarkdownCell {
   return ([string]$Value).Replace("|", "\|").Replace("`r", " ").Replace("`n", " ")
 }
 
-$contractPath = "samples/YoloVision/yolovision-task-output-contract.json"
+$contractPath = "applications/YoloVision/yolovision-task-output-contract.json"
 $candidateValidationPath = "artifacts/yolovision/yolovision-real-asset-candidate-validation.json"
 $ownerBackfillValidationPath = "artifacts/yolovision/yolovision-real-asset-owner-backfill-pack-validation.json"
 $ownerProofInputValidationPath = "artifacts/user-acceptance/yolovision-real-asset-owner-proof-input-validation.json"

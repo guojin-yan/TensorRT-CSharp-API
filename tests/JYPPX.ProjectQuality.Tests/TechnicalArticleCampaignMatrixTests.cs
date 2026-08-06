@@ -27,9 +27,9 @@ public sealed class TechnicalArticleCampaignMatrixTests
         Assert.False(matrix.GetProperty("canPromoteRuntimeProof").GetBoolean());
 
         string[] sourceLinks = matrix.GetProperty("sourceCodeSampleLinks").EnumerateArray().Select(static item => item.GetString()!).ToArray();
-        Assert.Contains("samples/YoloVision", sourceLinks);
-        Assert.Contains("samples/OnnxToEngine", sourceLinks);
-        Assert.Contains("samples/Classification", sourceLinks);
+        Assert.Contains("applications/YoloVision", sourceLinks);
+        Assert.Contains("applications/OnnxToEngine", sourceLinks);
+        Assert.Contains("samples/ComputerVision/01.Classification", sourceLinks);
         Assert.Contains("applications/TensorRtExec", sourceLinks);
         Assert.Contains("src/JYPPX.TensorRtSharp", sourceLinks);
 

@@ -1,19 +1,19 @@
 # OnnxToEngine 与 TensorRtExec 如何分工
 
-TensorRtSharp4.0 里有两个容易被混用的入口：`samples/OnnxToEngine` 和 `applications/TensorRtExec`。它们都和 ONNX 到 TensorRT engine 有关，但目标不同。前者是最小可验证样例，后者是面向用户的工具应用。
+TensorRtSharp4.0 里有两个容易被混用的入口：`applications/OnnxToEngine` 和 `applications/TensorRtExec`。它们都和 ONNX 到 TensorRT engine 有关，但目标不同。前者是最小可验证样例，后者是面向用户的工具应用。
 
 理解这条分工，可以少走很多弯路：先用 OnnxToEngine 证明最小构建链路，再用 TensorRtExec 管理外部 ONNX 的 build/report 工作流，最后由具体 sample runner 证明真实模型语义。
 
 ## OnnxToEngine：最小 round-trip 样例
 
-`samples/OnnxToEngine` 适合回答一个基础问题：在当前 TensorRT/CUDA 运行环境下，项目能否完成最小 ONNX parser、profile、engine build、deserialize、binding 和 readback。
+`applications/OnnxToEngine` 适合回答一个基础问题：在当前 TensorRT/CUDA 运行环境下，项目能否完成最小 ONNX parser、profile、engine build、deserialize、binding 和 readback。
 
 它默认生成内置 dynamic identity ONNX，不依赖外部模型资产：
 
 ```powershell
 $env:JYPPX_ENABLE_DEVELOPMENT_PROBING = "1"
 
-dotnet run --project .\samples\OnnxToEngine -- `
+dotnet run --project .\applications\OnnxToEngine -- `
   --tensor-rt-line 10 `
   --batch 2
 ```
@@ -74,9 +74,9 @@ OutputMatch=False
 IsRuntimeExecutionProof=False
 ```
 
-这不是功能缺失，而是边界清晰。真实模型 runtime proof 应由 `samples/Classification`、`samples/YoloVision` 或用户自己的 binding 应用来补足。
+这不是功能缺失，而是边界清晰。真实模型 runtime proof 应由 `samples/ComputerVision/01.Classification`、`applications/YoloVision` 或用户自己的 binding 应用来补足。
 
-对 YoloVision 来说，输出语义不由 OnnxToEngine 猜测。`samples/YoloVision/yolovision-task-output-contract.json` 负责定义 det/cls/seg/obb/pose/sem 的输出角色、required metadata、TensorRtExec profile hint 和 proof boundary；OnnxToEngine 或 TensorRtExec 的 build/report 只能作为 owner backfill 的构建证据，不能替代该 contract 与 YoloVision 真实运行日志。
+对 YoloVision 来说，输出语义不由 OnnxToEngine 猜测。`applications/YoloVision/yolovision-task-output-contract.json` 负责定义 det/cls/seg/obb/pose/sem 的输出角色、required metadata、TensorRtExec profile hint 和 proof boundary；OnnxToEngine 或 TensorRtExec 的 build/report 只能作为 owner backfill 的构建证据，不能替代该 contract 与 YoloVision 真实运行日志。
 
 ## dryRun 与 buildOnly 的区别
 
@@ -108,8 +108,8 @@ sidecar 不能越级。即使 sidecar 写了 `real-model-runtime` 或 `package-c
 1. 用 TensorRtExec 对外部 ONNX 做 build-only，生成 engine 和 report。
 2. 用 sidecar 记录模型来源、hash、许可证和输入资产。
 3. 根据模型类型选择 sample：
-   - 分类模型：`samples/Classification`
-   - YOLO-family：`samples/YoloVision`
+   - 分类模型：`samples/ComputerVision/01.Classification`
+   - YOLO-family：`applications/YoloVision`
 4. 运行 sample runner，保存真实日志。
 5. 回填 `sample-run-evidence-record`。
 6. 运行 manifest 和 user acceptance catalog 校验。

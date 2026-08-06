@@ -2,12 +2,12 @@
 param(
     [Parameter(Mandatory = $false)]
     [string[]] $InputPath = @(
-        "samples/YoloVision/examples/yolovision-output-det.example.json",
-        "samples/YoloVision/examples/yolovision-output-cls.example.json",
-        "samples/YoloVision/examples/yolovision-output-seg.example.json",
-        "samples/YoloVision/examples/yolovision-output-obb.example.json",
-        "samples/YoloVision/examples/yolovision-output-pose.example.json",
-        "samples/YoloVision/examples/yolovision-output-sem.example.json"
+        "applications/YoloVision/examples/yolovision-output-det.example.json",
+        "applications/YoloVision/examples/yolovision-output-cls.example.json",
+        "applications/YoloVision/examples/yolovision-output-seg.example.json",
+        "applications/YoloVision/examples/yolovision-output-obb.example.json",
+        "applications/YoloVision/examples/yolovision-output-pose.example.json",
+        "applications/YoloVision/examples/yolovision-output-sem.example.json"
     ),
 
     [Parameter(Mandatory = $false)]

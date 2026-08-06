@@ -18,7 +18,7 @@
 
 ## 背景与场景
 
-本文面向希望在 `samples/YoloVision` 中接入 YOLOv8n-pose 的开发者。Pose 模型通常把 box、score、class 和 keypoint 放在同一组候选里，后处理需要同时处理检测框、关键点坐标、关键点置信度和 letterbox 坐标还原。
+本文面向希望在 `applications/YoloVision` 中接入 YOLOv8n-pose 的开发者。Pose 模型通常把 box、score、class 和 keypoint 放在同一组候选里，后处理需要同时处理检测框、关键点坐标、关键点置信度和 letterbox 坐标还原。
 
 本文是一篇可发布的技术文章草稿，也是一份 owner 真实资产回填指南。它不会把文章、模板、matrix、screenshot 或 build-only report 晋级为 runtime proof。
 
@@ -87,7 +87,7 @@ dotnet run --project .\applications\TensorRtExec -- `
 在真实 keypoint 运行前，先写出离线预检报告：
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- --model .\models\yolov8n-pose.onnx --labels .\models\coco.names --input-data .\models\yolov8n-pose-fp32.bin --input-shape 1x3x640x640 --family v8 --task pose --output-role-map boxes:det,keypoints:pose-keypoints --pose-keypoint-count 17 --preflight --preflight-report .\models\yolov8n-pose-preflight.json
+dotnet run --project .\applications\YoloVision -- --model .\models\yolov8n-pose.onnx --labels .\models\coco.names --input-data .\models\yolov8n-pose-fp32.bin --input-shape 1x3x640x640 --family v8 --task pose --output-role-map boxes:det,keypoints:pose-keypoints --pose-keypoint-count 17 --preflight --preflight-report .\models\yolov8n-pose-preflight.json
 ```
 
 只有 `yolovision-preflight.v1`、`proofClassification=precheck` 且 execution flags 全为 `false` 的报告才符合模板；它不会证明 pose decode、坐标还原或模型质量。
@@ -95,7 +95,7 @@ dotnet run --project .\samples\YoloVision -- --model .\models\yolov8n-pose.onnx 
 ## YoloVision 运行
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- `
+dotnet run --project .\applications\YoloVision -- `
   --model .\models\yolov8n-pose.onnx `
   --labels .\models\coco.names `
   --input-data .\models\yolov8n-pose-fp32.bin `
@@ -161,13 +161,13 @@ Get-FileHash -Algorithm SHA256 ..\downloads\cases\yolov8n-pose\tensors\person-fp
 先只做预处理，确认输入契约和 tensor hash：
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- --preprocess-only --image ..\downloads\cases\yolov8n-pose\images\person.ppm --preprocessed-output ..\downloads\cases\yolov8n-pose\tensors\person-fp32.bin --input-shape 1x3x640x640 --tensor-layout NCHW --color-order RGB --resize letterbox
+dotnet run --project .\applications\YoloVision -- --preprocess-only --image ..\downloads\cases\yolov8n-pose\images\person.ppm --preprocessed-output ..\downloads\cases\yolov8n-pose\tensors\person-fp32.bin --input-shape 1x3x640x640 --tensor-layout NCHW --color-order RGB --resize letterbox
 ```
 
 随后保留显式 pose output role、layout 和输出产物：
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- --model ..\downloads\cases\yolov8n-pose\models\yolov8n-pose.onnx --labels ..\downloads\cases\yolov8n-pose\labels\coco-pose.names --input-data ..\downloads\cases\yolov8n-pose\tensors\person-fp32.bin --input-shape 1x3x640x640 --family v8 --task pose --output-role-map boxes:det,keypoints:pose-keypoints --keypoint-count 17 --keypoint-stride 3 --output-json ..\downloads\cases\yolov8n-pose\reports\yolov8n-pose-output.json --visualization-svg ..\downloads\cases\yolov8n-pose\reports\yolov8n-pose-output.svg
+dotnet run --project .\applications\YoloVision -- --model ..\downloads\cases\yolov8n-pose\models\yolov8n-pose.onnx --labels ..\downloads\cases\yolov8n-pose\labels\coco-pose.names --input-data ..\downloads\cases\yolov8n-pose\tensors\person-fp32.bin --input-shape 1x3x640x640 --family v8 --task pose --output-role-map boxes:det,keypoints:pose-keypoints --keypoint-count 17 --keypoint-stride 3 --output-json ..\downloads\cases\yolov8n-pose\reports\yolov8n-pose-output.json --visualization-svg ..\downloads\cases\yolov8n-pose\reports\yolov8n-pose-output.svg
 ```
 
 输出 JSON 至少要保存 `box`、`classId`、`className`、`score`、`keypoints[].index`、`keypoints[].x`、`keypoints[].y`、`keypoints[].score`、`keypointCount`、`keypointStride`、`coordinateLayout`、`letterbox`、`modelSha256`、`imageSha256` 和 `preprocessedTensorSha256`。当前输出 schema 中每个 pose keypoint 使用 `index/x/y/score`；名称、visibility 和 skeleton map 要放在 owner metadata 或配套记录中，并与同一 output JSON、输入图和 run log 关联。
@@ -184,12 +184,12 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-SampleRunEvidenceRecord
 
 ## 代码与文件入口
 
-- `samples/YoloVision/YoloVisionRuntimePipeline.cs`：pose output role 路由。
-- `samples/YoloVision/YoloVisionPoseDecoder.cs`：box 与 keypoint 字段解析。
-- `samples/YoloVision/YoloVisionCoordinateMapper.cs`：letterbox 坐标还原。
-- `samples/YoloVision/YoloVisionNms.cs`：候选过滤与保留索引。
-- `samples/YoloVision/yolovision-task-output-contract.json`：pose 输出契约。
-- `samples/YoloVision/Program.cs`：`--task pose`、`--pose-keypoint-count` 和 role map 参数。
+- `applications/YoloVision/YoloVisionRuntimePipeline.cs`：pose output role 路由。
+- `applications/YoloVision/YoloVisionPoseDecoder.cs`：box 与 keypoint 字段解析。
+- `applications/YoloVision/YoloVisionCoordinateMapper.cs`：letterbox 坐标还原。
+- `applications/YoloVision/YoloVisionNms.cs`：候选过滤与保留索引。
+- `applications/YoloVision/yolovision-task-output-contract.json`：pose 输出契约。
+- `applications/YoloVision/Program.cs`：`--task pose`、`--pose-keypoint-count` 和 role map 参数。
 - `eng/Test-YoloVisionRealAssetCandidate.ps1`：真实资产与证据字段验证。
 
 ## 图示建议

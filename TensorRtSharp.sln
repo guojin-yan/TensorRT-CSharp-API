@@ -71,17 +71,17 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkTrt11AdvancedLayersS
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkCompatLayerMetadataSmokeRunner", "smoke\NetworkCompatLayerMetadataSmokeRunner\NetworkCompatLayerMetadataSmokeRunner.csproj", "{67F96954-1712-4070-B176-B0B8F3DDE1F9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MultiStream", "samples\MultiStream\MultiStream.csproj", "{D3059B00-7A10-455D-9546-BDEEE74D0F40}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MultiStream", "samples\Performance\01.MultiStream\MultiStream.csproj", "{D3059B00-7A10-455D-9546-BDEEE74D0F40}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DynamicShape", "samples\DynamicShape\DynamicShape.csproj", "{33010930-E6B0-4B84-B2C9-32403B2F46B1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DynamicShape", "samples\Inference\02.DynamicShapes\DynamicShape.csproj", "{33010930-E6B0-4B84-B2C9-32403B2F46B1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InferenceBindings", "samples\InferenceBindings\InferenceBindings.csproj", "{7B6F8A61-4A53-4F43-90C9-CDF6EFB24971}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InferenceBindings", "samples\Inference\01.Bindings\InferenceBindings.csproj", "{7B6F8A61-4A53-4F43-90C9-CDF6EFB24971}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnnxToEngine", "samples\OnnxToEngine\OnnxToEngine.csproj", "{493E78D0-55A7-4C04-9743-AB5603F9E42C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnnxToEngine", "applications\OnnxToEngine\OnnxToEngine.csproj", "{493E78D0-55A7-4C04-9743-AB5603F9E42C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Classification", "samples\Classification\Classification.csproj", "{B5DB72E9-310B-4A93-BDC8-88A05AE76C25}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Classification", "samples\ComputerVision\01.Classification\Classification.csproj", "{B5DB72E9-310B-4A93-BDC8-88A05AE76C25}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YoloVision", "samples\YoloVision\YoloVision.csproj", "{0A5A9D22-A421-4208-AFA7-FC9F380F79F9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YoloVision", "applications\YoloVision\YoloVision.csproj", "{0A5A9D22-A421-4208-AFA7-FC9F380F79F9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CallbackAllocatorSafeControlsSmokeRunner", "smoke\CallbackAllocatorSafeControlsSmokeRunner\CallbackAllocatorSafeControlsSmokeRunner.csproj", "{A6A96D9E-8F72-4EBB-9BB2-F7F629E1E2E4}"
 EndProject
@@ -109,7 +109,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CudaIpcImportSmokeRunner", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LegacyParserDiagnosticsSmokeRunner", "smoke\LegacyParserDiagnosticsSmokeRunner\LegacyParserDiagnosticsSmokeRunner.csproj", "{30AD1FB0-B185-459F-9B06-253D86E69700}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CudaRuntimeCompilation", "samples\CudaRuntimeCompilation\CudaRuntimeCompilation.csproj", "{32FD332C-69EC-4FEF-B540-7FAC57E5132C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CudaRuntimeCompilation", "samples\Cuda\01.RuntimeCompilation\CudaRuntimeCompilation.csproj", "{32FD332C-69EC-4FEF-B540-7FAC57E5132C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_shared", "_shared", "{452F6B82-2D95-C28F-4E13-133BE037C8D2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JYPPX.TensorRtSharp.ApplicationTools", "applications\_shared\JYPPX.TensorRtSharp.ApplicationTools\JYPPX.TensorRtSharp.ApplicationTools.csproj", "{8FD632AD-E5B5-4890-B973-3F58638E5669}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -685,6 +689,18 @@ Global
 		{32FD332C-69EC-4FEF-B540-7FAC57E5132C}.Release|x64.Build.0 = Release|Any CPU
 		{32FD332C-69EC-4FEF-B540-7FAC57E5132C}.Release|x86.ActiveCfg = Release|Any CPU
 		{32FD332C-69EC-4FEF-B540-7FAC57E5132C}.Release|x86.Build.0 = Release|Any CPU
+		{8FD632AD-E5B5-4890-B973-3F58638E5669}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8FD632AD-E5B5-4890-B973-3F58638E5669}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8FD632AD-E5B5-4890-B973-3F58638E5669}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{8FD632AD-E5B5-4890-B973-3F58638E5669}.Debug|x64.Build.0 = Debug|Any CPU
+		{8FD632AD-E5B5-4890-B973-3F58638E5669}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{8FD632AD-E5B5-4890-B973-3F58638E5669}.Debug|x86.Build.0 = Debug|Any CPU
+		{8FD632AD-E5B5-4890-B973-3F58638E5669}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8FD632AD-E5B5-4890-B973-3F58638E5669}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8FD632AD-E5B5-4890-B973-3F58638E5669}.Release|x64.ActiveCfg = Release|Any CPU
+		{8FD632AD-E5B5-4890-B973-3F58638E5669}.Release|x64.Build.0 = Release|Any CPU
+		{8FD632AD-E5B5-4890-B973-3F58638E5669}.Release|x86.ActiveCfg = Release|Any CPU
+		{8FD632AD-E5B5-4890-B973-3F58638E5669}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -737,5 +753,7 @@ Global
 		{D2E71192-37E1-4477-BC0F-EB928836DF89} = {B08B4D4D-59D4-4B2C-AF1F-EEA2D2C2D7B1}
 		{30AD1FB0-B185-459F-9B06-253D86E69700} = {B08B4D4D-59D4-4B2C-AF1F-EEA2D2C2D7B1}
 		{32FD332C-69EC-4FEF-B540-7FAC57E5132C} = {5D20AA90-6969-D8BD-9DCD-8634F4692FDA}
+		{452F6B82-2D95-C28F-4E13-133BE037C8D2} = {A10A91C2-6485-6656-963B-F6FCBC812542}
+		{8FD632AD-E5B5-4890-B973-3F58638E5669} = {452F6B82-2D95-C28F-4E13-133BE037C8D2}
 	EndGlobalSection
 EndGlobal

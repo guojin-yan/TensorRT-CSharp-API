@@ -18,9 +18,9 @@ public sealed class EvidenceLadderAndArticleMatrixTests
 
         foreach (string required in new[]
         {
-            "samples/OnnxToEngine",
+            "applications/OnnxToEngine",
             "applications/TensorRtExec",
-            "samples/YoloVision",
+            "applications/YoloVision",
             "real-model-runtime",
             "package-consumer-runtime",
             "template",

@@ -26,8 +26,8 @@ Get-Command nvcc -ErrorAction SilentlyContinue
 
 ```powershell
 dotnet run --project .\applications\TensorRtExec -- --help
-dotnet run --project .\samples\OnnxToEngine -- --help
-dotnet run --project .\samples\YoloVision -- --help
+dotnet run --project .\applications\OnnxToEngine -- --help
+dotnet run --project .\applications\YoloVision -- --help
 ```
 
 如果使用自己的 consumer 项目，请安装 managed 包和匹配 runtime package。确认 `bin\Release\net8.0` 或发布目录中 native assets 已被复制。若出现 DLL load 失败，先检查 runtime key、RID、PATH、当前工作目录和是否混入旧 TensorRT DLL。
@@ -42,4 +42,4 @@ Windows 安装成功、sample help 成功、TensorRtExec GUI 截图、build-only
 
 ## 下一步
 
-如果你要在 Windows 上继续验证真实模型，请先选择 `samples/OnnxToEngine` 或 `samples/YoloVision`，准备模型来源、license、labels、input shape 和 SHA256。若你的目标是 release proof，请转到 `package-consumer-runtime-proof-clean-consumer-guide.md`。
+如果你要在 Windows 上继续验证真实模型，请先选择 `applications/OnnxToEngine` 或 `applications/YoloVision`，准备模型来源、license、labels、input shape 和 SHA256。若你的目标是 release proof，请转到 `package-consumer-runtime-proof-clean-consumer-guide.md`。

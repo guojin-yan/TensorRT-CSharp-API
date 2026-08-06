@@ -51,10 +51,10 @@ README / README.zh-CN 当前已经提供一组发布候选前台入口：
 
 | 入口 | 可以说明 | 必须保留的边界 |
 | --- | --- | --- |
-| `samples/OnnxToEngine` | 最小 ONNX round-trip 和 engine build 路径 | 不代表任意外部模型 runtime proof |
+| `applications/OnnxToEngine` | 最小 ONNX round-trip 和 engine build 路径 | 不代表任意外部模型 runtime proof |
 | `applications/TensorRtExec` | CLI / WinForms、build/precheck report、normalized command、sidecar | `build-only`、`parse-only`、`sidecar-only` 不是 release proof |
-| `samples/Classification` | 自备分类模型、labels、input 的样例入口 | 真实 `real-model-runtime` 需要资产、hash、license、runner log 和 validator |
-| `samples/YoloVision` | YOLO v5/v6/v7/v8/v9/v10/v11/v26/custom，det、cls、seg、obb、pose、sem 的统一样例框架 | support matrix 不能替代真实模型 proof |
+| `samples/ComputerVision/01.Classification` | 自备分类模型、labels、input 的样例入口 | 真实 `real-model-runtime` 需要资产、hash、license、runner log 和 validator |
+| `applications/YoloVision` | YOLO v5/v6/v7/v8/v9/v10/v11/v26/custom，det、cls、seg、obb、pose、sem 的统一样例框架 | support matrix 不能替代真实模型 proof |
 
 当前统一 YOLO-family 样例名是 `YoloVision`。不要把旧检测样例名或旧项目文件作为当前入口重新写入文档、README 或测试。
 

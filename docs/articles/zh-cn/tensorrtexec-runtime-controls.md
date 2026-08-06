@@ -31,7 +31,7 @@ parse-only，只输出无 tensor 数据的边界 artifact。
 Graph：
 
 ```powershell
-dotnet run --project .\samples\OnnxToEngine -- `
+dotnet run --project .\applications\OnnxToEngine -- `
   --tensor-rt-line 10 `
   --iterations 3 --warmUp 5 --duration 0 `
   --streams 1 --infStreams 2 `
@@ -61,7 +61,7 @@ dotnet run --project .\samples\OnnxToEngine -- `
 ## 零传输基准
 
 ```powershell
-dotnet run --project .\samples\OnnxToEngine -- `
+dotnet run --project .\applications\OnnxToEngine -- `
   --tensor-rt-line 10 `
   --iterations 2 --warmUp 2 `
   --noDataTransfers `
@@ -83,7 +83,7 @@ TensorRT 10.11 的官方 sample 在一个同步 stream 中排入 host function�
 推理 stream 等待该 event 后才开始 warmup/measurement。项目现在采用相同的调度结构：
 
 ```powershell
-dotnet run --project .\samples\OnnxToEngine -- `
+dotnet run --project .\applications\OnnxToEngine -- `
   --tensor-rt-line 10 `
   --iterations 2 --warmUp 5 --duration 0 `
   --streams 1 --infStreams 2 --threads `

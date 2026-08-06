@@ -42,7 +42,7 @@
 ```powershell
 dotnet run --project applications\TensorRtExec -- --onnx <owner-model.onnx> --saveEngine <owner-model.engine> --buildOnly --report <owner-build-report.json>
 
-dotnet run --project samples\YoloVision -- --model <owner-model.onnx> --input-data <owner-preprocessed-fp32.bin> --input-shape 1x3x640x640 --family v8 --task det --labels <owner-labels> --output <owner-output.json>
+dotnet run --project applications\YoloVision -- --model <owner-model.onnx> --input-data <owner-preprocessed-fp32.bin> --input-shape 1x3x640x640 --family v8 --task det --labels <owner-labels> --output <owner-output.json>
 ```
 
 `--report` 是 `--exportReport` 的兼容别名，工具会在 normalized command 和 report 中归一化为 `--exportReport`。该报告仍是 build-only evidence，不是 runtime proof。

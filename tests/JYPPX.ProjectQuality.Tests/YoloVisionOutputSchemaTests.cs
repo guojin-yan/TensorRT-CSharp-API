@@ -8,7 +8,7 @@ public sealed class YoloVisionOutputSchemaTests
     [Fact]
     public void YoloVisionOutputSchemaExistsAndCoversCoreTasks()
     {
-        string path = Path.Combine(RepositoryPaths.Root, "samples", "YoloVision", "yolovision-output.schema.json");
+        string path = Path.Combine(RepositoryPaths.Root, "applications", "YoloVision", "yolovision-output.schema.json");
         Assert.True(File.Exists(path), path);
 
         string text = File.ReadAllText(path);
@@ -131,8 +131,7 @@ public sealed class YoloVisionOutputSchemaTests
     {
         string schemaPath = Path.Combine(
             RepositoryPaths.Root,
-            "samples",
-            "YoloVision",
+            "applications", "YoloVision",
             "yolovision-segmentation-mask-artifacts.schema.json");
         string scriptPath = Path.Combine(
             RepositoryPaths.Root,

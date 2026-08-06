@@ -1,6 +1,6 @@
 # YoloVision 总览：一个样例覆盖 YOLO 多系列多任务
 
-早期检测样例命名太窄，只能让人想到 detection。TensorRtSharp4.0 现在把视觉样例统一到 `samples/YoloVision`：它的定位不是“跑一个 YOLOv8 检测 demo”，而是用一个样例承载 YOLOv5、YOLOv6、YOLOv7、YOLOv8、YOLOv9、YOLOv10、YOLO11、YOLO26、YOLOX 和 custom 模型的多任务教程、模型资产回填、输出 JSON、可视化、owner evidence 与文章案例。
+早期检测样例命名太窄，只能让人想到 detection。TensorRtSharp4.0 现在把视觉样例统一到 `applications/YoloVision`：它的定位不是“跑一个 YOLOv8 检测 demo”，而是用一个样例承载 YOLOv5、YOLOv6、YOLOv7、YOLOv8、YOLOv9、YOLOv10、YOLO11、YOLO26、YOLOX 和 custom 模型的多任务教程、模型资产回填、输出 JSON、可视化、owner evidence 与文章案例。
 
 这篇文章面向公众号、博客和项目主页读者。它要说明 YoloVision 为什么值得做成统一样例，也要把 proof boundary 讲清楚：模板、support matrix、preflight、local package consumer、截图和可视化都不是 package-consumer-runtime proof。
 
@@ -26,11 +26,11 @@ boundary = sample evidence, not package-consumer-runtime proof
 机器可读总览在：
 
 ```text
-samples/YoloVision/yolo-model-matrix.json
-samples/YoloVision/yolo-model-matrix.md
-samples/YoloVision/yolovision-task-output-contract.json
-samples/YoloVision/yolovision-output.schema.json
-samples/YoloVision/yolovision-preflight.schema.json
+applications/YoloVision/yolo-model-matrix.json
+applications/YoloVision/yolo-model-matrix.md
+applications/YoloVision/yolovision-task-output-contract.json
+applications/YoloVision/yolovision-output.schema.json
+applications/YoloVision/yolovision-preflight.schema.json
 samples/assets/yolovision-family-task-real-asset-roadmap.json
 samples/assets/yolovision-article-case-pack.json
 samples/assets/yolovision-real-asset-owner-backfill-pack.json
@@ -49,25 +49,25 @@ YOLO 系列模型的问题不是“能不能加载 ONNX”这么简单。不同�
 - pose：keypoint count、keypoint stride、visibility/confidence、skeleton metadata。
 - sem：semantic map、class count、palette、resize-back rule。
 
-统一样例可以把这些差异放在明确 metadata 中，而不是散落到每篇文章或每个 demo 的临时代码里。它也让 YoloVision 能和 `samples/OnnxToEngine`、`applications/TensorRtExec` 共享 evidence ladder：先构建 engine，再运行样例，再由 owner 回填真实日志和 hash。
+统一样例可以把这些差异放在明确 metadata 中，而不是散落到每篇文章或每个 demo 的临时代码里。它也让 YoloVision 能和 `applications/OnnxToEngine`、`applications/TensorRtExec` 共享 evidence ladder：先构建 engine，再运行样例，再由 owner 回填真实日志和 hash。
 
 ## 核心代码路径
 
 YoloVision 的实现分成 runner、preprocess、runtime output、managed postprocess、report 和 visualization：
 
 ```text
-samples/YoloVision/Program.cs
-samples/YoloVision/YoloVision.csproj
-samples/YoloVision/YoloSampleRunner.cs
-samples/YoloVision/YoloVisionResult.cs
-samples/YoloVision/YoloVisionOutputReport.cs
-samples/YoloVision/YoloVisionPreflightReport.cs
-samples/YoloVision/YoloImagePreprocessor.cs
-samples/YoloVision/YoloRuntimeOutputSet.cs
-samples/YoloVision/YoloRuntimeOutputTensor.cs
-samples/YoloVision/YoloRuntimeOutputRoleResolver.cs
-samples/YoloVision/YoloMultiOutputMetadata.cs
-samples/YoloVision/YoloVisionVisualizationWriter.cs
+applications/YoloVision/Program.cs
+applications/YoloVision/YoloVision.csproj
+applications/YoloVision/YoloSampleRunner.cs
+applications/YoloVision/YoloVisionResult.cs
+applications/YoloVision/YoloVisionOutputReport.cs
+applications/YoloVision/YoloVisionPreflightReport.cs
+applications/YoloVision/YoloImagePreprocessor.cs
+applications/YoloVision/YoloRuntimeOutputSet.cs
+applications/YoloVision/YoloRuntimeOutputTensor.cs
+applications/YoloVision/YoloRuntimeOutputRoleResolver.cs
+applications/YoloVision/YoloMultiOutputMetadata.cs
+applications/YoloVision/YoloVisionVisualizationWriter.cs
 ```
 
 任务专属 managed postprocess 包括：
@@ -93,7 +93,7 @@ YoloXOutputDecoder
 没有 CUDA、TensorRT、ONNX 或模型文件时，也可以跑 deterministic managed smoke：
 
 ```powershell
-dotnet run --project .\samples\YoloVision\YoloVision.csproj -- --self-test-end2end
+dotnet run --project .\applications\YoloVision\YoloVision.csproj -- --self-test-end2end
 ```
 
 它应输出：
@@ -109,7 +109,7 @@ ManagedSmokeBoundary=managed-array-decode-only
 准备 owner handoff 或文章案例时可以先跑 preflight：
 
 ```powershell
-dotnet run --project .\samples\YoloVision\YoloVision.csproj -- `
+dotnet run --project .\applications\YoloVision\YoloVision.csproj -- `
   --preflight `
   --family v8 `
   --task seg `
@@ -129,7 +129,7 @@ dotnet run --project .\samples\YoloVision\YoloVision.csproj -- `
 真实文章案例不应只用 synthetic tensor。YoloVision 支持把 `.bmp` / `.ppm` 图像预处理成 float32 tensor：
 
 ```powershell
-dotnet run --project .\samples\YoloVision\YoloVision.csproj -- `
+dotnet run --project .\applications\YoloVision\YoloVision.csproj -- `
   --preprocess-only `
   --image ..\downloads\images\dog.ppm `
   --preprocessed-output ..\downloads\tensors\dog-yolo-fp32.bin `
@@ -148,43 +148,43 @@ dotnet run --project .\samples\YoloVision\YoloVision.csproj -- `
 Detection：
 
 ```powershell
-dotnet run --project .\samples\YoloVision\YoloVision.csproj -- --model ..\downloads\models\yolo-det.onnx --labels ..\downloads\models\coco.names --image ..\downloads\images\det.ppm --preprocessed-output ..\downloads\tensors\det-fp32.bin --input-shape 1x3x640x640 --family v8 --task det --layout auto --has-objectness auto --nms-mode class-aware --confidence 0.25 --iou-threshold 0.45 --output ..\downloads\reports\yolo-det-output.json
+dotnet run --project .\applications\YoloVision\YoloVision.csproj -- --model ..\downloads\models\yolo-det.onnx --labels ..\downloads\models\coco.names --image ..\downloads\images\det.ppm --preprocessed-output ..\downloads\tensors\det-fp32.bin --input-shape 1x3x640x640 --family v8 --task det --layout auto --has-objectness auto --nms-mode class-aware --confidence 0.25 --iou-threshold 0.45 --output ..\downloads\reports\yolo-det-output.json
 ```
 
 YOLOv10 end-to-end detection：
 
 ```powershell
-dotnet run --project .\samples\YoloVision\YoloVision.csproj -- --model ..\downloads\models\yolov10n.onnx --labels ..\downloads\models\coco.names --image ..\downloads\images\det.ppm --preprocessed-output ..\downloads\tensors\yolov10n-fp32.bin --input-shape 1x3x640x640 --family v10 --task det --layout end2end --class-count 80 --confidence 0.25 --output ..\downloads\reports\yolov10n-output.json
+dotnet run --project .\applications\YoloVision\YoloVision.csproj -- --model ..\downloads\models\yolov10n.onnx --labels ..\downloads\models\coco.names --image ..\downloads\images\det.ppm --preprocessed-output ..\downloads\tensors\yolov10n-fp32.bin --input-shape 1x3x640x640 --family v10 --task det --layout end2end --class-count 80 --confidence 0.25 --output ..\downloads\reports\yolov10n-output.json
 ```
 
 Classification：
 
 ```powershell
-dotnet run --project .\samples\YoloVision\YoloVision.csproj -- --model ..\downloads\models\yolo-cls.onnx --labels ..\downloads\models\labels.txt --input-data ..\downloads\tensors\cls-fp32.bin --input-shape 1x3x224x224 --family custom --task cls --classification-output output0 --classification-score-mode probabilities --confidence 0 --top-k 5 --output ..\downloads\reports\yolo-cls-output.json
+dotnet run --project .\applications\YoloVision\YoloVision.csproj -- --model ..\downloads\models\yolo-cls.onnx --labels ..\downloads\models\labels.txt --input-data ..\downloads\tensors\cls-fp32.bin --input-shape 1x3x224x224 --family custom --task cls --classification-output output0 --classification-score-mode probabilities --confidence 0 --top-k 5 --output ..\downloads\reports\yolo-cls-output.json
 ```
 
 Segmentation：
 
 ```powershell
-dotnet run --project .\samples\YoloVision\YoloVision.csproj -- --model ..\downloads\models\yolo-seg.onnx --labels ..\downloads\models\coco.names --input-data ..\downloads\tensors\seg-fp32.bin --input-shape 1x3x640x640 --family v8 --task seg --output-role-map boxes:det,proto:mask-prototypes --mask-coefficient-count 32 --output ..\downloads\reports\yolo-seg-output.json
+dotnet run --project .\applications\YoloVision\YoloVision.csproj -- --model ..\downloads\models\yolo-seg.onnx --labels ..\downloads\models\coco.names --input-data ..\downloads\tensors\seg-fp32.bin --input-shape 1x3x640x640 --family v8 --task seg --output-role-map boxes:det,proto:mask-prototypes --mask-coefficient-count 32 --output ..\downloads\reports\yolo-seg-output.json
 ```
 
 Oriented bounding box：
 
 ```powershell
-dotnet run --project .\samples\YoloVision\YoloVision.csproj -- --model ..\downloads\models\yolo-obb.onnx --labels ..\downloads\models\labels.txt --input-data ..\downloads\tensors\obb-fp32.bin --input-shape 1x3x1024x1024 --family v8 --task obb --output-role-map boxes:det,angles:obb-angle --obb-angle-output angles --output ..\downloads\reports\yolo-obb-output.json
+dotnet run --project .\applications\YoloVision\YoloVision.csproj -- --model ..\downloads\models\yolo-obb.onnx --labels ..\downloads\models\labels.txt --input-data ..\downloads\tensors\obb-fp32.bin --input-shape 1x3x1024x1024 --family v8 --task obb --output-role-map boxes:det,angles:obb-angle --obb-angle-output angles --output ..\downloads\reports\yolo-obb-output.json
 ```
 
 Pose：
 
 ```powershell
-dotnet run --project .\samples\YoloVision\YoloVision.csproj -- --model ..\downloads\models\yolo-pose.onnx --labels ..\downloads\models\labels.txt --input-data ..\downloads\tensors\pose-fp32.bin --input-shape 1x3x640x640 --family v8 --task pose --output-role-map boxes:det,keypoints:pose-keypoints --pose-keypoint-count 17 --output ..\downloads\reports\yolo-pose-output.json
+dotnet run --project .\applications\YoloVision\YoloVision.csproj -- --model ..\downloads\models\yolo-pose.onnx --labels ..\downloads\models\labels.txt --input-data ..\downloads\tensors\pose-fp32.bin --input-shape 1x3x640x640 --family v8 --task pose --output-role-map boxes:det,keypoints:pose-keypoints --pose-keypoint-count 17 --output ..\downloads\reports\yolo-pose-output.json
 ```
 
 Semantic segmentation：
 
 ```powershell
-dotnet run --project .\samples\YoloVision\YoloVision.csproj -- --model ..\downloads\models\yolo-sem.onnx --labels ..\downloads\models\labels.txt --input-data ..\downloads\tensors\sem-fp32.bin --input-shape 1x3x512x512 --family custom --task sem --semantic-output semantic --class-count 21 --output ..\downloads\reports\yolo-sem-output.json
+dotnet run --project .\applications\YoloVision\YoloVision.csproj -- --model ..\downloads\models\yolo-sem.onnx --labels ..\downloads\models\labels.txt --input-data ..\downloads\tensors\sem-fp32.bin --input-shape 1x3x512x512 --family custom --task sem --semantic-output semantic --class-count 21 --output ..\downloads\reports\yolo-sem-output.json
 ```
 
 Dedicated role options 也可直接使用：`--detection-output`、`--classification-output`、`--semantic-output`、`--mask-prototypes-output`、`--pose-keypoints-output`、`--obb-angle-output`。如果没有显式 role，runner 会使用保守 tensor-name heuristics，例如 `proto`、`keypoint`、`angle`、`semantic`、`logits`、`box`、`detect`。
@@ -212,12 +212,12 @@ forbidden substitutes
 六任务最小输出示例位于：
 
 ```text
-samples/YoloVision/examples/yolovision-output-det.example.json
-samples/YoloVision/examples/yolovision-output-cls.example.json
-samples/YoloVision/examples/yolovision-output-seg.example.json
-samples/YoloVision/examples/yolovision-output-obb.example.json
-samples/YoloVision/examples/yolovision-output-pose.example.json
-samples/YoloVision/examples/yolovision-output-sem.example.json
+applications/YoloVision/examples/yolovision-output-det.example.json
+applications/YoloVision/examples/yolovision-output-cls.example.json
+applications/YoloVision/examples/yolovision-output-seg.example.json
+applications/YoloVision/examples/yolovision-output-obb.example.json
+applications/YoloVision/examples/yolovision-output-pose.example.json
+applications/YoloVision/examples/yolovision-output-sem.example.json
 ```
 
 验证示例或 owner 产出的 output JSON，脚本路径是 `eng/Test-YoloVisionOutputReport.ps1`：
@@ -342,12 +342,12 @@ eng/Test-SampleRunEvidenceRecord.ps1
 
 ## Local PackageReference consumer
 
-`YoloVision.csproj` 可以打包成 `JYPPX.TensorRT.CSharp.API.YoloVision`，暴露 pointer-free 的 `YoloVisionCommand.Run(string[] args)`。仓库外应用可以复用同一套 CLI、preprocess、decode、NMS、report 和 visualization 路径，而不需要 `ProjectReference`。
+`applications/YoloVision/YoloVision.csproj` 是 `IsPackable=false` 的完整应用。它通过公开的 `JYPPX.TensorRT.CSharp.API` 4 系列包和 `JYPPX.OpenCV.CSharp.API` 构建，复用同一套 CLI、preprocess、decode、NMS、report 和 visualization 路径；项目不发布 YoloVision 案例 NuGet 包。
 
 本地验证入口：
 
 ```text
-samples/YoloVision.PackageConsumer
+tests/fixtures/legacy-package-consumers/YoloVision.PackageConsumer
 eng/Test-YoloVisionLocalPackageConsumer.ps1
 eng/Test-YoloVisionLocalPackageConsumerMatrix.ps1
 eng/Test-YoloVisionPublicPackageProof.ps1

@@ -20,8 +20,6 @@ public sealed class NuGetPackageBrandingTests
 
     [Theory]
     [InlineData("pack/JYPPX.TensorRT.CSharp.API/JYPPX.TensorRT.CSharp.API.csproj", "../../README.md", "../../nuget/logo.jpg")]
-    [InlineData("samples/Classification/Classification.csproj", "../../README.md", "../../nuget/logo.jpg")]
-    [InlineData("samples/YoloVision/YoloVision.csproj", "../../README.md", "../../nuget/logo.jpg")]
     public void ManagedPackagesUseRootEnglishReadmeAndCanonicalLogo(
         string projectPath,
         string expectedReadme,
@@ -29,6 +27,20 @@ public sealed class NuGetPackageBrandingTests
     {
         XDocument project = XDocument.Load(Path.Combine(RepositoryPaths.Root, projectPath));
         AssertPackageMetadata(project, expectedReadme, expectedLogo);
+    }
+
+    [Theory]
+    [InlineData("samples/ComputerVision/01.Classification/Classification.csproj")]
+    [InlineData("applications/YoloVision/YoloVision.csproj")]
+    public void SampleApplicationsAreExplicitlyNotNuGetPackages(string projectPath)
+    {
+        XDocument project = XDocument.Load(Path.Combine(RepositoryPaths.Root, projectPath));
+
+        Assert.Contains(project.Descendants("IsPackable"), static element => element.Value == "false");
+        Assert.Empty(project.Descendants("PackageId"));
+        Assert.Empty(project.Descendants("PackageReadmeFile"));
+        Assert.Empty(project.Descendants("PackageIcon"));
+        Assert.Empty(project.Descendants("ProjectReference"));
     }
 
     [Theory]

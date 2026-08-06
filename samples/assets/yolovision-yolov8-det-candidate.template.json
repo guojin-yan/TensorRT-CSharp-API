@@ -7,7 +7,7 @@
   "proofClassification": "template-only",
   "canPromoteRealModelRuntime": false,
   "canPromotePackageConsumerRuntime": false,
-  "taskOutputContract": "samples/YoloVision/yolovision-task-output-contract.json",
+  "taskOutputContract": "applications/YoloVision/yolovision-task-output-contract.json",
   "family": "YOLOv8",
   "task": "det",
   "model": {
@@ -35,7 +35,7 @@
     "imageSha256": "owner-required",
     "preprocessedTensorPath": "models/yolov8-det-fp32.bin",
     "preprocessedTensorSha256": "owner-required",
-    "preprocessCommand": "dotnet run --project .\\samples\\YoloVision -- --preprocess-only --image .\\models\\yolov8-det-test.ppm --preprocessed-output .\\models\\yolov8-det-fp32.bin --input-shape 1x3x640x640 --tensor-layout NCHW --color-order RGB --resize letterbox",
+    "preprocessCommand": "dotnet run --project .\\applications\\YoloVision -- --preprocess-only --image .\\models\\yolov8-det-test.ppm --preprocessed-output .\\models\\yolov8-det-fp32.bin --input-shape 1x3x640x640 --tensor-layout NCHW --color-order RGB --resize letterbox",
     "inputShape": "1x3x640x640"
   },
   "outputMetadata": {
@@ -61,7 +61,7 @@
   },
   "commands": {
     "tensorRtExecBuildCommand": "dotnet run --project .\\applications\\TensorRtExec -- --onnx .\\models\\yolov8-det.onnx --saveEngine .\\models\\yolov8-det.plan --minShapes images:1x3x640x640 --optShapes images:1x3x640x640 --maxShapes images:4x3x640x640 --fp16 --workspace 1024 --buildOnly --exportReport .\\models\\yolov8-det-build-report.json --evidenceSidecar .\\models\\yolov8-det-evidence.sidecar.json",
-    "yoloVisionRunCommand": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8-det.onnx --labels .\\models\\coco.names --image .\\models\\yolov8-det-test.ppm --preprocessed-output .\\models\\yolov8-det-fp32.bin --input-shape 1x3x640x640 --tensor-rt-line 10 --family v8 --task det --layout auto --has-objectness auto --nms-mode class-aware --confidence 0.25 --iou-threshold 0.45 --output-json .\\models\\yolov8-det-output.json --visualization-svg .\\models\\yolov8-det-output.svg"
+    "yoloVisionRunCommand": "dotnet run --project .\\applications\\YoloVision -- --model .\\models\\yolov8-det.onnx --labels .\\models\\coco.names --image .\\models\\yolov8-det-test.ppm --preprocessed-output .\\models\\yolov8-det-fp32.bin --input-shape 1x3x640x640 --tensor-rt-line 10 --family v8 --task det --layout auto --has-objectness auto --nms-mode class-aware --confidence 0.25 --iou-threshold 0.45 --output-json .\\models\\yolov8-det-output.json --visualization-svg .\\models\\yolov8-det-output.svg"
   },
   "outputArtifacts": {
     "outputJsonPath": "models/yolov8-det-output.json",

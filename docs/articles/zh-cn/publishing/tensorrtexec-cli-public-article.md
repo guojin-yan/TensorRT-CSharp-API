@@ -2,7 +2,7 @@
 
 TensorRT 用户绕不开 `trtexec`。它是官方最常用的模型转换、engine 构建、profile 配置、timing cache、layer info 和快速诊断工具。问题是，当主项目是 C#/.NET 时，官方 `trtexec` 往往只是外部命令：参数、日志、报告、错误处理、GUI 操作和应用内工作流都要再包一层。
 
-TensorRtSharp4.0 中的 `applications/TensorRtExec` 目标就是做一个 C# 版 trtexec-like 应用：既能在控制台里以命令行方式使用，也能用 WinForms 打开页面；既服务 `samples/OnnxToEngine` 的模型转换，也服务 `samples/YoloVision` 的真实模型文章案例和 release evidence ladder。
+TensorRtSharp4.0 中的 `applications/TensorRtExec` 目标就是做一个 C# 版 trtexec-like 应用：既能在控制台里以命令行方式使用，也能用 WinForms 打开页面；既服务 `applications/OnnxToEngine` 的模型转换，也服务 `applications/YoloVision` 的真实模型文章案例和 release evidence ladder。
 
 这篇文章面向公众号、博客和项目主页读者。它可以介绍 TensorRtExec 的 CLI/WinForms 使用方式，但必须保持 proof boundary：TensorRtExec report、sidecar、GUI screenshot、command preview、dry-run、build-only 和 parity matrix 都不是 package-consumer-runtime proof。
 
@@ -394,9 +394,9 @@ Windows 下建议先用 where.exe 和进程实际工作目录确认 loader 看�
 
 ## 与 OnnxToEngine / YoloVision 的关系
 
-`samples/OnnxToEngine` 更像“面向样例读者的模型转换路径”，重点是清晰、易懂、适合教程；`applications/TensorRtExec` 更像正式工具，目标是覆盖官方 `trtexec` 的主要模型转换能力，并同时支持 CLI 和 WinForms。
+`applications/OnnxToEngine` 更像“面向样例读者的模型转换路径”，重点是清晰、易懂、适合教程；`applications/TensorRtExec` 更像正式工具，目标是覆盖官方 `trtexec` 的主要模型转换能力，并同时支持 CLI 和 WinForms。
 
-`samples/YoloVision` 则负责 model-specific real run：YOLOv5、YOLOv6、YOLOv7、YOLOv8、YOLOv9、YOLOv10、YOLO11、YOLO26、YOLOX 和 custom，det/cls/seg/obb/pose/sem 六任务都需要真实模型、labels、输入资产、output JSON、log SHA256 和 owner review。
+`applications/YoloVision` 则负责 model-specific real run：YOLOv5、YOLOv6、YOLOv7、YOLOv8、YOLOv9、YOLOv10、YOLO11、YOLO26、YOLOX 和 custom，det/cls/seg/obb/pose/sem 六任务都需要真实模型、labels、输入资产、output JSON、log SHA256 和 owner review。
 
 推荐证据路径：
 
@@ -411,7 +411,7 @@ TensorRtExec build-only report
   -> post-publish verification
 ```
 
-`samples/assets/yolovision-real-asset-owner-backfill-pack.json` 和 `samples/YoloVision/yolovision-task-output-contract.json` 会把 TensorRtExec shape profile、task/output metadata 和 sample-run evidence 字段对齐。它们是 owner backfill scaffold，不是 package-consumer-runtime proof。
+`samples/assets/yolovision-real-asset-owner-backfill-pack.json` 和 `applications/YoloVision/yolovision-task-output-contract.json` 会把 TensorRtExec shape profile、task/output metadata 和 sample-run evidence 字段对齐。它们是 owner backfill scaffold，不是 package-consumer-runtime proof。
 
 ## Real case proof pack
 

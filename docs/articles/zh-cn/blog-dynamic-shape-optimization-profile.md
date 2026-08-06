@@ -3,13 +3,13 @@
 > 文章类型：样例教程长文
 > 适合发布：微信公众号、技术博客、样例导览
 > 配图建议：一个输入 tensor 从 `[-1,3,4]` 进入 min/opt/max profile，再进入 runtime batch 的流程图。
-> 发布摘要：用 `samples/DynamicShape` 演示 TensorRtSharp4.0 如何在 C# 中构建动态 batch identity network，并用 optimization profile、runtime shape、binding readiness 和 output match 形成可复现证据。
+> 发布摘要：用 `samples/Inference/02.DynamicShapes` 演示 TensorRtSharp4.0 如何在 C# 中构建动态 batch identity network，并用 optimization profile、runtime shape、binding readiness 和 output match 形成可复现证据。
 
 ## 为什么 dynamic shape 值得单独讲
 
 TensorRT 的动态维度不是简单把 shape 写成 `-1`。Builder 需要知道这个动态范围的最小、最优、最大值，runtime 也需要在 enqueue 前设置实际输入 shape。任何一步漏掉，最后都会变成难读的 runtime 失败。
 
-TensorRtSharp4.0 的 `samples/DynamicShape` 选择了一个最小 identity network，目的是把 dynamic shape 的工程路径讲清楚，而不是让外部模型、图片和预处理干扰判断。
+TensorRtSharp4.0 的 `samples/Inference/02.DynamicShapes` 选择了一个最小 identity network，目的是把 dynamic shape 的工程路径讲清楚，而不是让外部模型、图片和预处理干扰判断。
 
 ## 样例链路
 
@@ -30,8 +30,8 @@ flowchart TD
 对应文件：
 
 ```text
-samples/DynamicShape/Program.cs
-samples/DynamicShape/README.md
+samples/Inference/02.DynamicShapes/Program.cs
+samples/Inference/02.DynamicShapes/README.md
 docs/articles/zh-cn/dynamic-shape-optimization-profile-tutorial.md
 ```
 
@@ -40,7 +40,7 @@ docs/articles/zh-cn/dynamic-shape-optimization-profile-tutorial.md
 ```powershell
 dotnet build .\TensorRtSharp.sln -c Debug --no-restore /p:UseSharedCompilation=false
 $env:JYPPX_ENABLE_DEVELOPMENT_PROBING = "1"
-dotnet .\samples\DynamicShape\bin\Debug\net8.0\DynamicShape.dll --tensor-rt-line 10 --batch 3
+dotnet .\samples\Inference\02.DynamicShapes\bin\Debug\net8.0\DynamicShape.dll --tensor-rt-line 10 --batch 3
 ```
 
 `--batch` 必须落在 profile 范围内。这个样例的范围是 1 到 4，默认使用 3。
@@ -139,11 +139,11 @@ $case = "..\downloads\cases\dynamic-shape-identity"
 New-Item -ItemType Directory -Force -Path "$case\logs" | Out-Null
 Set-Location $repo
 
-dotnet build .\samples\DynamicShape\DynamicShape.csproj -c Debug --no-restore --nologo
+dotnet build .\samples\Inference\02.DynamicShapes\DynamicShape.csproj -c Debug --no-restore --nologo
 $env:JYPPX_ENABLE_DEVELOPMENT_PROBING = "1"
 
 1..4 | ForEach-Object {
-  dotnet .\samples\DynamicShape\bin\Debug\net8.0\DynamicShape.dll `
+  dotnet .\samples\Inference\02.DynamicShapes\bin\Debug\net8.0\DynamicShape.dll `
     --tensor-rt-line 10 --batch $_ 2>&1 |
     Tee-Object "$case\logs\batch-$_.log"
   if ($LASTEXITCODE -ne 0) { throw "batch $_ failed" }

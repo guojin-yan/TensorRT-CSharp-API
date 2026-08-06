@@ -24,7 +24,7 @@ TensorRtExec `
 
 ## Classification / YoloVision 共享样例合同
 
-`samples/JYPPX.SampleSupport` 现在使用同样的严格名称绑定，不再把 Classification/YoloVision 限制为一个 ONNX
+`samples/_shared/JYPPX.SampleSupport` 现在使用同样的严格名称绑定，不再把 Classification/YoloVision 限制为一个 ONNX
 input。样例命令采用 kebab-case 参数：
 
 - `--input-shapes name:dims,...`：必须覆盖全部 model inputs；
@@ -49,7 +49,7 @@ smoke summary 把总体与单 tensor 完成状态分开命名为 `ReferenceValid
 
 每个 output 使用独立、可追溯的 JSON：
 
-共享样例对应 schema 为 `samples/JYPPX.SampleSupport/onnx-sample-reference.schema.json`。
+共享样例对应 schema 为 `samples/_shared/JYPPX.SampleSupport/onnx-sample-reference.schema.json`。
 
 ```json
 {

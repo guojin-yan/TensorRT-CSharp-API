@@ -1,0 +1,13 @@
+<Project>
+  <PropertyGroup>
+    <JYPPXOpenCvSamplePackageVersion Condition="'$(JYPPXOpenCvSamplePackageVersion)' == ''">5.*-*</JYPPXOpenCvSamplePackageVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="JYPPX.OpenCV.CSharp.API"
+                      Version="$(JYPPXOpenCvSamplePackageVersion)" />
+    <PackageReference Include="JYPPX.OpenCV.runtime.win-x64"
+                      Version="$(JYPPXOpenCvSamplePackageVersion)"
+                      Condition="'$(OS)' == 'Windows_NT'" />
+  </ItemGroup>
+</Project>

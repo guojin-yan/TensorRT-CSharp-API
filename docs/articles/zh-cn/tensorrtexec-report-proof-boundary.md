@@ -66,7 +66,7 @@ dotnet run --project applications\TensorRtExec -- `
   --exportReport <owner-build-report.json>
 ```
 
-真实 proof 需要由 `samples/YoloVision`、`samples/Classification` 或用户自己的推理程序补齐输入、输出、日志和 validator。
+真实 proof 需要由 `applications/YoloVision`、`samples/ComputerVision/01.Classification` 或用户自己的推理程序补齐输入、输出、日志和 validator。
 
 ## 截图与图示建议
 

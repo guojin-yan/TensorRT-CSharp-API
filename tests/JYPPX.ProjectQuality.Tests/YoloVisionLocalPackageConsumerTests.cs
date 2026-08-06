@@ -10,16 +10,15 @@ namespace JYPPX.ProjectQuality.Tests;
 public sealed class YoloVisionLocalPackageConsumerTests
 {
     [Fact]
-    public void YoloVisionPackageExposesReusablePointerFreeCommand()
+    public void YoloVisionApplicationIsNonPackableAndKeepsPointerFreeCommand()
     {
-        string project = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "YoloVision", "YoloVision.csproj"));
-        string program = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "YoloVision", "Program.cs"));
+        string project = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "YoloVision", "YoloVision.csproj"));
+        string program = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "YoloVision", "Program.cs"));
 
-        Assert.Contains("<IsPackable>true</IsPackable>", project, StringComparison.Ordinal);
-        Assert.Contains("<PackageId>JYPPX.TensorRT.CSharp.API.YoloVision</PackageId>", project, StringComparison.Ordinal);
+        Assert.Contains("<IsPackable>false</IsPackable>", project, StringComparison.Ordinal);
+        Assert.DoesNotContain("<PackageId>", project, StringComparison.Ordinal);
         Assert.Contains("<GenerateDocumentationFile>true</GenerateDocumentationFile>", project, StringComparison.Ordinal);
-        Assert.Contains("JYPPX.TensorRtSharp.csproj", project, StringComparison.Ordinal);
-        Assert.DoesNotContain("JYPPX.CudaSharp.csproj", project, StringComparison.Ordinal);
+        Assert.DoesNotContain("ProjectReference", project, StringComparison.Ordinal);
         Assert.Contains("public static class YoloVisionCommand", program, StringComparison.Ordinal);
         Assert.Contains("public static int Run(string[] args)", program, StringComparison.Ordinal);
         Assert.Contains("return YoloVisionCommand.Run(args);", program, StringComparison.Ordinal);
@@ -30,26 +29,17 @@ public sealed class YoloVisionLocalPackageConsumerTests
     }
 
     [Fact]
-    public void ConsumerTemplateUsesOnlyThreePackageReferences()
+    public void ApplicationConsumesPublishedTensorRtAndProjectOwnedOpenCvPackages()
     {
-        string templateRoot = Path.Combine(RepositoryPaths.Root, "samples", "YoloVision.PackageConsumer");
-        string project = File.ReadAllText(Path.Combine(templateRoot, "YoloVision.PackageConsumer.csproj.template"));
-        string program = File.ReadAllText(Path.Combine(templateRoot, "Program.cs"));
-        string readme = File.ReadAllText(Path.Combine(templateRoot, "README.md"));
+        string directoryProps = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "YoloVision", "Directory.Build.props"));
+        string tensorRtPackages = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "build", "JYPPX.PublicSamplePackages.props"));
+        string openCvPackages = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "build", "JYPPX.OpenCvSamplePackages.props"));
 
-        Assert.Equal(3, project.Split("<PackageReference ", StringSplitOptions.None).Length - 1);
-        Assert.DoesNotContain("ProjectReference", project, StringComparison.Ordinal);
-        Assert.Contains("JYPPX.TensorRT.CSharp.API\"", project, StringComparison.Ordinal);
-        Assert.Contains("JYPPX.TensorRT.CSharp.API.YoloVision", project, StringComparison.Ordinal);
-        Assert.Contains("__BRIDGE_PACKAGE_ID__", project, StringComparison.Ordinal);
-        Assert.DoesNotContain("trt10.11.cuda12.9", project, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("ProjectReference=False", program, StringComparison.Ordinal);
-        Assert.Contains("BridgeTensorRt=", program, StringComparison.Ordinal);
-        Assert.Contains("TensorRtEnvironmentProbe.GetCurrent()", program, StringComparison.Ordinal);
-        Assert.Contains("YoloVisionCommand.Run(args)", program, StringComparison.Ordinal);
-        Assert.Contains("TRT8, TRT10, or TRT11", readme, StringComparison.Ordinal);
-        Assert.Contains("local-package-consumer-runtime", readme, StringComparison.Ordinal);
-        Assert.Contains("not proof", readme, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("JYPPX.PublicSamplePackages.props", directoryProps, StringComparison.Ordinal);
+        Assert.Contains("JYPPX.OpenCvSamplePackages.props", directoryProps, StringComparison.Ordinal);
+        Assert.Contains("JYPPX.TensorRT.CSharp.API", tensorRtPackages, StringComparison.Ordinal);
+        Assert.Contains("JYPPX.OpenCV.CSharp.API", openCvPackages, StringComparison.Ordinal);
+        Assert.DoesNotContain("JYPPX.TensorRT.CSharp.API.YoloVision", tensorRtPackages, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -887,13 +877,13 @@ public sealed class YoloVisionLocalPackageConsumerTests
             "## ONNX 转换与暂存",
             "model.export(format=\"onnx\"",
             "models/YoloVision/Detection/yolov10n-thu-mig-v1.1/yolov10n.onnx",
-            "## 创建本地包消费项目",
+            "## 使用公开包准备应用",
             "## 编写程序入口",
             "## 已验证结果",
             "yolovision-yolov10n-local-package-consumer-annotated-cc0.jpg",
             "yolovision-yolov10n-local-package-consumer-terminal.png",
             "bus | 1 | `0.950415`",
-            "本次没有创建 tag、Release，也没有发布任何包"
+            "新的公共包 post-publish 证明必须另行运行"
         })
         {
             Assert.Contains(required, article, StringComparison.Ordinal);

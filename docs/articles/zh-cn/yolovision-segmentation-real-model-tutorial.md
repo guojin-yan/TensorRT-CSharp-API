@@ -24,8 +24,8 @@ segmentation 的常见问题是 engine 构建成功但 mask 语义不清：proto
 
 ## 代码与文件入口
 
-- `samples/YoloVision/Program.cs`
-- `samples/YoloVision/yolo-model-matrix.json`
+- `applications/YoloVision/Program.cs`
+- `applications/YoloVision/yolo-model-matrix.json`
 - `docs/articles/zh-cn/yolovision-segmentation-tutorial.md`
 - `artifacts/user-acceptance/sample-run-evidence-record.yolovision.template.json`
 - `applications/TensorRtExec/tensor-rt-exec-feature-matrix.json`

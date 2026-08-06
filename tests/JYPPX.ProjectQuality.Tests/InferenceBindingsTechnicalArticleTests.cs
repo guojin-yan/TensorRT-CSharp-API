@@ -55,7 +55,7 @@ public sealed class InferenceBindingsTechnicalArticleTests
         Assert.False(boundary.GetProperty("performsPublish").GetBoolean());
         Assert.False(boundary.GetProperty("uploadsVendorRuntime").GetBoolean());
 
-        string sourcePath = Path.Combine(RepositoryPaths.Root, "samples", "InferenceBindings", "Program.cs");
+        string sourcePath = Path.Combine(RepositoryPaths.Root, "samples", "Inference", "01.Bindings", "Program.cs");
         string screenshotPath = Path.Combine(
             RepositoryPaths.Root,
             assets.GetProperty("runtimeScreenshotPath").GetString()!.Replace('/', Path.DirectorySeparatorChar));
@@ -68,8 +68,7 @@ public sealed class InferenceBindingsTechnicalArticleTests
 
         string sampleReadme = File.ReadAllText(Path.Combine(
             RepositoryPaths.Root,
-            "samples",
-            "InferenceBindings",
+            "samples", "Inference", "01.Bindings",
             "README.md"));
         Assert.Contains("inference-bindings-tutorial.md", sampleReadme, StringComparison.Ordinal);
     }

@@ -2,7 +2,7 @@
 
 本目录分为用户教程、API/架构说明、模型演示和内部工程记录。文件多不等于都能作为公开技术文章：只有 publishing/publication-catalog.json 显式收录且通过完整性门禁的文章，才进入对外候选目录。
 
-Current release state: <code>4.0.0-preview.1</code> is a candidate. Runtime proof and post-publish proof remain <code>blocked</code> until the Owner supplies the required external inputs. Build-only/precheck output cannot be promoted to package-consumer-runtime proof. Owner action required: <code>artifacts/final-release/owner-action-required.md</code>.
+The first 4-series preview is published. Samples and applications consume the public package; build-only or precheck output still cannot be promoted to real-model or package-consumer runtime proof.
 
 ## Start Here
 
@@ -13,20 +13,21 @@ Current release state: <code>4.0.0-preview.1</code> is a candidate. Runtime proo
 - [模型获取与 ONNX 转换](articles/zh-cn/demo-model-acquisition-and-onnx-conversion.md)
 - [推理绑定教程](articles/zh-cn/inference-bindings-tutorial.md)
 
-## Samples And Visual Results
+## Example Series
 
-- [YOLOVision sample overview](articles/zh-cn/yolovision-sample-overview.md)
-- [YOLOv8n detection](articles/zh-cn/yolovision-yolov8n-det-local-package-consumer-tutorial.md)
-- [YOLOv8n classification](articles/zh-cn/yolovision-yolov8n-cls-local-package-consumer-tutorial.md)
-- [YOLOv8n segmentation](articles/zh-cn/yolovision-yolov8-seg-local-package-consumer-tutorial.md)
-- [LRASPP semantic segmentation](articles/zh-cn/yolovision-lraspp-semantic-local-package-consumer-tutorial.md)
-- [YOLOv8n pose](articles/zh-cn/yolovision-yolov8n-pose-local-package-consumer-tutorial.md)
-- [YOLOv8n OBB](articles/zh-cn/yolovision-yolov8n-obb-local-package-consumer-tutorial.md)
-- [YOLOv10n](articles/zh-cn/yolovision-yolov10n-real-asset-tutorial.md)
-- [YOLOX-S](articles/zh-cn/yolovision-yolox-official-runtime-tutorial.md)
-- [MNIST ONNX to TensorRT](articles/zh-cn/onnxtoengine-mnist-owner-generated-tutorial.md)
+- [English series learning path](articles/en/sample-series-overview.md)
+- [中文系列案例学习路线](articles/zh-cn/sample-series-overview.md)
+- [CUDA RTC](articles/zh-cn/cuda-runtime-compilation-technical-article.md)
+- [Inference bindings](articles/zh-cn/inference-bindings-tutorial.md)
+- [Dynamic shapes](articles/zh-cn/dynamic-shape-optimization-profile-tutorial.md)
+- [CUDA multi-stream](articles/zh-cn/cuda-stream-event-multistream-tutorial.md)
+- [ResNet18 classification](articles/zh-cn/classification-real-asset-walkthrough.md)
+- [YoloVision all-task application](articles/zh-cn/yolovision-all-task-overview.md)
+- [YoloVision application README](https://github.com/guojin-yan/TensorRT-CSharp-API/blob/TensorRtSharp4.0/applications/YoloVision/README.md)
+- [ONNX to TensorRT](articles/zh-cn/onnx-to-engine-quickstart.md)
+- [OnnxToEngine application README](https://github.com/guojin-yan/TensorRT-CSharp-API/blob/TensorRtSharp4.0/applications/OnnxToEngine/README.md)
 - [TensorRtExec GUI](articles/zh-cn/tensorrtexec-gui-user-guide.md)
-- TensorRtExec application entry: `applications/TensorRtExec/README.md`
+- [TensorRtExec application README](https://github.com/guojin-yan/TensorRT-CSharp-API/blob/TensorRtSharp4.0/applications/TensorRtExec/README.md)
 
 ## API And Native Runtime
 
@@ -45,9 +46,9 @@ Current release state: <code>4.0.0-preview.1</code> is a candidate. Runtime proo
 - [Release candidate gate](articles/zh-cn/release-candidate-gate.md)
 - [Publishing roadmap](articles/zh-cn/publishing/article-roadmap-30plus.md)
 - API readiness audit: `artifacts/interface-coverage/release-api-readiness-audit.json`
-- YOLOVision matrix: `samples/YoloVision/yolo-model-matrix.json`
+- YOLOVision matrix: `applications/YoloVision/yolo-model-matrix.json`
 - TensorRtExec matrix: `applications/TensorRtExec/tensor-rt-exec-feature-matrix.json`
-- ONNX parity matrix: `samples/OnnxToEngine/trtexec-parity-matrix.json`
+- ONNX parity matrix: `applications/OnnxToEngine/trtexec-parity-matrix.json`
 
 ## Internal Records
 

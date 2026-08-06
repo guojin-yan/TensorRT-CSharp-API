@@ -1,14 +1,14 @@
 # OnnxToEngine、TensorRtExec 与 YoloVision 证据梯度
 
-本项目现在有三类容易混淆的用户入口：`samples/OnnxToEngine`、`applications/TensorRtExec` 和 `samples/YoloVision`。它们都能帮助用户走向 TensorRT 部署，但证据等级不同，不能互相替代。
+本项目现在有三类容易混淆的用户入口：`applications/OnnxToEngine`、`applications/TensorRtExec` 和 `applications/YoloVision`。它们都能帮助用户走向 TensorRT 部署，但证据等级不同，不能互相替代。
 
 ## 梯度总览
 
 | 层级 | 入口 | 证明什么 | 不证明什么 |
 |---|---|---|---|
-| 教程层 | `samples/OnnxToEngine` | 最小 ONNX parser、profile、engine serialization、identity round-trip 教程 | 不证明用户真实模型质量，不证明公开包可消费 |
+| 教程层 | `applications/OnnxToEngine` | 最小 ONNX parser、profile、engine serialization、identity round-trip 教程 | 不证明用户真实模型质量，不证明公开包可消费 |
 | 应用层 | `applications/TensorRtExec` | CLI/WinForms 参数、build report、parity matrix、sidecar、preflight | 不证明 real-model-runtime，不证明 package-consumer-runtime |
-| 样例层 | `samples/YoloVision` | YOLO-family 后处理、真实模型运行候选、sample-run evidence | 不证明 NuGet package consumer proof |
+| 样例层 | `applications/YoloVision` | YOLO-family 后处理、真实模型运行候选、sample-run evidence | 不证明 NuGet package consumer proof |
 | 模型 proof | `real-model-runtime` record | 某个真实模型、真实输入、真实 log 和 hash 已通过 | 不证明公开包发布后 clean consumer 可用 |
 | 发布 proof | `package-consumer-runtime` record | 公开包源 + clean external consumer + runtime package key + smoke passed | 不证明所有模型质量，只证明发布包消费路径 |
 

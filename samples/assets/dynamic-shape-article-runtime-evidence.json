@@ -14,7 +14,7 @@
     "dotnetSdkVersion": "10.0.301"
   },
   "assets": {
-    "sampleSourcePath": "samples/DynamicShape/Program.cs",
+    "sampleSourcePath": "samples/Inference/02.DynamicShapes/Program.cs",
     "sampleSourceSha256": "c5197bbf8078739bb079ae78e50bb14389e7df24f3b69f133115e1765963f33b",
     "sampleAssemblySha256": "ed3a5a13408c2eb9879624b86f4060fc227ab5aa21286e8cb0feae8eac7bddd4",
     "nativeBridgeSha256": "0576f191617dcdad46fd40e238f61cf22b9fb04826b70c1c47993b7944bd26a0",

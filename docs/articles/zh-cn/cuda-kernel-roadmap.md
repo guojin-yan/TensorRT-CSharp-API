@@ -11,7 +11,7 @@ Raw CUDA launch entry point 目前只作为 generated/internal native 边界存�
 当前可以先运行这个真实示例：
 
 ```powershell
-dotnet run --project .\samples\MultiStream
+dotnet run --project .\samples\Performance\01.MultiStream
 ```
 
 它验证了未来 GPU preprocessing demo 会依赖的 CUDA memory 和 stream primitives。

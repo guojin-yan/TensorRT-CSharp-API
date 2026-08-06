@@ -88,7 +88,7 @@ New-Item -ItemType Directory -Force -Path $work | Out-Null
 
 ```powershell
 Set-Location $repo
-dotnet run --project .\samples\YoloVision -- --self-test-end2end
+dotnet run --project .\applications\YoloVision -- --self-test-end2end
 ```
 
 预期包含 `ManagedSmoke=YOLOv10EndToEnd Passed=True`、`Detections=2`、`ApplyNms=False`。该命令只处理固定数组，
@@ -257,7 +257,7 @@ Get-FileHash "$work\coco.names" -Algorithm SHA256
 ```powershell
 Set-Location $repo
 
-dotnet run --project .\samples\YoloVision -- `
+dotnet run --project .\applications\YoloVision -- `
   --model "$work\yolov10n.onnx" `
   --labels "$work\coco.names" `
   --image "$work\input.ppm" `

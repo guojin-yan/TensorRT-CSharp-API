@@ -2,14 +2,14 @@
 
 很多项目里的 YOLO 示例只覆盖一个固定模型：输入写死为 `1x3x640x640`，输出写死为 `[1,84,8400]`，然后把后处理写进一个函数里。这样做适合演示，却不适合做一个可维护的 TensorRT/C# 项目。因为 YOLOv5、YOLOv6、YOLOv7、YOLOv8、YOLOv9、YOLOv10、YOLOv11 以及后续 family 的 ONNX 输出并不完全相同；同一个 family 里，det、cls、seg、obb、pose、sem 任务也会改变输出 tensor 的数量和含义。
 
-`samples/YoloVision` 的定位是做一个 YOLO-family 配置底座，而不是把某个权重文件塞进仓库。它现在支持 family/task/profile 参数、常见 detection 输出布局、score filtering、NMS、classification、semantic map，以及 seg/pose/obb 的托管多输出 helper。本文讲清楚这套 metadata 怎么填、什么时候算 pipeline 证据、什么时候才能写成真实模型 smoke passed。
+`applications/YoloVision` 的定位是做一个 YOLO-family 配置底座，而不是把某个权重文件塞进仓库。它现在支持 family/task/profile 参数、常见 detection 输出布局、score filtering、NMS、classification、semantic map，以及 seg/pose/obb 的托管多输出 helper。本文讲清楚这套 metadata 怎么填、什么时候算 pipeline 证据、什么时候才能写成真实模型 smoke passed。
 
 ## 当前能力边界
 
 `YoloVision` 当前可以直接运行单输出路径：
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- `
+dotnet run --project .\applications\YoloVision -- `
   --model .\models\yolo.onnx `
   --labels .\models\coco.names `
   --input-shape 1x3x640x640 `
@@ -194,7 +194,7 @@ Copy-Item .\samples\assets\yolovision-assets.template.json .\models\my-yolo.asse
 
 ## 推荐验证顺序
 
-1. 用 `TensorRtExec` 或 `samples/OnnxToEngine` 做 `--buildOnly`，确认 ONNX 能构建 engine。
+1. 用 `TensorRtExec` 或 `applications/OnnxToEngine` 做 `--buildOnly`，确认 ONNX 能构建 engine。
 2. 用 `YoloVision` 单输出 runner 跑 det/cls/sem 这类可直接解码的路径。
 3. 对 seg/pose/obb，用托管多输出 helper 先跑 synthetic tensor 单元测试。
 4. 接入 `RunSingleFloatInputOutputs(...)` 或 host application 的 runtime 多输出 capture 后，再记录真实模型日志。

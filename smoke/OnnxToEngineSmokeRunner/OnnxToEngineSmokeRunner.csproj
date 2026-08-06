@@ -13,9 +13,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\..\samples\JYPPX.SampleSupport\TensorRtSampleSupport.cs" Link="JYPPX.SampleSupport\TensorRtSampleSupport.cs" />
-    <Compile Include="..\..\samples\JYPPX.SampleSupport\TensorRtOnnxSample.cs" Link="JYPPX.SampleSupport\TensorRtOnnxSample.cs" />
-    <Compile Include="..\..\samples\JYPPX.SampleSupport\TensorRtOnnxSample.Inputs.cs" Link="JYPPX.SampleSupport\TensorRtOnnxSample.Inputs.cs" />
-    <Compile Include="..\..\samples\JYPPX.SampleSupport\TensorRtOnnxSample.References.cs" Link="JYPPX.SampleSupport\TensorRtOnnxSample.References.cs" />
+    <Compile Include="..\..\samples\_shared\JYPPX.SampleSupport\TensorRtSampleSupport.cs" Link="JYPPX.SampleSupport\TensorRtSampleSupport.cs" />
+    <Compile Include="..\..\samples\_shared\JYPPX.SampleSupport\TensorRtOnnxSample.cs" Link="JYPPX.SampleSupport\TensorRtOnnxSample.cs" />
+    <Compile Include="..\..\samples\_shared\JYPPX.SampleSupport\TensorRtOnnxSample.Inputs.cs" Link="JYPPX.SampleSupport\TensorRtOnnxSample.Inputs.cs" />
+    <Compile Include="..\..\samples\_shared\JYPPX.SampleSupport\TensorRtOnnxSample.References.cs" Link="JYPPX.SampleSupport\TensorRtOnnxSample.References.cs" />
   </ItemGroup>
 </Project>

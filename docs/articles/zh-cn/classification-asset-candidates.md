@@ -1,6 +1,6 @@
 # Classification Asset Candidates
 
-本文为 `samples/Classification` 选择候选模型资产。当前状态是候选清单，属于未实跑 sample smoke，不是项目内置模型。
+本文为 `samples/ComputerVision/01.Classification` 选择候选模型资产。当前状态是候选清单，属于未实跑 sample smoke，不是项目内置模型。
 
 ## 选择原则
 

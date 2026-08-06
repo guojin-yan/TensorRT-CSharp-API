@@ -196,7 +196,7 @@ $packageCache = Join-Path $OutputRoot "packages"
 $runOutput = Join-Path $OutputRoot "run-output"
 $logRoot = Join-Path $OutputRoot "logs"
 New-Item -ItemType Directory -Path $workspace, $packageCache, $runOutput, $logRoot -Force | Out-Null
-$templateRoot = Join-Path $RepositoryRoot "samples\YoloVision.PackageConsumer"
+$templateRoot = Join-Path $RepositoryRoot "tests\fixtures\legacy-package-consumers\YoloVision.PackageConsumer"
 $projectPath = Join-Path $workspace "YoloVision.PackageConsumer.csproj"
 Copy-Item -LiteralPath (Join-Path $templateRoot "Program.cs") -Destination (Join-Path $workspace "Program.cs")
 $project = Get-Content -LiteralPath (Join-Path $templateRoot "YoloVision.PackageConsumer.csproj.template") -Raw -Encoding utf8

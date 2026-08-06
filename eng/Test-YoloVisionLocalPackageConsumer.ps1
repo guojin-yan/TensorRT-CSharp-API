@@ -776,7 +776,7 @@ New-Item -ItemType Directory -Path $workspace, $packageCache, $runOutput, $isola
 Copy-Item -LiteralPath $managedPackage.Path -Destination $isolatedManagedFeed -Force
 Copy-Item -LiteralPath $yoloVisionPackage.Path -Destination $isolatedYoloVisionFeed -Force
 Copy-Item -LiteralPath $bridgePackage.Path -Destination $isolatedBridgeFeed -Force
-$templateRoot = Join-Path $RepositoryRoot "samples\YoloVision.PackageConsumer"
+$templateRoot = Join-Path $RepositoryRoot "tests\fixtures\legacy-package-consumers\YoloVision.PackageConsumer"
 $consumerProjectPath = Join-Path $workspace "YoloVision.PackageConsumer.csproj"
 $consumerProgramPath = Join-Path $workspace "Program.cs"
 Copy-Item -LiteralPath (Join-Path $templateRoot "Program.cs") -Destination $consumerProgramPath
@@ -2754,7 +2754,7 @@ $report = [pscustomobject][ordered]@{
   runtimePackageKey = $RuntimePackageKey
   tensorRtLine = $TensorRtLine
   consumer = [pscustomobject][ordered]@{
-    template = "samples/YoloVision.PackageConsumer"
+    template = "tests/fixtures/legacy-package-consumers/YoloVision.PackageConsumer"
     targetFramework = "net8.0"
     projectReferenceCount = 0
     directAssemblyReferenceCount = 0

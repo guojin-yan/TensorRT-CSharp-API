@@ -152,7 +152,7 @@ JPG/PNG 不能直接传给 `--image`；请外部解码并生成 float32 `.bin/.r
 单独验证预处理：
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- `
+dotnet run --project .\applications\YoloVision -- `
   --preprocess-only `
   --image "$case\images\input.ppm" `
   --preprocessed-output "$case\tensors\input.fp32.bin" `
@@ -261,7 +261,7 @@ IoU(candidate, kept) > iouThreshold
 ### Generic Preflight
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- `
+dotnet run --project .\applications\YoloVision -- `
   --model "$case\models\model.onnx" `
   --labels "$case\labels\labels.txt" `
   --image "$case\images\input.ppm" `
@@ -282,7 +282,7 @@ dotnet run --project .\samples\YoloVision -- `
 ### Generic Real Run
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- `
+dotnet run --project .\applications\YoloVision -- `
   --model "$case\models\model.onnx" `
   --labels "$case\labels\labels.txt" `
   --image "$case\images\input.ppm" `
@@ -329,7 +329,7 @@ x1, y1, x2, y2, score, classId
 运行示例：
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- `
+dotnet run --project .\applications\YoloVision -- `
   --model "$case\models\yolov10n.onnx" `
   --labels "$case\labels\coco.names" `
   --image "$case\images\input.ppm" `
@@ -374,7 +374,7 @@ size   = exp(rawWH) * stride
 运行示例：
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- `
+dotnet run --project .\applications\YoloVision -- `
   --model "$case\models\yolox_s.onnx" `
   --labels "$case\labels\coco.names" `
   --image "$case\images\input.ppm" `
@@ -451,7 +451,7 @@ SVG 还应由 owner 与原始图片、Netron contract 和预期目标做人工�
 建议把 stdout/stderr 独立保存：
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- <真实参数> `
+dotnet run --project .\applications\YoloVision -- <真实参数> `
   1> "$case\logs\yolovision.stdout.log" `
   2> "$case\logs\yolovision.stderr.log"
 ```

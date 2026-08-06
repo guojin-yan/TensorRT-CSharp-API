@@ -2,7 +2,7 @@
 
 Classification（`cls`）和 Semantic Segmentation（`sem`）都不产生检测框，但二者的输出契约完全不同：分类把一个类别向量排序成 Top-K，语义分割则为每个像素保留一组类别分数并执行 argmax。本文提供一条可执行、可审计的共同接入路径，并在每个分叉点说明两类任务各自需要的 metadata、输出检查和证据。
 
-本文是 `samples/YoloVision` 的组合入口。分类的 labels/Top-K 深挖见 `yolovision-classification-yolov8n-labels-topk-guide.md`，语义图的 palette/resize-back 深挖见 `yolovision-semantic-segmentation-map-guide.md`。
+本文是 `applications/YoloVision` 的组合入口。分类的 labels/Top-K 深挖见 `yolovision-classification-yolov8n-labels-topk-guide.md`，语义图的 palette/resize-back 深挖见 `yolovision-semantic-segmentation-map-guide.md`。
 
 ## 先判断任务
 
@@ -83,7 +83,7 @@ Get-FileHash -Algorithm SHA256 ..\downloads\cases\cls-sem\sem\labels\palette.jso
 YoloVision 内置 `.bmp`/`.ppm` 路径支持 stretch、letterbox 或抗锯齿短边缩放 + center crop，并支持 RGB/BGR、NCHW/NHWC 和 normalization scale。先用 `--preprocess-only` 固化 tensor 和 hash：
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- `
+dotnet run --project .\applications\YoloVision -- `
   --preprocess-only `
   --image ..\downloads\cases\cls-sem\cls\images\input.ppm `
   --preprocessed-output ..\downloads\cases\cls-sem\cls\tensors\input-fp32.bin `
@@ -160,7 +160,7 @@ build report 证明 parser/build/serialization 路径，不证明 Top-K 正确�
 Classification：
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- `
+dotnet run --project .\applications\YoloVision -- `
   --preflight `
   --family v8 --task cls `
   --model ..\downloads\cases\cls-sem\cls\models\model.onnx `
@@ -175,7 +175,7 @@ dotnet run --project .\samples\YoloVision -- `
 Semantic Segmentation：
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- `
+dotnet run --project .\applications\YoloVision -- `
   --preflight `
   --family custom --task sem `
   --model ..\downloads\cases\cls-sem\sem\models\model.onnx `
@@ -192,7 +192,7 @@ preflight schema 必须为 `yolovision-preflight.v1`，`proofClassification=prec
 ## 执行 Classification
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- `
+dotnet run --project .\applications\YoloVision -- `
   --family v8 --task cls `
   --model ..\downloads\cases\cls-sem\cls\models\model.onnx `
   --labels ..\downloads\cases\cls-sem\cls\labels\labels.txt `
@@ -219,7 +219,7 @@ Expected real-log marker: YoloVision Passed=True
 ## 执行 Semantic Segmentation
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- `
+dotnet run --project .\applications\YoloVision -- `
   --family custom --task sem `
   --model ..\downloads\cases\cls-sem\sem\models\model.onnx `
   --labels ..\downloads\cases\cls-sem\sem\labels\labels.txt `
@@ -247,10 +247,10 @@ Expected real-log marker: YoloVision Passed=True
 
 仓库中的最小结构示例是：
 
-- `samples/YoloVision/examples/yolovision-output-cls.example.json`
-- `samples/YoloVision/examples/yolovision-output-sem.example.json`
-- schema：`samples/YoloVision/yolovision-output.schema.json`
-- task contract：`samples/YoloVision/yolovision-task-output-contract.json`
+- `applications/YoloVision/examples/yolovision-output-cls.example.json`
+- `applications/YoloVision/examples/yolovision-output-sem.example.json`
+- schema：`applications/YoloVision/yolovision-output.schema.json`
+- task contract：`applications/YoloVision/yolovision-task-output-contract.json`
 
 分类 output JSON 应核对 `task=cls`、`outputs[].role=probabilities`、`postprocess.classificationScoreMode=probabilities`、shape、`postprocess.topK`、每个 prediction 的 `classId`、`className` 和 `score`。语义 output JSON 应核对 `task=sem`、`outputs[].role=semantic`、shape、`classCount`、`width`、`height` 和 `valueCount=C*H*W`。
 
@@ -298,12 +298,12 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-YoloVisionOutputReport.
 
 ## 代码入口
 
-- `samples/YoloVision/YoloSampleRunner.cs`：classification shape/Top-K 和 semantic NCHW/NHWC 解码。
-- `samples/YoloVision/YoloRuntimeOutputRoleResolver.cs`：`--classification-output`、`--semantic-output` 与 output role。
-- `samples/YoloVision/YoloVisionOutputReport.cs`：结构化 JSON、predictions 和 boundary。
-- `samples/YoloVision/YoloVisionVisualizationWriter.cs`：Top-K bars 和 semantic argmax SVG。
-- `samples/YoloVision/YoloSemanticMap.cs`：class-major map 与元素数量约束。
-- `samples/YoloVision/Program.cs`：CLI、日志和 expected real-log `YoloVision Passed=True` 成功标记。
+- `applications/YoloVision/YoloSampleRunner.cs`：classification shape/Top-K 和 semantic NCHW/NHWC 解码。
+- `applications/YoloVision/YoloRuntimeOutputRoleResolver.cs`：`--classification-output`、`--semantic-output` 与 output role。
+- `applications/YoloVision/YoloVisionOutputReport.cs`：结构化 JSON、predictions 和 boundary。
+- `applications/YoloVision/YoloVisionVisualizationWriter.cs`：Top-K bars 和 semantic argmax SVG。
+- `applications/YoloVision/YoloSemanticMap.cs`：class-major map 与元素数量约束。
+- `applications/YoloVision/Program.cs`：CLI、日志和 expected real-log `YoloVision Passed=True` 成功标记。
 
 ## Proof Boundary
 

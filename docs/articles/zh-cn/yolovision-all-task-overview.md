@@ -44,7 +44,7 @@ engine、build report、preflight report、截图或 SVG 都不能单独证明�
 
 ### 第一层：托管能力矩阵
 
-`samples/YoloVision/YoloCapabilityMatrix.cs` 由 10 个 family 和 6 个 task 做笛卡尔积，共生成 60 行。
+`applications/YoloVision/YoloCapabilityMatrix.cs` 由 10 个 family 和 6 个 task 做笛卡尔积，共生成 60 行。
 
 - 其中 55 行标记为 supported。
 - 5 行 unsupported 都是 YOLOX 的非 detection 任务。
@@ -59,18 +59,18 @@ engine、build report、preflight report、截图或 SVG 都不能单独证明�
 离线查看表格：
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- --list-capabilities
+dotnet run --project .\applications\YoloVision -- --list-capabilities
 ```
 
 输出机器可读 JSON：
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- --list-capabilities --json
+dotnet run --project .\applications\YoloVision -- --list-capabilities --json
 ```
 
 ### 第二层：模型资产规划矩阵
 
-`samples/YoloVision/yolo-model-matrix.json` 只有 10 个 family entry。
+`applications/YoloVision/yolo-model-matrix.json` 只有 10 个 family entry。
 
 它记录更保守的 `supportedTasks`、模型来源提示、ONNX 导出注意事项和后处理说明。
 
@@ -88,7 +88,7 @@ dotnet run --project .\samples\YoloVision -- --list-capabilities --json
 
 ### 第三层：任务输出契约
 
-`samples/YoloVision/yolovision-task-output-contract.json` 按 6 个 task 描述：
+`applications/YoloVision/yolovision-task-output-contract.json` 按 6 个 task 描述：
 
 - primary output roles；
 - required/optional metadata；
@@ -216,7 +216,7 @@ preflight 不加载 TensorRT，不解析 ONNX，也不执行 inference。
 它用于检查 family/task 意图、资产路径、输入来源冲突和 metadata 完整性：
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- `
+dotnet run --project .\applications\YoloVision -- `
   --model ..\downloads\cases\my-yolo\models\model.onnx `
   --labels ..\downloads\cases\my-yolo\labels\labels.txt `
   --image ..\downloads\cases\my-yolo\images\input.ppm `
@@ -256,37 +256,37 @@ JPG/PNG 需要先由外部工具按模型约定解码并生成 float32 tensor，
 ### Detection
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- --model ..\downloads\cases\det\models\model.onnx --labels ..\downloads\cases\det\labels\labels.txt --image ..\downloads\cases\det\images\input.ppm --preprocessed-output ..\downloads\cases\det\tensors\input.fp32.bin --input-shape 1x3x640x640 --family v8 --task det --layout auto --has-objectness auto --nms-mode class-aware --confidence 0.25 --iou-threshold 0.45 --output-json ..\downloads\cases\det\reports\output.json --visualization-svg ..\downloads\cases\det\reports\output.svg
+dotnet run --project .\applications\YoloVision -- --model ..\downloads\cases\det\models\model.onnx --labels ..\downloads\cases\det\labels\labels.txt --image ..\downloads\cases\det\images\input.ppm --preprocessed-output ..\downloads\cases\det\tensors\input.fp32.bin --input-shape 1x3x640x640 --family v8 --task det --layout auto --has-objectness auto --nms-mode class-aware --confidence 0.25 --iou-threshold 0.45 --output-json ..\downloads\cases\det\reports\output.json --visualization-svg ..\downloads\cases\det\reports\output.svg
 ```
 
 ### Classification
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- --model ..\downloads\cases\cls\models\model.onnx --labels ..\downloads\cases\cls\labels\labels.txt --input-data ..\downloads\cases\cls\tensors\input.fp32.bin --input-shape 1x3x224x224 --family v8 --task cls --classification-output output0 --classification-score-mode probabilities --confidence 0 --class-count 1000 --top-k 5 --output-json ..\downloads\cases\cls\reports\output.json --visualization-svg ..\downloads\cases\cls\reports\output.svg
+dotnet run --project .\applications\YoloVision -- --model ..\downloads\cases\cls\models\model.onnx --labels ..\downloads\cases\cls\labels\labels.txt --input-data ..\downloads\cases\cls\tensors\input.fp32.bin --input-shape 1x3x224x224 --family v8 --task cls --classification-output output0 --classification-score-mode probabilities --confidence 0 --class-count 1000 --top-k 5 --output-json ..\downloads\cases\cls\reports\output.json --visualization-svg ..\downloads\cases\cls\reports\output.svg
 ```
 
 ### Instance Segmentation
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- --model ..\downloads\cases\seg\models\model.onnx --labels ..\downloads\cases\seg\labels\labels.txt --image ..\downloads\cases\seg\images\input.ppm --preprocessed-output ..\downloads\cases\seg\tensors\input.fp32.bin --input-shape 1x3x640x640 --family v8 --task seg --output-role-map boxes:det,proto:mask-prototypes --mask-coefficient-count 32 --mask-threshold 0.5 --mask-spatial-transform --mask-coordinate-space model-input --mask-crop-to-box true --output-json ..\downloads\cases\seg\reports\output.json --visualization-svg ..\downloads\cases\seg\reports\output.svg
+dotnet run --project .\applications\YoloVision -- --model ..\downloads\cases\seg\models\model.onnx --labels ..\downloads\cases\seg\labels\labels.txt --image ..\downloads\cases\seg\images\input.ppm --preprocessed-output ..\downloads\cases\seg\tensors\input.fp32.bin --input-shape 1x3x640x640 --family v8 --task seg --output-role-map boxes:det,proto:mask-prototypes --mask-coefficient-count 32 --mask-threshold 0.5 --mask-spatial-transform --mask-coordinate-space model-input --mask-crop-to-box true --output-json ..\downloads\cases\seg\reports\output.json --visualization-svg ..\downloads\cases\seg\reports\output.svg
 ```
 
 ### Oriented Bounding Box
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- --model ..\downloads\cases\obb\models\model.onnx --labels ..\downloads\cases\obb\labels\labels.txt --input-data ..\downloads\cases\obb\tensors\input.fp32.bin --input-shape 1x3x1024x1024 --family v8 --task obb --output-role-map boxes:det,angles:obb-angle --obb-angle-output angles --angle-radians --output-json ..\downloads\cases\obb\reports\output.json --visualization-svg ..\downloads\cases\obb\reports\output.svg
+dotnet run --project .\applications\YoloVision -- --model ..\downloads\cases\obb\models\model.onnx --labels ..\downloads\cases\obb\labels\labels.txt --input-data ..\downloads\cases\obb\tensors\input.fp32.bin --input-shape 1x3x1024x1024 --family v8 --task obb --output-role-map boxes:det,angles:obb-angle --obb-angle-output angles --angle-radians --output-json ..\downloads\cases\obb\reports\output.json --visualization-svg ..\downloads\cases\obb\reports\output.svg
 ```
 
 ### Pose
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- --model ..\downloads\cases\pose\models\model.onnx --labels ..\downloads\cases\pose\labels\labels.txt --input-data ..\downloads\cases\pose\tensors\input.fp32.bin --input-shape 1x3x640x640 --family v8 --task pose --output-role-map boxes:det,keypoints:pose-keypoints --pose-keypoints-output keypoints --keypoint-count 17 --keypoint-stride 3 --output-json ..\downloads\cases\pose\reports\output.json --visualization-svg ..\downloads\cases\pose\reports\output.svg
+dotnet run --project .\applications\YoloVision -- --model ..\downloads\cases\pose\models\model.onnx --labels ..\downloads\cases\pose\labels\labels.txt --input-data ..\downloads\cases\pose\tensors\input.fp32.bin --input-shape 1x3x640x640 --family v8 --task pose --output-role-map boxes:det,keypoints:pose-keypoints --pose-keypoints-output keypoints --keypoint-count 17 --keypoint-stride 3 --output-json ..\downloads\cases\pose\reports\output.json --visualization-svg ..\downloads\cases\pose\reports\output.svg
 ```
 
 ### Semantic Segmentation
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- --model ..\downloads\cases\sem\models\model.onnx --labels ..\downloads\cases\sem\labels\labels.txt --input-data ..\downloads\cases\sem\tensors\input.fp32.bin --input-shape 1x3x512x512 --family custom --task sem --semantic-output semantic --class-count 21 --output-json ..\downloads\cases\sem\reports\output.json --visualization-svg ..\downloads\cases\sem\reports\output.svg
+dotnet run --project .\applications\YoloVision -- --model ..\downloads\cases\sem\models\model.onnx --labels ..\downloads\cases\sem\labels\labels.txt --input-data ..\downloads\cases\sem\tensors\input.fp32.bin --input-shape 1x3x512x512 --family custom --task sem --semantic-output semantic --class-count 21 --output-json ..\downloads\cases\sem\reports\output.json --visualization-svg ..\downloads\cases\sem\reports\output.svg
 ```
 
 ## 输出 JSON、SVG 与日志

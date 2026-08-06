@@ -1,12 +1,12 @@
 # ONNX 到 TensorRT Engine 转换指南：从 OnnxToEngine 到 TensorRtExec
 
-TensorRT 部署的第一道门槛通常不是 C# API，而是把 ONNX 模型稳定转换成 serialized engine。官方 `trtexec` 是最常用的命令行工具；TensorRtSharp4.0 里的 `samples/OnnxToEngine` 和 `applications/TensorRtExec` 则把同一类 build 工作流带到 .NET 项目中，方便用户在 C# 工程、自动化脚本和 Windows GUI 之间复用一套参数语义。
+TensorRT 部署的第一道门槛通常不是 C# API，而是把 ONNX 模型稳定转换成 serialized engine。官方 `trtexec` 是最常用的命令行工具；TensorRtSharp4.0 里的 `applications/OnnxToEngine` 和 `applications/TensorRtExec` 则把同一类 build 工作流带到 .NET 项目中，方便用户在 C# 工程、自动化脚本和 Windows GUI 之间复用一套参数语义。
 
 本文从一个实际转换流程讲起：先用 `OnnxToEngine` 理解最小构建链路，再用 `TensorRtExec` 处理外部 ONNX、shape profile、precision、workspace、报告和 GUI。
 
 ## 两个入口的分工
 
-`samples/OnnxToEngine` 是最小样例。它能生成一个内置 dynamic identity ONNX，用来证明 parser、optimization profile、serialized engine、runtime deserialize、binding 和 output readback 在兼容环境下可以跑通。
+`applications/OnnxToEngine` 是最小样例。它能生成一个内置 dynamic identity ONNX，用来证明 parser、optimization profile、serialized engine、runtime deserialize、binding 和 output readback 在兼容环境下可以跑通。
 
 `applications/TensorRtExec` 是面向用户的应用。它有命令行和 WinForms 双入口，直接复用 `src/JYPPX.TensorRtSharp.Tools` 中的：
 
@@ -25,7 +25,7 @@ TensorRT 部署的第一道门槛通常不是 C# API，而是把 ONNX 模型稳�
 ```powershell
 $env:JYPPX_ENABLE_DEVELOPMENT_PROBING = "1"
 
-dotnet run --project .\samples\OnnxToEngine -- `
+dotnet run --project .\applications\OnnxToEngine -- `
   --tensor-rt-line 10 `
   --batch 2
 ```
@@ -123,7 +123,7 @@ dotnet run --project .\applications\TensorRtExec -- `
 
 ## 参数归一化与 GUI 对齐
 
-`samples/OnnxToEngine`、`applications/TensorRtExec` CLI 和 WinForms 现在都复用同一个 trtexec-like 参数模型。官方风格的 `--save-engine`、`--load-engine`、`--timingCache`、`--verbose` 会在报告中归一化为项目内部稳定参数名；memory 参数支持显式单位，归一化命令里仍以 MiB 记录，便于测试和 evidence diff。
+`applications/OnnxToEngine`、`applications/TensorRtExec` CLI 和 WinForms 现在都复用同一个 trtexec-like 参数模型。官方风格的 `--save-engine`、`--load-engine`、`--timingCache`、`--verbose` 会在报告中归一化为项目内部稳定参数名；memory 参数支持显式单位，归一化命令里仍以 MiB 记录，便于测试和 evidence diff。
 
 GUI 中的 Runs/Warm/Duration/Streams、Runtime Flags、Load Inputs、Raw Bindings、Output JSON、Times/Profile、Save Profile 会进入同一条 `NormalizedCommandLine`。因此 CLI 与 GUI 的差异应只体现在用户输入方式，不应体现在 build/report 语义。
 
@@ -241,8 +241,8 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-SampleRunEvidenceRecord
 
 完成 build-only 后，再根据模型类型选择 sample：
 
-- 分类模型：`samples/Classification`
-- YOLO-family：`samples/YoloVision`
+- 分类模型：`samples/ComputerVision/01.Classification`
+- YOLO-family：`applications/YoloVision`
 - 自定义推理：基于 `TensorRtInferenceBindings` 写具体 input/output 绑定
 
 这样 ONNX 到 engine 的转换、模型输入输出绑定、后处理和真实资产证据是分层推进的。项目可以更快定位问题，也更容易写出可信的发布材料。
@@ -267,9 +267,9 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-SampleRunEvidenceRecord
 
 ### 代码与文件入口
 
-- `samples/OnnxToEngine/Program.cs`
+- `applications/OnnxToEngine/Program.cs`
 - `applications/TensorRtExec/README.md`
-- `samples/OnnxToEngine/trtexec-parity-matrix.json`
+- `applications/OnnxToEngine/trtexec-parity-matrix.json`
 - `artifacts/user-acceptance/onnx-engine-build-evidence-sidecar.template.json`
 
 ### 边界说明

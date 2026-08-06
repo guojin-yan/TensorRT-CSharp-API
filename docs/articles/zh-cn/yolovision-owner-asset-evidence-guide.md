@@ -1,6 +1,6 @@
 # YoloVision Owner 真实资产 Evidence 指南
 
-`yolovision-owner-asset-evidence.template.json` 是 `samples/YoloVision` 的真实资产输入模板。它帮助 owner 收集模型、图片、labels、命令、日志、输出 JSON 和 SHA256，但模板本身不是 runtime proof。
+`yolovision-owner-asset-evidence.template.json` 是 `applications/YoloVision` 的真实资产输入模板。它帮助 owner 收集模型、图片、labels、命令、日志、输出 JSON 和 SHA256，但模板本身不是 runtime proof。
 
 机器可读模板：
 
@@ -65,12 +65,12 @@ YoloVision owner asset evidence 也不能替代 `package-consumer-runtime` 或 `
 ```powershell
 dotnet run --project applications\TensorRtExec -- --onnx <owner-model.onnx> --saveEngine <owner-model.engine> --buildOnly --report <owner-build-report.json>
 
-dotnet run --project samples\YoloVision -- --model <owner-model.onnx> --input-data <owner-preprocessed-fp32.bin> --input-shape <owner-input-shape> --family <custom|v5|v6|v7|v8|v9|v10|v11|v26> --task <det|cls|seg|obb|pose|sem> --labels <owner-labels> --output <owner-output.json>
+dotnet run --project applications\YoloVision -- --model <owner-model.onnx> --input-data <owner-preprocessed-fp32.bin> --input-shape <owner-input-shape> --family <custom|v5|v6|v7|v8|v9|v10|v11|v26> --task <det|cls|seg|obb|pose|sem> --labels <owner-labels> --output <owner-output.json>
 ```
 
 `--report` 是 `--exportReport` 的兼容别名，工具会在 normalized command 和 report 中归一化为 `--exportReport`。该报告仍是 build-only evidence，不是 runtime proof。
 
-真实 proof 需要同时提交命令输出、日志文件、输出 JSON 和 SHA256。当前 `samples/YoloVision` 使用 ONNX 模型和预处理后的 tensor 输入；`TensorRtExec` 生成的 engine/build report 应作为单独的 build-only 证据记录，不能替代样例运行输出。
+真实 proof 需要同时提交命令输出、日志文件、输出 JSON 和 SHA256。当前 `applications/YoloVision` 使用 ONNX 模型和预处理后的 tensor 输入；`TensorRtExec` 生成的 engine/build report 应作为单独的 build-only 证据记录，不能替代样例运行输出。
 
 ## 下一步
 

@@ -185,15 +185,14 @@ public sealed class YoloVisionSemanticSegmentationTests
     {
         string schemaPath = Path.Combine(
             RepositoryPaths.Root,
-            "samples",
-            "YoloVision",
+            "applications", "YoloVision",
             "yolovision-semantic-map-artifacts.schema.json");
         using JsonDocument schema = JsonDocument.Parse(File.ReadAllText(schemaPath));
         Assert.Equal(
             YoloSemanticMapArtifactWriter.SchemaVersion,
             schema.RootElement.GetProperty("properties").GetProperty("schemaVersion").GetProperty("const").GetString());
 
-        string program = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "YoloVision", "Program.cs"));
+        string program = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "YoloVision", "Program.cs"));
         Assert.Contains("--semantic-artifact-output-directory", program, StringComparison.Ordinal);
         Assert.Contains("--mean <r,g,b> --std <r,g,b>", program, StringComparison.Ordinal);
         Assert.DoesNotContain("--semantic-map-output-directory", program, StringComparison.Ordinal);
@@ -279,6 +278,7 @@ public sealed class YoloVisionSemanticSegmentationTests
         string source = File.ReadAllText(Path.Combine(
             RepositoryPaths.Root,
             "samples",
+            "_shared",
             "JYPPX.SampleSupport",
             "TensorRtOnnxSample.cs"));
         Assert.Contains("DisableTf32", source, StringComparison.Ordinal);

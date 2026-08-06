@@ -10,7 +10,7 @@ public sealed class ReleaseCandidateSmokeScaffoldTests
     public void YoloVisionSampleRunEvidenceTemplatesStayValidatorBackedAndNonPromotable()
     {
         string validator = ReadText("eng", "Test-SampleRunEvidenceRecord.ps1");
-        string readme = ReadText("samples", "YoloVision", "README.md");
+        string readme = ReadText("applications", "YoloVision", "README.md");
 
         foreach (string templateName in new[] { "yolovision", "yolox-s" })
         {
@@ -73,8 +73,8 @@ public sealed class ReleaseCandidateSmokeScaffoldTests
     public void TrtexecOptionCoverageStaysBackedByMatrixParserAndTests()
     {
         string coverage = ReadText("artifacts", "user-acceptance", "trtexec-option-coverage.md");
-        string parityJson = ReadText("samples", "OnnxToEngine", "trtexec-parity-matrix.json");
-        string parityMarkdown = ReadText("samples", "OnnxToEngine", "trtexec-parity-matrix.md");
+        string parityJson = ReadText("applications", "OnnxToEngine", "trtexec-parity-matrix.json");
+        string parityMarkdown = ReadText("applications", "OnnxToEngine", "trtexec-parity-matrix.md");
         string parser = ReadText("src", "JYPPX.TensorRtSharp.Tools", "Trtexec", "TrtexecLikeParser.cs");
         string onnxTests = ReadText("tests", "JYPPX.ProjectQuality.Tests", "OnnxToEngineTrtexecLikeTests.cs");
         string appTests = ReadText("tests", "JYPPX.ProjectQuality.Tests", "TensorRtExecApplicationTests.cs");
@@ -187,8 +187,8 @@ public sealed class ReleaseCandidateSmokeScaffoldTests
     [Fact]
     public void YoloVisionReadmeMatrixAndTemplatesAgreeOnTaskEvidenceRequirements()
     {
-        string readme = ReadText("samples", "YoloVision", "README.md");
-        string matrix = ReadText("samples", "YoloVision", "yolo-model-matrix.json");
+        string readme = ReadText("applications", "YoloVision", "README.md");
+        string matrix = ReadText("applications", "YoloVision", "yolo-model-matrix.json");
         string assetTemplate = ReadText("samples", "assets", "yolovision-assets.template.json");
         string sampleTemplate = ReadText("artifacts", "user-acceptance", "sample-run-evidence-record.yolovision.template.json");
         string combined = readme + matrix + assetTemplate + sampleTemplate;
@@ -227,8 +227,8 @@ public sealed class ReleaseCandidateSmokeScaffoldTests
     [Fact]
     public void YoloVisionCapabilityMatrixExposesMachineReadableJsonBoundary()
     {
-        string program = ReadText("samples", "YoloVision", "Program.cs");
-        string capabilitySource = ReadText("samples", "YoloVision", "YoloCapabilityMatrix.cs");
+        string program = ReadText("applications", "YoloVision", "Program.cs");
+        string capabilitySource = ReadText("applications", "YoloVision", "YoloCapabilityMatrix.cs");
 
         Assert.Contains("--list-capabilities --json", program, StringComparison.Ordinal);
         Assert.Contains("YoloCapabilityMatrix.FormatJson()", program, StringComparison.Ordinal);

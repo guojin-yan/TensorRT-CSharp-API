@@ -259,7 +259,7 @@ TensorRtInferenceExecutionSummary summary =
 float[] outputValues = bindings.ReadOutputSingles("output", inputValues.Length);
 ```
 
-完整可运行案例位于 `samples/InferenceBindings/Program.cs`。它构建 identity network，验证动态 batch、
+完整可运行案例位于 `samples/Inference/01.Bindings/Program.cs`。它构建 identity network，验证动态 batch、
 readiness、enqueue 和 output equality，适合学习对象模型而不依赖外部 ONNX。
 
 ## 释放顺序
@@ -324,7 +324,7 @@ line mismatch 是参数/状态错误，不是可通过强制转换修复的问�
 构建后使用目标 line：
 
 ```powershell
-dotnet run --project .\samples\InferenceBindings\InferenceBindings.csproj `
+dotnet run --project .\samples\Inference\01.Bindings\InferenceBindings.csproj `
   -c Debug --no-build -- --tensor-rt-line 10 --batch 2
 ```
 
@@ -398,7 +398,7 @@ consumer 或 post-publish proof。engine inspector/readiness/capability query �
 
 ## 下一步
 
-- [Inference Bindings 样例](https://github.com/guojin-yan/TensorRT-CSharp-API/blob/TensorRtSharp4.0/samples/InferenceBindings/README.md)
+- [Inference Bindings 样例](https://github.com/guojin-yan/TensorRT-CSharp-API/blob/TensorRtSharp4.0/samples/Inference/01.Bindings/README.md)
 - [Dynamic Shape 教程](dynamic-shape-optimization-profile-tutorial.md)
 - [Engine Inspector 只读边界](publishing/engine-inspector-public-article.md)
 - [C# Wrapper 生命周期设计](csharp-wrapper-lifetime-design.md)

@@ -91,7 +91,7 @@ public sealed class SampleLayoutTests
             Path.Combine(root, "docs", "articles", "zh-cn", "technical-article-roadmap.md"),
             Path.Combine(root, "eng", "Export-UserAcceptanceSampleCatalog.ps1"),
             Path.Combine(root, "tests", "JYPPX.ProjectQuality.Tests", "JYPPX.ProjectQuality.Tests.csproj"),
-            Path.Combine(root, "samples", "YoloVision", "YoloVision.csproj"),
+            Path.Combine(root, "applications", "YoloVision", "YoloVision.csproj"),
         };
         string[] publicYoloVisionEntryFiles =
         {
@@ -104,7 +104,7 @@ public sealed class SampleLayoutTests
             Path.Combine(root, "docs", "articles", "zh-cn", "sample-runners.md"),
             Path.Combine(root, "docs", "articles", "zh-cn", "technical-article-roadmap.md"),
             Path.Combine(root, "eng", "Export-UserAcceptanceSampleCatalog.ps1"),
-            Path.Combine(root, "samples", "YoloVision", "YoloVision.csproj"),
+            Path.Combine(root, "applications", "YoloVision", "YoloVision.csproj"),
         };
 
         foreach (string activeFile in activeFiles)
@@ -122,15 +122,15 @@ public sealed class SampleLayoutTests
         }
 
         Assert.False(Directory.Exists(Path.Combine(root, "samples", "YoloDet")));
-        Assert.True(Directory.Exists(Path.Combine(root, "samples", "YoloVision")));
-        Assert.False(File.Exists(Path.Combine(root, "samples", "YoloVision", "YoloDet.csproj")));
-        Assert.True(File.Exists(Path.Combine(root, "samples", "YoloVision", "YoloVision.csproj")));
+        Assert.True(Directory.Exists(Path.Combine(root, "applications", "YoloVision")));
+        Assert.False(File.Exists(Path.Combine(root, "applications", "YoloVision", "YoloDet.csproj")));
+        Assert.True(File.Exists(Path.Combine(root, "applications", "YoloVision", "YoloVision.csproj")));
     }
 
     [Fact]
     public void YoloVisionProjectIdentityIsStable()
     {
-        string sampleRoot = Path.Combine(RepositoryPaths.Root, "samples", "YoloVision");
+        string sampleRoot = Path.Combine(RepositoryPaths.Root, "applications", "YoloVision");
         string projectPath = Path.Combine(sampleRoot, "YoloVision.csproj");
         XDocument project = XDocument.Load(projectPath);
 
@@ -184,15 +184,15 @@ public sealed class SampleLayoutTests
         string exampleText = File.ReadAllText(examplePath);
         Assert.DoesNotContain("YoloDet", templateText, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("YoloDet", exampleText, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("dotnet run --project .\\\\samples\\\\YoloVision", templateText, StringComparison.Ordinal);
-        Assert.Contains("dotnet run --project .\\\\samples\\\\YoloVision", exampleText, StringComparison.Ordinal);
+        Assert.Contains("dotnet run --project .\\\\applications\\\\YoloVision", templateText, StringComparison.Ordinal);
+        Assert.Contains("dotnet run --project .\\\\applications\\\\YoloVision", exampleText, StringComparison.Ordinal);
     }
 
     [Fact]
     public void YoloVisionRealModelProofTemplatesKeepAssetHashesTasksAndPromotionBoundary()
     {
         string root = RepositoryPaths.Root;
-        string readme = File.ReadAllText(Path.Combine(root, "samples", "YoloVision", "README.md"));
+        string readme = File.ReadAllText(Path.Combine(root, "applications", "YoloVision", "README.md"));
         string assetTemplate = File.ReadAllText(Path.Combine(root, "samples", "assets", "yolovision-assets.template.json"));
         string sidecarTemplate = File.ReadAllText(Path.Combine(root, "artifacts", "user-acceptance", "onnx-engine-build-evidence-sidecar.yolovision.template.json"));
         string runEvidenceTemplate = File.ReadAllText(Path.Combine(root, "artifacts", "user-acceptance", "sample-run-evidence-record.yolovision.template.json"));
@@ -239,8 +239,10 @@ public sealed class SampleLayoutTests
     [Fact]
     public void ProgramFilesDoNotUseTopLevelStatements()
     {
-        string[] programFiles = Directory.EnumerateFiles(Path.Combine(RepositoryPaths.Root, "samples"), "Program.cs", SearchOption.AllDirectories)
-            .Concat(Directory.EnumerateFiles(Path.Combine(RepositoryPaths.Root, "smoke"), "Program.cs", SearchOption.AllDirectories))
+        string[] programFiles = Directory.EnumerateFiles(Path.Combine(RepositoryPaths.Root, "samples"), "*.cs", SearchOption.AllDirectories)
+            .Concat(Directory.EnumerateFiles(Path.Combine(RepositoryPaths.Root, "applications"), "*.cs", SearchOption.AllDirectories))
+            .Concat(Directory.EnumerateFiles(Path.Combine(RepositoryPaths.Root, "smoke"), "*.cs", SearchOption.AllDirectories))
+            .Where(static path => Regex.IsMatch(File.ReadAllText(path), @"\bMain\s*\("))
             .OrderBy(static path => path, StringComparer.Ordinal)
             .ToArray();
 
@@ -262,9 +264,9 @@ public sealed class SampleLayoutTests
     [Fact]
     public void OnnxSampleSupportExposesMultiOutputSnapshotsForYoloVision()
     {
-        string support = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "JYPPX.SampleSupport", "TensorRtOnnxSample.cs"));
-        string yoloRunner = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "YoloVision", "YoloSampleRunner.cs"));
-        string yoloProgram = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "YoloVision", "Program.cs"));
+        string support = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "_shared", "JYPPX.SampleSupport", "TensorRtOnnxSample.cs"));
+        string yoloRunner = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "YoloVision", "YoloSampleRunner.cs"));
+        string yoloProgram = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "YoloVision", "Program.cs"));
 
         Assert.Contains("internal sealed class OnnxSampleOutputTensor", support, StringComparison.Ordinal);
         Assert.Contains("internal sealed class OnnxSampleMultiOutputResult", support, StringComparison.Ordinal);
@@ -329,7 +331,7 @@ public sealed class SampleLayoutTests
         Assert.Contains(evidence.GetProperty("sampleRunEvidenceFailureReasons").EnumerateArray(), static item =>
             item.GetString()!.Contains("validator must pass", StringComparison.Ordinal));
         Assert.Contains(".\\applications\\TensorRtExec", evidence.GetProperty("buildOnlyCommand").GetString(), StringComparison.Ordinal);
-        Assert.Contains(".\\samples\\YoloVision", evidence.GetProperty("runCommand").GetString(), StringComparison.Ordinal);
+        Assert.Contains(".\\applications\\YoloVision", evidence.GetProperty("runCommand").GetString(), StringComparison.Ordinal);
         Assert.Equal("not-run", evidence.GetProperty("lastRunStatus").GetString());
         Assert.Equal(string.Empty, evidence.GetProperty("lastRunLog").GetString());
         Assert.Equal(string.Empty, evidence.GetProperty("lastRunLogSha256").GetString());
@@ -344,13 +346,15 @@ public sealed class SampleLayoutTests
 
     private static string[] GetSampleProjectDirectories()
     {
-        return Directory.GetDirectories(Path.Combine(RepositoryPaths.Root, "samples"))
-            .Where(directory => Directory.GetFiles(directory, "*.csproj", SearchOption.TopDirectoryOnly).Length == 1)
-            .Select(Path.GetFileName)
-            .Where(name => !string.IsNullOrWhiteSpace(name))
-            .Select(name => name!)
-            .Where(name => !string.Equals(name, "JYPPX.SampleSupport", StringComparison.Ordinal))
-            .OrderBy(static name => name, StringComparer.Ordinal)
+        string samplesRoot = Path.Combine(RepositoryPaths.Root, "samples");
+
+        return Directory.EnumerateFiles(samplesRoot, "*.csproj", SearchOption.AllDirectories)
+            .Select(Path.GetDirectoryName)
+            .Where(directory => !string.IsNullOrWhiteSpace(directory))
+            .Select(directory => Path.GetRelativePath(samplesRoot, directory!))
+            .Where(path => !string.Equals(path, "JYPPX.SampleSupport", StringComparison.Ordinal))
+            .Select(path => path.Replace('\\', '/'))
+            .OrderBy(static path => path, StringComparer.Ordinal)
             .ToArray();
     }
 }

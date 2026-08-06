@@ -24,8 +24,8 @@ classification 案例常被误认为“输出一个 tensor 就算完成”。本
 
 ## 代码与文件入口
 
-- `samples/YoloVision/Program.cs`
-- `samples/Classification/Program.cs`
+- `applications/YoloVision/Program.cs`
+- `samples/ComputerVision/01.Classification/Program.cs`
 - `samples/assets/yolovision-assets.template.json`
 - `artifacts/user-acceptance/sample-run-evidence-record.yolovision.template.json`
 - `docs/articles/zh-cn/classification-real-asset-walkthrough.md`

@@ -58,7 +58,7 @@ dotnet .\smoke\CudaSmokeRunner\bin\Debug\net8.0\CudaSmokeRunner.dll
 运行示例：
 
 ```powershell
-dotnet .\samples\MultiStream\bin\Debug\net8.0\MultiStream.dll
+dotnet .\samples\Performance\01.MultiStream\bin\Debug\net8.0\MultiStream.dll
 ```
 
 关键输出：
@@ -140,7 +140,7 @@ dotnet .\smoke\OnnxToEngineSmokeRunner\bin\Debug\net8.0\OnnxToEngineSmokeRunner.
 运行示例：
 
 ```powershell
-dotnet .\samples\DynamicShape\bin\Debug\net8.0\DynamicShape.dll --tensor-rt-line 10 --batch 3
+dotnet .\samples\Inference\02.DynamicShapes\bin\Debug\net8.0\DynamicShape.dll --tensor-rt-line 10 --batch 3
 ```
 
 关键输出：
@@ -163,7 +163,7 @@ dotnet .\samples\DynamicShape\bin\Debug\net8.0\DynamicShape.dll --tensor-rt-line
 运行示例：
 
 ```powershell
-dotnet .\samples\InferenceBindings\bin\Debug\net8.0\InferenceBindings.dll --tensor-rt-line 10 --batch 2
+dotnet .\samples\Inference\01.Bindings\bin\Debug\net8.0\InferenceBindings.dll --tensor-rt-line 10 --batch 2
 ```
 
 关键输出：
@@ -206,12 +206,12 @@ CUDA custom-kernel preprocessing 先保留为文档路线图，等待安全 publ
 分类模型示例：
 
 ```powershell
-dotnet run --project .\samples\Classification -- --model .\models\classifier.onnx --labels .\models\labels.txt --input-shape 1x3x224x224 --tensor-rt-line 10
+dotnet run --project .\samples\ComputerVision\01.Classification -- --model .\models\classifier.onnx --labels .\models\labels.txt --input-shape 1x3x224x224 --tensor-rt-line 10
 ```
 
 YOLO 检测模型示例：
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- --model .\models\yolo.onnx --labels .\models\coco.names --input-shape 1x3x640x640 --tensor-rt-line 10
+dotnet run --project .\applications\YoloVision -- --model .\models\yolo.onnx --labels .\models\coco.names --input-shape 1x3x640x640 --tensor-rt-line 10
 ```
 

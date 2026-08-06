@@ -1,0 +1,351 @@
+# YoloVision
+
+English | [简体中文](README.zh-CN.md)
+
+This sample runs a user-provided float YOLO-family ONNX model through TensorRT, including strict named multi-input models, then decodes common output layouts and task profiles. The managed postprocess base now has a unified `YoloVisionResult` path for detection, classification, segmentation, OBB, pose, and semantic segmentation. Detection-style tasks share box decode and score filtering; ordinary boxes use axis-aligned NMS while OBB uses probabilistic-IoU rotated Fast-NMS. Classification and semantic segmentation have primary-output decoders; segmentation, OBB, and pose also have pure managed helpers for embedded or separate auxiliary tensors.
+
+- `[1, 84, 8400]` style channel-first output
+- `[1, 8400, 84]` style box-first output
+- YOLOv5/v6/v7/v8/v9/v10/v11/v26 family labels
+- task labels: `det`, `cls`, `seg`, `obb`, `pose`, `sem`
+- application-side confidence filtering, class-aware/class-agnostic NMS helpers
+- dedicated YOLOv10-style `[1,N,6]` end-to-end `x1,y1,x2,y2,score,classId` decode without a second NMS pass, plus mask coefficient/prototype compose, pose keypoint, OBB angle, semantic map, and multi-output metadata helpers
+
+`YoloVision` is the unified YOLO-family sample for detection, classification, segmentation, OBB, pose, and semantic segmentation. It is intentionally broader than detection: the same sample documents family/task selection, multi-output metadata, managed postprocess helpers, and real-asset evidence requirements across the supported YOLO-family tasks.
+
+Start with `docs/articles/zh-cn/yolovision-all-task-overview.md` for the three-layer capability/evidence model and six-task workflow. For detection raw heads, YOLOv10 end-to-end output, YOLOX grid/stride decode, numeric fail-closed behavior, and the current source-image coordinate boundary, use `docs/articles/zh-cn/yolovision-detection-tutorial.md`.
+
+## Offline Preflight
+
+Run the deterministic YOLOv10 six-column managed decoder smoke without CUDA, TensorRT, ONNX, model files, or labels:
+
+```powershell
+dotnet run --project .\applications\YoloVision -- --self-test-end2end
+```
+
+The command must report `ManagedSmoke=YOLOv10EndToEnd Passed=True`, two retained detections, `ApplyNms=False`, and
+`ManagedSmokeBoundary=managed-array-decode-only`. This proves the managed array contract only; it is not TensorRT
+execution, real-model-runtime, or package-consumer-runtime proof.
+
+Use `--preflight` when preparing an owner handoff or article case and the TensorRT runtime is not available yet. It parses the family/task/profile and output metadata, records model/labels/input existence and SHA256 values when files are present, and writes a `yolovision-preflight.v1` report. It does not open TensorRT, parse ONNX, build an engine, load plugins, or enqueue inference.
+
+```powershell
+dotnet run --project .\applications\YoloVision -- `
+  --preflight `
+  --family v8 `
+  --task seg `
+  --model .\models\yolov8n-seg.onnx `
+  --labels .\models\coco.names `
+  --input-data .\models\yolov8n-seg-fp32.bin `
+  --input-shape 1x3x640x640 `
+  --output-role-map boxes:det,proto:mask-prototypes `
+  --mask-coefficient-count 32 `
+  --preflight-report .\artifacts\yolovision\yolov8n-seg-preflight.json
+```
+
+`state=ready-for-runtime-precheck` means the supplied preflight inputs and metadata are present; `owner-action-required` means the command is syntactically usable but an owner still needs to supply model assets, labels, input tensors, or task metadata; `invalid` is reserved for `--strict-preflight` blockers. `--dryRun` and `--previewOnly` are aliases. The report's execution flags remain false and its boundary is always `proofClassification=precheck`, `isRuntimeProof=false`, and `canPromoteRealModelRuntime=false`. The schema is `applications/YoloVision/yolovision-preflight.schema.json`.
+
+The repository does not bundle detector models, label files, or images because those assets have separate licensing and size constraints. The sample uses a synthetic input tensor by default, so detections are useful as pipeline evidence rather than as image-quality evidence.
+
+For real image evidence, either preprocess the image outside the runner into the model's exact tensor layout and pass the tensor with `--input-data`, or use `--image` for JPEG/PNG/BMP/PPM input. JPEG and PNG are decoded by `JYPPX.OpenCV.CSharp.API`; BMP and PPM retain the managed fallback. The built-in path supports stretch, letterbox, and antialiased shorter-side center crop, RGB/BGR channel order, optional normalization, NCHW/NHWC layout, writes a float32 tensor to `--preprocessed-output`, and feeds that tensor through the same `--input-data` runtime path. Classification defaults to `1x3x224x224`, shorter-side-to-224 center crop, RGB/NCHW, and `1/255`; detection-style profiles keep their existing letterbox defaults. The runner accepts float32 `.bin`/`.raw` files or comma/space/newline separated text with exactly `N*C*H*W` values. `--input` is intentionally narrower: it accepts a raw byte tensor with the same element count and normalizes bytes to `[0,1]`.
+
+Use `--preprocess-only` when preparing evidence or a `trtexec --loadInputs` run before the TensorRtSharp bridge is available:
+
+```powershell
+dotnet run --project .\applications\YoloVision -- `
+  --preprocess-only `
+  --image .\models\dog.ppm `
+  --preprocessed-output .\models\yolo-preprocessed-fp32.bin `
+  --input-shape 1x3x640x640 `
+  --tensor-layout NCHW `
+  --color-order RGB `
+  --resize letterbox
+```
+
+The command prints `ImagePreprocess`, `ImagePreprocessConfig`, source/tensor SHA256 values, source/target dimensions, resize scale, padding, normalization, layout, color order, and output element count. This is preprocessing evidence only; it is not a model runtime pass until the tensor is consumed by a successful TensorRT enqueue.
+
+```powershell
+dotnet run --project .\applications\YoloVision -- `
+  --model .\models\yolo.onnx `
+  --labels .\models\coco.names `
+  --image .\models\dog.ppm `
+  --preprocessed-output .\models\yolo-preprocessed-fp32.bin `
+  --input-shape 1x3x640x640 `
+  --tensor-rt-line 10 `
+  --family v8 `
+  --task det `
+  --layout auto `
+  --has-objectness auto `
+  --nms-mode class-aware `
+  --confidence 0.25 `
+  --iou-threshold 0.45 `
+  --output .\artifacts\yolovision\yolo-output.json
+```
+
+## YOLO Series And Task Capability Matrix
+
+Print the offline capability matrix without TensorRT runtime, CUDA, ONNX model assets, or labels:
+
+```powershell
+dotnet run --project .\applications\YoloVision -- --list-capabilities
+dotnet run --project .\applications\YoloVision -- --list-capabilities --json
+dotnet run --project .\applications\YoloVision -- --self-test-capabilities
+```
+
+The matrix currently covers `custom`, YOLOv5/v6/v7/v8/v9/v10/v11/v26, detection-only YOLOX, and task aliases `det`, `cls`, `seg`, `obb`, `pose`, and `sem`. It records supported and unsupported family/task boundaries, the managed decode path, required auxiliary metadata, and evidence level for each pair:
+
+| Task | Alias | Decode path | Required metadata | Evidence level |
+| --- | --- | --- | --- | --- |
+| Detection | `det` | Single-output boxes with score filtering and class-aware/class-agnostic NMS | none | runtime-smoke-ready |
+| Classification | `cls` | Strict raw/logits/probabilities decoder and Top-K | classification score mode | source-tree-real-model-runtime |
+| Segmentation | `seg` | Detection rows plus mask prototype composition | mask coefficient count, prototype tensor role, optional auxiliary channel start/layout | managed-metadata-ready |
+| Oriented bounding box | `obb` | Embedded or separate angle channels plus probabilistic-IoU rotated Fast-NMS | angle unit and exact auxiliary start/layout, or a separate angle tensor role | source-tree-real-model-runtime |
+| Pose | `pose` | Embedded keypoint channels or a separate keypoint tensor | keypoint count/stride, exact auxiliary start/layout for embedded output | source-tree-real-model-runtime |
+| Semantic segmentation | `sem` | Single-output semantic map decoder | class count and semantic tensor role | managed-smoke-ready |
+
+This is a support matrix and smoke surface, not proof that a specific external model has passed real image validation. Real model promotion still requires a model/license manifest, TensorRtExec build sidecar, `YoloVision Passed=True` run log, stdout/stderr summaries, SHA256 values, and owner-reviewed evidence.
+
+`--self-test-capabilities` validates the matrix JSON/table contract offline: 60 family/task rows, 55 supported rows, 5 explicit YOLOX unsupported task rows, and a proof boundary with `IsRuntimeProof=False`. It is a capability contract self-test only; it does not open TensorRT, build an engine, enqueue inference, or promote real-model/package-consumer runtime proof.
+
+For YOLOv10 NMS-free/end-to-end exports, pass `--layout end2end`. The managed decoder requires a batch-1 `[1,N,6]` tensor whose columns are `x1,y1,x2,y2,score,classId`; it validates the six-column contract, converts `xyxy` coordinates to the shared center/width/height representation, filters by confidence, checks class bounds, and deliberately disables application-side NMS. It does not guess that an arbitrary YOLOv10 ONNX uses this contract. Inspect the real ONNX outputs first, and use the generic metadata-driven path when the exporter returns raw heads or a different column order. See `docs/articles/zh-cn/yolovision-yolov10-end-to-end-output-guide.md`.
+
+The official THU-MIG YOLOv10n v1.1 ONNX path is backed by source-tree `real-model-runtime` evidence for `[1,300,6]` output. Run `eng/Acquire-YoloV10OfficialAssets.ps1` to acquire hash-pinned AGPL-3.0 assets in a repository-external workspace. The older `samples/assets/yolovision-yolov10n-local-package-consumer-runtime-evidence.json` record is retained as immutable pre-release history; it is not the current application setup and proves neither public-feed availability nor redistribution approval.
+
+The complete Chinese walkthrough, including model acquisition/export guidance, the exact runtime command, a path-sanitized stdout screenshot, and the annotated CC0 source image, is `docs/articles/zh-cn/yolovision-yolov10n-real-asset-tutorial.md`.
+
+The official YOLOX-S path is now backed by source-tree `real-model-runtime` evidence. `--family yolox` is detection-only and defaults to NCHW, BGR, raw `0..255` float values, fill 114, and top-left letterbox. Its `[1,8400,85]` raw output is transformed with `(xy + grid) * stride` and `exp(wh) * stride` for strides 8/16/32 before objectness scoring and NMS. Run `eng/Acquire-YoloXOfficialAssets.ps1` to acquire hash-pinned assets in a repository-external workspace. The complete walkthrough at `docs/articles/zh-cn/yolovision-yolox-official-runtime-tutorial.md` includes the exact acquisition/export flow, a real stdout screenshot, and an annotated CC0 result image. This proof is not package-consumer-runtime and does not approve public model redistribution.
+
+## Application package boundary
+
+`YoloVision` is a runnable application and is intentionally not packable. It does not publish a
+`JYPPX.TensorRT.CSharp.API.YoloVision` package. The application consumes the public 4-series
+`JYPPX.TensorRT.CSharp.API` package through `Directory.Build.props`; the OpenCV image decoder consumes
+`JYPPX.OpenCV.CSharp.API` and uses the Windows x64 runtime package when that native profile is available.
+
+The current public package contains the managed TensorRT/CUDA API only. CUDA, cuDNN, TensorRT, NVRTC, and the
+matching project-owned bridge are installed or referenced by the user separately. A source-tree application run is
+not package-consumer-runtime proof. Use the release proof scripts only for a separately authorized package validation.
+When a runtime run reaches `YoloVisionOutputReport`, the JSON now includes optional `bindingMetadata` copied from the existing `TensorRtEngineBindingReport`. It records engine/profile identity, enqueue readiness, tensor index/name, input/output mode, semantic output role, data type, engine/profile shapes, location, format, vectorization, byte-size fallback state, and non-fatal diagnostics. The console emits the same pointer-free summary as `BindingReport` and `BindingMetadata` lines. This is deployment metadata and does not promote the run to real-model-runtime or package-consumer-runtime proof.
+
+The machine-readable task/output contract is `applications/YoloVision/yolovision-task-output-contract.json`. It keeps task names, output roles, required metadata, TensorRtExec profile hints, article entrypoints, and promotion boundaries in one place so docs, owner asset packs, and validators do not drift. The contract is still planning evidence only: it is not `real-model-runtime` proof, not `package-consumer-runtime` proof, and not a replacement for owner-filled run logs and hashes.
+
+The cross-task provenance contract is `samples/assets/cross-task-reference-provenance-contract.json`. It keeps common
+model/input/labels/tensor/provider/reference/comparison/Owner fields separate from the semantics required by `det`, `cls`, `seg`,
+`obb`, `pose`, and `sem`. Detection needs box/score/objectness/NMS/coordinate rules; segmentation needs coefficient/prototype/mask
+composition and inverse transforms; OBB needs angle/layout/rotated NMS; pose needs keypoint/skeleton rules; semantic segmentation
+needs class-axis/argmax/palette/void-class rules. YoloVision `cls` is also distinct from the generic Classification sample.
+
+`eng/Export-CrossTaskReferenceProvenanceMatrix.ps1` projects the current templates into a seven-row readiness matrix, and
+`eng/Test-CrossTaskReferenceProvenanceMatrix.ps1 -Strict` checks source hashes, exact task fields, reuse fingerprints, and all
+promotion flags. The retained MNIST ONNX Runtime CPU candidate is eligible only for its MNIST task. It cannot be borrowed as a
+YoloVision golden output because its model, input, preprocessing, output tensors, labels, and task semantics do not match.
+
+For the shared classification and semantic-segmentation workflow, including repository-external asset isolation, output-layout decisions, Top-K versus pixel argmax, build/preflight/runtime commands, report validation, and proof boundaries, see `docs/articles/zh-cn/yolovision-classification-semantic-tutorial.md`. The first verified semantic case uses torchvision LRASPP MobileNetV3 Large; acquisition, ONNX export, ImageNet mean/std preprocessing, strict `--noTF32` parity, full-resolution class-index artifacts, and negative validation are documented in `docs/articles/zh-cn/yolovision-semantic-segmentation-map-guide.md`. Converted models are staged under `<workspace-root>/models` outside this Git repository.
+
+The official Ultralytics `v8.3.0` `yolov8n.pt` detection case is audited as source-tree `real-model-runtime`. Its ONNX contract is `images:[1,3,640,640] -> output0:[1,84,8400]`: 4 box channels, 80 exact COCO class channels, no separate objectness, channels-first layout, and application-side class-aware NMS. TensorRT compared all 705,600 values against an ONNX Runtime CPU reference for the exact C# letterbox tensor. Five retained boxes (four people and one bus) independently matched the Ultralytics/PyTorch CPU decode with minimum source-space IoU `0.999841` and maximum score error `0.000103`; a mutated coordinate reference failed closed with exit code 1. See `samples/assets/yolovision-yolov8n-det-real-model-runtime-evidence.json` and `docs/articles/zh-cn/yolovision-yolov8-det-real-asset-tutorial.md`. Public redistribution, package-consumer, post-publish, and release claims remain false.
+
+For instance segmentation, see `docs/articles/zh-cn/yolovision-segmentation-tutorial.md`. The managed multi-output path preserves detection source indices, composes embedded coefficients with `[P,H,W]` / `[1,P,H,W]` prototypes, applies a stable sigmoid, accepts `--mask-threshold`, reports active versus total prototype-grid pixels, and emits a bounded probability-mask SVG preview. The opt-in `--mask-spatial-transform` path additionally requires `--image` and `--mask-coordinate-space model-input|normalized`; it uses the exact preprocessing metadata for bilinear source-image resize-back and optional half-open detection-box crop. It never infers coordinates from an external tensor, and owner validation of exporter-specific mask alignment remains required.
+
+The repository now carries one audited source-tree real-model case for the official Ultralytics `v8.3.0` `yolov8n-seg.pt` asset. `samples/assets/yolovision-yolov8n-seg-official-assets.json` pins the upstream release/commit/license and local asset hashes; `samples/assets/yolovision-yolov8n-seg-real-model-runtime-evidence.json` records the actual TensorRT 10.11/CUDA 12.9 run without committing the model, engine, reference tensors, masks, or logs. The exported ONNX contract is `images:[1,3,640,640]`, `output0:[1,116,8400]`, and `output1:[1,32,160,160]`. Both raw outputs matched independent ONNX Runtime CPU references under the recorded tolerances, and four source-image masks independently matched Ultralytics/PyTorch CPU postprocessing with box IoU at least `0.998471` and mask IoU at least `0.991140`.
+
+The official Ultralytics `v8.3.0` `yolov8n-pose.pt` case is also audited as source-tree `real-model-runtime`. Its ONNX contract is `images:[1,3,640,640] -> output0:[1,56,8400]`: 4 box channels, 1 person class channel, and 17 keypoints with stride 3 starting at channel 5. `DecodeEmbeddedPoseOutput` decodes the detection prefix, preserves `SourceIndex` through NMS, and selects keypoints from the same original candidate. All 470,400 TensorRT values matched the ONNX Runtime CPU reference under the recorded coordinate-aware uniform tolerance; four source-image poses independently matched Ultralytics/PyTorch with minimum box IoU `0.998815` and maximum visible-keypoint error `3.920` pixels. See `samples/assets/yolovision-yolov8n-pose-real-model-runtime-evidence.json` and `docs/articles/zh-cn/yolovision-pose-tutorial.md`. This remains false for asset redistribution, package-consumer, public-package, post-publish, and release proof.
+
+The official Ultralytics `v8.3.0` `yolov8n-obb.pt` case is audited under the same source-tree boundary. Its ONNX contract is `images:[1,3,1024,1024] -> output0:[1,20,21504]`: 4 box channels, 15 DOTA class channels, and one radians angle channel starting at channel 19. `DecodeEmbeddedObbOutput` preserves the source angle and applies class-aware Fast-NMS with Ultralytics-compatible probabilistic IoU. All 430,080 TensorRT values matched an ONNX Runtime CPU reference; 40 source-image ship boxes independently matched Ultralytics/PyTorch with minimum OpenCV geometric rotated IoU `0.997781` and maximum periodic angle error `0.000432` radians. See `samples/assets/yolovision-yolov8n-obb-real-model-runtime-evidence.json` and `docs/articles/zh-cn/yolovision-obb-tutorial.md`. Models, images, tensors, references, and logs remain outside the repository, and public redistribution/package/release claims remain false.
+
+An older repository-external local-feed record for this pinned case is preserved separately from the source-tree result. The current application no longer publishes or consumes a YoloVision sample package; a new public-package post-publish result must be collected as a new record rather than rewriting the historical evidence.
+
+Use `--segmentation-mask-output-directory <path>` together with `--mask-spatial-transform` to write deterministic binary mask artifacts plus `segmentation-mask-artifacts.manifest.json`. Each prediction includes hashed prototype-grid float32 probabilities, source-image float32 probabilities, source-image thresholded bytes, class/source index, shapes, counts, box metadata, and proof boundaries. These binaries are comparison inputs, not standalone runtime proof, and are intentionally excluded from Git and packages.
+
+For cross-family case planning, use `samples/assets/yolovision-family-task-real-asset-roadmap.json` and `docs/articles/zh-cn/yolovision-family-task-real-asset-roadmap.md`. That roadmap turns the broad matrix into owner-action candidate rows for YOLOv5/v6/v7/v8/v9/v10/v11/v26/custom, but it remains planning material until real assets and logs are backfilled.
+
+For publishable YOLOv8n article cases, use `samples/assets/yolovision-article-case-pack.json`. The pack covers det, seg, pose, OBB, cls, and sem with export commands, YoloVision offline preflight commands/reports, TensorRtExec build-only commands, YoloVision run commands, required SHA256 fields, and expected evidence lines. A preflight report is `yolovision-preflight.v1`/`precheck` configuration evidence only; the pack remains article/template material until owner-provided assets and a real `YoloVision Passed=True` run log are validated.
+
+For owner execution, use `samples/assets/yolovision-real-asset-owner-backfill-pack.json` and `eng/Test-YoloVisionRealAssetOwnerBackfillPack.ps1`. That pack expands each YOLOv8n case into family/task/article-entrypoint consistency plus concrete model, labels, input image, preprocessed tensor, YoloVision preflight report/schema/hash/boundary, TensorRtExec report, engine, YoloVision run log, output JSON, stdout/stderr summary, and owner review fields. Template rows are not runtime proof; they remain `owner-action-required` until real hashes, logs, and review data are backfilled.
+
+To keep the article case pack, owner backfill pack, and sample-run evidence rows aligned, run `eng/Export-YoloVisionRealAssetOwnerBackfillPack.ps1`. It writes `artifacts/user-acceptance/yolovision-real-asset-owner-backfill-sample-run-evidence.template.json` plus a projection report under `artifacts/yolovision`. The six generated evidence rows preserve the det/seg/pose/OBB/cls/sem commands, YoloVision preflight report/schema/hash/boundary, TensorRtExec report and engine hash slots, `YoloVision Passed=True` expected line, output JSON hash, stdout/stderr summary, and owner review fields. The template is still not proof; each row stays `template-only` and must pass `eng/Test-SampleRunEvidenceRecord.ps1 -RequireExistingLog` after owner backfill before it can become real-model-runtime evidence.
+
+When an owner is ready to backfill real evidence, run `eng/Export-YoloVisionRealAssetOwnerProofInputTemplate.ps1` and fill `artifacts/user-acceptance/yolovision-real-asset-owner-proof-input.template.json`. Then validate and project it with `eng/Test-YoloVisionRealAssetOwnerProofInput.ps1 -Strict` and `eng/Import-YoloVisionRealAssetOwnerProofInput.ps1`. The importer writes `artifacts/user-acceptance/yolovision-real-asset-owner-sample-run-evidence.candidate.json`; it is a real-model-runtime candidate only after all hashes, host metadata, owner review, run logs and `YoloVision Passed=True` lines are real. It never becomes `package-consumer-runtime` proof.
+
+## Required Assets For A Full Demo
+
+- `model.onnx`: a YOLO-family model with documented input tensor name, output tensor names, layout, and supported image sizes.
+- `labels.txt`: class label list matching the model.
+- `input.*`: one or more redistributable test images.
+- Postprocessing metadata: confidence threshold, IoU threshold, output decoding format, and NMS/plugin requirements.
+
+## Asset Metadata Checklist
+
+- Model source URL, license, SHA256, opset, and export command.
+- Input tensor name, shape, layout, dtype, resize, padding, and normalization.
+- Output tensor name, shape, layout, class count, and objectness rule.
+- Label file source, license, and line count.
+- Test image source, license, and expected detection notes.
+- NMS location: graph, plugin, or application-side postprocessing.
+- NMS mode: class-aware or class-agnostic.
+- For segmentation: mask coefficient count, prototype count, prototype width/height, and mask scale/crop rule.
+- For pose: keypoint count/stride and whether keypoints are embedded after the detection prefix or returned as a separate tensor.
+- For OBB: angle channel index and unit, degrees or radians.
+- YOLO family/task declaration and any model-specific decode notes.
+
+## Managed Multi-Output Metadata
+
+The command-line runner captures every float output in engine order. For models whose exported graph returns separate auxiliary tensors, use the managed helpers from tests or a host application:
+
+- `YoloSampleRunner.DecodeSegmentationOutputs(...)`: detection rows plus mask coefficients and `[P,H,W]` or `[1,P,H,W]` prototype tensor.
+- `YoloSampleRunner.DecodePoseOutputs(...)`: detection rows plus `[1,N,K*stride]` or `[1,K*stride,N]` keypoint tensor.
+- `YoloSampleRunner.DecodeEmbeddedPoseOutput(...)`: one `[1,C,N]` or `[1,N,C]` tensor whose detection prefix is followed exactly by `K*stride` keypoint channels; unexplained channels fail closed.
+- `YoloSampleRunner.DecodeObbOutputs(...)`: detection rows plus `[1,N,1]` or `[1,1,N]` angle tensor.
+- `YoloSampleRunner.DecodeEmbeddedObbOutput(...)`: one `[1,C,N]` or `[1,N,C]` tensor whose detection prefix is followed by exactly one angle channel; candidates use probabilistic-IoU rotated Fast-NMS.
+- `YoloMultiOutputMetadata`: declares mask coefficient count, keypoint count/stride, angle unit, optional auxiliary channel start, and auxiliary tensor layout.
+
+These helpers keep model-specific ownership outside TensorRT and are covered by managed tests. A real asset manifest must still record the exact output tensor names, shapes, layout, crop/scale rules, and evidence log before the sample is treated as a real demo pass.
+
+The shared ONNX sample support now also has a multi-output snapshot path. `YoloVision` captures all float outputs, wraps them as `YoloRuntimeOutputTensor` values with explicit roles, then routes them through `YoloSampleRunner.DecodeRuntimeOutputs`. The command-line path remains compatible with single-output models by assigning the primary output role from the selected task and falling back to the single-output diagnostic decoder when no auxiliary metadata is supplied.
+
+## Named Multi-Input And Runtime References
+
+Custom YOLO exports with multiple float inputs use a strict name-bound contract. `--input-shapes` must cover every model input,
+and each name must have exactly one source in `--load-inputs`, `--load-byte-inputs`, or `--input-patterns`. If any dynamic profile
+map is supplied, `--min-shapes`, `--opt-shapes`, and `--max-shapes` must all cover the same names. Legacy singular arguments remain
+available for ordinary one-input models and cannot be mixed with the named contract.
+
+```powershell
+dotnet run --project .\applications\YoloVision -- `
+  --model .\models\fusion-yolo.onnx `
+  --family custom --task det `
+  --input-shapes "images:1x3x640x640,scale:1" `
+  --min-shapes "images:1x3x640x640,scale:1" `
+  --opt-shapes "images:1x3x640x640,scale:1" `
+  --max-shapes "images:4x3x640x640,scale:1" `
+  --load-inputs "images:.\models\image.fp32.bin,scale:.\models\scale.txt" `
+  --reference-outputs "boxes:.\references\boxes.json,scores:.\references\scores.json" `
+  --reference-abs-tolerance 1e-5 `
+  --reference-rel-tolerance 1e-4 `
+  --output-json .\artifacts\yolovision\fusion-output.json
+```
+
+Every reference document follows `samples/_shared/JYPPX.SampleSupport/onnx-sample-reference.schema.json` and uses `schemaVersion=1`, `tensorName`, `shape`, `values`, and `sourceClassification`. Reference mappings
+must cover every captured output. The report records ordered `inputTensors`, reference file SHA256, per-tensor shape/count,
+mismatch count, first mismatch, maximum errors, and special-value policy. A mismatch returns exit code 1 and
+`OutputValidated=False`. A synthetic or same-runtime reference remains regression evidence only; its hash does not make it an
+owner-reviewed golden, real-model, package-consumer, public-package, or post-publish proof.
+
+Use `--output <path>` or `--output-json <path>` to write a machine-readable `yolovision-output.v1` JSON report. The report includes copied output tensor shapes, per-output `valueSha256` and preview values, task/family metadata, postprocess thresholds, prediction summaries, labels path/class count/SHA256, model/input SHA256 values when files are available, and a strict boundary block that keeps the file out of runtime-proof promotion. When `--image` is used, the report also records the source image path/SHA256/size, the generated preprocessed tensor path/SHA256/element count, layout, color order, normalization scale, and letterbox/stretch metadata. It is intended for owner review, golden-output comparison, and sample-run evidence backfill; it still needs real logs, hashes, host metadata, and owner approval before any real-model-runtime decision.
+
+Use `--visualization <path>` or `--visualization-svg <path>` to write an SVG visualization beside the JSON report. By default, the SVG is a diagnostic canvas covering detection boxes, classification bars, segmentation masks/boxes, OBB rotation, pose keypoints, and semantic maps. Add `--visualization-background <jpg-png-or-bmp>` together with `--image` to embed a same-size source image and map predictions back through the recorded resize, crop, or letterbox transform. A size mismatch fails closed. Source-image segmentation additionally requires the explicit `--mask-spatial-transform` contract. The SVG is derived evidence and must remain tied to the real model, input, tensor, output JSON, run log, and image license record.
+
+Minimal output examples for all six tasks live under `applications/YoloVision/examples`: det, cls, seg, OBB, pose, and semantic segmentation. Validate those examples, or owner-produced output JSON files, with:
+
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-YoloVisionOutputReport.ps1 -Strict
+```
+
+The validator checks task-specific prediction metadata, copied output tensor summaries, `boundary.isRuntimeProof=false`, and the forbidden substitute list. It writes `artifacts/yolovision/yolovision-output-report-validation.json`; this validation artifact is still owner-review infrastructure, not runtime proof.
+
+For multi-output models, declare output roles and auxiliary metadata explicitly:
+
+```powershell
+dotnet run --project .\applications\YoloVision -- `
+  --model .\models\yolo-seg.onnx `
+  --family v8 `
+  --task seg `
+  --output-role-map boxes:det,proto:mask-prototypes `
+  --mask-coefficient-count 32 `
+  --aux-layout boxes-first
+```
+
+Task-specific command skeletons should stay explicit in article drafts and owner proof records. Use the same runner and change only the family/task/output metadata that the selected model actually needs:
+
+```powershell
+# Detection: YOLO v5/v6/v7/v8/v9/v10/v11/v26/YOLOX/custom
+dotnet run --project .\applications\YoloVision -- --model .\models\yolo-det.onnx --labels .\models\coco.names --image .\models\det.ppm --preprocessed-output .\models\det-fp32.bin --input-shape 1x3x640x640 --family v8 --task det --layout auto --has-objectness auto --nms-mode class-aware
+
+# YOLOv10 end-to-end detection: [1,N,6] = x1,y1,x2,y2,score,classId; no second NMS
+dotnet run --project .\applications\YoloVision -- --model .\models\yolov10n.onnx --labels .\models\coco.names --image .\models\det.ppm --preprocessed-output .\models\yolov10n-fp32.bin --input-shape 1x3x640x640 --family v10 --task det --layout end2end --class-count 80 --confidence 0.25 --output .\artifacts\yolovision\yolov10n-output.json
+
+# Official YOLOv8n classification export (graph output already contains Softmax)
+dotnet run --project .\applications\YoloVision -- --model .\models\yolov8n-cls.onnx --labels .\models\imagenet-yolov8n-cls.names --image .\models\bus.ppm --family v8 --task cls --classification-output output0 --classification-score-mode probabilities --top-k 5
+
+# Segmentation with explicit source-image mask mapping
+dotnet run --project .\applications\YoloVision -- --model .\models\yolo-seg.onnx --labels .\models\coco.names --image .\models\seg.ppm --preprocessed-output .\models\seg-fp32.bin --input-shape 1x3x640x640 --family v8 --task seg --output-role-map output0:det,output1:mask-prototypes --mask-coefficient-count 32 --mask-threshold 0.5 --mask-spatial-transform --mask-coordinate-space model-input --mask-crop-to-box true --segmentation-mask-output-directory .\artifacts\yolovision\segmentation-masks
+
+# Official YOLOv8n OBB single output: 4 box + 15 class + 1 angle channels
+dotnet run --project .\applications\YoloVision -- --model .\models\yolov8n-obb.onnx --labels .\models\dota.names --image .\models\boats.ppm --preprocessed-output .\models\obb-fp32.bin --input-shape 1x3x1024x1024 --family v8 --task obb --class-count 15 --layout channels-first --has-objectness auto --aux-channel-start 19 --aux-layout channels-first --angle-radians --nms-mode class-aware
+
+# Pose
+dotnet run --project .\applications\YoloVision -- --model .\models\yolov8n-pose.onnx --labels .\models\coco.names --image .\models\person.ppm --preprocessed-output .\models\pose-fp32.bin --input-shape 1x3x640x640 --family v8 --task pose --class-count 1 --layout channels-first --has-objectness auto --keypoint-count 17 --keypoint-stride 3 --aux-channel-start 5 --aux-layout channels-first
+
+# Semantic segmentation
+dotnet run --project .\applications\YoloVision -- --model .\models\yolo-sem.onnx --labels .\models\labels.txt --input-data .\models\sem-fp32.bin --input-shape 1x3x512x512 --family custom --task sem --semantic-output semantic --class-count 21
+```
+
+These skeletons are documentation and proof-record scaffolding, not bundled proof. A real `real-model-runtime` record still needs the exact model SHA256, labels SHA256, image SHA256, preprocessed tensor SHA256, run log SHA256, stdout/stderr summaries, expected evidence lines, license notes, and owner approval.
+
+Dedicated role options are also accepted: `--detection-output`, `--classification-output`, `--semantic-output`, `--mask-prototypes-output`, `--pose-keypoints-output`, and `--obb-angle-output`. If no explicit role is supplied, the runner uses conservative tensor-name heuristics such as `proto`, `keypoint`, `angle`, `semantic`, `logits`, `box`, or `detect`.
+
+Classification score semantics are explicit. `--classification-score-mode raw` preserves legacy scores, `logits` applies numerically stable softmax, and `probabilities` rejects non-finite/out-of-range values or vectors whose sum differs from 1 by more than `0.001`. A configured `--class-count` must exactly equal the output vector length; silent truncation is not allowed.
+
+The official YOLOv8n-cls source-tree case is pinned by `samples/assets/yolovision-yolov8n-cls-official-assets.json` and recorded by `samples/assets/yolovision-yolov8n-cls-real-model-runtime-evidence.json`. Its `output0:[1,1000]` graph ends in Softmax, all 1000 TensorRT values pass the ONNX Runtime reference at absolute/relative tolerance `0.001`, and a controlled single-value mutation fails closed. This is not package-consumer-runtime proof, asset redistribution approval, or release authorization.
+
+When the sample runs with the default synthetic tensor, it is pipeline evidence only. It does not prove real object detection quality.
+
+## Real Case Proof Pack
+
+The release-facing real case checklist is generated into `artifacts/final-release/real-case-proof-execution-pack.json` and `artifacts/final-release/real-case-proof-execution-pack.md`. The YoloVision portion covers detection, segmentation, OBB, pose, and classification cases, but the pack is still an owner execution plan rather than runtime proof.
+
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Export-RealCaseProofExecutionPack.ps1
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Export-RealCaseEvidenceRecordTemplate.ps1
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-RealCaseEvidenceRecord.ps1 -RecordPath .\artifacts\final-release\real-case-evidence-record-template.json
+```
+
+`Test-RealCaseEvidenceRecord.ps1` keeps the template at `blocked-owner-action-required` until a real owner supplies the model source, license, ONNX/engine/input/output SHA256 values, stdout/stderr logs, screenshot, host OS, GPU, driver, CUDA, TensorRT, runtime package metadata, and owner review. The sample README, article matrix, sidecar, screenshots, and build-only reports must keep `canPublishPublicly=false` and cannot substitute `real-model-runtime`, `package-consumer-runtime`, Linux runner, owner authorization, or post-publish verification proof.
+
+See `docs/articles/zh-cn/yolovision-model-assets.md`, `docs/articles/zh-cn/yolovision-asset-candidates.md`, `docs/articles/zh-cn/yolovision-real-asset-walkthrough.md`, `docs/articles/zh-cn/yolovision-yolox-official-runtime-tutorial.md`, `samples/assets/yolovision-assets.template.json`, and `samples/assets/yolovision-yolox-s-example.json` for the release-facing asset checklist and the completed official YOLOX-S source-tree runtime path.
+
+## Real Model Evidence Backfill
+
+Generate sidecar templates before turning a candidate YOLO asset record into real model evidence:
+
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Export-OnnxEngineBuildEvidenceSidecarTemplate.ps1
+```
+
+For a generic YOLO-family model, start from `artifacts/user-acceptance/onnx-engine-build-evidence-sidecar.yolovision.template.json`. For the YOLOX-S candidate walkthrough, start from `artifacts/user-acceptance/onnx-engine-build-evidence-sidecar.yolox-s.template.json`. Copy the selected template into the `models/*-evidence.sidecar.json` path referenced by the asset manifest, then run the TensorRtExec build-only command with `--evidenceSidecar`.
+
+Next, run `applications/YoloVision` with a real model, labels, input image, task/family profile, output tensor metadata, and postprocess settings. Record `YoloVision Passed=True`, stdout/stderr summaries, the run log SHA256, model SHA256, labels SHA256, image SHA256, and license notes in the manifest.
+
+Validate the backfill:
+
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Export-SampleRunEvidenceRecordTemplate.ps1
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Export-YoloVisionRealAssetOwnerBackfillPack.ps1
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Export-YoloVisionRealAssetOwnerProofInputTemplate.ps1
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-YoloVisionRealAssetOwnerProofInput.ps1 -Strict
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Import-YoloVisionRealAssetOwnerProofInput.ps1
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-SampleRunEvidenceRecord.ps1
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-OnnxEngineBuildEvidenceSidecar.ps1
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-SampleAssetManifest.ps1
+```
+
+Use `artifacts/user-acceptance/sample-run-evidence-record.yolovision.template.json` for generic YOLO-family assets, `sample-run-evidence-record.yolox-s.template.json` for the YOLOX-S walkthrough, or `yolovision-real-asset-owner-backfill-sample-run-evidence.template.json` for the six YOLOv8n task/article cases. This record carries the real runner log path, log SHA256, stdout/stderr summaries, expected evidence lines, and `canPromoteRealModelRuntime` decision. The sidecar is a bridge between TensorRtExec/OnnxToEngine reports and the asset manifest; the sample run evidence record is the bridge between the real `YoloVision` runner log and the manifest. Neither one can promote a build-only report or sample manifest to `package-consumer-runtime`.
+
+## Evidence Lines
+
+- `YoloVision TensorRtLine=...`
+- `Profile Family=... Task=... Layout=... Nms=... NmsMode=...`
+- `InputSource=external InputFile=...` for real preprocessed tensors, or `InputSource=synthetic InputFile=ramp`
+- `Input=... Output=...`
+- `Postprocess Task=...;Detections=...;Classifications=...;Semantic=...`
+- `OutputJson=...` when `--output` or `--output-json` is supplied
+- `Visualization=...` when `--visualization` or `--visualization-svg` is supplied
+- `Output=... Outputs=...` showing the primary output and captured output count
+- `Detection Class=... Score=... BoxCxCyWh=...` or `Detections=0 ...`
+- `Classification Class=... Score=...` for classification models
+- `SemanticMap Classes=... Width=... Height=... Values=...` for semantic segmentation models
+- `Segmentations=...`, `OrientedBoxes=...`, or `Poses=...` when a host application uses the managed multi-output helpers
+- `YoloVision Passed=True`
+
+## Managed Postprocess Tests
+
+Project quality tests cover layout inference, objectness/class score handling, class-aware NMS, family/task parsing, and the asset boundary. These tests do not require a TensorRT runtime or bundled model assets.

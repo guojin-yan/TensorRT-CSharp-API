@@ -118,7 +118,7 @@ LRASPP 路径显式使用：
 先把参考脚本生成的 `dog.ppm` 交给内置预处理器：
 
 ```powershell
-dotnet run --project .\samples\YoloVision -c Release -- `
+dotnet run --project .\applications\YoloVision -c Release -- `
   --task sem `
   --class-count 21 `
   --input-shape 1x3x320x320 `
@@ -145,7 +145,7 @@ $env:JYPPX_TENSORRT_ROOT = $env:TENSORRT_PATH
 $env:JYPPX_NATIVE_BRIDGE_PATH = ".\build-out\win-x64-trt10-cuda12-release\bin\Release\jyppxtrtbridge.dll"
 $env:JYPPX_ENABLE_DEVELOPMENT_PROBING = "true"
 
-dotnet run --project .\samples\YoloVision -c Release -- `
+dotnet run --project .\applications\YoloVision -c Release -- `
   --model "$modelRoot\lraspp-mobilenet-v3-large-320.onnx" `
   --labels "$referenceRoot\voc-semantic.names" `
   --image "$referenceRoot\dog.ppm" `
@@ -233,7 +233,7 @@ dotnet run --project .\applications\TensorRtExec -- --onnx .\models\yolov8n-sem.
 语义分割的 class map、palette 和输出 shape 需要 owner 确认；先生成离线预检报告：
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- --model .\models\yolov8n-sem.onnx --labels .\models\semantic-classes.names --input-data .\models\yolov8n-sem-fp32.bin --input-shape 1x3x512x512 --family custom --task sem --semantic-output semantic --class-count 21 --preflight --preflight-report .\models\yolov8n-sem-preflight.json
+dotnet run --project .\applications\YoloVision -- --model .\models\yolov8n-sem.onnx --labels .\models\semantic-classes.names --input-data .\models\yolov8n-sem-fp32.bin --input-shape 1x3x512x512 --family custom --task sem --semantic-output semantic --class-count 21 --preflight --preflight-report .\models\yolov8n-sem-preflight.json
 ```
 
 该报告只允许 `yolovision-preflight.v1`/`proofClassification=precheck`，并要求所有 execution 与 promotion flag 为 `false`；它不能替代真实 semantic map 输出和 owner review。
@@ -243,7 +243,7 @@ dotnet run --project .\samples\YoloVision -- --model .\models\yolov8n-sem.onnx -
 示例命令：
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- --model .\models\yolov8n-sem.onnx --labels .\models\semantic-classes.names --input-data .\models\yolov8n-sem-fp32.bin --input-shape 1x3x512x512 --family custom --task sem --semantic-output semantic --class-count 21 --output-json .\artifacts\yolovision\yolov8n-sem-output.json --visualization-svg .\artifacts\yolovision\yolov8n-sem-output.svg
+dotnet run --project .\applications\YoloVision -- --model .\models\yolov8n-sem.onnx --labels .\models\semantic-classes.names --input-data .\models\yolov8n-sem-fp32.bin --input-shape 1x3x512x512 --family custom --task sem --semantic-output semantic --class-count 21 --output-json .\artifacts\yolovision\yolov8n-sem-output.json --visualization-svg .\artifacts\yolovision\yolov8n-sem-output.svg
 ```
 
 `--semantic-map-shape`、`--class-map-layout` 和 `--palette` 不是当前 YoloVision CLI 参数。它们应作为 owner metadata 保存；命令行只声明实际支持的输出 role 和 class count。若模型输出不是浮点 class logits，或需要特殊 palette/resize-back 逻辑，必须先在 owner-approved preprocessing/postprocess adapter 中转换并记录版本、命令与 hash。
@@ -296,13 +296,13 @@ Get-FileHash -Algorithm SHA256 ..\downloads\cases\yolov8n-sem\tensors\street-fp3
 先只做预处理，确认输入 shape、颜色顺序和 tensor hash：
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- --preprocess-only --image ..\downloads\cases\yolov8n-sem\images\street.ppm --preprocessed-output ..\downloads\cases\yolov8n-sem\tensors\street-fp32.bin --input-shape 1x3x512x512 --tensor-layout NCHW --color-order RGB --resize letterbox
+dotnet run --project .\applications\YoloVision -- --preprocess-only --image ..\downloads\cases\yolov8n-sem\images\street.ppm --preprocessed-output ..\downloads\cases\yolov8n-sem\tensors\street-fp32.bin --input-shape 1x3x512x512 --tensor-layout NCHW --color-order RGB --resize letterbox
 ```
 
 运行时保留显式 semantic output role、class count、JSON 和 SVG：
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- --model ..\downloads\cases\yolov8n-sem\models\yolov8n-sem.onnx --labels ..\downloads\cases\yolov8n-sem\labels\semantic-classes.names --input-data ..\downloads\cases\yolov8n-sem\tensors\street-fp32.bin --input-shape 1x3x512x512 --family custom --task sem --semantic-output semantic --class-count 21 --output-json ..\downloads\cases\yolov8n-sem\reports\yolov8n-sem-output.json --visualization-svg ..\downloads\cases\yolov8n-sem\reports\yolov8n-sem-output.svg
+dotnet run --project .\applications\YoloVision -- --model ..\downloads\cases\yolov8n-sem\models\yolov8n-sem.onnx --labels ..\downloads\cases\yolov8n-sem\labels\semantic-classes.names --input-data ..\downloads\cases\yolov8n-sem\tensors\street-fp32.bin --input-shape 1x3x512x512 --family custom --task sem --semantic-output semantic --class-count 21 --output-json ..\downloads\cases\yolov8n-sem\reports\yolov8n-sem-output.json --visualization-svg ..\downloads\cases\yolov8n-sem\reports\yolov8n-sem-output.svg
 ```
 
 当前 `yolovision-output.v1` 的 semantic prediction 包含 `task=sem`、`classCount`、`width`、`height`、`valueCount`、`classIndexValueCount`、dominant class 和完整 `classHistogram`；output tensor summary 还保存实际 shape 与 value hash。`YoloVision` 不会自动应用 owner palette 或猜测 resize-back。需要完整逐像素复核时必须同时保存 `semantic-class-index.i32.bin` 和 manifest，并关联 `modelSha256`、`labelsSha256`、`paletteSha256`、`imageSha256`、`preprocessedTensorSha256`、run log hash、`classMapLayout` 和 `argmaxRule`。
@@ -319,18 +319,18 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-SampleRunEvidenceRecord
 
 ## 代码与文件入口
 
-- `samples/YoloVision/YoloSampleRunner.cs`：`DecodeSemanticMap` 与 `[C,H,W]`/`[1,C,H,W]`/按 class count 识别的 NHWC map 路由。
-- `samples/YoloVision/YoloVisionOutputReport.cs`：semantic prediction 的 classCount、width、height 和 valueCount 输出。
-- `samples/YoloVision/YoloVisionVisualizationWriter.cs`：按像素 argmax 的语义 SVG 网格。
-- `samples/YoloVision/YoloSemanticMapArtifactWriter.cs`：完整 class-index 二进制、SHA256、histogram 与 manifest。
-- `samples/YoloVision/yolovision-semantic-map-artifacts.schema.json`：完整语义图产物 schema。
+- `applications/YoloVision/YoloSampleRunner.cs`：`DecodeSemanticMap` 与 `[C,H,W]`/`[1,C,H,W]`/按 class count 识别的 NHWC map 路由。
+- `applications/YoloVision/YoloVisionOutputReport.cs`：semantic prediction 的 classCount、width、height 和 valueCount 输出。
+- `applications/YoloVision/YoloVisionVisualizationWriter.cs`：按像素 argmax 的语义 SVG 网格。
+- `applications/YoloVision/YoloSemanticMapArtifactWriter.cs`：完整 class-index 二进制、SHA256、histogram 与 manifest。
+- `applications/YoloVision/yolovision-semantic-map-artifacts.schema.json`：完整语义图产物 schema。
 - `eng/Acquire-TorchVisionLrasppOfficialAssets.ps1`：官方资产获取与固定 hash 校验。
 - `eng/Invoke-YoloVisionSemanticReference.py`：ONNX 导出、ORT reference、argmax 与负例比较。
 - `eng/Test-YoloVisionSemanticLocalPackageConsumer.ps1`：仓库外三包 `PackageReference` 语义运行、完整类别图与受控负例。
 - `eng/Test-YoloVisionSemanticMapArtifact.ps1`：类别索引二进制、manifest SHA256、范围和直方图严格校验。
 - [YoloVision LRASPP 语义分割本地包消费教程](yolovision-lraspp-semantic-local-package-consumer-tutorial.md)：从获取、转换到本地包运行的完整命令。
-- `samples/YoloVision/yolovision-task-output-contract.json`：semantic output role 与必填 metadata。
-- `samples/YoloVision/Program.cs`：`--task sem`、`--semantic-output`、`--class-count`、输出参数入口。
+- `applications/YoloVision/yolovision-task-output-contract.json`：semantic output role 与必填 metadata。
+- `applications/YoloVision/Program.cs`：`--task sem`、`--semantic-output`、`--class-count`、输出参数入口。
 - `eng/Test-YoloVisionRealAssetCandidate.ps1`：semantic map、palette 和 owner 证据字段验证。
 
 ## 图示建议

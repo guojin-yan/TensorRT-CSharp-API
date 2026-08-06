@@ -4,13 +4,14 @@
     <TargetFramework>net8.0-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <IsPackable>false</IsPackable>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <Import Project="..\..\build\JYPPX.PublicSamplePackages.props" />
+
   <ItemGroup>
-    <ProjectReference Include="..\..\src\JYPPX.CudaSharp\JYPPX.CudaSharp.csproj" />
-    <ProjectReference Include="..\..\src\JYPPX.TensorRtSharp\JYPPX.TensorRtSharp.csproj" />
-    <ProjectReference Include="..\..\src\JYPPX.TensorRtSharp.Tools\JYPPX.TensorRtSharp.Tools.csproj" />
+    <ProjectReference Include="..\_shared\JYPPX.TensorRtSharp.ApplicationTools\JYPPX.TensorRtSharp.ApplicationTools.csproj" />
   </ItemGroup>
 </Project>

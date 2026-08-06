@@ -2,7 +2,7 @@
 param(
   [string]$ContractPath = "samples/assets/cross-task-reference-provenance-contract.json",
   [string]$ClassificationManifestPath = "samples/assets/classification-assets.template.json",
-  [string]$YoloTaskContractPath = "samples/YoloVision/yolovision-task-output-contract.json",
+  [string]$YoloTaskContractPath = "applications/YoloVision/yolovision-task-output-contract.json",
   [string]$YoloOwnerInputPath = "artifacts/user-acceptance/yolovision-real-asset-owner-proof-input.template.json",
   [string]$IndependentReferenceEvidencePath = "artifacts/interface-coverage/tensorrtexec-mnist-onnxruntime-reference-evidence.json",
   [string]$OutputDirectory = "artifacts/interface-coverage",
@@ -171,10 +171,10 @@ $rows.Add([pscustomobject][ordered]@{
   missingFieldCount = $classificationTotal - $classificationReady
   runtimeContractState = "implemented-managed-contract-owner-assets-required"
   runtimeContractArtifacts = @(
-    "samples/Classification/ClassificationImagePreprocessor.cs",
-    "samples/Classification/ClassificationOutputArtifacts.cs",
-    "samples/Classification/classification-reference.schema.json",
-    "samples/Classification/classification-output.schema.json"
+    "samples/ComputerVision/01.Classification/ClassificationImagePreprocessor.cs",
+    "samples/ComputerVision/01.Classification/ClassificationOutputArtifacts.cs",
+    "samples/ComputerVision/01.Classification/classification-reference.schema.json",
+    "samples/ComputerVision/01.Classification/classification-output.schema.json"
   )
   runtimeContractIsRuntimeProof = $false
   independentReferenceState = "not-captured-for-classification"

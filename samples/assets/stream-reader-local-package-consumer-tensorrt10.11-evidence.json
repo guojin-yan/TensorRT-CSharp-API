@@ -95,7 +95,7 @@
   },
   "artifacts": {
     "sampleSource": {
-      "path": "samples/StreamReader.PackageConsumer/Program.cs",
+      "path": "tests/fixtures/package-consumers/StreamReader.PackageConsumer/Program.cs",
       "length": 15392,
       "sha256": "ad2ae8f582bc445525e417cd9749d798628b6a1397334af5ee6e144dfa0c47c8"
     },

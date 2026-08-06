@@ -7,7 +7,7 @@
   "proofClassification": "template-only",
   "canPromoteRealModelRuntime": false,
   "canPromotePackageConsumerRuntime": false,
-  "taskOutputContract": "samples/YoloVision/yolovision-task-output-contract.json",
+  "taskOutputContract": "applications/YoloVision/yolovision-task-output-contract.json",
   "family": "YOLOv8",
   "task": "obb",
   "model": {
@@ -62,7 +62,7 @@
   },
   "commands": {
     "tensorRtExecBuildCommand": "dotnet run --project .\\applications\\TensorRtExec -- --onnx .\\models\\yolov8-obb.onnx --saveEngine .\\models\\yolov8-obb.plan --minShapes images:1x3x1024x1024 --optShapes images:1x3x1024x1024 --maxShapes images:2x3x1024x1024 --fp16 --workspace 1024 --buildOnly --exportReport .\\models\\yolov8-obb-build-report.json --evidenceSidecar .\\models\\yolov8-obb-evidence.sidecar.json",
-    "yoloVisionRunCommand": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8-obb.onnx --labels .\\models\\dota.names --input-data .\\models\\yolov8-obb-fp32.bin --input-shape 1x3x1024x1024 --tensor-rt-line 10 --family v8 --task obb --output-role-map boxes:det,angles:obb-angles --obb-angle-output angles --angle-radians --aux-layout boxes-first --layout auto --has-objectness auto --nms-mode class-aware --confidence 0.25 --iou-threshold 0.45"
+    "yoloVisionRunCommand": "dotnet run --project .\\applications\\YoloVision -- --model .\\models\\yolov8-obb.onnx --labels .\\models\\dota.names --input-data .\\models\\yolov8-obb-fp32.bin --input-shape 1x3x1024x1024 --tensor-rt-line 10 --family v8 --task obb --output-role-map boxes:det,angles:obb-angles --obb-angle-output angles --angle-radians --aux-layout boxes-first --layout auto --has-objectness auto --nms-mode class-aware --confidence 0.25 --iou-threshold 0.45"
   },
   "proofChecklist": {
     "requiredEvidenceLines": [

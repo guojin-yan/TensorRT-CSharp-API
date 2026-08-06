@@ -54,7 +54,7 @@ public sealed class MnistOnnxRuntimeTests
     public void OnnxToEngine_exposes_explicit_mnist_runner_without_weakening_generic_boundary()
     {
         string root = RepositoryPaths.Root;
-        string program = File.ReadAllText(Path.Combine(root, "samples", "OnnxToEngine", "Program.cs"));
+        string program = File.ReadAllText(Path.Combine(root, "applications", "OnnxToEngine", "Program.cs"));
         string result = File.ReadAllText(Path.Combine(
             root, "src", "JYPPX.TensorRtSharp.Tools", "Runtime", "MnistOnnxRuntimeResult.cs"));
         string genericService = File.ReadAllText(Path.Combine(

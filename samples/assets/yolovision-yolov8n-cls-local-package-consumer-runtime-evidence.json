@@ -2,14 +2,14 @@
   "schemaVersion": 1,
   "recordKind": "yolovision-local-package-consumer-runtime-evidence",
   "recordName": "yolovision-yolov8n-cls-local-package-consumer-trt10.11",
-  "generatedAtUtc": "2026-08-02T22:29:22.8938980Z",
+  "generatedAtUtc": "2026-08-03T02:06:39.0575268Z",
   "templateOnly": false,
   "sampleName": "YoloVision.PackageConsumer",
   "family": "yolov8",
   "task": "cls",
   "proofClassification": "local-package-consumer-runtime",
-  "repositoryHeadAtExecution": "8cfba6a48cc1f5ea36bab8905c56ae8c999b1611",
-  "fullLocalReportSha256": "7a2d303c1de181f17bc1c03fdfe8b030c3f4295413b3dc68e47a2eaeef4f014d",
+  "repositoryHeadAtExecution": "a1621942b89ca601caa221c29477097f491ae5a9",
+  "fullLocalReportSha256": "cb5a098e45267a54730c89f870abdbbff295e0f602dd96064cd169b68399acc6",
   "packageConsumer": {
     "targetFramework": "net8.0",
     "packageSourceKind": "local-file-feed-only",
@@ -28,8 +28,8 @@
         "role": "yolovision",
         "id": "JYPPX.TensorRT.CSharp.API.YoloVision",
         "version": "4.0.0",
-        "length": 114430,
-        "sha256": "88c7c9a00765963c5fe5ca3a2de4e46dd6c0de7bf136989a67d196185066cc62"
+        "length": 114405,
+        "sha256": "12510a46182cb0680564c125591eaa6ce21b7902d5edd0e5229a99dda787e6de"
       },
       {
         "role": "bridge-only",
@@ -124,8 +124,8 @@
         1,
         1000
       ],
-      "maximumAbsoluteError": 5.9604645E-07,
-      "maximumRelativeError": 8.423144E-06,
+      "maximumAbsoluteError": 5.364418E-07,
+      "maximumRelativeError": 1.1230873E-05,
       "referenceSha256": "ded68dd048acdee3a38e95dc46490517e85ece8346f1ebe627bdd88cdb307697"
     },
     "completed": true,
@@ -138,27 +138,27 @@
       {
         "classId": 654,
         "className": "minibus",
-        "score": 0.50488305
+        "score": 0.504883
       },
       {
         "classId": 734,
         "className": "police_van",
-        "score": 0.2934018
+        "score": 0.29340178
       },
       {
         "classId": 874,
         "className": "trolleybus",
-        "score": 0.04973289
+        "score": 0.049732983
       },
       {
         "classId": 575,
         "className": "golfcart",
-        "score": 0.018500658
+        "score": 0.01850062
       },
       {
         "classId": 612,
         "className": "jinrikisha",
-        "score": 0.017727314
+        "score": 0.017727261
       }
     ],
     "passed": true

@@ -42,7 +42,7 @@ $env:JYPPX_ENABLE_DEVELOPMENT_PROBING = 'true'
 
 ## 示例验证的两段流程
 
-源码位于 `samples/MultiStream/Program.cs`，固定操作 4096 字节。
+源码位于 `samples/Performance/01.MultiStream/Program.cs`，固定操作 4096 字节。
 
 ### 独立 Stream
 
@@ -156,7 +156,7 @@ bool crossStreamWaitOk = orderedHost.ToArray(ByteCount)
 从仓库根目录编译 Release 示例：
 
 ```powershell
-dotnet build .\samples\MultiStream\MultiStream.csproj `
+dotnet build .\samples\Performance\01.MultiStream\MultiStream.csproj `
   -c Release `
   --no-restore `
   /p:UseSharedCompilation=false
@@ -165,7 +165,7 @@ dotnet build .\samples\MultiStream\MultiStream.csproj `
 运行：
 
 ```powershell
-dotnet .\samples\MultiStream\bin\Release\net8.0\MultiStream.dll
+dotnet .\samples\Performance\01.MultiStream\bin\Release\net8.0\MultiStream.dll
 ```
 
 这个示例没有命令行参数。CUDA 版本和桥接库由环境变量与本机安装决定。

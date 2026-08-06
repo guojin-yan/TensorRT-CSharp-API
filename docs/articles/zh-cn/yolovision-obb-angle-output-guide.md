@@ -18,7 +18,7 @@
 
 ## 背景与场景
 
-本文面向需要在 `samples/YoloVision` 中接入 YOLOv8n-obb 或其他 rotated bounding box 模型的开发者。OBB 比普通 detection 多了 angle 字段和几何约定，一旦角度单位、范围或坐标顺序没有写清楚，输出很容易“看起来有框但方向全错”。
+本文面向需要在 `applications/YoloVision` 中接入 YOLOv8n-obb 或其他 rotated bounding box 模型的开发者。OBB 比普通 detection 多了 angle 字段和几何约定，一旦角度单位、范围或坐标顺序没有写清楚，输出很容易“看起来有框但方向全错”。
 
 本文给出模型来源、ONNX 导出、TensorRtExec build-only、YoloVision 运行、angle metadata 和 proof boundary 的完整文章结构。它是发布文章和真实资产回填模板，不是 runtime proof。
 
@@ -91,7 +91,7 @@ build-only report 可以证明 engine 构建参数和输出 binding，但不能�
 先检查 OBB 的输出角色和输入资产，再进行真实运行：
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- --model .\models\yolov8n-obb.onnx --labels .\models\dota.names --input-data .\models\yolov8n-obb-fp32.bin --input-shape 1x3x1024x1024 --family v8 --task obb --class-count 15 --layout channels-first --aux-channel-start 19 --aux-layout channels-first --angle-radians --preflight --preflight-report .\models\yolov8n-obb-preflight.json
+dotnet run --project .\applications\YoloVision -- --model .\models\yolov8n-obb.onnx --labels .\models\dota.names --input-data .\models\yolov8n-obb-fp32.bin --input-shape 1x3x1024x1024 --family v8 --task obb --class-count 15 --layout channels-first --aux-channel-start 19 --aux-layout channels-first --angle-radians --preflight --preflight-report .\models\yolov8n-obb-preflight.json
 ```
 
 预检报告必须保持 `yolovision-preflight.v1`/`precheck` 边界，且不执行 TensorRT、parser、engine build 或 inference；它不能替代 angle metadata 和真实 OBB 运行证据。
@@ -99,7 +99,7 @@ dotnet run --project .\samples\YoloVision -- --model .\models\yolov8n-obb.onnx -
 ## YoloVision 运行
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- `
+dotnet run --project .\applications\YoloVision -- `
   --model .\models\yolov8n-obb.onnx `
   --labels .\models\dota.names `
   --input-data .\models\yolov8n-obb-fp32.bin `
@@ -166,13 +166,13 @@ Get-FileHash -Algorithm SHA256 ..\downloads\cases\yolov8n-obb\tensors\airplane-f
 先只做预处理，确认 1024 输入、RGB、NCHW 和 letterbox 记录一致：
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- --preprocess-only --image ..\downloads\cases\yolov8n-obb\images\airplane.ppm --preprocessed-output ..\downloads\cases\yolov8n-obb\tensors\airplane-fp32.bin --input-shape 1x3x1024x1024 --tensor-layout NCHW --color-order RGB --resize letterbox
+dotnet run --project .\applications\YoloVision -- --preprocess-only --image ..\downloads\cases\yolov8n-obb\images\airplane.ppm --preprocessed-output ..\downloads\cases\yolov8n-obb\tensors\airplane-fp32.bin --input-shape 1x3x1024x1024 --tensor-layout NCHW --color-order RGB --resize letterbox
 ```
 
 运行时保留显式 OBB angle role、单位和输出产物：
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- --model ..\downloads\cases\yolov8n-obb\models\yolov8n-obb.onnx --labels ..\downloads\cases\yolov8n-obb\labels\dota.names --input-data ..\downloads\cases\yolov8n-obb\tensors\airplane-fp32.bin --input-shape 1x3x1024x1024 --family v8 --task obb --class-count 15 --layout channels-first --aux-channel-start 19 --aux-layout channels-first --angle-radians --nms-mode class-aware --output-json ..\downloads\cases\yolov8n-obb\reports\yolov8n-obb-output.json --visualization-svg ..\downloads\cases\yolov8n-obb\reports\yolov8n-obb-output.svg
+dotnet run --project .\applications\YoloVision -- --model ..\downloads\cases\yolov8n-obb\models\yolov8n-obb.onnx --labels ..\downloads\cases\yolov8n-obb\labels\dota.names --input-data ..\downloads\cases\yolov8n-obb\tensors\airplane-fp32.bin --input-shape 1x3x1024x1024 --family v8 --task obb --class-count 15 --layout channels-first --aux-channel-start 19 --aux-layout channels-first --angle-radians --nms-mode class-aware --output-json ..\downloads\cases\yolov8n-obb\reports\yolov8n-obb-output.json --visualization-svg ..\downloads\cases\yolov8n-obb\reports\yolov8n-obb-output.svg
 ```
 
 当前 `yolovision-output.v1` 的 OBB prediction 至少记录 `center.x`、`center.y`、`size.width`、`size.height`、`angle`、`angleUnit`、`angleRange`、`classId`、`className` 和 `score`。程序输出的 `angleUnit` 是 `radian`，`angleRange` 仍是 `owner-record-required`；`corners`、旋转方向和 source-image 坐标反变换仍需 owner 依据模型文档或 golden output 复核。rotated NMS 已由 probabilistic IoU 测试与官方案例覆盖，但不能从一张 SVG 截图推断其他模型也兼容。输出 JSON 还应关联 model/image/tensor/run log hash。
@@ -189,11 +189,11 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-SampleRunEvidenceRecord
 
 ## 代码与文件入口
 
-- `samples/YoloVision/YoloSampleRunner.cs`：内嵌/独立 angle 路由、严格 channel 合同与 `SourceIndex` 绑定。
-- `samples/YoloVision/YoloObbDecoder.cs`：angle 转换、probabilistic IoU 和 rotated Fast-NMS。
-- `samples/YoloVision/YoloVisionOutputReport.cs`：中心点、尺寸、radian 与 proof boundary 输出。
-- `samples/YoloVision/yolovision-task-output-contract.json`：OBB 输出角色契约。
-- `samples/YoloVision/Program.cs`：`--task obb`、`--obb-angle-output` 与 role map 参数。
+- `applications/YoloVision/YoloSampleRunner.cs`：内嵌/独立 angle 路由、严格 channel 合同与 `SourceIndex` 绑定。
+- `applications/YoloVision/YoloObbDecoder.cs`：angle 转换、probabilistic IoU 和 rotated Fast-NMS。
+- `applications/YoloVision/YoloVisionOutputReport.cs`：中心点、尺寸、radian 与 proof boundary 输出。
+- `applications/YoloVision/yolovision-task-output-contract.json`：OBB 输出角色契约。
+- `applications/YoloVision/Program.cs`：`--task obb`、`--obb-angle-output` 与 role map 参数。
 - `eng/Test-YoloVisionRealAssetCandidate.ps1`：模型、输入、输出和证据 hash 验证。
 
 ## 图示建议

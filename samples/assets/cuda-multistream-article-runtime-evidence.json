@@ -13,7 +13,7 @@
     "dotnetSdkVersion": "10.0.301"
   },
   "assets": {
-    "sampleSourcePath": "samples/MultiStream/Program.cs",
+    "sampleSourcePath": "samples/Performance/01.MultiStream/Program.cs",
     "sampleSourceSha256": "49d61b66f29227116d2421a130961b178ba8e0e0844006b940b484064d830d80",
     "sampleAssemblySha256": "d3c8cdaa41a7e2806ceaa1a93bc9c88c94878d768e1bc95a53fb450853045957",
     "nativeBridgeSha256": "0576f191617dcdad46fd40e238f61cf22b9fb04826b70c1c47993b7944bd26a0",

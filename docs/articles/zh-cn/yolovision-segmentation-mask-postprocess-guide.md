@@ -18,7 +18,7 @@
 
 ## 背景与场景
 
-本文面向准备把 YOLOv8n-seg 接入 `samples/YoloVision` 的开发者。Segmentation 的难点通常不是 engine 能不能 build，而是 box 分支、mask prototype 分支、mask coefficient、letterbox 还原和阈值策略是否能被稳定解释。
+本文面向准备把 YOLOv8n-seg 接入 `applications/YoloVision` 的开发者。Segmentation 的难点通常不是 engine 能不能 build，而是 box 分支、mask prototype 分支、mask coefficient、letterbox 还原和阈值策略是否能被稳定解释。
 
 本篇把一条可发布的 segmentation walkthrough 拆成资产准备、ONNX 导出、TensorRtExec build-only、YoloVision 运行、mask 输出解释和 proof boundary。它是一篇文章和真实资产模板说明，不是 runtime proof。
 
@@ -97,7 +97,7 @@ build report 可以帮助定位 parser、profile、precision 和 output binding�
 先运行不加载 TensorRT 的配置预检，记录多输出角色和资产状态：
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- --model .\models\yolov8n-seg.onnx --labels .\models\coco.names --input-data .\models\yolov8n-seg-fp32.bin --input-shape 1x3x640x640 --family v8 --task seg --output-role-map boxes:det,proto:mask-prototypes --mask-coefficient-count 32 --preflight --preflight-report .\models\yolov8n-seg-preflight.json
+dotnet run --project .\applications\YoloVision -- --model .\models\yolov8n-seg.onnx --labels .\models\coco.names --input-data .\models\yolov8n-seg-fp32.bin --input-shape 1x3x640x640 --family v8 --task seg --output-role-map boxes:det,proto:mask-prototypes --mask-coefficient-count 32 --preflight --preflight-report .\models\yolov8n-seg-preflight.json
 ```
 
 `yolovision-preflight.v1` 报告的 `proofClassification` 必须是 `precheck`，四个 runtime execution flag 必须为 `false`；它是 owner 配置检查，不是 mask runtime proof。
@@ -105,7 +105,7 @@ dotnet run --project .\samples\YoloVision -- --model .\models\yolov8n-seg.onnx -
 ## YoloVision 运行
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- `
+dotnet run --project .\applications\YoloVision -- `
   --model .\models\yolov8n-seg.onnx `
   --labels .\models\coco.names `
   --image .\models\dog.ppm `
@@ -158,15 +158,15 @@ source image 元数据；不同 exporter 的坐标约定仍必须用独立 refer
 
 ## 代码与文件入口
 
-- `samples/YoloVision/YoloSampleRunner.cs`：多输出 runtime 路由、box/coefficient source-index 对齐与 prototype shape。
-- `samples/YoloVision/YoloMaskComposer.cs`：线性组合和稳定 sigmoid probability compose。
-- `samples/YoloVision/YoloSegmentationMask.cs`：value kind、threshold 与 active pixel statistics。
-- `samples/YoloVision/YoloSegmentationSpatialTransform.cs`：显式 coordinate space、letterbox 逆变换、bilinear resize 和 box crop。
-- `samples/YoloVision/YoloSegmentationMaskArtifactWriter.cs`：写出带 SHA256 的 prototype/source probability 和 thresholded mask。
-- `samples/YoloVision/yolovision-segmentation-mask-artifacts.schema.json`：mask artifact manifest 契约。
-- `samples/YoloVision/YoloSampleRunner.cs`：在 detection decode/NMS 后继续按 source index 关联 coefficients。
-- `samples/YoloVision/yolovision-task-output-contract.json`：segmentation 输出角色契约。
-- `samples/YoloVision/Program.cs`：`--task seg`、`--output-role-map` 和 mask 参数入口。
+- `applications/YoloVision/YoloSampleRunner.cs`：多输出 runtime 路由、box/coefficient source-index 对齐与 prototype shape。
+- `applications/YoloVision/YoloMaskComposer.cs`：线性组合和稳定 sigmoid probability compose。
+- `applications/YoloVision/YoloSegmentationMask.cs`：value kind、threshold 与 active pixel statistics。
+- `applications/YoloVision/YoloSegmentationSpatialTransform.cs`：显式 coordinate space、letterbox 逆变换、bilinear resize 和 box crop。
+- `applications/YoloVision/YoloSegmentationMaskArtifactWriter.cs`：写出带 SHA256 的 prototype/source probability 和 thresholded mask。
+- `applications/YoloVision/yolovision-segmentation-mask-artifacts.schema.json`：mask artifact manifest 契约。
+- `applications/YoloVision/YoloSampleRunner.cs`：在 detection decode/NMS 后继续按 source index 关联 coefficients。
+- `applications/YoloVision/yolovision-task-output-contract.json`：segmentation 输出角色契约。
+- `applications/YoloVision/Program.cs`：`--task seg`、`--output-role-map` 和 mask 参数入口。
 - `eng/Invoke-YoloVisionSegmentationReference.py`：独立 Ultralytics/PyTorch CPU box/mask 比较和失败退出码。
 - `eng/Test-YoloVisionRealAssetCandidate.ps1`：模型、图片、labels、日志和 SHA256 校验。
 
@@ -193,8 +193,8 @@ Get-FileHash -Algorithm SHA256 ..\downloads\cases\yolov8n-seg\tensors\dog-fp32.b
 
 预处理和运行命令应保留显式 layout、颜色顺序和 role map：
 
-dotnet run --project .\samples\YoloVision -- --preprocess-only --image ..\downloads\cases\yolov8n-seg\images\dog.ppm --preprocessed-output ..\downloads\cases\yolov8n-seg\tensors\dog-fp32.bin --input-shape 1x3x640x640 --tensor-layout NCHW --color-order RGB --resize letterbox
-dotnet run --project .\samples\YoloVision -- --model ..\downloads\cases\yolov8n-seg\models\yolov8n-seg.onnx --labels ..\downloads\cases\yolov8n-seg\labels\coco.names --image ..\downloads\cases\yolov8n-seg\images\dog.ppm --preprocessed-output ..\downloads\cases\yolov8n-seg\tensors\dog-fp32.bin --input-shape 1x3x640x640 --family v8 --task seg --output-role-map output0:det,output1:mask-prototypes --mask-coefficient-count 32 --mask-spatial-transform --mask-coordinate-space model-input --mask-crop-to-box true --segmentation-mask-output-directory ..\downloads\cases\yolov8n-seg\reports\segmentation-masks --output-json ..\downloads\cases\yolov8n-seg\reports\yolov8n-seg-output.json --visualization-svg ..\downloads\cases\yolov8n-seg\reports\yolov8n-seg-output.svg
+dotnet run --project .\applications\YoloVision -- --preprocess-only --image ..\downloads\cases\yolov8n-seg\images\dog.ppm --preprocessed-output ..\downloads\cases\yolov8n-seg\tensors\dog-fp32.bin --input-shape 1x3x640x640 --tensor-layout NCHW --color-order RGB --resize letterbox
+dotnet run --project .\applications\YoloVision -- --model ..\downloads\cases\yolov8n-seg\models\yolov8n-seg.onnx --labels ..\downloads\cases\yolov8n-seg\labels\coco.names --image ..\downloads\cases\yolov8n-seg\images\dog.ppm --preprocessed-output ..\downloads\cases\yolov8n-seg\tensors\dog-fp32.bin --input-shape 1x3x640x640 --family v8 --task seg --output-role-map output0:det,output1:mask-prototypes --mask-coefficient-count 32 --mask-spatial-transform --mask-coordinate-space model-input --mask-crop-to-box true --segmentation-mask-output-directory ..\downloads\cases\yolov8n-seg\reports\segmentation-masks --output-json ..\downloads\cases\yolov8n-seg\reports\yolov8n-seg-output.json --visualization-svg ..\downloads\cases\yolov8n-seg\reports\yolov8n-seg-output.svg
 
 通用输出 JSON 直接保留 detection output shape、prototype shape、maskThreshold、maskPixelCount、maskTotalPixelCount、maskValueKind、`maskPixelCountScope=prototype-grid-before-crop-resize`、className、score、modelSha256、imageSha256 和 preprocessedTensorSha256。owner 最终 overlay 记录还应补 letterboxScale、letterboxPadX、letterboxPadY、boxBeforeCrop、boxAfterResize 和 adapter hash。SVG 是派生证据，必须能追溯到同一份 JSON、输入图和 run log。
 

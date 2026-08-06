@@ -25,7 +25,7 @@ classification, and source path. These are managed copies and never expose devic
 
 ## Shared Classification / YoloVision Contract
 
-`samples/JYPPX.SampleSupport` now applies the same strict name binding instead of limiting Classification and YoloVision to one
+`samples/_shared/JYPPX.SampleSupport` now applies the same strict name binding instead of limiting Classification and YoloVision to one
 ONNX input. The sample commands use kebab-case options:
 
 - `--input-shapes name:dims,...` must cover every model input;
@@ -50,7 +50,7 @@ distinct from completed value comparison.
 
 Each output maps to one traceable structured document:
 
-The shared sample schema is `samples/JYPPX.SampleSupport/onnx-sample-reference.schema.json`.
+The shared sample schema is `samples/_shared/JYPPX.SampleSupport/onnx-sample-reference.schema.json`.
 
 ```json
 {

@@ -41,8 +41,8 @@ native/manifests/tensorrt/v8
 native/manifests/tensorrt/v10
 native/manifests/tensorrt/v11
 native/manifests/cuda
-samples/OnnxToEngine
-samples/YoloVision
+applications/OnnxToEngine
+applications/YoloVision
 applications/TensorRtExec
 pack/runtime
 pack/runtime-split
@@ -98,11 +98,11 @@ artifacts/interface-coverage/project-completion-review.md
 
 第二条是样例与应用。
 
-`samples/OnnxToEngine` 面向 ONNX 到 TensorRT engine 的转换，目标是贴近官方 `trtexec` 的模型转换能力，并输出 build/report/readback evidence。
+`applications/OnnxToEngine` 面向 ONNX 到 TensorRT engine 的转换，目标是贴近官方 `trtexec` 的模型转换能力，并输出 build/report/readback evidence。
 
 `applications/TensorRtExec` 是 trtexec-like 应用，既支持 CLI，也支持 WinForms。它通过 `TensorRtExecCommand.cs`、`TensorRtExecService.cs`、`TensorRtExecReport.cs`、`MainForm.cs`、`TrtexecLikeParser` 和 `TrtexecLikeOptions` 把命令行、GUI、report 和 parity matrix 串起来。
 
-`samples/YoloVision` 替代早期过窄的 detection demo，统一覆盖 YOLOv5、YOLOv6、YOLOv7、YOLOv8、YOLOv9、YOLOv10、YOLO11、YOLO26、YOLOX 和 custom 模型，并支持 det、cls、seg、obb、pose、sem 六任务。
+`applications/YoloVision` 替代早期过窄的 detection demo，统一覆盖 YOLOv5、YOLOv6、YOLOv7、YOLOv8、YOLOv9、YOLOv10、YOLO11、YOLO26、YOLOX 和 custom 模型，并支持 det、cls、seg、obb、pose、sem 六任务。
 
 第三条是安装与包。
 
@@ -168,7 +168,7 @@ docs/articles/zh-cn/package-consumer-runtime-proof-clean-consumer-guide.md
 ```text
 docs/articles/zh-cn/publishing/onnx-to-engine-public-article.md
 docs/articles/zh-cn/publishing/onnxtoengine-trtexec-parity-public-article.md
-samples/OnnxToEngine/Program.cs
+applications/OnnxToEngine/Program.cs
 applications/TensorRtExec/tensor-rt-exec-trtexec-parity-matrix.json
 applications/TensorRtExec/tensor-rt-exec-release-candidate-gap-list.json
 ```
@@ -177,9 +177,9 @@ applications/TensorRtExec/tensor-rt-exec-release-candidate-gap-list.json
 
 ```text
 docs/articles/zh-cn/publishing/yolovision-overview-public-article.md
-samples/YoloVision/README.md
-samples/YoloVision/yolo-model-matrix.json
-samples/YoloVision/yolovision-task-output-contract.json
+applications/YoloVision/README.md
+applications/YoloVision/yolo-model-matrix.json
+applications/YoloVision/yolovision-task-output-contract.json
 samples/assets/yolovision-article-case-pack.json
 samples/assets/yolovision-real-asset-owner-backfill-pack.json
 ```
@@ -191,8 +191,8 @@ samples/assets/yolovision-real-asset-owner-backfill-pack.json
 ```powershell
 dotnet build .\TensorRtSharp.sln -c Debug --no-restore
 dotnet run --project .\applications\TensorRtExec\TensorRtExec.csproj -- --help
-dotnet run --project .\samples\OnnxToEngine\OnnxToEngine.csproj -- --help
-dotnet run --project .\samples\YoloVision\YoloVision.csproj -- --help
+dotnet run --project .\applications\OnnxToEngine\OnnxToEngine.csproj -- --help
+dotnet run --project .\applications\YoloVision\YoloVision.csproj -- --help
 ```
 
 第二步，用 OnnxToEngine 或 TensorRtExec 构建 engine：
@@ -212,7 +212,7 @@ dotnet run --project .\applications\TensorRtExec\TensorRtExec.csproj -- `
 第三步，用 YoloVision 或自己的程序加载模型/engine：
 
 ```powershell
-dotnet run --project .\samples\YoloVision\YoloVision.csproj -- `
+dotnet run --project .\applications\YoloVision\YoloVision.csproj -- `
   --model ..\downloads\models\yolov8-det.onnx `
   --labels ..\downloads\models\coco.names `
   --image ..\downloads\images\dog.ppm `

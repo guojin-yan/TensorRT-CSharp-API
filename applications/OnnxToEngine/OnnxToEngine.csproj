@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <JYPPXIncludeTensorRtSampleSupport>true</JYPPXIncludeTensorRtSampleSupport>
+  </PropertyGroup>
+
+  <Import Project="..\..\build\JYPPX.PublicSamplePackages.props" />
+
+  <ItemGroup>
+    <ProjectReference Include="..\_shared\JYPPX.TensorRtSharp.ApplicationTools\JYPPX.TensorRtSharp.ApplicationTools.csproj" />
+  </ItemGroup>
+</Project>

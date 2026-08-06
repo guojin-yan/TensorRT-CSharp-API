@@ -1,6 +1,6 @@
 # YoloVision 系列样例路线图
 
-`samples/YoloVision` 是新的统一 YOLO-family 视觉样例入口，用来替代旧的单一检测命名思路。它面向 YOLOv5/v6/v7/v8/v9/v10/v11/v26/custom，并覆盖 `det`、`cls`、`seg`、`obb`、`pose`、`sem` 等任务。
+`applications/YoloVision` 是新的统一 YOLO-family 视觉样例入口，用来替代旧的单一检测命名思路。它面向 YOLOv5/v6/v7/v8/v9/v10/v11/v26/custom，并覆盖 `det`、`cls`、`seg`、`obb`、`pose`、`sem` 等任务。
 
 ## 当前定位
 
@@ -49,7 +49,7 @@ YoloVision 至少可以支撑以下文章：
 
 ## 与 TensorRtExec 的关系
 
-推荐用户先用 `applications/TensorRtExec` 或 `samples/OnnxToEngine` 生成 build-only report：
+推荐用户先用 `applications/TensorRtExec` 或 `applications/OnnxToEngine` 生成 build-only report：
 
 ```powershell
 dotnet run --project .\applications\TensorRtExec -- `
@@ -66,7 +66,7 @@ dotnet run --project .\applications\TensorRtExec -- `
 然后再用 YoloVision 做真实样例运行：
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- `
+dotnet run --project .\applications\YoloVision -- `
   --family yolov8 `
   --task det `
   --engine .\models\yolov8n.plan `

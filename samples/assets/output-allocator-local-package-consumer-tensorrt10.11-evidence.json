@@ -69,12 +69,12 @@
   },
   "artifacts": {
     "consumerSource": {
-      "path": "samples/OutputAllocator.PackageConsumer/Program.cs",
+      "path": "tests/fixtures/package-consumers/OutputAllocator.PackageConsumer/Program.cs",
       "sha256": "8aad7fa45efd9c18c23fc8f279f23432c103e39aca1ba64e5c9f360b4eb01fa0",
       "length": 11244
     },
     "projectTemplate": {
-      "path": "samples/OutputAllocator.PackageConsumer/OutputAllocator.PackageConsumer.csproj.template",
+      "path": "tests/fixtures/package-consumers/OutputAllocator.PackageConsumer/OutputAllocator.PackageConsumer.csproj.template",
       "sha256": "14459d08ff40d4df87364d973684dda5a9fad1892145df09e279c2b3a2739c6a",
       "length": 550
     },

@@ -11,10 +11,10 @@ public sealed class GpuAllocatorLocalPackageConsumerTests
     public void ConsumerTemplateUsesOnlyManagedAndBridgePackages()
     {
         string template = ReadSource(
-            "samples",
+            "tests", "fixtures", "package-consumers",
             "GpuAllocator.PackageConsumer",
             "GpuAllocator.PackageConsumer.csproj.template");
-        string program = ReadSource("samples", "GpuAllocator.PackageConsumer", "Program.cs");
+        string program = ReadSource("tests", "fixtures", "package-consumers", "GpuAllocator.PackageConsumer", "Program.cs");
 
         Assert.Equal(2, Regex.Matches(template, "<PackageReference ").Count);
         Assert.DoesNotContain("ProjectReference", template, StringComparison.Ordinal);

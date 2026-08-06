@@ -8,7 +8,7 @@ public sealed class ReleaseReadinessSamplesAndApplicationsTests
     [Fact]
     public void YoloVisionModelMatrixCoversFamiliesTasksAndProofBoundary()
     {
-        using JsonDocument document = ReadJson("samples", "YoloVision", "yolo-model-matrix.json");
+        using JsonDocument document = ReadJson("applications", "YoloVision", "yolo-model-matrix.json");
         JsonElement root = document.RootElement;
 
         Assert.Equal("yolovision-model-matrix", root.GetProperty("matrixId").GetString());
@@ -26,7 +26,7 @@ public sealed class ReleaseReadinessSamplesAndApplicationsTests
             Assert.Contains(task, tasks);
         }
 
-        string markdown = ReadText("samples", "YoloVision", "yolo-model-matrix.md");
+        string markdown = ReadText("applications", "YoloVision", "yolo-model-matrix.md");
         Assert.Contains("YOLOv26", markdown, StringComparison.Ordinal);
         Assert.Contains("sample-run-evidence", markdown, StringComparison.OrdinalIgnoreCase);
     }
@@ -34,7 +34,7 @@ public sealed class ReleaseReadinessSamplesAndApplicationsTests
     [Fact]
     public void OnnxToEngineAndTensorRtExecMatricesCoverTrtexecReadiness()
     {
-        using JsonDocument parity = ReadJson("samples", "OnnxToEngine", "trtexec-parity-matrix.json");
+        using JsonDocument parity = ReadJson("applications", "OnnxToEngine", "trtexec-parity-matrix.json");
         string[] options = parity.RootElement.GetProperty("entries").EnumerateArray()
             .Select(static item => item.GetProperty("option").GetString()!)
             .ToArray();
@@ -107,8 +107,8 @@ public sealed class ReleaseReadinessSamplesAndApplicationsTests
 
         foreach (string marker in new[]
         {
-            "samples/YoloVision/yolo-model-matrix.json",
-            "samples/OnnxToEngine/trtexec-parity-matrix.json",
+            "applications/YoloVision/yolo-model-matrix.json",
+            "applications/OnnxToEngine/trtexec-parity-matrix.json",
             "applications/TensorRtExec/tensor-rt-exec-feature-matrix.json",
             "artifacts/interface-coverage/release-api-readiness-audit.json",
             "article-roadmap-30plus"

@@ -76,9 +76,9 @@ public sealed class ReleaseProofSampleArticleClosureTests
 
         foreach (string expected in new[]
                  {
-                     "samples/OnnxToEngine/trtexec-parity-matrix.json",
+                     "applications/OnnxToEngine/trtexec-parity-matrix.json",
                      "applications/TensorRtExec/tensor-rt-exec-trtexec-parity-matrix.json",
-                     "samples/YoloVision/yolo-model-matrix.json",
+                     "applications/YoloVision/yolo-model-matrix.json",
                      "docs/articles/zh-cn/publishing/article-roadmap-30plus.json",
                      "YOLOv26",
                      "custom",
@@ -155,7 +155,7 @@ public sealed class ReleaseProofSampleArticleClosureTests
             "\n",
             File.ReadAllText(Path.Combine(RepositoryPaths.Root, "TensorRtSharp.sln")),
             File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "README.md")),
-            File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "YoloVision", "README.md")),
+            File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "YoloVision", "README.md")),
             File.ReadAllText(Path.Combine(RepositoryPaths.Root, "artifacts", "final-release", "release-proof-sample-article-closure-matrix.json")),
             File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "articles", "zh-cn", "release-proof-sample-article-closure.md")));
 

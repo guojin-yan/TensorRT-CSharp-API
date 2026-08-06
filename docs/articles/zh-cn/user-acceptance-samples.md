@@ -29,15 +29,15 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Export-UserAcceptanceSampleC
 
 低资产依赖、适合作为第一批文章和用户验收的样例：
 
-- `samples/MultiStream`
-- `samples/DynamicShape`
-- `samples/InferenceBindings`
-- `samples/OnnxToEngine`
+- `samples/Performance/01.MultiStream`
+- `samples/Inference/02.DynamicShapes`
+- `samples/Inference/01.Bindings`
+- `applications/OnnxToEngine`
 
 需要外部模型资产的长教程：
 
-- `samples/Classification`
-- `samples/YoloVision`
+- `samples/ComputerVision/01.Classification`
+- `applications/YoloVision`
 
 这些文章必须先说明模型来源、授权注意事项、输入 shape、labels、预处理和预期输出，不能只给一条运行命令。
 

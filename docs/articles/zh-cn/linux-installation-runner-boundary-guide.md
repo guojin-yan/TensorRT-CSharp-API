@@ -29,7 +29,7 @@ Linux runtime package 应与 RID、CUDA、TensorRT、cuDNN 组合一致。对于
 ```bash
 dotnet restore
 dotnet build -c Release --no-restore
-dotnet run -c Release --no-build --project samples/OnnxToEngine -- --help
+dotnet run -c Release --no-build --project applications/OnnxToEngine -- --help
 ```
 
 这些命令适合确认基础工具链。真实 smoke 需要模型资产和 native runtime。release 级别 proof 还要求仓库外 clean consumer、public package source、restore/build/smoke 日志与 hash。

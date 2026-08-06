@@ -126,7 +126,7 @@
       "validator must pass before real-model-runtime promotion"
     ],
     "buildOnlyCommand": "dotnet run --project .\\applications\\TensorRtExec -- --onnx .\\models\\yolo.onnx --saveEngine .\\models\\yolo.plan --minShapes images:1x3x640x640 --optShapes images:1x3x640x640 --maxShapes images:1x3x640x640 --buildOnly --exportReport .\\models\\yolo-build-report.json --evidenceSidecar .\\models\\yolo-evidence.sidecar.json",
-    "runCommand": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolo.onnx --labels .\\models\\coco.names --input-data .\\models\\yolo-preprocessed-fp32.bin --input-shape 1x3x640x640 --tensor-rt-line 10 --layout auto --has-objectness auto --nms-mode class-aware --confidence 0.25",
+    "runCommand": "dotnet run --project .\\applications\\YoloVision -- --model .\\models\\yolo.onnx --labels .\\models\\coco.names --input-data .\\models\\yolo-preprocessed-fp32.bin --input-shape 1x3x640x640 --tensor-rt-line 10 --layout auto --has-objectness auto --nms-mode class-aware --confidence 0.25",
     "expectedEvidenceLines": [
       "YoloVision TensorRtLine=...",
       "Profile Family=... Task=... Layout=... Nms=... NmsMode=...",

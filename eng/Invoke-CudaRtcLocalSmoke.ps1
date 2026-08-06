@@ -21,8 +21,8 @@ if ([string]::IsNullOrWhiteSpace($OutputPath)) {
 }
 
 $BridgePath = (Resolve-Path -LiteralPath $BridgePath).Path
-$sampleProject = Join-Path $RepositoryRoot 'samples\CudaRuntimeCompilation\CudaRuntimeCompilation.csproj'
-$sampleDll = Join-Path $RepositoryRoot 'samples\CudaRuntimeCompilation\bin\Debug\net8.0\CudaRuntimeCompilation.dll'
+$sampleProject = Join-Path $RepositoryRoot 'samples\Cuda\01.RuntimeCompilation\CudaRuntimeCompilation.csproj'
+$sampleDll = Join-Path $RepositoryRoot 'samples\Cuda\01.RuntimeCompilation\bin\Debug\net8.0\CudaRuntimeCompilation.dll'
 
 if ([string]::IsNullOrWhiteSpace($CudaRuntimeRoot)) {
   $CudaRuntimeRoot = if (-not [string]::IsNullOrWhiteSpace($env:JYPPX_CUDA_ROOT)) { $env:JYPPX_CUDA_ROOT } else { $env:CUDA_PATH }

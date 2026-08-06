@@ -8,8 +8,8 @@ public sealed class ReleaseReadinessSmokeClosureTests
     [Fact]
     public void YoloVisionMatrixAndManagedSmokeCoverEveryPromisedTask()
     {
-        using JsonDocument matrix = ReadJson("samples", "YoloVision", "yolo-model-matrix.json");
-        string matrixText = ReadText("samples", "YoloVision", "yolo-model-matrix.md");
+        using JsonDocument matrix = ReadJson("applications", "YoloVision", "yolo-model-matrix.json");
+        string matrixText = ReadText("applications", "YoloVision", "yolo-model-matrix.md");
         string tests = ReadText("tests", "JYPPX.ProjectQuality.Tests", "YoloVisionManagedPipelineTests.cs");
 
         string[] tasks = matrix.RootElement.GetProperty("tasks").EnumerateArray()
@@ -74,7 +74,7 @@ public sealed class ReleaseReadinessSmokeClosureTests
     [Fact]
     public void TrtexecParityMatrixIsBackedByParserAndApplicationSurfaces()
     {
-        using JsonDocument parity = ReadJson("samples", "OnnxToEngine", "trtexec-parity-matrix.json");
+        using JsonDocument parity = ReadJson("applications", "OnnxToEngine", "trtexec-parity-matrix.json");
         string parser = ReadText("src", "JYPPX.TensorRtSharp.Tools", "Trtexec", "TrtexecLikeParser.cs");
         string options = ReadText("src", "JYPPX.TensorRtSharp.Tools", "Trtexec", "TrtexecLikeOptions.cs");
         string deploymentOptions = string.Concat(

@@ -14,7 +14,7 @@ param(
     [switch] $Strict,
 
     [Parameter(Mandatory = $false)]
-    [string] $ContractPath = "samples/YoloVision/yolovision-task-output-contract.json",
+    [string] $ContractPath = "applications/YoloVision/yolovision-task-output-contract.json",
 
     [Parameter(Mandatory = $false)]
     [string] $OutputPath = "artifacts/yolovision/yolovision-real-asset-candidate-validation.json"

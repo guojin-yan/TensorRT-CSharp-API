@@ -29,7 +29,7 @@ CUDA 11.8、CUDA 12.1、CUDA 12.9、CUDA 13.2 的 Windows header、import LIB、
 - ABI 覆盖 capability、dependency diagnostic、source/program name、virtual header、name expression、compile、log、PTX/CUBIN/LTO IR 与 lowered-name 的 caller-buffer/count-copy；输入有 UTF-8、embedded NUL、重复值、数量和字节上限，C++ exception 与 Windows SEH 均在边界内收敛。
 - managed 新增 `CudaRtcCompiler`、`CudaRtcProgram`、`CudaRtcProgramSource`、`CudaRtcCompileOptions`、`CudaRtcCompilationResult` 与 `CudaRtcArtifact`；public surface 不暴露 `IntPtr`、`SafeHandle` 或 vendor program/kernel handle。
 - native 同时新增 optional dynamic CUDA Driver loader、retained-primary-context `JYPPX_CudaDriverModule`、typed launch storage 与 Driver event completion owner，共 9 个 ABI；managed 新增 `CudaDriver`、`CudaDriverModule` 与 `CudaDriverKernelLaunch`，不暴露 raw Driver handle。
-- `samples/CudaRuntimeCompilation` 真实覆盖 virtual header、template lowered name、成功 PTX、`sm_75` CUBIN、可用版本的 LTO IR、重复 PTX SHA256 确定性和 intentional compile failure log。
+- `samples/Cuda/01.RuntimeCompilation` 真实覆盖 virtual header、template lowered name、成功 PTX、`sm_75` CUBIN、可用版本的 LTO IR、重复 PTX SHA256 确定性和 intentional compile failure log。
 - 本机四版 compile 均成功；11.8/12.1/12.9 PTX 可由当前 CUDA 12.9 `CudaKernelLibrary` 和系统 Driver 12090 两条路径加载、按名称启动并读回 257 个 float，三版 output SHA256 一致；13.2 PTX 被两条路径以对应 unsupported-PTX-version 诊断拒绝，因此只记 compile-only/load-rejected proof。
 - `eng/Test-CudaRtcBridgePackageConsumer.ps1` 会创建仓库外 consumer，清空远程 NuGet source，只引用 managed/bridge 两个 `PackageReference`。它验证 bridge 包只含 `jyppxtrtbridge.dll`，不依赖 `JYPPX_NATIVE_BRIDGE_PATH` 即可复制同 hash bridge；负向环境中 RTC 不可用但 Driver 12090 仍可用，正向再使用本机 NVRTC 12.9 完成 compile、intentional failure log 与 Runtime-library/Driver 双路径 launch/readback/correctness，且输出 hash 一致。
 - 证据位于 `artifacts/cuda-runtime-compilation/capability-matrix.json`、`driver-capability-matrix.json`、`local-smoke.json`、`native-abi-surface.json`、`kernel-launch-native-abi-surface.json` 与 `driver-native-abi-surface.json`。前三版 Runtime-library/Driver 的 launch/readback/correctness/owner-retention 均为 true；13.2 明确保持为 false。
@@ -96,7 +96,7 @@ PTX、CUBIN 和 LTO IR 是 option/target dependent outputs。API 必须显式表
 
 ### 阶段 E：Samples 与真实 smoke（Windows 本机已完成）
 
-`samples/CudaRuntimeCompilation` 已覆盖：
+`samples/Cuda/01.RuntimeCompilation` 已覆盖：
 
 - vector add 或 elementwise kernel：compile、load、launch、synchronize、readback 和 expected-output comparison。
 - 故意编译失败：保留完整 compiler log 和失败分类。

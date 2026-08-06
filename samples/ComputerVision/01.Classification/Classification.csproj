@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>Classification</AssemblyName>
+    <RootNamespace>ClassificationSample</RootNamespace>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <JYPPXIncludeTensorRtOnnxSampleSupport>true</JYPPXIncludeTensorRtOnnxSampleSupport>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+</Project>

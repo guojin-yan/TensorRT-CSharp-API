@@ -4,7 +4,7 @@
 >
 > 主要库：`JYPPX.TensorRtSharp`、`JYPPX.CudaSharp`、`jyppxtrtbridge`
 >
-> 示例：`samples/StreamReader.PackageConsumer`
+> 示例：`tests/fixtures/package-consumers/StreamReader.PackageConsumer`
 >
 > 本机结果：TensorRT 10.11、CUDA 12.9、NVIDIA GeForce RTX 3060 Laptop GPU
 >

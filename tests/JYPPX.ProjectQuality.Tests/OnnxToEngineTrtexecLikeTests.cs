@@ -1871,11 +1871,11 @@ public sealed class OnnxToEngineTrtexecLikeTests
     [Fact]
     public void OnnxToEngineProgramDelegatesBuildWorkToReusableService()
     {
-        string program = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "OnnxToEngine", "Program.cs"));
+        string program = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "OnnxToEngine", "Program.cs"));
         string toolsProject = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp.Tools", "JYPPX.TensorRtSharp.Tools.csproj"));
         string service = ReadBuildService("Core");
         string diagnostics = ReadBuildDiagnostics("Json", "Markdown");
-        string project = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "OnnxToEngine", "OnnxToEngine.csproj"));
+        string project = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "OnnxToEngine", "OnnxToEngine.csproj"));
 
         Assert.Contains("new OnnxEngineBuildService().Execute", program, StringComparison.Ordinal);
         Assert.Contains("JYPPX.CudaSharp.csproj", toolsProject, StringComparison.Ordinal);
@@ -1904,7 +1904,10 @@ public sealed class OnnxToEngineTrtexecLikeTests
         Assert.Contains("Memory values accept MiB by default", program, StringComparison.Ordinal);
         Assert.Contains("--iterations <n> --warmUp <ms> --duration <sec> --streams <n> --useCudaGraph", program, StringComparison.Ordinal);
         Assert.Contains("--exportReport|--report <path.json|path.md>", program, StringComparison.Ordinal);
-        Assert.Contains("src\\JYPPX.TensorRtSharp.Tools\\JYPPX.TensorRtSharp.Tools.csproj", project.Replace("/", "\\"), StringComparison.Ordinal);
+        Assert.Contains("_shared\\JYPPX.TensorRtSharp.ApplicationTools\\JYPPX.TensorRtSharp.ApplicationTools.csproj", project.Replace("/", "\\"), StringComparison.Ordinal);
+        Assert.Contains("JYPPX.PublicSamplePackages.props", project, StringComparison.Ordinal);
+        Assert.DoesNotContain("src\\JYPPX.CudaSharp", project.Replace("/", "\\"), StringComparison.Ordinal);
+        Assert.DoesNotContain("src\\JYPPX.TensorRtSharp\\", project.Replace("/", "\\"), StringComparison.Ordinal);
     }
 
     [Fact]
@@ -1947,9 +1950,9 @@ public sealed class OnnxToEngineTrtexecLikeTests
         Assert.Contains("HasRawBindingProof=false", trtexecCoverage, StringComparison.Ordinal);
         Assert.Contains("synthetic-input-runtime is not real-model-runtime", trtexecCoverage, StringComparison.Ordinal);
         Assert.Contains("PreflightMetadata", trtexecCoverage, StringComparison.Ordinal);
-        Assert.Contains("ArtifactProofBoundary", File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "OnnxToEngine", "README.md")), StringComparison.Ordinal);
-        Assert.Contains("HasTensorOutputProof", File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "OnnxToEngine", "README.md")), StringComparison.Ordinal);
-        Assert.Contains("HasRawBindingProof=false", File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "OnnxToEngine", "README.md")), StringComparison.Ordinal);
+        Assert.Contains("ArtifactProofBoundary", File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "OnnxToEngine", "README.md")), StringComparison.Ordinal);
+        Assert.Contains("HasTensorOutputProof", File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "OnnxToEngine", "README.md")), StringComparison.Ordinal);
+        Assert.Contains("HasRawBindingProof=false", File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "OnnxToEngine", "README.md")), StringComparison.Ordinal);
         Assert.Contains("--save-engine", trtexecCoverage, StringComparison.Ordinal);
         Assert.Contains("--timingCache", trtexecCoverage, StringComparison.Ordinal);
         Assert.Contains("--useCudaGraph", trtexecCoverage, StringComparison.Ordinal);

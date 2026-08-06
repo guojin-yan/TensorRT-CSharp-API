@@ -1,11 +1,11 @@
 {
   "recordKind": "yolovision-real-asset-owner-backfill-pack",
   "sampleName": "YoloVision",
-  "samplePath": "samples/YoloVision",
+  "samplePath": "applications/YoloVision",
   "sourcePack": "samples/assets/yolovision-article-case-pack.json",
-  "taskOutputContract": "samples/YoloVision/yolovision-task-output-contract.json",
+  "taskOutputContract": "applications/YoloVision/yolovision-task-output-contract.json",
   "preflightContract": {
-    "schemaPath": "samples/YoloVision/yolovision-preflight.schema.json",
+    "schemaPath": "applications/YoloVision/yolovision-preflight.schema.json",
     "schemaVersion": "yolovision-preflight.v1",
     "proofClassification": "precheck",
     "canPromoteRealModelRuntime": false,
@@ -138,7 +138,7 @@
         "proofBoundary": "TensorRtExec build report, command transcript, stdout/stderr logs, and engine hash are build evidence only; they are not real-model-runtime proof and never package-consumer-runtime proof."
       },
       "yoloVision": {
-        "runCommand": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8n.onnx --labels .\\models\\coco.names --image .\\models\\yolov8n-det.ppm --preprocessed-output .\\models\\yolov8n-det-fp32.bin --input-shape 1x3x640x640 --family v8 --task det --layout auto --has-objectness auto --nms-mode class-aware --confidence 0.25 --iou-threshold 0.45 --output-json .\\models\\yolov8n-det-output.json --visualization-svg .\\models\\yolov8n-det-output.svg",
+        "runCommand": "dotnet run --project .\\applications\\YoloVision -- --model .\\models\\yolov8n.onnx --labels .\\models\\coco.names --image .\\models\\yolov8n-det.ppm --preprocessed-output .\\models\\yolov8n-det-fp32.bin --input-shape 1x3x640x640 --family v8 --task det --layout auto --has-objectness auto --nms-mode class-aware --confidence 0.25 --iou-threshold 0.45 --output-json .\\models\\yolov8n-det-output.json --visualization-svg .\\models\\yolov8n-det-output.svg",
         "expectedEvidenceLines": [
           "Profile Family=v8 Task=det",
           "Postprocess Task=det",
@@ -156,10 +156,10 @@
         "outputJsonSha256": "owner-required"
       },
       "yoloVisionPreflight": {
-        "command": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8n.onnx --labels .\\models\\coco.names --image .\\models\\yolov8n-det.ppm --preprocessed-output .\\models\\yolov8n-det-fp32.bin --input-shape 1x3x640x640 --family v8 --task det --layout auto --has-objectness auto --nms-mode class-aware --confidence 0.25 --iou-threshold 0.45 --preflight --strict-preflight --preflight-report .\\models\\yolov8n-det-preflight.json",
+        "command": "dotnet run --project .\\applications\\YoloVision -- --model .\\models\\yolov8n.onnx --labels .\\models\\coco.names --image .\\models\\yolov8n-det.ppm --preprocessed-output .\\models\\yolov8n-det-fp32.bin --input-shape 1x3x640x640 --family v8 --task det --layout auto --has-objectness auto --nms-mode class-aware --confidence 0.25 --iou-threshold 0.45 --preflight --strict-preflight --preflight-report .\\models\\yolov8n-det-preflight.json",
         "reportPath": "models/yolov8n-det-preflight.json",
         "reportSha256": "owner-required",
-        "schemaPath": "samples/YoloVision/yolovision-preflight.schema.json",
+        "schemaPath": "applications/YoloVision/yolovision-preflight.schema.json",
         "schemaVersion": "yolovision-preflight.v1",
         "expectedState": "owner-action-required",
         "proofClassification": "precheck",
@@ -259,7 +259,7 @@
         "proofBoundary": "TensorRtExec build report, command transcript, stdout/stderr logs, and engine hash are build evidence only; they are not real-model-runtime proof and never package-consumer-runtime proof."
       },
       "yoloVision": {
-        "runCommand": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8n-seg.onnx --labels .\\models\\coco.names --image .\\models\\yolov8n-seg.ppm --preprocessed-output .\\models\\yolov8n-seg-fp32.bin --input-shape 1x3x640x640 --family v8 --task seg --output-role-map boxes:det,proto:mask-prototypes --mask-coefficient-count 32 --mask-threshold 0.5 --mask-spatial-transform --mask-coordinate-space model-input --mask-crop-to-box true --output-json .\\models\\yolov8n-seg-output.json --visualization-svg .\\models\\yolov8n-seg-output.svg",
+        "runCommand": "dotnet run --project .\\applications\\YoloVision -- --model .\\models\\yolov8n-seg.onnx --labels .\\models\\coco.names --image .\\models\\yolov8n-seg.ppm --preprocessed-output .\\models\\yolov8n-seg-fp32.bin --input-shape 1x3x640x640 --family v8 --task seg --output-role-map boxes:det,proto:mask-prototypes --mask-coefficient-count 32 --mask-threshold 0.5 --mask-spatial-transform --mask-coordinate-space model-input --mask-crop-to-box true --output-json .\\models\\yolov8n-seg-output.json --visualization-svg .\\models\\yolov8n-seg-output.svg",
         "expectedEvidenceLines": [
           "Profile Family=v8 Task=seg",
           "Segmentations=",
@@ -277,10 +277,10 @@
         "outputJsonSha256": "owner-required"
       },
       "yoloVisionPreflight": {
-        "command": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8n-seg.onnx --labels .\\models\\coco.names --image .\\models\\yolov8n-seg.ppm --input-shape 1x3x640x640 --family v8 --task seg --output-role-map boxes:det,proto:mask-prototypes --mask-coefficient-count 32 --mask-threshold 0.5 --mask-spatial-transform --mask-coordinate-space model-input --mask-crop-to-box true --preflight --preflight-report .\\models\\yolov8n-seg-preflight.json",
+        "command": "dotnet run --project .\\applications\\YoloVision -- --model .\\models\\yolov8n-seg.onnx --labels .\\models\\coco.names --image .\\models\\yolov8n-seg.ppm --input-shape 1x3x640x640 --family v8 --task seg --output-role-map boxes:det,proto:mask-prototypes --mask-coefficient-count 32 --mask-threshold 0.5 --mask-spatial-transform --mask-coordinate-space model-input --mask-crop-to-box true --preflight --preflight-report .\\models\\yolov8n-seg-preflight.json",
         "reportPath": "models/yolov8n-seg-preflight.json",
         "reportSha256": "owner-required",
-        "schemaPath": "samples/YoloVision/yolovision-preflight.schema.json",
+        "schemaPath": "applications/YoloVision/yolovision-preflight.schema.json",
         "schemaVersion": "yolovision-preflight.v1",
         "expectedState": "owner-action-required",
         "proofClassification": "precheck",
@@ -383,7 +383,7 @@
         "proofBoundary": "TensorRtExec build report, command transcript, stdout/stderr logs, and engine hash are build evidence only; they are not real-model-runtime proof and never package-consumer-runtime proof."
       },
       "yoloVision": {
-        "runCommand": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8n-pose.onnx --labels .\\models\\coco.names --input-data .\\models\\yolov8n-pose-fp32.bin --input-shape 1x3x640x640 --family v8 --task pose --output-role-map boxes:det,keypoints:pose-keypoints --pose-keypoint-count 17",
+        "runCommand": "dotnet run --project .\\applications\\YoloVision -- --model .\\models\\yolov8n-pose.onnx --labels .\\models\\coco.names --input-data .\\models\\yolov8n-pose-fp32.bin --input-shape 1x3x640x640 --family v8 --task pose --output-role-map boxes:det,keypoints:pose-keypoints --pose-keypoint-count 17",
         "expectedEvidenceLines": [
           "Profile Family=v8 Task=pose",
           "Poses=",
@@ -401,10 +401,10 @@
         "outputJsonSha256": "owner-required"
       },
       "yoloVisionPreflight": {
-        "command": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8n-pose.onnx --labels .\\models\\coco.names --input-data .\\models\\yolov8n-pose-fp32.bin --input-shape 1x3x640x640 --family v8 --task pose --output-role-map boxes:det,keypoints:pose-keypoints --pose-keypoint-count 17 --preflight --preflight-report .\\models\\yolov8n-pose-preflight.json",
+        "command": "dotnet run --project .\\applications\\YoloVision -- --model .\\models\\yolov8n-pose.onnx --labels .\\models\\coco.names --input-data .\\models\\yolov8n-pose-fp32.bin --input-shape 1x3x640x640 --family v8 --task pose --output-role-map boxes:det,keypoints:pose-keypoints --pose-keypoint-count 17 --preflight --preflight-report .\\models\\yolov8n-pose-preflight.json",
         "reportPath": "models/yolov8n-pose-preflight.json",
         "reportSha256": "owner-required",
-        "schemaPath": "samples/YoloVision/yolovision-preflight.schema.json",
+        "schemaPath": "applications/YoloVision/yolovision-preflight.schema.json",
         "schemaVersion": "yolovision-preflight.v1",
         "expectedState": "owner-action-required",
         "proofClassification": "precheck",
@@ -501,7 +501,7 @@
         "proofBoundary": "TensorRtExec build report, command transcript, stdout/stderr logs, and engine hash are build evidence only; they are not real-model-runtime proof and never package-consumer-runtime proof."
       },
       "yoloVision": {
-        "runCommand": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8n-obb.onnx --labels .\\models\\dota.names --input-data .\\models\\yolov8n-obb-fp32.bin --input-shape 1x3x1024x1024 --family v8 --task obb --output-role-map boxes:det,angles:obb-angle --obb-angle-output angles",
+        "runCommand": "dotnet run --project .\\applications\\YoloVision -- --model .\\models\\yolov8n-obb.onnx --labels .\\models\\dota.names --input-data .\\models\\yolov8n-obb-fp32.bin --input-shape 1x3x1024x1024 --family v8 --task obb --output-role-map boxes:det,angles:obb-angle --obb-angle-output angles",
         "expectedEvidenceLines": [
           "Profile Family=v8 Task=obb",
           "OrientedBoxes=",
@@ -519,10 +519,10 @@
         "outputJsonSha256": "owner-required"
       },
       "yoloVisionPreflight": {
-        "command": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8n-obb.onnx --labels .\\models\\dota.names --input-data .\\models\\yolov8n-obb-fp32.bin --input-shape 1x3x1024x1024 --family v8 --task obb --output-role-map boxes:det,angles:obb-angle --obb-angle-output angles --preflight --preflight-report .\\models\\yolov8n-obb-preflight.json",
+        "command": "dotnet run --project .\\applications\\YoloVision -- --model .\\models\\yolov8n-obb.onnx --labels .\\models\\dota.names --input-data .\\models\\yolov8n-obb-fp32.bin --input-shape 1x3x1024x1024 --family v8 --task obb --output-role-map boxes:det,angles:obb-angle --obb-angle-output angles --preflight --preflight-report .\\models\\yolov8n-obb-preflight.json",
         "reportPath": "models/yolov8n-obb-preflight.json",
         "reportSha256": "owner-required",
-        "schemaPath": "samples/YoloVision/yolovision-preflight.schema.json",
+        "schemaPath": "applications/YoloVision/yolovision-preflight.schema.json",
         "schemaVersion": "yolovision-preflight.v1",
         "expectedState": "owner-action-required",
         "proofClassification": "precheck",
@@ -618,7 +618,7 @@
         "proofBoundary": "TensorRtExec build report, command transcript, stdout/stderr logs, and engine hash are build evidence only; they are not real-model-runtime proof and never package-consumer-runtime proof."
       },
       "yoloVision": {
-        "runCommand": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8n-cls.onnx --labels .\\models\\imagenet-yolov8n-cls.names --input-data .\\models\\yolov8n-cls-fp32.bin --input-shape 1x3x224x224 --family v8 --task cls --classification-output output0 --classification-score-mode probabilities --confidence 0 --top-k 5",
+        "runCommand": "dotnet run --project .\\applications\\YoloVision -- --model .\\models\\yolov8n-cls.onnx --labels .\\models\\imagenet-yolov8n-cls.names --input-data .\\models\\yolov8n-cls-fp32.bin --input-shape 1x3x224x224 --family v8 --task cls --classification-output output0 --classification-score-mode probabilities --confidence 0 --top-k 5",
         "expectedEvidenceLines": [
           "Profile Family=v8 Task=cls",
           "Classification Class=",
@@ -636,10 +636,10 @@
         "outputJsonSha256": "owner-required"
       },
       "yoloVisionPreflight": {
-        "command": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8n-cls.onnx --labels .\\models\\imagenet-yolov8n-cls.names --input-data .\\models\\yolov8n-cls-fp32.bin --input-shape 1x3x224x224 --family v8 --task cls --classification-output output0 --classification-score-mode probabilities --confidence 0 --top-k 5 --preflight --preflight-report .\\models\\yolov8n-cls-preflight.json",
+        "command": "dotnet run --project .\\applications\\YoloVision -- --model .\\models\\yolov8n-cls.onnx --labels .\\models\\imagenet-yolov8n-cls.names --input-data .\\models\\yolov8n-cls-fp32.bin --input-shape 1x3x224x224 --family v8 --task cls --classification-output output0 --classification-score-mode probabilities --confidence 0 --top-k 5 --preflight --preflight-report .\\models\\yolov8n-cls-preflight.json",
         "reportPath": "models/yolov8n-cls-preflight.json",
         "reportSha256": "owner-required",
-        "schemaPath": "samples/YoloVision/yolovision-preflight.schema.json",
+        "schemaPath": "applications/YoloVision/yolovision-preflight.schema.json",
         "schemaVersion": "yolovision-preflight.v1",
         "expectedState": "owner-action-required",
         "proofClassification": "precheck",
@@ -733,7 +733,7 @@
         "proofBoundary": "TensorRtExec build report, command transcript, stdout/stderr logs, and engine hash are build evidence only; they are not real-model-runtime proof and never package-consumer-runtime proof."
       },
       "yoloVision": {
-        "runCommand": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8n-sem.onnx --labels .\\models\\semantic-classes.names --input-data .\\models\\yolov8n-sem-fp32.bin --input-shape 1x3x512x512 --family custom --task sem --semantic-output semantic --class-count 21 --output-json .\\models\\yolov8n-sem-output.json --visualization-svg .\\models\\yolov8n-sem-output.svg",
+        "runCommand": "dotnet run --project .\\applications\\YoloVision -- --model .\\models\\yolov8n-sem.onnx --labels .\\models\\semantic-classes.names --input-data .\\models\\yolov8n-sem-fp32.bin --input-shape 1x3x512x512 --family custom --task sem --semantic-output semantic --class-count 21 --output-json .\\models\\yolov8n-sem-output.json --visualization-svg .\\models\\yolov8n-sem-output.svg",
         "expectedEvidenceLines": [
           "Profile Family=custom Task=sem",
           "SemanticMap Classes=",
@@ -751,10 +751,10 @@
         "outputJsonSha256": "owner-required"
       },
       "yoloVisionPreflight": {
-        "command": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolov8n-sem.onnx --labels .\\models\\semantic-classes.names --input-data .\\models\\yolov8n-sem-fp32.bin --input-shape 1x3x512x512 --family custom --task sem --semantic-output semantic --class-count 21 --preflight --preflight-report .\\models\\yolov8n-sem-preflight.json",
+        "command": "dotnet run --project .\\applications\\YoloVision -- --model .\\models\\yolov8n-sem.onnx --labels .\\models\\semantic-classes.names --input-data .\\models\\yolov8n-sem-fp32.bin --input-shape 1x3x512x512 --family custom --task sem --semantic-output semantic --class-count 21 --preflight --preflight-report .\\models\\yolov8n-sem-preflight.json",
         "reportPath": "models/yolov8n-sem-preflight.json",
         "reportSha256": "owner-required",
-        "schemaPath": "samples/YoloVision/yolovision-preflight.schema.json",
+        "schemaPath": "applications/YoloVision/yolovision-preflight.schema.json",
         "schemaVersion": "yolovision-preflight.v1",
         "expectedState": "owner-action-required",
         "proofClassification": "precheck",

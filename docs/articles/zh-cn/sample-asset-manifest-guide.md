@@ -71,7 +71,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-SampleAssetManifest.ps1
 
 `Test-SampleAssetManifest.ps1` 现在也会读取 manifest 中的 `evidence.sampleRunEvidenceRecord` 和 `evidence.sampleRunEvidenceValidation`。如果 record 文件不存在，模板保持 `owner-action-required`，不报 error；如果 record 文件存在，会 cross-check `sampleName`、`modelSha256`、`labelsSha256`、`inputAssetSha256`，并拒绝 `package-consumer-runtime`。这一步的目标是防止真实 runner 日志、manifest 和 sidecar 各说各话。
 
-manifest 的 `sampleName` 还会被当作样例项目身份校验：`Classification` 必须对应 `samples/Classification/Classification.csproj`，`YoloVision` 必须对应 `samples/YoloVision/YoloVision.csproj`。这条规则用于防止样例改名后旧项目名、旧构建产物或错误 manifest 回流到发布证据链。
+manifest 的 `sampleName` 还会被当作样例项目身份校验：`Classification` 必须对应 `samples/ComputerVision/01.Classification/Classification.csproj`，`YoloVision` 必须对应 `applications/YoloVision/YoloVision.csproj`。这条规则用于防止样例改名后旧项目名、旧构建产物或错误 manifest 回流到发布证据链。
 
 ## 晋级规则
 

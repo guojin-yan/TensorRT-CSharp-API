@@ -10,7 +10,7 @@ public sealed class YoloVisionOutputReportValidatorTests
     [Fact]
     public void YoloVisionOutputExamplesCoverAllTasksAndKeepProofBoundary()
     {
-        string examplesDirectory = Path.Combine(RepositoryPaths.Root, "samples", "YoloVision", "examples");
+        string examplesDirectory = Path.Combine(RepositoryPaths.Root, "applications", "YoloVision", "examples");
         string[] expectedFiles =
         {
             "yolovision-output-det.example.json",
@@ -78,11 +78,11 @@ public sealed class YoloVisionOutputReportValidatorTests
         Assert.Contains("source-image-after-explicit-preprocess-inverse-and-optional-box-crop", script, StringComparison.Ordinal);
         Assert.Contains("explicit-preprocess-metadata-transform; owner must validate exporter-specific mask alignment", script, StringComparison.Ordinal);
         Assert.Contains("no-yolodet", script, StringComparison.Ordinal);
-        Assert.Contains("samples/YoloVision/examples/yolovision-output-det.example.json", script, StringComparison.Ordinal);
-        Assert.Contains("samples/YoloVision/examples/yolovision-output-sem.example.json", script, StringComparison.Ordinal);
+        Assert.Contains("applications/YoloVision/examples/yolovision-output-det.example.json", script, StringComparison.Ordinal);
+        Assert.Contains("applications/YoloVision/examples/yolovision-output-sem.example.json", script, StringComparison.Ordinal);
 
-        string readme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "YoloVision", "README.md"));
-        Assert.Contains("samples/YoloVision/examples", readme, StringComparison.Ordinal);
+        string readme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "YoloVision", "README.md"));
+        Assert.Contains("applications/YoloVision/examples", readme, StringComparison.Ordinal);
         Assert.Contains("Test-YoloVisionOutputReport.ps1 -Strict", readme, StringComparison.Ordinal);
         Assert.Contains("boundary.isRuntimeProof=false", readme, StringComparison.Ordinal);
         Assert.Contains("valueSha256", readme, StringComparison.Ordinal);
@@ -107,8 +107,7 @@ public sealed class YoloVisionOutputReportValidatorTests
             string outputPath = Path.Combine(directory, "validation.json");
             JsonNode root = JsonNode.Parse(File.ReadAllText(Path.Combine(
                 RepositoryPaths.Root,
-                "samples",
-                "YoloVision",
+                "applications", "YoloVision",
                 "examples",
                 "yolovision-output-seg.example.json")))!;
             root["predictions"]![0]!["maskTotalPixelCount"] = 123;
@@ -141,8 +140,7 @@ public sealed class YoloVisionOutputReportValidatorTests
             string outputPath = Path.Combine(directory, "validation.json");
             JsonNode root = JsonNode.Parse(File.ReadAllText(Path.Combine(
                 RepositoryPaths.Root,
-                "samples",
-                "YoloVision",
+                "applications", "YoloVision",
                 "examples",
                 "yolovision-output-seg.example.json")))!;
             root["predictions"]![0]!["spatialTransform"] = new JsonObject

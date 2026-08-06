@@ -37,7 +37,7 @@ flowchart TD
 smoke/CudaSmokeRunner/Program.cs
 docs/articles/zh-cn/cuda-memory-wrapper.md
 docs/articles/zh-cn/cuda-memory-range-apis.md
-samples/MultiStream/Program.cs
+samples/Performance/01.MultiStream/Program.cs
 ```
 
 ## 运行命令
@@ -165,7 +165,7 @@ TensorRT hot path 的 device memory。
 推荐让 `TensorRtInferenceBindings` 创建和持有常规 input/output `CudaMemory`，或让应用显式持有外部 buffer 后在 context
 存活期绑定。无论哪种方式，execution context 不拥有 memory；enqueue 完成前释放或复用 buffer 会产生 use-after-free/data race。
 
-多 stream 场景使用 `CudaEvent` 表达 producer/consumer ordering，参见 `samples/MultiStream/Program.cs`。host readback 前必须
+多 stream 场景使用 `CudaEvent` 表达 producer/consumer ordering，参见 `samples/Performance/01.MultiStream/Program.cs`。host readback 前必须
 同步对应 consumer stream，而不是任意另一条 stream。
 
 ## 常见错误

@@ -99,7 +99,7 @@ dotnet run --project .\applications\TensorRtExec -- `
 在准备真实运行前，先生成离线配置和资产预检报告：
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- --model .\models\yolov8n.onnx --labels .\models\coco.names --input-data .\models\yolov8n-det-fp32.bin --input-shape 1x3x640x640 --family v8 --task det --layout auto --has-objectness auto --nms-mode class-aware --preflight --preflight-report .\models\yolov8n-det-preflight.json
+dotnet run --project .\applications\YoloVision -- --model .\models\yolov8n.onnx --labels .\models\coco.names --input-data .\models\yolov8n-det-fp32.bin --input-shape 1x3x640x640 --family v8 --task det --layout auto --has-objectness auto --nms-mode class-aware --preflight --preflight-report .\models\yolov8n-det-preflight.json
 ```
 
 报告必须标记为 `yolovision-preflight.v1` 和 `proofClassification=precheck`，并明确 `TensorRT/ONNX parser/engine/inference` 均未执行。它只帮助 owner 发现路径、SHA256 和输出 metadata 缺口，不能替代后面的 `YoloVision Passed=True` 真实运行日志。
@@ -109,7 +109,7 @@ dotnet run --project .\samples\YoloVision -- --model .\models\yolov8n.onnx --lab
 准备一个真实图片，预处理成 NCHW float32 tensor 后运行：
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- `
+dotnet run --project .\applications\YoloVision -- `
   --model .\models\yolov8n.onnx `
   --labels .\models\coco.names `
   --input-data .\models\yolov8n-det-fp32.bin `
@@ -149,11 +149,11 @@ Detection 输出建议按如下字段记录：
 
 仓库中的关键入口如下：
 
-- `samples/YoloVision/Program.cs`：CLI 参数解析、模型 profile 和运行入口。
-- `samples/YoloVision/YoloVisionRuntimePipeline.cs`：真实 runtime 输出到统一视觉结果的管线。
-- `samples/YoloVision/YoloVisionDetectionDecoder.cs`：检测输出 layout、score 与 box 解码。
-- `samples/YoloVision/YoloVisionNms.cs`：class-aware 与 class-agnostic NMS。
-- `samples/YoloVision/yolovision-task-output-contract.json`：det/cls/seg/obb/pose/sem 输出角色契约。
+- `applications/YoloVision/Program.cs`：CLI 参数解析、模型 profile 和运行入口。
+- `applications/YoloVision/YoloVisionRuntimePipeline.cs`：真实 runtime 输出到统一视觉结果的管线。
+- `applications/YoloVision/YoloVisionDetectionDecoder.cs`：检测输出 layout、score 与 box 解码。
+- `applications/YoloVision/YoloVisionNms.cs`：class-aware 与 class-agnostic NMS。
+- `applications/YoloVision/yolovision-task-output-contract.json`：det/cls/seg/obb/pose/sem 输出角色契约。
 - `samples/assets/yolovision-yolox-s-example.json`：模型 profile 示例，可按 YOLOv8n 实际输出调整。
 - `applications/TensorRtExec`：ONNX build、engine serialization 与 report 输出。
 - `eng/Test-YoloVisionRealAssetCandidate.ps1`：真实资产候选字段验证。
@@ -183,11 +183,11 @@ Get-FileHash -Algorithm SHA256 ..\downloads\cases\yolov8n-det\images\dog.ppm
 
 使用真实图片时，先把预处理步骤独立保存：
 
-dotnet run --project .\samples\YoloVision -- --preprocess-only --image ..\downloads\cases\yolov8n-det\images\dog.ppm --preprocessed-output ..\downloads\cases\yolov8n-det\tensors\dog-fp32.bin --input-shape 1x3x640x640 --tensor-layout NCHW --color-order RGB --resize letterbox
+dotnet run --project .\applications\YoloVision -- --preprocess-only --image ..\downloads\cases\yolov8n-det\images\dog.ppm --preprocessed-output ..\downloads\cases\yolov8n-det\tensors\dog-fp32.bin --input-shape 1x3x640x640 --tensor-layout NCHW --color-order RGB --resize letterbox
 
 运行 YoloVision 时同时导出结构化结果和可视化：
 
-dotnet run --project .\samples\YoloVision -- --model ..\downloads\cases\yolov8n-det\models\yolov8n.onnx --labels ..\downloads\cases\yolov8n-det\labels\coco.names --input-data ..\downloads\cases\yolov8n-det\tensors\dog-fp32.bin --input-shape 1x3x640x640 --family v8 --task det --layout auto --has-objectness auto --nms-mode class-aware --confidence 0.25 --iou-threshold 0.45 --output-json ..\downloads\cases\yolov8n-det\reports\yolov8n-det-output.json --visualization-svg ..\downloads\cases\yolov8n-det\reports\yolov8n-det-output.svg
+dotnet run --project .\applications\YoloVision -- --model ..\downloads\cases\yolov8n-det\models\yolov8n.onnx --labels ..\downloads\cases\yolov8n-det\labels\coco.names --input-data ..\downloads\cases\yolov8n-det\tensors\dog-fp32.bin --input-shape 1x3x640x640 --family v8 --task det --layout auto --has-objectness auto --nms-mode class-aware --confidence 0.25 --iou-threshold 0.45 --output-json ..\downloads\cases\yolov8n-det\reports\yolov8n-det-output.json --visualization-svg ..\downloads\cases\yolov8n-det\reports\yolov8n-det-output.svg
 
 运行结束后，应对 preprocessed tensor、engine、build report、output JSON、SVG 和 stdout/stderr log 计算 SHA256。output JSON 至少要能回答 classCount、outputLayout、hasObjectness、scoreThreshold、iouThreshold、nmsMode、modelSha256、labelsSha256、imageSha256 和 preprocessedTensorSha256。
 

@@ -2,12 +2,12 @@
   "schemaVersion": 1,
   "recordKind": "yolovision-local-package-consumer-runtime-evidence",
   "recordName": "yolovision-yolov8n-seg-local-package-consumer-trt10.11",
-  "generatedAtUtc": "08/02/2026 22:19:54",
+  "generatedAtUtc": "08/03/2026 02:12:59",
   "templateOnly": false,
   "sampleName": "YoloVision.PackageConsumer",
   "proofClassification": "local-package-consumer-runtime",
-  "repositoryHeadAtExecution": "8cfba6a48cc1f5ea36bab8905c56ae8c999b1611",
-  "fullLocalReportSha256": "46b981e7639e8bd3259310100cdc729a03dcfa572b9be56bbb919a9bc787e713",
+  "repositoryHeadAtExecution": "a1621942b89ca601caa221c29477097f491ae5a9",
+  "fullLocalReportSha256": "c66bc68b585f50447d8c8e0ad96af429cb0a61b998ff82940140021c2fd7bc19",
   "packageConsumer": {
     "targetFramework": "net8.0",
     "packageSourceKind": "local-file-feed-only",
@@ -26,8 +26,8 @@
         "role": "yolovision",
         "id": "JYPPX.TensorRT.CSharp.API.YoloVision",
         "version": "4.0.0",
-        "length": 114430,
-        "sha256": "88c7c9a00765963c5fe5ca3a2de4e46dd6c0de7bf136989a67d196185066cc62"
+        "length": 114405,
+        "sha256": "12510a46182cb0680564c125591eaa6ce21b7902d5edd0e5229a99dda787e6de"
       },
       {
         "role": "bridge-only",
@@ -129,8 +129,8 @@
         "comparedElementCount": 974400,
         "mismatchCount": 0,
         "firstMismatchIndex": -1,
-        "maximumAbsoluteError": 1.1924133,
-        "maximumRelativeError": 1.9936548,
+        "maximumAbsoluteError": 1.335083,
+        "maximumRelativeError": 1.9354582,
         "referenceSha256": "a607dd1d80dbb85a1a77f5354c7669e357c2caf8d0a9cd93328397d1858bde5f",
         "sourceClassification": "independent-onnxruntime-cpu-execution-provider",
         "passed": true
@@ -152,8 +152,8 @@
         "comparedElementCount": 819200,
         "mismatchCount": 0,
         "firstMismatchIndex": -1,
-        "maximumAbsoluteError": 0.011473894,
-        "maximumRelativeError": 1.9984908,
+        "maximumAbsoluteError": 0.010821223,
+        "maximumRelativeError": 1.9950749,
         "referenceSha256": "3cc8387483187bc5d86ef8e82943e215caadefbbf41a8523d9ffc4c6b040f8d5",
         "sourceClassification": "independent-onnxruntime-cpu-execution-provider",
         "passed": true
@@ -163,8 +163,8 @@
     "passed": true
   },
   "maskArtifacts": {
-    "runtimeManifestSha256": "0a0086f68498ae123bf778b52d53957396b93a60685b0abe8999ce263f1c7a61",
-    "archivedManifestSha256": "19346b4c7cde9de5173847306166b0061a4d5bf0bede348f3aa6b548cc2e897d",
+    "runtimeManifestSha256": "6b8f6c37b236ca8c2ba2f9c42469bd7829438d41eafbfb82cefeee4a5bfc5c4d",
+    "archivedManifestSha256": "ef4000bc7c7b2b6924433b5369d74d55fcec9764e510491b248af3312206b937",
     "artifactFileCount": 13,
     "predictionCount": 4,
     "sourceThresholdedMaskCount": 4,
@@ -177,7 +177,7 @@
     "ultralyticsVersion": "8.4.21",
     "torchVersion": "2.10.0+cpu",
     "referenceSha256": "a9ce9d68a09238e64e7b876ad573025c6497a4bfddc5acd456894b6a8506b706",
-    "comparisonSha256": "468b702868c6dde565bc598d2f9a1a0cd336fb617581c55e240cdfbdcb87ef2c",
+    "comparisonSha256": "6de1710ea06d9bd2e4b8a8668372b5cf7ba2fbca0935e7777b41d2ba2bf5f97c",
     "thresholds": {
       "maximumBoxCoordinateAbsoluteError": 1.0,
       "maximumScoreAbsoluteError": 0.01,
@@ -189,37 +189,37 @@
       {
         "classId": 16,
         "className": "dog",
-        "maximumBoxCoordinateAbsoluteError": 0.0706210351562504,
-        "scoreAbsoluteError": 0.0004342383651733117,
-        "boxIoU": 0.9996855021415767,
-        "maskIoU": 0.9958688699360341,
+        "maximumBoxCoordinateAbsoluteError": 0.0726310351562347,
+        "scoreAbsoluteError": 0.00040003836517332747,
+        "boxIoU": 0.9996685678070382,
+        "maskIoU": 0.9958955223880597,
         "passed": true
       },
       {
         "classId": 1,
         "className": "bicycle",
-        "maximumBoxCoordinateAbsoluteError": 0.1292506835937388,
-        "scoreAbsoluteError": 0.0004950095390320319,
-        "boxIoU": 0.9993528972144728,
-        "maskIoU": 0.9957464154688691,
+        "maximumBoxCoordinateAbsoluteError": 0.10791068359372957,
+        "scoreAbsoluteError": 0.0005570095390319274,
+        "boxIoU": 0.9993738685371947,
+        "maskIoU": 0.9957816377171216,
         "passed": true
       },
       {
         "classId": 7,
         "className": "truck",
-        "maximumBoxCoordinateAbsoluteError": 0.1927221484374968,
-        "scoreAbsoluteError": 0.005462287831726087,
-        "boxIoU": 0.9984865347610292,
-        "maskIoU": 0.996742671009772,
+        "maximumBoxCoordinateAbsoluteError": 0.1916221484374887,
+        "scoreAbsoluteError": 0.004970447831726066,
+        "boxIoU": 0.9984698264427463,
+        "maskIoU": 0.9968169368569102,
         "passed": true
       },
       {
         "classId": 2,
         "className": "car",
-        "maximumBoxCoordinateAbsoluteError": 0.14840853515624985,
-        "scoreAbsoluteError": 0.0068770506927490205,
-        "boxIoU": 0.9987239576698513,
-        "maskIoU": 0.9912144702842377,
+        "maximumBoxCoordinateAbsoluteError": 0.149348535156264,
+        "scoreAbsoluteError": 0.00654581069274901,
+        "boxIoU": 0.9987127090937662,
+        "maskIoU": 0.991141296323638,
         "passed": true
       }
     ],
@@ -240,9 +240,9 @@
   },
   "controlledArtifactIntegrityValidation": {
     "kind": "source-thresholded-mask-single-byte-mutation-with-unchanged-manifest-sha256",
-    "expectedSha256": "9cb89ef4b4dfd0ffe50460621ed1c72dc2d375dcb6aa264fd4eb10a4304f07f1",
-    "originalSha256": "9cb89ef4b4dfd0ffe50460621ed1c72dc2d375dcb6aa264fd4eb10a4304f07f1",
-    "mutatedSha256": "7d19c67bb98613c8486f35d5c09c82465a24a0748e27490a6396de61fee9fee4",
+    "expectedSha256": "41b3e6eff14307f05659f770a4e579104e4067e84756dbce89ae374f0303912d",
+    "originalSha256": "41b3e6eff14307f05659f770a4e579104e4067e84756dbce89ae374f0303912d",
+    "mutatedSha256": "ad1632a687ffd2b4495464a1e8ca7c925699c3f2e98b4bf45d94054d672135f4",
     "exitCode": 1,
     "diagnostic": "Thresholded mask SHA256 does not match the manifest.",
     "failClosed": true

@@ -49,7 +49,7 @@ public sealed class FinalPrepublishReadinessSnapshotTests
         Assert.Equal("YoloVision", root.GetProperty("sampleRenameReadiness").GetProperty("currentSampleName").GetString());
 
         string solutionText = ReadText("TensorRtSharp.sln");
-        Assert.Contains("samples\\YoloVision\\YoloVision.csproj", solutionText, StringComparison.Ordinal);
+        Assert.Contains("applications\\YoloVision\\YoloVision.csproj", solutionText, StringComparison.Ordinal);
         Assert.DoesNotContain("samples\\YoloDet\\YoloDet.csproj", solutionText, StringComparison.Ordinal);
     }
 

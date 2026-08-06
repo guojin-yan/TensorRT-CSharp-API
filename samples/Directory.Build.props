@@ -1,21 +1,7 @@
 <Project>
-  <ItemGroup Condition="'$(MSBuildProjectExtension)' == '.csproj'">
-    <Compile Include="$(MSBuildThisFileDirectory)JYPPX.SampleSupport\SampleCommandLine.cs"
-             Link="JYPPX.SampleSupport\SampleCommandLine.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)JYPPX.SampleSupport\TensorRtSampleSupport.cs"
-             Link="JYPPX.SampleSupport\TensorRtSampleSupport.cs"
-             Condition="'$(JYPPXIncludeTensorRtSampleSupport)' == 'true' or '$(JYPPXIncludeTensorRtOnnxSampleSupport)' == 'true'" />
-    <Compile Include="$(MSBuildThisFileDirectory)JYPPX.SampleSupport\TensorRtOnnxSample.cs"
-             Link="JYPPX.SampleSupport\TensorRtOnnxSample.cs"
-             Condition="'$(JYPPXIncludeTensorRtOnnxSampleSupport)' == 'true'" />
-    <Compile Include="$(MSBuildThisFileDirectory)JYPPX.SampleSupport\TensorRtOnnxSample.Inputs.cs"
-             Link="JYPPX.SampleSupport\TensorRtOnnxSample.Inputs.cs"
-             Condition="'$(JYPPXIncludeTensorRtOnnxSampleSupport)' == 'true'" />
-    <Compile Include="$(MSBuildThisFileDirectory)JYPPX.SampleSupport\TensorRtOnnxSample.References.cs"
-             Link="JYPPX.SampleSupport\TensorRtOnnxSample.References.cs"
-             Condition="'$(JYPPXIncludeTensorRtOnnxSampleSupport)' == 'true'" />
-    <Compile Include="$(MSBuildThisFileDirectory)JYPPX.SampleSupport\SampleRgbImage.cs"
-             Link="JYPPX.SampleSupport\SampleRgbImage.cs"
-             Condition="'$(JYPPXIncludeTensorRtOnnxSampleSupport)' == 'true'" />
-  </ItemGroup>
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <Import Project="..\build\JYPPX.SampleSupport.props" />
+  <Import Project="..\build\JYPPX.PublicSamplePackages.props" />
 </Project>

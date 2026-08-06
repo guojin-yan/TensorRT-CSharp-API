@@ -1,14 +1,14 @@
 # ONNX Parser 到 Serialized Engine：不依赖外部模型的端到端教程
 
-很多部署教程第一步就要求下载模型，这会让“验证框架是否可用”和“验证某个模型是否正确”混在一起。TensorRtSharp4.0 的 `samples/OnnxToEngine` 刻意避开这个问题：它在进程内生成一个最小 dynamic-batch identity ONNX model，然后用 TensorRT ONNX parser 构建 serialized engine，再从文件反序列化并完成一次推理。
+很多部署教程第一步就要求下载模型，这会让“验证框架是否可用”和“验证某个模型是否正确”混在一起。TensorRtSharp4.0 的 `applications/OnnxToEngine` 刻意避开这个问题：它在进程内生成一个最小 dynamic-batch identity ONNX model，然后用 TensorRT ONNX parser 构建 serialized engine，再从文件反序列化并完成一次推理。
 
 这让样例可以作为最干净的 ONNX 到 TensorRT engine 端到端验证路径。
 
 ## 样例位置
 
 ```text
-samples/OnnxToEngine/Program.cs
-samples/OnnxToEngine/README.md
+applications/OnnxToEngine/Program.cs
+applications/OnnxToEngine/README.md
 ```
 
 它不需要外部 `.onnx` 文件，也不会把大模型提交进仓库。模型字节由 `OnnxIdentityModel.CreateDynamicBatchModel()` 生成。
@@ -46,7 +46,7 @@ $env:JYPPX_ENABLE_DEVELOPMENT_PROBING = "1"
 运行：
 
 ```powershell
-dotnet .\samples\OnnxToEngine\bin\Debug\net8.0\OnnxToEngine.dll --tensor-rt-line 10 --batch 2
+dotnet .\applications\OnnxToEngine\bin\Debug\net8.0\OnnxToEngine.dll --tensor-rt-line 10 --batch 2
 ```
 
 参数：
@@ -164,7 +164,7 @@ OnnxToEngine=Skipped Reason=...
 
 ### 适用读者
 
-本文适合第一次验证 ONNX parser、builder、serialized engine 和 runtime deserialize 链路的开发者，也适合维护 `samples/OnnxToEngine` 与 TensorRtExec parity 的负责人。
+本文适合第一次验证 ONNX parser、builder、serialized engine 和 runtime deserialize 链路的开发者，也适合维护 `applications/OnnxToEngine` 与 TensorRtExec parity 的负责人。
 
 ### 解决问题
 

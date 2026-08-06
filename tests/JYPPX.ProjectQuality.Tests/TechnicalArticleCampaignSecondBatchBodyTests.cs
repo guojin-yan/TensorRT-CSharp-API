@@ -122,7 +122,7 @@ public sealed class TechnicalArticleCampaignSecondBatchBodyTests
             "articles",
             "zh-cn",
             "dynamic-shape-optimization-profile-tutorial.md");
-        string sampleReadmePath = Path.Combine(RepositoryPaths.Root, "samples", "DynamicShape", "README.md");
+        string sampleReadmePath = Path.Combine(RepositoryPaths.Root, "samples", "Inference", "02.DynamicShapes", "README.md");
 
         Assert.True(File.Exists(evidencePath));
         using JsonDocument evidence = JsonDocument.Parse(File.ReadAllText(evidencePath));
@@ -139,7 +139,7 @@ public sealed class TechnicalArticleCampaignSecondBatchBodyTests
         Assert.True(validation.GetProperty("outputMatch").GetBoolean());
         Assert.Equal(0, validation.GetProperty("processExitCode").GetInt32());
 
-        string sourcePath = Path.Combine(RepositoryPaths.Root, "samples", "DynamicShape", "Program.cs");
+        string sourcePath = Path.Combine(RepositoryPaths.Root, "samples", "Inference", "02.DynamicShapes", "Program.cs");
         string screenshotPath = Path.Combine(
             RepositoryPaths.Root,
             assets.GetProperty("runtimeScreenshotPath").GetString()!.Replace('/', Path.DirectorySeparatorChar));

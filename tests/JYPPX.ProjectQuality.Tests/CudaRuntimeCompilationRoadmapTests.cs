@@ -63,7 +63,7 @@ public sealed class CudaRuntimeCompilationRoadmapTests
     public void TechnicalArticleUsesRealRuntimeEvidenceAndNoModelClaims()
     {
         string article = ReadSource("docs", "articles", "zh-cn", "cuda-runtime-compilation-technical-article.md");
-        string sampleReadme = ReadSource("samples", "CudaRuntimeCompilation", "README.md");
+        string sampleReadme = ReadSource("samples", "Cuda", "01.RuntimeCompilation", "README.md");
         string evidenceText = ReadSource("samples", "assets", "cuda-rtc-article-runtime-evidence.json");
         using System.Text.Json.JsonDocument evidence = System.Text.Json.JsonDocument.Parse(evidenceText);
         System.Text.Json.JsonElement root = evidence.RootElement;

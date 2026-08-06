@@ -55,10 +55,10 @@
 
 对应样例：
 
-- `samples/MultiStream`
-- `samples/DynamicShape`
-- `samples/InferenceBindings`
-- `samples/OnnxToEngine`
+- `samples/Performance/01.MultiStream`
+- `samples/Inference/02.DynamicShapes`
+- `samples/Inference/01.Bindings`
+- `applications/OnnxToEngine`
 
 这些文章证明样例路径和 wrapper 使用方式清楚，但不自动变成 release proof record。sample-level evidence 和 `package-consumer-runtime` 必须分开。
 
@@ -98,7 +98,7 @@
 - `yolo-family-profile-and-postprocess-guide.md`
 - `real-model-evidence-backfill-playbook.md`
 
-`samples/YoloVision` 是统一 YOLO-family 样例，覆盖 `YOLO v5/v6/v7/v8/v9/v10/v11/v26/custom` 与 `det、cls、seg、obb、pose、sem`。support matrix、asset template 和 sidecar 不等于 `real-model-runtime`；真实晋级需要模型、labels、input、license、SHA256、runner log 和 validator。
+`applications/YoloVision` 是统一 YOLO-family 样例，覆盖 `YOLO v5/v6/v7/v8/v9/v10/v11/v26/custom` 与 `det、cls、seg、obb、pose、sem`。support matrix、asset template 和 sidecar 不等于 `real-model-runtime`；真实晋级需要模型、labels、input、license、SHA256、runner log 和 validator。
 
 ## 6. Release proof 与 owner action
 

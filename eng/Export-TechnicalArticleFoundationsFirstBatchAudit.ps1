@@ -155,7 +155,7 @@ $definitions = @(
       "src/JYPPX.TensorRtSharp/Inference/TensorRtInferenceBindings.cs",
       "src/JYPPX.TensorRtSharp/Inference/TensorRtInferenceBindings.Buffers.cs",
       "src/JYPPX.TensorRtSharp/Inference/TensorRtInferenceBindings.Execution.cs",
-      "samples/InferenceBindings/Program.cs"
+      "samples/Inference/01.Bindings/Program.cs"
     )
   },
   [ordered]@{
@@ -184,7 +184,7 @@ $definitions = @(
       "src/JYPPX.CudaSharp/Memory/CudaPinnedMemory.cs",
       "src/JYPPX.CudaSharp/Internal/Handles/SafeCudaMemoryHandle.cs",
       "smoke/CudaSmokeRunner/Program.cs",
-      "samples/MultiStream/Program.cs"
+      "samples/Performance/01.MultiStream/Program.cs"
     )
   },
   [ordered]@{

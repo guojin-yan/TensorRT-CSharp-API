@@ -1,6 +1,6 @@
 # YOLO 全系列配置与后处理指南
 
-`samples/YoloVision` 的目标不是在仓库里内置某个特定 YOLO 权重，而是为 YOLO-family 模型提供一套可审计的配置底座。模型、labels、图片和许可证由用户或发布 owner 选择；样例负责把输入 shape、输出 layout、任务类型和托管后处理边界讲清楚。
+`applications/YoloVision` 的目标不是在仓库里内置某个特定 YOLO 权重，而是为 YOLO-family 模型提供一套可审计的配置底座。模型、labels、图片和许可证由用户或发布 owner 选择；样例负责把输入 shape、输出 layout、任务类型和托管后处理边界讲清楚。
 
 当前样例已经覆盖以下托管能力：
 
@@ -52,7 +52,7 @@ YOLO 系列的 ONNX 输出并不完全统一。不同 family、export 脚本、o
 先查看当前 family/task 支持矩阵：
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- --list-capabilities
+dotnet run --project .\applications\YoloVision -- --list-capabilities
 ```
 
 该命令只输出支持范围，不会加载 TensorRT runtime，也不会把任意外部模型声明为已验证。它适合用于文档、CI smoke、资产清单规划和下一步模型接入前的能力对照。
@@ -60,7 +60,7 @@ dotnet run --project .\samples\YoloVision -- --list-capabilities
 真实模型运行命令示例：
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- `
+dotnet run --project .\applications\YoloVision -- `
   --model .\models\yolo.onnx `
   --labels .\models\coco.names `
   --input-data .\models\yolo-preprocessed-fp32.bin `
@@ -131,8 +131,8 @@ Get-FileHash "$case\source\sample.jpg" -Algorithm SHA256
 仓库中的机器可读来源：
 
 ```text
-samples/YoloVision/yolo-model-matrix.json
-samples/YoloVision/yolovision-task-output-contract.json
+applications/YoloVision/yolo-model-matrix.json
+applications/YoloVision/yolovision-task-output-contract.json
 samples/assets/yolovision-assets.template.json
 samples/assets/yolovision-article-case-pack.json
 ```
@@ -154,7 +154,7 @@ dotnet run --project .\applications\TensorRtExec -- `
   --buildOnly `
   --exportReport "$case\reports\tensor-rt-exec-build.json"
 
-dotnet run --project .\samples\YoloVision -- `
+dotnet run --project .\applications\YoloVision -- `
   --model "$case\source\model.onnx" `
   --labels "$case\source\labels.txt" `
   --input-data "$case\derived\input-fp32.bin" `
@@ -301,7 +301,7 @@ ProjectReference 和 direct `.nupkg`。
 1. 先选定一个许可证清晰、导出流程稳定的 detection ONNX。
 2. 填写 asset manifest，记录 hash 和模型 I/O。
 3. 用 `--buildOnly` 或 TensorRtExec 先验证 ONNX 能构建 engine。
-4. 再运行 `samples/YoloVision`，确认输出 layout、objectness、class count。
+4. 再运行 `applications/YoloVision`，确认输出 layout、objectness、class count。
 5. 调整 confidence 和 IoU threshold，记录真实图片输出。
 6. 最后再推进 seg、pose、OBB 或 semantic 模型。
 

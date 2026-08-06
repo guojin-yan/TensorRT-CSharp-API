@@ -203,7 +203,7 @@ sourceDevice.CopyToAsync(destinationDevice, sourceDevice.SizeInBytes, consumer);
 consumer.Synchronize();
 ```
 
-`samples/MultiStream/Program.cs` 展示两个独立 stream 和跨 stream event wait，并验证 host 输出。
+`samples/Performance/01.MultiStream/Program.cs` 展示两个独立 stream 和跨 stream event wait，并验证 host 输出。
 
 ## 测量操作耗时
 
@@ -326,7 +326,7 @@ ManagedMemoryRoundTrip=True
 多流案例：
 
 ```powershell
-dotnet run --project .\samples\MultiStream\MultiStream.csproj `
+dotnet run --project .\samples\Performance\01.MultiStream\MultiStream.csproj `
   -c Debug --no-build
 ```
 
@@ -413,7 +413,7 @@ Memory wrapper ready 不等于 allocator callback proof ready。`CudaMemory` own
 
 - [CUDA Memory Range APIs](cuda-memory-range-apis.md)
 - [CUDA Stream/Event 多流教程](cuda-stream-event-multistream-tutorial.md)
-- [MultiStream 样例](https://github.com/guojin-yan/TensorRT-CSharp-API/blob/TensorRtSharp4.0/samples/MultiStream/README.md)
+- [MultiStream 样例](https://github.com/guojin-yan/TensorRT-CSharp-API/blob/TensorRtSharp4.0/samples/Performance/01.MultiStream/README.md)
 - [TensorRT Inference Bindings](inference-bindings-tutorial.md)
 
 ## 第二批正文门禁

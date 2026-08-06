@@ -45,7 +45,7 @@
     "published": false
   },
   "assets": {
-    "consumerProgramPath": "samples/RefittedPlan.PackageConsumer/Program.cs",
+    "consumerProgramPath": "tests/fixtures/package-consumers/RefittedPlan.PackageConsumer/Program.cs",
     "consumerProgramSha256": "f1e7960e6e7a0c50008a66eb62010e07fab0c9ae9ac31ae588f23855606c7481",
     "runnerPath": "eng/Test-TrtexecRefittedPlanPackageConsumer.ps1",
     "runnerSha256": "f02ef167aa10ed82ea3cf87231d29de6a61408873e27d564293f5305a4dd99ac",

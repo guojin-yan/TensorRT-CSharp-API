@@ -10,8 +10,8 @@ public sealed class ProfilerLocalPackageConsumerTests
     [Fact]
     public void ConsumerUsesOnlyPackagesAndExercisesImmediateDeferredAndExceptionPaths()
     {
-        string template = ReadSource("samples", "Profiler.PackageConsumer", "Profiler.PackageConsumer.csproj.template");
-        string program = ReadSource("samples", "Profiler.PackageConsumer", "Program.cs");
+        string template = ReadSource("tests", "fixtures", "package-consumers", "Profiler.PackageConsumer", "Profiler.PackageConsumer.csproj.template");
+        string program = ReadSource("tests", "fixtures", "package-consumers", "Profiler.PackageConsumer", "Program.cs");
 
         Assert.Equal(2, Regex.Matches(template, "<PackageReference ").Count);
         Assert.DoesNotContain("ProjectReference", template, StringComparison.Ordinal);

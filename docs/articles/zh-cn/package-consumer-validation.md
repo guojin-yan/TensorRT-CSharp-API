@@ -25,4 +25,3 @@ powershell -ExecutionPolicy Bypass -File .\eng\Test-PackageConsumer.ps1 -Runtime
 ## 下一步
 
 正式发布前由 Owner 提供实际主机、包哈希、运行日志和严格校验结果。该文章本身只是执行指南，不执行上传、tag、Release 或 `dotnet nuget push`。
-*** End Patch

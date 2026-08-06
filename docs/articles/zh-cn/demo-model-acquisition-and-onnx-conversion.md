@@ -20,6 +20,8 @@ $python = (Get-Command python).Source
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Sync-DemoOnnxModels.ps1
 ```
 
+如果 Windows 环境没有安装 PowerShell 7，使用系统自带的 Windows PowerShell 5.1 时，将命令开头的 `pwsh` 替换为 `powershell.exe`；脚本本身不依赖 PowerShell 7 专属语法。
+
 脚本读取清单，把 `downloads` 或用户 TensorRT sample data 中的 ONNX 复制到外层 `models`，逐项检查长度与 SHA256，并写
 `artifacts/demo-models/inventory-validation.json`。只检查而不复制时使用 `-VerifyOnly`；脚本不访问上传或发布接口。
 

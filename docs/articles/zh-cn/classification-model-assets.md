@@ -1,6 +1,6 @@
 # Classification Model Assets
 
-`samples/Classification` 不随仓库分发模型、labels 或图片。本文说明完整分类 demo 需要准备哪些资产，以及如何避免把未验证模型写成已通过。
+`samples/ComputerVision/01.Classification` 不随仓库分发模型、labels 或图片。本文说明完整分类 demo 需要准备哪些资产，以及如何避免把未验证模型写成已通过。
 
 ## 需要的文件
 
@@ -38,7 +38,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Acquire-TorchVisionResNet18O
 ## 运行命令
 
 ```powershell
-dotnet run --project .\samples\Classification -- `
+dotnet run --project .\samples\ComputerVision\01.Classification -- `
   --model .\models\classifier.onnx `
   --labels .\models\labels.txt `
   --input-shape 1x3x224x224 `
@@ -49,7 +49,7 @@ dotnet run --project .\samples\Classification -- `
 动态 batch 需要补 profile：
 
 ```powershell
-dotnet run --project .\samples\Classification -- `
+dotnet run --project .\samples\ComputerVision\01.Classification -- `
   --model .\models\classifier.onnx `
   --input-shape 1x3x224x224 `
   --min-shape 1x3x224x224 `

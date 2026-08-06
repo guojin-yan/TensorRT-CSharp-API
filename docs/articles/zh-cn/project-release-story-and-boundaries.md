@@ -209,7 +209,7 @@ CUDA 能力同样遵循版本线、owner 和 runtime proof 分层。
 ## OnnxToEngine
 
 ```text
-samples/OnnxToEngine
+applications/OnnxToEngine
 ```
 
 它是教学型 round-trip sample，展示：
@@ -263,7 +263,7 @@ dotnet run --project .\applications\TensorRtExec -- --help-json
 ## YoloVision
 
 ```text
-samples/YoloVision
+applications/YoloVision
 ```
 
 YoloVision 统一：
@@ -284,12 +284,12 @@ YoloVision 统一：
 
 用户入口包括：
 
-- `samples/MultiStream`；
-- `samples/DynamicShape`；
-- `samples/InferenceBindings`；
-- `samples/OnnxToEngine`；
-- `samples/Classification`；
-- `samples/YoloVision`。
+- `samples/Performance/01.MultiStream`；
+- `samples/Inference/02.DynamicShapes`；
+- `samples/Inference/01.Bindings`；
+- `applications/OnnxToEngine`；
+- `samples/ComputerVision/01.Classification`；
+- `applications/YoloVision`。
 
 smoke runners 覆盖 builder/runtime/network layers、plugin inventory、parser/refitter diagnostics、CUDA memory/stream/graph、managed callback safe controls 等路径。
 

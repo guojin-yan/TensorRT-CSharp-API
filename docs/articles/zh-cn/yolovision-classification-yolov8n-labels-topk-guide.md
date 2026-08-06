@@ -123,7 +123,7 @@ python .\eng\Invoke-YoloVisionClassificationReference.py `
 ### 3. 验证 C# 直接图片预处理
 
 ```powershell
-dotnet run --project .\samples\YoloVision -c Release -- `
+dotnet run --project .\applications\YoloVision -c Release -- `
   --preprocess-only `
   --image ..\downloads\cases\yolov8n-cls\derived\bus.ppm `
   --preprocessed-output ..\downloads\cases\yolov8n-cls\tensors\bus-csharp.fp32.bin `
@@ -135,7 +135,7 @@ dotnet run --project .\samples\YoloVision -c Release -- `
 ### 4. TensorRT 完整运行
 
 ```powershell
-dotnet run --project .\samples\YoloVision -c Release -- `
+dotnet run --project .\applications\YoloVision -c Release -- `
   --model ..\downloads\cases\yolov8n-cls\source\yolov8n-cls.onnx `
   --labels ..\downloads\cases\yolov8n-cls\reports\independent-reference\imagenet-yolov8n-cls.names `
   --input-data ..\downloads\cases\yolov8n-cls\reports\independent-reference\input-ultralytics-1x3x224x224.fp32.bin `
@@ -196,12 +196,12 @@ Get-FileHash -Algorithm SHA256 ..\downloads\cases\yolov8n-cls\reports\independen
 
 ## 代码与文件入口
 
-- `samples/YoloVision/YoloClassificationScoreMode.cs`
-- `samples/YoloVision/YoloSampleRunner.cs`
-- `samples/YoloVision/YoloImagePreprocessor.cs`
-- `samples/YoloVision/YoloVisionOutputReport.cs`
-- `samples/YoloVision/yolovision-task-output-contract.json`
-- `samples/YoloVision/yolovision-output.schema.json`
+- `applications/YoloVision/YoloClassificationScoreMode.cs`
+- `applications/YoloVision/YoloSampleRunner.cs`
+- `applications/YoloVision/YoloImagePreprocessor.cs`
+- `applications/YoloVision/YoloVisionOutputReport.cs`
+- `applications/YoloVision/yolovision-task-output-contract.json`
+- `applications/YoloVision/yolovision-output.schema.json`
 
 ## 验证命令
 

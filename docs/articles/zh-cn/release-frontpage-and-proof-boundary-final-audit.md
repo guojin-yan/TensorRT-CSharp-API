@@ -44,10 +44,10 @@ README 可以强调项目已经具备完整的 bridge、wrapper、samples、appl
 
 | 入口 | 可以说明 | 不能替代 |
 | --- | --- | --- |
-| `samples/OnnxToEngine` | 最小 ONNX round-trip、engine build、parser path | 任意外部模型 runtime proof |
+| `applications/OnnxToEngine` | 最小 ONNX round-trip、engine build、parser path | 任意外部模型 runtime proof |
 | `applications/TensorRtExec` | build/precheck report、normalized command、sidecar、WinForms 入口 | `package-consumer-runtime` |
-| `samples/Classification` | 用户自备分类模型的 sample runner | release package consumer proof |
-| `samples/YoloVision` | YOLO v5/v6/v7/v8/v9/v10/v11/v26/custom 与 det、cls、seg、obb、pose、sem 的统一样例框架 | `real-model-runtime`，除非真实资产和日志通过 validator |
+| `samples/ComputerVision/01.Classification` | 用户自备分类模型的 sample runner | release package consumer proof |
+| `applications/YoloVision` | YOLO v5/v6/v7/v8/v9/v10/v11/v26/custom 与 det、cls、seg、obb、pose、sem 的统一样例框架 | `real-model-runtime`，除非真实资产和日志通过 validator |
 
 旧 YOLO 检测样例名不应作为当前入口重新出现。当前统一入口是 `YoloVision`。
 

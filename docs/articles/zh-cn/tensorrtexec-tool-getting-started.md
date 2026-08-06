@@ -122,7 +122,7 @@ This report is build/sample evidence only. build-only and dependency-probe-only 
 
 ## 与 OnnxToEngine 样例的关系
 
-`samples/OnnxToEngine` 仍然是最小可验证样例，负责证明 parser、optimization profile、serialized engine 和 identity round-trip 可以在兼容环境下跑通。`applications/TensorRtExec` 直接引用 `src/JYPPX.TensorRtSharp.Tools`，不再依赖 sample executable project，因此应用发布边界更清楚。
+`applications/OnnxToEngine` 仍然是最小可验证样例，负责证明 parser、optimization profile、serialized engine 和 identity round-trip 可以在兼容环境下跑通。`applications/TensorRtExec` 直接引用 `src/JYPPX.TensorRtSharp.Tools`，不再依赖 sample executable project，因此应用发布边界更清楚。
 
 ## 排障建议
 

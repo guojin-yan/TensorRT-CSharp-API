@@ -186,7 +186,7 @@ $caseRoot = "..\downloads\cases\yolox-s"
   New-Item -ItemType Directory -Force -Path (Join-Path $caseRoot $_) | Out-Null
 }
 
-dotnet run --project .\samples\YoloVision -- `
+dotnet run --project .\applications\YoloVision -- `
   --model "$assetRoot\source\yolox_s.onnx" `
   --labels "$assetRoot\derived\coco.names" `
   --image "$assetRoot\derived\dog.ppm" `
@@ -354,7 +354,7 @@ expected real-log success marker 必须来自真实运行；不能从文档复�
 samples/assets/yolovision-article-case-pack.json
 samples/assets/yolovision-real-asset-owner-backfill-pack.json
 samples/assets/yolovision-real-asset-owner-backfill-pack.generated.json
-samples/YoloVision/yolovision-task-output-contract.json
+applications/YoloVision/yolovision-task-output-contract.json
 ```
 
 导出并检查投影漂移：

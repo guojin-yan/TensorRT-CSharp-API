@@ -52,8 +52,8 @@
 
 ## 样例与应用发布化路线
 
-1. `samples/YoloVision` 是统一 YOLO-family 样例，旧 YOLO detection 样例名不再作为 live sample 回流。目标覆盖 YOLO v5/v6/v7/v8/v9/v10/v11/v26/custom，以及 det、cls、seg、obb、pose、sem。每篇案例文章都要给出模型获取、许可证提示、ONNX 导出/转换、metadata、运行命令、输出 schema 和 evidence 回填方法。
-2. `samples/OnnxToEngine` 要继续对齐官方 `trtexec` 的模型转换能力，明确 implemented / parse-only / report-only / owner-input-required 的参数层级。
+1. `applications/YoloVision` 是统一 YOLO-family 样例，旧 YOLO detection 样例名不再作为 live sample 回流。目标覆盖 YOLO v5/v6/v7/v8/v9/v10/v11/v26/custom，以及 det、cls、seg、obb、pose、sem。每篇案例文章都要给出模型获取、许可证提示、ONNX 导出/转换、metadata、运行命令、输出 schema 和 evidence 回填方法。
+2. `applications/OnnxToEngine` 要继续对齐官方 `trtexec` 的模型转换能力，明确 implemented / parse-only / report-only / owner-input-required 的参数层级。
 3. `applications/TensorRtExec` 是 trtexec-like 应用层入口，必须同时覆盖 CLI 和 WinForms GUI；功能矩阵、参数分层、report schema、GUI/CLI 字段一致性都应进入质量门禁。
 4. 宣传文章不少于 30 篇，但质量优先。文章面向微信公众号、博客和用户采用，不只是 API 文档；必须有完整开头、场景、步骤、代码位置、命令、预期输出、风险边界和下一步。
 

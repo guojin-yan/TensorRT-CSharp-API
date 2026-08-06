@@ -4,10 +4,44 @@
   href: releases/README.md
 - name: English user guides
   items:
+  - name: Getting started
+    href: articles/en/getting-started.md
+  - name: Sample runners
+    href: articles/en/sample-runners.md
+  - name: Sample series learning path
+    href: articles/en/sample-series-overview.md
+  - name: Source organization
+    href: articles/en/source-organization.md
 - name: Chinese user guides and samples
   items:
+  - name: 中文文章目录
+    href: articles/zh-cn/README.md
+  - name: 系列案例学习路线
+    href: articles/zh-cn/sample-series-overview.md
+  - name: 快速开始
+    href: articles/zh-cn/getting-started.md
+  - name: CUDA RTC
+    href: articles/zh-cn/cuda-runtime-compilation-technical-article.md
+  - name: 推理绑定
+    href: articles/zh-cn/inference-bindings-tutorial.md
+  - name: 动态 Shape
+    href: articles/zh-cn/dynamic-shape-optimization-profile-tutorial.md
+  - name: CUDA 多流
+    href: articles/zh-cn/cuda-stream-event-multistream-tutorial.md
+  - name: ResNet18 分类
+    href: articles/zh-cn/classification-real-asset-walkthrough.md
+  - name: YoloVision 全任务
+    href: articles/zh-cn/yolovision-all-task-overview.md
+  - name: 模型获取与 ONNX 转换
+    href: articles/zh-cn/demo-model-acquisition-and-onnx-conversion.md
+  - name: TensorRtExec GUI
+    href: articles/zh-cn/tensorrtexec-gui-user-guide.md
 - name: Publishing and internal records
   items:
+  - name: Article completeness rules
+    href: articles/zh-cn/README.md
+  - name: Known issues
+    href: releases/known-issues.md
 # Navigation entries are not runtime proof, post-publish proof, or release approval.
 # Compatibility index for source contracts; these paths are intentionally not rendered as public navigation.
 # articles/en/api-coverage-and-deferred-boundaries.md

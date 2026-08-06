@@ -228,7 +228,7 @@ Copy-Item -LiteralPath $managed.path -Destination $managedFeed
 Copy-Item -LiteralPath $classification.path -Destination $classificationFeed
 Copy-Item -LiteralPath $bridge.path -Destination $bridgeFeed
 
-$templateRoot = Join-Path $RepositoryRoot "samples\Classification.PackageConsumer"
+$templateRoot = Join-Path $RepositoryRoot "tests\fixtures\legacy-package-consumers\Classification.PackageConsumer"
 $projectPath = Join-Path $workspace "Classification.PackageConsumer.csproj"
 Copy-Item -LiteralPath (Join-Path $templateRoot "Program.cs") -Destination (Join-Path $workspace "Program.cs")
 $project = Get-Content -LiteralPath (Join-Path $templateRoot "Classification.PackageConsumer.csproj.template") -Raw -Encoding utf8
@@ -322,7 +322,7 @@ $report = [pscustomobject][ordered]@{
   packageVersion = $PackageVersion
   packages = @(@($managed, $classification, $bridge) | ForEach-Object { [pscustomobject][ordered]@{ id = $_.id; version = $_.version; length = $_.length; sha256 = $_.sha256 } })
   consumer = [pscustomobject][ordered]@{
-    template = "samples/Classification.PackageConsumer"
+    template = "tests/fixtures/legacy-package-consumers/Classification.PackageConsumer"
     packageReferenceCount = 3
     projectReferenceCount = 0
     restoredProjectLibraryCount = $projectLibraryCount

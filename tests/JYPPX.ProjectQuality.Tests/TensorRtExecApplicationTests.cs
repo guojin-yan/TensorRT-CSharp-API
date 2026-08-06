@@ -36,8 +36,11 @@ public sealed class TensorRtExecApplicationTests
         Assert.Contains("--dumpProfile", appReadme, StringComparison.Ordinal);
         Assert.Contains("--separateProfileRun", appReadme, StringComparison.Ordinal);
         Assert.Contains("blocked-by-cuda-driver", appReadme, StringComparison.Ordinal);
-        Assert.Contains("src\\JYPPX.TensorRtSharp.Tools\\JYPPX.TensorRtSharp.Tools.csproj", projectText.Replace("/", "\\"), StringComparison.Ordinal);
-        Assert.DoesNotContain("samples\\OnnxToEngine\\OnnxToEngine.csproj", projectText.Replace("/", "\\"), StringComparison.Ordinal);
+        Assert.Contains("_shared\\JYPPX.TensorRtSharp.ApplicationTools\\JYPPX.TensorRtSharp.ApplicationTools.csproj", projectText.Replace("/", "\\"), StringComparison.Ordinal);
+        Assert.Contains("JYPPX.PublicSamplePackages.props", projectText, StringComparison.Ordinal);
+        Assert.DoesNotContain("src\\JYPPX.CudaSharp", projectText.Replace("/", "\\"), StringComparison.Ordinal);
+        Assert.DoesNotContain("src\\JYPPX.TensorRtSharp\\", projectText.Replace("/", "\\"), StringComparison.Ordinal);
+        Assert.DoesNotContain("applications\\OnnxToEngine\\OnnxToEngine.csproj", projectText.Replace("/", "\\"), StringComparison.Ordinal);
     }
 
     [Fact]
@@ -593,7 +596,7 @@ public sealed class TensorRtExecApplicationTests
         Assert.Contains("applications/TensorRtExec", zhReadme, StringComparison.Ordinal);
         Assert.Contains("applications/TensorRtExec/README.md", docsIndex, StringComparison.Ordinal);
         Assert.Contains("Evidence Ladder For Asset-Dependent Samples", samplesReadme, StringComparison.Ordinal);
-        Assert.Contains("package-consumer-runtime belongs to release proof records", samplesReadme, StringComparison.Ordinal);
+        Assert.Contains("belongs to release proof records", samplesReadme, StringComparison.Ordinal);
         string trtexecCoverage = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "artifacts", "user-acceptance", "trtexec-option-coverage.md"));
         Assert.Contains("--minTiming", trtexecCoverage, StringComparison.Ordinal);
         Assert.Contains("--precisionConstraints", trtexecCoverage, StringComparison.Ordinal);
@@ -607,8 +610,8 @@ public sealed class TensorRtExecApplicationTests
     public void TensorRtExecOnnxToEngineAndYoloVisionDocsKeepProofChainSeparation()
     {
         string tensorRtExecReadme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "TensorRtExec", "README.md"));
-        string onnxToEngineReadme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "OnnxToEngine", "README.md"));
-        string yoloReadme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "samples", "YoloVision", "README.md"));
+        string onnxToEngineReadme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "OnnxToEngine", "README.md"));
+        string yoloReadme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "YoloVision", "README.md"));
         string boundaryArticle = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "articles", "zh-cn", "onnxtoengine-and-tensorrtexec-boundary.md"));
         string coverage = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "artifacts", "user-acceptance", "trtexec-option-coverage.md"));
         string combined = tensorRtExecReadme + onnxToEngineReadme + yoloReadme + boundaryArticle + coverage;

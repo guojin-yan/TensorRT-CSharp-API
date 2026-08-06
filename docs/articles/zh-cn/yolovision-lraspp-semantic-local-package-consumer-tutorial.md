@@ -1,6 +1,6 @@
 # 使用 TensorRtSharp4.0 在 C# 中运行 LRASPP 语义分割
 
-本文从一个仓库外的空 .NET 控制台项目开始，完成 torchvision LRASPP MobileNetV3 Large 权重获取、ONNX 转换、本地 NuGet 包引用、图像预处理、TensorRT 推理、逐像素 argmax、结果校验和原图可视化。
+本文从一个仓库外的空 .NET 控制台项目开始，完成 torchvision LRASPP MobileNetV3 Large 权重获取、ONNX 转换、公开 NuGet 包引用、图像预处理、TensorRT 推理、逐像素 argmax、结果校验和原图可视化。
 
 最终程序会输出结构化 JSON、完整 `int32` 类别索引图和一张叠加到原图上的语义分割结果。模型、权重和原始张量只暂存在工作区外层目录，不进入 Git、NuGet 或 GitHub Release。
 
@@ -11,7 +11,7 @@
 | 包 | 作用 |
 | --- | --- |
 | `JYPPX.TensorRT.CSharp.API` | TensorRT managed API、环境探测、engine 构建与推理执行。 |
-| `JYPPX.TensorRT.CSharp.API.YoloVision` | 图像预处理、语义张量解码、argmax、报告、artifact 和可视化。 |
+| `applications/YoloVision` | 图像预处理、语义张量解码、argmax、报告、artifact 和可视化。 |
 | `JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge` | 仅包含项目编译的 native bridge，不包含 NVIDIA 运行库。 |
 
 CUDA、cuDNN 与 TensorRT 由用户自行安装。bridge 包负责 managed/native 连接，不负责分发 `nvinfer`、`cudart`、`cudnn` 或 `nvrtc`。
@@ -151,51 +151,23 @@ Get-FileHash $inputJpg, $inputPpm -Algorithm SHA256
 
 PPM 用于读取像素，JPEG 用于嵌入可视化。程序会校验两者尺寸一致，防止把预测覆盖到错误图片上。
 
-## 创建本地包消费项目
+## 使用公开包准备应用
 
-第一版尚未执行公共 NuGet 发布，因此先从当前源码生成三个本地包：
+`applications/YoloVision` 是完整应用并设置为 `IsPackable=false`。它通过共享 props 引用已发布的
+`JYPPX.TensorRT.CSharp.API` 4 系列包，以及作者维护的
+[OpenCV-CSharp-API](https://github.com/guojin-yan/OpenCV-CSharp-API)。应用本身不发布 YoloVision 案例 NuGet 包。
 
-```powershell
-$packageVersion = '4.0.0'
-$packageRoot = Join-Path $repoRoot 'artifacts/article-semantic-packages'
-$feed = Join-Path $workspaceRoot 'local-feed/tensorrtsharp4-semantic'
-
-New-Item -ItemType Directory -Force -Path $packageRoot, $feed | Out-Null
-
-dotnet pack (Join-Path $repoRoot 'pack/JYPPX.TensorRT.CSharp.API/JYPPX.TensorRT.CSharp.API.csproj') `
-  -c Release -o $packageRoot `
-  -p:JYPPXPackageVersion=$packageVersion
-
-dotnet pack (Join-Path $repoRoot 'samples/YoloVision/YoloVision.csproj') `
-  -c Release -o $packageRoot `
-  -p:JYPPXPackageVersion=$packageVersion
-
-pwsh -NoProfile -ExecutionPolicy Bypass `
-  -File (Join-Path $repoRoot 'eng/Invoke-LocalSplitRuntimePackage.ps1') `
-  -SourceRuntimeKey win-x64-trt10.11-cuda12.9-cudnn9.22 `
-  -Version $packageVersion `
-  -SplitPackageRole bridge `
-  -SkipManagedPack `
-  -SkipConsumerValidation
-```
-
-把 managed、YoloVision 和当前环境的 `.Bridge` 包复制到 `$feed`。不要选择 `FullRuntime` 或任何包含 NVIDIA DLL 的历史包。
-
-创建仓库外项目并添加三个引用：
+新建仓库外项目时，可以让 NuGet 获取当前公开预览版，而不在文章中写死具体版本：
 
 ```powershell
-dotnet new console --framework net8.0 --force --output $demoRoot
-Set-Location $demoRoot
-
-dotnet add package JYPPX.TensorRT.CSharp.API `
-  --version $packageVersion --source $feed
-dotnet add package JYPPX.TensorRT.CSharp.API.YoloVision `
-  --version $packageVersion --source $feed
-dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge `
-  --version $packageVersion --source $feed
+dotnet add package JYPPX.TensorRT.CSharp.API --prerelease
+dotnet add package JYPPX.OpenCV.CSharp.API --prerelease
+dotnet add package JYPPX.OpenCV.runtime.win-x64 --prerelease
+dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --prerelease
 ```
 
-最终项目只能包含三个 `PackageReference`，不能出现 `ProjectReference` 或手工 DLL 引用。
+最后一个包 ID 必须按目标机器环境替换。它只包含项目自有 bridge；CUDA、cuDNN、TensorRT 和 NVRTC
+继续由用户安装。仓库中的 YoloVision 项目直接运行当前源码，但 TensorRT/CUDA API 来自公开 NuGet 包。
 
 ## 编写程序入口
 
@@ -256,7 +228,7 @@ $runArgs = @(
   '--std', '0.229,0.224,0.225'
 )
 
-dotnet run -c Release --no-build -- @runArgs
+dotnet run --project ./applications/YoloVision -c Release --no-build -- @runArgs
 ```
 
 `--preprocessed-output` 会保存 C# 真正送入 TensorRT 的输入。严格比较必须基于这个张量生成 ONNX Runtime 参考，不能把 Pillow 与 C# 不同的缩放像素混成同一个输入：
@@ -272,7 +244,7 @@ $strictReferenceRoot = Join-Path $resultRoot 'strict-reference'
   --csharp-tensor $tensorPath
 
 $referenceOutput = Join-Path $strictReferenceRoot 'semantic.reference.json'
-dotnet run -c Release --no-build -- @runArgs `
+dotnet run --project ./applications/YoloVision -c Release --no-build -- @runArgs `
   --reference-outputs "semantic:$referenceOutput" `
   --reference-abs-tolerance 0.0001 `
   --reference-rel-tolerance 0.0001
@@ -282,11 +254,11 @@ dotnet run -c Release --no-build -- @runArgs `
 
 ## 已验证结果
 
-下面是仓库外消费项目只通过三个 `PackageReference` 执行时的 Windows Terminal 窗口：
+下面的 Windows Terminal 窗口来自发布前的历史隔离消费验证。原始截图和证据分类保持不变；当前教程命令已经切换到使用公开核心包构建的 YoloVision 应用：
 
 ![YoloVision LRASPP 语义分割真实程序运行窗口](../../images/yolovision-lraspp-semantic-runtime-terminal.png)
 
-终端截图来自本次真实运行的 stdout，只筛选了不含机器路径的结果行；它不是手工填写的指标卡片。窗口显示 external project、3 个 PackageReference、输入输出合同、TensorRT 执行耗时、全部 logits 比较以及进程退出码 0。
+终端截图来自真实运行的 stdout，只筛选了不含机器路径的结果行；它不是手工填写的指标卡片。窗口中的历史包引用数量不作为当前公共包 post-publish 证明，输入输出合同、TensorRT 执行耗时、全部 logits 比较和退出码仍可复核。
 
 程序生成的 SVG 已渲染成 PNG。橙色表示 `dog`，紫色表示 `person`，背景只保留低透明度覆盖；右上角图例给出每类像素数与占比：
 

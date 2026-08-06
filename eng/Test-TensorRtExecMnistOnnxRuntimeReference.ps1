@@ -148,7 +148,7 @@ try {
     Copy-Item -LiteralPath $package.path -Destination (Join-Path $feedDirectory ([IO.Path]::GetFileName($package.path)))
   }
 
-  $templateRoot = Join-Path $RepositoryRoot "samples\Mnist.OnnxRuntimeReference"
+  $templateRoot = Join-Path $RepositoryRoot "tests\fixtures\mnist-onnx-runtime-reference"
   $projectPath = Join-Path $projectDirectory "Mnist.OnnxRuntimeReference.csproj"
   $programPath = Join-Path $projectDirectory "Program.cs"
   $project = Get-Content -LiteralPath (Join-Path $templateRoot "Mnist.OnnxRuntimeReference.csproj.template") -Raw -Encoding utf8

@@ -87,10 +87,10 @@ README 第一屏还应保留：
 
 | 入口 | 当前价值 | 不能替代 |
 | --- | --- | --- |
-| `samples/OnnxToEngine` | 最小 ONNX round-trip 和 engine build 路径 | 任意外部模型 runtime proof |
+| `applications/OnnxToEngine` | 最小 ONNX round-trip 和 engine build 路径 | 任意外部模型 runtime proof |
 | `applications/TensorRtExec` | CLI / WinForms build-only、precheck、report、sidecar | `package-consumer-runtime` |
-| `samples/Classification` | 用户自备分类模型样例 | release package consumer proof |
-| `samples/YoloVision` | YOLO v5/v6/v7/v8/v9/v10/v11/v26/custom，det、cls、seg、obb、pose、sem 统一样例 | `real-model-runtime`，除非真实资产和日志通过 validator |
+| `samples/ComputerVision/01.Classification` | 用户自备分类模型样例 | release package consumer proof |
+| `applications/YoloVision` | YOLO v5/v6/v7/v8/v9/v10/v11/v26/custom，det、cls、seg、obb、pose、sem 统一样例 | `real-model-runtime`，除非真实资产和日志通过 validator |
 
 当前统一 YOLO-family 样例入口是 `YoloVision`。不要把旧检测样例名或旧项目文件重新写成当前入口。
 

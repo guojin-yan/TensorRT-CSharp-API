@@ -8,7 +8,7 @@ TensorRtSharp4.0 的发布证据必须分层看待。README、模板、build rep
 
 - 准备执行发布候选审计的人。
 - 需要理解 `package-consumer-runtime proof`、`real-model-runtime proof`、`post-publish proof` 区别的人。
-- 想把 `applications/TensorRtExec`、`samples/YoloVision`、OnnxToEngine build report 和 owner proof 产物串起来的维护者。
+- 想把 `applications/TensorRtExec`、`applications/YoloVision`、OnnxToEngine build report 和 owner proof 产物串起来的维护者。
 - 负责判断 GitHub Actions dry-run、local feed、ProjectReference、direct `.nupkg` 是否能进入 release close 的发布负责人。
 
 ## 关键路径

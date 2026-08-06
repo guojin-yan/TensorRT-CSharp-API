@@ -1,6 +1,6 @@
 # YoloVision Pose 单输出内嵌通道与多输出实战教程
 
-Pose 模型在 detection 的 box/class/score 之外，还为每个候选目标输出一组 keypoints。工程上最危险的不是少画一个点，而是 detection 行、NMS 后目标、keypoint 行、坐标空间和 stride 没有使用同一份模型契约。本文绑定 `samples/YoloVision` 的当前实现，从 E 盘资产目录、ONNX build-only、preflight、真实运行、JSON/SVG 到证据回填形成完整路径。
+Pose 模型在 detection 的 box/class/score 之外，还为每个候选目标输出一组 keypoints。工程上最危险的不是少画一个点，而是 detection 行、NMS 后目标、keypoint 行、坐标空间和 stride 没有使用同一份模型契约。本文绑定 `applications/YoloVision` 的当前实现，从 E 盘资产目录、ONNX build-only、preflight、真实运行、JSON/SVG 到证据回填形成完整路径。
 
 ## 当前实现范围
 
@@ -170,7 +170,7 @@ dotnet run --project .\applications\TensorRtExec -- `
 ## 离线 preflight
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- `
+dotnet run --project .\applications\YoloVision -- `
   --model ..\downloads\cases\yolov8n-pose\models\yolov8n-pose.onnx `
   --labels ..\downloads\cases\yolov8n-pose\labels\coco.names `
   --image ..\downloads\cases\yolov8n-pose\images\input.ppm `
@@ -189,7 +189,7 @@ dotnet run --project .\samples\YoloVision -- `
 ## 真实运行与输出
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- `
+dotnet run --project .\applications\YoloVision -- `
   --model ..\downloads\cases\yolov8n-pose\models\yolov8n-pose.onnx `
   --labels ..\downloads\cases\yolov8n-pose\labels\coco.names `
   --image ..\downloads\cases\yolov8n-pose\images\input.ppm `
@@ -216,7 +216,7 @@ dotnet run --project .\samples\YoloVision -- `
 
 ## JSON 与 SVG 语义
 
-每条 pose prediction 包含 detection `box`、`classId`、`className`、目标 `score`，以及 keypoint 数组中的 `index/x/y/score`。示例位于 `samples/YoloVision/examples/yolovision-output-pose.example.json`。
+每条 pose prediction 包含 detection `box`、`classId`、`className`、目标 `score`，以及 keypoint 数组中的 `index/x/y/score`。示例位于 `applications/YoloVision/examples/yolovision-output-pose.example.json`。
 
 SVG 会绘制 box、可见 keypoint 圆点和 COCO 人体骨架边。它最多处理 50 个 pose；当 `--image`、预处理元数据与同尺寸 `--visualization-background` 同时存在时，全部几何元素映射回原图坐标。该图适合结果复查和文章展示，但不替代 raw tensor 与独立后处理比较。
 
@@ -252,12 +252,12 @@ validator 会检查 task、输入、engine、runtime、output summaries、pose b
 
 ## 代码入口
 
-- `samples/YoloVision/YoloRuntimeOutputRoleResolver.cs`：role map、keypoint count/stride 和 layout 参数。
-- `samples/YoloVision/YoloSampleRunner.cs`：`DecodeEmbeddedPoseOutput`、独立 tensor 兼容路径、`SourceIndex` 绑定与 keypoint row 路由。
+- `applications/YoloVision/YoloRuntimeOutputRoleResolver.cs`：role map、keypoint count/stride 和 layout 参数。
+- `applications/YoloVision/YoloSampleRunner.cs`：`DecodeEmbeddedPoseOutput`、独立 tensor 兼容路径、`SourceIndex` 绑定与 keypoint row 路由。
 - `eng/Invoke-YoloVisionPoseReference.py`：ONNX Runtime 原始 reference、Ultralytics/PyTorch CPU 参考与结果比较。
-- `samples/YoloVision/YoloPoseDecoder.cs`：`x/y/score` 的纯托管解析。
-- `samples/YoloVision/YoloVisionOutputReport.cs`：pose JSON prediction。
-- `samples/YoloVision/YoloVisionVisualizationWriter.cs`：box 与关键点 SVG。
+- `applications/YoloVision/YoloPoseDecoder.cs`：`x/y/score` 的纯托管解析。
+- `applications/YoloVision/YoloVisionOutputReport.cs`：pose JSON prediction。
+- `applications/YoloVision/YoloVisionVisualizationWriter.cs`：box 与关键点 SVG。
 - `eng/Test-YoloVisionOutputReport.ps1`：输出结构和 proof boundary 校验。
 
 ## 收尾清单

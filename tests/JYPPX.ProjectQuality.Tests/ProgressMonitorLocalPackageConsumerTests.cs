@@ -11,10 +11,10 @@ public sealed class ProgressMonitorLocalPackageConsumerTests
     public void ConsumerUsesOnlyPackageReferencesAndExercisesRealProgressAndCancellation()
     {
         string template = ReadSource(
-            "samples",
+            "tests", "fixtures", "package-consumers",
             "ProgressMonitor.PackageConsumer",
             "ProgressMonitor.PackageConsumer.csproj.template");
-        string program = ReadSource("samples", "ProgressMonitor.PackageConsumer", "Program.cs");
+        string program = ReadSource("tests", "fixtures", "package-consumers", "ProgressMonitor.PackageConsumer", "Program.cs");
 
         Assert.Equal(2, Regex.Matches(template, "<PackageReference ").Count);
         Assert.DoesNotContain("ProjectReference", template, StringComparison.Ordinal);

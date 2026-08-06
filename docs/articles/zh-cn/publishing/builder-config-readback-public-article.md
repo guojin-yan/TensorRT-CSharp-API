@@ -6,7 +6,7 @@ TensorRT engine 的构建参数很多：workspace、memory pool、profiling verb
 
 ## 适合
 
-- 正在使用 `samples/OnnxToEngine` 或 `applications/TensorRtExec` 构建 engine 的用户。
+- 正在使用 `applications/OnnxToEngine` 或 `applications/TensorRtExec` 构建 engine 的用户。
 - 需要确认 `--workspace`、`--memPoolSize`、`--avgTiming`、`--tacticSources`、`--profilingVerbosity` 是否真正应用的维护者。
 - 想把 TensorRT 8、TensorRT 10、TensorRT 11 的 version guard 和配置差异讲清楚的文章作者。
 - 负责 release evidence 审核，但需要区分 build/report evidence 与 package-consumer-runtime proof 的发布负责人。
@@ -120,7 +120,7 @@ BuilderConfigCanPromoteReleaseProof = false
 下面的命令适合做本地构建参数检查。路径请放在 E 盘或项目工作区，不要把大模型、engine、timing cache 写到 C 盘临时目录。
 
 ```powershell
-dotnet run --project .\samples\OnnxToEngine\OnnxToEngine.csproj -- `
+dotnet run --project .\applications\OnnxToEngine\OnnxToEngine.csproj -- `
   --onnx ..\downloads\models\model.onnx `
   --saveEngine ..\downloads\engines\model.plan `
   --workspace 2048 `

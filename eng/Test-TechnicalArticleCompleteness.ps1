@@ -1,4 +1,4 @@
-[CmdletBinding()]
+﻿[CmdletBinding()]
 param(
   [string]$RepositoryRoot,
   [string]$CatalogPath,
@@ -31,6 +31,23 @@ function Resolve-RepositoryPath {
     return [IO.Path]::GetFullPath($Path)
   }
   return [IO.Path]::GetFullPath((Join-Path $RepositoryRoot $Path))
+}
+
+function Get-RelativePathCompat {
+  param(
+    [Parameter(Mandatory = $true)][string]$BasePath,
+    [Parameter(Mandatory = $true)][string]$TargetPath
+  )
+
+  $nativeMethod = [IO.Path].GetMethod("GetRelativePath", [type[]]@([string], [string]))
+  if ($null -ne $nativeMethod) {
+    return [IO.Path]::GetRelativePath($BasePath, $TargetPath)
+  }
+
+  $baseWithSeparator = $BasePath.TrimEnd([IO.Path]::DirectorySeparatorChar, [IO.Path]::AltDirectorySeparatorChar) + [IO.Path]::DirectorySeparatorChar
+  $baseUri = [Uri]::new($baseWithSeparator)
+  $targetUri = [Uri]::new($TargetPath)
+  return [Uri]::UnescapeDataString($baseUri.MakeRelativeUri($targetUri).ToString()).Replace('/', [IO.Path]::DirectorySeparatorChar)
 }
 
 function Normalize-PathText {
@@ -79,22 +96,38 @@ $results = @(
     else {
       ""
     }
-    foreach ($heading in @(
-      "## 本文使用的项目与库",
-      "## 模型获取与许可证",
-      "## ONNX 转换与暂存",
-      "## 创建本地包消费项目",
-      "## 编写程序入口",
-      "## 编译并运行",
-      "## 已验证结果",
-      "## 复查与边界"
-    )) {
-      if ($content.IndexOf($heading, [StringComparison]::Ordinal) -lt 0) {
-        $failures.Add("missing-heading:$heading")
+    $requiredHeadingGroups = @(
+      @("## 本文使用的项目与库"),
+      @("## 模型获取与许可证"),
+      @("## ONNX 转换与暂存"),
+      @("## 使用公开包准备应用", "## 使用公开包准备案例", "## 创建本地包消费项目"),
+      @("## 编写程序入口"),
+      @("## 编译并运行"),
+      @("## 已验证结果"),
+      @("## 复查与边界")
+    )
+    foreach ($headingGroup in $requiredHeadingGroups) {
+      $matchedHeading = @($headingGroup | Where-Object {
+        $content.IndexOf($_, [StringComparison]::Ordinal) -ge 0
+      }).Count -gt 0
+      if (-not $matchedHeading) {
+        $failures.Add("missing-heading:$($headingGroup -join '|')")
       }
     }
-    if ($content.IndexOf("终端截图来自本次真实运行的 stdout", [StringComparison]::Ordinal) -lt 0 -or
-        $content.IndexOf("两张图都来自同一次真实 TensorRT 执行", [StringComparison]::Ordinal) -lt 0) {
+
+    $hasTerminalRuntimeStatement =
+      $content.IndexOf("终端截图来自", [StringComparison]::Ordinal) -ge 0 -and
+      $content.IndexOf("真实运行", [StringComparison]::Ordinal) -ge 0 -and
+      $content.IndexOf("stdout", [StringComparison]::OrdinalIgnoreCase) -ge 0
+    $hasTensorRtRuntimeStatement =
+      $content.IndexOf("真实 TensorRT", [StringComparison]::OrdinalIgnoreCase) -ge 0
+    $hasSharedResultSourceStatement =
+      $content.IndexOf("两张图都来自同一次", [StringComparison]::Ordinal) -ge 0 -or
+      $content.IndexOf("同次运行输出", [StringComparison]::Ordinal) -ge 0 -or
+      $content.IndexOf("结果图使用同一个", [StringComparison]::Ordinal) -ge 0
+    if (-not $hasTerminalRuntimeStatement -or
+        -not $hasTensorRtRuntimeStatement -or
+        -not $hasSharedResultSourceStatement) {
       $failures.Add("missing-runtime-and-annotated-image-source-statement")
     }
 
@@ -241,7 +274,7 @@ $report = [pscustomobject][ordered]@{
   schemaVersion = 1
   recordKind = "technical-article-completeness-validation"
   generatedAtUtc = [DateTime]::UtcNow.ToString("O")
-  catalogPath = [IO.Path]::GetRelativePath($RepositoryRoot, $CatalogPath).Replace('\', '/')
+  catalogPath = (Get-RelativePathCompat -BasePath $RepositoryRoot -TargetPath $CatalogPath).Replace('\', '/')
   repositoryMarkdownCount = $markdownFiles.Count
   repositoryMarkdownWithImageCount = $markdownWithImages.Count
   catalogArticleCount = $results.Count

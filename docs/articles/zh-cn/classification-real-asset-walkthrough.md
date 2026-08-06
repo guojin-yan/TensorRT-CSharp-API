@@ -1,10 +1,10 @@
-# Classification 本地包消费实战：C#、TensorRT 与 ResNet18 Top-5 分类
+# 使用公开 NuGet 包完成 C#、TensorRT 与 ResNet18 Top-5 分类
 
-这篇文章从空白环境开始，完整演示如何获取 TorchVision ResNet18、转换为 ONNX、把模型暂存在 Git 仓库外、生成 C# 预处理 tensor、建立独立 ONNX Runtime 参考，并让仓库外项目只通过三个本地候选包执行真实 TensorRT 推理。最终结果不是模板日志，而是原图上的 Top-5 叠加图和同次运行输出的终端截图。
+这篇文章完整演示如何获取 TorchVision ResNet18、转换为 ONNX、把模型暂存在 Git 仓库外、使用已发布的 TensorRtSharp4.0 与 OpenCV NuGet 包生成 C# 预处理 tensor、建立独立 ONNX Runtime 参考并执行真实 TensorRT 推理。最终结果不是模板日志，而是原图上的 Top-5 叠加图和同次运行输出的终端截图。
 
 ## 本文使用的项目与库
 
-本文使用 TensorRtSharp4.0 仓库中的 `samples/Classification`。这个样例负责图片预处理、TensorRT engine 构建与执行、Softmax、Top-K、结构化 JSON、独立参考比较和 SVG 结果图导出。
+本文使用 TensorRtSharp4.0 仓库中的 `samples/ComputerVision/01.Classification`。这个样例负责图片预处理、TensorRT engine 构建与执行、Softmax、Top-K、结构化 JSON、独立参考比较和 SVG 结果图导出。
 
 主要组件如下：
 
@@ -12,8 +12,9 @@
 | --- | --- |
 | `JYPPX.TensorRtSharp` | 解析 ONNX、构建 engine、绑定 tensor 并执行推理 |
 | `JYPPX.CudaSharp` | 提供 CUDA 设备、内存和 stream 基础能力 |
-| `samples/Classification` | 完成图片预处理、Softmax、Top-5、结果 JSON 和可视化 |
-| `samples/Classification.PackageConsumer` | 只通过 managed、Classification 和 bridge-only 三个 `PackageReference` 调用同一命令入口 |
+| `samples/ComputerVision/01.Classification` | 完成图片预处理、Softmax、Top-5、结果 JSON 和可视化 |
+| `JYPPX.TensorRT.CSharp.API` 4 系列包 | 提供已发布的 TensorRT 与 CUDA managed API |
+| `JYPPX.OpenCV.CSharp.API` | 由项目作者维护，负责 JPEG/PNG/BMP 图片解码 |
 | TorchVision `v0.25.0` | 提供 ResNet18 网络定义、权重和 ImageNet-1K 标签 |
 | ONNX Runtime CPU | 对同一个 C# float32 输入 tensor 生成独立参考 |
 | TensorRT `10.11` | 本文实际运行使用的推理后端 |
@@ -69,15 +70,23 @@ ead3558569edd88aa73a4eb46acbe6c38dee113933234547f04a0f6e48169903
 
 模型合同是 `images:float32[1,3,224,224] -> logits:float32[1,1000]`。输入采用 RGB、NCHW、短边缩放到 256、中心裁剪 224 x 224、scale `1/255`、ImageNet mean/std；输出 logits 再执行 Softmax 和稳定 Top-5 排序。
 
-## 创建本地包消费项目
+## 使用公开包准备案例
 
-项目仍处于第一版开发收尾阶段，本文不从 NuGet.org 或 GitHub Packages 安装 4.0 包，也不会执行任何发布命令。验证脚本先在本机生成候选包，再把下面的模板复制到仓库外隔离目录：
+`samples/ComputerVision/01.Classification` 是可执行案例，不是 NuGet 库。项目设置为 `IsPackable=false`，
+通过仓库共享 props 引用公开的 `JYPPX.TensorRT.CSharp.API` 4 系列包以及
+[OpenCV-CSharp-API](https://github.com/guojin-yan/OpenCV-CSharp-API)。它不引用 `src` 下的 TensorRT/CUDA 项目，
+也不存在 `JYPPX.TensorRT.CSharp.API.Classification` 这个待发布案例包。
 
-```text
-samples/Classification.PackageConsumer
+在仓库外创建自己的项目时，可以不写死具体版本：
+
+```powershell
+dotnet add package JYPPX.TensorRT.CSharp.API --prerelease
+dotnet add package JYPPX.OpenCV.CSharp.API --prerelease
+dotnet add package JYPPX.OpenCV.runtime.win-x64 --prerelease
+dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --prerelease
 ```
 
-模板只有三个 `PackageReference`：`JYPPX.TensorRT.CSharp.API`、`JYPPX.TensorRT.CSharp.API.Classification` 和当前运行时键对应的 bridge-only 包。脚本清空远程源、使用隔离 NuGet 缓存，并检查 restore graph 中 `ProjectReference=0`、直接程序集引用为 0。bridge-only 包只含 `jyppxtrtbridge.dll`；CUDA、cuDNN 和 TensorRT 继续从用户安装目录加载。
+最后一个包 ID 必须按本机环境选择。它只包含项目自有 bridge；CUDA、cuDNN 和 TensorRT 继续从用户安装目录加载。
 
 先定义工作目录，正文后续命令都使用变量，避免绑定某台机器的盘符：
 
@@ -91,28 +100,20 @@ $ImageBmp = Join-Path $CaseRoot 'dog.bmp'
 New-Item -ItemType Directory -Force -Path $CaseRoot | Out-Null
 ```
 
-下载 CC0 图片，并转换为样例原生支持的 24-bit BMP：
+下载 CC0 图片。案例使用 `JYPPX.OpenCV.CSharp.API` 直接解码 JPEG，不再要求为了运行案例额外转成 BMP：
 
 ```powershell
 Invoke-WebRequest `
   'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Dog_at_N%C3%B8rre_Vorup%C3%B8r_Strand.jpg/1280px-Dog_at_N%C3%B8rre_Vorup%C3%B8r_Strand.jpg' `
   -OutFile $ImageJpeg
 
-Add-Type -AssemblyName System.Drawing
-$source = [Drawing.Image]::FromFile($ImageJpeg)
-$bitmap = [Drawing.Bitmap]::new($source.Width, $source.Height, [Drawing.Imaging.PixelFormat]::Format24bppRgb)
-$graphics = [Drawing.Graphics]::FromImage($bitmap)
-$graphics.DrawImage($source, 0, 0, $source.Width, $source.Height)
-$bitmap.Save($ImageBmp, [Drawing.Imaging.ImageFormat]::Bmp)
-$graphics.Dispose(); $bitmap.Dispose(); $source.Dispose()
 ```
 
 ## 编写程序入口
 
-Classification 扩展包公开 `ClassificationCommand.Run(string[])`，原来的 `Main(string[])` 仍委托给它，命令参数和退出码保持不变。包消费者的完整入口只有下面几行：
+案例入口把命令参数交给 `ClassificationCommand.Run(string[])`，命令参数和退出码保持稳定：
 
 ```csharp
-Console.WriteLine("ClassificationPackageConsumer ProjectReference=False");
 TensorRtEnvironmentSnapshot snapshot = TensorRtEnvironmentProbe.GetCurrent();
 Console.WriteLine($"BridgeTensorRt={snapshot.BuildInfo.TensorRtVersion}");
 return ClassificationCommand.Run(args);
@@ -142,40 +143,39 @@ ClassificationVisualizationWriter.Write(
 
 ## 编译并运行
 
-先生成 managed 主包和 Classification 扩展包；这里只写入本地目录，不上传任何 feed：
+先还原并检查依赖图，然后编译案例。这里不会打包或发布案例项目：
 
 ```powershell
-dotnet pack ./pack/JYPPX.TensorRT.CSharp.API/JYPPX.TensorRT.CSharp.API.csproj `
-  -c Release -o ./artifacts/classification-package-consumer/managed `
-  -p:JYPPXPackageVersion=4.0.0
-
-dotnet pack ./samples/Classification/Classification.csproj `
-  -c Release -o ./artifacts/classification-package-consumer/classification `
-  -p:JYPPXPackageVersion=4.0.0
+dotnet restore ./samples/ComputerVision/01.Classification/Classification.csproj
+dotnet list ./samples/ComputerVision/01.Classification/Classification.csproj package
+dotnet build ./samples/ComputerVision/01.Classification/Classification.csproj -c Release --no-restore
 ```
 
-bridge-only 候选包由仓库的 runtime-split 构建流程生成。本文选择
-`win-x64-trt10.11-cuda12.9-cudnn9.22`；对应包内的 native 目录必须只有 `jyppxtrtbridge.dll`。设置本机 TensorRT 根目录，CUDA 和 cuDNN 则由运行时根目录解析器按运行时键检查：
+本文实测环境选择 `win-x64-trt10.11-cuda12.9-cudnn9.22` bridge。设置本机 TensorRT 根目录；
+CUDA 和 cuDNN 由运行时根目录解析器按运行时键检查：
 
 ```powershell
 $env:TENSORRT_PATH = '<TensorRT-root>'
 ```
 
-第一次运行源码样例只用于让 C# 写出权威预处理 tensor，以便独立框架使用完全相同的输入；这一步不替代最终三包验证：
+运行使用公开包构建的仓库案例，并让 C# 写出权威预处理 tensor，以便独立框架使用完全相同的输入：
 
 ```powershell
-$App = './samples/Classification/bin/Release/net8.0/Classification.dll'
 $InputTensor = Join-Path $CaseRoot 'classification-input.fp32.bin'
+$OutputJson = Join-Path $CaseRoot 'classification-output.json'
+$Visualization = Join-Path $CaseRoot 'classification-result.svg'
 
-dotnet $App `
+dotnet run --project ./samples/ComputerVision/01.Classification -c Release --no-build -- `
   --model (Join-Path $ModelRoot 'resnet18-imagenet1k-v1.onnx') `
   --labels (Join-Path $ModelRoot 'imagenet1k.names') `
-  --image $ImageBmp --preprocessed-output $InputTensor `
+  --image $ImageJpeg --preprocessed-output $InputTensor `
   --input-shape 1x3x224x224 --tensor-rt-line 10 `
   --image-resize shorter-side-center-crop --resize-shorter-side 256 `
   --tensor-layout NCHW --color-order RGB --scale 0.00392156862745098 `
   --mean 0.485,0.456,0.406 --std 0.229,0.224,0.225 `
-  --score-transform softmax --top-k 5 --noTF32
+  --score-transform softmax --top-k 5 --noTF32 `
+  --output-json $OutputJson --visualization $Visualization `
+  --visualization-background $ImageJpeg
 ```
 
 为这个精确 tensor 生成独立参考：
@@ -192,15 +192,8 @@ python ./eng/Invoke-ClassificationResNet18Reference.py `
   --expected-input-sha256 $InputSha
 ```
 
-生成独立参考后，执行仓库外三包消费者。脚本会重新从 BMP 生成 C# tensor、比较任务概率与原始 logits、写结果图，然后把参考值索引 0 增加 `0.125` 再执行一次负例：
-
-```powershell
-pwsh -NoProfile -ExecutionPolicy Bypass `
-  -File ./eng/Test-ClassificationLocalPackageConsumer.ps1 `
-  -RuntimePackageKey win-x64-trt10.11-cuda12.9-cudnn9.22
-```
-
-脚本默认从外层 `models/Classification/resnet18-torchvision-v0.25.0` 读取 ONNX 和 labels，从外层 `downloads` 读取固定 CC0 图片与独立参考。也可以通过 `-ModelPath`、`-LabelsPath`、`-ImagePath`、`-TaskReferencePath` 和 `-RawReferencePath` 显式覆盖；模型仍不得复制进仓库。
+生成独立参考后，使用同一条案例命令增加 `--reference-output` 重新运行，比较任务概率与原始 logits。
+再复制参考 JSON，把索引 0 的参考值增加 `0.125` 后执行受控负例；进程必须返回非零，证明错误参考会失败关闭。
 
 ## 已验证结果
 
@@ -217,9 +210,9 @@ pwsh -NoProfile -ExecutionPolicy Bypass `
 
 ![ResNet18 在 CC0 狗图片上的真实 TensorRT Top-5 结果](../../images/classification-resnet18-annotated-cc0.webp)
 
-![Classification 三包消费者真实运行输出](../../images/classification-resnet18-local-package-consumer-terminal.png)
+![Classification 真实运行输出](../../images/classification-resnet18-local-package-consumer-terminal.png)
 
-终端截图来自本次真实运行的 stdout，只移除了机器路径并压缩成长短适合窗口展示的字段，包引用数、shape、耗时、Top-5、比较数量、负例和通过状态均未修改。两张图都来自同一次真实 TensorRT 执行：结果图使用同一个 CC0 输入和同一套 Classification 可视化写入器生成；为避免仓库保存两份内容相同的大图，源码运行与三包运行复用这张 Top-5 图。
+终端截图来自真实运行的 stdout，只移除了机器路径并压缩成长短适合窗口展示的字段；shape、耗时、Top-5、比较数量、负例和通过状态均未修改。结果图使用同一个 CC0 输入和同一套 Classification 可视化写入器生成。
 
 ## 复查与边界
 
@@ -231,6 +224,6 @@ Get-FileHash $InputTensor -Algorithm SHA256
 pwsh -NoProfile -ExecutionPolicy Bypass -File ./eng/Test-ClassificationLocalPackageConsumer.ps1
 ```
 
-结构化结果保存在 `samples/assets/classification-resnet18-local-package-consumer-runtime-evidence.json`。本文证明的是固定 ResNet18、固定 CC0 图片、固定预处理和 TensorRT 10.11 的本地 `PackageReference` 三包消费主路径，以及任务概率和原始 logits 的 fail-closed 对照。它不证明 ImageNet 整体精度，也不是公开 feed、post-publish、Owner release acceptance、Tag 或 GitHub Release 证明。
+原始结构化结果保存在 `samples/assets/classification-resnet18-local-package-consumer-runtime-evidence.json`。该文件名保留发布前历史证据语义，不应改写为新的公开包证明。本文证明固定 ResNet18、固定 CC0 图片、固定预处理和 TensorRT 10.11 的推理与 fail-closed 对照；公共包的 post-publish 验证需要单独生成新的运行记录。
 
 模型文件继续只放在外层 `models` 目录，不上传 GitHub；CUDA、cuDNN、TensorRT 和 NVRTC 继续由用户安装。本文内容完整不等于已授权公开发布，更不会触发包、Release 或版本发布。

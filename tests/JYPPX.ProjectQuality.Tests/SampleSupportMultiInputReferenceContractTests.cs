@@ -125,13 +125,13 @@ public sealed class SampleSupportMultiInputReferenceContractTests
     [Fact]
     public void RuntimeSourceSchemasAndSmokeExposeTheCompleteContract()
     {
-        string support = Read("samples", "JYPPX.SampleSupport", "TensorRtOnnxSample.cs");
-        string inputs = Read("samples", "JYPPX.SampleSupport", "TensorRtOnnxSample.Inputs.cs");
-        string references = Read("samples", "JYPPX.SampleSupport", "TensorRtOnnxSample.References.cs");
+        string support = Read("samples", "_shared", "JYPPX.SampleSupport", "TensorRtOnnxSample.cs");
+        string inputs = Read("samples", "_shared", "JYPPX.SampleSupport", "TensorRtOnnxSample.Inputs.cs");
+        string references = Read("samples", "_shared", "JYPPX.SampleSupport", "TensorRtOnnxSample.References.cs");
         string smoke = Read("smoke", "OnnxToEngineSmokeRunner", "Program.cs");
-        string yoloSchema = Read("samples", "YoloVision", "yolovision-output.schema.json");
-        string classificationSchema = Read("samples", "Classification", "classification-output.schema.json");
-        string referenceSchema = Read("samples", "JYPPX.SampleSupport", "onnx-sample-reference.schema.json");
+        string yoloSchema = Read("applications", "YoloVision", "yolovision-output.schema.json");
+        string classificationSchema = Read("samples", "ComputerVision", "01.Classification", "classification-output.schema.json");
+        string referenceSchema = Read("samples", "_shared", "JYPPX.SampleSupport", "onnx-sample-reference.schema.json");
 
         Assert.DoesNotContain("This sample supports one float input tensor", support, StringComparison.Ordinal);
         Assert.Contains("foreach (OnnxSampleNetworkInput input in networkInputs)", support, StringComparison.Ordinal);

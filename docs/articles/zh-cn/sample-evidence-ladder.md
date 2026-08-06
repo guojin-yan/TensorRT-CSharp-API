@@ -49,7 +49,7 @@ IsRuntimeExecutionProof=False
 
 ## OnnxToEngine 的证据位置
 
-`samples/OnnxToEngine` 是最小 identity ONNX round-trip 样例。它可以生成内置 dynamic identity ONNX，并在兼容环境下验证 parser、optimization profile、serialized engine、deserialize、binding 和 readback。
+`applications/OnnxToEngine` 是最小 identity ONNX round-trip 样例。它可以生成内置 dynamic identity ONNX，并在兼容环境下验证 parser、optimization profile、serialized engine、deserialize、binding 和 readback。
 
 这条路径证明项目自己的最小 ONNX 构建与执行链路，不证明任意外部 ONNX 的语义都已经被项目理解。外部模型仍应先通过 TensorRtExec 形成 build report，再由 Classification、YoloVision 或用户自己的 binding 代码补真实输出语义。
 

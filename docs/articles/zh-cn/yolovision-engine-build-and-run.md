@@ -1,6 +1,6 @@
 # YoloVision Engine 构建与运行
 
-本文串联 YoloVision 的 engine 构建、样例运行和证据回填。推荐流程是先用 `TensorRtExec` 做 build-only，再用 `samples/YoloVision` 跑真实模型输入，最后把 sample-run-evidence 与 release proof record 分开保存。
+本文串联 YoloVision 的 engine 构建、样例运行和证据回填。推荐流程是先用 `TensorRtExec` 做 build-only，再用 `applications/YoloVision` 跑真实模型输入，最后把 sample-run-evidence 与 release proof record 分开保存。
 
 ## 1. 生成 build-only 报告
 
@@ -22,7 +22,7 @@ dotnet run --project .\applications\TensorRtExec -- `
 ## 2. 运行 YoloVision
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- `
+dotnet run --project .\applications\YoloVision -- `
   --model .\models\yolovision\model.onnx `
   --labels .\models\yolovision\labels.txt `
   --input-data .\models\yolovision\input-fp32.bin `

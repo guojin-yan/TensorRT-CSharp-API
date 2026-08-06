@@ -224,7 +224,7 @@ $oldDotnetHome = $env:DOTNET_CLI_HOME
 $oldTelemetry = $env:DOTNET_CLI_TELEMETRY_OPTOUT
 try {
   New-Item -ItemType Directory -Path $workspace, $packageCache, $dotnetHome -Force | Out-Null
-  $templateRoot = Join-Path $RepositoryRoot "samples\YoloVision.ManagedPackageConsumer"
+  $templateRoot = Join-Path $RepositoryRoot "tests\fixtures\legacy-package-consumers\YoloVision.ManagedPackageConsumer"
   Copy-Item -LiteralPath (Join-Path $templateRoot "Program.cs") -Destination $programPath
   $project = Get-Content -LiteralPath (Join-Path $templateRoot "YoloVision.ManagedPackageConsumer.csproj.template") -Raw -Encoding utf8
   $project = $project.Replace("__MANAGED_PACKAGE_VERSION__", $PackageVersion).Replace("__YOLOVISION_PACKAGE_VERSION__", $PackageVersion)
@@ -318,7 +318,7 @@ try {
       nativeEntryCount = 0
     }
     consumer = [pscustomobject][ordered]@{
-      template = "samples/YoloVision.ManagedPackageConsumer"
+      template = "tests/fixtures/legacy-package-consumers/YoloVision.ManagedPackageConsumer"
       workspaceOutsideRepository = -not $workspace.StartsWith($RepositoryRoot, [StringComparison]::OrdinalIgnoreCase)
       packageReferenceCount = 2
       projectReferenceCount = 0

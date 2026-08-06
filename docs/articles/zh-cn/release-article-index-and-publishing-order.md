@@ -38,10 +38,10 @@ TensorRtSharp4.0 的中文材料已经从“接口补全记录”扩展为完整
 
 | 顺序 | 文章 | 样例 |
 | --- | --- | --- |
-| 11 | `cuda-stream-event-multistream-tutorial.md` | `samples/MultiStream` |
-| 12 | `dynamic-shape-optimization-profile-tutorial.md` | `samples/DynamicShape` |
-| 13 | `inference-bindings-tutorial.md` | `samples/InferenceBindings` |
-| 14 | `onnx-parser-to-serialized-engine-tutorial.md` | `samples/OnnxToEngine` |
+| 11 | `cuda-stream-event-multistream-tutorial.md` | `samples/Performance/01.MultiStream` |
+| 12 | `dynamic-shape-optimization-profile-tutorial.md` | `samples/Inference/02.DynamicShapes` |
+| 13 | `inference-bindings-tutorial.md` | `samples/Inference/01.Bindings` |
+| 14 | `onnx-parser-to-serialized-engine-tutorial.md` | `applications/OnnxToEngine` |
 | 15 | `sample-evidence-ladder.md` | `samples/README.md` |
 
 这些文章可以证明 wrapper 和样例路径可用，但不自动变成 `package-consumer-runtime`。样例输出属于 sample-level evidence，不属于 release proof record。

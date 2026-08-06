@@ -76,7 +76,7 @@ dotnet run --project .\applications\TensorRtExec -- --ui
 
 ## 与 OnnxToEngine 的关系
 
-`samples/OnnxToEngine` 适合作为最小 ONNX-to-engine 教程和 identity round-trip smoke；`applications/TensorRtExec` 适合作为最终用户工具，覆盖 CLI、WinForms、report、sidecar、parity matrix 和 release-facing 边界说明。两者可以共享 parser 和 build service，但不互相替代：
+`applications/OnnxToEngine` 适合作为最小 ONNX-to-engine 教程和 identity round-trip smoke；`applications/TensorRtExec` 适合作为最终用户工具，覆盖 CLI、WinForms、report、sidecar、parity matrix 和 release-facing 边界说明。两者可以共享 parser 和 build service，但不互相替代：
 
 - OnnxToEngine：更像教程和最小样例。
 - TensorRtExec：更像应用程序和发布前诊断工具。
@@ -86,7 +86,7 @@ dotnet run --project .\applications\TensorRtExec -- --ui
 
 1. 先用 `TensorRtExec --dryRun` 生成参数归一化报告，确认模型路径、shape profile、precision 和 artifact 路径。
 2. 再用 `TensorRtExec --buildOnly` 构建 engine 和 report，记录 ONNX/engine/log SHA256。
-3. 对真实模型，转入 `samples/Classification` 或 `samples/YoloVision` 运行带输入资产的 sample runner。
+3. 对真实模型，转入 `samples/ComputerVision/01.Classification` 或 `applications/YoloVision` 运行带输入资产的 sample runner。
 4. 对发布关闭，转入 clean external consumer proof，回填 owner input，运行 validator。
 
 ## 不能替代 proof 的材料

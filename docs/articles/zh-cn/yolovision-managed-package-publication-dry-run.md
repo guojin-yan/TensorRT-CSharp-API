@@ -1,6 +1,8 @@
 # YoloVision Managed Extension 发布 Dry-Run
 
-`JYPPX.TensorRT.CSharp.API.YoloVision` 与 `JYPPX.TensorRT.CSharp.API.Classification` 都是纯 C# managed extension。它们与基础包 `JYPPX.TensorRT.CSharp.API` 一起由 `.github/workflows/package-managed.yml` 打包；CUDA、cuDNN、TensorRT、NVRTC、模型和 engine 都不属于这些 artifact。
+> 状态：已退役的发布前方案，仅保留用于解释历史证据，不得作为当前打包或发布说明。
+
+YoloVision 与 Classification 现在都是 `IsPackable=false` 的案例应用。当前只发布基础包 `JYPPX.TensorRT.CSharp.API` 与项目自有 bridge-only 包；CUDA、cuDNN、TensorRT、NVRTC、模型和 engine 都不属于这些 artifact。旧文后续出现的示例扩展包命令均不得执行。
 
 ## 日常 Actions 验证
 
@@ -66,13 +68,13 @@ dotnet pack .\pack\JYPPX.TensorRT.CSharp.API\JYPPX.TensorRT.CSharp.API.csproj `
   -p:RepositoryCommit=$commit `
   -p:ContinuousIntegrationBuild=true
 
-dotnet pack .\samples\YoloVision\YoloVision.csproj `
+dotnet pack .\applications\YoloVision\YoloVision.csproj `
   -c Release -o $output `
   -p:JYPPXPackageVersion=$version `
   -p:RepositoryCommit=$commit `
   -p:ContinuousIntegrationBuild=true
 
-dotnet pack .\samples\Classification\Classification.csproj `
+dotnet pack .\samples\ComputerVision\01.Classification\Classification.csproj `
   -c Release -o $output `
   -p:JYPPXPackageVersion=$version `
   -p:RepositoryCommit=$commit `

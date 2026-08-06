@@ -29,8 +29,8 @@ public sealed class SourceBuildCmakeWindowsGuideTests
         Assert.Contains("dotnet test .\\tests\\JYPPX.ProjectQuality.Tests\\JYPPX.ProjectQuality.Tests.csproj", article);
         Assert.Contains("DLL 加载失败", article);
         Assert.Contains("CUDA error 35", article);
-        Assert.Contains("samples/YoloVision", article);
-        Assert.Contains("samples/OnnxToEngine", article);
+        Assert.Contains("applications/YoloVision", article);
+        Assert.Contains("applications/OnnxToEngine", article);
         Assert.Contains("applications/TensorRtExec", article);
     }
 

@@ -1001,8 +1001,8 @@ public sealed class ReleaseCandidateReadinessTests
         string tensorRtExecExternalReport = ReadSource("docs", "articles", "zh-cn", "tensorrtexec-external-onnx-build-report.md");
         string classificationRealAssetWalkthrough = ReadSource("docs", "articles", "zh-cn", "classification-real-asset-walkthrough.md");
         string realModelOwnerBackfillChecklist = ReadSource("docs", "articles", "zh-cn", "real-model-owner-backfill-checklist.md");
-        string classificationReadme = ReadSource("samples", "Classification", "README.md");
-        string yoloReadme = ReadSource("samples", "YoloVision", "README.md");
+        string classificationReadme = ReadSource("samples", "ComputerVision", "01.Classification", "README.md");
+        string yoloReadme = ReadSource("applications", "YoloVision", "README.md");
         string sampleAssetsReadme = ReadSource("samples", "assets", "README.md");
         string classificationManifest = ReadSource("samples", "assets", "classification-assets.template.json");
         string yoloManifest = ReadSource("samples", "assets", "yolovision-assets.template.json");
@@ -1364,16 +1364,16 @@ public sealed class ReleaseCandidateReadinessTests
         Assert.Contains("validationState=template-only", blogLinuxRunnerEvidence, StringComparison.Ordinal);
         Assert.Contains("validationState=real-linux-runner-proof", blogLinuxRunnerEvidence, StringComparison.Ordinal);
         Assert.Contains("Dynamic Shape 博客版", blogDynamicShape, StringComparison.Ordinal);
-        Assert.Contains("samples/DynamicShape", blogDynamicShape, StringComparison.Ordinal);
+        Assert.Contains("samples/Inference/02.DynamicShapes", blogDynamicShape, StringComparison.Ordinal);
         Assert.Contains("blocked-by-cuda-driver", blogDynamicShape, StringComparison.Ordinal);
         Assert.Contains("InferenceBindings 博客版", blogInferenceBindings, StringComparison.Ordinal);
-        Assert.Contains("samples/InferenceBindings", blogInferenceBindings, StringComparison.Ordinal);
+        Assert.Contains("samples/Inference/01.Bindings", blogInferenceBindings, StringComparison.Ordinal);
         Assert.Contains("不是 allocator/debug listener callback runtime proof", blogInferenceBindings, StringComparison.Ordinal);
         Assert.Contains("ONNX Parser 博客版", blogOnnxParser, StringComparison.Ordinal);
-        Assert.Contains("samples/OnnxToEngine", blogOnnxParser, StringComparison.Ordinal);
+        Assert.Contains("applications/OnnxToEngine", blogOnnxParser, StringComparison.Ordinal);
         Assert.Contains("不宣称所有真实模型都无需修改即可运行", blogOnnxParser, StringComparison.Ordinal);
         Assert.Contains("MultiStream 博客版", blogMultiStream, StringComparison.Ordinal);
-        Assert.Contains("samples/MultiStream", blogMultiStream, StringComparison.Ordinal);
+        Assert.Contains("samples/Performance/01.MultiStream", blogMultiStream, StringComparison.Ordinal);
         Assert.Contains("IndependentStreams=True", blogMultiStream, StringComparison.Ordinal);
         Assert.Contains("CrossStreamWait=True", blogMultiStream, StringComparison.Ordinal);
         Assert.Contains("TensorRT callback runtime proof 已完成", blogMultiStream, StringComparison.Ordinal);
@@ -3660,7 +3660,7 @@ public sealed class ReleaseCandidateReadinessTests
             item.GetProperty("sampleRunEvidenceCrossCheckState").GetString() == "owner-action-required" &&
             item.GetProperty("sampleProjectExists").GetBoolean() &&
             item.GetProperty("sampleProjectNameMatches").GetBoolean() &&
-            item.GetProperty("sampleProjectRelativePath").GetString() == "samples\\Classification\\Classification.csproj" &&
+            item.GetProperty("sampleProjectRelativePath").GetString() == "samples\\ComputerVision\\01.Classification\\Classification.csproj" &&
             !item.GetProperty("isSmokePassed").GetBoolean());
         Assert.Contains(items, static item =>
             item.GetProperty("sampleName").GetString() == "YoloVision" &&
@@ -3670,7 +3670,7 @@ public sealed class ReleaseCandidateReadinessTests
             item.GetProperty("sampleRunEvidenceCrossCheckState").GetString() == "owner-action-required" &&
             item.GetProperty("sampleProjectExists").GetBoolean() &&
             item.GetProperty("sampleProjectNameMatches").GetBoolean() &&
-            item.GetProperty("sampleProjectRelativePath").GetString() == "samples\\YoloVision\\YoloVision.csproj" &&
+            item.GetProperty("sampleProjectRelativePath").GetString() == "applications\\YoloVision\\YoloVision.csproj" &&
             !item.GetProperty("isSmokePassed").GetBoolean());
     }
 
@@ -3949,7 +3949,7 @@ public sealed class ReleaseCandidateReadinessTests
   "preprocessedInputTensorSha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
   "evidenceSidecarPath": ".\\models\\yolo-evidence.sidecar.json",
   "buildReportPath": ".\\models\\yolo-build-report.json",
-  "sampleRunCommand": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolo.onnx --labels .\\models\\coco.names --input-data .\\models\\yolo-preprocessed-fp32.bin",
+  "sampleRunCommand": "dotnet run --project .\\applications\\YoloVision -- --model .\\models\\yolo.onnx --labels .\\models\\coco.names --input-data .\\models\\yolo-preprocessed-fp32.bin",
   "sampleRunLogPath": ".\\models\\yolo-sample-run.log",
   "sampleRunLogSha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
   "stdoutSummary": "YoloVision Passed=True",

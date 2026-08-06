@@ -1,6 +1,6 @@
 # YOLOv8n Segmentation 真实多输出运行教程
 
-本文记录 `samples/YoloVision` 已执行的 YOLOv8n segmentation 真实案例。它覆盖官方资产获取、ONNX 导出、
+本文记录 `applications/YoloVision` 已执行的 YOLOv8n segmentation 真实案例。它覆盖官方资产获取、ONNX 导出、
 TensorRT 多输出构建与加载、ONNX Runtime tensor reference、Ultralytics/PyTorch 独立后处理比较、source-image mask
 工件和受控失败验证。该结果可归类为 source-tree `real-model-runtime`，但本记录本身不是 `package-consumer-runtime`、公开包、
 post-publish、Owner 发布验收或模型再分发许可。
@@ -99,7 +99,7 @@ load-engine 运行中，两份 reference 均通过。reference 来源是独立 O
 $caseRoot = '..\downloads\yolov8n-seg-ultralytics-v8.3.0'
 $sharedAssets = '..\downloads\yolox-apache\derived'
 
-dotnet .\samples\YoloVision\bin\Release\net8.0\YoloVision.dll `
+dotnet .\applications\YoloVision\bin\Release\net8.0\YoloVision.dll `
   --model "$caseRoot\source\yolov8n-seg.onnx" `
   --labels "$sharedAssets\coco.names" `
   --image "$sharedAssets\dog.ppm" `

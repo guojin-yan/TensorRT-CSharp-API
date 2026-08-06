@@ -11,10 +11,10 @@
 ## 常见问题
 
 **Q：我应该从哪里开始？**
-先看 `README.zh-CN.md`、`docs/index.md`、`docs/articles/zh-cn/getting-started.md`。如果目标是模型转换，看 `samples/OnnxToEngine` 和 `applications/TensorRtExec`；如果目标是 YOLO，使用 `samples/YoloVision`。
+先看 `README.zh-CN.md`、`docs/index.md`、`docs/articles/zh-cn/getting-started.md`。如果目标是模型转换，看 `applications/OnnxToEngine` 和 `applications/TensorRtExec`；如果目标是 YOLO，使用 `applications/YoloVision`。
 
 **Q：旧检测样例命名还在吗？**
-不建议恢复早期过窄的检测样例命名。当前统一视觉样例是 `samples\YoloVision`，覆盖 YOLO v5/v6/v7/v8/v9/v10/v11/v26/custom，以及 det、cls、seg、obb、pose、sem。
+不建议恢复早期过窄的检测样例命名。当前统一视觉样例是 `applications\YoloVision`，覆盖 YOLO v5/v6/v7/v8/v9/v10/v11/v26/custom，以及 det、cls、seg、obb、pose、sem。
 
 **Q：为什么 sample 需要我自己提供模型？**
 模型、labels、输入图片、license 和 SHA256 涉及授权与可复现性。项目可以提供 runner、manifest 和模板，但真实模型 proof 需要 owner 提供可审计资产。

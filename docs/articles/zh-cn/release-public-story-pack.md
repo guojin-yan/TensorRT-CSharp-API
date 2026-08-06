@@ -33,10 +33,10 @@ deferred 不是偷懒，也不是未登记接口；它是对高风险边界的�
 
 用户可以从这些入口开始：
 
-- `samples/OnnxToEngine`：最小 ONNX round-trip。
+- `applications/OnnxToEngine`：最小 ONNX round-trip。
 - `applications/TensorRtExec`：外部 ONNX build-only、dry-run、report 和 WinForms 入口。
-- `samples/Classification`：自备分类模型、labels 和输入图像。
-- `samples/YoloVision`：自备 YOLO-family ONNX、metadata、labels 和输入图像。
+- `samples/ComputerVision/01.Classification`：自备分类模型、labels 和输入图像。
+- `applications/YoloVision`：自备 YOLO-family ONNX、metadata、labels 和输入图像。
 - `smoke/*Runner`：本机或兼容主机上的 runtime smoke。
 
 这些路径必须保留证据边界：build-only 是构建证据，sample-run-evidence 是样例证据，`package-consumer-runtime` belongs to release proof records。

@@ -82,8 +82,8 @@ public sealed class CudaRuntimeCompilationOwnerTests
     [Fact]
     public void SampleRunsOwnerBoundTypedKernelAndSeparatesPackageProof()
     {
-        string sample = ReadSource("samples", "CudaRuntimeCompilation", "Program.cs");
-        string readme = ReadSource("samples", "CudaRuntimeCompilation", "README.md");
+        string sample = ReadSource("samples", "Cuda", "01.RuntimeCompilation", "Program.cs");
+        string readme = ReadSource("samples", "Cuda", "01.RuntimeCompilation", "README.md");
         Assert.Contains("CudaRtcCompiler.Compile", sample, StringComparison.Ordinal);
         Assert.Contains("CudaKernelLibrary.Load", sample, StringComparison.Ordinal);
         Assert.Contains("CudaRtcResultCode.Compilation", sample, StringComparison.Ordinal);

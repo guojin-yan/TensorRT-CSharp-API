@@ -6,8 +6,8 @@
 
 适用范围：
 
-- `samples/Classification`
-- `samples/YoloVision`
+- `samples/ComputerVision/01.Classification`
+- `applications/YoloVision`
 - `samples/assets/classification-assets.template.json`
 - `samples/assets/yolovision-assets.template.json`
 - `samples/assets/yolovision-yolox-s-example.json`
@@ -116,7 +116,7 @@ dotnet run --project .\applications\TensorRtExec -- `
 运行样例并保存日志：
 
 ```powershell
-dotnet run --project .\samples\Classification -- `
+dotnet run --project .\samples\ComputerVision\01.Classification -- `
   --model .\models\classifier.onnx `
   --labels .\models\classifier.labels.txt `
   --input .\models\classifier.input.png `
@@ -188,7 +188,7 @@ dotnet run --project .\applications\TensorRtExec -- `
 运行样例并保存日志：
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- `
+dotnet run --project .\applications\YoloVision -- `
   --model .\models\yolo.onnx `
   --labels .\models\coco.names `
   --input-data .\models\yolo-preprocessed-fp32.bin `
@@ -244,7 +244,7 @@ dotnet run --project .\applications\TensorRtExec -- `
   --exportReport .\models\yolox_s-build-report.json `
   --evidenceSidecar .\models\yolox_s-evidence.sidecar.json
 
-dotnet run --project .\samples\YoloVision -- `
+dotnet run --project .\applications\YoloVision -- `
   --model .\models\yolox_s.onnx `
   --labels .\models\coco.names `
   --input-data .\models\yolox_s-preprocessed-fp32.bin `

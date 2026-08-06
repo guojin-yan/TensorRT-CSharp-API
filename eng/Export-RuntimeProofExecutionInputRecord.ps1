@@ -73,7 +73,7 @@ function Get-CommandLineForLane {
     "package-consumer" { return "dotnet restore; dotnet build -c Release; dotnet run --project <clean-consumer-smoke-project> --configuration Release" }
     "post-publish" { return "dotnet add package JYPPX.TensorRtSharp --version <public-version>; dotnet run --project <post-publish-clean-consumer>" }
     "linux" { return "pwsh -NoProfile -ExecutionPolicy Bypass -File ./eng/Collect-LinuxRunnerEvidence.ps1 -RuntimePackageKey <linux-runtime-package-key>" }
-    "real-model" { return "dotnet run --project samples/YoloVision -- --model <owner-model.onnx> --image <owner-image> --runtime <runtime-package-key>" }
+    "real-model" { return "dotnet run --project applications/YoloVision -- --model <owner-model.onnx> --image <owner-image> --runtime <runtime-package-key>" }
     "release-close|strict-close" { return "pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-ReleaseIssueCloseRecord.ps1 -FailOnNotCloseReady" }
     default { return "Run the owner-approved real proof command and capture stdout, stderr, merged transcript, hashes, and validator output." }
   }

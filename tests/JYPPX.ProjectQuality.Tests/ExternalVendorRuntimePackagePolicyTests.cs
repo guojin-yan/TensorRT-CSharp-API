@@ -339,7 +339,7 @@ public sealed class ExternalVendorRuntimePackagePolicyTests
     {
         ProcessStartInfo startInfo = new()
         {
-            FileName = "pwsh",
+            FileName = OperatingSystem.IsWindows() ? "powershell.exe" : "pwsh",
             WorkingDirectory = RepositoryPaths.Root,
             RedirectStandardOutput = true,
             RedirectStandardError = true,

@@ -27,7 +27,7 @@ dotnet run --project .\applications\TensorRtExec -- `
 
 - `applications/TensorRtExec`
 - `src/JYPPX.TensorRtSharp.Tools`
-- `samples/OnnxToEngine/trtexec-parity-matrix.json`
+- `applications/OnnxToEngine/trtexec-parity-matrix.json`
 - `artifacts/user-acceptance/trtexec-option-coverage.md`
 
 ## 基础参数

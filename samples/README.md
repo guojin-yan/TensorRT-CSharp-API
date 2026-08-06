@@ -1,95 +1,97 @@
 # Samples
 
-This directory is now reserved for user-facing examples and common adoption scenarios.
+English | [简体中文](README.zh-CN.md)
 
-Deep-learning model binaries are staged outside this Git repository under
-`<workspace-root>/models`. The complete model/source/export/hash map is
-`samples/assets/demo-model-inventory.json`, with the reproducible acquisition and ONNX conversion guide at
-`docs/articles/zh-cn/demo-model-acquisition-and-onnx-conversion.md`. No ONNX or weight file from that workspace-level directory is
-uploaded with the source repository or included in project packages.
+`samples/` contains small, focused, runnable workflows. The directory name is part of the learning path: each
+capability is a module and each case has a stable numeric prefix.
 
-Smoke-oriented validation projects have been moved out to:
+Only the numbered projects under `Cuda`, `Inference`, `Performance`, and `ComputerVision` are user-facing samples.
+`_shared` contains source files compiled into those projects, while `assets` contains lightweight manifests and
+evidence metadata. Package-consumer templates and independent reference programs live under `tests/fixtures`; they
+are test inputs, not additional samples.
 
-- `smoke/`
+## Case Series
 
-That split keeps:
+| Module | Case | What it demonstrates | Article entrypoint |
+| --- | --- | --- | --- |
+| `Cuda` | `Cuda/01.RuntimeCompilation` | CUDA RTC source compilation, module loading, typed launch, and readback | [CUDA RTC article](../docs/articles/zh-cn/cuda-runtime-compilation-technical-article.md) |
+| `Inference` | `Inference/01.Bindings` | TensorRT input/output bindings and host/device ownership | [Inference bindings tutorial](../docs/articles/zh-cn/inference-bindings-tutorial.md) |
+| `Inference` | `Inference/02.DynamicShapes` | Explicit optimization profiles and dynamic shape execution | [Dynamic shape tutorial](../docs/articles/zh-cn/dynamic-shape-optimization-profile-tutorial.md) |
+| `Performance` | `Performance/01.MultiStream` | CUDA streams, events, and cross-stream ordering | [Multi-stream tutorial](../docs/articles/zh-cn/cuda-stream-event-multistream-tutorial.md) |
+| `ComputerVision` | `ComputerVision/01.Classification` | Image preprocessing, TensorRT classification, Top-K, JSON, and an annotated result image | [Classification walkthrough](../docs/articles/zh-cn/classification-real-asset-walkthrough.md) |
 
-- `samples/` focused on readable reference cases for adopters
-- `smoke/` focused on CI diagnostics, package validation, and release gates
+Larger end-to-end workflows are under [`applications/`](../applications/README.md): `YoloVision` is the unified
+six-task YOLO-family application, and `OnnxToEngine` is the ONNX-to-engine conversion application. `TensorRtExec`
+is the desktop/CLI application.
 
-## Current Common Examples
+## Package Boundary
 
-| Directory | Purpose | Status |
-| --- | --- | --- |
-| `MultiStream` | CUDA multi-stream and cross-stream wait example | runnable |
-| `CudaRuntimeCompilation` | owner-safe NVRTC compile, copied PTX/CUBIN/LTO IR, failure log, determinism, named typed-kernel launch, owner retention, and GPU readback | runnable with CUDA 12.9+ runtime bridge; CUDA 13.2 compile-only/load-rejected boundary is recorded |
-| `DynamicShape` | TensorRT dynamic-shape/profile/binding example | runnable |
-| `InferenceBindings` | TensorRtInferenceBindings host/device workflow example | runnable |
-| `OnnxToEngine` | user-facing ONNX to engine walkthrough with trtexec-like option parsing | runnable |
-| `RefittedPlan.PackageConsumer` | PackageReference-only persisted refitted-plan reload, enqueue, raw output hash, and owner cleanup example | runnable through the local-package proof script |
-| `GpuAllocator.PackageConsumer` | PackageReference-only TensorRT GPU allocator attach, callback, zero-leak, rejection, and exception example | runnable through `eng/Test-GpuAllocatorLocalPackageConsumer.ps1` with host-installed CUDA and TensorRT |
-| `OutputAllocator.PackageConsumer` | PackageReference-only TensorRT dynamic output allocation, release, detach, and rejection example | runnable through `eng/Test-OutputAllocatorLocalPackageConsumer.ps1` with host-installed CUDA and TensorRT |
-| `DebugListener.PackageConsumer` | PackageReference-only TensorRT debug tensor callback, copied metadata, detach, and rejection example | runnable through `eng/Test-DebugListenerLocalPackageConsumer.ps1` with host-installed CUDA and TensorRT |
-| `StreamReader.PackageConsumer` | PackageReference-only TensorRT IStreamReaderV2 read/seek, sequential reuse, deferred disposal, and truncated-plan example | runnable through `eng/Test-StreamReaderLocalPackageConsumer.ps1` with host-installed CUDA and TensorRT |
-| `Classification` | External ONNX classifier inference with legacy single-input and strict named multi-input binding, raw/task reference validation, and Top-K output | runnable with user-provided ONNX assets |
-| `YoloVision` | External YOLO-family ONNX vision sample with strict named multi-input binding, all-output reference validation, family/task profiles, preprocessing, and det/cls/seg/pose/OBB/semantic helpers | runnable with user-provided ONNX assets |
-| `YoloVision.ManagedPackageConsumer` | Repository-external template used to validate the managed API and YoloVision extension through PackageReference-only restore/build/run | runnable through `eng/Test-YoloVisionManagedPackageDryRun.ps1`; no NVIDIA runtime required |
+Every runnable sample in this directory consumes the published managed package through
+[`build/JYPPX.PublicSamplePackages.props`](../build/JYPPX.PublicSamplePackages.props). The repository keeps the
+current 4-series dependency rule in that one file instead of repeating a package version in every project. This
+central guard also prevents historical packages with an incompatible API surface from being selected.
 
-`YoloVision` also exposes an offline capability matrix for documentation, smoke, and asset-planning workflows:
+The sample projects are executables and are explicitly `IsPackable=false`. `Classification` and `YoloVision` are
+examples, not `JYPPX.TensorRT.CSharp.API.Classification` or `JYPPX.TensorRT.CSharp.API.YoloVision` packages.
+
+For a new consumer project, install the managed API from the 4 series and one matching project-owned bridge package.
+CUDA, cuDNN, TensorRT, and NVRTC remain user-installed prerequisites and are never downloaded by these samples.
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- --list-capabilities
+dotnet add package JYPPX.TensorRT.CSharp.API --prerelease
+dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --prerelease
 ```
 
-This command does not require CUDA, TensorRT, ONNX models, labels, or images. It lists the supported family/task matrix for `custom`, YOLOv5/v6/v7/v8/v9/v10/v11/v26 and `det`/`cls`/`seg`/`obb`/`pose`/`sem`, including each task's managed decode path, auxiliary metadata boundary, and evidence level.
+These consumer commands resolve the latest available prerelease instead of embedding a release number. Repository
+projects use one shared 4-series floating rule so local and CI restores remain reproducible.
 
-For an owner-ready asset/configuration checklist without invoking TensorRT, use `samples/YoloVision --preflight`. The resulting `yolovision-preflight.v1` report records profile values, asset existence/SHA256, output metadata, normalized command hash, and an explicit `precheck` boundary. It never replaces a real `YoloVision Passed=True` run log or `real-model-runtime` evidence.
+## Model And Image Assets
 
-Recommended YoloVision documentation starts at `docs/articles/zh-cn/yolovision-sample-overview.md`, then continues through preprocess/postprocess, engine build/run, and troubleshooting. These articles keep the old detection-only naming out of the user-facing path and treat all asset-dependent runs as sample evidence until real owner logs and hashes are supplied.
+ONNX models, converted tensors, weights, labels, and article screenshots are intentionally kept outside Git. The
+temporary workspace is the repository sibling `<workspace-root>/models`; the acquisition URL, license, export command, ONNX input /
+output contract, SHA256, and conversion tool must be recorded in the corresponding article and manifest. Source files
+must never assume a machine-specific drive-letter or absolute directory.
 
-For the broader publishable article route, use `docs/articles/zh-cn/yolovision-series-roadmap.md`. That roadmap is the owner-facing checklist for YOLOv5/v6/v7/v8/v9/v10/v11/v26/custom and `det`/`cls`/`seg`/`obb`/`pose`/`sem`. It intentionally keeps TensorRtExec build reports, screenshots, templates, sidecars, local package-feed results, project-reference runs, and direct `.nupkg` runs out of runtime evidence promotion.
+For image-backed cases, pass an image path supplied by the user. `Classification` and `YoloVision` use the project-owned
+`JYPPX.OpenCV.CSharp.API` package for JPEG/PNG decoding on Windows x64 and retain a managed BMP/PPM fallback for all
+platforms currently covered by the repository. The OpenCV native runtime package is not bundled into TensorRT packages.
 
-CUDA runtime compilation and the CUDA 12.9+ owner-bound named-kernel launch/readback path are executable through `CudaRuntimeCompilation`. CUDA 11.8/12.1 Driver ownership, Linux runtime proof, package-consumer proof, and post-publish verification remain tracked separately. See [CUDA Kernel Wrapper Roadmap](../docs/articles/en/cuda-kernel-roadmap.md) and [CUDA Runtime Compilation Roadmap](../docs/articles/en/cuda-runtime-compilation-roadmap.md).
+## Run
+
+Run commands from the repository root. The offline commands do not require CUDA or TensorRT:
+
+```powershell
+dotnet run --project .\samples\Cuda\01.RuntimeCompilation -- --help
+dotnet run --project .\samples\Inference\01.Bindings -- --help
+dotnet run --project .\samples\Inference\02.DynamicShapes -- --help
+dotnet run --project .\samples\Performance\01.MultiStream -- --help
+dotnet run --project .\samples\ComputerVision\01.Classification -- --help
+dotnet run --project .\applications\YoloVision -- --list-capabilities
+```
+
+To run a real model, first follow the matching article's acquisition and conversion steps, then provide `--model`,
+`--labels`, `--image` or `--input-data`, and the exact shape/layout/output metadata. A successful build, preflight,
+or SVG/PNG report is not by itself model-runtime proof; the article must include the actual command output and a
+rendered result image.
 
 ## Evidence Ladder For Asset-Dependent Samples
 
-Classification and YoloVision are intentionally runnable with user-provided assets instead of bundled model files. Treat their evidence as a ladder:
-
-| Evidence level | Meaning | Promotion boundary |
+| Level | Meaning | Boundary |
 | --- | --- | --- |
-| `precheck` | command, shape, report, or manifest template can be parsed | not runtime proof |
-| `build-only` | ONNX parser/builder produced build evidence or a conversion report | not inference proof |
-| `synthetic-input-runtime` | a sample pipeline executed with synthetic input | not real model quality proof |
-| `real-model-runtime` | real model, labels, input asset, hashes, license notes, runner log, and sample-run-evidence all agree | sample-level proof only |
-| `package-consumer-runtime` | clean external package consumer runtime smoke with validated release proof record | release proof records only |
+| `precheck` | Arguments, assets, shape, and output metadata are validated | not runtime proof |
+| `build-only` | ONNX parsing or engine serialization produced a report | not inference proof |
+| `synthetic-input-runtime` | The pipeline ran with generated input | not real-image proof |
+| `real-model-runtime` | Real model, image, labels, hashes, output comparison, and rendered result agree | sample-level proof only |
+| `package-consumer-runtime` | A clean external project restored published packages and ran successfully | release proof only |
 
-`sample-run-evidence` files and asset manifests can promote a sample to real-model evidence only. package-consumer-runtime belongs to release proof records, and `blocked-by-cuda-driver` is an environment compatibility blocker rather than smoke passed.
+`package-consumer-runtime` belongs to release proof records, not to an ordinary source-tree sample run. Any missing
+CUDA/TensorRT/OpenCV native runtime is recorded as an environment blocker rather than silently reported as success.
 
-## Environment
+## Adding A Case
 
-Run examples from the repository root. Development probing may discover `build-out` and standard CUDA installations; select user-installed TensorRT and cuDNN with explicit `JYPPX_*_ROOT` variables:
-
-```powershell
-$env:JYPPX_ENABLE_DEVELOPMENT_PROBING = "1"
-```
-
-Only set `JYPPX_NATIVE_BRIDGE_PATH`, `JYPPX_TENSORRT_ROOT`, `JYPPX_CUDA_ROOT`, or `JYPPX_CUDNN_ROOT` when you intentionally want to override the default probing behavior.
-
-## Local Packaging Gate
-
-Before treating example evidence as release-ready, validate the package path first:
-
-This is a focused single-key example. Omit `-WindowsRuntimeKeys` when you want the full Windows runtime matrix from `eng/Invoke-LocalReleaseBundle.ps1`.
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\eng\Invoke-LocalReleaseBundle.ps1 `
-  -Version 4.0.0 `
-  -WindowsRuntimeKeys <runtime-key> `
-  -WindowsRuntimeDeliveryMode split `
-  -RunWindowsSmoke `
-  -SignWindowsConsumerOutput `
-  -TrustWindowsConsumerSigningCertificate `
-  -TrustWindowsConsumerSigningCertificateRoot
-```
-
-If you want validation-oriented runners after that, use `smoke/README.md`.
+1. Choose a capability module and the next numeric case directory.
+2. Keep the project executable and `IsPackable=false`.
+3. Consume the published managed package; do not add a source `ProjectReference` to `src/JYPPX.TensorRtSharp` or `src/JYPPX.CudaSharp`.
+4. Add deterministic inputs, a structured report, a rendered result, and a focused bilingual article.
+5. Add the project to `TensorRtSharp.sln`, this table, and the appropriate application/article index.
+6. Build and run locally before changing an Action workflow or publishing a package.

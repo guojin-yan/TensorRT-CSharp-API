@@ -170,7 +170,7 @@ function Resolve-EvidenceFiles {
   }
   elseif ($className -match "Parser") {
     $evidence.Add("src/JYPPX.TensorRtSharp/Parsing")
-    $evidence.Add("samples/OnnxToEngine")
+    $evidence.Add("applications/OnnxToEngine")
   }
 
   if (-not [string]::IsNullOrWhiteSpace($methodName) -and (Test-FileContains -RelativePath "src/JYPPX.TensorRtSharp/Builder/TensorRtBuilder.cs" -Needle $methodName)) {

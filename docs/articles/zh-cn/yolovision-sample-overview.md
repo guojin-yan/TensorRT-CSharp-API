@@ -1,6 +1,6 @@
 # YoloVision 样例总览
 
-`samples/YoloVision` 是 TensorRtSharp4.0 面向 YOLO-family 模型的统一视觉样例入口。它替代旧的单一检测命名思路，把 YOLO v5/v6/v7/v8/v9/v10/v11/v26/custom 与 `det`、`cls`、`seg`、`obb`、`pose`、`sem` 放到同一个 family/task/profile/postprocess 框架里。
+`applications/YoloVision` 是 TensorRtSharp4.0 面向 YOLO-family 模型的统一视觉样例入口。它替代旧的单一检测命名思路，把 YOLO v5/v6/v7/v8/v9/v10/v11/v26/custom 与 `det`、`cls`、`seg`、`obb`、`pose`、`sem` 放到同一个 family/task/profile/postprocess 框架里。
 
 本文是用户进入 YoloVision 的第一篇文章。它说明样例能做什么、资产怎么准备、哪些命令可以离线运行，以及哪些输出只能算 sample evidence，不能升级成 public package proof 或 post-publish proof。
 
@@ -9,7 +9,7 @@
 - 已经有 YOLO-family ONNX 模型，准备在 .NET 中完成 TensorRT engine 构建与样例推理的用户。
 - 需要同时覆盖 detection、classification、segmentation、OBB、pose、semantic segmentation 的视觉模型部署工程师。
 - 需要把模型资产、build report、sample-run evidence 和 release proof record 分开管理的发布负责人。
-- 正在维护 `samples/YoloVision`，需要避免旧检测-only 命名和 proof 越级声明的贡献者。
+- 正在维护 `applications/YoloVision`，需要避免旧检测-only 命名和 proof 越级声明的贡献者。
 
 ## 适用范围
 
@@ -23,7 +23,7 @@
 先查看离线能力矩阵：
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- --list-capabilities
+dotnet run --project .\applications\YoloVision -- --list-capabilities
 ```
 
 该命令不需要 CUDA、TensorRT、ONNX、labels 或图片。它只说明当前样例层支持哪些 family/task/postprocess 组合，不证明真实模型已经运行。
@@ -31,7 +31,7 @@ dotnet run --project .\samples\YoloVision -- --list-capabilities
 准备 owner 资产时，可以先运行离线 preflight：
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- `
+dotnet run --project .\applications\YoloVision -- `
   --preflight `
   --family v8 `
   --task seg `
@@ -53,7 +53,7 @@ dotnet run --project .\samples\YoloVision -- `
 ```powershell
 $env:JYPPX_ENABLE_DEVELOPMENT_PROBING = "1"
 
-dotnet run --project .\samples\YoloVision -- `
+dotnet run --project .\applications\YoloVision -- `
   --model .\models\yolovision\model.onnx `
   --labels .\models\yolovision\labels.txt `
   --input-data .\models\yolovision\input-fp32.bin `
@@ -68,13 +68,13 @@ dotnet run --project .\samples\YoloVision -- `
   --iou-threshold 0.45
 ```
 
-如果要先生成 build-only 报告，使用 `applications/TensorRtExec` 或 `samples/OnnxToEngine`。build-only 只能证明 ONNX 构建路径，不证明检测框、分类标签、mask、pose keypoint 或 OBB angle 正确。
+如果要先生成 build-only 报告，使用 `applications/TensorRtExec` 或 `applications/OnnxToEngine`。build-only 只能证明 ONNX 构建路径，不证明检测框、分类标签、mask、pose keypoint 或 OBB angle 正确。
 
 ## 目录关系
 
 | 路径 | 用途 | 证据边界 |
 | --- | --- | --- |
-| `samples/YoloVision` | YOLO-family 托管样例和后处理 | sample-level evidence |
+| `applications/YoloVision` | YOLO-family 托管样例和后处理 | sample-level evidence |
 | `samples/assets/yolovision-assets.template.json` | 资产清单模板 | template-only |
 | `artifacts/user-acceptance/sample-run-evidence-record.yolovision.template.json` | 真实运行回填模板 | owner input required |
 | `applications/TensorRtExec` | ONNX build/report 工具 | build-only/precheck |
@@ -128,13 +128,13 @@ YoloVision 文章、模板、asset candidates 和 `--list-capabilities` 仍然�
 - 先填写 `samples/assets/yolovision-assets.template.json`。
 - 再填写 `artifacts/user-acceptance/sample-run-evidence-record.yolovision.template.json`。
 - 如果需要 build-only 报告，先用 `applications/TensorRtExec` 生成 report，再把 report path 写入 evidence sidecar。
-- 维护者新增 family/task 时，必须同步更新 `samples/YoloVision/yolo-model-matrix.json`、README、托管测试和 sample-run evidence requirement。
+- 维护者新增 family/task 时，必须同步更新 `applications/YoloVision/yolo-model-matrix.json`、README、托管测试和 sample-run evidence requirement。
 
 ## 第二批正文门禁
 
 ### 适用读者
 
-本文适合准备用 `samples/YoloVision` 承载 YOLO v5/v6/v7/v8/v9/v10/v11/v26/custom 的用户，也适合准备写公众号或博客案例教程的维护者。
+本文适合准备用 `applications/YoloVision` 承载 YOLO v5/v6/v7/v8/v9/v10/v11/v26/custom 的用户，也适合准备写公众号或博客案例教程的维护者。
 
 ### 解决问题
 
@@ -146,7 +146,7 @@ YoloVision 文章、模板、asset candidates 和 `--list-capabilities` 仍然�
 
 ### 操作路径
 
-先运行 capability matrix，再为目标模型准备 ONNX、labels、输入图片和许可证记录；用 `samples/OnnxToEngine` 或 `applications/TensorRtExec` 生成 build-only report；最后用 YoloVision runner 完成真实推理、后处理和输出摘要。
+先运行 capability matrix，再为目标模型准备 ONNX、labels、输入图片和许可证记录；用 `applications/OnnxToEngine` 或 `applications/TensorRtExec` 生成 build-only report；最后用 YoloVision runner 完成真实推理、后处理和输出摘要。
 
 ### 边界说明
 

@@ -2,20 +2,20 @@
 
 ONNX 转 TensorRT Engine 不应只停留在“生成了一个 `.plan` 文件”。完整流程还要确认 ONNX Parser 接受模型、Engine 能被重新加载、输入预处理与模型合同一致、GPU 真正执行了推理，并且输出结果通过模型语义校验。
 
-本文使用 TensorRtSharp4.0 的 `samples/OnnxToEngine`，把 NVIDIA TensorRT sample data 中的 MNIST ONNX 构建为 Engine，再用数字 7 的 PGM 输入完成真实推理。最终结果还会与 ONNX Runtime CPU 输出比较，避免把“进程正常退出”误写成模型正确。
+本文使用 TensorRtSharp4.0 的 `applications/OnnxToEngine`，把 NVIDIA TensorRT sample data 中的 MNIST ONNX 构建为 Engine，再用数字 7 的 PGM 输入完成真实推理。最终结果还会与 ONNX Runtime CPU 输出比较，避免把“进程正常退出”误写成模型正确。
 
 ## 目标读者
 
 - 第一次在 .NET 中把 ONNX 转换为 TensorRT Engine 的开发者。
 - 希望了解 ONNX Parser、Engine 序列化和 ExecutionContext 完整关系的模型部署工程师。
-- 准备使用 `applications/TensorRtExec`、`samples/Classification` 或 `samples/YoloVision` 接入自己模型的维护者。
+- 准备使用 `applications/TensorRtExec`、`samples/ComputerVision/01.Classification` 或 `applications/YoloVision` 接入自己模型的维护者。
 
 ## 本文使用的项目与库
 
 | 组件 | 本文中的职责 |
 | --- | --- |
 | TensorRtSharp4.0 | 提供 TensorRT/CUDA C# API、构建工具和示例。 |
-| `samples/OnnxToEngine` | 解析参数并运行 MNIST 模型专用路径。 |
+| `applications/OnnxToEngine` | 解析参数并运行 MNIST 模型专用路径。 |
 | `JYPPX.TensorRtSharp.Tools` | 实现 PGM 读取、预处理、Engine 构建、推理与结果记录。 |
 | `JYPPX.TensorRtSharp` | 包装 ONNX Parser、Builder、Runtime、Engine 和 ExecutionContext。 |
 | `JYPPX.CudaSharp` | 管理 CUDA stream 与 GPU buffer。 |
@@ -157,7 +157,7 @@ bool outputMatch = classification.PredictedDigit == options.ExpectedDigit &&
 ## 编译与环境
 
 ```powershell
-dotnet build .\samples\OnnxToEngine\OnnxToEngine.csproj `
+dotnet build .\applications\OnnxToEngine\OnnxToEngine.csproj `
   -c Release `
   --no-restore `
   /p:UseSharedCompilation=false
@@ -175,7 +175,7 @@ $InputPath = Join-Path $env:JYPPX_TENSORRT_ROOT 'data\mnist\7.pgm'
 $OutputRoot = Join-Path $WorkspaceRoot 'work\onnx-to-engine-mnist'
 New-Item -ItemType Directory -Path $OutputRoot -Force | Out-Null
 
-dotnet .\samples\OnnxToEngine\bin\Release\net8.0\OnnxToEngine.dll `
+dotnet .\applications\OnnxToEngine\bin\Release\net8.0\OnnxToEngine.dll `
   --mnist `
   --tensor-rt-line 10 `
   --onnx $ModelPath `
@@ -234,14 +234,14 @@ ProcessExitCode=0
 
 ## 使用自己的 ONNX
 
-MNIST runner 的输入输出语义是专门实现的。任意外部 ONNX 可以使用 `samples/OnnxToEngine` 或 `applications/TensorRtExec` 生成 Engine 和 build report，但不能自动推断业务预处理与后处理。
+MNIST runner 的输入输出语义是专门实现的。任意外部 ONNX 可以使用 `applications/OnnxToEngine` 或 `applications/TensorRtExec` 生成 Engine 和 build report，但不能自动推断业务预处理与后处理。
 
 | 场景 | 后续入口 |
 | --- | --- |
 | 通用构建与 CLI/GUI | `applications/TensorRtExec` |
-| 图像分类 | `samples/Classification` |
-| 检测、分割、OBB、Pose、语义分割 | `samples/YoloVision` |
-| 参数兼容矩阵 | `samples/OnnxToEngine/trtexec-parity-matrix.json` |
+| 图像分类 | `samples/ComputerVision/01.Classification` |
+| 检测、分割、OBB、Pose、语义分割 | `applications/YoloVision` |
+| 参数兼容矩阵 | `applications/OnnxToEngine/trtexec-parity-matrix.json` |
 
 `--buildOnly` 只证明 Parser/Builder 路径和 Engine 产物生成，不是模型推理成功。外部模型必须另行定义输入合同、参考输出和后处理验收。
 

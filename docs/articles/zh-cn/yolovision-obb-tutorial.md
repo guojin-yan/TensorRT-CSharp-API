@@ -1,6 +1,6 @@
 # YoloVision OBB 单输出与多输出实战教程
 
-OBB（Oriented Bounding Box）在普通 detection 的 center/size/class/score 之外增加旋转角。角度单位、范围、宽高规范化、输出 layout 或 NMS 策略只要有一个与 exporter 不一致，就会出现“中心正确但方向错误”的静默结果。本文绑定 `samples/YoloVision` 当前真实实现，给出从 E 盘资产准备到 JSON/SVG 和 owner evidence 的完整操作路径。
+OBB（Oriented Bounding Box）在普通 detection 的 center/size/class/score 之外增加旋转角。角度单位、范围、宽高规范化、输出 layout 或 NMS 策略只要有一个与 exporter 不一致，就会出现“中心正确但方向错误”的静默结果。本文绑定 `applications/YoloVision` 当前真实实现，给出从 E 盘资产准备到 JSON/SVG 和 owner evidence 的完整操作路径。
 
 ## 当前实现范围
 
@@ -158,7 +158,7 @@ dotnet run --project .\applications\TensorRtExec -- `
 ## 离线 preflight
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- `
+dotnet run --project .\applications\YoloVision -- `
   --model ..\downloads\cases\yolov8n-obb\models\yolov8n-obb.onnx `
   --labels ..\downloads\cases\yolov8n-obb\labels\dota.names `
   --image ..\downloads\cases\yolov8n-obb\images\input.ppm `
@@ -176,7 +176,7 @@ dotnet run --project .\samples\YoloVision -- `
 ## 真实运行与输出
 
 ```powershell
-dotnet run --project .\samples\YoloVision -- `
+dotnet run --project .\applications\YoloVision -- `
   --model ..\downloads\cases\yolov8n-obb\models\yolov8n-obb.onnx `
   --labels ..\downloads\cases\yolov8n-obb\labels\dota.names `
   --image ..\downloads\cases\yolov8n-obb\images\input.ppm `
@@ -203,7 +203,7 @@ dotnet run --project .\samples\YoloVision -- `
 - `angleRange=owner-record-required`。
 - `classId/className/score`。
 
-示例位于 `samples/YoloVision/examples/yolovision-output-obb.example.json`。真实 runtime writer 的规范化字段优先于示例中的说明性值，owner 仍应单独记录 exporter 原始角度合同。
+示例位于 `applications/YoloVision/examples/yolovision-output-obb.example.json`。真实 runtime writer 的规范化字段优先于示例中的说明性值，owner 仍应单独记录 exporter 原始角度合同。
 
 SVG 使用 `AngleRadians * 180 / PI` 旋转矩形，适合快速发现 90 度偏差、宽高颠倒和明显坐标错误。它不是 rotated-IoU 评估，也不能证明原图 resize-back 正确。
 
@@ -253,11 +253,11 @@ owner 审核通过后最多形成 `real-model-runtime` 候选。它不是 `packa
 
 ## 代码入口
 
-- `samples/YoloVision/YoloRuntimeOutputRoleResolver.cs`：angle role、单位和 auxiliary layout 参数。
-- `samples/YoloVision/YoloSampleRunner.cs`：detection decode、`SourceIndex` 绑定与 angle row 路由。
-- `samples/YoloVision/YoloObbDecoder.cs`：degree/radian 转换、probabilistic IoU 与 rotated Fast-NMS。
-- `samples/YoloVision/YoloVisionOutputReport.cs`：center/size/radian 输出合同。
-- `samples/YoloVision/YoloVisionVisualizationWriter.cs`：旋转矩形 SVG。
+- `applications/YoloVision/YoloRuntimeOutputRoleResolver.cs`：angle role、单位和 auxiliary layout 参数。
+- `applications/YoloVision/YoloSampleRunner.cs`：detection decode、`SourceIndex` 绑定与 angle row 路由。
+- `applications/YoloVision/YoloObbDecoder.cs`：degree/radian 转换、probabilistic IoU 与 rotated Fast-NMS。
+- `applications/YoloVision/YoloVisionOutputReport.cs`：center/size/radian 输出合同。
+- `applications/YoloVision/YoloVisionVisualizationWriter.cs`：旋转矩形 SVG。
 - `eng/Test-YoloVisionOutputReport.ps1`：输出结构与 proof boundary 校验。
 
 ## 收尾清单
