@@ -1,4 +1,4 @@
-# 用本地 NuGet 包验证 TensorRT IStreamReaderV2：安全所有权、真实读取与失败闭环
+# 通过公开 NuGet 包使用 TensorRT IStreamReaderV2：安全所有权、真实读取与失败闭环
 
 > 项目：TensorRtSharp4.0
 >
@@ -8,7 +8,7 @@
 >
 > 本机结果：TensorRT 10.11、CUDA 12.9、NVIDIA GeForce RTX 3060 Laptop GPU
 >
-> 证据边界：本文验证本地 managed 包和 bridge-only 包，不代表公开源下载、Release 或发布后验证。
+> 安装边界：用户流程使用公开 NuGet 包；文中的既有截图和 JSON 仍是发布前 local-feed 历史证据，不代表 post-publish 验证。
 
 ## 1. 项目与功能背景
 
@@ -28,7 +28,7 @@ TensorRtSharp4.0 为 NVIDIA TensorRT 和 CUDA 提供 C# 托管接口。TensorRT 
 
 运行者需要自行安装 .NET 8 SDK、NVIDIA 驱动、CUDA Toolkit 和匹配的 TensorRT SDK。项目不打包 CUDA、cuDNN、TensorRT 或 NVRTC。
 
-仓库外消费者只引用两个本地候选包：
+仓库外消费者需要两个公开包：
 
 | 包 | 职责 | 内容边界 |
 | --- | --- | --- |
@@ -101,7 +101,19 @@ using TensorRtStreamReader reader = new(TensorRtApiLine.TensorRt10, source);
 
 `GetRuntimeSnapshot()` 返回 pointer-free 快照，包括 plan 长度、位置、deserialize/read/seek 计数、host/device 读取次数、字节数、失败数和最后诊断。该快照用于诊断和测试，不允许调用者接管 native 指针。
 
-## 6. 生成本地候选包
+## 6. 安装公开包
+
+在仓库外创建项目，并从公开 NuGet 源引用 managed 包和匹配本机矩阵的 bridge-only 包：
+
+~~~powershell
+dotnet new console --framework net8.0
+dotnet add package JYPPX.TensorRT.CSharp.API --version "4.0.0-*"
+dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --version "4.0.0-*"
+~~~
+
+`4.0.0-*` 只跟随当前 4.0.0 预览线，避免 NuGet 选择 API 不兼容的历史 `4.0.6170`。Bridge 包 ID 必须按目标机器环境替换；NVIDIA runtime 继续由用户安装。
+
+### 发布前 local-feed 证据复核
 
 先构建与主机版本匹配的 bridge：
 

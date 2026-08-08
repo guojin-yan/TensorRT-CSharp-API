@@ -1,4 +1,4 @@
-# 用本地 NuGet 包验证 TensorRT IProgressMonitor：真实构建进度与安全取消
+# 通过公开 NuGet 包使用 TensorRT IProgressMonitor：真实构建进度与安全取消
 
 > 项目：TensorRtSharp4.0
 >
@@ -8,7 +8,7 @@
 >
 > 本机结果：TensorRT 10.11、CUDA 12.9、NVIDIA GeForce RTX 3060 Laptop GPU
 >
-> 证据边界：本文验证本地 managed 包与 bridge-only 包，不代表公开源下载、Release 或发布后验证。
+> 安装边界：用户流程使用公开 NuGet 包；文中的既有截图和 JSON 仍是发布前 local-feed 历史证据，不代表 post-publish 验证。
 
 ## 1. 项目与功能背景
 
@@ -22,7 +22,7 @@ TensorRT 10/11 的 `IProgressMonitor` 会在 engine 构建期间报告三种事�
 
 这类回调的难点不在于“能否调用一个委托”，而在于 native vtable、托管委托、`GCHandle` 和 builder config 借用关系必须同时存活。TensorRT 还可能从多个内部线程报告进度，所以用户 handler 也必须使用线程安全状态。
 
-本文从本地候选包开始，完整验证仓库外消费者能否接收真实构建回调、复制阶段元数据、主动取消构建，并在正负例后安全解绑。它不使用合成的 `EmitDiagnostic` 代替 TensorRT 真实调用。
+本文从公开 NuGet 包开始，完整验证仓库外消费者能否接收真实构建回调、复制阶段元数据、主动取消构建，并在正负例后安全解绑。它不使用合成的 `EmitDiagnostic` 代替 TensorRT 真实调用。
 
 ## 2. 依赖与包职责
 
@@ -33,7 +33,7 @@ TensorRT 10/11 的 `IProgressMonitor` 会在 engine 构建期间报告三种事�
 - CUDA Toolkit；
 - 与 bridge 版本匹配的 TensorRT SDK。
 
-项目不打包 CUDA、cuDNN、TensorRT 或 NVRTC。仓库外消费者只引用两个本地候选包：
+项目不打包 CUDA、cuDNN、TensorRT 或 NVRTC。仓库外消费者需要两个公开包：
 
 | 包 | 作用 | 内容边界 |
 | --- | --- | --- |
@@ -57,7 +57,19 @@ TensorRT 10/11 的 `IProgressMonitor` 会在 engine 构建期间报告三种事�
 
 分类、检测、实例分割、语义分割、姿态和 OBB 案例仍必须在各自文章中写清模型来源、固定 revision、许可证、转换命令、ONNX 哈希和外层 `models` 暂存位置，并把识别结果绘制到原图。这个 callback 案例不能替代那些要求。
 
-## 4. 生成本地候选包
+## 4. 安装公开包
+
+在仓库外创建项目，并从公开 NuGet 源引用 managed 包和匹配本机矩阵的 bridge-only 包：
+
+~~~powershell
+dotnet new console --framework net8.0
+dotnet add package JYPPX.TensorRT.CSharp.API --version "4.0.0-*"
+dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --version "4.0.0-*"
+~~~
+
+`4.0.0-*` 只跟随当前 4.0.0 预览线，避免 NuGet 选择 API 不兼容的历史 `4.0.6170`。Bridge 包 ID 必须按目标机器环境替换，并且只包含项目自有 bridge。
+
+### 发布前 local-feed 证据复核
 
 先按当前 CUDA/TensorRT 组合构建 native bridge：
 

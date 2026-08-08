@@ -181,7 +181,7 @@ public sealed class TrtexecRefittedPlanPackageConsumerTests
             "## 模型获取与许可证",
             "## ONNX 转换与暂存",
             "## 生成可部署的 Refitted Plan",
-            "## 创建本地包消费项目",
+            "## 创建公开包消费项目",
             "## 编写程序入口",
             "## 编译并运行",
             "## 已验证结果",

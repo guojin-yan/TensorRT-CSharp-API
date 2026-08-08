@@ -8,11 +8,11 @@ All sample and application projects are executables with `IsPackable=false`. The
 
 ## Package Setup
 
-Do not pin an exact preview in tutorial commands when the goal is to consume the current 4-series prerelease:
+Use the `4.0.0-*` floating rule for the maintained preview line. A bare `--prerelease` may select the API-incompatible historical `4.0.6170` package:
 
 ```powershell
-dotnet add package JYPPX.TensorRT.CSharp.API --prerelease
-dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --prerelease
+dotnet add package JYPPX.TensorRT.CSharp.API --version "4.0.0-*"
+dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --version "4.0.0-*"
 ```
 
 The Bridge ID is an environment example. Choose the package matching the target OS, architecture, TensorRT, CUDA, and cuDNN line. Bridge packages do not install NVIDIA vendor runtimes.

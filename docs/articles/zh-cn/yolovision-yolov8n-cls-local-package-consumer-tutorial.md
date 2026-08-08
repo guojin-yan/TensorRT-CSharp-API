@@ -1,6 +1,6 @@
 # 使用 TensorRtSharp4.0 在 C# 中运行 YOLOv8n 图像分类
 
-图像分类的输出不是检测框，而是一组“整张图片属于哪个类别”的概率。本教程从一个空的 .NET 控制台项目开始，演示如何获取官方 YOLOv8n-cls 权重、转换并暂存 ONNX、生成 C# 实际预处理 tensor、建立独立 ONNX Runtime 参考、通过三个本地 NuGet 包运行 TensorRT，最后把 Top-5 分类结果叠加到原图并保存程序窗口截图。
+图像分类的输出不是检测框，而是一组“整张图片属于哪个类别”的概率。本教程从一个空的 .NET 控制台项目开始，演示如何获取官方 YOLOv8n-cls 权重、转换并暂存 ONNX、生成 C# 实际预处理 tensor、建立独立 ONNX Runtime 参考、通过公开 NuGet 包运行 TensorRT，最后把 Top-5 分类结果叠加到原图并保存程序窗口截图。
 
 本文使用的图片是一辆伦敦双层巴士。最终 Top-1 是 `fire_engine`，而不是人工期望的 `bus`。这不是隐藏掉的坏结果：本文验证的是 C# 预处理、TensorRT 输出和独立 CPU reference 是否一致，不把单张图片的分类结果包装成模型精度证明。
 
@@ -166,13 +166,13 @@ PPM 提供推理像素，JPEG 嵌入 SVG 结果图。YoloVision 会校验两者�
 新建仓库外项目时，可以让 NuGet 获取当前公开预览版，而不在文章中写死具体版本：
 
 ```powershell
-dotnet add package JYPPX.TensorRT.CSharp.API --prerelease
+dotnet add package JYPPX.TensorRT.CSharp.API --version "4.0.0-*"
 dotnet add package JYPPX.OpenCV.CSharp.API --prerelease
 dotnet add package JYPPX.OpenCV.runtime.win-x64 --prerelease
-dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --prerelease
+dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --version "4.0.0-*"
 ```
 
-最后一个包 ID 必须按目标机器环境替换。它只包含项目自有 bridge；CUDA、cuDNN、TensorRT 和 NVRTC
+`4.0.0-*` 只跟随当前 4.0.0 预览线，避免误选 API 不兼容的历史 `4.0.6170`。最后一个包 ID 必须按目标机器环境替换。它只包含项目自有 bridge；CUDA、cuDNN、TensorRT 和 NVRTC
 继续由用户安装。仓库中的 YoloVision 项目直接运行当前源码，但 TensorRT/CUDA API 来自公开 NuGet 包。
 
 ## 编写程序入口
@@ -332,7 +332,7 @@ dotnet run --project ./applications/YoloVision -c Release --no-build -- `
 | Top-5 数量 | `5` |
 | 退出码 | `0` |
 
-三个本地包都锚定源码提交 `be2e507ae2d34836982eadc4d18a71d9d6655ab0`：
+发布前历史证据中的三个包都锚定源码提交 `be2e507ae2d34836982eadc4d18a71d9d6655ab0`：
 
 | 包 | 长度 | SHA256 |
 | --- | ---: | --- |
@@ -397,12 +397,14 @@ bridge-only 包只负责项目自己的 native bridge。请安装与包键一致
 
 ## 复查与边界
 
+### 发布前 local-feed 证据复核
+
 本文已经证明：
 
 - 官方 YOLOv8n-cls 可以转换为固定静态 ONNX 并暂存在外层 `models`；
 - C# 内置 center-crop 预处理能够生成可哈希 tensor；
 - 独立 ORT reference 与 TensorRT 全 1,000 概率零 mismatch；
-- 外部项目只通过 managed、YoloVision、bridge-only 三个本地包完成真实 GPU 推理；
+- 外部项目可以通过公开 managed/bridge 包完成真实 GPU 推理；
 - 原图 Top-5、JSON、完整日志和程序窗口可相互追溯；
 - 受控 reference 变更会返回非零退出码。
 

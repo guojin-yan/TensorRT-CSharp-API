@@ -36,10 +36,10 @@ The executable project is `IsPackable=false`. It consumes the public 4-series
 Classification extension package. A new external consumer can install the current previews without embedding an exact version:
 
 ```powershell
-dotnet add package JYPPX.TensorRT.CSharp.API --prerelease
+dotnet add package JYPPX.TensorRT.CSharp.API --version "4.0.0-*"
 dotnet add package JYPPX.OpenCV.CSharp.API --prerelease
 dotnet add package JYPPX.OpenCV.runtime.win-x64 --prerelease
-dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --prerelease
+dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --version "4.0.0-*"
 ```
 
 The bridge package ID is only an example for TensorRT 10.11/CUDA 12.9 on Windows x64. Select the package matching the

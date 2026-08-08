@@ -153,13 +153,13 @@ Get-FileHash $jpgPath, $ppmPath -Algorithm SHA256
 新建仓库外项目时，可以让 NuGet 获取当前公开预览版，而不在文章中写死版本：
 
 ```powershell
-dotnet add package JYPPX.TensorRT.CSharp.API --prerelease
+dotnet add package JYPPX.TensorRT.CSharp.API --version "4.0.0-*"
 dotnet add package JYPPX.OpenCV.CSharp.API --prerelease
 dotnet add package JYPPX.OpenCV.runtime.win-x64 --prerelease
-dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --prerelease
+dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --version "4.0.0-*"
 ```
 
-最后一个包必须按目标机器环境替换。它只包含项目自有 bridge，不包含 CUDA、cuDNN 或 TensorRT。
+`4.0.0-*` 只跟随当前 4.0.0 预览线，避免误选 API 不兼容的历史 `4.0.6170`。最后一个包必须按目标机器环境替换。它只包含项目自有 bridge，不包含 CUDA、cuDNN 或 TensorRT。
 
 ## 编写程序入口
 
@@ -265,6 +265,8 @@ $pngPath = Join-Path $resultRoot 'detection.png'
 ```
 
 ## 严格参考验证
+
+### 发布前 local-feed 证据复核
 
 文章主流程关注用户可见的完整推理结果。仓库还提供独立的严格验证脚本，用固定输入比较 TensorRT 与 ONNX Runtime 的全部原始输出，并比较 Ultralytics/PyTorch 后处理结果：
 

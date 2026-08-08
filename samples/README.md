@@ -38,12 +38,12 @@ For a new consumer project, install the managed API from the 4 series and one ma
 CUDA, cuDNN, TensorRT, and NVRTC remain user-installed prerequisites and are never downloaded by these samples.
 
 ```powershell
-dotnet add package JYPPX.TensorRT.CSharp.API --prerelease
-dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --prerelease
+dotnet add package JYPPX.TensorRT.CSharp.API --version "4.0.0-*"
+dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --version "4.0.0-*"
 ```
 
-These consumer commands resolve the latest available prerelease instead of embedding a release number. Repository
-projects use one shared 4-series floating rule so local and CI restores remain reproducible.
+These consumer commands follow the maintained `4.0.0-*` preview line instead of selecting the API-incompatible
+historical `4.0.6170` package. Repository projects use the same shared rule so local and CI restores remain reproducible.
 
 ## Model And Image Assets
 

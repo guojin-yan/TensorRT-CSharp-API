@@ -80,10 +80,10 @@ ead3558569edd88aa73a4eb46acbe6c38dee113933234547f04a0f6e48169903
 在仓库外创建自己的项目时，可以不写死具体版本：
 
 ```powershell
-dotnet add package JYPPX.TensorRT.CSharp.API --prerelease
+dotnet add package JYPPX.TensorRT.CSharp.API --version "4.0.0-*"
 dotnet add package JYPPX.OpenCV.CSharp.API --prerelease
 dotnet add package JYPPX.OpenCV.runtime.win-x64 --prerelease
-dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --prerelease
+dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --version "4.0.0-*"
 ```
 
 最后一个包 ID 必须按本机环境选择。它只包含项目自有 bridge；CUDA、cuDNN 和 TensorRT 继续从用户安装目录加载。

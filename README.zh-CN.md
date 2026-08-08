@@ -64,9 +64,11 @@ CUDA、cuDNN、TensorRT 和 NVRTC 由使用者自行安装。仓库不重新分�
 ~~~powershell
 dotnet new console -n TrtQuickstart
 cd TrtQuickstart
-dotnet add package JYPPX.TensorRT.CSharp.API --prerelease
-dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --prerelease
+dotnet add package JYPPX.TensorRT.CSharp.API --version "4.0.0-*"
+dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --version "4.0.0-*"
 ~~~
+
+`4.0.0-*` 只跟随当前维护的预览线，不会误选 API 不兼容的历史 4.x 包（例如 `4.0.6170`）。请根据目标机器安装的 RID 和 NVIDIA 运行时矩阵替换 Bridge 包 ID。
 
 程序创建 runtime、加载 engine、绑定输入输出并执行推理。bridge 包不包含 CUDA、cuDNN 或 TensorRT。请先阅读 [推理绑定教程](docs/articles/zh-cn/inference-bindings-tutorial.md) 和 [Windows 安装排错](docs/articles/zh-cn/windows-installation-and-troubleshooting-guide.md)。
 

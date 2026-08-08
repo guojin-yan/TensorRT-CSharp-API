@@ -1,6 +1,6 @@
 # C# 使用 TensorRtSharp4.0 运行 YOLOv8n Pose
 
-本文从一个空的控制台项目开始，演示如何获取官方 YOLOv8n Pose 权重、转换 ONNX、生成独立参考、引用 TensorRtSharp4.0 的三个本地包，并在 TensorRT 10.11 上完成人体姿态估计。最终结果包含 17 个 COCO 关键点、人体骨架、原图坐标叠加、JSON 报告和严格参考输出比较。
+本文从一个空的控制台项目开始，演示如何获取官方 YOLOv8n Pose 权重、转换 ONNX、生成独立参考、引用 TensorRtSharp4.0 的公开 managed/bridge 包，并在 TensorRT 10.11 上完成人体姿态估计。最终结果包含 17 个 COCO 关键点、人体骨架、原图坐标叠加、JSON 报告和严格参考输出比较。
 
 本文只执行本地构建和验证。没有创建版本、Release 或上传包；CUDA、cuDNN 和 TensorRT 均由使用者自行安装。
 
@@ -98,13 +98,13 @@ $image = Join-Path $workspaceRoot 'downloads/article-assets/pose-input.jpg'
 新建仓库外项目时，可以让 NuGet 获取当前公开预览版，而不在文章中写死具体版本：
 
 ```powershell
-dotnet add package JYPPX.TensorRT.CSharp.API --prerelease
+dotnet add package JYPPX.TensorRT.CSharp.API --version "4.0.0-*"
 dotnet add package JYPPX.OpenCV.CSharp.API --prerelease
 dotnet add package JYPPX.OpenCV.runtime.win-x64 --prerelease
-dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --prerelease
+dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --version "4.0.0-*"
 ```
 
-最后一个包 ID 必须按目标机器环境替换。它只包含项目自有 bridge；CUDA、cuDNN、TensorRT 和 NVRTC
+`4.0.0-*` 只跟随当前 4.0.0 预览线，避免误选 API 不兼容的历史 `4.0.6170`。最后一个包 ID 必须按目标机器环境替换。它只包含项目自有 bridge；CUDA、cuDNN、TensorRT 和 NVRTC
 继续由用户安装。仓库中的 YoloVision 项目直接运行当前源码，但 TensorRT/CUDA API 来自公开 NuGet 包。
 
 ## 编写程序入口
@@ -202,11 +202,13 @@ bridge-only 包不携带 CUDA、cuDNN 或 TensorRT。请安装与 bridge 包键�
 
 ## 复查与边界
 
+### 发布前 local-feed 证据复核
+
 本文已经证明：
 
 - 官方 YOLOv8n Pose 权重可以按固定版本获取并转换为静态 ONNX；
 - 转换模型存放在外层 `models`，不进入 Git；
-- 仓库外项目只通过三个本地包完成 restore、build 和真实 GPU 推理；
+- 仓库外项目可以通过公开 managed/bridge 包完成 restore、build 和真实 GPU 推理；
 - C# 预处理、TensorRT 全量 raw 输出、独立 PyTorch 后处理、JSON 和原图骨架结果能够相互追溯；
 - 受控 reference 变更会非零退出。
 

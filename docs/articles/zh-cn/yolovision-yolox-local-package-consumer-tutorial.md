@@ -1,4 +1,16 @@
-# 使用本地 NuGet 包运行 YOLOX-S：从官方模型到 TensorRT 检测结果
+# 使用 TensorRtSharp4.0 公开 NuGet 包运行 YOLOX-S
+
+当前用户流程请优先阅读[官方 YOLOX-S 实机教程](yolovision-yolox-official-runtime-tutorial.md)，并从公开 NuGet 源安装 managed 包和与主机矩阵匹配的 bridge-only 包：
+
+~~~powershell
+dotnet new console --framework net8.0
+dotnet add package JYPPX.TensorRT.CSharp.API --version "4.0.0-*"
+dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --version "4.0.0-*"
+~~~
+
+`4.0.0-*` 只跟随当前 4.0.0 预览线，避免 NuGet 选择 API 不兼容的历史 `4.0.6170`。Bridge 包 ID 必须按目标机器环境替换；CUDA、cuDNN、TensorRT 和 NVRTC 继续由用户安装。
+
+### 发布前 local-feed 证据复核
 
 > 历史文章：本文记录首版发布前的本地案例包验证，当前不可作为公开技术文章发布，也不得继续执行其中的 YoloVision 案例包命令。当前公开包与应用流程请阅读[官方 YOLOX-S 实机教程](yolovision-yolox-official-runtime-tutorial.md)。
 

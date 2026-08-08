@@ -160,13 +160,13 @@ PPM 用于读取像素，JPEG 用于嵌入可视化。程序会校验两者尺�
 新建仓库外项目时，可以让 NuGet 获取当前公开预览版，而不在文章中写死具体版本：
 
 ```powershell
-dotnet add package JYPPX.TensorRT.CSharp.API --prerelease
+dotnet add package JYPPX.TensorRT.CSharp.API --version "4.0.0-*"
 dotnet add package JYPPX.OpenCV.CSharp.API --prerelease
 dotnet add package JYPPX.OpenCV.runtime.win-x64 --prerelease
-dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --prerelease
+dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --version "4.0.0-*"
 ```
 
-最后一个包 ID 必须按目标机器环境替换。它只包含项目自有 bridge；CUDA、cuDNN、TensorRT 和 NVRTC
+`4.0.0-*` 只跟随当前 4.0.0 预览线，避免误选 API 不兼容的历史 `4.0.6170`。最后一个包 ID 必须按目标机器环境替换。它只包含项目自有 bridge；CUDA、cuDNN、TensorRT 和 NVRTC
 继续由用户安装。仓库中的 YoloVision 项目直接运行当前源码，但 TensorRT/CUDA API 来自公开 NuGet 包。
 
 ## 编写程序入口
@@ -330,6 +330,8 @@ LRASPP 使用 ImageNet normalization。只做 `1/255` 会改变 logits 和 argma
 
 ## 复查与边界
 
+### 发布前 local-feed 证据复核
+
 仓库内固定回归链路还提供受控负例：篡改一个 raw reference 值或 class-index 字节后，严格验证必须非零退出。可以运行：
 
 ```powershell
@@ -340,4 +342,4 @@ pwsh -NoProfile -ExecutionPolicy Bypass `
 
 该回归脚本使用另一张未随文章分发的固定输入，以保持历史 reference 哈希稳定；它的负例不能替代本文 CC0 图片的正向结果。
 
-本文和轻量 JSON 证明的是本地生成的三个包可以被仓库外项目 restore、build 和真实运行。它不是 nuget.org 公共下载证明，不是 post-publish 验证，不是模型再分发授权，也不授权创建 tag、GitHub Release 或推送任何包。
+本文主流程使用公开包；上面的严格 runner 和轻量 JSON 仍记录发布前 local-feed 运行，只能复核当时的输出与负例，不能改写为 post-publish 证明。本文也不是模型再分发授权，不授权创建 tag、GitHub Release 或推送任何包。

@@ -62,8 +62,16 @@ public sealed class ApplicationPublicPackageConsumptionTests
 
         Assert.Contains("4.0.0-*", tensorRtProps, StringComparison.Ordinal);
         Assert.Contains("5.*-*", openCvProps, StringComparison.Ordinal);
-        Assert.Contains("dotnet add package JYPPX.TensorRT.CSharp.API --prerelease", combinedReadmes, StringComparison.Ordinal);
-        Assert.DoesNotContain("dotnet add package JYPPX.TensorRT.CSharp.API --version", combinedReadmes, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains(
+            "dotnet add package JYPPX.TensorRT.CSharp.API --version \"4.0.0-*\"",
+            combinedReadmes,
+            StringComparison.Ordinal);
+        Assert.DoesNotContain(
+            "dotnet add package JYPPX.TensorRT.CSharp.API --prerelease",
+            combinedReadmes,
+            StringComparison.Ordinal);
+        Assert.DoesNotContain("dotnet add package JYPPX.TensorRT.CSharp.API --version \"4.0.0-preview.1\"", combinedReadmes, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("dotnet add package JYPPX.TensorRT.CSharp.API --version \"4.0.0\"", combinedReadmes, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("4.0.0-preview.1", combinedReadmes, StringComparison.Ordinal);
     }
 }

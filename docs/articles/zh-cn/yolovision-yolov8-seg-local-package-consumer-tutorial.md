@@ -6,7 +6,7 @@
 
 ## 本文使用的项目与库
 
-本流程使用 TensorRtSharp4.0 的三个本地包：
+本流程使用 TensorRtSharp4.0 的公开包和仓库内应用：
 
 | 包 | 职责 |
 | --- | --- |
@@ -125,13 +125,13 @@ $tensor = Join-Path $artifactRoot 'seg-csharp-input.fp32.bin'
 新建仓库外项目时，可以让 NuGet 获取当前公开预览版，而不在文章中写死具体版本：
 
 ```powershell
-dotnet add package JYPPX.TensorRT.CSharp.API --prerelease
+dotnet add package JYPPX.TensorRT.CSharp.API --version "4.0.0-*"
 dotnet add package JYPPX.OpenCV.CSharp.API --prerelease
 dotnet add package JYPPX.OpenCV.runtime.win-x64 --prerelease
-dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --prerelease
+dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --version "4.0.0-*"
 ```
 
-最后一个包 ID 必须按目标机器环境替换。它只包含项目自有 bridge；CUDA、cuDNN、TensorRT 和 NVRTC
+`4.0.0-*` 只跟随当前 4.0.0 预览线，避免误选 API 不兼容的历史 `4.0.6170`。最后一个包 ID 必须按目标机器环境替换。它只包含项目自有 bridge；CUDA、cuDNN、TensorRT 和 NVRTC
 继续由用户安装。仓库中的 YoloVision 项目直接运行当前源码，但 TensorRT/CUDA API 来自公开 NuGet 包。
 
 ## 编写程序入口
@@ -229,10 +229,12 @@ box 门槛为 `0.995`，mask 门槛为 `0.96`。mask 差异集中在阈值边缘
 
 ## 复查与边界
 
-本文已经证明：官方 YOLOv8n-seg 权重可以固定获取并转换；ONNX 按要求暂存在外层 `models`；仓库外消费者只使用三个本地包；C# tensor 同时驱动 TensorRT 和 ONNX Runtime；两路 raw 输出、实例框、mask 二进制、原图叠加和独立 PyTorch 结果能够互相追溯。
+### 发布前 local-feed 证据复核
+
+本文已经证明：官方 YOLOv8n-seg 权重可以固定获取并转换；ONNX 按要求暂存在外层 `models`；仓库外消费者可以使用公开 managed/bridge 包；C# tensor 同时驱动 TensorRT 和 ONNX Runtime；两路 raw 输出、实例框、mask 二进制、原图叠加和独立 PyTorch 结果能够互相追溯。
 
 证据清单位于 `samples/assets/yolovision-yolov8n-seg-article-runtime-evidence.json` 和 `samples/assets/yolovision-yolov8n-seg-article-visual-assets.json`。既有本地包 runner 还验证了单值 raw reference 篡改与 mask 单字节篡改都会非零退出。
 
-本文完成的是本地包消费者复验，不是公开源的 `package-consumer-runtime`、public-package、post-publish、Owner acceptance 或 Release 证明。模型、tensor、raw reference、mask、日志和中间 SVG 留在 Git 外部；Git 只保存文章、经所有者授权的两张派生 PNG 和哈希记录。本文没有发布或上传任何包，也没有把 NVIDIA 运行库打包。
+本文主流程使用公开包；既有 runner、截图和 JSON 仍保持发布前 local-feed 分类，不自动晋级为 `package-consumer-runtime`、post-publish、Owner acceptance 或 Release 证明。模型、tensor、raw reference、mask、日志和中间 SVG 留在 Git 外部；Git 只保存文章、经所有者授权的两张派生 PNG 和哈希记录。本文没有发布或上传任何包，也没有把 NVIDIA 运行库打包。
 
 对应机器可读边界保持 `publicPackageProof=false`、`postPublishProof=false`、`ownerReleaseAcceptance=false`、`releaseProof=false`、`performsPublish=false` 和 `uploadsAssets=false`。

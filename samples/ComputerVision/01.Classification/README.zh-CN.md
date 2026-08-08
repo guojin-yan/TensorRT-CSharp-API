@@ -22,10 +22,10 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Acquire-TorchVisionResNet18O
 外部消费者使用当前 4 系列预览包，不需要在示例代码中写死版本：
 
 ```powershell
-dotnet add package JYPPX.TensorRT.CSharp.API --prerelease
+dotnet add package JYPPX.TensorRT.CSharp.API --version "4.0.0-*"
 dotnet add package JYPPX.OpenCV.CSharp.API --prerelease
 dotnet add package JYPPX.OpenCV.runtime.win-x64 --prerelease
-dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --prerelease
+dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --version "4.0.0-*"
 ```
 
 最后一个 Bridge ID 只是 Windows x64、TensorRT 10.11、CUDA 12.9 和 cuDNN 9.22 的示例。必须根据目标平台选择对应 Bridge；CUDA、cuDNN 和 TensorRT 由用户自行安装。

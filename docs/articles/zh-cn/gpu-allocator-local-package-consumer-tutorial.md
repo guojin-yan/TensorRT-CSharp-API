@@ -1,4 +1,4 @@
-# 用本地 NuGet 包验证 TensorRT IGpuAllocator：独立消费者全流程
+# 通过公开 NuGet 包使用 TensorRT IGpuAllocator：独立消费者全流程
 
 > 项目：TensorRtSharp4.0
 >
@@ -8,7 +8,7 @@
 >
 > 本机结果：TensorRT 10.11、CUDA 12.9、NVIDIA GeForce RTX 3060 Laptop GPU
 >
-> 证据边界：本文验证本地 managed 包与 bridge-only 包，不代表公开源下载、Release 或发布后验证。
+> 安装边界：用户流程使用公开 NuGet 包；文中的既有截图和 JSON 仍是发布前 local-feed 历史证据，不代表 post-publish 验证。
 
 ## 1. 项目与验证目标
 
@@ -27,7 +27,7 @@ TensorRtSharp4.0 为 TensorRT 与 CUDA 提供 C# 封装。`JYPPX.TensorRtSharp` 
 
 用户需要自行安装兼容版本的 .NET 8 SDK、CUDA Toolkit、显卡驱动和 TensorRT SDK。本项目不会把 CUDA、cuDNN、TensorRT 或 NVRTC 打入包中。
 
-外部消费者只引用两个本地包：
+外部消费者需要两个公开包：
 
 | 包 | 作用 | 不包含 |
 | --- | --- | --- |
@@ -49,7 +49,19 @@ bridge 包的 TensorRT/CUDA 组合必须与本机安装匹配。TensorRT 10 brid
 
 真实分类、检测、分割、姿态和 OBB 示例仍需在各自文章中给出上游模型地址、许可证、权重 SHA256、导出命令与外部 `models` 暂存位置。本案例不能替代它们的模型说明。
 
-## 4. 生成本地测试包
+## 4. 安装公开包
+
+在仓库外创建项目，并从公开 NuGet 源引用 managed 包和匹配本机矩阵的 bridge-only 包：
+
+~~~powershell
+dotnet new console --framework net8.0
+dotnet add package JYPPX.TensorRT.CSharp.API --version "4.0.0-*"
+dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --version "4.0.0-*"
+~~~
+
+`4.0.0-*` 只跟随当前 4.0.0 预览线，避免 NuGet 选择 API 不兼容的历史 `4.0.6170`。Bridge 包 ID 必须按目标机器环境替换，并且只包含项目自有 bridge。
+
+### 发布前 local-feed 证据复核
 
 先按本机 TensorRT 与 CUDA 版本编译 bridge，再在仓库根目录生成 managed 包和 bridge-only 包：
 

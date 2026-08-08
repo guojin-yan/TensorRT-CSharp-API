@@ -1,4 +1,4 @@
-# 使用 TensorRtSharp4.0 从本地 NuGet 包加载 Refitted Plan 并完成 MNIST 推理
+# 使用 TensorRtSharp4.0 公开 NuGet 包加载 Refitted Plan 并完成 MNIST 推理
 
 在源码树里完成一次 TensorRT 推理，只能证明当前项目引用和开发探测路径可用。真正准备给使用者安装时，还要验证一个仓库外项目能否只通过 `PackageReference` 恢复 managed API 与 bridge-only 包，并使用用户自行安装的 TensorRT/CUDA 加载 Engine、绑定显存、执行 enqueue 和读回结果。
 
@@ -108,7 +108,19 @@ dotnet .\applications\TensorRtExec\bin\Release\net8.0-windows\TensorRtExec.dll `
 
 持久化顺序不能省略：提交 refit、清除并回读 `ExcludeWeights`、序列化、释放原 Engine、重新反序列化、检查 metadata，最后才允许创建 ExecutionContext。本项目固定验证 plan 为 408,876 bytes，SHA256 为 `5594817d8b152a9478a57ae73ec2a8ed19e8c9e0794b448b89bcd738d99441eb`。
 
-## 创建本地包消费项目
+## 创建公开包消费项目
+
+在仓库外创建项目，并从公开 NuGet 源引用 managed 包和匹配本机矩阵的 bridge-only 包：
+
+~~~powershell
+dotnet new console --framework net8.0
+dotnet add package JYPPX.TensorRT.CSharp.API --version "4.0.0-*"
+dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --version "4.0.0-*"
+~~~
+
+`4.0.0-*` 只跟随当前 4.0.0 预览线，避免 NuGet 选择 API 不兼容的历史 `4.0.6170`。Bridge 包 ID 必须按目标机器环境替换，并且只包含项目自有 bridge。
+
+### 发布前 local-feed 证据复核
 
 第一版尚未发布公共包，所以这里只从当前源码生成本地 managed 包和 bridge-only 包。不要使用历史 `FullRuntime` 包，也不要把 CUDA、cuDNN 或 TensorRT DLL 打进 feed。
 

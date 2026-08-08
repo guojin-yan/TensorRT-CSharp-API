@@ -66,9 +66,11 @@ Create a console project, reference the managed package, and install the bridge 
 ~~~powershell
 dotnet new console -n TrtQuickstart
 cd TrtQuickstart
-dotnet add package JYPPX.TensorRT.CSharp.API --prerelease
-dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --prerelease
+dotnet add package JYPPX.TensorRT.CSharp.API --version "4.0.0-*"
+dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --version "4.0.0-*"
 ~~~
+
+The `4.0.0-*` rule follows the maintained preview line without selecting API-incompatible historical 4.x packages such as `4.0.6170`. Replace the Bridge package ID with the RID and NVIDIA-runtime matrix installed on the target machine.
 
 Then create a runtime, load an engine, bind input/output tensors, execute, and read the result. The bridge package is not a replacement for the user-installed NVIDIA runtime. See the [inference bindings tutorial](docs/articles/zh-cn/inference-bindings-tutorial.md) and [Windows installation guide](docs/articles/zh-cn/windows-installation-and-troubleshooting-guide.md).
 

@@ -144,7 +144,7 @@ public sealed class GpuAllocatorLocalPackageConsumerTests
             "## 3. 模型获取与转换说明",
             "官方获取方式：不适用",
             "ONNX 转换方式：不适用",
-            "## 4. 生成本地测试包",
+            "## 4. 安装公开包",
             "## 5. 独立消费者项目",
             "## 6. 创建网络并挂载 allocator",
             "## 8. 两个受控负例",

@@ -1,4 +1,4 @@
-# 用本地 NuGet 包验证 TensorRT DebugListener：从调试张量到真实回调
+# 通过公开 NuGet 包使用 TensorRT DebugListener：从调试张量到真实回调
 
 > 项目：TensorRtSharp4.0
 >
@@ -8,7 +8,7 @@
 >
 > 本机结果：TensorRT 10.11、CUDA 12.9、NVIDIA GeForce RTX 3060 Laptop GPU
 >
-> 证据边界：本文验证本地 managed 包与 bridge-only 包，不代表公开源下载、Release 或发布后验证。
+> 安装边界：用户流程使用公开 NuGet 包；文中的既有截图和 JSON 仍是发布前 local-feed 历史证据，不代表 post-publish 验证。
 
 ## 1. 项目与功能背景
 
@@ -22,7 +22,7 @@ TensorRT 10/11 的 `IDebugListener::processDebugTensor` 可以在 enqueue 时接
 
 用户需要自行安装 .NET 8 SDK、NVIDIA 驱动、CUDA Toolkit 和匹配的 TensorRT SDK。本项目不打包 CUDA、cuDNN、TensorRT 或 NVRTC。
 
-外部消费者只引用两个本地候选包：
+外部消费者需要两个公开包：
 
 | 包 | 作用 | 边界 |
 | --- | --- | --- |
@@ -46,7 +46,19 @@ TensorRT 10/11 的 `IDebugListener::processDebugTensor` 可以在 enqueue 时接
 
 分类、检测、分割、姿态和 OBB 演示仍必须在各自文章中写清官方模型来源、许可证、权重哈希、ONNX 导出命令和外部 `models` 暂存位置，并把识别结果绘制到输入图像上。本例不替代视觉模型文章的这些要求。
 
-## 4. 生成本地测试包
+## 4. 安装公开包
+
+在仓库外创建项目，并从公开 NuGet 源引用 managed 包和与主机矩阵匹配的 bridge-only 包：
+
+~~~powershell
+dotnet new console --framework net8.0
+dotnet add package JYPPX.TensorRT.CSharp.API --version "4.0.0-*"
+dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --version "4.0.0-*"
+~~~
+
+`4.0.0-*` 只跟随当前 4.0.0 预览线，避免 NuGet 选择 API 不兼容的历史 `4.0.6170`。最后一个包 ID 必须按目标机器的 RID、TensorRT、CUDA 和 cuDNN 版本替换；Bridge 包不包含 NVIDIA vendor runtime。
+
+### 发布前 local-feed 证据复核
 
 先按本机 CUDA/TensorRT 组合编译 bridge，再生成 managed 与 bridge-only 本地候选包：
 

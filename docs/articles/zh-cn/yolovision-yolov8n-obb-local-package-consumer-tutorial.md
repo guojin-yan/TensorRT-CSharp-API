@@ -2,7 +2,7 @@
 
 本文从模型获取开始，演示如何把官方 YOLOv8n OBB 权重转换为 ONNX，建立只含三个 `PackageReference` 的仓库外项目，再用 TensorRT 10.11 对航拍图片执行旋转目标检测。最终结果不是一段模拟输出，而是 12 个飞机旋转框、原图标注、JSON 报告、完整 raw tensor 对照和真实终端页面。
 
-本文只执行本地构建和验证。CUDA、cuDNN 和 TensorRT 由使用者自行安装；模型暂存在仓库外层 `models` 目录。当前项目仍在开发中，没有创建版本、Release 或发布包。
+本文在本机执行构建和验证。CUDA、cuDNN 和 TensorRT 由使用者自行安装；模型暂存在仓库外层 `models` 目录。用户通过已发布的 managed/bridge 包复现，本文不会创建版本、Release 或发布包。
 
 ## 本文使用的项目与库
 
@@ -127,13 +127,13 @@ $tensor = Join-Path $artifactRoot 'obb-csharp-input.fp32.bin'
 新建仓库外项目时，可以让 NuGet 获取当前公开预览版，而不在文章中写死具体版本：
 
 ```powershell
-dotnet add package JYPPX.TensorRT.CSharp.API --prerelease
+dotnet add package JYPPX.TensorRT.CSharp.API --version "4.0.0-*"
 dotnet add package JYPPX.OpenCV.CSharp.API --prerelease
 dotnet add package JYPPX.OpenCV.runtime.win-x64 --prerelease
-dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --prerelease
+dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --version "4.0.0-*"
 ```
 
-最后一个包 ID 必须按目标机器环境替换。它只包含项目自有 bridge；CUDA、cuDNN、TensorRT 和 NVRTC
+`4.0.0-*` 只跟随当前 4.0.0 预览线，避免误选 API 不兼容的历史 `4.0.6170`。最后一个包 ID 必须按目标机器环境替换。它只包含项目自有 bridge；CUDA、cuDNN、TensorRT 和 NVRTC
 继续由用户安装。仓库中的 YoloVision 项目直接运行当前源码，但 TensorRT/CUDA API 来自公开 NuGet 包。
 
 ## 编写程序入口
@@ -209,8 +209,10 @@ dotnet run --project ./applications/YoloVision -c Release --no-build -- `
 
 ## 复查与边界
 
-本文已经证明：官方权重可以固定获取并转换；ONNX 可暂存在外层 `models`；仓库外项目只依赖三个本地包；C# 预处理 tensor 可同时驱动 TensorRT 与 ONNX Runtime；旋转框能够恢复到原图，并与独立 PyTorch 参考匹配。
+### 发布前 local-feed 证据复核
+
+本文已经证明：官方权重可以固定获取并转换；ONNX 可暂存在外层 `models`；仓库外项目可以依赖公开 managed/bridge 包；C# 预处理 tensor 可同时驱动 TensorRT 与 ONNX Runtime；旋转框能够恢复到原图，并与独立 PyTorch 参考匹配。
 
 可复核记录位于 `samples/assets/yolovision-yolov8n-obb-article-runtime-evidence.json` 和 `samples/assets/yolovision-yolov8n-obb-article-visual-assets.json`。既有本地包 runner 还包含单值 raw reference 篡改负例，证明 mismatch 会非零退出。
 
-本文不是 public-package、post-publish、Owner acceptance 或 Release 证明。它没有从公开 feed 下载包，没有上传模型、NVIDIA 运行库或证据资产，也没有执行任何发布命令。模型、tensor、raw reference、日志和中间 SVG 继续留在 Git 之外，后续再迁移到独立 Model Zoo。
+本文主流程使用公开包；既有 runner、截图和 JSON 仍保持发布前 local-feed 分类，不自动晋级为 post-publish、Owner acceptance 或 Release 证明。它没有上传模型、NVIDIA 运行库或证据资产，也没有执行任何发布命令。模型、tensor、raw reference、日志和中间 SVG 继续留在 Git 之外，后续再迁移到独立 Model Zoo。

@@ -1,4 +1,4 @@
-# 用本地 NuGet 包验证 TensorRT OutputAllocator：动态输出内存全流程
+# 通过公开 NuGet 包使用 TensorRT OutputAllocator：动态输出内存全流程
 
 > 项目：TensorRtSharp4.0
 >
@@ -8,7 +8,7 @@
 >
 > 本机结果：TensorRT 10.11、CUDA 12.9、NVIDIA GeForce RTX 3060 Laptop GPU
 >
-> 证据边界：本文验证本地 managed 包与 bridge-only 包，不代表公开源下载、Release 或发布后验证。
+> 安装边界：用户流程使用公开 NuGet 包；文中的既有截图和 JSON 仍是发布前 local-feed 历史证据，不代表 post-publish 验证。
 
 ## 1. 项目与功能背景
 
@@ -47,7 +47,19 @@ TensorRT 主版本与 bridge 必须匹配。消费者在运行前读取 bridge b
 
 对于分类、检测、分割、姿态或 OBB 演示，仍需在对应文章中写明官方模型来源、许可证、权重哈希、ONNX 导出命令、外部 `models` 暂存位置，并把识别结果绘制到原图。本例不替代这些要求。
 
-## 4. 生成本地包
+## 4. 安装公开包
+
+在仓库外创建项目，并从公开 NuGet 源引用 managed 包和匹配本机矩阵的 bridge-only 包：
+
+~~~powershell
+dotnet new console --framework net8.0
+dotnet add package JYPPX.TensorRT.CSharp.API --version "4.0.0-*"
+dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --version "4.0.0-*"
+~~~
+
+`4.0.0-*` 只跟随当前 4.0.0 预览线，避免 NuGet 选择 API 不兼容的历史 `4.0.6170`。Bridge 包 ID 必须按目标机器环境替换，并且只包含项目自有 bridge。
+
+### 发布前 local-feed 证据复核
 
 先按实际 CUDA/TensorRT 组合编译 bridge，再生成本地 managed 包和 bridge-only 包：
 
