@@ -8,9 +8,9 @@ namespace JYPPX.ProjectQuality.Tests;
 public sealed class ManagedCallbackMetadataDesignGateSourceLayoutTests
 {
     private const string AlgorithmGateOriginalNormalizedSha256 =
-        "e622a6d3c2a77e78d59cb25fb36d50ac9bacf5001bb71f2051086a57ba9e4667";
+        "b13c49eb39b2be68bb91511e3aa4d2ab4879d0f0fe4e589abb5200dddbb3b73d";
     private const string AllocatorInterfaceGateOriginalNormalizedSha256 =
-        "5e6fbe72e3bdb90ba6ce14904f2d2e4274f294c203d7f93b853d74931245274a";
+        "2e888614f45d50448db13eed2db9e07fc7679660b43d784855b7dbc4f86486d3";
 
     public static TheoryData<string, string, string[]> FileOwnersAndMethods => new()
     {

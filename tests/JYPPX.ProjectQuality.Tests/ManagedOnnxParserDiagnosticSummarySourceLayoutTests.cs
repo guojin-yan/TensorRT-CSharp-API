@@ -8,9 +8,9 @@ namespace JYPPX.ProjectQuality.Tests;
 public sealed class ManagedOnnxParserDiagnosticSummarySourceLayoutTests
 {
     private const string ParserOriginalNormalizedSha256 =
-        "9239ea696671216091e72abcc5f3606c5be7e4021033d312cfb4ddb39cc8a2c9";
+        "53fa5bc92ff03210bccc0567c289c642a0d506cebf32d0f948bcb8dfb2e0db40";
     private const string RefitterOriginalNormalizedSha256 =
-        "0231f71dfc55d28c26d09ff152010165bf2b9d51214b9b1b1533d87e25f58e1a";
+        "be3da95d15d4be82623708f5f4aaa8fd4653d7567eb368b9b836fd0b85dc9b07";
 
     public static TheoryData<string, string, string[]> FileOwnersAndMethods => new()
     {

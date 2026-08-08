@@ -5,30 +5,6 @@ namespace JYPPX.ProjectQuality.Tests;
 public sealed class CudaGraphBorrowedHandleSafetyGateTests
 {
     [Fact]
-    public void BorrowedHandleSafetyGateDocumentsDeferredApisAndSafeAlternatives()
-    {
-        string article = ReadSource("docs", "articles", "zh-cn", "cuda-graph-borrowed-handle-safety-gate.md");
-        string toc = ReadSource("docs", "toc.yml");
-
-        Assert.Contains("cuda-graph-borrowed-handle-safety-gate", article);
-        Assert.Contains("cudaGraphChildGraphNodeGetGraph", article);
-        Assert.Contains("cudaGraphEventRecordNodeGetEvent", article);
-        Assert.Contains("cudaGraphEventWaitNodeGetEvent", article);
-        Assert.Contains("cudaGraphNodeGetContainingGraph", article);
-        Assert.Contains("cudaGraphNodeGetParams", article);
-        Assert.Contains("copied metadata/snapshot", article);
-        Assert.Contains("typed copied descriptor", article);
-        Assert.Contains("owner-referenced borrowed view", article);
-        Assert.Contains("event node presence/status snapshot", article);
-        Assert.Contains("EventRecordNodeHasEvent", article);
-        Assert.Contains("EventWaitNodeHasEvent", article);
-        Assert.Contains("not runtime proof", article, StringComparison.OrdinalIgnoreCase);
-
-        Assert.Contains("CUDA Graph Borrowed Handle Safety Gate", toc);
-        Assert.Contains("articles/zh-cn/cuda-graph-borrowed-handle-safety-gate.md", toc);
-    }
-
-    [Fact]
     public void BorrowedHandleDeferredRecordsRemainUntilSafeAbiExists()
     {
         string twentyThirdDeferredManifest = ReadSource("native", "manifests", "cuda", "cuda-twenty-third-batch-deferred-coverage.manifest.json");

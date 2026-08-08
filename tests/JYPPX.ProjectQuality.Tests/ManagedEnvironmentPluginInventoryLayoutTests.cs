@@ -8,9 +8,9 @@ namespace JYPPX.ProjectQuality.Tests;
 public sealed class ManagedEnvironmentPluginInventoryLayoutTests
 {
     private const string EnvironmentProbeOriginalNormalizedSha256 =
-        "532720104c57a6316bf47b7a2c1e83eacaa8749fe4515a5ea83a4aeecff210a2";
+        "b5f693d39d2e988ddb85599c714a198246b411abe2207dff688479a5c4f2a3e6";
     private const string PluginInventoryOriginalNormalizedSha256 =
-        "2af6a19673875d36b0c0143f9c25343a3a1c989e89e5eb346562f4f766dedd93";
+        "1e7b4b8afa5164389039ce85b7d8cb2af17a992c26d999a7a46ba67164a3290b";
 
     private static readonly string[] EnvironmentFeatureOrder =
     {

@@ -264,7 +264,7 @@ public sealed class PostPublishProofInputTests
     private static string RunPowerShell(string scriptPath, params string[] arguments)
     {
         using Process process = new();
-        process.StartInfo.FileName = "pwsh";
+        process.StartInfo.FileName = PowerShellHost.ResolveExecutable();
         process.StartInfo.ArgumentList.Add("-NoProfile");
         process.StartInfo.ArgumentList.Add("-ExecutionPolicy");
         process.StartInfo.ArgumentList.Add("Bypass");

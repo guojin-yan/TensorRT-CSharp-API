@@ -117,7 +117,7 @@ public sealed class GpuAllocatorRealRuntimeOwnerTests
         Assert.Contains("ReleaseManagedGpuAllocatorForDispose();", builderCore);
 
         int engineDestroy = engine.IndexOf("_handle.Dispose();", StringComparison.Ordinal);
-        int ownerRelease = engine.IndexOf("_gpuAllocatorKeepAlive?.DetachEngineBorrower();", StringComparison.Ordinal);
+        int ownerRelease = engine.IndexOf("_gpuAllocatorKeepAlive?.DetachEngineBorrower();", engineDestroy, StringComparison.Ordinal);
         Assert.True(engineDestroy >= 0 && ownerRelease > engineDestroy);
     }
 

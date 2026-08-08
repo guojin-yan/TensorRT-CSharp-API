@@ -274,7 +274,12 @@ public sealed class ReleaseQualityGateWorkflowTests
         Assert.True(counts.GetProperty("total").GetInt32() >= counts.GetProperty("trackedDirty").GetInt32());
         Assert.True(counts.GetProperty("safeStageCandidate").GetInt32() >= 0);
         Assert.True(counts.GetProperty("ignoreCandidate").GetInt32() >= 0);
-        Assert.Equal(0, counts.GetProperty("reviewCandidate").GetInt32());
+        JsonElement[] reviewCandidates = root.GetProperty("reviewCandidates").EnumerateArray().ToArray();
+        string[] reviewBuckets = root.GetProperty("reviewBuckets").EnumerateArray().Select(static item => item.GetString()!).ToArray();
+        Assert.Equal(reviewCandidates.Length, counts.GetProperty("reviewCandidate").GetInt32());
+        Assert.All(
+            reviewCandidates,
+            candidate => Assert.Contains(candidate.GetProperty("bucket").GetString()!, reviewBuckets));
 
         string[] safeBuckets = root.GetProperty("safeStageBuckets").EnumerateArray().Select(static item => item.GetString()!).ToArray();
         if (counts.GetProperty("safeStageCandidate").GetInt32() > 0)
@@ -305,10 +310,18 @@ public sealed class ReleaseQualityGateWorkflowTests
         string safeStagePathspecs = File.ReadAllText(Path.Combine(pathspecRoot, "safe-stage-pathspecs.txt"));
         string reviewHoldPathspecs = File.ReadAllText(Path.Combine(pathspecRoot, "review-hold-pathspecs.txt"));
         string ignoreHoldPathspecs = File.ReadAllText(Path.Combine(pathspecRoot, "ignore-hold-pathspecs.txt"));
+        string[] reviewCandidatePaths = reviewCandidates
+            .Select(static candidate => candidate.GetProperty("path").GetString()!)
+            .Order(StringComparer.Ordinal)
+            .ToArray();
+        string[] reviewHoldPaths = reviewHoldPathspecs
+            .Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries)
+            .Order(StringComparer.Ordinal)
+            .ToArray();
         Assert.True(safeStagePathspecs.Length > 0 || counts.GetProperty("safeStageCandidate").GetInt32() == 0);
         Assert.DoesNotContain("samples/YoloDet", safeStagePathspecs, StringComparison.Ordinal);
         Assert.DoesNotContain("YoloDet.csproj", safeStagePathspecs, StringComparison.Ordinal);
-        Assert.True(reviewHoldPathspecs.Length == 0 || reviewHoldPathspecs.Split(Environment.NewLine).Length >= 0);
+        Assert.Equal(reviewCandidatePaths, reviewHoldPaths);
         Assert.True(ignoreHoldPathspecs.Length > 0 || counts.GetProperty("ignoreCandidate").GetInt32() == 0);
         Assert.DoesNotContain("samples/YoloDet", ignoreHoldPathspecs, StringComparison.Ordinal);
         Assert.DoesNotContain("YoloDet.csproj", ignoreHoldPathspecs, StringComparison.Ordinal);
@@ -452,7 +465,7 @@ public sealed class ReleaseQualityGateWorkflowTests
     {
         ProcessStartInfo startInfo = new()
         {
-            FileName = "pwsh",
+            FileName = PowerShellHost.ResolveExecutable(),
             WorkingDirectory = RepositoryPaths.Root,
             RedirectStandardOutput = true,
             RedirectStandardError = true,

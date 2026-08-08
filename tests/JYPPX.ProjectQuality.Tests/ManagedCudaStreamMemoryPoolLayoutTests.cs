@@ -8,7 +8,7 @@ namespace JYPPX.ProjectQuality.Tests;
 public sealed class ManagedCudaStreamMemoryPoolLayoutTests
 {
     private const string CudaStreamOriginalNormalizedSha256 =
-        "8b6117416cd402dc7bbed964431822652be7ef19fe61a94c7e3924b8f780fd52";
+        "c8c3ce689984d543ca806817fa36d6bd0ca2bf82e5419f2e76d0ffce5a213be7";
     private const string CudaMemoryPoolOriginalNormalizedSha256 =
         "df79524f844e67591ee942abdca0a9a8ce996cbcc32729695dcc7754722f707e";
 
@@ -65,7 +65,7 @@ public sealed class ManagedCudaStreamMemoryPoolLayoutTests
         },
         {
             "Synchronization",
-            new[] { "WaitFor", "CopyAttributesFrom", "Synchronize", "MeasureElapsedTime" },
+            new[] { "WaitFor", "EnqueueDelay", "CopyAttributesFrom", "Synchronize", "MeasureElapsedTime" },
             Array.Empty<string>()
         },
         {

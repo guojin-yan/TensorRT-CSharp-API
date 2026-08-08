@@ -99,7 +99,7 @@ public sealed class DeferredBTierAliasProofClosureTests
     {
         ProcessStartInfo startInfo = new()
         {
-            FileName = "pwsh",
+            FileName = PowerShellHost.ResolveExecutable(),
             WorkingDirectory = RepositoryPaths.Root,
             RedirectStandardOutput = true,
             RedirectStandardError = true,

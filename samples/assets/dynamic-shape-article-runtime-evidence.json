@@ -56,7 +56,7 @@
     "validatedUtcDate": "2026-08-04",
     "validationScope": "namespace-root-migration",
     "validationBaseCommit": "b930e7f2abb604bfeeab74336af15bb0d17a3351",
-    "currentSourceSha256": "e9b9e65805e53735173b6becdb57fdbba58cba53ac2d52e480317e3fbd4ef6bb",
+    "currentSourceSha256": "280d5cb852850c13027fb22f2ce9f00c09d4ec3b46471af140bdae50931b63ad",
     "currentAssemblySha256": "db9cecece73be846cc1132fec4068036410eae76a5c2a4aad43830cb88bcb30b",
     "currentRuntimeLogSha256": "c83a16fa6019beaa1da3b91a6dfa154ec59487275fd2e4ece71bfcf9b4ba6e10",
     "elapsedMilliseconds": 0.724,

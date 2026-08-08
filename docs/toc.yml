@@ -36,6 +36,8 @@
     href: articles/zh-cn/demo-model-acquisition-and-onnx-conversion.md
   - name: TensorRtExec GUI
     href: articles/zh-cn/tensorrtexec-gui-user-guide.md
+  - name: Windows Source Build CMake Guide
+    href: articles/zh-cn/source-build-cmake-windows-guide.md
 - name: Publishing and internal records
   items:
   - name: Article completeness rules

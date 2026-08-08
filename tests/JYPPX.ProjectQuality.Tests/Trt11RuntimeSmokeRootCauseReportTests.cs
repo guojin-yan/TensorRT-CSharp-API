@@ -69,7 +69,7 @@ public sealed class Trt11RuntimeSmokeRootCauseReportTests
     private static string RunPowerShell(string scriptPath)
     {
         using Process process = new();
-        process.StartInfo.FileName = "pwsh";
+        process.StartInfo.FileName = PowerShellHost.ResolveExecutable();
         process.StartInfo.ArgumentList.Add("-NoProfile");
         process.StartInfo.ArgumentList.Add("-ExecutionPolicy");
         process.StartInfo.ArgumentList.Add("Bypass");

@@ -8,9 +8,9 @@ namespace JYPPX.ProjectQuality.Tests;
 public sealed class ManagedWrapperFeatureLayoutTests
 {
     private const string LayerOriginalNormalizedSha256 =
-        "a87256e88735c3896b4c75227e108191b5ae85a20a035af08bc3fa55442c1f4f";
+        "54cdadddd4e8344d6ab1af79c17b927dc839463acddd1729beeb0f78edcdfb5c";
     private const string NetworkOriginalNormalizedSha256 =
-        "ac973a03e4580ddaed35c5d83e5d23a84dd981b46b475b323fe9c30a87e5accc";
+        "7f157345724c73c6d12c1193d1dfe64b691bcad809e687d0cb97ea68996479d1";
 
     private static readonly string[] LayerFeatureOrder =
     {

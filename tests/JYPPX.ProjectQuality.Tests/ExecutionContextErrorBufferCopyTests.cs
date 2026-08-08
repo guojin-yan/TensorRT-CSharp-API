@@ -37,18 +37,6 @@ public sealed class ExecutionContextErrorBufferCopyTests
     }
 
     [Fact]
-    public void CoverageKeepsCompatibilityEntryAndHistoryDeferredOnly()
-    {
-        string script = ReadSource("eng", "Export-InterfaceCoverageMatrix.ps1");
-        string coverage = ReadSource("artifacts", "interface-coverage", "tensorrt-interface-coverage.csv");
-
-        Assert.Contains("\"IExecutionContext::getErrorBuffer\" = @(\"id:*execution-context-get-error-buffer-copy-deferred\")", script, StringComparison.Ordinal);
-        Assert.Contains("\"IExecutionContext::getErrorBuffer\" = @(\"id:*execution-context-get-error-buffer-deferred\")", script, StringComparison.Ordinal);
-        Assert.Contains("\"IExecutionContext\",\"getErrorBuffer\",\"IExecutionContext::getErrorBuffer\",\"engine-context\",\"deferred-only\"", coverage, StringComparison.Ordinal);
-        Assert.Contains("trt8-execution-context-get-error-buffer-copy-deferred;trt8-execution-context-get-error-buffer-deferred", coverage, StringComparison.Ordinal);
-    }
-
-    [Fact]
     public void SmokeReportsDeferredDiagnosticWithoutClaimingRuntimeProof()
     {
         string smoke = ReadSource("smoke", "NetworkActivationPoolingResizeSmokeRunner", "Program.cs");

@@ -8,9 +8,9 @@ namespace JYPPX.ProjectQuality.Tests;
 public sealed class ManagedCalibratorRnnDesignGateResultSourceLayoutTests
 {
     private const string CalibratorOriginalNormalizedSha256 =
-        "d9f624227e9d1486ad4a2b6bf42ec979a517637652fa418ae8cec2a94b1af5f4";
+        "59d643f32b2ddd4e0fdf3dcd8f6c623a96504fc1962760e34c31bfaee1978016";
     private const string RnnOriginalNormalizedSha256 =
-        "25b435da28b6a6476302556065f0bf253dcd68e5b0f6b967fa71696fed7e0e0c";
+        "cc0e4ed5792b187595b1c350b95ca6383b83567b230f4289f8a2557b9a235727";
 
     public static TheoryData<string, string, string, string[]> FileOwnersAndMethods => new()
     {

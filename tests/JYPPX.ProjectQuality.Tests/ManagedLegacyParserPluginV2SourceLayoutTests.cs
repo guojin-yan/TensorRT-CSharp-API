@@ -8,9 +8,9 @@ namespace JYPPX.ProjectQuality.Tests;
 public sealed class ManagedLegacyParserPluginV2SourceLayoutTests
 {
     private const string LegacyOriginalNormalizedSha256 =
-        "654f82ed466b129ee1c749e488703689a4f95c31e42268e09df87c41350667af";
+        "ffeebb61964d50749995b85492645ca0da825dfc10c0e0141cd41f0fda6b813a";
     private const string PluginV2OriginalNormalizedSha256 =
-        "815f5eb5b1f22efa6d8e8ce9b7d827849403d27f674877742294eef809c597e1";
+        "798c6ae9c79f14245036051093ea436dd1a4c3a7c235d1285958e1088d586a66";
 
     public static TheoryData<string, string, string, string[]> FileOwnersAndMethods => new()
     {

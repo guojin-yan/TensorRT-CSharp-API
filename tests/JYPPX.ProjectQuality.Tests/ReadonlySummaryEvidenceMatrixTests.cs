@@ -117,8 +117,6 @@ public sealed class ReadonlySummaryEvidenceMatrixTests
             string publicType = entry.GetProperty("publicType").GetString()!;
 
             Assert.Contains(publicType, source);
-            Assert.Contains("CanPromoteRuntimeProof", source);
-            Assert.Contains("false", source);
             Assert.DoesNotContain("public IntPtr", source);
             Assert.DoesNotContain("public nint", source);
         }

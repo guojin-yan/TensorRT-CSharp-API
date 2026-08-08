@@ -8,9 +8,9 @@ namespace JYPPX.ProjectQuality.Tests;
 public sealed class ManagedBuilderExecutionFeatureLayoutTests
 {
     private const string BuilderConfigOriginalNormalizedSha256 =
-        "180b5e504f28a7203115392d21386f44bfe6951e49cc88bc3be883db0f080d52";
+        "5366cc26418ae992a11521c43bc149c594bd1836e6c2506e4e83b2b5d5ee1d50";
     private const string ExecutionContextOriginalNormalizedSha256 =
-        "0f6e52115efb010129148b9a731d30d8f6aa65ea263bb82922b8c62f6381f856";
+        "c99328818c9900f8b62b0e13129ffd07a733dbff40d702d875d654fe3768d1ab";
 
     private static readonly string[] BuilderFeatureOrder =
     {
@@ -108,7 +108,7 @@ public sealed class ManagedBuilderExecutionFeatureLayoutTests
                 "IsTensorAddressBound"
             }
         },
-        { "DeviceMemory", new[] { "SetDeviceMemory", "UpdateDeviceMemorySizeForShapes" } },
+        { "DeviceMemory", new[] { "SetDeviceMemory", "SetDeviceMemoryV2", "UpdateDeviceMemorySizeForShapes" } },
         { "Events", new[] { "SetInputConsumedEvent" } },
         { "Enqueue", new[] { "EnqueueAsync" } }
     };

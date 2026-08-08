@@ -53,7 +53,7 @@
   "blockedArticleCount": 42,
   "readyArticleCount": 0,
   "ownerOrRuntimeProofRequiredCount": 42,
-  "contentCompleteCount": 103,
+  "contentCompleteCount": 102,
   "observedReleaseState": {
     "convergenceState": "blocked-real-owner-proof-convergence-real-owner-input-required",
     "ownerProofPreflightState": "blocked-real-proof-required",

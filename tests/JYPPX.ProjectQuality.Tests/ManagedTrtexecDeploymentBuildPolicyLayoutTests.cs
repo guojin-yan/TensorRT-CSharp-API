@@ -10,7 +10,7 @@ public sealed class ManagedTrtexecDeploymentBuildPolicyLayoutTests
     private const string DeploymentOriginalNormalizedSha256 =
         "cd3154c7ed1bc1fc75023dead6f623b460378ed25898766c7f4bbebf50432e43";
     private const string BuildPolicyOriginalNormalizedSha256 =
-        "68f57328142b52c81d08a6c15f6f7165e55fef7b1da39e5d101fb9c6646c3468";
+        "043a44f417ce162464aa9d9266690034df473d373157cde2cc58a644fef77d47";
 
     public static TheoryData<string, string[]> DeploymentFileMethods => new()
     {

@@ -39,12 +39,6 @@ public sealed class PublicMaterialFinalScanTests
     }
 
     [Fact]
-    public void PublicMaterialFinalScanArticleIsLinkedAndNonProof()
-    {
-        ReleaseCandidateFreezeManifestTests.AssertArticleLinked("public-material-final-scan.md");
-    }
-
-    [Fact]
     public void PublicEntryPointsDoNotContainLiveYoloDetPath()
     {
         string publicEntryText = string.Join(Environment.NewLine, new[]

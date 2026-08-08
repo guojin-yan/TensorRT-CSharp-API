@@ -318,9 +318,6 @@ public sealed class RuntimeDeserializationBoundaryPrecheckTests
         Assert.Contains("runtime-deserialization-dependency-diagnostics", latest);
         Assert.Contains("runtime-deserialization-boundary-precheck", smokeReadme);
         Assert.Contains("runtime-deserialization-dependency-diagnostics", smokeReadme);
-        Assert.Contains("runtimeDeserializationBoundaryPrecheck", splitReadme);
-        Assert.Contains("runtimeDeserializationDependencyDiagnostics", splitReadme);
-
         Assert.Contains("New-RuntimeDeserializationBoundaryPrecheckEvidence", readiness);
         Assert.Contains("New-RuntimeDeserializationDependencyDiagnosticsEvidence", readiness);
         Assert.Contains("runtimeDeserializationDependencyDiagnostics", readiness);

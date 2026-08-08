@@ -25,10 +25,10 @@
 | `matrix-contract-cross-check` | `True` | samples/assets/cross-task-reference-provenance-contract.json/1c48e81bbb066dd1b79a48037e92fc9cb64c6dadd7b6b3a5a4456ca9be9ad925/cross-task-reference-provenance-contract.v1 |
 | `source-count` | `True` | 4 |
 | `source-roles` | `True` | classification-manifest,yolovision-task-contract,yolovision-owner-input-template,independent-reference-candidate |
-| `source-classification-manifest-hash` | `True` | samples/assets/classification-assets.template.json/880f939d4f64c0fadd95b849dca2a05e5eaf73ff702208a3272c79cdbc692cae |
-| `source-yolovision-task-contract-hash` | `True` | samples/YoloVision/yolovision-task-output-contract.json/b3f3b32a46f003269ba1b55c5ded9cac25e491a81baf662dfd6a126b49104df6 |
-| `source-yolovision-owner-input-template-hash` | `True` | artifacts/user-acceptance/yolovision-real-asset-owner-proof-input.template.json/43ffda8ddc805fcf71d6c9d232b3702afba458d256e20334afdba1b62d8977f7 |
-| `source-independent-reference-candidate-hash` | `True` | artifacts/interface-coverage/tensorrtexec-mnist-onnxruntime-reference-evidence.json/3de54437688df1e2d04995f4bbe86a2d3b69dfd834a6b5022a4cf4a40f9e3d5d |
+| `source-classification-manifest-hash` | `True` | samples/assets/classification-assets.template.json/8085e1b21802b24d4f07ac304bfe8261c847340e06b80e97981d3a0d11b4506b |
+| `source-yolovision-task-contract-hash` | `True` | applications/YoloVision/yolovision-task-output-contract.json/6fb42216f9a709621d8fae8623405b3427b60cb6ee1d39024abf2994db615520 |
+| `source-yolovision-owner-input-template-hash` | `True` | artifacts/user-acceptance/yolovision-real-asset-owner-proof-input.template.json/6f31053963344baa87188c1feb581928423bc05361291fa302dfdeb2466313dd |
+| `source-independent-reference-candidate-hash` | `True` | artifacts/interface-coverage/tensorrtexec-mnist-onnxruntime-reference-evidence.json/434b56912a791c7ed1976ce24897891182754905329de69449d3b1a7e6e0909d |
 | `classification-field-counts` | `True` | 6/26/20 |
 | `classification-common-fields` | `True` | count=15/duplicates=0 |
 | `classification-semantic-fields` | `True` | imageResizePolicy,imageCropPolicy,colorOrder,scale,mean,std,outputValueKind,scoreTransform,labelMappingSha256,topK,argmaxRule |
@@ -54,7 +54,7 @@
 | `yolo-cls-promotion-boundary` | `True` | False/False/False |
 | `yolo-cls-proof-classification` | `True` | template-only/owner-action-required |
 | `yolo-cls-boundary` | `True` | YoloVision classification remains distinct from the generic Classification sample and requires its own exporter, labels, and score semantics. |
-| `yolo-cls-yolo-contract-link` | `True` | inputShape,classificationOutput,classCount,labelsPath,topK |
+| `yolo-cls-yolo-contract-link` | `True` | inputShape,classificationOutput,classCount,labelsPath,topK,classificationScoreMode |
 | `yolo-seg-field-counts` | `True` | 10/24/14 |
 | `yolo-seg-common-fields` | `True` | count=15/duplicates=0 |
 | `yolo-seg-semantic-fields` | `True` | imagePreprocessContract,outputRoleMap,maskCoefficientCount,prototypeShape,maskResizePolicy,maskThreshold,maskValueKind,maskSpatialTransform,maskCropToDetection |
@@ -72,7 +72,7 @@
 | `yolo-obb-promotion-boundary` | `True` | False/False/False |
 | `yolo-obb-proof-classification` | `True` | template-only/owner-action-required |
 | `yolo-obb-boundary` | `True` | OBB references require angle units/range, rotated-box layout, coordinate mapping, and rotated NMS semantics. |
-| `yolo-obb-yolo-contract-link` | `True` | inputShape,outputRoleMap,classCount,angleOutput,angleUnit,boxFormat |
+| `yolo-obb-yolo-contract-link` | `True` | inputShape,classCount,angleUnit,boxFormat,auxiliaryLayout |
 | `yolo-pose-field-counts` | `True` | 5/23/18 |
 | `yolo-pose-common-fields` | `True` | count=15/duplicates=0 |
 | `yolo-pose-semantic-fields` | `True` | imagePreprocessContract,keypointCount,keypointStride,coordinateLayout,keypointLayout,keypointScoreField,skeletonMap,sourceImageInversePolicy |

@@ -27,7 +27,7 @@
   "preprocessedInputTensorElementCount": "",
   "evidenceSidecarPath": ".\\models\\yolo-evidence.sidecar.json",
   "buildReportPath": ".\\models\\yolo-build-report.json",
-  "sampleRunCommand": "dotnet run --project .\\samples\\YoloVision -- --model .\\models\\yolo.onnx --labels .\\models\\coco.names --input-data .\\models\\yolo-preprocessed-fp32.bin --input-shape 1x3x640x640 --tensor-rt-line 10 --layout auto --has-objectness auto --nms-mode class-aware --confidence 0.25",
+  "sampleRunCommand": "dotnet run --project .\\applications\\YoloVision -- --model .\\models\\yolo.onnx --labels .\\models\\coco.names --input-data .\\models\\yolo-preprocessed-fp32.bin --input-shape 1x3x640x640 --tensor-rt-line 10 --layout auto --has-objectness auto --nms-mode class-aware --confidence 0.25",
   "sampleRunLogPath": ".\\models\\yolo-sample-run.log",
   "sampleRunLogSha256": "",
   "stdoutSummary": "",

@@ -59,15 +59,16 @@ public sealed class RuntimeAliasAndCuda13SearchUpliftTests
     public void RuntimeDeserializationPublicSurfaceRemainsPointerFree()
     {
         string precheck = ReadSource("src", "JYPPX.TensorRtSharp", "Runtime", "TensorRtRuntimeDeserializationBoundaryPrecheck.cs");
+        string result = ReadSource("src", "JYPPX.TensorRtSharp", "Runtime", "TensorRtRuntimeDeserializationBoundaryPrecheckResult.cs");
         string runtime = ReadSource("src", "JYPPX.TensorRtSharp", "Runtime", "TensorRtRuntime.cs");
 
-        Assert.Contains("DirectDeserializeCudaEngineRowsDeferred => false", precheck);
-        Assert.Contains("DirectDeserializeCudaEngineRowsImplemented => SafeDeserializeBridgeReady", precheck);
+        Assert.Contains("DirectDeserializeCudaEngineRowsDeferred => false", result);
+        Assert.Contains("DirectDeserializeCudaEngineRowsImplemented => SafeDeserializeBridgeReady", result);
         Assert.Contains("public TensorRtEngine Deserialize(byte[] serializedEngine)", runtime);
         Assert.Contains("public TensorRtEngine Deserialize(Stream serializedEngineStream)", runtime);
-        Assert.DoesNotContain("public IntPtr", precheck + runtime);
-        Assert.DoesNotContain("public nint", precheck + runtime);
-        Assert.DoesNotContain("public SafeHandle", precheck + runtime);
+        Assert.DoesNotContain("public IntPtr", precheck + result + runtime);
+        Assert.DoesNotContain("public nint", precheck + result + runtime);
+        Assert.DoesNotContain("public SafeHandle", precheck + result + runtime);
     }
 
     private static string ReadSource(params string[] pathParts)

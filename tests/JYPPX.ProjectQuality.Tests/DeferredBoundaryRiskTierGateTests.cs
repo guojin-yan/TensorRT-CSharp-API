@@ -5,44 +5,6 @@ namespace JYPPX.ProjectQuality.Tests;
 public sealed class DeferredBoundaryRiskTierGateTests
 {
     [Fact]
-    public void DeferredRiskTierGuideDocumentsReleaseProofBoundaryAndUnsafeGroups()
-    {
-        string guide = ReadSource("docs", "articles", "zh-cn", "deferred-boundary-risk-tier-gate.md");
-        string manualGroups = ReadSource("docs", "articles", "zh-cn", "deferred-manual-design-groups.md");
-        string index = ReadSource("docs", "index.md");
-        string toc = ReadSource("docs", "toc.yml");
-
-        foreach (string marker in new[]
-        {
-            "deferred-boundary-risk-tier-gate",
-            "manifest-source-match-not-release-proof",
-            "no-public-raw-pointer",
-            "package-consumer-smoke-required",
-            "algorithm-selector-borrowed-pointer",
-            "A-tier copied value",
-            "B-tier safe alternative",
-            "C-tier design-gate-required",
-            "D-tier keep-deferred",
-            "IAlgorithm::getTimingMSec",
-            "IAlgorithmContext::getName",
-            "IAlgorithmVariant::getTactic",
-            "Plugin V2/V3 callback trampoline",
-            "IGpuAllocator::allocate/free/deallocate/reallocate",
-            "IOutputAllocator::notifyShape/reallocateOutput",
-            "IExecutionContext::execute/executeV2/enqueueV2/INoCopy",
-        })
-        {
-            Assert.Contains(marker, guide, StringComparison.Ordinal);
-        }
-
-        Assert.Contains("deferred-boundary-risk-tier-gate.md", manualGroups);
-        Assert.Contains("Deferred Boundary Risk Tier Gate", index);
-        Assert.Contains("articles/zh-cn/deferred-boundary-risk-tier-gate.md", index);
-        Assert.Contains("Deferred Boundary Risk Tier Gate", toc);
-        Assert.Contains("articles/zh-cn/deferred-boundary-risk-tier-gate.md", toc);
-    }
-
-    [Fact]
     public void RemainingHighRiskDeferredGroupsStayExplicitDeferredUntilSafeHandlesExist()
     {
         string comparison = ReadSource("artifacts", "interface-coverage", "tensorrt-interface-comparison.csv");

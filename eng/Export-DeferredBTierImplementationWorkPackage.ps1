@@ -125,11 +125,11 @@ function Resolve-ValidationCommands {
     $commands.Add("dotnet test .\tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj -c Debug --no-build --filter `"FullyQualifiedName~PluginRegistryInventoryTests|FullyQualifiedName~BridgePackageConsumerTests`" /p:UseSharedCompilation=false /nr:false")
   }
   elseif ($Phase -eq "phase-4-manual-review-hold") {
-    $commands.Add("dotnet test .\tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj -c Debug --no-build --filter `"FullyQualifiedName~DeferredBTierImplementationWorkPackageTests|FullyQualifiedName~DeferredBTierProofClosureTests|FullyQualifiedName~DeferredBTierAliasProofClosureTests`" /p:UseSharedCompilation=false /nr:false")
+    $commands.Add("dotnet test .\tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj -c Debug --no-build --filter `"FullyQualifiedName~DeferredBTierWorkItemProofClosureLedgerTests|FullyQualifiedName~DeferredBTier41To45ProofClosureTests|FullyQualifiedName~DeferredBTier46To50ProofClosureTests|FullyQualifiedName~DeferredBTierProofClosureTests|FullyQualifiedName~DeferredBTierAliasProofClosureTests`" /p:UseSharedCompilation=false /nr:false")
   }
   else {
     $commands.Add("dotnet build .\TensorRtSharp.sln -c Debug --no-restore /m:1 /p:UseSharedCompilation=false /nr:false")
-    $commands.Add("dotnet test .\tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj -c Debug --no-build --filter `"FullyQualifiedName~DeferredBTierImplementationWorkPackageTests|FullyQualifiedName~DeferredBTierProofClosureTests|FullyQualifiedName~DeferredBTierAliasProofClosureTests`" /p:UseSharedCompilation=false /nr:false")
+    $commands.Add("dotnet test .\tests\JYPPX.ProjectQuality.Tests\JYPPX.ProjectQuality.Tests.csproj -c Debug --no-build --filter `"FullyQualifiedName~DeferredBTierWorkItemProofClosureLedgerTests|FullyQualifiedName~DeferredBTier41To45ProofClosureTests|FullyQualifiedName~DeferredBTier46To50ProofClosureTests|FullyQualifiedName~DeferredBTierProofClosureTests|FullyQualifiedName~DeferredBTierAliasProofClosureTests`" /p:UseSharedCompilation=false /nr:false")
   }
 
   return ,$commands

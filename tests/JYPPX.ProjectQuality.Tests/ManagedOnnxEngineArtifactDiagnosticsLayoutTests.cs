@@ -10,7 +10,7 @@ public sealed class ManagedOnnxEngineArtifactDiagnosticsLayoutTests
     private const string ArtifactWriterOriginalNormalizedSha256 =
         "ef0a5dbcb12d1924a2c764fc30c8997adc704f165053e8c11cd9a74ec525a5a7";
     private const string BuildDiagnosticsOriginalNormalizedSha256 =
-        "149fad1b78428b823b8f4f14424491e66ea215e4885175ae6886b49e3fcb7329";
+        "597e490f1e4e5a436c90730de1c2bf44310aab6ad43ddd0a392e740ed2293142";
 
     public static TheoryData<string, string[], string[]> WriterFeatureMembers => new()
     {

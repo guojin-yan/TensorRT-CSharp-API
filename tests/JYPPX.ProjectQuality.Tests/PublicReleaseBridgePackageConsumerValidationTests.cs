@@ -317,7 +317,7 @@ public sealed class PublicReleaseBridgePackageConsumerValidationTests
     private static ProcessResult RunValidator(string root, bool failOnNotEvidence)
     {
         using Process process = new();
-        process.StartInfo.FileName = "pwsh";
+        process.StartInfo.FileName = PowerShellHost.ResolveExecutable();
         process.StartInfo.ArgumentList.Add("-NoProfile");
         process.StartInfo.ArgumentList.Add("-ExecutionPolicy");
         process.StartInfo.ArgumentList.Add("Bypass");
@@ -355,7 +355,7 @@ public sealed class PublicReleaseBridgePackageConsumerValidationTests
         {
             using Process process = Process.Start(new ProcessStartInfo
             {
-                FileName = "pwsh",
+                FileName = PowerShellHost.ResolveExecutable(),
                 Arguments = "-NoProfile -Command \"exit 0\"",
                 CreateNoWindow = true,
                 UseShellExecute = false,

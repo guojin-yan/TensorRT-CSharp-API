@@ -153,7 +153,7 @@ public sealed class CrossTaskReferenceProvenanceTests
     {
         ProcessStartInfo startInfo = new()
         {
-            FileName = "pwsh",
+            FileName = PowerShellHost.ResolveExecutable(),
             WorkingDirectory = RepositoryPaths.Root,
             RedirectStandardOutput = true,
             RedirectStandardError = true,

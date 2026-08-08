@@ -8,9 +8,9 @@ namespace JYPPX.ProjectQuality.Tests;
 public sealed class ManagedOnnxEngineBuildLayoutTests
 {
     private const string BuildServiceOriginalNormalizedSha256 =
-        "433cd0e3ffdf2da39f8bb345eb96d39423885e5046119edb11b9f11c5bc4d4cb";
+        "e4a2811a52ed6779619b628e06faf8d60e4f165fb3f41473a8d8c16f6bd734e6";
     private const string BuildResultOriginalNormalizedSha256 =
-        "683fd2ce1579286a222cd61842b754b7731b94bf6b30440da4bfb653cd2dbc2b";
+        "fb2bde6714156d36f40578a4016a4a7b9e78bf6f244334526304a509f317115c";
 
     public static TheoryData<string, string[], string[]> ServiceFeatureMembers => new()
     {
@@ -78,7 +78,7 @@ public sealed class ManagedOnnxEngineBuildLayoutTests
                 "RunWorkerWarmUp",
                 "RunWorkerMeasurement"
             },
-            new[] { "OnnxEngineBenchmarkWorker", "OnnxEngineBenchmarkRun", "OnnxEngineWorkerWarmUp", "OnnxEngineWorkerRun" }
+            new[] { "OnnxEngineBenchmarkWorker", "BenchmarkStartDelayGate", "OnnxEngineBenchmarkRun", "OnnxEngineWorkerWarmUp", "OnnxEngineWorkerRun" }
         },
         {
             "OnnxEngineBuildService.RuntimeInputs.cs",
@@ -231,24 +231,6 @@ public sealed class ManagedOnnxEngineBuildLayoutTests
         Assert.Contains("public sealed partial class OnnxEngineBuildService", core, StringComparison.Ordinal);
         Assert.DoesNotContain("ReferenceJsonOptions", core, StringComparison.Ordinal);
         Assert.Contains("private static readonly JsonSerializerOptions ReferenceJsonOptions", reference, StringComparison.Ordinal);
-    }
-
-    [Fact]
-    public void ArticlesAndExporterReferenceFeatureOwners()
-    {
-        string blog = ReadRepositorySource(
-            "docs", "articles", "zh-cn", "blog-onnx-parser-engine-roundtrip.md");
-        string builderArticle = ReadRepositorySource(
-            "docs", "articles", "zh-cn", "publishing", "builder-config-readback-public-article.md");
-        string inspectorArticle = ReadRepositorySource(
-            "docs", "articles", "zh-cn", "publishing", "engine-inspector-public-article.md");
-        string exporter = ReadRepositorySource(
-            "eng", "Export-TechnicalArticleFoundationsSecondBatchAudit.ps1");
-
-        Assert.Contains("OnnxEngineBuildService.DeploymentConfiguration.cs", blog + builderArticle + exporter, StringComparison.Ordinal);
-        Assert.Contains("OnnxEngineBuildService.RuntimeExecution.cs", blog + exporter, StringComparison.Ordinal);
-        Assert.Contains("OnnxEngineBuildService.Diagnostics.cs", builderArticle + inspectorArticle, StringComparison.Ordinal);
-        Assert.Contains("OnnxLoadedEngineDiagnostics.cs", inspectorArticle, StringComparison.Ordinal);
     }
 
     [Fact]

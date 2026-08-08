@@ -141,7 +141,7 @@ public sealed class ReleaseAutomationTests
         Assert.DoesNotContain("windows_split_package_roles=bridge,collection", chinese, StringComparison.Ordinal);
         Assert.DoesNotContain("windows_cuda_cudnn_package_version", chinese, StringComparison.Ordinal);
         Assert.DoesNotContain("windows_tensorrt_package_version", chinese, StringComparison.Ordinal);
-        Assert.Contains("-WindowsRuntimeKeys <runtime-key>", samples, StringComparison.Ordinal);
+        Assert.Contains("dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --prerelease", samples, StringComparison.Ordinal);
         Assert.Contains("img.shields.io/nuget/vpre/JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge.svg?label=version", english, StringComparison.Ordinal);
         Assert.Contains("img.shields.io/nuget/vpre/JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge.svg?label=version", chinese, StringComparison.Ordinal);
         Assert.Contains("NuGet.org", english, StringComparison.Ordinal);
@@ -350,7 +350,7 @@ public sealed class ReleaseAutomationTests
     {
         ProcessStartInfo startInfo = new()
         {
-            FileName = OperatingSystem.IsWindows() ? "powershell.exe" : "pwsh",
+            FileName = PowerShellHost.ResolveExecutable(),
             WorkingDirectory = RepositoryPaths.Root,
             RedirectStandardOutput = true,
             RedirectStandardError = true,

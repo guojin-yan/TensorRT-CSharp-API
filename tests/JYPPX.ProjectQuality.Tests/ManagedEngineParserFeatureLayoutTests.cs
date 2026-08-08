@@ -10,7 +10,7 @@ public sealed class ManagedEngineParserFeatureLayoutTests
     private const string EngineOriginalNormalizedSha256 =
         "6bf5e8e5cec6c5e164a98cdb3577fb202da2ad1b1dd4dfc400926ba150f552cb";
     private const string ParserOriginalNormalizedSha256 =
-        "3bce180397b2eb158c2fe1a6c79d16807d77e9eb3ba0ef8d169247b9a0f7897e";
+        "5630772494e31ac2c4a0a0221018dbf55f980ddda786f00a656dbadf77de3f4a";
 
     public static TheoryData<string, string[]> EngineFeatureMethods => new()
     {

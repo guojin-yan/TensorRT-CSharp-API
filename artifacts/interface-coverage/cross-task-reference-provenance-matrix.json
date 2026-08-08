@@ -1,6 +1,6 @@
 {
   "schemaVersion": "cross-task-reference-provenance-matrix.v1",
-  "generatedDate": "2026-07-29",
+  "generatedDate": "2026-08-08",
   "state": "owner-action-required",
   "contract": {
     "path": "samples/assets/cross-task-reference-provenance-contract.json",
@@ -11,22 +11,22 @@
     {
       "role": "classification-manifest",
       "path": "samples/assets/classification-assets.template.json",
-      "sha256": "880f939d4f64c0fadd95b849dca2a05e5eaf73ff702208a3272c79cdbc692cae"
+      "sha256": "8085e1b21802b24d4f07ac304bfe8261c847340e06b80e97981d3a0d11b4506b"
     },
     {
       "role": "yolovision-task-contract",
-      "path": "samples/YoloVision/yolovision-task-output-contract.json",
-      "sha256": "b3f3b32a46f003269ba1b55c5ded9cac25e491a81baf662dfd6a126b49104df6"
+      "path": "applications/YoloVision/yolovision-task-output-contract.json",
+      "sha256": "6fb42216f9a709621d8fae8623405b3427b60cb6ee1d39024abf2994db615520"
     },
     {
       "role": "yolovision-owner-input-template",
       "path": "artifacts/user-acceptance/yolovision-real-asset-owner-proof-input.template.json",
-      "sha256": "43ffda8ddc805fcf71d6c9d232b3702afba458d256e20334afdba1b62d8977f7"
+      "sha256": "6f31053963344baa87188c1feb581928423bc05361291fa302dfdeb2466313dd"
     },
     {
       "role": "independent-reference-candidate",
       "path": "artifacts/interface-coverage/tensorrtexec-mnist-onnxruntime-reference-evidence.json",
-      "sha256": "3de54437688df1e2d04995f4bbe86a2d3b69dfd834a6b5022a4cf4a40f9e3d5d"
+      "sha256": "434b56912a791c7ed1976ce24897891182754905329de69449d3b1a7e6e0909d"
     }
   ],
   "rowCount": 7,
@@ -204,10 +204,10 @@
       "missingFieldCount": 20,
       "runtimeContractState": "implemented-managed-contract-owner-assets-required",
       "runtimeContractArtifacts": [
-        "samples/Classification/ClassificationImagePreprocessor.cs",
-        "samples/Classification/ClassificationOutputArtifacts.cs",
-        "samples/Classification/classification-reference.schema.json",
-        "samples/Classification/classification-output.schema.json"
+        "samples/ComputerVision/01.Classification/ClassificationImagePreprocessor.cs",
+        "samples/ComputerVision/01.Classification/ClassificationOutputArtifacts.cs",
+        "samples/ComputerVision/01.Classification/classification-reference.schema.json",
+        "samples/ComputerVision/01.Classification/classification-output.schema.json"
       ],
       "runtimeContractIsRuntimeProof": false,
       "independentReferenceState": "not-captured-for-classification",
@@ -408,7 +408,8 @@
         "classificationOutput",
         "classCount",
         "labelsPath",
-        "topK"
+        "topK",
+        "classificationScoreMode"
       ],
       "commonFieldChecks": [
         {
@@ -738,11 +739,10 @@
       "proofClassification": "template-only",
       "contractRequiredMetadata": [
         "inputShape",
-        "outputRoleMap",
         "classCount",
-        "angleOutput",
         "angleUnit",
-        "boxFormat"
+        "boxFormat",
+        "auxiliaryLayout"
       ],
       "commonFieldChecks": [
         {

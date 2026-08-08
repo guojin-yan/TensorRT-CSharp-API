@@ -8,9 +8,9 @@ namespace JYPPX.ProjectQuality.Tests;
 public sealed class ManagedMonitoringCallbackSourceLayoutTests
 {
     private const string LoggerOriginalNormalizedSha256 =
-        "a6b7e894ab16a55d041d9c91c9f3a9ba4273486fdc6cda4d2e808dc760859d27";
+        "680a3192b73524d792bcf4d65deb5821af6b4b373b551160e5490a4929b3da16";
     private const string ProfilerOriginalNormalizedSha256 =
-        "5f0bf52a3879ae779b747d21c52bfd7b93c0c66ae62aabe435a219916dae33d0";
+        "22bc5c1c6eb2f8ef5347ba73b853a64cb5cf3ffc9029972a3093e877af000726";
     private const string OriginalUsingHeader =
         "using System;\n" +
         "using System.Runtime.InteropServices;\n" +
@@ -181,7 +181,7 @@ public sealed class ManagedMonitoringCallbackSourceLayoutTests
                      "ManagedLoggerCallbackBoundaryTests.cs",
                      "ManagedProfilerCallbackBoundaryTests.cs",
                      "DeferredProfilerInterfaceProofClosureTests.cs",
-                     "DeferredBTierWorkItemProofBatchTests.cs",
+                     "DeferredBTier41To45ProofClosureTests.cs",
                      "VersionedInterfaceApiLanguageReadonlyUpliftTests.cs"
                  })
         {

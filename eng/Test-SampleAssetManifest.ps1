@@ -226,16 +226,27 @@ function Get-SampleProjectInfo {
   $projectCount = 0
 
   if ($isValidSampleName) {
-    $sampleDirectory = Join-Path (Join-Path $RepositoryRoot "samples") $SampleName
-    $fullPath = Join-Path $sampleDirectory "$SampleName.csproj"
-    $relativePath = "samples\$SampleName\$SampleName.csproj"
-    $directoryExists = Test-Path -LiteralPath $sampleDirectory -PathType Container
+    # Samples and complete applications intentionally live in separate roots. Resolve the
+    # project by its declared project name instead of rebuilding the retired samples/<name>
+    # layout; this keeps the asset audit aligned with the public repository structure.
+    $projectFiles = @()
+    foreach ($projectRootName in @("samples", "applications")) {
+      $projectRoot = Join-Path $RepositoryRoot $projectRootName
+      if (Test-Path -LiteralPath $projectRoot -PathType Container) {
+        $projectFiles += @(Get-ChildItem -LiteralPath $projectRoot -Recurse -Filter "$SampleName.csproj" -File)
+      }
+    }
 
-    if ($directoryExists) {
-      $projectFiles = @(Get-ChildItem -LiteralPath $sampleDirectory -Filter "*.csproj" -File)
-      $projectCount = $projectFiles.Count
-      $projectExists = Test-Path -LiteralPath $fullPath -PathType Leaf
-      $projectNameMatches = $projectExists -and [string]::Equals([IO.Path]::GetFileNameWithoutExtension($fullPath), $SampleName, [System.StringComparison]::Ordinal)
+    $projectCount = $projectFiles.Count
+    $directoryExists = $projectCount -gt 0
+    $projectExists = $projectCount -eq 1
+    if ($projectExists) {
+      $fullPath = $projectFiles[0].FullName
+      $relativePath = ConvertTo-RelativePath -Path $fullPath
+      $projectNameMatches = [string]::Equals(
+        [IO.Path]::GetFileNameWithoutExtension($fullPath),
+        $SampleName,
+        [System.StringComparison]::Ordinal)
     }
   }
 
@@ -282,10 +293,10 @@ foreach ($file in $manifestFiles) {
     $findings.Add((New-Finding -Manifest $relative -RuleId "sample-name-format" -Severity "error" -Message "sampleName must be a project-safe directory name."))
   }
   elseif (-not $sampleProject.directoryExists) {
-    $findings.Add((New-Finding -Manifest $relative -RuleId "sample-project-directory-missing" -Severity "error" -Message "sampleName must map to an existing samples/<sampleName> directory."))
+    $findings.Add((New-Finding -Manifest $relative -RuleId "sample-project-directory-missing" -Severity "error" -Message "sampleName must map to an existing sample or application project."))
   }
   elseif (-not $sampleProject.projectExists) {
-    $findings.Add((New-Finding -Manifest $relative -RuleId "sample-project-missing" -Severity "error" -Message "sampleName must map to samples/<sampleName>/<sampleName>.csproj."))
+    $findings.Add((New-Finding -Manifest $relative -RuleId "sample-project-missing" -Severity "error" -Message "sampleName must map to exactly one sample or application project."))
   }
   elseif (-not $sampleProject.projectNameMatches) {
     $findings.Add((New-Finding -Manifest $relative -RuleId "sample-project-name-mismatch" -Severity "error" -Message "sample project file name must match sampleName."))
@@ -548,9 +559,9 @@ $summary = [pscustomobject]@{
   allowedStatuses = $allowedStatuses
   allowedProofClassifications = $allowedProofClassifications
   sampleProjectCrossCheckRules = @(
-    "manifest.sampleName must resolve to samples/<sampleName>/<sampleName>.csproj.",
-    "manifest.sampleName must be a project-safe directory name and must not contain path separators.",
-    "Each manifest sampleName must map to exactly one sample project file.",
+    "manifest.sampleName must resolve to exactly one project under samples/ or applications/.",
+    "manifest.sampleName must be a project-safe project name and must not contain path separators.",
+    "Each manifest sampleName must map to exactly one sample or application project file.",
     "Renamed samples such as YoloVision must not keep stale project identities such as YoloDet."
   )
   sidecarCrossCheckRules = @(

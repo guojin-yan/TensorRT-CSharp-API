@@ -8,7 +8,7 @@ namespace JYPPX.ProjectQuality.Tests;
 public sealed class ManagedCallbackAllocatorReadinessSourceLayoutTests
 {
     private const string OriginalNormalizedSha256 =
-        "50be00404eaf752c7c78c39e79d231a43f7334895024e755a8d0bc543b99d064";
+        "5b3929090c93dce4dd4d601a52ace0fe4d4596df297a613bd0756dade47d61ca";
 
     public static TheoryData<string, string, string[]> FileOwnersAndMethods => new()
     {

@@ -28,12 +28,40 @@ public sealed class DeferredBTierWorkItemProofClosureLedgerTests
         JsonElement[] batches = root.GetProperty("closureBatches").EnumerateArray().ToArray();
         Assert.Equal(5, batches.Length);
         Assert.Equal(51, batches.Sum(static batch => batch.GetProperty("closedWorkItemCount").GetInt32()));
+        Dictionary<string, int> expectedBatches = new(StringComparer.Ordinal)
+        {
+            ["btier-001-012"] = 12,
+            ["btier-013-024"] = 12,
+            ["btier-025-040"] = 16,
+            ["btier-041-046"] = 6,
+            ["btier-047-051"] = 5,
+        };
+        Assert.Equal(
+            expectedBatches,
+            batches.ToDictionary(
+                static batch => batch.GetProperty("batch").GetString()!,
+                static batch => batch.GetProperty("closedWorkItemCount").GetInt32(),
+                StringComparer.Ordinal));
         Assert.All(batches, static batch =>
         {
             Assert.NotEmpty(batch.GetProperty("evidence").EnumerateArray());
             Assert.All(batch.GetProperty("evidence").EnumerateArray(), static evidence =>
                 Assert.True(File.Exists(Path.Combine(RepositoryPaths.Root, evidence.GetString()!.Replace('/', Path.DirectorySeparatorChar)))));
         });
+
+        string markdown = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "artifacts",
+            "interface-coverage",
+            "deferred-btier-work-item-proof-closure-ledger.md"));
+        foreach ((string batch, int count) in expectedBatches)
+        {
+            Assert.Contains($"| `{batch}` | {count} |", markdown, StringComparison.Ordinal);
+        }
+        Assert.Contains("`btier-001` 到 `btier-051`", markdown, StringComparison.Ordinal);
+        Assert.Contains("DeferredBTierWorkItemProofClosureLedgerTests", markdown, StringComparison.Ordinal);
+        Assert.DoesNotContain("DeferredBTierImplementationWorkPackageTests", markdown, StringComparison.Ordinal);
+        Assert.DoesNotContain("DeferredBTierWorkItemProofBatchTests", markdown, StringComparison.Ordinal);
 
         Assert.False(root.GetProperty("performsPublish").GetBoolean());
         Assert.False(root.GetProperty("canPublishPublicly").GetBoolean());
@@ -45,38 +73,6 @@ public sealed class DeferredBTierWorkItemProofClosureLedgerTests
         Assert.Contains("does not prove runtime execution", root.GetProperty("boundary").GetString()!, StringComparison.OrdinalIgnoreCase);
     }
 
-    [Fact]
-    public void GeneratedWorkPackageConsumesLedgerAndLeavesNoClosedItemPending()
-    {
-        string output = RunPowerShell("Export-DeferredBTierImplementationWorkPackage.ps1");
-        Assert.Contains("ClosedWorkItemCount=51", output, StringComparison.Ordinal);
-        Assert.Contains("RemainingWorkItemCount=0", output, StringComparison.Ordinal);
-
-        using JsonDocument ledger = ReadJson("artifacts", "interface-coverage", "deferred-btier-work-item-proof-closure-ledger.json");
-        using JsonDocument workPackage = ReadJson("artifacts", "interface-coverage", "deferred-btier-implementation-work-package.json");
-        string[] closedIds = ledger.RootElement.GetProperty("closedWorkItemIds").EnumerateArray().Select(static value => value.GetString()!).ToArray();
-        Dictionary<string, JsonElement> workItems = workPackage.RootElement.GetProperty("workItems")
-            .EnumerateArray()
-            .ToDictionary(static item => item.GetProperty("workItemId").GetString()!, static item => item);
-
-        Assert.Equal(closedIds, workItems.Keys);
-        Assert.All(closedIds, id =>
-        {
-            JsonElement item = workItems[id];
-            Assert.Equal("source-quality-proof-closed", item.GetProperty("workItemState").GetString());
-            Assert.Equal("artifacts/interface-coverage/deferred-btier-work-item-proof-closure-ledger.json", item.GetProperty("closureProofRecord").GetString());
-            Assert.Contains("do not schedule this item as new implementation work", item.GetProperty("implementationAction").GetString()!, StringComparison.Ordinal);
-            Assert.True(item.GetProperty("safeAlternativeManifestIds").GetArrayLength() > 0);
-            Assert.True(item.GetProperty("deferredHistoryManifestIds").GetArrayLength() > 0);
-            Assert.False(item.GetProperty("canDeleteDeferredRecord").GetBoolean());
-            Assert.False(item.GetProperty("canPromoteReleaseProof").GetBoolean());
-        });
-
-        string markdown = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "artifacts", "interface-coverage", "deferred-btier-work-item-proof-closure-ledger.md"));
-        Assert.Contains("source-quality-proof-closed", markdown, StringComparison.Ordinal);
-        Assert.Contains("不得再次选择", markdown, StringComparison.Ordinal);
-    }
-
     private static JsonDocument ReadJson(params string[] pathParts) =>
         JsonDocument.Parse(File.ReadAllText(Path.Combine(new[] { RepositoryPaths.Root }.Concat(pathParts).ToArray())));
 
@@ -84,7 +80,7 @@ public sealed class DeferredBTierWorkItemProofClosureLedgerTests
     {
         ProcessStartInfo startInfo = new()
         {
-            FileName = "pwsh",
+            FileName = PowerShellHost.ResolveExecutable(),
             WorkingDirectory = RepositoryPaths.Root,
             RedirectStandardOutput = true,
             RedirectStandardError = true,

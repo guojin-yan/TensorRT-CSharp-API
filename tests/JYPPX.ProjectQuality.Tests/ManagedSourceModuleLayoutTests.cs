@@ -39,9 +39,15 @@ public sealed class ManagedSourceModuleLayoutTests
             {
                 "NativeBridgeApi.AllocatorOwnerDryRun.cs",
                 "NativeBridgeApi.CallbackInterfaceInfo.cs",
+                "NativeBridgeApi.DebugListenerOwner.cs",
                 "NativeBridgeApi.ExecutionContextCallbackState.cs",
+                "NativeBridgeApi.GpuAllocatorOwner.cs",
                 "NativeBridgeApi.ManagedDiagnostics.cs",
+                "NativeBridgeApi.OutputAllocatorOwner.cs",
+                "TensorRtDebugListenerNativeCallback.cs",
+                "TensorRtGpuAllocatorNativeCallback.cs",
                 "TensorRtLoggerCallback.cs",
+                "TensorRtOutputAllocatorNativeCallback.cs",
                 "TensorRtProfilerCallback.cs",
                 "TensorRtProgressMonitorCallback.cs"
             }
@@ -444,7 +450,7 @@ public sealed class ManagedSourceModuleLayoutTests
             method => Assert.True(
                 method.Contains("Engine", StringComparison.Ordinal) || method == "CreateRefitter",
                 $"Engine deployment interop contains a non-engine method: {method}"));
-        Assert.Equal(28, executionMethods.Length);
+        Assert.Equal(29, executionMethods.Length);
         Assert.All(
             executionMethods,
             method => Assert.True(

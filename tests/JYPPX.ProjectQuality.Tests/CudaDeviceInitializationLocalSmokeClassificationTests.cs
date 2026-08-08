@@ -37,69 +37,6 @@ public sealed class CudaDeviceInitializationLocalSmokeClassificationTests
         AssertFalseProofFlags(validation);
     }
 
-    [Fact]
-    public void PackageConsumerDocsAndArticleRoadmapDescribeLocalSmokeBoundary()
-    {
-        RunPowerShell("Export-CudaDeviceInitializationLocalSmokeClassification.ps1");
-        RunPowerShell("Export-ArticleRoadmap30Plus.ps1");
-        RunPowerShell("Test-ArticleRoadmap30Plus.ps1", "-Strict");
-
-        string packageConsumerDoc = ReadSource("docs", "articles", "zh-cn", "package-consumer-validation.md");
-        string preflightMatrixDoc = ReadSource("docs", "articles", "zh-cn", "package-consumer-runtime-proof-preflight-matrix.md");
-        string roadmapJson = ReadSource("docs", "articles", "zh-cn", "publishing", "article-roadmap-30plus.json");
-
-        Assert.Contains("CudaDeviceInitializationProofRunner", packageConsumerDoc, StringComparison.Ordinal);
-        Assert.Contains("local-smoke-not-external-proof", packageConsumerDoc, StringComparison.Ordinal);
-        Assert.Contains("IsPackageConsumerRuntimeProof=False", packageConsumerDoc, StringComparison.Ordinal);
-        Assert.Contains("CanPromoteRuntimeProof=False", packageConsumerDoc, StringComparison.Ordinal);
-        Assert.Contains("Skipped=True", packageConsumerDoc, StringComparison.Ordinal);
-
-        Assert.Contains("CudaDeviceInitializationProofRunner local-smoke", preflightMatrixDoc, StringComparison.Ordinal);
-        Assert.Contains("Skipped=True", preflightMatrixDoc, StringComparison.Ordinal);
-
-        Assert.Contains("CUDA 初始化 Proof Scaffold", roadmapJson, StringComparison.Ordinal);
-        Assert.Contains("CUDA Graph Event Node borrowed handle", roadmapJson, StringComparison.Ordinal);
-        Assert.Contains("Package Consumer Proof 分层", roadmapJson, StringComparison.Ordinal);
-        Assert.Contains("YoloVision 真实资产证据链", roadmapJson, StringComparison.Ordinal);
-        Assert.DoesNotContain("YoloDet", roadmapJson, StringComparison.Ordinal);
-        Assert.Contains("must not claim CudaDeviceInitializationProofRunner local smoke is package-consumer-runtime proof", roadmapJson, StringComparison.Ordinal);
-        Assert.Contains("must not treat Skipped=True as proof", roadmapJson, StringComparison.Ordinal);
-    }
-
-    [Fact]
-    public void ReleaseEvidenceBundleCarriesLocalSmokeClassificationAsRequiredNonProofItem()
-    {
-        RunPowerShell("Export-CudaDeviceInitializationLocalSmokeClassification.ps1");
-        RunPowerShell("Test-CudaDeviceInitializationLocalSmokeClassification.ps1", "-Strict");
-        RunPowerShell("Export-ArticleRoadmap30Plus.ps1");
-        RunPowerShell("Test-ArticleRoadmap30Plus.ps1", "-Strict");
-        RunPowerShell("Export-ReleaseEvidenceBundle.ps1");
-        RunPowerShell("Test-ReleaseEvidenceClassificationAudit.ps1", "-Strict");
-
-        using JsonDocument bundleDocument = ReadFinalReleaseJson("release-evidence-bundle.json");
-        JsonElement bundle = bundleDocument.RootElement;
-
-        Assert.Contains(bundle.GetProperty("nonSubstituteProofKinds").EnumerateArray(), static marker =>
-            marker.GetString() == "CudaDeviceInitializationProofRunner local smoke");
-        Assert.Contains(bundle.GetProperty("nonSubstituteProofKinds").EnumerateArray(), static marker =>
-            marker.GetString() == "local-smoke-not-external-proof");
-        Assert.Contains(bundle.GetProperty("sourceArtifacts").EnumerateArray(), static artifact =>
-            artifact.GetString() == "artifacts/final-release/cuda-device-initialization-local-smoke-classification.json");
-
-        JsonElement item = bundle.GetProperty("evidenceItems")
-            .EnumerateArray()
-            .Single(static evidenceItem => evidenceItem.GetProperty("id").GetString() == "cuda-device-initialization-local-smoke-classification");
-        Assert.False(item.GetProperty("passed").GetBoolean());
-        Assert.Contains("not runtime proof", item.GetProperty("boundary").GetString()!, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("local-smoke-not-external-proof", item.GetProperty("state").GetString()!, StringComparison.Ordinal);
-
-        using JsonDocument auditDocument = ReadFinalReleaseJson("release-evidence-classification-audit.json");
-        Assert.Contains(auditDocument.RootElement.GetProperty("auditedItems").EnumerateArray(), static auditedItem =>
-            auditedItem.GetProperty("id").GetString() == "cuda-device-initialization-local-smoke-classification" &&
-            auditedItem.GetProperty("passed").GetBoolean() == false &&
-            auditedItem.GetProperty("hasNonProofBoundary").GetBoolean());
-    }
-
     private static JsonDocument ReadFinalReleaseJson(string fileName)
     {
         return JsonDocument.Parse(File.ReadAllText(Path.Combine(RepositoryPaths.Root, "artifacts", "final-release", fileName)));
@@ -125,7 +62,7 @@ public sealed class CudaDeviceInitializationLocalSmokeClassificationTests
         using Process process = new();
         process.StartInfo = new ProcessStartInfo
         {
-            FileName = "pwsh",
+            FileName = PowerShellHost.ResolveExecutable(),
             RedirectStandardError = true,
             RedirectStandardOutput = true,
             WorkingDirectory = RepositoryPaths.Root

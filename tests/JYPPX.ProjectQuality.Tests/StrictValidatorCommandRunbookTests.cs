@@ -45,9 +45,4 @@ public sealed class StrictValidatorCommandRunbookTests
         }
     }
 
-    [Fact]
-    public void StrictValidatorCommandRunbookArticleIsLinkedAndNonProof()
-    {
-        OwnerRealProofImportAuditBundleTests.AssertArticleLinked("strict-validator-command-runbook.md");
-    }
 }

@@ -202,7 +202,7 @@ public sealed class YoloVisionOutputReportValidatorTests
     private static (int ExitCode, string Output) RunStrictValidator(string inputPath, string outputPath)
     {
         using Process process = new();
-        process.StartInfo.FileName = "pwsh";
+        process.StartInfo.FileName = PowerShellHost.ResolveExecutable();
         process.StartInfo.ArgumentList.Add("-NoProfile");
         process.StartInfo.ArgumentList.Add("-ExecutionPolicy");
         process.StartInfo.ArgumentList.Add("Bypass");

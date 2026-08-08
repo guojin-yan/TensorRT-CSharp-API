@@ -385,7 +385,7 @@ public sealed class OwnerStagingArticleAndYoloVisionAdmissionTests
         {
             StartInfo = new ProcessStartInfo
             {
-                FileName = "pwsh",
+                FileName = PowerShellHost.ResolveExecutable(),
                 WorkingDirectory = RepositoryPaths.Root,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,

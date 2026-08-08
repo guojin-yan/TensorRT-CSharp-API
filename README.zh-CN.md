@@ -1,6 +1,8 @@
-<p align="center">
-  <img src="https://socialify.git.ci/guojin-yan/TensorRT-CSharp-API/image?description=1&descriptionEditable=TensorRT%20and%20CUDA%20bindings%20for%20C%23%20and%20.NET&forks=1&issues=1&name=1&owner=1&pattern=Circuit%20Board&pulls=1&stargazers=1&theme=Light" alt="TensorRtSharp4.0" width="100%" />
-</p>
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/readme/hero-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="docs/images/readme/hero-light.svg">
+  <img alt="TensorRtSharp4.0 - 面向 C# 与 .NET 的 TensorRT 和 CUDA 接口" src="docs/images/readme/hero-light.svg" width="100%">
+</picture>
 
 <h1 align="center">TensorRtSharp4.0</h1>
 
@@ -9,13 +11,11 @@
 </p>
 
 <p align="center">
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="Apache-2.0 许可证" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/guojin-yan/TensorRT-CSharp-API.svg" alt="仓库许可证" /></a>
   <a href="https://www.nuget.org/packages/JYPPX.TensorRT.CSharp.API/"><img src="https://img.shields.io/nuget/vpre/JYPPX.TensorRT.CSharp.API.svg" alt="NuGet 预览版本" /></a>
   <a href="https://www.nuget.org/packages/JYPPX.TensorRT.CSharp.API/"><img src="https://img.shields.io/nuget/dt/JYPPX.TensorRT.CSharp.API.svg" alt="NuGet 下载量" /></a>
-  <a href="https://github.com/users/guojin-yan/packages/nuget/package/jyppx.tensorrt.csharp.api"><img src="https://img.shields.io/badge/GitHub%20Packages-package%20feed-24292f" alt="GitHub Packages 源" /></a>
   <a href="https://github.com/guojin-yan/TensorRT-CSharp-API/releases"><img src="https://img.shields.io/github/v/release/guojin-yan/TensorRT-CSharp-API?include_prereleases&label=Release" alt="GitHub Release" /></a>
-  <a href="https://dotnet.microsoft.com/"><img src="https://img.shields.io/badge/.NET-Framework%204.6--4.8.1%20%7C%20Core%203.1%20%7C%205--10-512BD4" alt="支持的 .NET 版本" /></a>
-  <a href="https://developer.nvidia.com/tensorrt"><img src="https://img.shields.io/badge/TensorRT-%E7%94%A8%E6%88%B7%E8%87%AA%E8%A1%8C%E5%AE%89%E8%A3%85-76B900" alt="TensorRT 由用户安装" /></a>
+  <a href="https://github.com/guojin-yan/TensorRT-CSharp-API/stargazers"><img src="https://img.shields.io/github/stars/guojin-yan/TensorRT-CSharp-API?style=flat&amp;label=Stars" alt="GitHub Stars" /></a>
 </p>
 
 <p align="center">
@@ -29,7 +29,7 @@
 
 [![构建](https://github.com/guojin-yan/TensorRT-CSharp-API/actions/workflows/ci-validation.yml/badge.svg)](https://github.com/guojin-yan/TensorRT-CSharp-API/actions/workflows/ci-validation.yml)
 [![文档](https://img.shields.io/badge/docs-DocFX-2f80ed)](https://guojin-yan.github.io/TensorRT-CSharp-API/)
-[![许可证](https://img.shields.io/badge/license-Apache--2.0-green)](LICENSE)
+[![许可证](https://img.shields.io/github/license/guojin-yan/TensorRT-CSharp-API.svg)](LICENSE)
 
 TensorRtSharp4.0 是面向 .NET 的 TensorRT / CUDA 桥接项目，包含推理执行、CUDA 运行时编译、显存、流与事件、回调、分配器以及 TensorRtExec 桌面工具。首个 4 系列预览版已经发布，当前开发重点转向使用公开包的系列案例、完整应用和配套技术文章。
 

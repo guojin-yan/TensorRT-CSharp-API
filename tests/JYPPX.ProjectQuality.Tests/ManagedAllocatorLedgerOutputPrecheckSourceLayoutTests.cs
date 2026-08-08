@@ -8,16 +8,16 @@ namespace JYPPX.ProjectQuality.Tests;
 public sealed class ManagedAllocatorLedgerOutputPrecheckSourceLayoutTests
 {
     private const string AllocatorLedgerOriginalNormalizedSha256 =
-        "31ba18ac5466a804cf8e3b013192e8082e1384b5b19c96c43d84f32331e0e962";
+        "f2c9919bab01cd09733187534924efeaa83e5f2e1b963452d27e9368d306b1cc";
     private const string OutputPrecheckOriginalNormalizedSha256 =
-        "214bb9a84e7caff5a7142f0afc2212bd9149a0fa403f2b29f751721486ae388a";
+        "cb464838c7b468a0200418cf67bbe9aef4a40ad4fd57ad389b0613cf28015f48";
 
     public static TheoryData<string, string, string[]> FileOwnersAndMethods => new()
     {
         {
             "TensorRtAllocatorLedgerSafetyGate.cs",
             "TensorRtAllocatorLedgerSafetyGate",
-            new[] { "Evaluate", "GetSnapshot" }
+            new[] { "Evaluate", "GetSnapshot", "GetSnapshot" }
         },
         {
             "TensorRtAllocatorLedgerSafetyGateResult.cs",

@@ -30,9 +30,15 @@ public sealed class OnnxConfigLifecycleCoverageConvergenceTests
         string comparison = ReadSource(
             "artifacts", "interface-coverage", "tensorrt-interface-comparison.csv");
 
-        Assert.Equal(6, CountRows(
+        string[] createRows = RowsContaining(
             comparison,
-            "\"Global\",\"createONNXConfig\",\"Global::createONNXConfig\",\"global\",\"implemented-with-deferred-history\""));
+            "\"Global\",\"createONNXConfig\",\"Global::createONNXConfig\",\"global\",\"implemented-with-deferred-history\"");
+        Assert.True(
+            createRows.Length >= 6,
+            $"Expected createONNXConfig coverage for at least six installed TensorRT package roots, but found {createRows.Length}.");
+        Assert.Contains(createRows, static line => line.Contains("\"TensorRT-8.", StringComparison.Ordinal));
+        Assert.Contains(createRows, static line => line.Contains("\"TensorRT-10.", StringComparison.Ordinal));
+        Assert.Contains(createRows, static line => line.Contains("\"TensorRT-11.", StringComparison.Ordinal));
         Assert.Contains(
             "\"IOnnxConfig\",\"destroy\",\"IOnnxConfig::destroy\",\"onnx-parser\",\"implemented-with-deferred-history\"",
             comparison);
@@ -132,6 +138,11 @@ public sealed class OnnxConfigLifecycleCoverageConvergenceTests
         }
         return count;
     }
+
+    private static string[] RowsContaining(string text, string rowFragment) =>
+        text.Split(["\r\n", "\n"], StringSplitOptions.RemoveEmptyEntries)
+            .Where(line => line.Contains(rowFragment, StringComparison.Ordinal))
+            .ToArray();
 
     private static string ReadSource(params string[] pathParts) =>
         RepositorySourceReader.Read(Path.Combine(new[] { RepositoryPaths.Root }.Concat(pathParts).ToArray()));

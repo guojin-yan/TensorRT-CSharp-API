@@ -75,7 +75,7 @@ public sealed class ExternalCleanConsumerOwnerCommandPackTests
         {
             StartInfo = new ProcessStartInfo
             {
-                FileName = "pwsh",
+                FileName = PowerShellHost.ResolveExecutable(),
                 WorkingDirectory = RepositoryPaths.Root,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,

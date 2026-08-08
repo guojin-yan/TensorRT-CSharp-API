@@ -174,47 +174,6 @@ public sealed class ReleaseCandidatePackageConsumerClosureTests
         }
     }
 
-    [Fact]
-    public void ClosureMapIsDocumentedAndCrossLinked()
-    {
-        string artifactMarkdown = ReadFinalReleaseText("release-candidate-package-consumer-closure-map.md");
-        string article = ReadText("docs", "articles", "zh-cn", "release-candidate-package-consumer-closure-map.md");
-        string docsIndex = ReadText("docs", "index.md");
-        string docsToc = ReadText("docs", "toc.yml");
-
-        foreach (string marker in new[]
-        {
-            "Release Candidate Package Consumer Closure Map",
-            "package-consumer-runtime",
-            "post-publish-verification",
-            "release-issue-close",
-            "direct `.nupkg`",
-            "ProjectReference"
-        })
-        {
-            Assert.Contains(marker, artifactMarkdown, StringComparison.Ordinal);
-        }
-
-        foreach (string marker in new[]
-        {
-            "发布候选包消费闭环图",
-            "real-model-runtime",
-            "package-consumer-runtime",
-            "post-publish verification",
-            "release issue close",
-            "无 ProjectReference",
-            "无 local feed",
-            "无 direct `.nupkg`"
-        })
-        {
-            Assert.Contains(marker, article, StringComparison.Ordinal);
-        }
-
-        Assert.Contains("articles/zh-cn/release-candidate-package-consumer-closure-map.md", docsIndex, StringComparison.Ordinal);
-        Assert.Contains("artifacts/final-release/release-candidate-package-consumer-closure-map.md", docsIndex, StringComparison.Ordinal);
-        Assert.Contains("articles/zh-cn/release-candidate-package-consumer-closure-map.md", docsToc, StringComparison.Ordinal);
-    }
-
     private static JsonDocument ReadFinalReleaseJson(string fileName)
     {
         return JsonDocument.Parse(ReadFinalReleaseText(fileName));

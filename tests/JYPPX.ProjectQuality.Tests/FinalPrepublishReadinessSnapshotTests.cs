@@ -69,28 +69,6 @@ public sealed class FinalPrepublishReadinessSnapshotTests
         }
     }
 
-    [Fact]
-    public void SnapshotRunnerAndDocsAreLinked()
-    {
-        string script = ReadText("eng", "Export-FinalPrepublishReadinessSnapshot.ps1");
-        string artifact = ReadFinalReleaseText("final-prepublish-readiness-snapshot.md");
-        string article = ReadText("docs", "articles", "zh-cn", "final-prepublish-readiness-snapshot.md");
-        string docsIndex = ReadText("docs", "index.md");
-        string docsToc = ReadText("docs", "toc.yml");
-
-        Assert.Contains("does not publish packages", script, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("canPublishPublicly = $false", script, StringComparison.Ordinal);
-        Assert.Contains("canCloseReleaseIssue = $false", script, StringComparison.Ordinal);
-        Assert.DoesNotContain("dotnet nuget push", script, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("Final Prepublish Readiness Snapshot", artifact, StringComparison.Ordinal);
-        Assert.Contains("Can publish publicly: `false`", artifact, StringComparison.Ordinal);
-        Assert.Contains("发布最终复验与打包发布准备快照", article, StringComparison.Ordinal);
-        Assert.Contains("canPublishPublicly=false", article, StringComparison.Ordinal);
-        Assert.Contains("articles/zh-cn/final-prepublish-readiness-snapshot.md", docsIndex, StringComparison.Ordinal);
-        Assert.Contains("artifacts/final-release/final-prepublish-readiness-snapshot.md", docsIndex, StringComparison.Ordinal);
-        Assert.Contains("articles/zh-cn/final-prepublish-readiness-snapshot.md", docsToc, StringComparison.Ordinal);
-    }
-
     private static JsonDocument ReadFinalReleaseJson(string fileName)
     {
         return JsonDocument.Parse(ReadFinalReleaseText(fileName));

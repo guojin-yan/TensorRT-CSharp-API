@@ -5,7 +5,7 @@
 - proof relations: ``89``
 - lanes: ``6``
 - blocked articles: ``42``
-- content complete count: ``103``
+- content complete count: ``102``
 - performsPublish=false; canPublishPublicly=false; canCloseReleaseIssue=false; canPromoteRuntimeProof=false
 
 This backlog is a deterministic projection of content proof dependencies and owner handoff contracts. It is not runtime proof, package-consumer proof, callback invocation proof, Linux runner proof, real-model proof, post-publish proof, publish approval, or release issue close approval.

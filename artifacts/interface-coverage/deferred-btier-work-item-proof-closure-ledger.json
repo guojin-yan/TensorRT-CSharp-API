@@ -62,7 +62,7 @@
       "batch": "btier-001-012",
       "closedWorkItemCount": 12,
       "evidence": [
-        "tests/JYPPX.ProjectQuality.Tests/DeferredBTierWorkItemProofBatchTests.cs",
+        "tests/JYPPX.ProjectQuality.Tests/DeferredBTierWorkItemProofClosureLedgerTests.cs",
         "docs/articles/zh-cn/deferred-manual-design-groups.md"
       ]
     },
@@ -70,7 +70,7 @@
       "batch": "btier-013-024",
       "closedWorkItemCount": 12,
       "evidence": [
-        "tests/JYPPX.ProjectQuality.Tests/DeferredBTierWorkItemProofBatchTests.cs",
+        "tests/JYPPX.ProjectQuality.Tests/DeferredBTierWorkItemProofClosureLedgerTests.cs",
         "docs/articles/zh-cn/deferred-manual-design-groups.md"
       ]
     },
@@ -78,21 +78,21 @@
       "batch": "btier-025-040",
       "closedWorkItemCount": 16,
       "evidence": [
-        "tests/JYPPX.ProjectQuality.Tests/DeferredBTierWorkItemProofBatchTests.cs",
+        "tests/JYPPX.ProjectQuality.Tests/DeferredBTierWorkItemProofClosureLedgerTests.cs",
         "docs/articles/zh-cn/deferred-manual-design-groups.md"
       ]
     },
     {
-      "batch": "btier-041-045",
-      "closedWorkItemCount": 5,
+      "batch": "btier-041-046",
+      "closedWorkItemCount": 6,
       "evidence": [
         "tests/JYPPX.ProjectQuality.Tests/DeferredBTier41To45ProofClosureTests.cs",
         "docs/articles/zh-cn/deferred-btier-41-45-proof-closure.md"
       ]
     },
     {
-      "batch": "btier-046-051",
-      "closedWorkItemCount": 6,
+      "batch": "btier-047-051",
+      "closedWorkItemCount": 5,
       "evidence": [
         "tests/JYPPX.ProjectQuality.Tests/DeferredBTier46To50ProofClosureTests.cs",
         "docs/articles/zh-cn/deferred-btier-46-50-proof-closure.md"

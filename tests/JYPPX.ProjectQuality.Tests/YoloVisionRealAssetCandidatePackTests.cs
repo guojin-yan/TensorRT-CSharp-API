@@ -204,7 +204,7 @@ public sealed class YoloVisionRealAssetCandidatePackTests
         Assert.Contains("仍不是公开 feed 或 post-publish 证明", segmentation, StringComparison.Ordinal);
 
         string packageConsumer = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "articles", "zh-cn", "yolovision-yolov8-seg-local-package-consumer-tutorial.md"));
-        Assert.Contains("local-package-consumer-runtime", packageConsumer, StringComparison.Ordinal);
+        Assert.Contains("package-consumer-runtime", packageConsumer, StringComparison.Ordinal);
         Assert.Contains("1,793,600", packageConsumer, StringComparison.Ordinal);
         Assert.Contains("publicPackageProof", packageConsumer, StringComparison.Ordinal);
         Assert.Contains("ownerReleaseAcceptance", packageConsumer, StringComparison.Ordinal);

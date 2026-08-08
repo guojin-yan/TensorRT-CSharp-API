@@ -8,9 +8,9 @@ namespace JYPPX.ProjectQuality.Tests;
 public sealed class ManagedMonitoringErrorRecorderLoggerFinderSourceLayoutTests
 {
     private const string ErrorRecorderOriginalNormalizedSha256 =
-        "c10dbac254bc930f907db63f2c5816e9e4474aeee7c9043a18db45fb28a32a14";
+        "cf5073560b8b5e2df9a131537c836503426ed193a6262555e606e4633d9d8668";
     private const string LoggerFinderGateOriginalNormalizedSha256 =
-        "4c841669b7e1366a7917e0e6f842a30dfbe71832b019ffdb6d051b760064f7f4";
+        "18c43b3a69885c448a1ba3558c3ef9c2dc664e45f6c57c49ac48cff8044cb9a3";
 
     public static TheoryData<string, string, string[]> ErrorRecorderModelOwners => new()
     {

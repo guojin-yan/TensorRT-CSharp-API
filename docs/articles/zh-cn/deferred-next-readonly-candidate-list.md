@@ -22,18 +22,19 @@ Deferred API 升级容易在 callback、allocator、borrowed pointer 和 plugin 
 
 ## 已固定的 B-tier 推进队列
 
-后续阶段不要再从全量 deferred 文件重新摸底。机器工作包 `artifacts/interface-coverage/deferred-btier-implementation-work-package.json` 和闭环台账 `artifacts/interface-coverage/deferred-btier-work-item-proof-closure-ledger.json` 已把 `btier-001` 到 `btier-045` 固定为 `source-quality-proof-closed`，并由 `tests/JYPPX.ProjectQuality.Tests/DeferredBTierWorkItemProofBatchTests.cs` 与 `DeferredBTier41To45ProofClosureTests` 持续回归。
+后续阶段不要再从全量 deferred 文件重新摸底。机器工作包 `artifacts/interface-coverage/deferred-btier-implementation-work-package.json` 和闭环台账 `artifacts/interface-coverage/deferred-btier-work-item-proof-closure-ledger.json` 已把 `btier-001` 到 `btier-051` 固定为 `source-quality-proof-closed`，并由 `tests/JYPPX.ProjectQuality.Tests/DeferredBTierWorkItemProofClosureLedgerTests.cs`、`DeferredBTier41To45ProofClosureTests.cs` 与 `DeferredBTier46To50ProofClosureTests.cs` 持续回归。
 
 | 批次 | 工作项 | 主题 | 当前处理方式 |
 |---|---|---|---|
 | 第一批 | `btier-001` 到 `btier-012` | execution context name、profiler interface info、engine profile shape、layer input、TRT10 builder/config scalar readback | 已进入 safe alternative / wrapper / docs / quality proof 收口，不删除 deferred history。 |
 | 第二批 | `btier-013` 到 `btier-024` | TRT10 builder config scalar getter、TRT11 parser/refitter copied diagnostics、TRT8 builder compatibility getter | 已进入同一质量门禁，重点证明 public wrapper 和 native/source/manifest 证据链。 |
 | 第三批 | `btier-025` 到 `btier-040` | TRT8 builder/config/engine/context/parser legacy safe alternative | 已进入质量门禁，证明 legacy copied value/string/shape wrapper，不把 smoke 或 readonly diagnostics 晋级为 runtime proof。 |
-| 第四批 | `btier-041` 到 `btier-045` | TRT10 tiling level、legacy implicit-batch bool、execution context NVTX verbosity、ONNX parser/refitter copied diagnostics | 已由 `DeferredBTier41To45ProofClosureTests` 和 `deferred-btier-41-45-proof-closure.md` 固化为 proof closure；保留 deferred history，不晋级 runtime/release proof。 |
+| 第四批 | `btier-041` 到 `btier-046` | TRT8 Caffe binaryproto copied snapshot、UFF required version copied snapshot | 已由 `DeferredBTier41To45ProofClosureTests` 和 `deferred-btier-41-45-proof-closure.md` 固化为 proof closure；保留 deferred history，不晋级 runtime/release proof。 |
+| 第五批 | `btier-047` 到 `btier-051` | TRT10 tiling level、legacy implicit-batch bool、execution context NVTX verbosity、ONNX parser/refitter copied diagnostics | 已由 `DeferredBTier46To50ProofClosureTests` 和 `deferred-btier-46-50-proof-closure.md` 固化为 proof closure；保留 deferred history，不晋级 runtime/release proof。 |
 
 ## 下一批建议
 
-下一轮应直接从新 candidate audit 或独立 runtime/model gap 中挑选，而不是重复处理 `btier-001` 到 `btier-045`：
+下一轮应直接从新 candidate audit 或独立 runtime/model gap 中挑选，而不是重复处理 `btier-001` 到 `btier-051`：
 
 1. **ONNX parser copied diagnostics / layer-output presence**：优先补强已存在的 `LayerOutputTensorExists`、subgraph count/copy、parser error copied diagnostics 和 sample/smoke 证据；继续避免返回 parser-owned `ITensor*`。
 2. **IAlgorithm 结果快照设计**：仅做设计门禁和 copied snapshot 草图，暂不把 `IAlgorithm*`、`IAlgorithmContext*`、`IAlgorithmIOInfo*` 作为 public handle 暴露。

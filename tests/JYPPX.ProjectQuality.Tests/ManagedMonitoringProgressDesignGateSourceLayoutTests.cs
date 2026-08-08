@@ -8,11 +8,11 @@ namespace JYPPX.ProjectQuality.Tests;
 public sealed class ManagedMonitoringProgressDesignGateSourceLayoutTests
 {
     private const string ProgressMonitorOriginalNormalizedSha256 =
-        "615988b4c7c65a15d2ee74815a44d5c0d0d59d58d9f5036e9694ffee70ebe73c";
+        "85bb8d410365b19a28996490552e2ab074c6e03b6c1ea6118f0cd37586ddd926";
     private const string ErrorRecorderGateOriginalNormalizedSha256 =
-        "5fe4fcc308b043ae5d16c50c03544de40d6e03152203a0858bc66aed59927d3e";
+        "66979ba636bdccc1f7bcd62a7c845601f2f24ed2eb9bef739819dad1f875bb6a";
     private const string StreamIoGateOriginalNormalizedSha256 =
-        "ce954216836edd26581e33434f8597fb2696fe57a32964cfe171125bca824714";
+        "145716c1860a4be9a8a970b63cc83d1b81f51d8988fd0ae2dadd77cb1f12c183";
     private const string ProgressMonitorOriginalUsingHeader =
         "using System;\n" +
         "using System.Runtime.InteropServices;\n" +

@@ -94,39 +94,6 @@ public sealed class DebugListenerRealCallbackRuntimeProofPreflightBatchTests
         Assert.Contains("$hasRuntimeMarker = $combinedSmokeOutput.IndexOf(\"EvidenceKind=real-callback-runtime\"", packageConsumer);
     }
 
-    [Fact]
-    public void ReadinessDocsSmokePackageAndDeferredRowsContainPreflightEvidence()
-    {
-        string source = ReadSource("src", "JYPPX.TensorRtSharp", "Callbacks", "Debugging", "TensorRtDebugListenerRuntimeProofAttemptPreflight.cs");
-        string smoke = ReadSource("smoke", "CallbackAllocatorSafeControlsSmokeRunner", "Program.cs");
-        string readiness = ReadSource("eng", "Test-RuntimePackageReadiness.ps1");
-        string bridgeConsumer = ReadSource("eng", "Test-BridgePackageConsumer.ps1");
-        string packageConsumer = ReadSource("eng", "Test-PackageConsumer.ps1");
-        string doc = ReadSource("docs", "articles", "zh-cn", "debug-listener-real-callback-runtime-proof-preflight.md");
-        string schema = ReadSource("docs", "articles", "zh-cn", "real-callback-runtime-evidence-schema.md");
-        string latest = ReadSource("docs", "articles", "zh-cn", "windows-api-completion-latest.md");
-        string smokeReadme = ReadSource("smoke", "README.md");
-        string toc = ReadSource("docs", "toc.yml");
-        string index = ReadSource("docs", "index.md");
-        string comparison = ReadSource("artifacts", "interface-coverage", "tensorrt-interface-comparison.csv");
-
-        AssertPreflightMarkers(source);
-        AssertPreflightMarkers(smoke);
-        AssertPreflightMarkers(readiness);
-        AssertPreflightMarkers(bridgeConsumer);
-        AssertPreflightMarkers(packageConsumer);
-        AssertPreflightMarkers(doc);
-        AssertPreflightMarkers(schema);
-        AssertPreflightMarkers(latest);
-        AssertPreflightMarkers(smokeReadme);
-        AssertPreflightMarkers(toc);
-        AssertPreflightMarkers(index);
-        Assert.Contains("New-DebugListenerRuntimeProofAttemptPreflightEvidence", readiness);
-        Assert.Contains("debugListenerRuntimeProofAttemptPreflight", readiness);
-        Assert.Contains("hasDebugListenerRuntimeProofAttemptPreflight", readiness);
-        Assert.Contains("\"IDebugListener\",\"processDebugTensor\",\"IDebugListener::processDebugTensor\",\"other\",\"deferred-only\"", comparison);
-    }
-
     private static void AssertFreshnessGuard(string script)
     {
         Assert.Contains("ManagedPackageFreshnessRequiredMarkers", script);

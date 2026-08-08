@@ -1,0 +1,127 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="300" viewBox="0 0 1200 300" role="img" aria-labelledby="title desc">
+  <title id="title">TensorRtSharp4.0 - TensorRT and CUDA bindings for C# and .NET</title>
+  <desc id="desc">A C# tensor crosses the TensorRtSharp native bridge into a TensorRT GPU chip and returns a managed result.</desc>
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#172033" flood-opacity="0.12"/>
+    </filter>
+    <filter id="small-shadow" x="-30%" y="-30%" width="160%" height="170%">
+      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#172033" flood-opacity="0.13"/>
+    </filter>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto" markerUnits="strokeWidth">
+      <path d="M1 1 7 4 1 7Z" fill="#15A39A"/>
+    </marker>
+  </defs>
+
+  <rect width="1200" height="300" fill="#F7F9FC"/>
+  <path d="M0 0H1200V14H0Z" fill="#2855D9"/>
+  <path d="M1052 14H1200V300H1128C1153 246 1167 183 1167 116C1167 78 1162 44 1153 14Z" fill="#EEF5EC"/>
+  <g fill="#D8E7D3" opacity="0.72">
+    <rect x="1150" y="42" width="10" height="10" rx="2"/>
+    <rect x="1167" y="42" width="10" height="10" rx="2"/>
+    <rect x="1184" y="42" width="10" height="10" rx="2"/>
+    <rect x="1150" y="59" width="10" height="10" rx="2"/>
+    <rect x="1167" y="59" width="10" height="10" rx="2"/>
+    <rect x="1184" y="59" width="10" height="10" rx="2"/>
+    <rect x="1150" y="76" width="10" height="10" rx="2"/>
+    <rect x="1167" y="76" width="10" height="10" rx="2"/>
+    <rect x="1184" y="76" width="10" height="10" rx="2"/>
+  </g>
+
+  <g font-family="Segoe UI, system-ui, -apple-system, BlinkMacSystemFont, sans-serif">
+    <text x="56" y="49" fill="#52708F" font-size="13" font-weight="700" letter-spacing="0">MANAGED GPU INFERENCE</text>
+    <text x="56" y="111" font-size="56" font-weight="800" letter-spacing="0">
+      <tspan fill="#2855D9">TensorRt</tspan><tspan fill="#172033">Sharp4.0</tspan>
+    </text>
+    <text x="58" y="145" fill="#45576B" font-size="20" font-weight="500" letter-spacing="0">TensorRT + CUDA bindings for C# and .NET</text>
+
+    <g filter="url(#small-shadow)">
+      <rect x="56" y="169" width="576" height="48" rx="8" fill="#FFFFFF" stroke="#D9E2EE"/>
+      <circle cx="79" cy="193" r="5" fill="#76B900"/>
+      <text x="96" y="199" fill="#24364B" font-family="Cascadia Code, SFMono-Regular, Consolas, monospace" font-size="14" font-weight="600" letter-spacing="0">dotnet add package JYPPX.TensorRT.CSharp.API</text>
+      <g transform="translate(592 183)" fill="none" stroke="#6D28D9" stroke-width="1.8" stroke-linejoin="round">
+        <path d="M0 5 10 0 20 5 10 10Z"/>
+        <path d="M0 5V15L10 20V10M20 5V15L10 20"/>
+      </g>
+    </g>
+
+    <g fill="#50657A" font-size="13" font-weight="700" letter-spacing="0">
+      <circle cx="62" cy="250" r="4" fill="#2855D9"/>
+      <text x="74" y="255">C# / .NET</text>
+      <path d="M153 240V260" stroke="#CBD6E2"/>
+      <circle cx="174" cy="250" r="4" fill="#76B900"/>
+      <text x="186" y="255">TensorRT</text>
+      <path d="M260 240V260" stroke="#CBD6E2"/>
+      <circle cx="281" cy="250" r="4" fill="#15A39A"/>
+      <text x="293" y="255">Native bridge</text>
+    </g>
+  </g>
+
+  <g filter="url(#shadow)">
+    <path d="M739 104 770 86 832 104 801 122Z" fill="#DDE6F2"/>
+    <path d="M739 104V189L801 210V122Z" fill="#FFFFFF" stroke="#B9C8D9" stroke-width="2"/>
+    <path d="M801 122 832 104V189L801 210Z" fill="#EAF0F7" stroke="#B9C8D9" stroke-width="2"/>
+    <path d="M739 104 770 86 832 104 801 122Z" fill="#EEF2FF" stroke="#B9C8D9" stroke-width="2"/>
+    <g fill="#CCD8E6" opacity="0.8">
+      <path d="M757 101 767 96 777 101 767 106Z"/>
+      <path d="M773 109 783 104 793 109 783 114Z"/>
+      <path d="M789 101 799 96 809 101 799 106Z"/>
+    </g>
+    <circle cx="771" cy="144" r="24" fill="#6D28D9"/>
+    <text x="771" y="151" text-anchor="middle" fill="#FFFFFF" font-family="Segoe UI, system-ui, sans-serif" font-size="20" font-weight="800" letter-spacing="0">C#</text>
+    <g>
+      <rect x="752" y="174" width="11" height="8" rx="2" fill="#6D28D9"/>
+      <rect x="767" y="174" width="11" height="8" rx="2" fill="#2855D9"/>
+      <rect x="782" y="174" width="11" height="8" rx="2" fill="#15A39A"/>
+      <rect x="756" y="186" width="11" height="8" rx="2" fill="#2855D9" opacity="0.72"/>
+      <rect x="771" y="186" width="11" height="8" rx="2" fill="#15A39A" opacity="0.72"/>
+      <rect x="786" y="186" width="11" height="8" rx="2" fill="#76B900" opacity="0.8"/>
+    </g>
+  </g>
+
+  <path d="M814 146C850 98 908 88 957 123" fill="none" stroke="#B9D98A" stroke-width="18" stroke-linecap="round"/>
+  <path d="M814 146C850 98 908 88 957 123" fill="none" stroke="#15A39A" stroke-width="4" stroke-linecap="round" marker-end="url(#arrow)"/>
+  <path d="M844 129V175M916 109V160" stroke="#7FBE39" stroke-width="7" stroke-linecap="round"/>
+  <path d="M836 175H852M908 160H924" stroke="#7FBE39" stroke-width="7" stroke-linecap="round"/>
+  <g filter="url(#small-shadow)">
+    <path d="M835 115 845 110 855 115 845 120Z" fill="#FFFFFF" stroke="#6D28D9" stroke-width="2"/>
+    <path d="M835 115V125L845 130V120M855 115V125L845 130" fill="#EEE8FF" stroke="#6D28D9" stroke-width="2" stroke-linejoin="round"/>
+  </g>
+  <g filter="url(#small-shadow)">
+    <rect x="871" y="89" width="34" height="27" rx="6" fill="#FFFFFF" stroke="#15A39A" stroke-width="2"/>
+    <rect x="878" y="96" width="7" height="6" rx="1.5" fill="#2855D9"/>
+    <rect x="889" y="96" width="9" height="6" rx="1.5" fill="#76B900"/>
+    <rect x="878" y="106" width="20" height="4" rx="2" fill="#A7B7C8"/>
+  </g>
+  <text x="884" y="190" text-anchor="middle" fill="#567086" font-family="Segoe UI, system-ui, sans-serif" font-size="12" font-weight="700" letter-spacing="0">MANAGED BRIDGE</text>
+
+  <g filter="url(#shadow)">
+    <rect x="953" y="77" width="170" height="146" rx="8" fill="#FFFFFF" stroke="#AFC1D2" stroke-width="2"/>
+    <g stroke="#7890A8" stroke-width="3" stroke-linecap="round">
+      <path d="M974 67V77M997 67V77M1020 67V77M1043 67V77M1066 67V77M1089 67V77"/>
+      <path d="M974 223V233M997 223V233M1020 223V233M1043 223V233M1066 223V233M1089 223V233"/>
+      <path d="M943 98H953M943 122H953M943 146H953M943 170H953M943 194H953"/>
+      <path d="M1123 98H1133M1123 122H1133M1123 146H1133M1123 170H1133M1123 194H1133"/>
+    </g>
+    <rect x="974" y="96" width="128" height="108" rx="7" fill="#172033"/>
+    <text x="990" y="119" fill="#A9BBCD" font-family="Segoe UI, system-ui, sans-serif" font-size="11" font-weight="700" letter-spacing="0">TENSORRT</text>
+    <g>
+      <rect x="990" y="134" width="20" height="20" rx="4" fill="#2855D9"/>
+      <rect x="1016" y="134" width="20" height="20" rx="4" fill="#406BE2"/>
+      <rect x="1042" y="134" width="20" height="20" rx="4" fill="#15A39A"/>
+      <rect x="1068" y="134" width="18" height="20" rx="4" fill="#76B900"/>
+      <rect x="990" y="160" width="20" height="20" rx="4" fill="#406BE2"/>
+      <rect x="1016" y="160" width="20" height="20" rx="4" fill="#15A39A"/>
+      <rect x="1042" y="160" width="20" height="20" rx="4" fill="#76B900"/>
+    </g>
+    <path d="M1062 171H1071" stroke="#76B900" stroke-width="3" stroke-linecap="round"/>
+    <g filter="url(#small-shadow)">
+      <rect x="1069" y="151" width="61" height="47" rx="7" fill="#FFFFFF" stroke="#76B900" stroke-width="2"/>
+      <rect x="1079" y="177" width="6" height="11" rx="2" fill="#6D28D9"/>
+      <rect x="1089" y="170" width="6" height="18" rx="2" fill="#2855D9"/>
+      <rect x="1099" y="164" width="6" height="24" rx="2" fill="#15A39A"/>
+      <circle cx="1118" cy="166" r="8" fill="#76B900"/>
+      <path d="M1114 166 1117 169 1122 163" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+  </g>
+</svg>

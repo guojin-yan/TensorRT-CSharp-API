@@ -8,7 +8,7 @@ namespace JYPPX.ProjectQuality.Tests;
 public sealed class ManagedOnnxConfigModelSupportSourceLayoutTests
 {
     private const string ConfigOriginalNormalizedSha256 =
-        "3f0ad5e0f709596c5bc2587211e913e8c5e2f4054e9e929b657da17fe416681b";
+        "137d359e84a49296caaf3df0860d3c424f7d58fe56b60e2024d2b2ea4440a33a";
     private const string ModelSupportOriginalNormalizedSha256 =
         "520cec9d6e6bc4ac58bf37eea8b93abb981b89e075b7b6945541a1dbfa14996d";
 

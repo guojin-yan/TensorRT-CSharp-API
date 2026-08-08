@@ -87,7 +87,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Export-DeferredReadOnlyApiCa
 
 ## B-tier 前 12 项 proof 批量收口
 
-`artifacts/interface-coverage/deferred-btier-implementation-work-package.json` 的前 12 个工作项已作为第一批 proof 收口对象固定到 `DeferredBTierWorkItemProofBatchTests`。这批工作不是删除 deferred history，也不是 runtime proof、package-consumer proof 或 release proof，而是把已有 safe alternative / alias 证据链压实到 manifest、native source、C# wrapper、ProjectQuality test 和本文档。
+`artifacts/interface-coverage/deferred-btier-implementation-work-package.json` 的前 12 个工作项已作为第一批 proof 收口对象固定到 `DeferredBTierWorkItemProofClosureLedgerTests`。这批工作不是删除 deferred history，也不是 runtime proof、package-consumer proof 或 release proof，而是把已有 safe alternative / alias 证据链压实到 manifest、native source、C# wrapper、ProjectQuality test 和本文档。
 
 本批 proof 的核心边界是：不能删除 deferred history，不能把 alias/safe alternative 证明解释为 100% runtime 可用，也不能把它作为发布许可。
 
@@ -106,11 +106,11 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Export-DeferredReadOnlyApiCa
 | `btier-011` | `IBuilderConfig::getDefaultDeviceType` | TRT10 | 使用 default device type getter/setter safe alternative 证明 wrapper；不删除 getter/setter deferred history。 |
 | `btier-012` | `IBuilderConfig::getDeviceType` | TRT10 | 使用 layer device type get/is-set/reset/set 组合证明 safe alternative；仍按 wrapper/docs/quality proof 处理，不视为 runtime proof。 |
 
-当前 alias-proof-ready 候选已完整展开为 `btier-001` 到 `btier-045`，并由 `deferred-btier-work-item-proof-closure-ledger.json` 标记为 `source-quality-proof-closed`。工作包采用 `stable-v1-existing-40-then-deterministic-append` 排序策略，既有 40 项编号不会因 dashboard 扩容而漂移，新候选只追加到末尾。后续批量推进不得再次选择这 45 项；必须先确认 `remainingWorkItemCount`，再从新 candidate audit 或独立 runtime/model gap 中选择任务。safe alternative manifest、deferred history、public pointer guard 和 wrapper/doc/test 证据仍须持续回归。
+当前 alias-proof-ready 候选已完整展开为 `btier-001` 到 `btier-051`，并由 `deferred-btier-work-item-proof-closure-ledger.json` 标记为 `source-quality-proof-closed`。工作包采用 `stable-v1-existing-40-then-deterministic-append` 排序策略，既有 40 项编号不会因 dashboard 扩容而漂移，新候选只追加到末尾。后续批量推进不得再次选择这 51 项；必须先确认 `remainingWorkItemCount`，再从新 candidate audit 或独立 runtime/model gap 中选择任务。safe alternative manifest、deferred history、public pointer guard 和 wrapper/doc/test 证据仍须持续回归。
 
 ## B-tier 后 12 项 proof 批量收口
 
-`btier-013` 到 `btier-024` 已并入同一个 `DeferredBTierWorkItemProofBatchTests` 门禁，覆盖 builder config scalar getter、TRT11 parser copied diagnostics、ParserRefitter copied diagnostics 以及 TRT8 builder compatibility getter。该批仍然只是 wrapper/docs/quality proof：不能删除 deferred history，不能替代 runtime proof，也不能作为 package-consumer 或 release 许可。
+`btier-013` 到 `btier-024` 已并入同一个 `DeferredBTierWorkItemProofClosureLedgerTests` 门禁，覆盖 builder config scalar getter、TRT11 parser copied diagnostics、ParserRefitter copied diagnostics 以及 TRT8 builder compatibility getter。该批仍然只是 wrapper/docs/quality proof：不能删除 deferred history，不能替代 runtime proof，也不能作为 package-consumer 或 release 许可。
 
 | ID | 接口 | 版本 | 收口边界 |
 | --- | --- | --- | --- |
@@ -129,7 +129,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Export-DeferredReadOnlyApiCa
 
 ## B-tier 第三批 proof 批量收口
 
-`btier-025` 到 `btier-040` 已进入同一个 `DeferredBTierWorkItemProofBatchTests` 门禁，重点覆盖 TRT8 builder/config/engine/context/parser 的 legacy safe alternative。该批不是新的 native ABI 扩展，而是把已经存在的 manifest、native source、generated interop、高层 wrapper 与 ProjectQuality proof 串成可回归证据链；deferred history 必须继续保留，不能删除来制造完成度。
+`btier-025` 到 `btier-040` 已进入同一个 `DeferredBTierWorkItemProofClosureLedgerTests` 门禁，重点覆盖 TRT8 builder/config/engine/context/parser 的 legacy safe alternative。该批不是新的 native ABI 扩展，而是把已经存在的 manifest、native source、generated interop、高层 wrapper 与 ProjectQuality proof 串成可回归证据链；deferred history 必须继续保留，不能删除来制造完成度。
 
 本批边界仍然是 wrapper/docs/quality proof：不是 runtime proof，不是 package-consumer smoke，不是公开发布许可；也不允许把 layer、engine、parser 等 borrowed native object 以裸 `IntPtr`/`nint` 暴露给 public API。
 
@@ -154,15 +154,16 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Export-DeferredReadOnlyApiCa
 
 ## B-tier 第四批 proof 批量收口
 
-`btier-041` 到 `btier-045` 是 dashboard 扩到 60 个候选后新增发现的五个 TRT10 alias-proof-ready 工作项。它们全部已有真实参数 native entrypoint、高层 copied/scalar wrapper 和 deferred history，本批只补稳定编号、文档与质量门证据，不修改 ABI，也不把 package restore/build 当作 runtime proof。
+`btier-041` 到 `btier-046` 是 dashboard 扩到 60 个候选后按稳定排序追加的六个 TRT8 legacy parser alias-proof-ready 工作项。它们通过 caller-owned buffer 或 copied scalar snapshot 提供 safe alternative，并继续保留原始 deferred history；本批只固定编号、文档与质量门证据，不把 package restore/build 当作 runtime proof。
 
 | ID | 接口 | 版本 | 收口边界 |
 | --- | --- | --- | --- |
-| `btier-041` | `IBuilderConfig::getTilingOptimizationLevel` | TRT10 | 使用 `GetTilingOptimizationLevel` 与 native scalar getter 证明 tiling level 查询；不扩展 tiling runtime execution proof。 |
-| `btier-042` | `ICudaEngine::hasImplicitBatchDimension` | TRT10 | 使用 `HasImplicitBatchDimensionCompatibility` 与 copied bool native getter 证明 legacy engine 查询；不暴露 engine borrowed pointer。 |
-| `btier-043` | `IExecutionContext::getNvtxVerbosity` | TRT10 | 使用 `GetNvtxVerbosity` 与 scalar native getter 证明 diagnostics 查询；不触碰 execute/enqueue 或 callback 边界。 |
-| `btier-044` | `IParser::getError` | TRT10 | 使用 ONNX parser `ErrorCount`/`GetError` copied diagnostics 证明只读错误查询；错误字符串继续由 managed copy 承接。 |
-| `btier-045` | `IParserRefitter::getError` | TRT10 | 使用 ParserRefitter copied error/count wrapper 证明诊断路径；不提升 refit model-buffer ownership 或 runtime proof。 |
+| `btier-041` | `IBinaryProtoBlob::getData` | TRT8 | 使用 `ReadCaffeBinaryProto` 将数据复制到 caller-owned managed buffer；不暴露 blob-owned pointer。 |
+| `btier-042` | `IBinaryProtoBlob::getDataType` | TRT8 | 复用 binaryproto copied snapshot 返回数据类型；不公开 legacy blob handle。 |
+| `btier-043` | `IBinaryProtoBlob::getDimensions` | TRT8 | 复用 binaryproto copied snapshot 返回维度；不延长 parser/blob native lifetime。 |
+| `btier-044` | `IUffParser::getUffRequiredVersionMajor` | TRT8 | 使用 `GetUffRequiredVersion` copied version snapshot 返回 major。 |
+| `btier-045` | `IUffParser::getUffRequiredVersionMinor` | TRT8 | 使用同一 copied version snapshot 返回 minor。 |
+| `btier-046` | `IUffParser::getUffRequiredVersionPatch` | TRT8 | 使用同一 copied version snapshot 返回 patch；不公开 `IUffParser*`。 |
 
 第四批仍保留全部 deferred history，`canDeleteDeferredRecord=false`、`canPromoteReleaseProof=false`、`isRuntimeExecutionProof=false`、`isPackageConsumerRuntimeProof=false`。
 

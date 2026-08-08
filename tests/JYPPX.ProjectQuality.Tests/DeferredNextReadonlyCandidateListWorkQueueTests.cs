@@ -21,7 +21,9 @@ public sealed class DeferredNextReadonlyCandidateListWorkQueueTests
         Assert.Contains("articles/zh-cn/deferred-next-readonly-candidate-list.md", docsIndex, StringComparison.Ordinal);
         Assert.Contains("articles/zh-cn/deferred-next-readonly-candidate-list.md", docsToc, StringComparison.Ordinal);
         Assert.Contains("deferred-btier-implementation-work-package.json", article, StringComparison.Ordinal);
-        Assert.Contains("DeferredBTierWorkItemProofBatchTests.cs", article, StringComparison.Ordinal);
+        Assert.Contains("DeferredBTierWorkItemProofClosureLedgerTests.cs", article, StringComparison.Ordinal);
+        Assert.Contains("DeferredBTier41To45ProofClosureTests.cs", article, StringComparison.Ordinal);
+        Assert.Contains("DeferredBTier46To50ProofClosureTests.cs", article, StringComparison.Ordinal);
 
         foreach (string marker in new[]
         {

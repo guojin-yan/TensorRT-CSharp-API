@@ -8,9 +8,9 @@ namespace JYPPX.ProjectQuality.Tests;
 public sealed class ManagedDimensionPluginDesignGateResultSourceLayoutTests
 {
     private const string DimensionOriginalNormalizedSha256 =
-        "0b998614fc741b7a016dd273a3ab061fe849eb574b06375b6c78268db8069f80";
+        "625ddabc344b0596a41b573347ac0c130613e70c625e868edf35b3d8cb498672";
     private const string PluginOriginalNormalizedSha256 =
-        "23f0571f784ffd698cedf3ee3613753e59c82570dd5ab65ebe2140785dd5ce59";
+        "586c6596d6fc417723f9f20dda452e794fa3c6a5acbb45096a388bc63d20a685";
 
     public static TheoryData<string, string, string, string[]> FileOwnersAndMethods => new()
     {

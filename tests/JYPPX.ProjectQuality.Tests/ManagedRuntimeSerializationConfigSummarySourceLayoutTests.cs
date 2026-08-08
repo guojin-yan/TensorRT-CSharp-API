@@ -8,9 +8,9 @@ namespace JYPPX.ProjectQuality.Tests;
 public sealed class ManagedRuntimeSerializationConfigSummarySourceLayoutTests
 {
     private const string RuntimeOriginalNormalizedSha256 =
-        "da5c8921ce02c2fcd66c1aa3d2214c941b15e31c1edc7cb4c24c167a4932658d";
+        "22e7d5b8f4578ab44e55a30e9bfdd7f7042d006271804c8a9dd7a479b944ed6b";
     private const string SerializationOriginalNormalizedSha256 =
-        "91a5979d9a8f23239b24da43094572d978ec2aea1aa16ec9f3c8bb411351766a";
+        "75099f70da1917ce9c2476f012346513354f97b476d0c203c218c6393d2a8b1e";
 
     public static TheoryData<string, string, string[]> FileOwnersAndMethods => new()
     {

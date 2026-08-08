@@ -8,9 +8,9 @@ namespace JYPPX.ProjectQuality.Tests;
 public sealed class ManagedCallbackPrecheckAllocatorLayoutTests
 {
     private const string PrecheckOriginalNormalizedSha256 =
-        "d7ede0aca1090be578050e43b80e1ed737189f415f9c1663465457e3bd7cc67c";
+        "27bef27bfec81e801af8663460c88bcefe43411a5ab4c3dbaebf14e907d7dab7";
     private const string AllocatorOriginalNormalizedSha256 =
-        "7b1556a06acdf5dce2fff5af49852df5f7490ec8201fba083abbfa548ce1b993";
+        "dd04372ac040a7427aeec06c7cf8d86c286b7a5146d1dcd8ff27905a2cfe6945";
 
     private static readonly string[] PrecheckPrerequisiteTypes =
     {

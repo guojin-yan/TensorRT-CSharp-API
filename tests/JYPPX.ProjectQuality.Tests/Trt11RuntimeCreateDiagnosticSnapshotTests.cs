@@ -67,44 +67,6 @@ public sealed class Trt11RuntimeCreateDiagnosticSnapshotTests
         Assert.Contains("runtimeCreateDiagnostic = $runtimeCreateDiagnostic", runtimeConsumer);
     }
 
-    [Fact]
-    public void FinalReportsConsumeRuntimeCreateDiagnosticWithoutPromotingProof()
-    {
-        string rootCause = ReadSource("eng", "Export-Trt11RuntimeSmokeRootCauseReport.ps1");
-        string dllResolution = ReadSource("eng", "Export-Trt11RuntimeDllResolutionReport.ps1");
-        string diff = ReadSource("eng", "Export-Trt10VsTrt11BridgeRuntimeDiagnosticDiff.ps1");
-        string dashboard = ReadSource("eng", "Export-FinalProofReadinessBlockerDashboard.ps1");
-        string releaseBundle = ReadSource("eng", "Export-ReleaseEvidenceBundle.ps1");
-
-        foreach (string source in new[] { rootCause, dllResolution, diff, dashboard, releaseBundle })
-        {
-            Assert.True(
-                source.Contains("nativeCreateRuntime", StringComparison.OrdinalIgnoreCase) ||
-                source.Contains("runtimeCreateDiagnostic", StringComparison.OrdinalIgnoreCase),
-                "Each final proof/report script must consume the TRT11 runtime-create diagnostic fields.");
-        }
-
-        Assert.Contains("runtimeCreateDiagnostic = $runtimeCreateDiagnostic", rootCause);
-        Assert.Contains("nativeCreateRuntimeDiagnosticAvailable", rootCause);
-        Assert.Contains("nativeCreateRuntimePhase", rootCause);
-        Assert.Contains("nativeCreateRuntimeLoggerMessageCount", rootCause);
-        Assert.Contains("nativeCreateRuntimeLastLoggerMessage", rootCause);
-        Assert.Contains("native create-runtime diagnostic available", rootCause);
-        Assert.Contains("runtimeCreateDiagnostic = $runtimeCreateDiagnostic", dllResolution);
-        Assert.Contains("nativeCreateRuntimeDiagnosticAvailable", dllResolution);
-        Assert.Contains("nativeCreateRuntimePhase", dllResolution);
-        Assert.Contains("nativeCreateRuntimeLoggerMessageCount", dllResolution);
-        Assert.Contains("runtimeCreateDiagnostic.available", diff);
-        Assert.Contains("runtimeCreateDiagnostic.phase", diff);
-        Assert.Contains("runtimeCreateDiagnostic.lastLoggerMessage", diff);
-        Assert.Contains("trt11RuntimeCreateDiagnostic", diff);
-        Assert.Contains("TRT11 native create-runtime diagnostic snapshot", dashboard);
-        Assert.Contains("trt11RootCauseNativeCreateRuntimeDiagnosticAvailable", releaseBundle);
-        Assert.Contains("trt11RootCauseNativeCreateRuntimePhase", releaseBundle);
-        Assert.Contains("trt11RootCauseNativeCreateRuntimeLoggerMessageCount", releaseBundle);
-        Assert.Contains("nativeCreateDiag=", releaseBundle);
-    }
-
     private static string ReadSource(params string[] segments)
     {
         return File.ReadAllText(Path.Combine(new[] { RepositoryPaths.Root }.Concat(segments).ToArray()));

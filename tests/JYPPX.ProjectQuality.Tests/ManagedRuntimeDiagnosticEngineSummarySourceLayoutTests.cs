@@ -8,7 +8,7 @@ namespace JYPPX.ProjectQuality.Tests;
 public sealed class ManagedRuntimeDiagnosticEngineSummarySourceLayoutTests
 {
     private const string RuntimeDiagnosticOriginalNormalizedSha256 =
-        "744329112e0680d03a61b400c9de073d675d555882191f25dd9a3ba3186b25f5";
+        "8f16e61cd799203c690154b7b03c90f7a3de9a7fa080163413bd77358b4e47d2";
     private const string EngineOriginalNormalizedSha256 =
         "2803fd2737d166351134e43094c986aa0c6cb6484f2fe36b166d8dc95bbc004d";
 

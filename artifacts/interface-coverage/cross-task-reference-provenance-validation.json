@@ -98,22 +98,22 @@
     {
       "id": "source-classification-manifest-hash",
       "passed": true,
-      "actual": "samples/assets/classification-assets.template.json/880f939d4f64c0fadd95b849dca2a05e5eaf73ff702208a3272c79cdbc692cae"
+      "actual": "samples/assets/classification-assets.template.json/8085e1b21802b24d4f07ac304bfe8261c847340e06b80e97981d3a0d11b4506b"
     },
     {
       "id": "source-yolovision-task-contract-hash",
       "passed": true,
-      "actual": "samples/YoloVision/yolovision-task-output-contract.json/b3f3b32a46f003269ba1b55c5ded9cac25e491a81baf662dfd6a126b49104df6"
+      "actual": "applications/YoloVision/yolovision-task-output-contract.json/6fb42216f9a709621d8fae8623405b3427b60cb6ee1d39024abf2994db615520"
     },
     {
       "id": "source-yolovision-owner-input-template-hash",
       "passed": true,
-      "actual": "artifacts/user-acceptance/yolovision-real-asset-owner-proof-input.template.json/43ffda8ddc805fcf71d6c9d232b3702afba458d256e20334afdba1b62d8977f7"
+      "actual": "artifacts/user-acceptance/yolovision-real-asset-owner-proof-input.template.json/6f31053963344baa87188c1feb581928423bc05361291fa302dfdeb2466313dd"
     },
     {
       "id": "source-independent-reference-candidate-hash",
       "passed": true,
-      "actual": "artifacts/interface-coverage/tensorrtexec-mnist-onnxruntime-reference-evidence.json/3de54437688df1e2d04995f4bbe86a2d3b69dfd834a6b5022a4cf4a40f9e3d5d"
+      "actual": "artifacts/interface-coverage/tensorrtexec-mnist-onnxruntime-reference-evidence.json/434b56912a791c7ed1976ce24897891182754905329de69449d3b1a7e6e0909d"
     },
     {
       "id": "classification-field-counts",
@@ -243,7 +243,7 @@
     {
       "id": "yolo-cls-yolo-contract-link",
       "passed": true,
-      "actual": "inputShape,classificationOutput,classCount,labelsPath,topK"
+      "actual": "inputShape,classificationOutput,classCount,labelsPath,topK,classificationScoreMode"
     },
     {
       "id": "yolo-seg-field-counts",
@@ -333,7 +333,7 @@
     {
       "id": "yolo-obb-yolo-contract-link",
       "passed": true,
-      "actual": "inputShape,outputRoleMap,classCount,angleOutput,angleUnit,boxFormat"
+      "actual": "inputShape,classCount,angleUnit,boxFormat,auxiliaryLayout"
     },
     {
       "id": "yolo-pose-field-counts",

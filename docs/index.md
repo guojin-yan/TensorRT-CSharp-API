@@ -36,6 +36,7 @@ The first 4-series preview is published. Samples and applications consume the pu
 - [CUDA stream/event](articles/zh-cn/cuda-stream-event-multistream-tutorial.md)
 - [Dynamic shape profiles](articles/zh-cn/dynamic-shape-optimization-profile-tutorial.md)
 - [ONNX to engine quickstart](articles/zh-cn/onnx-to-engine-quickstart.md)
+- [Windows Source Build CMake Guide](articles/zh-cn/source-build-cmake-windows-guide.md)
 - [Runtime package strategy](articles/en/runtime-packages.md)
 - [Package consumer validation](articles/zh-cn/package-consumer-validation.md)
 

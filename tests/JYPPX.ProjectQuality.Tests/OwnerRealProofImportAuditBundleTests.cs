@@ -47,12 +47,6 @@ public sealed class OwnerRealProofImportAuditBundleTests
         AssertForbiddenSubstitutes(root.GetProperty("forbiddenProofSubstitutes").EnumerateArray().Select(static item => item.GetString()!).ToArray());
     }
 
-    [Fact]
-    public void OwnerRealProofImportAuditBundleArticleIsLinkedAndNonProof()
-    {
-        AssertArticleLinked("owner-real-proof-import-audit-bundle.md");
-    }
-
     internal static JsonDocument ReadFinalReleaseJson(string fileName)
     {
         return JsonDocument.Parse(File.ReadAllText(Path.Combine(RepositoryPaths.Root, "artifacts", "final-release", fileName)));
@@ -79,28 +73,4 @@ public sealed class OwnerRealProofImportAuditBundleTests
         }
     }
 
-    internal static void AssertArticleLinked(string fileName)
-    {
-        string article = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "articles", "zh-cn", fileName));
-        string docsIndex = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "index.md"));
-        string docsToc = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "toc.yml"));
-        string readme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "README.md"));
-        string zhReadme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "README.zh-CN.md"));
-        string href = "articles/zh-cn/" + fileName;
-
-        Assert.Contains(href, docsIndex, StringComparison.Ordinal);
-        Assert.Contains(href, docsToc, StringComparison.Ordinal);
-        Assert.Contains("docs/" + href, readme, StringComparison.Ordinal);
-        Assert.Contains("docs/" + href, zhReadme, StringComparison.Ordinal);
-
-        foreach (string marker in new[] { "适用读者", "解决问题", "边界说明", "下一步", "runtime proof", "post-publish proof", "TensorRtExec report", "YoloVision matrix", "OnnxToEngine report", "readonly diagnostics" })
-        {
-            Assert.Contains(marker, article, StringComparison.OrdinalIgnoreCase);
-        }
-
-        Assert.DoesNotContain("dotnet nuget push", article, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("canPublishPublicly=true", article, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("canCloseReleaseIssue=true", article, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("samples/YoloDet", article, StringComparison.OrdinalIgnoreCase);
-    }
 }

@@ -8,8 +8,8 @@
 | KI-002 | Open | OpenCV 图片解码已在 Windows x64 通过 `JYPPX.OpenCV.CSharp.API` 与 `JYPPX.OpenCV.runtime.win-x64` 验证；其他平台的 JPEG/PNG 原生运行时组合尚未完成本项目实测。 | OpenCV 对应 runtime 包可用后补 Linux/macOS 干净消费者验证；BMP/PPM 托管回退继续保留。 |
 | KI-003 | Controlled | 用户安装命令不写死版本；仓库项目通过单一共享规则跟随当前 4 系列预览线。由于 NuGet 源中存在 API 不兼容的历史 4.x 包，不能使用会选中旧包的宽泛 `4.*`。 | 维护的 4 系列版本线前进时只更新 `build/JYPPX.PublicSamplePackages.props`，并运行全部案例 restore graph 检查。 |
 | KI-004 | Open | 部分历史证据文件和旧文章文件名仍含 `local-package-consumer`，它们记录的是发布前本地 feed 证明，不代表当前公共包消费。 | 保留历史证据不可篡改；逐篇文章改为当前公共包流程，并在发布目录中隐藏未完成更新的旧稿。 |
-| KI-005 | Open | 部分历史 `ProjectQuality` 测试直接启动 `pwsh`。仅安装 Windows PowerShell 5.1、没有 PowerShell 7 的机器无法运行这些测试，即使对应脚本本身兼容 Windows PowerShell。 | 建立统一 PowerShell 启动器：Windows 优先使用可用的 `pwsh`，缺失时回退 `powershell.exe`；逐组验证后替换测试内的硬编码启动方式。 |
-| KI-006 | Open | `TechnicalArticleRoadmapTests.ProjectReleaseStoryMatchesCurrentCoverageMatricesAndFinalBlockers` 仍固定旧接口覆盖数 `3976`，与当前覆盖产物存在漂移。 | 从当前接口覆盖 JSON 动态读取数量，删除路线图测试中的手写快照；在不重写 Owner 台账的定向测试中完成验证。 |
+| KI-005 | Closed | 部分历史 `ProjectQuality` 测试曾直接启动 `pwsh`，导致仅安装 Windows PowerShell 5.1 的机器无法运行。 | 已增加 `PowerShellHost` 统一解析器：优先使用 `JYPPX_POWERSHELL_EXECUTABLE`、PowerShell 7 默认安装目录和 `pwsh`，Windows 最后回退 `powershell.exe`；相关测试已全部替换并在 PowerShell 7.6.4 下完成回归。需要 PowerShell 7 语法的脚本仍明确要求 `pwsh`。 |
+| KI-006 | Closed | `TechnicalArticleRoadmapTests.ProjectReleaseStoryMatchesCurrentCoverageMatricesAndFinalBlockers` 曾固定旧接口覆盖数 `3976`，与当前覆盖产物漂移。 | 路线图测试现在从当前 manifest 和生成矩阵动态读取数量；定向测试已通过，不再维护手写覆盖快照。 |
 
 ## 记录规则
 

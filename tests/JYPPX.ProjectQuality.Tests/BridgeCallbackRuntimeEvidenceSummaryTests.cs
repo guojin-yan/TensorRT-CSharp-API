@@ -214,7 +214,7 @@ public sealed class BridgeCallbackRuntimeEvidenceSummaryTests
             string script = Path.Combine(RepositoryPaths.Root, "eng", "Export-BridgeCallbackRuntimeEvidenceSummary.ps1");
             ProcessStartInfo startInfo = new()
             {
-                FileName = OperatingSystem.IsWindows() ? "powershell" : "pwsh",
+                FileName = PowerShellHost.ResolveExecutable(),
                 WorkingDirectory = RepositoryPaths.Root,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,

@@ -233,6 +233,6 @@ box 门槛为 `0.995`，mask 门槛为 `0.96`。mask 差异集中在阈值边缘
 
 证据清单位于 `samples/assets/yolovision-yolov8n-seg-article-runtime-evidence.json` 和 `samples/assets/yolovision-yolov8n-seg-article-visual-assets.json`。既有本地包 runner 还验证了单值 raw reference 篡改与 mask 单字节篡改都会非零退出。
 
-本文不是 public-package、post-publish、Owner acceptance 或 Release 证明。模型、tensor、raw reference、mask、日志和中间 SVG 留在 Git 外部；Git 只保存文章、经所有者授权的两张派生 PNG 和哈希记录。本文没有发布或上传任何包，也没有把 NVIDIA 运行库打包。
+本文完成的是本地包消费者复验，不是公开源的 `package-consumer-runtime`、public-package、post-publish、Owner acceptance 或 Release 证明。模型、tensor、raw reference、mask、日志和中间 SVG 留在 Git 外部；Git 只保存文章、经所有者授权的两张派生 PNG 和哈希记录。本文没有发布或上传任何包，也没有把 NVIDIA 运行库打包。
 
 对应机器可读边界保持 `publicPackageProof=false`、`postPublishProof=false`、`ownerReleaseAcceptance=false`、`releaseProof=false`、`performsPublish=false` 和 `uploadsAssets=false`。

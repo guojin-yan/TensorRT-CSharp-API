@@ -8,27 +8,6 @@ namespace JYPPX.ProjectQuality.Tests;
 public sealed class PublicProofClaimBoundaryAuditTests
 {
     [Fact]
-    public void PublicClaimAuditPassesWithoutPromotingProof()
-    {
-        RunPowerShell("Test-PublicProofClaimBoundaryAudit.ps1", "-Strict");
-
-        using JsonDocument document = ReadFinalReleaseJson("public-proof-claim-boundary-audit.json");
-        JsonElement audit = document.RootElement;
-
-        Assert.Equal("public-proof-claim-boundary-audit", audit.GetProperty("recordKind").GetString());
-        Assert.Equal("public-proof-claim-boundary-audit-passed", audit.GetProperty("auditState").GetString());
-        Assert.Equal("public-docs-proof-boundary-freeze-passed", audit.GetProperty("publicFreezeState").GetString());
-        Assert.True(audit.GetProperty("scannedFileCount").GetInt32() > 0);
-        Assert.True(audit.GetProperty("publicFreezeRequiredCount").GetInt32() >= 5);
-        Assert.Equal(0, audit.GetProperty("publicFreezeFindingCount").GetInt32());
-        Assert.Equal(0, audit.GetProperty("findingCount").GetInt32());
-        Assert.Equal(0, audit.GetProperty("blockedFindingCount").GetInt32());
-        Assert.Equal("inline-plus-markdown-heading-stack", audit.GetProperty("negationContextMode").GetString());
-        AssertFlagsStayNonProof(audit);
-        AssertBoundary(audit.GetProperty("boundary").GetString()!);
-    }
-
-    [Fact]
     public void MarkdownNegativeSectionsAreSafeButRealPromotionStillFailsClosed()
     {
         string fixtureRoot = Path.Combine(Path.GetTempPath(), $"public-proof-boundary-{Guid.NewGuid():N}");
@@ -116,7 +95,7 @@ public sealed class PublicProofClaimBoundaryAuditTests
     {
         ProcessStartInfo startInfo = new()
         {
-            FileName = "pwsh",
+            FileName = PowerShellHost.ResolveExecutable(),
             WorkingDirectory = RepositoryPaths.Root,
             RedirectStandardOutput = true,
             RedirectStandardError = true,

@@ -8,9 +8,9 @@ namespace JYPPX.ProjectQuality.Tests;
 public sealed class ManagedRuntimeRefitterDiagnosticSummarySourceLayoutTests
 {
     private const string RuntimeOriginalNormalizedSha256 =
-        "436e702ad3182c377999a01358d18e5eb6a6b2b57b3497e3d332344fa3eb65dc";
+        "1ffb80facdd0e2f9c61a3c480189c2cad7e3ce5bc4c2636f5dd757e933533206";
     private const string RefitterOriginalNormalizedSha256 =
-        "615ad27b6336d49c6313ff3bb9e60ade2f9445efc2362cfce7145cb32ca429bd";
+        "8f0fe9326b187f94dcb161b2940f715625ed01819dfac7b7db73e45bacd88e34";
 
     public static TheoryData<string, string, string[]> FileOwnersAndMethods => new()
     {
