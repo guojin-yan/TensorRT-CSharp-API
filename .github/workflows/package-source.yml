@@ -6,7 +6,7 @@ on:
       version:
         description: Source archive version (must start with 4.0.x)
         required: false
-        default: 4.0.0-preview.1
+        default: 4.0.0
         type: string
       owner_publish_approved:
         description: Explicit Owner approval for GitHub Release publication side effects
@@ -32,7 +32,7 @@ on:
     inputs:
       version:
         required: false
-        default: 4.0.0-preview.1
+        default: 4.0.0
         type: string
       owner_publish_approved:
         required: false

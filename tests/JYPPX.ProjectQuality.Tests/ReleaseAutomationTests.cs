@@ -44,7 +44,9 @@ public sealed class ReleaseAutomationTests
         Assert.Contains("runner_mode", runtimeLinux, StringComparison.Ordinal);
         Assert.Contains("fromJson(matrix.runsOnJson)", runtimeLinux, StringComparison.Ordinal);
         Assert.Contains("publish_runtime_to_nuget", releaseBundle, StringComparison.Ordinal);
-        Assert.Contains("publish_to_nuget=$PUBLISH_RUNTIME_TO_NUGET", releaseBundle, StringComparison.Ordinal);
+        Assert.DoesNotContain("publish_to_nuget=$PUBLISH_RUNTIME_TO_NUGET", releaseBundle, StringComparison.Ordinal);
+        Assert.Contains("-f \"publish_to_nuget=false\"", releaseBundle, StringComparison.Ordinal);
+        Assert.Contains("Publish exact package set to nuget.org", releaseBundle, StringComparison.Ordinal);
         Assert.Contains("runtime_delivery_mode == 'split'", runtimeWindows, StringComparison.Ordinal);
         Assert.Contains("runtime_delivery_mode == 'split'", runtimeLinux, StringComparison.Ordinal);
     }
@@ -55,13 +57,14 @@ public sealed class ReleaseAutomationTests
         string english = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "README.md"));
         string chinese = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "README.zh-CN.md"));
         string index = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "releases", "README.md"));
-        string details = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "releases", "4.0.0-preview.1.md"));
+        string details = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "releases", "4.0.0.md"));
 
-        Assert.Contains("## Latest Update: 4.0.0-preview.1", english, StringComparison.Ordinal);
-        Assert.Contains("## 本次更新：4.0.0-preview.1", chinese, StringComparison.Ordinal);
-        Assert.Contains("docs/releases/4.0.0-preview.1.md", english, StringComparison.Ordinal);
-        Assert.Contains("docs/releases/4.0.0-preview.1.md", chinese, StringComparison.Ordinal);
-        Assert.Contains("[4.0.0-preview.1](4.0.0-preview.1.md)", index, StringComparison.Ordinal);
+        Assert.Contains("## Latest Update: 4.0.0", english, StringComparison.Ordinal);
+        Assert.Contains("## 本次更新：4.0.0", chinese, StringComparison.Ordinal);
+        Assert.Contains("docs/releases/4.0.0.md", english, StringComparison.Ordinal);
+        Assert.Contains("docs/releases/4.0.0.md", chinese, StringComparison.Ordinal);
+        Assert.Contains("[4.0.0](4.0.0.md)", index, StringComparison.Ordinal);
+        Assert.Contains("正式公开包集合固定为 19 个包", details, StringComparison.Ordinal);
         Assert.Contains("## 兼容性与环境要求", details, StringComparison.Ordinal);
         Assert.Contains("## 验证范围与已知限制", details, StringComparison.Ordinal);
         Assert.Contains("不包含 CUDA、cuDNN、TensorRT 或 NVRTC", details, StringComparison.Ordinal);
@@ -78,10 +81,15 @@ public sealed class ReleaseAutomationTests
         Assert.Contains("[ \"$PUBLISH_RUNTIME_TO_NUGET\" = \"true\" ]", releaseBundle, StringComparison.Ordinal);
         Assert.Contains("Publishing managed or Bridge packages to nuget.org requires the repository secret NUGET_API_KEY", releaseBundle, StringComparison.Ordinal);
         Assert.Equal(
-            5,
+            6,
             System.Text.RegularExpressions.Regex.Matches(
                 releaseBundle,
                 "owner_publish_approved=\\$OWNER_PUBLISH_APPROVED").Count);
+        Assert.Contains("nuget.org publication must include both the managed package and all Bridge packages", releaseBundle, StringComparison.Ordinal);
+        Assert.Contains("GitHub Packages publication must include both the managed package and all Bridge packages", releaseBundle, StringComparison.Ordinal);
+        Assert.Contains("Formal package publication requires all 6 Windows, 9 hosted Linux, and 3 Ubuntu 20.04 hosted-container Bridge lanes", releaseBundle, StringComparison.Ordinal);
+        Assert.Contains("publish_to_github_packages=false", releaseBundle, StringComparison.Ordinal);
+        Assert.DoesNotContain("Publish-ReleaseNuGetAssetsToGitHubPackages.ps1", releaseBundle, StringComparison.Ordinal);
 
         foreach (string workflow in new[] { runtimeWindows, runtimeLinux })
         {
@@ -100,6 +108,7 @@ public sealed class ReleaseAutomationTests
         string packageManaged = File.ReadAllText(Path.Combine(RepositoryPaths.Root, ".github", "workflows", "package-managed.yml"));
         string packageSource = File.ReadAllText(Path.Combine(RepositoryPaths.Root, ".github", "workflows", "package-source.yml"));
         string releaseBundle = File.ReadAllText(Path.Combine(RepositoryPaths.Root, ".github", "workflows", "release-bundle.yml"));
+        string docsRelease = File.ReadAllText(Path.Combine(RepositoryPaths.Root, ".github", "workflows", "docs-release.yml"));
         string[] runtimeWorkflows =
         [
             File.ReadAllText(Path.Combine(RepositoryPaths.Root, ".github", "workflows", "runtime-windows.yml")),
@@ -109,6 +118,7 @@ public sealed class ReleaseAutomationTests
         Assert.True(System.Text.RegularExpressions.Regex.Matches(packageManaged, "name: production-release").Count == 3);
         Assert.True(System.Text.RegularExpressions.Regex.Matches(packageSource, "name: production-release").Count == 1);
         Assert.True(System.Text.RegularExpressions.Regex.Matches(releaseBundle, "name: production-release").Count == 1);
+        Assert.True(System.Text.RegularExpressions.Regex.Matches(docsRelease, "name: production-release").Count == 1);
         Assert.DoesNotContain(
             "name: production-release",
             packageManaged[..packageManaged.IndexOf("  attach-github-release:", StringComparison.Ordinal)],
@@ -118,6 +128,10 @@ public sealed class ReleaseAutomationTests
         Assert.Contains("PRODUCTION_RELEASE_READY", packageSource, StringComparison.Ordinal);
         Assert.Contains("Test-ProductionReleaseEnvironment.ps1", releaseBundle, StringComparison.Ordinal);
         Assert.Contains("PRODUCTION_RELEASE_READY", releaseBundle, StringComparison.Ordinal);
+        Assert.Contains("inputs.owner_publish_approved && github.repository_owner == 'guojin-yan'", docsRelease, StringComparison.Ordinal);
+        Assert.Contains("Test-ProductionReleaseEnvironment.ps1", docsRelease, StringComparison.Ordinal);
+        Assert.Contains("PRODUCTION_RELEASE_READY", docsRelease, StringComparison.Ordinal);
+        Assert.Contains("actions/deploy-pages", docsRelease, StringComparison.Ordinal);
 
         foreach (string workflow in runtimeWorkflows)
         {
@@ -135,6 +149,28 @@ public sealed class ReleaseAutomationTests
         string environmentGate = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "eng", "Test-ProductionReleaseEnvironment.ps1"));
         Assert.Contains("PRODUCTION_RELEASE_READY", environmentGate, StringComparison.Ordinal);
         Assert.Contains("production-release Environment is not configured", environmentGate, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ReleaseBundlePublishesOneValidatedStablePayloadFromTheCurrentCommit()
+    {
+        string workflow = File.ReadAllText(Path.Combine(RepositoryPaths.Root, ".github", "workflows", "release-bundle.yml"));
+
+        Assert.Contains("Formal release payload must contain exactly 19 NuGet packages: 1 managed package and 18 Bridge packages", workflow, StringComparison.Ordinal);
+        Assert.Contains("fixed 6 Windows + 12 Linux runtime manifest", workflow, StringComparison.Ordinal);
+        Assert.Contains("TensorRtSharp4.0-source-$RELEASE_VERSION.zip", workflow, StringComparison.Ordinal);
+        Assert.Contains(".commit == $commit", workflow, StringComparison.Ordinal);
+        Assert.Contains(".sha256 == $sha", workflow, StringComparison.Ordinal);
+        Assert.Contains("title=\"TensorRT-CSharp-API $RELEASE_VERSION\"", workflow, StringComparison.Ordinal);
+        Assert.Contains("notes_path=\"$GITHUB_WORKSPACE/docs/releases/$RELEASE_VERSION.md\"", workflow, StringComparison.Ordinal);
+        Assert.Contains("--target \"$GH_HEAD_SHA\"", workflow, StringComparison.Ordinal);
+        Assert.Contains("--draft", workflow, StringComparison.Ordinal);
+        Assert.Contains("draft:false", workflow, StringComparison.Ordinal);
+        Assert.Contains("prerelease:false", workflow, StringComparison.Ordinal);
+        Assert.Contains("gh api --method PATCH", workflow, StringComparison.Ordinal);
+        Assert.Contains("Stable GitHub Release requires exactly 20 assets", workflow, StringComparison.Ordinal);
+        Assert.Contains("tag_commit", workflow, StringComparison.Ordinal);
+        Assert.Contains("gh workflow run docs-release.yml", workflow, StringComparison.Ordinal);
     }
 
     [Fact]

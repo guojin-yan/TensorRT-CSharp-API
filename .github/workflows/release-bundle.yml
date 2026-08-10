@@ -6,7 +6,7 @@ on:
       version:
         description: Release version (must start with 4.0.x)
         required: false
-        default: 4.0.0-preview.1
+        default: 4.0.0
         type: string
       configuration:
         description: Build configuration
@@ -201,6 +201,23 @@ jobs:
           if ($hasPublicationSideEffect -and '${{ inputs.owner_publish_approved }}' -ne 'true') {
             throw "Release publication side effects require owner_publish_approved=true."
           }
+          $packagePublicationRequested = '${{ inputs.publish_managed_to_nuget }}' -eq 'true' -or
+            '${{ inputs.publish_managed_to_github_packages }}' -eq 'true' -or
+            '${{ inputs.publish_runtime_to_github_packages }}' -eq 'true' -or
+            '${{ inputs.publish_runtime_to_nuget }}' -eq 'true' -or
+            '${{ inputs.attach_runtime_to_github_release }}' -eq 'true'
+          if ('${{ inputs.publish_managed_to_nuget }}' -ne '${{ inputs.publish_runtime_to_nuget }}') {
+            throw "nuget.org publication must include both the managed package and all Bridge packages."
+          }
+          if ('${{ inputs.publish_managed_to_github_packages }}' -ne '${{ inputs.publish_runtime_to_github_packages }}') {
+            throw "GitHub Packages publication must include both the managed package and all Bridge packages."
+          }
+          if ($packagePublicationRequested -and (
+              '${{ inputs.run_windows_runtime_packaging }}' -ne 'true' -or
+              '${{ inputs.run_linux_runtime_packaging }}' -ne 'true' -or
+              '${{ inputs.run_linux_ubuntu20_runtime_packaging }}' -ne 'true')) {
+            throw "Formal package publication requires all 6 Windows, 9 hosted Linux, and 3 Ubuntu 20.04 hosted-container Bridge lanes."
+          }
           if ('${{ inputs.windows_split_package_roles }}'.Trim().ToLowerInvariant() -ne 'bridge' -or
               '${{ inputs.linux_split_package_roles }}'.Trim().ToLowerInvariant() -ne 'bridge') {
             throw "Windows and Linux split_package_roles must be 'bridge'. NVIDIA runtime package roles are retired."
@@ -210,6 +227,21 @@ jobs:
             '${{ inputs.linux_tensorrt_package_version }}'
           ) | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
           $releaseConfig = '${{ inputs.release_config_json }}' | ConvertFrom-Json
+          $runtimeVersion = '${{ inputs.runtime_version }}'.Trim()
+          if ($packagePublicationRequested -and
+              -not [string]::IsNullOrWhiteSpace($runtimeVersion) -and
+              $runtimeVersion -ne '${{ inputs.version }}') {
+            throw "Formal publication requires runtime_version to match version."
+          }
+          $bridgeVersionOverrides = @(
+            [string]$releaseConfig.windows_bridge_package_version,
+            [string]$releaseConfig.linux_bridge_package_version
+          ) | Where-Object {
+            -not [string]::IsNullOrWhiteSpace($_) -and $_ -ne '${{ inputs.version }}'
+          }
+          if ($packagePublicationRequested -and $bridgeVersionOverrides.Count -gt 0) {
+            throw "Formal publication requires all Bridge package versions to match version."
+          }
           $retiredConfigKeys = @($releaseConfig.PSObject.Properties.Name | Where-Object {
             $_ -match '(cuda_cudnn|tensorrt_package|meta_package|include_meta)'
           })
@@ -223,7 +255,7 @@ jobs:
           set -euo pipefail
 
           if { [ "$PUBLISH_MANAGED_TO_NUGET" = "true" ] || [ "$PUBLISH_RUNTIME_TO_NUGET" = "true" ]; } && [ "$HAS_NUGET_API_KEY" != "true" ]; then
-            echo "Publishing managed or Bridge packages to nuget.org requires the repository secret NUGET_API_KEY. Add a valid nuget.org API key secret before dispatching child workflows." >&2
+            echo "Publishing managed or Bridge packages to nuget.org requires the repository secret NUGET_API_KEY. Add a valid nuget.org API key secret before centralized publication." >&2
             exit 1
           fi
 
@@ -414,24 +446,20 @@ jobs:
             echo "Dispatched $run_label -> $run_url"
           }
 
-          if [ "$RUN_DOCS_RELEASE" = "true" ]; then
-            dispatch_workflow "docs-release"
-          fi
-
           dispatch_workflow "package-managed" \
             -f "version=$RELEASE_VERSION" \
             -f "configuration=$RELEASE_CONFIGURATION" \
             -f "owner_publish_approved=$OWNER_PUBLISH_APPROVED" \
-            -f "publish_to_nuget=$PUBLISH_MANAGED_TO_NUGET" \
-            -f "publish_to_github_packages=$PUBLISH_MANAGED_TO_GITHUB_PACKAGES" \
+            -f "publish_to_nuget=false" \
+            -f "publish_to_github_packages=false" \
             -f "release_tag=$RELEASE_TAG" \
-            -f "attach_to_github_release=$ATTACH_RUNTIME_TO_GITHUB_RELEASE"
+            -f "attach_to_github_release=false"
 
           dispatch_workflow "package-source" \
             -f "version=$RELEASE_VERSION" \
             -f "owner_publish_approved=$OWNER_PUBLISH_APPROVED" \
             -f "release_tag=$RELEASE_TAG" \
-            -f "attach_to_github_release=$ATTACH_RUNTIME_TO_GITHUB_RELEASE"
+            -f "attach_to_github_release=false"
 
           if [ "$RUN_WINDOWS_RUNTIME_PACKAGING" = "true" ]; then
             dispatch_workflow "runtime-windows" \
@@ -455,10 +483,10 @@ jobs:
               -f "skip_consumer_validation=$WINDOWS_SKIP_CONSUMER_VALIDATION" \
               -f "run_smoke=$RUN_WINDOWS_SMOKE" \
               -f "sign_consumer_output=$SIGN_WINDOWS_CONSUMER_OUTPUT" \
-              -f "publish_to_github_packages=$PUBLISH_RUNTIME_TO_GITHUB_PACKAGES" \
-              -f "publish_to_nuget=$PUBLISH_RUNTIME_TO_NUGET" \
+              -f "publish_to_github_packages=false" \
+              -f "publish_to_nuget=false" \
               -f "release_tag=$RELEASE_TAG" \
-              -f "attach_to_github_release=$ATTACH_RUNTIME_TO_GITHUB_RELEASE"
+              -f "attach_to_github_release=false"
           fi
 
           if [ "$RUN_LINUX_RUNTIME_PACKAGING" = "true" ]; then
@@ -484,10 +512,10 @@ jobs:
               -f "include_meta_package=$LINUX_INCLUDE_META_PACKAGE" \
               -f "skip_consumer_validation=$LINUX_SKIP_CONSUMER_VALIDATION" \
               -f "run_smoke=$RUN_LINUX_SMOKE" \
-              -f "publish_to_github_packages=$PUBLISH_RUNTIME_TO_GITHUB_PACKAGES" \
-              -f "publish_to_nuget=$PUBLISH_RUNTIME_TO_NUGET" \
+              -f "publish_to_github_packages=false" \
+              -f "publish_to_nuget=false" \
               -f "release_tag=$RELEASE_TAG" \
-              -f "attach_to_github_release=$ATTACH_RUNTIME_TO_GITHUB_RELEASE"
+              -f "attach_to_github_release=false"
           fi
 
           if [ "$RUN_LINUX_UBUNTU20_RUNTIME_PACKAGING" = "true" ]; then
@@ -513,10 +541,10 @@ jobs:
               -f "include_meta_package=$LINUX_INCLUDE_META_PACKAGE" \
               -f "skip_consumer_validation=$LINUX_SKIP_CONSUMER_VALIDATION" \
               -f "run_smoke=$RUN_LINUX_SMOKE" \
-              -f "publish_to_github_packages=$PUBLISH_RUNTIME_TO_GITHUB_PACKAGES" \
-              -f "publish_to_nuget=$PUBLISH_RUNTIME_TO_NUGET" \
+              -f "publish_to_github_packages=false" \
+              -f "publish_to_nuget=false" \
               -f "release_tag=$RELEASE_TAG" \
-              -f "attach_to_github_release=$ATTACH_RUNTIME_TO_GITHUB_RELEASE"
+              -f "attach_to_github_release=false"
           fi
 
           {
@@ -596,7 +624,7 @@ jobs:
           fi
 
       - name: Download package artifacts
-        if: ${{ inputs.attach_runtime_to_github_release }}
+        if: ${{ inputs.publish_managed_to_nuget || inputs.publish_managed_to_github_packages || inputs.publish_runtime_to_github_packages || inputs.publish_runtime_to_nuget || inputs.attach_runtime_to_github_release }}
         shell: bash
         run: |
           set -euo pipefail
@@ -609,26 +637,16 @@ jobs:
             run_id="$(jq -r '.id' <<<"$child")"
 
             case "$workflow_name" in
-              package-managed)
+              package-managed|package-source|runtime-windows|runtime-linux-hosted|runtime-linux-hosted-container-ubuntu20)
                 target_dir="$download_root/$workflow_name"
                 mkdir -p "$target_dir"
-                if ! gh run download "$run_id" --repo "$GH_REPO" --dir "$target_dir"; then
-                  echo "No downloadable artifacts for $workflow_name ($run_id)."
-                fi
+                gh run download "$run_id" --repo "$GH_REPO" --dir "$target_dir"
                 ;;
             esac
           done
 
-      - name: Validate downloaded release packages
-        if: ${{ inputs.attach_runtime_to_github_release }}
-        shell: pwsh
-        run: |
-          $downloadRoot = Join-Path $env:RUNNER_TEMP 'release-bundle-downloads'
-          pwsh -NoProfile -File .\eng\Test-ExternalVendorRuntimePackagePolicy.ps1 -PackagePath $downloadRoot
-          pwsh -NoProfile -File .\eng\Test-PublicationLicenseReadiness.ps1 -ArtifactPath $downloadRoot
-
-      - name: Create or update GitHub Release
-        if: ${{ inputs.attach_runtime_to_github_release }}
+      - name: Stage exact formal release payload
+        if: ${{ inputs.publish_managed_to_nuget || inputs.publish_managed_to_github_packages || inputs.publish_runtime_to_github_packages || inputs.publish_runtime_to_nuget || inputs.attach_runtime_to_github_release }}
         shell: bash
         run: |
           set -euo pipefail
@@ -637,18 +655,101 @@ jobs:
           staging_root="$RUNNER_TEMP/release-bundle-staging"
           mkdir -p "$staging_root"
 
-          while IFS= read -r -d '' package_file; do
-            cp -f "$package_file" "$staging_root/$(basename "$package_file")"
-          done < <(find "$download_root" -type f -name '*.nupkg' -print0)
+          stage_unique() {
+            local source_file="$1"
+            local target_file="$staging_root/$(basename "$source_file")"
+            if [ -f "$target_file" ]; then
+              if ! cmp -s "$source_file" "$target_file"; then
+                echo "Conflicting artifacts share the filename '$(basename "$source_file")'." >&2
+                exit 1
+              fi
+              return
+            fi
+            cp "$source_file" "$target_file"
+          }
 
-          mapfile -t files < <(find "$staging_root" -maxdepth 1 -type f -name '*.nupkg' | sort)
-          if [ "${#files[@]}" -eq 0 ]; then
-            echo "No nupkg artifacts were found after downloading child workflow artifacts." >&2
+          while IFS= read -r -d '' package_file; do
+            stage_unique "$package_file"
+          done < <(find "$download_root/package-managed" -type f -name '*.nupkg' -print0)
+
+          for runtime_dir in \
+            "$download_root/runtime-windows" \
+            "$download_root/runtime-linux-hosted" \
+            "$download_root/runtime-linux-hosted-container-ubuntu20"; do
+            while IFS= read -r -d '' package_file; do
+              package_name="$(basename "$package_file")"
+              if [[ "$package_name" == JYPPX.TensorRT.CSharp.API.Runtime.*.Bridge."$RELEASE_VERSION".nupkg ]]; then
+                stage_unique "$package_file"
+              elif [ "$package_name" != "JYPPX.TensorRT.CSharp.API.$RELEASE_VERSION.nupkg" ]; then
+                echo "Unexpected non-Bridge package in runtime artifacts: $package_name" >&2
+                exit 1
+              fi
+            done < <(find "$runtime_dir" -type f -name '*.nupkg' -print0)
+          done
+
+          while IFS= read -r -d '' source_file; do
+            stage_unique "$source_file"
+          done < <(find "$download_root/package-source" -type f -name '*.zip' -print0)
+
+          mapfile -t nupkg_files < <(find "$staging_root" -maxdepth 1 -type f -name '*.nupkg' | sort)
+          mapfile -t source_files < <(find "$staging_root" -maxdepth 1 -type f -name '*.zip' | sort)
+          managed_count=0
+          bridge_count=0
+          actual_bridge_names="$RUNNER_TEMP/release-bundle-actual-bridge-names.txt"
+          expected_bridge_names="$RUNNER_TEMP/release-bundle-expected-bridge-names.txt"
+          : > "$actual_bridge_names"
+          for package_file in "${nupkg_files[@]}"; do
+            package_name="$(basename "$package_file")"
+            if [ "$package_name" = "JYPPX.TensorRT.CSharp.API.$RELEASE_VERSION.nupkg" ]; then
+              managed_count=$((managed_count + 1))
+            elif [[ "$package_name" == JYPPX.TensorRT.CSharp.API.Runtime.*.Bridge."$RELEASE_VERSION".nupkg ]]; then
+              bridge_count=$((bridge_count + 1))
+              printf '%s\n' "$package_name" >> "$actual_bridge_names"
+            else
+              echo "Unexpected package in formal release payload: $package_name" >&2
+              exit 1
+            fi
+          done
+
+          jq -r --arg version "$RELEASE_VERSION" \
+            '.packages[] | select(.platform == "windows" or .platform == "linux") | "\(.packageId).Bridge.\($version).nupkg"' \
+            "$GITHUB_WORKSPACE/pack/runtime/runtime-packages.manifest.json" \
+            | sort > "$expected_bridge_names"
+          sort -o "$actual_bridge_names" "$actual_bridge_names"
+
+          expected_source="TensorRtSharp4.0-source-$RELEASE_VERSION.zip"
+          if [ "${#nupkg_files[@]}" -ne 19 ] || [ "$managed_count" -ne 1 ] || [ "$bridge_count" -ne 18 ]; then
+            echo "Formal release payload must contain exactly 19 NuGet packages: 1 managed package and 18 Bridge packages." >&2
+            exit 1
+          fi
+          if ! diff -u "$expected_bridge_names" "$actual_bridge_names"; then
+            echo "Bridge package inventory does not match the fixed 6 Windows + 12 Linux runtime manifest." >&2
+            exit 1
+          fi
+          if [ "${#source_files[@]}" -ne 1 ] || [ "$(basename "${source_files[0]}")" != "$expected_source" ]; then
+            echo "Formal release payload must contain exactly one source archive named '$expected_source'." >&2
             exit 1
           fi
 
+          source_metadata="$download_root/package-source/source-package/TensorRtSharp4.0-source-$RELEASE_VERSION.json"
+          if [ ! -f "$source_metadata" ]; then
+            source_metadata="$(find "$download_root/package-source" -type f -name "TensorRtSharp4.0-source-$RELEASE_VERSION.json" -print -quit)"
+          fi
+          if [ -z "$source_metadata" ] || [ ! -f "$source_metadata" ]; then
+            echo "Source archive metadata was not downloaded." >&2
+            exit 1
+          fi
+          source_sha="$(sha256sum "${source_files[0]}" | awk '{print $1}')"
+          jq -e \
+            --arg version "$RELEASE_VERSION" \
+            --arg commit "$GH_HEAD_SHA" \
+            --arg archive "$expected_source" \
+            --arg sha "$source_sha" \
+            '.version == $version and .commit == $commit and .archiveName == $archive and .sha256 == $sha and .trackedFilesOnly == true and .vendorRuntimeBinaryCount == 0' \
+            "$source_metadata" >/dev/null
+
           limit=$((2 * 1024 * 1024 * 1024))
-          for file in "${files[@]}"; do
+          for file in "${nupkg_files[@]}" "${source_files[@]}"; do
             size="$(stat -c %s "$file")"
             if [ "$size" -ge "$limit" ]; then
               echo "Release asset '$file' is too large for GitHub Releases (must be under 2 GiB)." >&2
@@ -656,31 +757,134 @@ jobs:
             fi
           done
 
+          printf 'Validated formal release payload: %s managed + %s Bridge + %s source archive.\n' \
+            "$managed_count" "$bridge_count" "${#source_files[@]}"
+
+      - name: Validate staged release licenses and vendor boundary
+        if: ${{ inputs.publish_managed_to_nuget || inputs.publish_managed_to_github_packages || inputs.publish_runtime_to_github_packages || inputs.publish_runtime_to_nuget || inputs.attach_runtime_to_github_release }}
+        shell: pwsh
+        run: |
+          $stagingRoot = Join-Path $env:RUNNER_TEMP 'release-bundle-staging'
+          pwsh -NoProfile -File .\eng\Test-ExternalVendorRuntimePackagePolicy.ps1 -PackagePath $stagingRoot
+          pwsh -NoProfile -File .\eng\Test-PublicationLicenseReadiness.ps1 -ArtifactPath $stagingRoot
+
+      - name: Publish exact package set to GitHub Packages
+        if: ${{ inputs.publish_managed_to_github_packages && inputs.publish_runtime_to_github_packages }}
+        shell: pwsh
+        env:
+          GITHUB_PACKAGES_TOKEN: ${{ github.token }}
+        run: |
+          $stagingRoot = Join-Path $env:RUNNER_TEMP 'release-bundle-staging'
+          pwsh -NoProfile -File .\eng\Push-NuGetPackages.ps1 `
+            -PackageRoot $stagingRoot `
+            -Source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" `
+            -ApiKeyEnvironmentVariable GITHUB_PACKAGES_TOKEN `
+            -TimeoutSeconds 1800 `
+            -MaxAttempts 3 `
+            -RetryDelaySeconds 15
+
+      - name: Publish exact package set to nuget.org
+        if: ${{ inputs.publish_managed_to_nuget && inputs.publish_runtime_to_nuget }}
+        shell: pwsh
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: |
+          $stagingRoot = Join-Path $env:RUNNER_TEMP 'release-bundle-staging'
+          pwsh -NoProfile -File .\eng\Test-PublishPrerequisites.ps1 `
+            -Target nuget.org `
+            -ApiKey $env:NUGET_API_KEY
+          pwsh -NoProfile -File .\eng\Push-NuGetPackages.ps1 `
+            -PackageRoot $stagingRoot `
+            -Source https://api.nuget.org/v3/index.json `
+            -ApiKeyEnvironmentVariable NUGET_API_KEY `
+            -TimeoutSeconds 1800 `
+            -MaxAttempts 2 `
+            -RetryDelaySeconds 15
+
+      - name: Create Stable public GitHub Release
+        if: ${{ inputs.attach_runtime_to_github_release }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          staging_root="$RUNNER_TEMP/release-bundle-staging"
           tag="v$RELEASE_VERSION"
-          title="$tag"
-          notes="Automated release for $tag"
+          title="TensorRT-CSharp-API $RELEASE_VERSION"
+          notes_path="$GITHUB_WORKSPACE/docs/releases/$RELEASE_VERSION.md"
+          if [ ! -f "$notes_path" ]; then
+            echo "Release notes do not exist: $notes_path" >&2
+            exit 1
+          fi
+
+          mapfile -t files < <(find "$staging_root" -maxdepth 1 -type f \( -name '*.nupkg' -o -name '*.zip' \) | sort)
+          if [ "${#files[@]}" -ne 20 ]; then
+            echo "Stable GitHub Release requires exactly 20 assets: 19 NuGet packages and 1 source archive." >&2
+            exit 1
+          fi
 
           if ! gh release view "$tag" --repo "$GH_REPO" >/dev/null 2>&1; then
-            release_args=(release create "$tag" --title "$title" --notes "$notes" --repo "$GH_REPO")
-            if [[ "$tag" == *-* ]]; then
-              release_args+=(--prerelease)
-            fi
-            if ! gh "${release_args[@]}"; then
+            if ! gh release create "$tag" \
+              --target "$GH_HEAD_SHA" \
+              --title "$title" \
+              --notes-file "$notes_path" \
+              --draft \
+              --repo "$GH_REPO"; then
               gh release view "$tag" --repo "$GH_REPO" >/dev/null 2>&1
             fi
           fi
 
+          tag_commit="$(gh api "repos/$GH_REPO/commits/$tag" --jq '.sha')"
+          if [ "$tag_commit" != "$GH_HEAD_SHA" ]; then
+            echo "Release tag '$tag' resolves to '$tag_commit', expected '$GH_HEAD_SHA'." >&2
+            exit 1
+          fi
+
           gh release upload "$tag" "${files[@]}" --clobber --repo "$GH_REPO"
 
-      - name: Backfill release nupkg assets to GitHub Packages
-        if: ${{ inputs.attach_runtime_to_github_release && inputs.publish_runtime_to_github_packages }}
-        shell: pwsh
-        env:
-          GH_TOKEN: ${{ github.token }}
-          GITHUB_PACKAGES_TOKEN: ${{ github.token }}
+          release_id="$(gh api "repos/$GH_REPO/releases/tags/$tag" --jq '.id')"
+          jq -n \
+            --arg name "$title" \
+            --rawfile body "$notes_path" \
+            '{name:$name,body:$body,draft:false,prerelease:false}' \
+            | gh api --method PATCH "repos/$GH_REPO/releases/$release_id" --input - >/dev/null
+
+          gh api "repos/$GH_REPO/releases/tags/$tag" \
+            | jq -e \
+              --arg tag "$tag" \
+              --arg title "$title" \
+              'select(.tag_name == $tag and .name == $title and .draft == false and .prerelease == false)' \
+              >/dev/null
+
+      - name: Dispatch and wait for API docs release
+        if: ${{ inputs.run_docs_release }}
+        shell: bash
         run: |
-          pwsh -NoProfile -File .\eng\Publish-ReleaseNuGetAssetsToGitHubPackages.ps1 `
-            -ReleaseTag "v$env:RELEASE_VERSION" `
-            -Repository "$env:GH_REPO" `
-            -AssetPattern "*.nupkg" `
-            -PackageTokenEnvironmentVariable GITHUB_PACKAGES_TOKEN
+          set -euo pipefail
+
+          start_time="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+          gh workflow run docs-release.yml \
+            --repo "$GH_REPO" \
+            --ref "$GH_REF_NAME" \
+            -f "owner_publish_approved=$OWNER_PUBLISH_APPROVED"
+
+          run_id=""
+          for attempt in $(seq 1 60); do
+            run_id="$(gh run list \
+              --repo "$GH_REPO" \
+              --workflow docs-release.yml \
+              --branch "$GH_REF_NAME" \
+              --event workflow_dispatch \
+              --json databaseId,createdAt,headSha \
+              --jq 'map(select(.headSha == "'"$GH_HEAD_SHA"'" and .createdAt >= "'"$start_time"'")) | sort_by(.createdAt) | reverse | .[0].databaseId // empty')"
+            if [ -n "$run_id" ]; then
+              break
+            fi
+            sleep 5
+          done
+
+          if [ -z "$run_id" ]; then
+            echo "Unable to locate the dispatched docs-release run." >&2
+            exit 1
+          fi
+
+          gh run watch "$run_id" --repo "$GH_REPO" --exit-status

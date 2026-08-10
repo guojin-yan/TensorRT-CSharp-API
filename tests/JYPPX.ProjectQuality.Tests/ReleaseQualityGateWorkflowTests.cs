@@ -16,7 +16,7 @@ public sealed class ReleaseQualityGateWorkflowTests
         Assert.Contains("workflow_dispatch:", workflow, StringComparison.Ordinal);
         Assert.DoesNotContain("push:", workflow, StringComparison.Ordinal);
         Assert.DoesNotContain("pull_request:", workflow, StringComparison.Ordinal);
-        Assert.Contains("default: 4.0.0-preview.1", workflow, StringComparison.Ordinal);
+        Assert.Contains("default: 4.0.0", workflow, StringComparison.Ordinal);
         Assert.Contains("source-quality:", workflow, StringComparison.Ordinal);
         Assert.Contains("run_release_artifact_audit", workflow, StringComparison.Ordinal);
         Assert.Contains("run_split_package_build", workflow, StringComparison.Ordinal);

@@ -49,13 +49,13 @@ CUDA、cuDNN、TensorRT 和 NVRTC 由使用者自行安装。仓库不重新分�
 - NuGet 包固定使用 nuget/logo.jpg，并嵌入当前英文 README。
 - 许可证为 Apache-2.0。
 
-## 本次更新：4.0.0-preview.1
+## 本次更新：4.0.0
 
-- 确立 `JYPPX.TensorRtSharp` 与 `JYPPX.CudaSharp` 顶层命名空间，并提供首个预览版托管 API。
-- 提供托管包和按版本区分的 Windows/Linux bridge-only 包，CUDA、cuDNN、TensorRT 仍由用户自行安装。
-- 补充演示模型的可复现获取与 ONNX 转换记录，模型二进制继续保存在 Git 仓库外。
+- 固定 `JYPPX.TensorRtSharp` 与 `JYPPX.CudaSharp` 顶层命名空间及 4.0 托管 API。
+- 发布 1 个托管包、6 个 Windows Bridge 包和 12 个 Linux Bridge 包，匹配的 NVIDIA 运行时仍由用户自行安装。
+- CUDA、cuDNN、TensorRT、NVRTC、样例应用和模型二进制均不进入 NuGet 包。
 
-查看 [4.0.0-preview.1 详细说明](docs/releases/4.0.0-preview.1.md)，或浏览 [全部版本列表](docs/releases/README.md)。
+查看 [4.0.0 详细说明](docs/releases/4.0.0.md)，或浏览 [全部版本列表](docs/releases/README.md)。
 
 ## 30 秒开始
 

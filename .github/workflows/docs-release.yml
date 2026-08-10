@@ -2,6 +2,12 @@ name: docs-release
 
 on:
   workflow_dispatch:
+    inputs:
+      owner_publish_approved:
+        description: Explicit Owner approval for API documentation deployment
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -10,10 +16,19 @@ permissions:
 
 jobs:
   build:
+    if: ${{ inputs.owner_publish_approved && github.repository_owner == 'guojin-yan' }}
     runs-on: windows-latest
+    environment:
+      name: production-release
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+
+      - name: Validate production release Environment readiness
+        shell: pwsh
+        env:
+          PRODUCTION_RELEASE_READY: ${{ secrets.PRODUCTION_RELEASE_READY }}
+        run: pwsh -NoProfile -File .\eng\Test-ProductionReleaseEnvironment.ps1 -ReadyMarker $env:PRODUCTION_RELEASE_READY
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v5

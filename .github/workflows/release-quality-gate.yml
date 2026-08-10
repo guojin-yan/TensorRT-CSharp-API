@@ -6,7 +6,7 @@ on:
       candidate_version:
         description: Candidate package version used by optional pack jobs
         required: false
-        default: 4.0.0-preview.1
+        default: 4.0.0
         type: string
       runtime_package_key:
         description: Runtime key used by optional package gates
