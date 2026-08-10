@@ -113,6 +113,11 @@ public sealed class ReleaseAutomationTests
             "name: production-release",
             packageManaged[..packageManaged.IndexOf("  attach-github-release:", StringComparison.Ordinal)],
             StringComparison.Ordinal);
+        Assert.Equal(9, System.Text.RegularExpressions.Regex.Matches(packageManaged, "PRODUCTION_RELEASE_READY").Count);
+        Assert.Contains("Test-ProductionReleaseEnvironment.ps1", packageSource, StringComparison.Ordinal);
+        Assert.Contains("PRODUCTION_RELEASE_READY", packageSource, StringComparison.Ordinal);
+        Assert.Contains("Test-ProductionReleaseEnvironment.ps1", releaseBundle, StringComparison.Ordinal);
+        Assert.Contains("PRODUCTION_RELEASE_READY", releaseBundle, StringComparison.Ordinal);
 
         foreach (string workflow in runtimeWorkflows)
         {
@@ -123,7 +128,13 @@ public sealed class ReleaseAutomationTests
             Assert.Contains("name: production-release", workflow[publishJobIndex..], StringComparison.Ordinal);
             Assert.Contains("inputs.publish_to_nuget || inputs.publish_to_github_packages", workflow[publishJobIndex..], StringComparison.Ordinal);
             Assert.DoesNotContain("secrets.NUGET_API_KEY", workflow[..publishJobIndex], StringComparison.Ordinal);
+            Assert.Contains("Test-ProductionReleaseEnvironment.ps1", workflow[publishJobIndex..], StringComparison.Ordinal);
+            Assert.Contains("PRODUCTION_RELEASE_READY", workflow[publishJobIndex..], StringComparison.Ordinal);
         }
+
+        string environmentGate = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "eng", "Test-ProductionReleaseEnvironment.ps1"));
+        Assert.Contains("PRODUCTION_RELEASE_READY", environmentGate, StringComparison.Ordinal);
+        Assert.Contains("production-release Environment is not configured", environmentGate, StringComparison.Ordinal);
     }
 
     [Fact]

@@ -678,6 +678,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Validate production release Environment readiness
+        shell: pwsh
+        env:
+          PRODUCTION_RELEASE_READY: ${{ secrets.PRODUCTION_RELEASE_READY }}
+        run: pwsh -NoProfile -File .\eng\Test-ProductionReleaseEnvironment.ps1 -ReadyMarker $env:PRODUCTION_RELEASE_READY
+
       - name: Download Windows bridge artifacts
         uses: actions/download-artifact@v8
         with:
