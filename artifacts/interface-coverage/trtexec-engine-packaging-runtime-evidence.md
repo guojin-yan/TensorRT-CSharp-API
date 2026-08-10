@@ -7,6 +7,7 @@
 - TRT10 weighted model streamable bytes: `35829504`
 - TRT10 50% budget/readback/scratch: `17914752` / `17914752` / `5901824`
 - TRT10 load-engine automatic budget: `35829504`; readback `True`
-- TRT11: `dependency-probe-only`; structured exception `3228369022`
+- TRT11 refit/reload: `external-onnx-refit-reload-reference-validated-runtime`; parser load, engine commit, persistence, reload, enqueue, and zero-mismatch reference comparison passed
+- TRT11 historical probe: `dependency-probe-only`; structured exception `3228369022` retained as immutable 2026-07-22 environment evidence
 
-This is local builder/engine policy and weighted-model enqueue evidence. It is not model accuracy, cross-version lean-runtime, stripped-plan refit lifecycle, package-consumer, post-publish, or public release proof.
+This is local builder/engine policy, weighted-model enqueue, and TRT11 stripped-plan refit lifecycle evidence. It is not model accuracy, cross-version lean-runtime, package-consumer, post-publish, or public release proof.

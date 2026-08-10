@@ -51,6 +51,30 @@ public sealed class NativeVendorBoundaryGuardTests
     }
 
     [Fact]
+    public void TensorRt8OnnxParserCreationConvertsVendorExceptionsBeforeCreatingOwnerHandle()
+    {
+        string source = ReadSource("native", "src", "tensorrt", "v8", "modules", "parser", "parser_inspector.inc");
+
+        Assert.Contains("JYPPX_StatusCode create_onnx_parser_with_seh_guard", source);
+        Assert.Contains("JYPPX_StatusCode create_onnx_parser_with_guard", source);
+        Assert.Contains("__except (jyppx::tensorrt::capture_vendor_seh_exception_code", source);
+        Assert.Contains("report_vendor_seh_exception(kLine, \"ONNX parser creation\"", source);
+        Assert.Contains("catch (const std::exception& exception)", source);
+        Assert.Contains("report_vendor_exception(kLine, \"ONNX parser creation\"", source);
+        Assert.Contains("*out_parser = nullptr;", source);
+        Assert.Contains("status = create_onnx_parser_with_guard(*network_payload, *logger_payload, &parser);", source);
+        Assert.DoesNotContain("ONNX parser creation is disabled on Windows", source);
+
+        string publicCreate = ExtractBetween(
+            source,
+            "JYPPX_StatusCode jyppx_trt8_onnx_parser_create",
+            "JYPPX_StatusCode jyppx_trt8_onnx_parser_parse_from_file");
+        Assert.Contains("create_onnx_parser_with_guard", publicCreate);
+        Assert.Contains("create_handle_with_payload", publicCreate);
+        Assert.DoesNotContain("nvonnxparser::createParser(*network_payload, *logger_payload)", publicCreate);
+    }
+
+    [Fact]
     public void GlobalPluginRegistryReadOnlyProbeConvertsNativeExceptionsToStatusCodes()
     {
         string source = ReadSource("native", "src", "tensorrt", "common", "global_runtime_plugin_probe.inc");

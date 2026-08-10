@@ -194,14 +194,14 @@ dotnet .\applications\OnnxToEngine\bin\Debug\net8.0\OnnxToEngine.dll `
 
 | 行为 | TRT8 | TRT10 | TRT11 |
 | --- | --- | --- | --- |
-| version compatible | applied/readback | applied/readback | vendor API 存在；本机 runtime blocker 前未到达 build |
-| exclude lean runtime | applied/readback | applied/readback | vendor API 存在；本机 runtime blocker 前未到达 build |
-| refit 单独使用 | applied/readback | applied/readback + engine readback | vendor API 存在 |
-| version compatible + refit | vendor readback conflict，refit parse-only | applied/readback | 本机 dependency-probe-only |
-| strip weights | parse-only | `StripPlan + RefitIdentical/Refit` | vendor API 存在 |
-| weight streaming | parse-only | builder + engine budget readback | vendor API 存在 |
+| version compatible | applied/readback | applied/readback | 本次未请求，仍需单独验证 |
+| exclude lean runtime | applied/readback | applied/readback | 本次未请求，仍需单独验证 |
+| refit 单独使用 | applied/readback | applied/readback + engine readback | applied/readback + parser load + engine commit |
+| version compatible + refit | vendor readback conflict，refit parse-only | applied/readback | 本次未请求，不能由 refit-only 结果代替 |
+| strip weights | parse-only | `StripPlan + RefitIdentical/Refit` | `StripPlan + Refit` applied/readback |
+| weight streaming | parse-only | builder + engine budget readback | 本次未请求，仍需单独验证 |
 
-TRT11 当前主机在 runtime creation 遇到已知 structured exception `3228369022`，所以报告保持 `dependency-probe-only`。不能用 header、enum mapping 或 capability probe 代替真实 builder/runtime 结果。
+TRT11 当前主机已经完成 stripped-plan build、parser-refitter load、engine commit、`ExcludeWeights` clear/readback、原 owner dispose、full-weight plan reload、独立进程 reload、enqueue 和 10 值零 mismatch reference comparison。2026-07-22 的 structured exception `3228369022` 记录继续作为 historical dependency probe 保留；它不能覆盖 2026-08-10 的新结果，也不能被删除。上述结果仍不代表 TRT11 version-compatible、lean runtime 或 weight streaming 已验证。
 
 ## 10. 证据生成与严格验证
 
@@ -225,7 +225,7 @@ artifacts/interface-coverage/trtexec-engine-packaging-runtime-evidence-validatio
 artifacts/interface-coverage/trtexec-engine-packaging-runtime-evidence-validation.md
 ```
 
-本次 strict 结果为 `20 checks / 0 failures`。
+本次 strict 结果为 `21 checks / 0 failures`。
 
 ## 11. 常见错误
 
@@ -245,7 +245,7 @@ artifacts/interface-coverage/trtexec-engine-packaging-runtime-evidence-validatio
 - builder flag 使用稳定 logical enum 到 TRT8/10/11 raw index 的映射。
 - TRT10 version-compatible/refit plan 可 round-trip 并输出匹配。
 - TRT10 对真实 YOLOX-S 权重得到非零 budget/scratch readback并完成 enqueue。
-- TRT8 和 TRT11 不支持或环境阻塞的路径没有被伪装成 applied。
+- TRT8 不支持的路径，以及 TRT11 本次没有请求的 version-compatible、lean runtime 和 weight streaming 路径，没有被伪装成 applied。
 
 本批没有证明：
 

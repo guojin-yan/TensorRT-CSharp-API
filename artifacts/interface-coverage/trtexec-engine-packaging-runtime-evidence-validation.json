@@ -1,7 +1,7 @@
 {
   "schemaVersion": "trtexec-engine-packaging-runtime-evidence-validation.v1",
   "validationState": "passed",
-  "checkCount": 20,
+  "checkCount": 21,
   "failureCount": 0,
   "checks": [
     {
@@ -95,9 +95,14 @@
       "detail": "Load-engine bounded runtime executed"
     },
     {
-      "name": "trt11-dependency-boundary",
+      "name": "trt11-refit-runtime",
       "passed": true,
-      "detail": "TRT11 known structured exception remains dependency-only"
+      "detail": "TRT11 stripped-plan refit, persistence, reload, and reference validation"
+    },
+    {
+      "name": "trt11-historical-probe-retained",
+      "passed": true,
+      "detail": "Historical TRT11 dependency probe remains immutable"
     },
     {
       "name": "proof-boundary",

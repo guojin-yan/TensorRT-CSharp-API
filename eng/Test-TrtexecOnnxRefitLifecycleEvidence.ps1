@@ -14,6 +14,19 @@ function Add-Check([string]$Id, [bool]$Passed, [string]$Actual) {
   $checks.Add([pscustomobject]@{ id = $Id; passed = $Passed; actual = $Actual })
 }
 
+function Read-Record([string]$RelativePath) {
+  return Get-Content -LiteralPath (Join-Path $root $RelativePath) -Raw | ConvertFrom-Json
+}
+
+function Get-RecordSha256([string]$RelativePath) {
+  return (Get-FileHash -LiteralPath (Join-Path $root $RelativePath) -Algorithm SHA256).Hash.ToLowerInvariant()
+}
+
+$trt11 = $evidence.tensorRt11
+$trt11Report = Read-Record $trt11.reportPath
+$trt11Output = Read-Record $trt11.outputPath
+$trt11Validation = Read-Record $trt11.strictValidationPath
+
 Add-Check "schema" ($evidence.schemaVersion -eq "trtexec-onnx-refit-lifecycle-evidence.v1") ([string]$evidence.schemaVersion)
 Add-Check "contract-requires-onnx" (@($evidence.contract.requires) -contains "--onnx") (@($evidence.contract.requires) -join ",")
 Add-Check "contract-requires-strip" (@($evidence.contract.requires) -contains "--stripWeights") (@($evidence.contract.requires) -join ",")
@@ -32,10 +45,21 @@ Add-Check "trt10-inference" ([bool]$evidence.tensorRt10.inferenceRan) ([string]$
 Add-Check "trt10-output-shape" ([int]$evidence.tensorRt10.outputElementCount -eq 10 -and [int]$evidence.tensorRt10.outputByteLength -eq 40) "$($evidence.tensorRt10.outputElementCount)/$($evidence.tensorRt10.outputByteLength)"
 Add-Check "trt10-output-match" ([bool]$evidence.tensorRt10.outputExactMatch -and $evidence.tensorRt10.refitOutputSha256 -eq $evidence.tensorRt10.baselineOutputSha256) ([string]$evidence.tensorRt10.refitOutputSha256)
 Add-Check "trt8-precheck" ($evidence.tensorRt8.state -eq "dry-run-precheck" -and [bool]$evidence.tensorRt8.refitFromOnnxParseOnly) "$($evidence.tensorRt8.state)/$($evidence.tensorRt8.refitFromOnnxParseOnly)"
-Add-Check "trt11-dependency" ($evidence.tensorRt11.state -eq "dependency-probe-only" -and [bool]$evidence.tensorRt11.refitFromOnnxParseOnly) "$($evidence.tensorRt11.state)/$($evidence.tensorRt11.refitFromOnnxParseOnly)"
+Add-Check "trt11-report-hash" ((Get-RecordSha256 $trt11.reportPath) -eq $trt11.reportSha256) (Get-RecordSha256 $trt11.reportPath)
+Add-Check "trt11-output-artifact-hash" ((Get-RecordSha256 $trt11.outputPath) -eq $trt11.outputArtifactSha256) (Get-RecordSha256 $trt11.outputPath)
+Add-Check "trt11-strict-validation-hash" ((Get-RecordSha256 $trt11.strictValidationPath) -eq $trt11.strictValidationSha256) (Get-RecordSha256 $trt11.strictValidationPath)
+Add-Check "trt11-state" ($trt11Report.State -eq "external-onnx-refit-reload-reference-validated-runtime" -and [bool]$trt11Report.Success -and -not [bool]$trt11Report.Skipped) "$($trt11Report.State)/$($trt11Report.Success)/$($trt11Report.Skipped)"
+Add-Check "trt11-options-applied" (@($trt11Report.OptionImplementationStatus.AppliedOptions) -contains "--refitFromOnnx" -and @($trt11Report.OptionImplementationStatus.AppliedOptions) -contains "--saveRefittedEngine") (@($trt11Report.OptionImplementationStatus.AppliedOptions) -join ",")
+Add-Check "trt11-refit-gates" ([bool]$trt11Report.RefitSnapshot.Succeeded -and [bool]$trt11Report.RefitSnapshot.ParserRefitReturned -and [bool]$trt11Report.RefitSnapshot.EngineRefitReturned -and [bool]$trt11Report.RefitSnapshot.EngineRefittableBefore -and [bool]$trt11Report.RefitSnapshot.EngineRefittableAfter -and [bool]$trt11Report.RefitSnapshot.ContextCreationAllowed) "$($trt11Report.RefitSnapshot.State)/$($trt11Report.RefitSnapshot.ContextCreationAllowed)"
+Add-Check "trt11-refit-inventory" (@($trt11Report.RefitSnapshot.MissingWeightsAfter).Count -eq 0 -and @($trt11Report.RefitSnapshot.AllWeightsAfter).Count -eq 6 -and [int]$trt11Report.RefitSnapshot.ParserErrorCount -eq 0) "$(@($trt11Report.RefitSnapshot.MissingWeightsAfter).Count)/$(@($trt11Report.RefitSnapshot.AllWeightsAfter).Count)/$($trt11Report.RefitSnapshot.ParserErrorCount)"
+Add-Check "trt11-model-hash" ([long]$trt11Report.RefitSnapshot.SourceLengthBytes -eq [long]$trt11.modelLengthBytes -and $trt11Report.RefitSnapshot.SourceSha256 -eq $trt11.modelSha256) "$($trt11Report.RefitSnapshot.SourceLengthBytes)/$($trt11Report.RefitSnapshot.SourceSha256)"
+Add-Check "trt11-runtime-output" ([bool]$trt11Report.InferenceRan -and [bool]$trt11Report.OutputValidated -and [bool]$trt11Output.OutputValidated -and [int]$trt11Output.OutputElementCount -eq 10 -and [int]$trt11Output.OutputByteLength -eq 40) "$($trt11Report.InferenceRan)/$($trt11Report.OutputValidated)/$($trt11Output.OutputSha256)"
+Add-Check "trt11-reference-comparison" ([bool]$trt11Output.ReferenceValidation.Passed -and [int]$trt11Output.ReferenceValidation.TensorComparisons[0].MismatchCount -eq 0 -and $trt11Output.ReferenceValidation.TensorComparisons[0].ReferenceSha256 -eq $trt11.referenceSha256 -and $trt11Output.OutputSha256 -eq $trt11.outputSha256) "$($trt11Output.ReferenceValidation.TensorComparisons[0].MismatchCount)/$($trt11Output.ReferenceValidation.TensorComparisons[0].MaximumAbsoluteError)"
+Add-Check "trt11-strict-validation" ($trt11Validation.validationState -eq "tensor-rt-exec-report-ready" -and [int]$trt11Validation.failedBlockers -eq 0 -and @($trt11Validation.validationItems).Count -eq [int]$trt11.strictValidationCheckCount) "$($trt11Validation.validationState)/$($trt11Validation.failedBlockers)/$(@($trt11Validation.validationItems).Count)"
+Add-Check "trt11-historical-probe-retained" ($trt11.historicalDependencyProbe.state -eq "dependency-probe-only" -and (Test-Path -LiteralPath (Join-Path $root $trt11.historicalDependencyProbe.reportPath) -PathType Leaf)) "$($trt11.historicalDependencyProbe.state)/$($trt11.historicalDependencyProbe.reportPath)"
 Add-Check "boundary-local" ([bool]$evidence.proofBoundary.isLocalSourceTreeRefitLifecycleEvidence) ([string]$evidence.proofBoundary.isLocalSourceTreeRefitLifecycleEvidence)
 Add-Check "boundary-no-accuracy" (-not [bool]$evidence.proofBoundary.isModelAccuracyProof) ([string]$evidence.proofBoundary.isModelAccuracyProof)
-Add-Check "boundary-no-persistence" (-not [bool]$evidence.proofBoundary.isRefittedPlanPersistenceProof) ([string]$evidence.proofBoundary.isRefittedPlanPersistenceProof)
+Add-Check "boundary-local-persistence" ([bool]$evidence.proofBoundary.isRefittedPlanPersistenceProof) ([string]$evidence.proofBoundary.isRefittedPlanPersistenceProof)
 Add-Check "boundary-no-package" (-not [bool]$evidence.proofBoundary.isPackageConsumerRuntimeProof) ([string]$evidence.proofBoundary.isPackageConsumerRuntimeProof)
 Add-Check "boundary-no-publish" (-not [bool]$evidence.proofBoundary.canPublishPublicly -and -not [bool]$evidence.proofBoundary.publicReleaseSideEffectsExecuted) "$($evidence.proofBoundary.canPublishPublicly)/$($evidence.proofBoundary.publicReleaseSideEffectsExecuted)"
 

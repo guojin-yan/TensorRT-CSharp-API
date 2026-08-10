@@ -64,7 +64,9 @@ TRT10.11 / CUDA12.9 的 TensorRT MNIST ONNX 实跑结果：
 | enqueue | 成功，output `[1,10]` |
 | refit/baseline output | 40 bytes，SHA256 完全一致 |
 
-TRT11 当前主机在 runtime creation 返回 null，因此保持 `dependency-probe-only`，不能写成 refit applied。
+TRT11.0 / CUDA12.9 也已在当前主机完成同一生命周期：stripped plan 反序列化、6 项 named-weight inventory、parser load、engine commit、`ExcludeWeights` 清除/readback、原 owner 释放、full-weight plan reload、context gate、enqueue 与 10 值零 mismatch reference comparison 均通过。随后启动的第二个独立进程只使用 `--loadEngine`，不引用 ONNX 或 refit 参数，仍得到相同输出 SHA256。两份报告都通过 `eng/Test-TensorRtExecReport.ps1 -Strict` 的 `69/69` 项检查。
+
+TRT11 证据根目录为 `artifacts/real-case/tensorrtexec-trt11-refit-lifecycle-20260810-091859/`。仓库内固定 reference 来自同一 MNIST 输入的未审核 runtime 输出，所以这里证明的是本机 source-tree refit/reload 与数值回归，不是模型准确率、package consumer、public feed、post-publish 或 release proof。2026-07-22 的 `dependency-probe-only` 报告继续作为历史环境记录保留，不代表当前 TRT11 refit 状态。
 
 ## 证据边界
 

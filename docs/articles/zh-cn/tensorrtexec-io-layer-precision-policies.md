@@ -2,7 +2,7 @@
 
 `TensorRtExec` 和 `OnnxToEngine` 现在可以把官方 `trtexec` 的 I/O format、precision constraint 与逐层类型规则应用到已经解析的 TensorRT network。本文给出可直接运行的语法、匹配顺序、跨版本差异和报告判读方法。
 
-这些能力解决的是 build policy，不是模型精度证明。报告中的 `ReadbackMatch=True` 说明 TensorRT 接受并回读了请求值，但不能证明调用方 buffer layout 正确、最终 tactic 符合预期、模型输出数值正确或 NuGet 包已由外部消费者验证。
+这些能力解决的是 build policy，不是模型精度证明。报告中的 `ReadbackMatch=True` 说明 TensorRT 接受并回读了请求值，但不能单独证明调用方 buffer layout 正确、最终 tactic、模型输出数值正确或 NuGet 包已由外部消费者验证。真实构建可以另用 `--profilingVerbosity=detailed --exportLayerInfo <path>` 获取 TensorRT inspector JSON，其中包含实际引擎层 I/O datatype/format 与选中 tactic；它仍不提供独立的内部计算/累加精度字段。
 
 ## 支持的参数
 
@@ -126,6 +126,10 @@ TrtexecBuildPolicy Name=LayerOutputTypes Applied=True Matched=... ReadbackMatch=
 
 这些选项随后进入 `OptionImplementationStatus.AppliedOptions`。版本不支持、TRT11 type 不匹配、dry-run、load-engine 或依赖不可用时不会产生伪 readback，对应选项保留在 `ParseOnlyOptions`。
 
+当同时指定 `--profilingVerbosity=detailed` 与 `--dumpLayerInfo` 或 `--exportLayerInfo` 时，build 和 load-engine 路径会请求 inspector `Json` 格式，并在日志中记录 `Format=Json RequestedProfilingVerbosity=detailed`。导出文件是带 `SchemaVersion`、`ArtifactKind`、`Source`、`LayerCount` 和 `Layers` 的合法 JSON 文档，报告顶层 `LayerInfoArtifact` 会记录文件长度和 SHA256，strict validator 会核对两者。其他 verbosity 保持 `Oneline` 格式。详细 JSON 可以证明该次构建实际生成的 engine layer metadata，例如 I/O datatype/format、权重类型和 tactic；字段不存在时不能从名称推断内部计算精度。
+
+2026-08-10 的版本化记录进一步固定了边界。TRT10.11/CUDA12.9 运行产出 87 层 JSON，TRT11.0/CUDA12.9 运行产出 88 层 JSON；两次都完成 engine round-trip 与 1000 值零 mismatch 参考校验。层数与 tactic 是单次 engine build 的结果，不应成为跨构建固定断言。TRT11 只对 inferred type 已匹配的 FP32 I/O format 报告 applied，`--precisionConstraints`、`--layerPrecisions` 和 `--layerOutputTypes` 保持 parse-only。TRT8.6/CUDA12.1 随后把 Windows `createParser` vendor SEH/C++ exception 转为受控 native status，并在独立 TensorRtExec 子进程中完成 MNIST parse、engine build/round-trip、enqueue 与 10 值零 mismatch；本次未请求 layer artifact，所以不能补写 TRT8 detailed layer-policy 结论。TRT10/11 layer 证据位于 `samples/assets/tensorrtexec-yolov8n-cls-precision-policy-runtime-evidence.json` 与 `samples/assets/tensorrtexec-yolov8n-cls-cross-version-runtime-evidence.json`，TRT8 边界证据位于 `artifacts/interface-coverage/trt8-windows-onnx-parser-seh-boundary-evidence.json`。
+
 ## 常见失败
 
 `requires one broadcast specification` 表示 I/O spec 数量既不是 1，也不等于 tensor 数量。
@@ -141,7 +145,8 @@ TrtexecBuildPolicy Name=LayerOutputTypes Applied=True Matched=... ReadbackMatch=
 本功能的 TRT10 identity smoke 证明 I/O、constraint、layer policy 的 set/readback、engine round-trip、enqueue 与 synthetic output match；TRT8 smoke 证明 DirectIO raw 12 与 prefer raw 11 不混淆。它们仍不是：
 
 - 外部真实模型的 caller buffer layout 证明。
-- tactic selection 或性能证明。
+- 未导出 detailed inspector 时的 tactic selection，或任何性能证明。
+- 独立的内部计算/累加精度证明。
 - FP16/BF16/INT8 数值准确率证明。
 - DLA 模型执行证明。
 - repository-external package consumer proof。

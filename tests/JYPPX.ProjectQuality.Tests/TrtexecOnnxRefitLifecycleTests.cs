@@ -32,8 +32,18 @@ public sealed class TrtexecOnnxRefitLifecycleTests
         Assert.Equal(trt10.GetProperty("baselineOutputSha256").GetString(), trt10.GetProperty("refitOutputSha256").GetString());
 
         Assert.Equal("dry-run-precheck", root.GetProperty("tensorRt8").GetProperty("state").GetString());
-        Assert.Equal("dependency-probe-only", root.GetProperty("tensorRt11").GetProperty("state").GetString());
-        Assert.False(root.GetProperty("proofBoundary").GetProperty("isRefittedPlanPersistenceProof").GetBoolean());
+        JsonElement trt11 = root.GetProperty("tensorRt11");
+        Assert.Equal("external-onnx-refit-reload-reference-validated-runtime", trt11.GetProperty("state").GetString());
+        Assert.True(trt11.GetProperty("refitFromOnnxApplied").GetBoolean());
+        Assert.True(trt11.GetProperty("parserRefitReturned").GetBoolean());
+        Assert.True(trt11.GetProperty("engineRefitReturned").GetBoolean());
+        Assert.Equal(0, trt11.GetProperty("missingWeightsAfter").GetInt32());
+        Assert.True(trt11.GetProperty("contextCreatedAfterRefitCommit").GetBoolean());
+        Assert.True(trt11.GetProperty("inferenceRan").GetBoolean());
+        Assert.True(trt11.GetProperty("outputValidated").GetBoolean());
+        Assert.Equal(0, trt11.GetProperty("referenceMismatchCount").GetInt32());
+        Assert.Equal("dependency-probe-only", trt11.GetProperty("historicalDependencyProbe").GetProperty("state").GetString());
+        Assert.True(root.GetProperty("proofBoundary").GetProperty("isRefittedPlanPersistenceProof").GetBoolean());
         Assert.False(root.GetProperty("proofBoundary").GetProperty("isPackageConsumerRuntimeProof").GetBoolean());
         Assert.False(root.GetProperty("proofBoundary").GetProperty("canPublishPublicly").GetBoolean());
     }
@@ -45,8 +55,8 @@ public sealed class TrtexecOnnxRefitLifecycleTests
             "artifacts", "interface-coverage", "trtexec-onnx-refit-lifecycle-validation.json"));
         JsonElement root = document.RootElement;
         Assert.True(root.GetProperty("strict").GetBoolean());
-        Assert.Equal(24, root.GetProperty("checkCount").GetInt32());
-        Assert.Equal(24, root.GetProperty("passedCount").GetInt32());
+        Assert.Equal(35, root.GetProperty("checkCount").GetInt32());
+        Assert.Equal(35, root.GetProperty("passedCount").GetInt32());
         Assert.Equal(0, root.GetProperty("failureCount").GetInt32());
     }
 

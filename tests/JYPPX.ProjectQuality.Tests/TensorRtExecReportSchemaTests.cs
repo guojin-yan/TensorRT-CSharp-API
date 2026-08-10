@@ -30,7 +30,14 @@ public sealed class TensorRtExecReportSchemaTests
                      "DeploymentOptions",
                      "RuntimeOptions",
                      "PreflightMetadata",
-                      "LoadedEngineDiagnostics",
+                     "LoadedEngineDiagnostics",
+                     "LayerInfoArtifact",
+                     "ContentKind",
+                     "BindingMetadata",
+                     "copied-pointer-free-TensorRtEngineBindingReport",
+                     "PointerFreeCopiedSnapshot",
+                     "CanPromoteRuntimeProof",
+                     "CanPromoteReleaseProof",
                       "TimingCacheArtifact",
                       "InputRequested",
                       "InputApplied",
@@ -58,6 +65,12 @@ public sealed class TensorRtExecReportSchemaTests
                      "ParserPreflightSnapshot",
                      "copied-parser-preflight",
                      "Copied builder-config readback",
+                     "RefitSnapshot",
+                     "onnx-refit-complete",
+                     "RefitPersistenceSnapshot",
+                     "refitted-plan-persisted-and-reloaded",
+                     "OriginalRefittedEngineDisposedBeforeReload",
+                     "RefittableWeightsIncludedInSerialization",
                      "OptionImplementationStatus",
                      "ParsedOptions",
                      "AppliedOptions",
@@ -178,6 +191,17 @@ public sealed class TensorRtExecReportSchemaTests
         Assert.True(reportRoot.GetProperty("LoadedEngineDiagnostics").TryGetProperty("EvidenceBoundary", out _));
         Assert.True(reportRoot.GetProperty("LoadedEngineDiagnostics").TryGetProperty("ReadbackFingerprint", out _));
         Assert.True(reportRoot.GetProperty("LoadedEngineDiagnostics").TryGetProperty("ReadbackSha256", out _));
+        JsonElement layerInfoArtifact = reportRoot.GetProperty("LayerInfoArtifact");
+        Assert.Equal("not-requested", layerInfoArtifact.GetProperty("State").GetString());
+        Assert.False(layerInfoArtifact.GetProperty("Collected").GetBoolean());
+        Assert.True(layerInfoArtifact.GetProperty("PointerFreeCopiedSnapshot").GetBoolean());
+        Assert.False(layerInfoArtifact.GetProperty("CanPromoteRuntimeProof").GetBoolean());
+        Assert.False(layerInfoArtifact.GetProperty("CanPromoteReleaseProof").GetBoolean());
+        JsonElement bindingMetadata = reportRoot.GetProperty("BindingMetadata");
+        Assert.Equal("not-attempted", bindingMetadata.GetProperty("State").GetString());
+        Assert.True(bindingMetadata.GetProperty("PointerFreeCopiedSnapshot").GetBoolean());
+        Assert.False(bindingMetadata.GetProperty("CanPromoteRuntimeProof").GetBoolean());
+        Assert.False(bindingMetadata.GetProperty("CanPromoteReleaseProof").GetBoolean());
         JsonElement timingCacheArtifact = reportRoot.GetProperty("TimingCacheArtifact");
         Assert.False(timingCacheArtifact.GetProperty("InputRequested").GetBoolean());
         Assert.False(timingCacheArtifact.GetProperty("OutputRequested").GetBoolean());

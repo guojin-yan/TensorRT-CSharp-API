@@ -1,7 +1,7 @@
 # Trtexec Engine Packaging Runtime Evidence Validation
 
 - State: `passed`
-- Checks: `20`
+- Checks: `21`
 - Failures: `0`
 
 | Check | Passed | Detail |
@@ -24,5 +24,6 @@
 | trt10-load-diagnostics | True | Load-engine readonly diagnostics succeeded |
 | trt10-load-auto-budget | True | Automatic budget resolved and read back |
 | trt10-load-enqueue | True | Load-engine bounded runtime executed |
-| trt11-dependency-boundary | True | TRT11 known structured exception remains dependency-only |
+| trt11-refit-runtime | True | TRT11 stripped-plan refit, persistence, reload, and reference validation |
+| trt11-historical-probe-retained | True | Historical TRT11 dependency probe remains immutable |
 | proof-boundary | True | No proof or publish promotion |

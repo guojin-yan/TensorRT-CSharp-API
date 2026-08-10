@@ -13,6 +13,9 @@
 | `Cuda` | `Cuda/01.RuntimeCompilation` | CUDA RTC 源码编译、模块加载、类型化启动和结果读回 | [CUDA RTC 技术文章](../docs/articles/zh-cn/cuda-runtime-compilation-technical-article.md) |
 | `Inference` | `Inference/01.Bindings` | TensorRT 输入输出、主机/设备内存所有权与 binding | [推理绑定教程](../docs/articles/zh-cn/inference-bindings-tutorial.md) |
 | `Inference` | `Inference/02.DynamicShapes` | 显式优化配置和动态 Shape 推理 | [动态 Shape 教程](../docs/articles/zh-cn/dynamic-shape-optimization-profile-tutorial.md) |
+| `Inference` | `Inference/03.OnnxBuildAndRun` | 公开包解析 ONNX、构建 engine、单次推理和结构化 JSON | [示例说明](Inference/03.OnnxBuildAndRun/README.zh-CN.md) |
+| `Inference` | `Inference/04.RefittedPlan` | ONNX initializer refit、plan 持久化、磁盘重载和输出验证 | [示例说明](Inference/04.RefittedPlan/README.zh-CN.md) |
+| `Diagnostics` | `Diagnostics/01.CallbackLifecycle` | Logger、ProgressMonitor、Profiler、DebugListener 的所有权和解除顺序 | [示例说明](Diagnostics/01.CallbackLifecycle/README.zh-CN.md) |
 | `Performance` | `Performance/01.MultiStream` | CUDA Stream、Event 与跨流同步 | [多流与 Event 教程](../docs/articles/zh-cn/cuda-stream-event-multistream-tutorial.md) |
 | `ComputerVision` | `ComputerVision/01.Classification` | 图像预处理、TensorRT 分类、Top-K、JSON 和标注结果图 | [真实分类模型实战](../docs/articles/zh-cn/classification-real-asset-walkthrough.md) |
 
@@ -52,6 +55,9 @@ ONNX、权重、标签、预处理张量和临时运行产物统一暂存在源�
 dotnet run --project .\samples\Cuda\01.RuntimeCompilation -- --help
 dotnet run --project .\samples\Inference\01.Bindings -- --help
 dotnet run --project .\samples\Inference\02.DynamicShapes -- --help
+dotnet run --project .\samples\Inference\03.OnnxBuildAndRun -- --help
+dotnet run --project .\samples\Inference\04.RefittedPlan -- --help
+dotnet run --project .\samples\Diagnostics\01.CallbackLifecycle -- --help
 dotnet run --project .\samples\Performance\01.MultiStream -- --help
 dotnet run --project .\samples\ComputerVision\01.Classification -- --help
 dotnet run --project .\applications\YoloVision -- --list-capabilities

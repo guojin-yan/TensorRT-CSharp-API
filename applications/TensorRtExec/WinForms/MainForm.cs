@@ -494,42 +494,13 @@ public sealed class MainForm : Form
         }
         catch (Exception exception)
         {
-            _log.Text = exception.Message;
+            _log.Text = TensorRtExecReportFormatter.FormatFailure(exception);
         }
     }
 
     private static string FormatReportLog(TensorRtExecReport report)
     {
-        List<string> lines = new List<string>();
-        lines.AddRange(report.LogLines);
-
-        if (!string.IsNullOrWhiteSpace(report.ReportPath))
-        {
-            lines.Add("TensorRtExec ReportPath=" + report.ReportPath);
-        }
-
-        if (!string.IsNullOrWhiteSpace(report.ProofClassification))
-        {
-            lines.Add("TensorRtExec ProofClassification=" + report.ProofClassification + " BuildEvidenceOnly=" + report.BuildEvidenceOnly.ToString(CultureInfo.InvariantCulture) + " DryRun=" + report.DryRun.ToString(CultureInfo.InvariantCulture));
-        }
-
-        if (!string.IsNullOrWhiteSpace(report.NormalizedCommandSha256))
-        {
-            lines.Add("TensorRtExec NormalizedCommandSha256=" + report.NormalizedCommandSha256);
-        }
-
-        if (!string.IsNullOrWhiteSpace(report.LoadEngineDiagnosticsState))
-        {
-            lines.Add("TensorRtExec LoadEngineDiagnosticsState=" + report.LoadEngineDiagnosticsState + " Attempted=" + report.LoadEngineDiagnosticsAttempted.ToString(CultureInfo.InvariantCulture) + " Succeeded=" + report.LoadEngineDiagnosticsSucceeded.ToString(CultureInfo.InvariantCulture));
-            lines.Add("TensorRtExec LoadEngineDiagnosticsBoundary=" + report.LoadEngineDiagnosticsBoundary);
-        }
-
-        lines.Add("TensorRtExec WorkspaceBytes=" + report.WorkspaceBytes.ToString(CultureInfo.InvariantCulture));
-        lines.Add("TensorRtExec BuilderConfigDeploymentSnapshot=" + report.BuilderConfigDeploymentSnapshotState + " Diagnostics=" + report.BuilderConfigDeploymentDiagnosticCount.ToString(CultureInfo.InvariantCulture));
-        lines.Add("TensorRtExec ParserPreflightSnapshot=" + report.ParserPreflightSnapshotState + " Diagnostics=" + report.ParserPreflightDiagnosticCount.ToString(CultureInfo.InvariantCulture));
-        lines.Add("TensorRtExec RefitPersistence=" + report.RefitPersistenceState + " Attempted=" + report.RefitPersistenceAttempted.ToString(CultureInfo.InvariantCulture) + " Succeeded=" + report.RefitPersistenceSucceeded.ToString(CultureInfo.InvariantCulture) + " Plan=" + report.PersistedRefittedEnginePath);
-        lines.Add(report.Summary);
-        return string.Join(Environment.NewLine, lines);
+        return string.Join(Environment.NewLine, TensorRtExecReportFormatter.Format(report));
     }
 
     private void OnPreview(object? sender, EventArgs e)

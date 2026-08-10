@@ -46,11 +46,12 @@ public sealed class TensorRtExecReleaseCandidateGapTests
         Assert.Contains(items, static item => item.GetProperty("id").GetString() == "plugin-library-boundary" && item.GetProperty("currentStatus").GetString() == "diagnostic-gui-cli" && item.GetProperty("winFormsSupported").GetBoolean());
         Assert.Contains(items, static item =>
             item.GetProperty("id").GetString() == "binding-metadata" &&
-            item.GetProperty("currentStatus").GetString() == "implemented-pointer-free-multi-input-binding-multi-output-artifacts-and-reference-validation" &&
+            item.GetProperty("currentStatus").GetString() == "implemented-structured-pointer-free-binding-report-and-reference-validation" &&
             item.GetProperty("winFormsSupported").GetBoolean());
         Assert.Contains(items, static item =>
             item.GetProperty("id").GetString() == "winforms-command-surface" &&
-            item.GetProperty("currentStatus").GetString() == "checklist-and-real-gui-build-backed" &&
+            item.GetProperty("currentStatus").GetString() == "shared-command-report-error-formatting-checklist-and-real-gui-build-backed" &&
+            item.GetProperty("cliSupported").GetBoolean() &&
             item.GetProperty("winFormsSupported").GetBoolean() &&
             item.GetProperty("nextImplementationPaths").EnumerateArray().Any(path => path.GetString() == "samples/assets/tensorrtexec-gui-article-runtime-evidence.json"));
         Assert.Contains(items, static item =>
@@ -60,6 +61,8 @@ public sealed class TensorRtExecReleaseCandidateGapTests
             item.GetProperty("nextImplementationPaths").EnumerateArray().Any(path => path.GetString() == "tests/fixtures/package-consumers/RefittedPlan.PackageConsumer"));
         Assert.Contains(items, static item => item.GetProperty("id").GetString() == "dynamic-shape" && item.GetProperty("nextImplementationPaths").EnumerateArray().Any(path => path.GetString() == "applications/YoloVision/yolovision-task-output-contract.json"));
         Assert.Contains(items, static item => item.GetProperty("id").GetString() == "binding-metadata" && item.GetProperty("nextImplementationPaths").EnumerateArray().Any(path => path.GetString() == "applications/YoloVision/yolovision-task-output-contract.json"));
+        Assert.Contains(items, static item => item.GetProperty("id").GetString() == "io-layer-precision-policies" && item.GetProperty("nextImplementationPaths").EnumerateArray().Any(path => path.GetString() == "samples/assets/tensorrtexec-yolov8n-cls-precision-policy-runtime-evidence.json"));
+        Assert.Contains(items, static item => item.GetProperty("id").GetString() == "package-consumer-runtime-proof-boundary" && item.GetProperty("nextImplementationPaths").EnumerateArray().Any(path => path.GetString() == "artifacts/interface-coverage/trtexec-refitted-plan-package-consumer-validation.json"));
 
         string markdown = File.ReadAllText(markdownPath);
         string article = File.ReadAllText(articlePath);
@@ -74,13 +77,19 @@ public sealed class TensorRtExecReleaseCandidateGapTests
         Assert.Contains("workspace-memory-pool", markdown, StringComparison.Ordinal);
         Assert.Contains("implemented-readback-report", markdown, StringComparison.Ordinal);
         Assert.Contains("winforms-command-surface", markdown, StringComparison.Ordinal);
-        Assert.Contains("checklist-and-real-gui-build-backed", markdown, StringComparison.Ordinal);
-        Assert.Contains("implemented-pointer-free-multi-input-binding-multi-output-artifacts-and-reference-validation", markdown, StringComparison.Ordinal);
+        Assert.Contains("shared-command-report-error-formatting-checklist-and-real-gui-build-backed", markdown, StringComparison.Ordinal);
+        Assert.Contains("implemented-structured-pointer-free-binding-report-and-reference-validation", markdown, StringComparison.Ordinal);
+        Assert.Contains("TensorRtExecReportFormatter", markdown, StringComparison.Ordinal);
         Assert.Contains("applications/YoloVision/yolovision-task-output-contract.json", markdown, StringComparison.Ordinal);
+        Assert.Contains("tensorrtexec-yolov8n-cls-precision-policy-runtime-evidence.json", markdown, StringComparison.Ordinal);
+        Assert.Contains("53/53", markdown, StringComparison.Ordinal);
 
         Assert.Contains("applications/TensorRtExec/tensor-rt-exec-release-candidate-gap-list.json", article, StringComparison.Ordinal);
         Assert.Contains("package-consumer-runtime proof", article, StringComparison.Ordinal);
         Assert.Contains("WinForms parity", article, StringComparison.Ordinal);
+        Assert.Contains("BindingMetadata", article, StringComparison.Ordinal);
+        Assert.Contains("1000", article, StringComparison.Ordinal);
+        Assert.Contains("53/53", article, StringComparison.Ordinal);
         Assert.Contains("articles/zh-cn/tensorrtexec-release-candidate-gap-list.md", docsIndex, StringComparison.Ordinal);
         Assert.Contains("articles/zh-cn/tensorrtexec-release-candidate-gap-list.md", docsToc, StringComparison.Ordinal);
     }

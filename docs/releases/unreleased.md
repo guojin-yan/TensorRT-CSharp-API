@@ -5,6 +5,7 @@
 ## 案例与应用
 
 - `samples` 按 CUDA、Inference、Performance 和 ComputerVision 模块整理，案例项目统一设置为不可打包。
+- 新增 `Inference/03.OnnxBuildAndRun`：通过公开包解析 ONNX、构建 engine、执行一次推理并输出结构化 JSON；`--synthetic` 提供确定性的 Identity 模型 smoke，`--help` 保持离线可用。
 - `YoloVision`、Classification 和基础案例使用已发布的 `JYPPX.TensorRT.CSharp.API` 4 系列包。
 - `OnnxToEngine` 与 `TensorRtExec` 已移除到核心 `src/JYPPX.CudaSharp`、`src/JYPPX.TensorRtSharp` 的项目引用。
 - 新增不可打包的 `applications/_shared/JYPPX.TensorRtSharp.ApplicationTools`，链接 Tools 实现并使用公共 TensorRT 包编译。
@@ -43,7 +44,7 @@
 - DocFX：0 warning、0 error。
 - managed 包 dry-run 已确认包含根目录 `README.md` 和 `logo.jpg`，不包含 NVIDIA vendor runtime；当前机器的 TensorRT 10.11/CUDA 12.9 bridge-only dry-run 也只包含项目 bridge DLL、README 和 logo。
 
-本机环境限制：当前机器没有 `pwsh`（PowerShell 7）命令，但 Windows PowerShell `powershell.exe` 可以执行同一套获取、同步和验证脚本。文章命令保留跨平台的 `pwsh` 写法；Windows PowerShell 用户将命令名替换为 `powershell.exe` 即可。CUDA、cuDNN、TensorRT 和 NVRTC 仍由使用者自行安装，Linux、其他 CUDA/TensorRT 组合尚未在本机验证。
+本机已验证 PowerShell 7.6.4 的 `pwsh`，并保留 KI-005 引入的 `PowerShellHost` 解析与 Windows PowerShell `powershell.exe` 回退。只有明确依赖 PowerShell 7 语法的脚本才强制要求 `pwsh`。CUDA、cuDNN、TensorRT 和 NVRTC 仍由使用者自行安装，Linux 与未列入本机矩阵的 CUDA/TensorRT 组合尚未验证。
 
 ## 发布状态
 

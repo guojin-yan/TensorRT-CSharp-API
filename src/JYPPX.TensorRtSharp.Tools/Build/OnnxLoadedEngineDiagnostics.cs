@@ -28,7 +28,9 @@ public sealed class OnnxLoadedEngineDiagnostics
         IReadOnlyList<string> ioTensorSummaries,
         string readbackFingerprint,
         string readbackSha256,
-        string evidenceBoundary)
+        string evidenceBoundary,
+        OnnxEngineBindingMetadata? bindingMetadata = null,
+        OnnxEngineLayerInfoArtifact? layerInfoArtifact = null)
     {
         Attempted = attempted;
         Succeeded = succeeded;
@@ -47,6 +49,8 @@ public sealed class OnnxLoadedEngineDiagnostics
         ReadbackFingerprint = readbackFingerprint ?? string.Empty;
         ReadbackSha256 = readbackSha256 ?? string.Empty;
         EvidenceBoundary = evidenceBoundary ?? string.Empty;
+        BindingMetadata = bindingMetadata ?? OnnxEngineBindingMetadata.Empty;
+        LayerInfoArtifact = layerInfoArtifact ?? OnnxEngineLayerInfoArtifact.Empty;
     }
 
     public static OnnxLoadedEngineDiagnostics Empty { get; } = new OnnxLoadedEngineDiagnostics(
@@ -101,4 +105,8 @@ public sealed class OnnxLoadedEngineDiagnostics
     public string ReadbackSha256 { get; }
 
     public string EvidenceBoundary { get; }
+
+    public OnnxEngineBindingMetadata BindingMetadata { get; }
+
+    public OnnxEngineLayerInfoArtifact LayerInfoArtifact { get; }
 }

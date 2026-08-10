@@ -123,27 +123,27 @@
       "entryPoints": ["TrtexecLikeWeightStreamingBudget", "OnnxEngineBuildService.ApplyEnginePackagingOptions", "OnnxEngineBuildService.ApplyEngineRuntimePolicies", "TensorRtBuilderConfig.SetFlag/GetFlag", "TensorRtEngine.SetWeightStreamingBudgetV2", "TensorRtExecOptions", "WinForms Packaging fields"],
       "proofBoundary": "Builder/engine set-readback and a local weighted-model enqueue prove policy routing only. The separate --refitFromOnnx/--saveRefittedEngine extensions do not change official trtexec parity or prove package consumption or release.",
       "isRuntimeProof": false,
-      "gap": "TRT8 keeps strip/weight-streaming and version-compatible+refit conflict parse-only; TRT11 remains dependency-probe-only on this host. External lean runtime still needs separate owner evidence.",
-      "nextStep": "Retain the version guards and compact runtime evidence; treat both refit lifecycle switches as managed extensions rather than official trtexec options."
+      "gap": "TRT8 keeps strip/weight-streaming and version-compatible+refit conflict parse-only. TRT11 strip/refit now has parser load, engine commit, persistence, reload, enqueue, and reference comparison evidence; TRT11 version-compatible+refit, weight streaming, and external lean runtime remain unverified.",
+      "nextStep": "Retain the version guards and compact runtime evidence; collect TRT11 version-compatible, weight-streaming, and external lean-runtime evidence separately from the managed refit extensions."
     },
     {
       "id": "onnx-stripped-plan-refit-extension",
       "trtexecOption": "TensorRtExec extension: --refitFromOnnx",
-      "tensorRtExecStatus": "implemented-trt10-refit-lifecycle-with-version-guards",
+      "tensorRtExecStatus": "implemented-trt10-trt11-refit-lifecycle-with-version-guards",
       "entryPoints": ["OnnxEngineBuildService.RefitStrippedEngineFromOnnx", "OnnxEngineRefitSnapshot", "TensorRtRefitter", "TensorRtOnnxParserRefitter", "TensorRtExecOptions", "WinForms Refit ONNX field"],
-      "proofBoundary": "TRT10 local evidence proves stripped-plan deserialize, copied inventory, parser load, engine commit, context ordering, enqueue, and exact baseline output comparison. It does not prove refitted-plan persistence, model accuracy, package-consumer runtime, or public release.",
+      "proofBoundary": "TRT10 and TRT11 local evidence prove stripped-plan deserialize, copied inventory, parser load, engine commit, context ordering, and enqueue. TRT11 additionally passes a 10-value zero-mismatch unreviewed reference comparison; this is not model accuracy, package-consumer runtime, or public release proof.",
       "isRuntimeProof": false,
-      "gap": "TRT8 is explicitly unsupported and TRT11 remains dependency-probe-only on this host. Package consumption remains an external proof gap.",
+      "gap": "TRT8 is explicitly unsupported. TRT10/11 source-tree refit lifecycles pass, but only TRT10 has local-feed PackageReference consumer evidence and neither line has public-feed post-publish proof.",
       "nextStep": "Keep the extension owner-safe and pair it with the separate persisted-plan extension when a durable output is required."
     },
     {
       "id": "refitted-plan-persistence-extension",
       "trtexecOption": "TensorRtExec extension: --saveRefittedEngine",
-      "tensorRtExecStatus": "implemented-trt10-persist-dispose-independent-reload",
+      "tensorRtExecStatus": "implemented-trt10-trt11-persist-dispose-independent-reload",
       "entryPoints": ["OnnxEngineBuildService.PersistAndReloadRefittedEngine", "OnnxEngineRefitPersistenceSnapshot", "TensorRtEngine.CreateSerializationConfig", "TensorRtSerializationConfig.ClearFlag", "TensorRtEngine.Serialize(TensorRtSerializationConfig)", "TensorRtRuntime.DeserializeFromFile", "TensorRtExecOptions", "WinForms Refitted Engine field"],
-      "proofBoundary": "TRT10 source-tree evidence proves ExcludeWeights was cleared, full-weight bytes differ from the stripped plan, the original owner was disposed, independent reload and bounded enqueue succeeded, and output exactly matched the fixed baseline. Separate local-feed PackageReference evidence reproduces that hash without source assembly loading; it is still not public package, post-publish, model-accuracy, or release proof.",
+      "proofBoundary": "TRT10 and TRT11 source-tree evidence prove ExcludeWeights clear/readback, distinct full-weight bytes, original-owner disposal, reload gates, and bounded enqueue. TRT11 also passes a second-process loadEngine-only reload with identical output SHA and zero reference mismatch. Only TRT10 has separate local-feed PackageReference evidence; neither is public package, post-publish, model-accuracy, or release proof.",
       "isRuntimeProof": false,
-      "gap": "TRT8 cannot enter parser-refitter; TRT11 remains dependency-probe-only on this host. Public-feed post-publish package-consumer evidence and a compatible TRT11 host are still required for broader proof.",
+      "gap": "TRT8 cannot enter parser-refitter. TRT10/11 persistence and independent reload pass locally, but public-feed post-publish package-consumer evidence is still required for broader proof.",
       "nextStep": "Preserve the overwrite guards and independent-owner ordering; collect public-feed post-publish reload evidence separately."
     },
     {
@@ -170,11 +170,11 @@
       "id": "io-layer-precision-policies",
       "trtexecOption": "--inputIOFormats --outputIOFormats --precisionConstraints --layerPrecisions --layerOutputTypes",
       "tensorRtExecStatus": "implemented-build-readback-with-version-guards",
-      "entryPoints": ["TrtexecLikeBuildPolicy", "TensorRtTensor.DataType", "TensorRtTensor.AllowedFormats", "TensorRtLayer.Precision", "TensorRtLayer.SetOutputType", "OnnxEngineBuildDiagnostics.OptionImplementationStatus"],
-      "proofBoundary": "Tensor/layer set-readback proves parsed-network builder policy application only. It does not prove caller memory layout, tactic selection, numerical accuracy, real-model runtime, or package-consumer runtime.",
+      "entryPoints": ["TrtexecLikeBuildPolicy", "TensorRtTensor.DataType", "TensorRtTensor.AllowedFormats", "TensorRtLayer.Precision", "TensorRtLayer.SetOutputType", "OnnxEngineBuildDiagnostics.OptionImplementationStatus", "samples/assets/tensorrtexec-yolov8n-cls-precision-policy-runtime-evidence.json", "samples/assets/tensorrtexec-yolov8n-cls-cross-version-runtime-evidence.json"],
+      "proofBoundary": "Tensor/layer set-readback proves parsed-network builder policy application only. A separate detailed inspector record now observes the built target layer's engine I/O datatype/format and selected tactic, but it does not expose standalone internal compute or accumulator precision, prove caller memory layout, numerical accuracy beyond the recorded reference, real-model semantics, or package-consumer runtime.",
       "isRuntimeProof": false,
-      "gap": "TRT11 removed tensor type and layer precision setters; only matching inferred I/O types can receive allowed-format constraints. Real external models still require binding-layout and numerical validation.",
-      "nextStep": "Keep TRT11 removed setters parse-only and pair TRT8/10 policy reports with model-specific input layout, expected output, and owner hashes before any proof promotion."
+      "gap": "TRT11 removed tensor type and layer precision setters; only matching inferred I/O types can receive allowed-format constraints. TRT10.11 proves request/set/readback and detailed engine metadata. TRT11.0 proves matching FP32 I/O format validation, engine round-trip, detailed metadata and reference output while the removed setters remain parse-only. TensorRT inspector still exposes no standalone internal compute or accumulator precision property.",
+      "nextStep": "Retain the versioned TRT10/TRT11 external-model records and the TRT8 parser safety blocker. Require internal-precision observability plus model-specific owner evidence before any broader proof promotion."
     },
     {
       "id": "timing-cache",
@@ -241,10 +241,10 @@
       "trtexecOption": "--dumpLayerInfo --exportLayerInfo",
       "tensorRtExecStatus": "implemented-inspector-readback",
       "entryPoints": ["DumpLayerInfo", "ExportLayerInfoPath", "TensorRtEngineInspector", "WinForms Runtime Flags"],
-      "proofBoundary": "Real build/load-engine paths copy TensorRtEngineInspector layer text and can export it; dry-run/dependency-unavailable paths remain report-only. Layer info is diagnostic metadata, not output correctness proof.",
+      "proofBoundary": "Real build/load-engine paths copy TensorRtEngineInspector layer data and can export it; detailed mode writes a self-describing JSON document and top-level LayerInfoArtifact length/SHA256, while dry-run/dependency-unavailable paths remain report-only. Layer info is diagnostic metadata, not output correctness proof.",
       "isRuntimeProof": false,
       "gap": "External ONNX layer semantics require model-specific documentation.",
-      "nextStep": "Cross-check EngineInspector read-only APIs in future diagnostics."
+      "nextStep": "Retain the hashed TRT10.11 and TRT11.0 LayerInfoArtifact records. TRT8 now has a native SEH/status parser boundary plus isolated MNIST parse/build/enqueue evidence, but a hashed TRT8 detailed LayerInfoArtifact and external-model semantic review remain uncollected."
     },
     {
       "id": "report-export-alias",
@@ -269,22 +269,22 @@
     {
       "id": "binding-metadata",
       "trtexecOption": "--loadInputs --dumpOutput --dumpRawBindingsToFile --exportOutput plus JYPPX --referenceOutputs validation",
-      "tensorRtExecStatus": "implemented-pointer-free-multi-input-binding-multi-output-artifacts-and-reference-validation",
-      "entryPoints": ["RuntimeOptions", "OnnxEngineRuntimeInputArtifact", "OnnxEngineRuntimeOutputArtifact", "OnnxEngineReferenceTensorData", "OnnxEngineReferenceValidationArtifact", "OnnxEngineRuntimeArtifactData.InputTensors", "OnnxEngineRuntimeArtifactData.OutputTensors", "OnnxEngineRuntimeArtifactWriter", "YoloRuntimeOutputTensor", "OnnxSampleMultiOutputResult", "YoloVisionOutputReport.bindingMetadata", "TensorRtEngineBindingReport"],
-      "proofBoundary": "Generic bounded runtime binds every float input and captures every float output in engine order. OutputValidated requires every output to match a structured, hashed reference under explicit tolerance and special-value policies; synthetic references and YoloVision copied semantic roles remain distinct from real-model and package-consumer proof.",
+      "tensorRtExecStatus": "implemented-structured-pointer-free-binding-report-and-reference-validation",
+      "entryPoints": ["OnnxEngineBindingMetadata", "OnnxEngineBuildResult.BindingMetadata", "OnnxEngineBuildDiagnostics.ToJson", "tensor-rt-exec-report.schema.json", "TensorRtExecReportFormatter", "RuntimeOptions", "OnnxEngineRuntimeInputArtifact", "OnnxEngineRuntimeOutputArtifact", "OnnxEngineReferenceTensorData", "OnnxEngineReferenceValidationArtifact", "OnnxEngineRuntimeArtifactData.InputTensors", "OnnxEngineRuntimeArtifactData.OutputTensors", "OnnxEngineRuntimeArtifactWriter", "YoloRuntimeOutputTensor", "OnnxSampleMultiOutputResult", "YoloVisionOutputReport.bindingMetadata", "TensorRtEngineBindingReport", "samples/assets/tensorrtexec-yolov8n-cls-precision-policy-runtime-evidence.json"],
+      "proofBoundary": "Build, load-engine, and bounded runtime paths copy engine-order mode, dtype, shapes, location, format, vectorization, and fallback diagnostics into top-level BindingMetadata. Generic bounded runtime also binds every float input and captures every float output in engine order. OutputValidated still requires every output to match a structured, hashed reference; copied metadata and synthetic references remain distinct from real-model and package-consumer proof.",
       "isRuntimeProof": false,
-      "gap": "Generic multi-input/output float execution and structured validation are implemented, but owner-reviewed real-model references, task semantics, and public package-consumer evidence remain absent.",
-      "nextStep": "Pair structured reference JSON and comparison artifacts with YoloVision task contracts plus owner-filled model, input, engine, expected output, log, and review hashes before any proof promotion."
+      "gap": "Structured generic binding metadata, multi-input/output float execution, shared CLI/WinForms summaries, and reference validation are implemented. An external static YOLOv8n-cls profile-zero run is recorded, but TensorRtExec does not own task semantics or public package-consumer promotion.",
+      "nextStep": "Retain the structured external-model comparison and link it to YoloVision task contracts; keep public package-consumer and owner release acceptance external."
     },
     {
       "id": "package-consumer-runtime-proof-boundary",
       "trtexecOption": "release-proof-validator",
-      "tensorRtExecStatus": "release-proof-records-only",
-      "entryPoints": ["package-consumer-runtime-proof-owner-input", "Test-PackageConsumerRuntimeProofRecord.ps1"],
+      "tensorRtExecStatus": "local-refitted-plan-package-consumer-runtime-public-proof-owner-action-required",
+      "entryPoints": ["eng/Test-TrtexecRefittedPlanPackageConsumer.ps1", "artifacts/interface-coverage/trtexec-refitted-plan-package-consumer-evidence.json", "artifacts/interface-coverage/trtexec-refitted-plan-package-consumer-validation.json", "package-consumer-runtime-proof-owner-input", "Test-PackageConsumerRuntimeProofRecord.ps1"],
       "proofBoundary": "Only clean external package consumer smoke validated as package-consumer-runtime can promote release proof.",
       "isRuntimeProof": false,
-      "gap": "Owner must provide public package source, clean consumer, real host metadata, exitCode=0, and matching hashes.",
-      "nextStep": "Collect real owner input and run strict validators after public package availability."
+      "gap": "The 2026-08-09 current-Release local-file-feed consumer passed restore/build/runtime and 53/53 strict checks. Owner must still provide a public package source and post-publish evidence.",
+      "nextStep": "Retain the local package-consumer engineering evidence and run the public proof validators only after actual package availability."
     }
   ]
 }

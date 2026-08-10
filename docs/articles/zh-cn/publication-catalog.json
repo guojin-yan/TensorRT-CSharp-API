@@ -95,7 +95,8 @@
     },
     {
       "id": "yolovision-yolov8n-det-local-package-consumer",
-      "path": "docs/articles/zh-cn/yolovision-yolov8n-det-local-package-consumer-tutorial.md",
+      "path": "docs/articles/zh-cn/yolovision-yolov8n-detection-tutorial.md",
+      "legacyPath": "docs/articles/zh-cn/yolovision-yolov8n-det-local-package-consumer-tutorial.md",
       "classification": "complete-technical-article",
       "status": "complete-with-runtime-screenshot-and-annotated-result",
       "realExecutionEvidence": "samples/assets/yolovision-yolov8n-det-local-package-consumer-runtime-evidence.json",
@@ -129,7 +130,8 @@
     },
     {
       "id": "yolovision-lraspp-semantic-local-package-consumer",
-      "path": "docs/articles/zh-cn/yolovision-lraspp-semantic-local-package-consumer-tutorial.md",
+      "path": "docs/articles/zh-cn/yolovision-lraspp-semantic-segmentation-tutorial.md",
+      "legacyPath": "docs/articles/zh-cn/yolovision-lraspp-semantic-local-package-consumer-tutorial.md",
       "classification": "complete-technical-article",
       "status": "complete-with-runtime-screenshot-and-annotated-result",
       "realExecutionEvidence": "samples/assets/yolovision-lraspp-semantic-article-runtime-evidence.json",
@@ -163,7 +165,8 @@
     },
     {
       "id": "yolovision-yolov8n-pose-local-package-consumer",
-      "path": "docs/articles/zh-cn/yolovision-yolov8n-pose-local-package-consumer-tutorial.md",
+      "path": "docs/articles/zh-cn/yolovision-yolov8n-pose-tutorial.md",
+      "legacyPath": "docs/articles/zh-cn/yolovision-yolov8n-pose-local-package-consumer-tutorial.md",
       "classification": "complete-technical-article",
       "status": "complete-with-runtime-screenshot-and-annotated-result",
       "realExecutionEvidence": "samples/assets/yolovision-yolov8n-pose-article-runtime-evidence.json",
@@ -197,7 +200,8 @@
     },
     {
       "id": "yolovision-yolov8n-cls-local-package-consumer",
-      "path": "docs/articles/zh-cn/yolovision-yolov8n-cls-local-package-consumer-tutorial.md",
+      "path": "docs/articles/zh-cn/yolovision-yolov8n-classification-tutorial.md",
+      "legacyPath": "docs/articles/zh-cn/yolovision-yolov8n-cls-local-package-consumer-tutorial.md",
       "classification": "complete-technical-article",
       "status": "complete-with-runtime-screenshot-and-annotated-result",
       "realExecutionEvidence": "samples/assets/yolovision-yolov8n-cls-article-runtime-evidence.json",
@@ -231,7 +235,8 @@
     },
     {
       "id": "yolovision-yolov8n-obb-local-package-consumer",
-      "path": "docs/articles/zh-cn/yolovision-yolov8n-obb-local-package-consumer-tutorial.md",
+      "path": "docs/articles/zh-cn/yolovision-yolov8n-obb-tutorial.md",
+      "legacyPath": "docs/articles/zh-cn/yolovision-yolov8n-obb-local-package-consumer-tutorial.md",
       "classification": "complete-technical-article",
       "status": "complete-with-runtime-screenshot-and-annotated-result",
       "realExecutionEvidence": "samples/assets/yolovision-yolov8n-obb-article-runtime-evidence.json",
@@ -265,7 +270,8 @@
     },
     {
       "id": "yolovision-yolov8n-seg-local-package-consumer",
-      "path": "docs/articles/zh-cn/yolovision-yolov8-seg-local-package-consumer-tutorial.md",
+      "path": "docs/articles/zh-cn/yolovision-yolov8n-instance-segmentation-tutorial.md",
+      "legacyPath": "docs/articles/zh-cn/yolovision-yolov8-seg-local-package-consumer-tutorial.md",
       "classification": "complete-technical-article",
       "status": "complete-with-runtime-screenshot-and-annotated-result",
       "realExecutionEvidence": "samples/assets/yolovision-yolov8n-seg-article-runtime-evidence.json",

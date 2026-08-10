@@ -109,6 +109,28 @@ public sealed partial class OnnxEngineBuildService
         bool debugRequested = !string.IsNullOrWhiteSpace(deployment.MarkDebug) || deployment.DumpDebugTensors;
         bool weightStreamingRequested = deployment.AllowWeightStreaming || deployment.WeightStreamingBudget.IsSpecified;
 
+        if (options.DryRun)
+        {
+            return new OnnxEngineCapabilityProbe(
+                attempted: false,
+                probeState: "not-attempted",
+                tensorRtLine: options.TensorRtLine,
+                tensorRtVersion: string.Empty,
+                cudaToolkitVersion: string.Empty,
+                runtimeAvailable: false,
+                builderAvailable: false,
+                builderConfigAvailable: false,
+                engineInspectorApiAvailable: false,
+                fp8FlagRequested: fp8Requested,
+                fp8FlagKnown: false,
+                debugTensorOptionsRequested: debugRequested,
+                debugTensorApiKnown: false,
+                weightStreamingRequested: weightStreamingRequested,
+                weightStreamingApiKnown: false,
+                probeItems: new[] { "probe-skipped:dry-run" },
+                evidenceBoundary: "dry-run skips TensorRT and CUDA capability probing; availability fields are unprobed defaults and cannot promote runtime or release proof.");
+        }
+
         try
         {
             TensorRtEnvironmentSnapshot snapshot = TensorRtEnvironmentProbe.GetCurrent();
@@ -235,15 +257,21 @@ public sealed partial class OnnxEngineBuildService
             using TensorRtEngine engine = runtime.DeserializeFromFile(preflightMetadata.Path);
             using TensorRtEngineInspector inspector = engine.CreateInspector();
             IReadOnlyList<TensorRtTensorInfo> tensors = engine.GetIOTensors();
-            string inspectorInformation = inspector.GetEngineInformation(TensorRtLayerInformationFormat.Oneline);
-            TryCollectLayerInformation(inspector, engine.LayerCount, options, log, "LoadEngine");
+            TensorRtLayerInformationFormat layerInformationFormat = ResolveLayerInformationFormat(options);
+            string inspectorInformation = inspector.GetEngineInformation(layerInformationFormat);
+            log.Add($"LoadEngineReadonlyDiagnostics InspectorFormat={layerInformationFormat} RequestedProfilingVerbosity={options.ProfilingVerbosity}");
+            OnnxEngineLayerInfoArtifact layerInfoArtifact = TryCollectLayerInformation(inspector, engine.LayerCount, options, log, "LoadEngine");
             string[] tensorSummaries = tensors
                 .Select(static tensor => $"{tensor.Index}:{tensor.Name}:{tensor.IOMode}:{tensor.DataType}:{tensor.Shape}")
                 .ToArray();
+            OnnxEngineBindingMetadata bindingMetadata = OnnxEngineBindingMetadata.FromBindingReport(
+                engine.GetBindingReport(profileIndex: 0),
+                "copied-engine-readback");
             string readbackFingerprint = CreateLoadedEngineReadbackFingerprint(engine, inspectorInformation, tensorSummaries);
             string readbackSha256 = ComputeSha256(readbackFingerprint);
             log.Add($"LoadEngineReadonlyDiagnostics Attempted=True Succeeded=True IOTensors={engine.IOTensorCount} Layers={engine.LayerCount} Profiles={engine.OptimizationProfileCount} InspectorBytes={inspectorInformation.Length} ReadbackSha256={readbackSha256}");
             log.Add("LoadEngineReadonlyDiagnostics Tensors=" + string.Join("; ", tensorSummaries));
+            log.Add($"BindingMetadata State={bindingMetadata.State} Tensors={bindingMetadata.TensorCount} Inputs={bindingMetadata.InputCount} Outputs={bindingMetadata.OutputCount} ContextReadinessAttached={bindingMetadata.ContextReadinessAttached} EvidenceKind={bindingMetadata.EvidenceKind}");
             return new OnnxLoadedEngineDiagnostics(
                 attempted: true,
                 succeeded: true,
@@ -261,7 +289,9 @@ public sealed partial class OnnxEngineBuildService
                 ioTensorSummaries: tensorSummaries,
                 readbackFingerprint: readbackFingerprint,
                 readbackSha256: readbackSha256,
-                evidenceBoundary: boundary);
+                evidenceBoundary: boundary,
+                bindingMetadata: bindingMetadata,
+                layerInfoArtifact: layerInfoArtifact);
         }
         catch (Exception exception) when (exception is TensorRtException || exception is BridgeProbeException || exception is InvalidOperationException || exception is FileNotFoundException || exception is DllNotFoundException || exception is BadImageFormatException)
         {
@@ -308,7 +338,7 @@ public sealed partial class OnnxEngineBuildService
         });
     }
 
-    private static void TryCollectLayerInformationFromSerializedEngine(
+    private static OnnxEngineLayerInfoArtifact TryCollectLayerInformationFromSerializedEngine(
         TensorRtRuntime runtime,
         string enginePath,
         OnnxEngineBuildOptions options,
@@ -317,14 +347,14 @@ public sealed partial class OnnxEngineBuildService
     {
         if (!options.DumpLayerInfo && string.IsNullOrWhiteSpace(options.ExportLayerInfoPath))
         {
-            return;
+            return CreateLayerInformationBoundaryArtifact(options, source, "not-requested");
         }
 
         try
         {
             using TensorRtEngine engine = runtime.DeserializeFromFile(enginePath);
             using TensorRtEngineInspector inspector = engine.CreateInspector();
-            TryCollectLayerInformation(inspector, engine.LayerCount, options, log, source);
+            return TryCollectLayerInformation(inspector, engine.LayerCount, options, log, source);
         }
         catch (Exception exception) when (exception is TensorRtException ||
                                           exception is BridgeProbeException ||
@@ -333,11 +363,13 @@ public sealed partial class OnnxEngineBuildService
                                           exception is BadImageFormatException ||
                                           exception is FileNotFoundException)
         {
-            log.Add($"LayerInfo Collected=False Source={source} Reason={exception.GetType().Name}:{exception.Message} EvidenceBoundary=copied-engine-inspector-diagnostics-only");
+            string reason = exception.GetType().Name + ":" + exception.Message;
+            log.Add($"LayerInfo Collected=False Source={source} Reason={reason} EvidenceBoundary=copied-engine-inspector-diagnostics-only");
+            return CreateLayerInformationFailureArtifact(options, source, reason);
         }
     }
 
-    private static void TryCollectLayerInformation(
+    private static OnnxEngineLayerInfoArtifact TryCollectLayerInformation(
         TensorRtEngineInspector inspector,
         int layerCount,
         OnnxEngineBuildOptions options,
@@ -346,14 +378,15 @@ public sealed partial class OnnxEngineBuildService
     {
         if (!options.DumpLayerInfo && string.IsNullOrWhiteSpace(options.ExportLayerInfoPath))
         {
-            return;
+            return CreateLayerInformationBoundaryArtifact(options, source, "not-requested");
         }
 
-        string[] layerInformation;
+        TensorRtLayerInformationFormat layerInformationFormat = ResolveLayerInformationFormat(options);
+        string[] rawLayerInformation;
         try
         {
-            layerInformation = Enumerable.Range(0, Math.Max(0, layerCount))
-                .Select(index => $"Layer[{index}] {inspector.GetLayerInformation(index, TensorRtLayerInformationFormat.Oneline)}")
+            rawLayerInformation = Enumerable.Range(0, Math.Max(0, layerCount))
+                .Select(index => inspector.GetLayerInformation(index, layerInformationFormat))
                 .ToArray();
         }
         catch (Exception exception) when (exception is TensorRtException ||
@@ -362,17 +395,34 @@ public sealed partial class OnnxEngineBuildService
                                           exception is DllNotFoundException ||
                                           exception is BadImageFormatException)
         {
-            log.Add($"LayerInfo Collected=False Source={source} Reason={exception.GetType().Name}:{exception.Message} EvidenceBoundary=copied-engine-inspector-diagnostics-only");
-            return;
+            string reason = exception.GetType().Name + ":" + exception.Message;
+            log.Add($"LayerInfo Collected=False Source={source} Reason={reason} EvidenceBoundary=copied-engine-inspector-diagnostics-only");
+            return CreateLayerInformationFailureArtifact(options, source, reason);
         }
 
-        string content = layerInformation.Length == 0
-            ? string.Empty
-            : string.Join(Environment.NewLine, layerInformation) + Environment.NewLine;
+        string[] layerInformation = rawLayerInformation
+            .Select((value, index) => $"Layer[{index}] {value}")
+            .ToArray();
+        string content;
+        try
+        {
+            content = layerInformationFormat == TensorRtLayerInformationFormat.Json
+                ? CreateStructuredLayerInformationContent(rawLayerInformation, source, options.ProfilingVerbosity)
+                : layerInformation.Length == 0
+                    ? string.Empty
+                    : string.Join(Environment.NewLine, layerInformation) + Environment.NewLine;
+        }
+        catch (JsonException exception)
+        {
+            string reason = "invalid-inspector-json:" + exception.Message;
+            log.Add($"LayerInfo Collected=False Source={source} Reason={reason} EvidenceBoundary=copied-engine-inspector-diagnostics-only");
+            return CreateLayerInformationFailureArtifact(options, source, reason);
+        }
+
         Encoding utf8NoBom = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
         int byteCount = utf8NoBom.GetByteCount(content);
         string sha256 = ComputeSha256(content);
-        log.Add($"LayerInfo Collected=True Source={source} Layers={layerInformation.Length} Bytes={byteCount} Sha256={sha256} EvidenceBoundary=copied-engine-inspector-diagnostics-only");
+        log.Add($"LayerInfo Collected=True Source={source} Format={layerInformationFormat} RequestedProfilingVerbosity={options.ProfilingVerbosity} Layers={layerInformation.Length} Bytes={byteCount} Sha256={sha256} EvidenceBoundary=copied-engine-inspector-diagnostics-only");
 
         if (options.DumpLayerInfo)
         {
@@ -382,6 +432,8 @@ public sealed partial class OnnxEngineBuildService
             }
         }
 
+        bool exportWritten = false;
+        string exportPath = string.Empty;
         if (!string.IsNullOrWhiteSpace(options.ExportLayerInfoPath))
         {
             string fullPath = Path.GetFullPath(options.ExportLayerInfoPath);
@@ -392,8 +444,117 @@ public sealed partial class OnnxEngineBuildService
             }
 
             File.WriteAllText(fullPath, content, utf8NoBom);
-            log.Add($"LayerInfo ExportRequested=True Written=True Path={fullPath} LengthBytes={byteCount} Sha256={sha256} EvidenceBoundary=copied-engine-inspector-diagnostics-only");
+            log.Add($"LayerInfo ExportRequested=True Written=True Format={layerInformationFormat} Path={fullPath} LengthBytes={byteCount} Sha256={sha256} EvidenceBoundary=copied-engine-inspector-diagnostics-only");
+            exportWritten = true;
+            exportPath = fullPath;
         }
+
+        return new OnnxEngineLayerInfoArtifact(
+            requested: true,
+            collected: true,
+            source,
+            state: exportWritten ? "export-written" : "collected",
+            informationFormat: layerInformationFormat.ToString(),
+            contentKind: layerInformationFormat == TensorRtLayerInformationFormat.Json ? "json-document" : "one-line-text",
+            requestedProfilingVerbosity: options.ProfilingVerbosity,
+            layerCount: layerInformation.Length,
+            dumpRequested: options.DumpLayerInfo,
+            exportRequested: !string.IsNullOrWhiteSpace(options.ExportLayerInfoPath),
+            exportWritten,
+            exportPath,
+            lengthBytes: byteCount,
+            sha256,
+            diagnostics: Array.Empty<string>(),
+            evidenceBoundary: "Copied TensorRT engine-inspector layer metadata only. It cannot promote runtime, model, package-consumer, or release proof.");
+    }
+
+    private static string CreateStructuredLayerInformationContent(
+        IReadOnlyList<string> layerInformation,
+        string source,
+        string requestedProfilingVerbosity)
+    {
+        object[] layers = layerInformation
+            .Select((value, index) => new
+            {
+                Index = index,
+                Information = ParseLayerInformationJson(value)
+            })
+            .ToArray();
+        return JsonSerializer.Serialize(new
+        {
+            SchemaVersion = 1,
+            ArtifactKind = "tensor-rt-engine-layer-information",
+            Source = source,
+            InformationFormat = TensorRtLayerInformationFormat.Json.ToString(),
+            RequestedProfilingVerbosity = requestedProfilingVerbosity,
+            LayerCount = layers.Length,
+            Layers = layers,
+            EvidenceBoundary = "Copied TensorRT engine-inspector layer metadata only. It cannot promote runtime, model, package-consumer, or release proof."
+        }, new JsonSerializerOptions { WriteIndented = true }) + Environment.NewLine;
+    }
+
+    private static JsonElement ParseLayerInformationJson(string value)
+    {
+        using JsonDocument document = JsonDocument.Parse(value);
+        return document.RootElement.Clone();
+    }
+
+    private static OnnxEngineLayerInfoArtifact CreateLayerInformationBoundaryArtifact(
+        OnnxEngineBuildOptions options,
+        string source,
+        string state)
+    {
+        bool requested = options.DumpLayerInfo || !string.IsNullOrWhiteSpace(options.ExportLayerInfoPath);
+        TensorRtLayerInformationFormat format = ResolveLayerInformationFormat(options);
+        return new OnnxEngineLayerInfoArtifact(
+            requested,
+            collected: false,
+            source,
+            state,
+            format.ToString(),
+            format == TensorRtLayerInformationFormat.Json ? "json-document" : "one-line-text",
+            options.ProfilingVerbosity,
+            layerCount: 0,
+            dumpRequested: options.DumpLayerInfo,
+            exportRequested: !string.IsNullOrWhiteSpace(options.ExportLayerInfoPath),
+            exportWritten: false,
+            exportPath: string.Empty,
+            lengthBytes: 0,
+            sha256: string.Empty,
+            diagnostics: Array.Empty<string>(),
+            evidenceBoundary: "Copied TensorRT engine-inspector layer metadata only. It cannot promote runtime, model, package-consumer, or release proof.");
+    }
+
+    private static OnnxEngineLayerInfoArtifact CreateLayerInformationFailureArtifact(
+        OnnxEngineBuildOptions options,
+        string source,
+        string reason)
+    {
+        OnnxEngineLayerInfoArtifact boundary = CreateLayerInformationBoundaryArtifact(options, source, "collection-failed");
+        return new OnnxEngineLayerInfoArtifact(
+            boundary.Requested,
+            collected: false,
+            boundary.Source,
+            boundary.State,
+            boundary.InformationFormat,
+            boundary.ContentKind,
+            boundary.RequestedProfilingVerbosity,
+            boundary.LayerCount,
+            boundary.DumpRequested,
+            boundary.ExportRequested,
+            boundary.ExportWritten,
+            boundary.ExportPath,
+            boundary.LengthBytes,
+            boundary.Sha256,
+            new[] { reason },
+            boundary.EvidenceBoundary);
+    }
+
+    private static TensorRtLayerInformationFormat ResolveLayerInformationFormat(OnnxEngineBuildOptions options)
+    {
+        return string.Equals(options.ProfilingVerbosity, "detailed", StringComparison.OrdinalIgnoreCase)
+            ? TensorRtLayerInformationFormat.Json
+            : TensorRtLayerInformationFormat.Oneline;
     }
 
     private static string ComputeSha256(string value)

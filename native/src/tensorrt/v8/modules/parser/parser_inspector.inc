@@ -1,3 +1,49 @@
+#if JYPPX_HAS_TENSORRT && JYPPX_HAS_TENSORRT_ONNXPARSER
+static JYPPX_StatusCode create_onnx_parser_with_seh_guard(
+    nvinfer1::INetworkDefinition& network,
+    ManagedLogger& logger,
+    nvonnxparser::IParser** out_parser)
+{
+#if defined(_MSC_VER)
+    uint32_t seh_exception_code = 0;
+    __try
+    {
+        *out_parser = nvonnxparser::createParser(network, logger);
+        return JYPPX_STATUS_OK;
+    }
+    __except (jyppx::tensorrt::capture_vendor_seh_exception_code(&seh_exception_code, GetExceptionCode()))
+    {
+        *out_parser = nullptr;
+        return jyppx::tensorrt::report_vendor_seh_exception(kLine, "ONNX parser creation", seh_exception_code);
+    }
+#else
+    *out_parser = nvonnxparser::createParser(network, logger);
+    return JYPPX_STATUS_OK;
+#endif
+}
+
+static JYPPX_StatusCode create_onnx_parser_with_guard(
+    nvinfer1::INetworkDefinition& network,
+    ManagedLogger& logger,
+    nvonnxparser::IParser** out_parser)
+{
+    try
+    {
+        return create_onnx_parser_with_seh_guard(network, logger, out_parser);
+    }
+    catch (const std::exception& exception)
+    {
+        *out_parser = nullptr;
+        return jyppx::tensorrt::report_vendor_exception(kLine, "ONNX parser creation", exception.what());
+    }
+    catch (...)
+    {
+        *out_parser = nullptr;
+        return jyppx::tensorrt::report_vendor_exception(kLine, "ONNX parser creation", "unknown native exception");
+    }
+}
+#endif
+
 JYPPX_StatusCode jyppx_trt8_onnx_parser_create(JYPPX_TensorRtLogger* logger, JYPPX_TensorRtNetworkDefinition* network, JYPPX_TensorRtOnnxParser** out_parser)
 {
     auto status = jyppx::tensorrt::validate_output_pointer(out_parser, "out_parser");
@@ -26,10 +72,6 @@ JYPPX_StatusCode jyppx_trt8_onnx_parser_create(JYPPX_TensorRtLogger* logger, JYP
         return jyppx::tensorrt::report_vendor_mismatch(kLine, JYPPX_TENSORRT_VERSION_MAJOR_NUM, "ONNX parser creation");
     }
 
-#if defined(_WIN32)
-    jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "TensorRT 8 ONNX parser creation is disabled on Windows in the current bridge because nvonnxparser::createParser can raise a vendor SEH exception in the validated TensorRT 8.6 Windows package. Use TensorRT 10 ONNX parsing or build the network through TensorRtBuilder until this vendor path is isolated.");
-    return JYPPX_STATUS_NOT_SUPPORTED;
-#else
     auto* logger_payload = get_payload<ManagedLogger>(logger);
     auto* network_payload = get_payload<nvinfer1::INetworkDefinition>(network);
     if (logger_payload == nullptr || network_payload == nullptr)
@@ -38,7 +80,12 @@ JYPPX_StatusCode jyppx_trt8_onnx_parser_create(JYPPX_TensorRtLogger* logger, JYP
         return JYPPX_STATUS_INVALID_STATE;
     }
 
-    nvonnxparser::IParser* parser = nvonnxparser::createParser(*network_payload, *logger_payload);
+    nvonnxparser::IParser* parser = nullptr;
+    status = create_onnx_parser_with_guard(*network_payload, *logger_payload, &parser);
+    if (status != JYPPX_STATUS_OK)
+    {
+        return status;
+    }
     if (parser == nullptr)
     {
         return report_null_vendor_object("nvonnxparser::createParser");
@@ -53,7 +100,6 @@ JYPPX_StatusCode jyppx_trt8_onnx_parser_create(JYPPX_TensorRtLogger* logger, JYP
 
     *out_parser = reinterpret_cast<JYPPX_TensorRtOnnxParser*>(handle);
     return JYPPX_STATUS_OK;
-#endif
 #elif JYPPX_HAS_TENSORRT
     jyppx::common::set_last_error(JYPPX_ERROR_CATEGORY_TENSORRT, "TensorRT ONNX parser library was not found at build time.");
     return JYPPX_STATUS_DEPENDENCY_MISSING;

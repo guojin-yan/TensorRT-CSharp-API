@@ -8,9 +8,9 @@ namespace JYPPX.ProjectQuality.Tests;
 public sealed class ManagedOnnxEngineBuildLayoutTests
 {
     private const string BuildServiceOriginalNormalizedSha256 =
-        "e4a2811a52ed6779619b628e06faf8d60e4f165fb3f41473a8d8c16f6bd734e6";
+        "dcea246b388b28ef133c67bb37fb7d7ee5b21b700ef8425bee9b2ea8fdd6ddf1";
     private const string BuildResultOriginalNormalizedSha256 =
-        "fb2bde6714156d36f40578a4016a4a7b9e78bf6f244334526304a509f317115c";
+        "2b8c17af2550480d39da9e7c944b4830b3ec908e8b652bc85bd83c8402487200";
 
     public static TheoryData<string, string[], string[]> ServiceFeatureMembers => new()
     {
@@ -51,6 +51,11 @@ public sealed class ManagedOnnxEngineBuildLayoutTests
                 "CreateLoadedEngineReadbackFingerprint",
                 "TryCollectLayerInformationFromSerializedEngine",
                 "TryCollectLayerInformation",
+                "CreateStructuredLayerInformationContent",
+                "ParseLayerInformationJson",
+                "CreateLayerInformationBoundaryArtifact",
+                "CreateLayerInformationFailureArtifact",
+                "ResolveLayerInformationFormat",
                 "ComputeSha256"
             },
             Array.Empty<string>()
@@ -133,7 +138,7 @@ public sealed class ManagedOnnxEngineBuildLayoutTests
                 "ElapsedMilliseconds", "SkipReason", "NormalizedCommandLine", "NormalizedCommandSha256", "DeploymentOptions",
                 "RuntimeOptions", "BenchmarkSummary", "PreflightMetadata", "LoadedEngineDiagnostics", "TimingCacheArtifact",
                 "CapabilityProbe", "WorkspaceBytes", "BuilderConfigDeploymentSnapshot", "ParserPreflightSnapshot", "RefitSnapshot",
-                "RefitPersistenceSnapshot", "IsRuntimeExecutionProof", "BuildEvidenceOnly", "ProofClassification",
+                "RefitPersistenceSnapshot", "BindingMetadata", "LayerInfoArtifact", "IsRuntimeExecutionProof", "BuildEvidenceOnly", "ProofClassification",
                 "EvidenceClassifications", "IsRealModelRuntimeProof", "IsPackageConsumerRuntimeProof", "StdoutSummary",
                 "StderrSummary", "ModelEvidence", "EvidenceSidecar", "Diagnostics", "LogLines"
             }
@@ -166,7 +171,39 @@ public sealed class ManagedOnnxEngineBuildLayoutTests
                 "Empty", "Attempted", "Succeeded", "DiagnosticsState", "FailureReason", "EngineName", "IOTensorCount",
                 "LayerCount", "OptimizationProfileCount", "DeviceMemorySizeInBytes", "AuxiliaryStreamCount", "Capability",
                 "ProfilingVerbosity", "InspectorInformationLength", "IOTensorSummaries", "ReadbackFingerprint", "ReadbackSha256",
-                "EvidenceBoundary"
+                "EvidenceBoundary", "BindingMetadata", "LayerInfoArtifact"
+            }
+        },
+        {
+            "OnnxEngineLayerInfoArtifact.cs",
+            "OnnxEngineLayerInfoArtifact",
+            new[]
+            {
+                "Empty", "Requested", "Collected", "Source", "State", "InformationFormat", "ContentKind",
+                "RequestedProfilingVerbosity", "LayerCount", "DumpRequested", "ExportRequested", "ExportWritten",
+                "ExportPath", "LengthBytes", "Sha256", "Diagnostics", "EvidenceBoundary", "PointerFreeCopiedSnapshot",
+                "CanPromoteRuntimeProof", "CanPromoteReleaseProof"
+            }
+        },
+        {
+            "OnnxEngineBindingMetadata.cs",
+            "OnnxEngineBindingMetadata",
+            new[]
+            {
+                "Empty", "Attempted", "Succeeded", "State", "EngineName", "ProfileIndex", "ContextReadinessAttached",
+                "IsReadyForEnqueue", "TensorCount", "InputCount", "OutputCount", "Tensors", "Diagnostics", "EvidenceKind",
+                "EvidenceBoundary", "PointerFreeCopiedSnapshot", "CanPromoteRuntimeProof", "CanPromoteReleaseProof"
+            }
+        },
+        {
+            "OnnxEngineBindingTensorMetadata.cs",
+            "OnnxEngineBindingTensorMetadata",
+            new[]
+            {
+                "Index", "Name", "IOMode", "DataType", "EngineShape", "Location", "IsShapeInferenceIO",
+                "BytesPerComponent", "ComponentsPerElement", "EffectiveBytesPerComponent", "EffectiveComponentsPerElement",
+                "UsesDataTypeSizeFallback", "Format", "FormatDescription", "VectorizedDimension", "ProfileIndex",
+                "ProfileMinShape", "ProfileOptShape", "ProfileMaxShape", "Diagnostics"
             }
         },
         {
@@ -234,6 +271,16 @@ public sealed class ManagedOnnxEngineBuildLayoutTests
     }
 
     [Fact]
+    public void StaticExternalOnnxUsesImplicitProfileZeroForReadbackAndExecution()
+    {
+        string source = ReadBuildSource("OnnxEngineBuildService.BuilderConfiguration.cs");
+
+        Assert.Contains("options.ShapeProfile.IsEmpty && options.UsesExternalOnnx", source, StringComparison.Ordinal);
+        Assert.Contains("return 0;", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("return -1;", source, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void BuildServiceFilesRecomposeTheOriginalSource()
     {
         string core = Normalize(ReadBuildSource("OnnxEngineBuildService.cs"));
@@ -288,6 +335,9 @@ public sealed class ManagedOnnxEngineBuildLayoutTests
             "OnnxEngineTimingCacheArtifact.cs",
             "OnnxEngineCapabilityProbe.cs",
             "OnnxLoadedEngineDiagnostics.cs",
+            "OnnxEngineBindingMetadata.cs",
+            "OnnxEngineBindingTensorMetadata.cs",
+            "OnnxEngineLayerInfoArtifact.cs",
             "OnnxEnginePreflightMetadata.cs",
             "OnnxEngineBuildModelEvidence.cs",
             "OnnxEngineBenchmarkSummary.cs"

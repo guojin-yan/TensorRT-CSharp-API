@@ -122,7 +122,7 @@
       "cliSupported": true,
       "winFormsSupported": true,
       "nextImplementationPaths": ["src/JYPPX.TensorRtSharp.Tools/Trtexec/TrtexecLikeWeightStreamingBudget.cs", "src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildService.cs", "applications/TensorRtExec", "tests/fixtures/package-consumers/RefittedPlan.PackageConsumer", "eng/Test-TrtexecRefittedPlanPackageConsumer.ps1"],
-      "nextStep": "Keep TRT8 guards and the TRT11 dependency boundary; retain TRT10 parser-load, engine-commit, persisted reload, baseline comparison, and local-feed PackageReference consumer evidence. External lean-runtime, public-feed and post-publish proof remain separate Owner work."
+      "nextStep": "Keep TRT8 guards and retain TRT10/11 parser-load, engine-commit, persisted reload, context/enqueue, and output-comparison evidence. TRT11 now also has a loadEngine-only second-process reload, identical output SHA, 69/69 strict report checks, and zero reference mismatch. TRT11 version-compatible+refit, weight streaming, external lean-runtime, public-feed, and post-publish proof remain separate Owner work."
     },
     {
       "id": "io-layer-precision-policies",
@@ -132,8 +132,8 @@
       "isPackageConsumerRuntimeProof": false,
       "cliSupported": true,
       "winFormsSupported": true,
-      "nextImplementationPaths": ["src/JYPPX.TensorRtSharp.Tools/Trtexec/TrtexecLikeBuildPolicy.IoFormats.cs", "src/JYPPX.TensorRtSharp.Tools/Trtexec/TrtexecLikeBuildPolicy.Precision.cs", "src/JYPPX.TensorRtSharp.Tools/Trtexec/TrtexecLikeBuildPolicy.Layers.cs", "src/JYPPX.TensorRtSharp/Builder/TensorRtBuilderFlagMapper.cs", "applications/TensorRtExec"],
-      "nextStep": "Retain TRT8/10 compatible-host set/readback evidence; keep TRT11 removed setters guarded and require model-specific layout/output evidence before promotion."
+      "nextImplementationPaths": ["src/JYPPX.TensorRtSharp.Tools/Trtexec/TrtexecLikeBuildPolicy.IoFormats.cs", "src/JYPPX.TensorRtSharp.Tools/Trtexec/TrtexecLikeBuildPolicy.Precision.cs", "src/JYPPX.TensorRtSharp.Tools/Trtexec/TrtexecLikeBuildPolicy.Layers.cs", "src/JYPPX.TensorRtSharp/Builder/TensorRtBuilderFlagMapper.cs", "applications/TensorRtExec", "samples/assets/tensorrtexec-yolov8n-cls-precision-policy-runtime-evidence.json", "samples/assets/tensorrtexec-yolov8n-cls-cross-version-runtime-evidence.json"],
+      "nextStep": "Retain the versioned TRT10.11 requested/applied/readback record and TRT11.0 guarded-runtime record. Keep TRT11 removed setters parse-only, keep internal compute/accumulator precision unclaimed, preserve the TRT8 parser safety blocker, and require model-specific owner evidence before promotion."
     },
     {
       "id": "bounded-benchmark-scheduler",
@@ -188,7 +188,7 @@
       "cliSupported": true,
       "winFormsSupported": true,
       "nextImplementationPaths": ["src/JYPPX.TensorRtSharp/Engine/TensorRtEngineInspector.Trt11Diagnostics.cs", "docs/articles/zh-cn/publishing"],
-      "nextStep": "Capture compatible-host TRT8/10/11 copied inspector layer reports while keeping external ONNX semantics as owner-reviewed diagnostic metadata, not model correctness proof."
+      "nextStep": "Retain the TRT10.11 and TRT11.0 detailed JSON inspector records with top-level LayerInfoArtifact file/hash validation. TRT8 parser creation now has a native SEH/status boundary and a successful isolated MNIST parse/build/enqueue probe, but TRT8 detailed LayerInfoArtifact, internal precision, external-model semantics, and package consumption remain separate owner-reviewed gaps."
     },
     {
       "id": "verbose-logging",
@@ -204,24 +204,24 @@
     {
       "id": "binding-metadata",
       "officialTrtexecParity": "--loadInputs --dumpOutput --dumpRawBindingsToFile --exportOutput plus JYPPX structured reference validation",
-      "currentStatus": "implemented-pointer-free-multi-input-binding-multi-output-artifacts-and-reference-validation",
+      "currentStatus": "implemented-structured-pointer-free-binding-report-and-reference-validation",
       "isRuntimeProof": false,
       "isPackageConsumerRuntimeProof": false,
       "cliSupported": true,
       "winFormsSupported": true,
-      "nextImplementationPaths": ["src/JYPPX.TensorRtSharp.Tools/Artifacts/OnnxEngineRuntimeArtifactWriter.cs", "src/JYPPX.TensorRtSharp.Tools/Artifacts/OnnxEngineRuntimeValidationArtifacts.cs", "applications/YoloVision", "applications/YoloVision/yolovision-task-output-contract.json", "eng/Test-YoloVisionRealAssetCandidate.ps1", "eng/Test-YoloVisionRealAssetOwnerBackfillPack.ps1"],
-      "nextStep": "Retain engine-order input/output metadata, reference comparison diagnostics, per-tensor hashes, and deterministic raw offsets; owner must still supply reviewed real-model reference sources, model/engine/input/log hashes, task roles, and public consumer evidence before promotion."
+      "nextImplementationPaths": ["src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBindingMetadata.cs", "src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildDiagnostics.Json.cs", "applications/TensorRtExec/tensor-rt-exec-report.schema.json", "applications/TensorRtExec/Core/TensorRtExecReportFormatter.cs", "src/JYPPX.TensorRtSharp.Tools/Artifacts/OnnxEngineRuntimeValidationArtifacts.cs", "applications/YoloVision", "applications/YoloVision/yolovision-task-output-contract.json", "samples/assets/tensorrtexec-yolov8n-cls-precision-policy-runtime-evidence.json", "eng/Test-YoloVisionRealAssetCandidate.ps1", "eng/Test-YoloVisionRealAssetOwnerBackfillPack.ps1"],
+      "nextStep": "Retain top-level pointer-free BindingMetadata, shared CLI/WinForms summaries, reference comparison diagnostics, per-tensor hashes, deterministic raw offsets, and the external static YOLOv8n-cls profile-zero runtime record. The linked YoloVision record remains the model-specific real-model proof; public consumer evidence is still required before release promotion."
     },
     {
       "id": "winforms-command-surface",
       "officialTrtexecParity": "GUI parity for CLI options",
-      "currentStatus": "checklist-and-real-gui-build-backed",
+      "currentStatus": "shared-command-report-error-formatting-checklist-and-real-gui-build-backed",
       "isRuntimeProof": false,
       "isPackageConsumerRuntimeProof": false,
-      "cliSupported": false,
+      "cliSupported": true,
       "winFormsSupported": true,
-      "nextImplementationPaths": ["applications/TensorRtExec/WinForms", "applications/TensorRtExec/tensor-rt-exec-gui-cli-field-map.json", "docs/articles/zh-cn/tensorrtexec-gui-user-guide.md", "samples/assets/tensorrtexec-gui-article-runtime-evidence.json"],
-      "nextStep": "Retain the 84-option GUI/CLI map and the real MNIST ONNX GUI build record. Keep both classified as parity/build evidence rather than inference or release proof."
+      "nextImplementationPaths": ["applications/TensorRtExec/Core/TensorRtExecOptions.cs", "applications/TensorRtExec/Core/TensorRtExecReportFormatter.cs", "applications/TensorRtExec/Console/TensorRtExecCommand.cs", "applications/TensorRtExec/WinForms/MainForm.cs", "applications/TensorRtExec/tensor-rt-exec-gui-cli-field-map.json", "docs/articles/zh-cn/tensorrtexec-gui-user-guide.md", "samples/assets/tensorrtexec-gui-article-runtime-evidence.json"],
+      "nextStep": "Retain the shared normalized command, report/error formatter, 84-option GUI/CLI map, and real MNIST ONNX GUI build record. Keep all of them classified as parity/build evidence rather than inference or release proof."
     },
     {
       "id": "package-consumer-runtime-proof-boundary",
@@ -231,8 +231,8 @@
       "isPackageConsumerRuntimeProof": false,
       "cliSupported": false,
       "winFormsSupported": false,
-      "nextImplementationPaths": ["tests/fixtures/package-consumers/RefittedPlan.PackageConsumer", "eng/Test-TrtexecRefittedPlanPackageConsumer.ps1", "eng/Test-TrtexecRefittedPlanPackageConsumerEvidence.ps1", "eng/Test-PackageConsumerRuntimeProofRecord.ps1", "docs/articles/zh-cn/publishing/package-consumer-proof-public-article.md"],
-      "nextStep": "Retain the completed local-file-feed refitted-plan runtime as local engineering evidence. Wait for an external consumer using a public package source plus post-publish strict validators before setting isPackageConsumerRuntimeProof=true."
+      "nextImplementationPaths": ["tests/fixtures/package-consumers/RefittedPlan.PackageConsumer", "eng/Test-TrtexecRefittedPlanPackageConsumer.ps1", "eng/Test-TrtexecRefittedPlanPackageConsumerEvidence.ps1", "artifacts/interface-coverage/trtexec-refitted-plan-package-consumer-evidence.json", "artifacts/interface-coverage/trtexec-refitted-plan-package-consumer-validation.json", "eng/Test-PackageConsumerRuntimeProofRecord.ps1", "docs/articles/zh-cn/publishing/package-consumer-proof-public-article.md"],
+      "nextStep": "Retain the 2026-08-09 current-Release local-file-feed refitted-plan runtime and its 53/53 strict validation as local engineering evidence. Wait for an external consumer using a public package source plus post-publish strict validators before setting isPackageConsumerRuntimeProof=true."
     }
   ]
 }

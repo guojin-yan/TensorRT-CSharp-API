@@ -36,11 +36,13 @@ applications/TensorRtExec/tensor-rt-exec-release-candidate-gap-list.md
 
 第四类是 deployment policy 的执行证明。`--device`、DLA/GPU fallback、tactic sources、DirectIO、sparsity enable/disable 和 strongly typed 已接入 typed set/readback 或 version-aware network creation：TRT10 使用 raw bit，TRT11 依赖 always-strongly-typed 契约。TRT10.11 identity smoke 只证明主机配置和 synthetic runtime；TRT8 strongly typed、sparsity force 保持 parse-only，DLA layer 真执行还需要 DLA 主机和真实模型。
 
-第五类是 I/O 与 layer precision policy。TRT8/10 已完成官方 grammar、IO broadcast/count、exact-before-wildcard、later-rule override、单 output type broadcast 和 typed readback；TRT11 只能在请求 type 与 inferred type 相等时设置 allowed formats，移除的 precision constraint/layer setters 保持 parse-only。identity smoke 证明路由和 readback，但不证明真实模型的 caller layout、tactic 或数值正确性。
+第五类是 I/O 与 layer precision policy。TRT8/10 已完成官方 grammar、IO broadcast/count、exact-before-wildcard、later-rule override、单 output type broadcast 和 typed readback；TRT10.11 外部 YOLOv8n-cls 进一步验证 `fp32:chw` 输入/输出、`obey` 和首个卷积层 FP32 precision/output type 的 requested/applied/readback，并以 1000 个独立参考值零 mismatch 收口输出。详细 inspector 现在导出自描述的合法 JSON 并由顶层 `LayerInfoArtifact` 记录长度/SHA256。本次 TRT10.11 产物含 87 层，目标卷积层显示 Float 输入/输出、Float 权重/偏置和选中的 `sm80_xmma_fprop_implicit_gemm...` tactic；层数和 tactic 只绑定该次 engine build。TRT11.0 也完成 88 层导出、engine round-trip 与 1000 值零 mismatch，但只对 inferred type 已匹配的 FP32 I/O format 报告 applied，移除的 precision constraint/layer setters 保持 parse-only。TRT8 Windows parser 已通过原生 SEH/status 转换隔离风险，并在独立子进程完成 MNIST parse、engine build/round-trip、enqueue 与 10 值零 mismatch；本次没有 TRT8 detailed layer artifact，仍不能声明 layer policy 或外部模型语义。TensorRT 没有提供独立的内部计算/累加精度字段，因此这部分继续保持未观测边界，也不替代 YoloVision 模型语义证明。
 
-第六类是 WinForms parity。GUI 不应该只是“能打开页面”，而是要能覆盖 CLI 的主要参数、生成可复制命令、展示 report 摘要和错误诊断。
+第六类是 WinForms parity。当前 GUI 已覆盖 84 个 normalized options，命令预览继续由 `TensorRtExecOptions.ToArgumentLine()` 生成；CLI 与 WinForms 现在还共用 `TensorRtExecReportFormatter`，因此结构化 binding 摘要、refit 状态、最终状态和错误分类来自同一实现。8 月 4 日的真实 MNIST GUI build-only 截图与 assembly 证据保持原样，8 月 9 日的 formatter 源码更新被单独标记为未重采运行证据，不能借此晋级 runtime proof。
 
-第七类是 proof 边界。TensorRtExec 可以辅助生成 build report 和 sidecar，但不能替代 YoloVision real-model-runtime proof，更不能替代 clean external consumer 的 package-consumer-runtime proof。
+`binding-metadata` 也已从字符串化 `IOTensorSummaries` 收口为顶层 `BindingMetadata`：build、load-engine 和 bounded runtime 都会复制 engine-order input/output mode、dtype、engine/profile shape、location、format、vectorization、byte-size fallback 和 diagnostics，并固定 `PointerFreeCopiedSnapshot=true`、`CanPromoteRuntimeProof=false`、`CanPromoteReleaseProof=false`。外部静态 YOLOv8n-cls 现在使用隐式 profile 0，输入 `1x3x224x224`、输出 `1x1000` 均在 enqueue 前完成读回；证据位于 `samples/assets/tensorrtexec-yolov8n-cls-precision-policy-runtime-evidence.json`。YoloVision 仍负责模型特定的 semantic role 和 real-model-runtime 晋级。
+
+第七类是 proof 边界。TensorRtExec 可以辅助生成 build report 和 sidecar，但不能替代 YoloVision real-model-runtime proof。本次 current Release 托管包与当前 bridge 包已通过仓外、仅两个本地 feed、PackageReference-only 的 refitted-plan consumer，严格校验为 `53/53`；它仍明确是 local package-consumer engineering evidence，不能替代 public-feed、post-publish 的 package-consumer-runtime proof。
 
 ## 配图建议
 
@@ -50,4 +52,4 @@ applications/TensorRtExec/tensor-rt-exec-release-candidate-gap-list.md
 
 ## 下一步
 
-下一阶段优先补 I/O format 与 layer policy 的真实外部模型 layout/expected-output 证据、剩余 runtime mechanics、`binding-metadata` 和 `winforms-command-surface`；deployment policy、I/O/layer policy、`workspace-memory-pool` 与 `timing-iterations` 继续进入 compatible-host owner build record。所有实现都需要同步更新 CLI、WinForms、文档、测试和 proof 边界说明。
+下一阶段不再重复补 TRT10.11 YOLOv8n-cls 的 I/O/layer requested-applied-readback、expected-output、引擎层 I/O datatype/format 与 tactic 本地证据；剩余工作是内部计算/累加精度的独立可观测性、其他受支持 TensorRT 线的 compatible-host owner record，以及公开 package consumer/post-publish 证明。`binding-metadata` 与 `winforms-command-surface` 已完成本地代码、schema、validator、CLI/GUI 输出和合同测试收口。

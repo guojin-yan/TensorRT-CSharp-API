@@ -5,7 +5,7 @@ English | [简体中文](README.zh-CN.md)
 `samples/` contains small, focused, runnable workflows. The directory name is part of the learning path: each
 capability is a module and each case has a stable numeric prefix.
 
-Only the numbered projects under `Cuda`, `Inference`, `Performance`, and `ComputerVision` are user-facing samples.
+Only the numbered projects under `Cuda`, `Inference`, `Diagnostics`, `Performance`, and `ComputerVision` are user-facing samples.
 `_shared` contains source files compiled into those projects, while `assets` contains lightweight manifests and
 evidence metadata. Package-consumer templates and independent reference programs live under `tests/fixtures`; they
 are test inputs, not additional samples.
@@ -17,6 +17,9 @@ are test inputs, not additional samples.
 | `Cuda` | `Cuda/01.RuntimeCompilation` | CUDA RTC source compilation, module loading, typed launch, and readback | [CUDA RTC article](../docs/articles/zh-cn/cuda-runtime-compilation-technical-article.md) |
 | `Inference` | `Inference/01.Bindings` | TensorRT input/output bindings and host/device ownership | [Inference bindings tutorial](../docs/articles/zh-cn/inference-bindings-tutorial.md) |
 | `Inference` | `Inference/02.DynamicShapes` | Explicit optimization profiles and dynamic shape execution | [Dynamic shape tutorial](../docs/articles/zh-cn/dynamic-shape-optimization-profile-tutorial.md) |
+| `Inference` | `Inference/03.OnnxBuildAndRun` | Public-package ONNX parsing, engine build, one inference, and structured JSON | [Sample README](Inference/03.OnnxBuildAndRun/README.md) |
+| `Inference` | `Inference/04.RefittedPlan` | ONNX initializer refit, plan persistence, disk reload, and output verification | [Sample README](Inference/04.RefittedPlan/README.md) |
+| `Diagnostics` | `Diagnostics/01.CallbackLifecycle` | Logger, ProgressMonitor, Profiler, and DebugListener ownership and detach order | [Sample README](Diagnostics/01.CallbackLifecycle/README.md) |
 | `Performance` | `Performance/01.MultiStream` | CUDA streams, events, and cross-stream ordering | [Multi-stream tutorial](../docs/articles/zh-cn/cuda-stream-event-multistream-tutorial.md) |
 | `ComputerVision` | `ComputerVision/01.Classification` | Image preprocessing, TensorRT classification, Top-K, JSON, and an annotated result image | [Classification walkthrough](../docs/articles/zh-cn/classification-real-asset-walkthrough.md) |
 
@@ -64,6 +67,9 @@ Run commands from the repository root. The offline commands do not require CUDA 
 dotnet run --project .\samples\Cuda\01.RuntimeCompilation -- --help
 dotnet run --project .\samples\Inference\01.Bindings -- --help
 dotnet run --project .\samples\Inference\02.DynamicShapes -- --help
+dotnet run --project .\samples\Inference\03.OnnxBuildAndRun -- --help
+dotnet run --project .\samples\Inference\04.RefittedPlan -- --help
+dotnet run --project .\samples\Diagnostics\01.CallbackLifecycle -- --help
 dotnet run --project .\samples\Performance\01.MultiStream -- --help
 dotnet run --project .\samples\ComputerVision\01.Classification -- --help
 dotnet run --project .\applications\YoloVision -- --list-capabilities

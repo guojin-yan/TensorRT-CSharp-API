@@ -64,14 +64,27 @@ Add-Check "trt10-load-diagnostics" ([bool]$load.diagnosticsSucceeded) "Load-engi
 Add-Check "trt10-load-auto-budget" ([bool]$load.readbackMatch -and [long]$load.resolvedBudgetBytes -eq [long]$load.automaticBudgetBytes) "Automatic budget resolved and read back"
 Add-Check "trt10-load-enqueue" ([bool]$load.inferenceRan) "Load-engine bounded runtime executed"
 
-Add-Check "trt11-dependency-boundary" ($record.tensorRt11.proofClassification -eq "dependency-probe-only" -and [int64]$record.tensorRt11.knownVendorStructuredExceptionCode -eq 3228369022) "TRT11 known structured exception remains dependency-only"
+$trt11ReportPath = Resolve-RepositoryPath $record.reports.trt11.path
+$trt11HistoricalPath = Resolve-RepositoryPath $record.reports.trt11HistoricalDependencyProbe.path
+$trt11Report = Get-Content -LiteralPath $trt11ReportPath -Raw | ConvertFrom-Json
+Add-Check "trt11-refit-runtime" (
+  (Get-FileHash -LiteralPath $trt11ReportPath -Algorithm SHA256).Hash.ToLowerInvariant() -eq $record.reports.trt11.sha256 -and
+  $trt11Report.State -eq "external-onnx-refit-reload-reference-validated-runtime" -and
+  [bool]$trt11Report.RefitSnapshot.Succeeded -and
+  [bool]$trt11Report.RefitPersistenceSnapshot.Succeeded -and
+  [bool]$trt11Report.OutputValidated -and
+  @($trt11Report.OptionImplementationStatus.AppliedOptions) -contains "--refitFromOnnx" -and
+  @($trt11Report.OptionImplementationStatus.AppliedOptions) -contains "--saveRefittedEngine") "TRT11 stripped-plan refit, persistence, reload, and reference validation"
+Add-Check "trt11-historical-probe-retained" (
+  (Get-FileHash -LiteralPath $trt11HistoricalPath -Algorithm SHA256).Hash.ToLowerInvariant() -eq $record.reports.trt11HistoricalDependencyProbe.sha256 -and
+  [bool]$record.tensorRt11.historicalDependencyProbeRetained) "Historical TRT11 dependency probe remains immutable"
 $boundary = $record.proofBoundary
 Add-Check "proof-boundary" (
   [bool]$boundary.isBuilderAndEnginePolicyEvidence -and
   [bool]$boundary.isWeightedModelEnqueueEvidence -and
   -not [bool]$boundary.isModelAccuracyProof -and
   -not [bool]$boundary.isCrossVersionLeanRuntimeProof -and
-  -not [bool]$boundary.isStrippedPlanRefitLifecycleProof -and
+  [bool]$boundary.isStrippedPlanRefitLifecycleProof -and
   -not [bool]$boundary.isPackageConsumerRuntimeProof -and
   -not [bool]$boundary.isPostPublishProof -and
   -not [bool]$boundary.canPublishPublicly -and

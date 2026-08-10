@@ -146,6 +146,11 @@ public sealed partial class OnnxEngineBuildService
                 worker.Configure(runtimeInputs, outputs, options.RuntimeOptions.NoDataTransfers);
             }
 
+            OnnxEngineBindingMetadata bindingMetadata = OnnxEngineBindingMetadata.FromBindingReport(
+                firstWorker.Bindings.Report,
+                "runtime-binding-readback");
+            log.Add($"BindingMetadata State={bindingMetadata.State} Tensors={bindingMetadata.TensorCount} Inputs={bindingMetadata.InputCount} Outputs={bindingMetadata.OutputCount} ContextReadinessAttached={bindingMetadata.ContextReadinessAttached} ReadyForEnqueue={bindingMetadata.IsReadyForEnqueue} EvidenceKind={bindingMetadata.EvidenceKind}");
+
             OnnxEngineBenchmarkRun benchmark = RunBoundedBenchmark(workers, options);
             float elapsedMilliseconds = benchmark.TimingSamplesMilliseconds[0];
 
@@ -262,7 +267,8 @@ public sealed partial class OnnxEngineBuildService
                     benchmark.UseCudaGraphApplied,
                     benchmark.UseCudaGraphFallbackReason,
                     benchmark.MeasurementRoundsPerContext),
-                artifactData);
+                artifactData,
+                bindingMetadata);
         }
         finally
         {
@@ -358,7 +364,8 @@ public sealed partial class OnnxEngineBuildService
             int profileIndex,
             float elapsedMilliseconds,
             OnnxEngineBenchmarkSummary benchmarkSummary,
-            OnnxEngineRuntimeArtifactData artifactData)
+            OnnxEngineRuntimeArtifactData artifactData,
+            OnnxEngineBindingMetadata bindingMetadata)
         {
             InferenceRan = inferenceRan;
             OutputMatch = outputMatch;
@@ -368,6 +375,7 @@ public sealed partial class OnnxEngineBuildService
             ElapsedMilliseconds = elapsedMilliseconds;
             BenchmarkSummary = benchmarkSummary ?? OnnxEngineBenchmarkSummary.Empty;
             ArtifactData = artifactData ?? OnnxEngineRuntimeArtifactData.Empty;
+            BindingMetadata = bindingMetadata ?? OnnxEngineBindingMetadata.Empty;
         }
 
         public bool InferenceRan { get; }
@@ -385,6 +393,8 @@ public sealed partial class OnnxEngineBuildService
         public OnnxEngineBenchmarkSummary BenchmarkSummary { get; }
 
         public OnnxEngineRuntimeArtifactData ArtifactData { get; }
+
+        public OnnxEngineBindingMetadata BindingMetadata { get; }
     }
 
     private sealed class OnnxEngineRuntimeInput

@@ -1,8 +1,8 @@
 {
   "schemaVersion": "trtexec-onnx-refit-lifecycle-validation.v1",
   "strict": true,
-  "checkCount": 24,
-  "passedCount": 24,
+  "checkCount": 35,
+  "passedCount": 35,
   "failureCount": 0,
   "checks": [
     {
@@ -96,9 +96,64 @@
       "actual": "dry-run-precheck/True"
     },
     {
-      "id": "trt11-dependency",
+      "id": "trt11-report-hash",
       "passed": true,
-      "actual": "dependency-probe-only/True"
+      "actual": "18ca7c2bd477ecf699406bcfd3b74d7fba07cb683e810a9ab12d1bdbcb8aa2e5"
+    },
+    {
+      "id": "trt11-output-artifact-hash",
+      "passed": true,
+      "actual": "d8d40cb3d174a742dc600eeff564b9df0b25228012546cb4f59af273946a7217"
+    },
+    {
+      "id": "trt11-strict-validation-hash",
+      "passed": true,
+      "actual": "f57a229840d86ad938f268ae45f9f8ef3f24d8bd9fc7755bd0a04ddcf6ccb756"
+    },
+    {
+      "id": "trt11-state",
+      "passed": true,
+      "actual": "external-onnx-refit-reload-reference-validated-runtime/True/False"
+    },
+    {
+      "id": "trt11-options-applied",
+      "passed": true,
+      "actual": "--tensor-rt-line,--workspace,--builderOptimizationLevel,--loadEngine,--stripWeights,--refit,--refitFromOnnx,--saveRefittedEngine,--minShapes/--optShapes/--maxShapes,--saveEngine,--loadInputs,--exportOutput,--referenceOutputs,--referenceAbsTolerance,--referenceRelTolerance,--referenceNaNPolicy,--referenceInfinityPolicy,--iterations,--warmUp,--duration,--streams"
+    },
+    {
+      "id": "trt11-refit-gates",
+      "passed": true,
+      "actual": "onnx-refit-complete/True"
+    },
+    {
+      "id": "trt11-refit-inventory",
+      "passed": true,
+      "actual": "0/6/0"
+    },
+    {
+      "id": "trt11-model-hash",
+      "passed": true,
+      "actual": "26454/2f06e72de813a8635c9bc0397ac447a601bdbfa7df4bebc278723b958831c9bf"
+    },
+    {
+      "id": "trt11-runtime-output",
+      "passed": true,
+      "actual": "True/True/3e4d0227be4c8e760f58a0b306ae7153df78b56586b5c3f5ddc658319e5c5b7c"
+    },
+    {
+      "id": "trt11-reference-comparison",
+      "passed": true,
+      "actual": "0/1.9073486E-06"
+    },
+    {
+      "id": "trt11-strict-validation",
+      "passed": true,
+      "actual": "tensor-rt-exec-report-ready/0/69"
+    },
+    {
+      "id": "trt11-historical-probe-retained",
+      "passed": true,
+      "actual": "dependency-probe-only/artifacts/real-case/trtexec-onnx-refit-lifecycle/trt11-refit-dependency-probe.json"
     },
     {
       "id": "boundary-local",
@@ -111,9 +166,9 @@
       "actual": "False"
     },
     {
-      "id": "boundary-no-persistence",
+      "id": "boundary-local-persistence",
       "passed": true,
-      "actual": "False"
+      "actual": "True"
     },
     {
       "id": "boundary-no-package",

@@ -1,6 +1,6 @@
 {
   "schemaVersion": "trtexec-engine-packaging-runtime-evidence.v1",
-  "generatedAt": "2026-07-22",
+  "generatedAt": "2026-08-10",
   "evidenceKind": "local-project-reference-engine-packaging-and-weight-streaming-policy",
   "reports": {
     "trt8": {
@@ -29,6 +29,11 @@
       "sha256": "974cb3d040034c8f440eb833ee0d4b30155b790ca3598437bef8c6b394fbc44e"
     },
     "trt11": {
+      "path": "artifacts/real-case/tensorrtexec-trt11-refit-lifecycle-20260810-091859/report.json",
+      "lengthBytes": 46679,
+      "sha256": "18ca7c2bd477ecf699406bcfd3b74d7fba07cb683e810a9ab12d1bdbcb8aa2e5"
+    },
+    "trt11HistoricalDependencyProbe": {
       "path": "artifacts/real-case/trtexec-engine-packaging-policy/trt11-packaging-dependency-probe.json",
       "lengthBytes": 17635,
       "sha256": "c917dd35a12084669f24d05166f43eaa55c4155e4d4650d18cc111c61138f5a9"
@@ -129,19 +134,24 @@
     }
   },
   "tensorRt11": {
-    "state": "dependency-probe-only",
-    "proofClassification": "dependency-probe-only",
-    "knownVendorStructuredExceptionCode": 3228369022,
-    "reachedBuilderPolicyApplication": false,
-    "requestedOptionsRemainParseOnly": true,
-    "skipReason": "TensorRT native build dependency or runtime is unavailable: TensorRT 11.x runtime creation raised a structured exception with code 3228369022."
+    "state": "external-onnx-refit-reload-reference-validated-runtime",
+    "proofClassification": "synthetic-input-runtime",
+    "reachedBuilderPolicyApplication": true,
+    "requestedOptionsRemainParseOnly": false,
+    "refitConfigReadbackMatch": true,
+    "stripPlanReadbackMatch": true,
+    "parserRefitReturned": true,
+    "engineRefitReturned": true,
+    "persistedReloadSucceeded": true,
+    "outputValidated": true,
+    "historicalDependencyProbeRetained": true
   },
   "proofBoundary": {
     "isBuilderAndEnginePolicyEvidence": true,
     "isWeightedModelEnqueueEvidence": true,
     "isModelAccuracyProof": false,
     "isCrossVersionLeanRuntimeProof": false,
-    "isStrippedPlanRefitLifecycleProof": false,
+    "isStrippedPlanRefitLifecycleProof": true,
     "isPackageConsumerRuntimeProof": false,
     "isPostPublishProof": false,
     "canPublishPublicly": false,

@@ -1,8 +1,8 @@
 # TensorRtExec Refitted Plan Persistence Validation
 
 - Strict: `True`
-- Checks: `35`
-- Passed: `35`
+- Checks: `52`
+- Passed: `52`
 - Failed: `0`
 
 | Check | Passed | Actual |
@@ -34,11 +34,28 @@
 | `trt8-report-hash` | `True` | `b801bb53913065180e8c82392a638aafa317b5c99cb2deb1d0de1e5cf9175e18` |
 | `trt8-dry-parse-only` | `True` | `dry-run-precheck/True` |
 | `trt8-nondry-guard` | `True` | `2/TensorRT 8 has no ONNX parser-refitter API` |
-| `trt11-report-hash` | `True` | `5c991040999d51403b9646c5610a81bf2a3ee1bb01f0f738f60f826f7b468dda` |
-| `trt11-dependency-only` | `True` | `dependency-probe-only/dependency-probe-only` |
-| `trt11-not-applied` | `True` | `--stripWeights,--refit,--refitFromOnnx,--saveRefittedEngine,--iterations,--warmUp,--duration,--streams,capability-probe-only` |
+| `trt11-same-report-hash` | `True` | `18ca7c2bd477ecf699406bcfd3b74d7fba07cb683e810a9ab12d1bdbcb8aa2e5` |
+| `trt11-same-output-artifact-hash` | `True` | `d8d40cb3d174a742dc600eeff564b9df0b25228012546cb4f59af273946a7217` |
+| `trt11-same-validation-hash` | `True` | `f57a229840d86ad938f268ae45f9f8ef3f24d8bd9fc7755bd0a04ddcf6ccb756` |
+| `trt11-second-report-hash` | `True` | `5f45fd23017b35064d9cb8c2f7b753320d5764cc1bcf5f0eb6b61fd36c1f43cd` |
+| `trt11-second-output-artifact-hash` | `True` | `4a981597505d1ca6682ae557230ac0fddf85e80a3628b6f73f22c1d1cbc7f469` |
+| `trt11-second-validation-hash` | `True` | `b6144334d07d98e24d527a8f583cda8eaba116913875452c26d39d7e1a7ebd94` |
+| `trt11-state` | `True` | `external-onnx-refit-reload-reference-validated-runtime/True/False` |
+| `trt11-applied` | `True` | `--tensor-rt-line,--workspace,--builderOptimizationLevel,--loadEngine,--stripWeights,--refit,--refitFromOnnx,--saveRefittedEngine,--minShapes/--optShapes/--maxShapes,--saveEngine,--loadInputs,--exportOutput,--referenceOutputs,--referenceAbsTolerance,--referenceRelTolerance,--referenceNaNPolicy,--referenceInfinityPolicy,--iterations,--warmUp,--duration,--streams` |
+| `trt11-plan-hashes` | `True` | `1ad0ba680913fc50e2278bd8c1d7ed357b9fb3e6b9e766d435f907911b8b86c7/c20d0797a16dcc553e714f9de719d9bcd9f6f6adbb3f4dab0eef089e6c2e04c9` |
+| `trt11-exclude-weights` | `True` | `3/2` |
+| `trt11-owner-dispose-reload` | `True` | `True/True/True` |
+| `trt11-reload-metadata` | `True` | `2/5/1` |
+| `trt11-runtime-selected` | `True` | `True/True` |
+| `trt11-second-process-independent-command` | `True` | `--tensor-rt-line 11 --loadEngine E:\GitSpace\TensorRT-CSharp-API-4.0\TensorRtSharp4.0\artifacts\real-case\tensorrtexec-trt11-refit-lifecycle-20260810-091859\mnist-trt11-refitted-full-weight.plan --workspace 64 --profilingVerbosity layer_names_only --exportReport E:\GitSpace\TensorRT-CSharp-API-4.0\TensorRtSharp4.0\artifacts\real-case\tensorrtexec-trt11-refit-lifecycle-20260810-091859\second-process-reload\report.json --batch 2 --iterations 1 --warmUp 0 --duration 0 --streams 1 --builderOptimizationLevel 3 --loadInputs Input3:E:\GitSpace\TensorRT-CSharp-API-4.0\TensorRtSharp4.0\artifacts\real-case\onnx-to-engine-mnist-trt10-runtime\digit-7\mnist-trt10-7-input-f32.bin --exportOutput E:\GitSpace\TensorRT-CSharp-API-4.0\TensorRtSharp4.0\artifacts\real-case\tensorrtexec-trt11-refit-lifecycle-20260810-091859\second-process-reload\output.json --referenceOutputs Plus214_Output_0:E:\GitSpace\TensorRT-CSharp-API-4.0\TensorRtSharp4.0\artifacts\real-case\onnx-to-engine-mnist-trt10-runtime\digit-7\mnist-trt10-7.reference.json --referenceAbsTolerance 0.0001 --referenceRelTolerance 0.0001 --referenceNaNPolicy reject --referenceInfinityPolicy exact` |
+| `trt11-second-process-reload` | `True` | `load-engine-reference-validated-runtime/True/True` |
+| `trt11-output-match` | `True` | `3e4d0227be4c8e760f58a0b306ae7153df78b56586b5c3f5ddc658319e5c5b7c/3e4d0227be4c8e760f58a0b306ae7153df78b56586b5c3f5ddc658319e5c5b7c` |
+| `trt11-strict-validations` | `True` | `tensor-rt-exec-report-ready/0/tensor-rt-exec-report-ready/0` |
+| `trt11-process-exits` | `True` | `0/0` |
+| `trt11-historical-probe-retained` | `True` | `dependency-probe-only/artifacts/real-case/trtexec-refitted-plan-persistence/trt11-save-refitted-dependency-probe.json` |
 | `boundary-local` | `True` | `True` |
 | `boundary-no-accuracy` | `True` | `False` |
-| `boundary-no-package` | `True` | `False/False/False/False` |
+| `boundary-trt11-local` | `True` | `True/True` |
+| `boundary-no-package` | `True` | `False/False/False/False/False/False` |
 | `boundary-no-publish` | `True` | `False/False` |
 | `boundary-no-release-close` | `True` | `False` |

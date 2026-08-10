@@ -10,7 +10,7 @@
 
 ## Parity 的核心思路
 
-项目用 `applications/TensorRtExec/Core/TensorRtExecOptions.cs` 表达共享选项，用 `Console/TensorRtExecCommand.cs` 做 CLI 入口，用 `WinForms/MainForm.cs` 做桌面配置。`artifacts/final-release/tensor-rt-exec-gui-cli-parity-checklist.json` 则把 `onnx`、`save-engine`、`load-engine`、shape profiles、precision、INT8 calibration、workspace、timing cache、plugins、profiling、layer info、runtime benchmark、binding output、safety/cache policy、device/DLA 等能力列成 machine-readable checklist。
+项目用 `applications/TensorRtExec/Core/TensorRtExecOptions.cs` 表达共享选项，用 `Console/TensorRtExecCommand.cs` 做 CLI 入口，用 `WinForms/MainForm.cs` 做桌面配置。命令预览统一调用 `TensorRtExecOptions.ToArgumentLine()`；执行后的 binding metadata、refit 状态、最终状态和错误分类统一调用 `TensorRtExecReportFormatter`。`artifacts/final-release/tensor-rt-exec-gui-cli-parity-checklist.json` 则把 `onnx`、`save-engine`、`load-engine`、shape profiles、precision、INT8 calibration、workspace、timing cache、plugins、profiling、layer info、runtime benchmark、binding output、safety/cache policy、device/DLA 等能力列成 machine-readable checklist。
 
 ## 用户如何使用
 
@@ -23,7 +23,7 @@ GUI 用户可以通过 WinForms 配置同类选项，并从 command preview 中�
 
 ## 设计边界
 
-TensorRtExec 可以生成 build/precheck report、profile/layer info 等诊断数据。它有助于模型转换和问题定位，但 report 不等于 inference output correctness，也不等于 public package consumer runtime proof。尤其是 build-only 和 parse-only 状态，只能说明 engine build 或参数解析路径，不代表真实 runtime enqueue 已验证。
+TensorRtExec 可以生成 build/precheck report、profile/layer info 和顶层 `BindingMetadata` 等诊断数据。`BindingMetadata` 从 `TensorRtEngineBindingReport` 复制 engine-order mode、dtype、shape、location、format 和 vectorization，不持有 native pointer。它有助于模型转换和问题定位，但 report 不等于 inference output correctness，也不等于 public package consumer runtime proof。尤其是 build-only 和 parse-only 状态，只能说明 engine build 或参数解析路径，不代表真实 runtime enqueue 已验证。
 
 ## 边界说明
 

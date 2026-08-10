@@ -1,0 +1,131 @@
+{
+  "schemaVersion": 1,
+  "recordKind": "tensorrtexec-cross-version-external-onnx-runtime-evidence",
+  "recordId": "tensorrtexec-yolov8n-cls-trt8-trt11-20260810",
+  "executedUtcDate": "2026-08-10",
+  "sourceBaseCommit": "3d30ed8b5ea35b5b8dba7bb7d3b6718019e831e2",
+  "sourceTreeDirtyAtExecution": true,
+  "sharedAssets": {
+    "modelSha256": "630c022a99885d59f633ab5a614738f8a49be7f361e340fd3ff89b8c19b0768f",
+    "inputSha256": "05e47521b07652eee70942902ab5bf070edc9da7067466a5433c7cdd29fb1a62",
+    "referenceSha256": "ded68dd048acdee3a38e95dc46490517e85ece8346f1ebe627bdd88cdb307697",
+    "inputShape": [1, 3, 224, 224],
+    "outputShape": [1, 1000]
+  },
+  "runs": {
+    "tensorRt8": {
+      "tensorRtVersion": "8.6.1",
+      "cudaToolkitVersion": "12.1",
+      "nativeBridgeSha256": "78bb65dec98137c121d29b1c3cdd43a5e33a54fbfcef67bfec9d89a09594a51b",
+      "normalizedCommandSha256": "e0e0ef8581f72e25b45672b345316ab0c555f4ff3a53d1ff5bcc0fdd72312465",
+      "processExitCode": 0,
+      "success": true,
+      "skipped": true,
+      "state": "dependency-probe-only",
+      "proofClassification": "dependency-probe-only",
+      "runtimeAvailable": true,
+      "builderAvailable": true,
+      "parsed": false,
+      "engineSaved": false,
+      "inferenceRan": false,
+      "outputValidated": false,
+      "layerInfoArtifact": {
+        "requested": true,
+        "collected": false,
+        "state": "dependency-probe-only",
+        "layerCount": 0,
+        "exportWritten": false
+      },
+      "blockerKind": "vendor-seh-parser-safety-guard",
+      "blocker": "TensorRT 8 ONNX parser creation is disabled on Windows in the current bridge because nvonnxparser::createParser can raise a vendor SEH exception in the validated TensorRT 8.6 Windows package.",
+      "ownerAction": "Isolate the vendor SEH path before enabling TRT8 Windows ONNX parsing, or build the network through TensorRtBuilder. Do not promote dependency-probe evidence to model runtime proof.",
+      "artifacts": {
+        "root": "artifacts/real-case/tensorrtexec-yolov8n-cls-trt8-layer-artifact-20260810",
+        "report": { "length": 29508, "sha256": "345a8e564069bc197b7b50af03df6ea9986f98f1e69aed97da7e6dd2a022cc64" },
+        "strictValidation": { "state": "tensor-rt-exec-report-ready", "failedBlockers": 0, "length": 12186, "sha256": "a372b01b1e8d35c0183b257bc08b0e0379bd2ff3314db50fae5ae38adf0dfb7d" },
+        "stdout": { "length": 6069, "sha256": "aaec102b586af96ea3545dbd0c2bab91347a0697ec91d86c30168c5344e8cb72" },
+        "stderr": { "length": 0, "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" }
+      }
+    },
+    "tensorRt11": {
+      "tensorRtVersion": "11.0.0",
+      "cudaToolkitVersion": "12.9",
+      "nativeBridgeSha256": "a94d1e5fe4454c9402979ae050f7a64d74c7f51bd6bb2d74936531f608a9ef6f",
+      "normalizedCommandSha256": "bc4af65ccc7f86864b32ee0d238066b56cc83ceb6af788daf9fc57bcd9e2c89f",
+      "processExitCode": 0,
+      "success": true,
+      "skipped": false,
+      "state": "external-onnx-reference-validated-runtime",
+      "proofClassification": "synthetic-input-runtime",
+      "runtimeAvailable": true,
+      "builderAvailable": true,
+      "parsed": true,
+      "engineSaved": true,
+      "engineFileRoundTrip": true,
+      "inferenceRan": true,
+      "outputMatch": true,
+      "outputValidated": true,
+      "optionClassification": {
+        "applied": ["--inputIOFormats", "--outputIOFormats", "--noTF32", "--exportLayerInfo"],
+        "parseOnly": ["--precisionConstraints", "--layerPrecisions", "--layerOutputTypes"],
+        "boundary": "TensorRT 11 validates allowed formats when the inferred I/O type already matches. Removed precision-constraint and layer type setters remain parse-only and are not reported as applied."
+      },
+      "referenceValidation": {
+        "passed": true,
+        "comparedElementCount": 1000,
+        "mismatchCount": 0,
+        "maximumAbsoluteError": 6.2584877e-7,
+        "maximumRelativeError": 8.419635e-6,
+        "actualTensorSha256": "fa460b882e8499514111be60a3503a47c0f623cf67435b22149de48a245019b0"
+      },
+      "layerInfoArtifact": {
+        "artifactKind": "tensor-rt-engine-layer-information",
+        "contentKind": "json-document",
+        "source": "LoadEngine",
+        "informationFormat": "Json",
+        "requestedProfilingVerbosity": "detailed",
+        "state": "export-written",
+        "layerCount": 88,
+        "length": 140985,
+        "sha256": "06fd1ff67142568f9bcbe4f660e71d950624ee47193ef20252cd93c34e7568da",
+        "targetLayer": {
+          "name": "/model.0/conv/Conv",
+          "layerType": "CaskConvolution",
+          "inputDatatype": "Float",
+          "outputDatatype": "Float",
+          "weightsType": "Float",
+          "biasType": "Float",
+          "tacticName": "sm70_xmma_fprop_implicit_gemm_f32f32_f32f32_f32_nchwkcrs_nchw_tilesize128x16x8_stage1_warpsize4x1x1_g1_ffma_aligna4_alignc4",
+          "tacticValue": "0x160b77f4a95ab6d3"
+        }
+      },
+      "artifacts": {
+        "root": "artifacts/real-case/tensorrtexec-yolov8n-cls-trt11-layer-artifact-20260810",
+        "engine": { "length": 12650620, "sha256": "80775b0338450e107c69d21627db356e23b52f530bee377853dcd710a7ed9670", "crossHostDeterministic": false },
+        "report": { "length": 56886, "sha256": "5284ef3dc751600fb47bd51dd6559eb43779bc2390c12c5c9b44bfd00eed2da4" },
+        "output": { "length": 6405, "sha256": "ed3758f746c74eaa006469d1e04bf1f73243314f64628331593e9e8501d44f0c" },
+        "layerInfo": { "length": 140985, "sha256": "06fd1ff67142568f9bcbe4f660e71d950624ee47193ef20252cd93c34e7568da" },
+        "strictValidation": { "state": "tensor-rt-exec-report-ready", "failedBlockers": 0, "length": 12188, "sha256": "dbc929c6a7c0abfdad5fd25b054622eb4ddaa30bbcc7d373f4b4a697c2bc64bf" },
+        "stdout": { "length": 10980, "sha256": "fb7e2c43efb54552f84f30e3bd3ec2d4567326fb44f80c585d7d38dfe0eabd19" },
+        "stderr": { "length": 0, "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" }
+      }
+    }
+  },
+  "companionTensorRt10Evidence": "samples/assets/tensorrtexec-yolov8n-cls-precision-policy-runtime-evidence.json",
+  "proofBoundary": {
+    "tensorRt8DependencyProbeOnly": true,
+    "tensorRt11TensorRtExecRuntimeExecution": true,
+    "tensorRt11OutputReferenceValidated": true,
+    "tensorRt11RemovedPrecisionSettersApplied": false,
+    "sourceTreeRealModelRuntimeProof": false,
+    "packageConsumerRuntimeProof": false,
+    "publicPackageProof": false,
+    "postPublishProof": false,
+    "ownerReleaseAcceptance": false,
+    "releaseProof": false,
+    "modelRedistributionApproved": false,
+    "performsPublish": false,
+    "uploadsAssets": false,
+    "statement": "This record preserves line-specific results. TRT8 proves runtime/builder availability and a controlled Windows ONNX parser safety guard only. TRT11 proves this external static ONNX/input/reference execution with a hashed self-describing layer artifact and zero reference mismatches, while removed precision setters remain parse-only. Neither result promotes model-specific semantics, package consumption, public availability, or release approval."
+  }
+}

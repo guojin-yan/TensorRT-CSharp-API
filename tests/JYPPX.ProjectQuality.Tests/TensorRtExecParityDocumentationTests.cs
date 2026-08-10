@@ -73,6 +73,8 @@ public sealed class TensorRtExecParityDocumentationTests
         Assert.Contains("--exportLayerInfo", commandSource, StringComparison.Ordinal);
         Assert.Contains("--exportReport|--report", commandSource, StringComparison.Ordinal);
         Assert.Contains("--verbose", appReadme, StringComparison.Ordinal);
+        Assert.Contains("BindingMetadata", appReadme, StringComparison.Ordinal);
+        Assert.Contains("TensorRtExecReportFormatter", appReadme, StringComparison.Ordinal);
         Assert.Contains("package-consumer-runtime belongs to release proof records", appReadme, StringComparison.Ordinal);
     }
 

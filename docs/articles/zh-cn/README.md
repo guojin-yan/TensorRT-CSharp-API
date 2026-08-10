@@ -8,7 +8,7 @@
 - Owner 输入、候选 proof 和 post-publish 模板；
 - `publishing` 子目录中的文章规划与发布治理材料。
 
-2026-08-06 复查时盘点到 355 个 Markdown 文件。严格发布目录当前收录 10 篇文章，这 10 篇都具备真实程序运行窗口截图和原图叠加识别结果，并由外层 `models` 目录中的 ONNX 对应支撑；其余 345 篇仍是项目文档、内部记录、非视觉实机教程或待完善稿。数量代表项目过程材料多，不代表有 355 篇完整成稿。
+2026-08-09 复查时盘点到 361 个 Markdown 文件。严格发布目录当前收录 10 篇文章，这 10 篇都具备真实程序运行窗口截图和原图叠加识别结果，并由外层 `models` 目录中的 ONNX 对应支撑；其余 351 篇仍是项目文档、内部记录、非视觉实机教程、历史兼容入口或待完善稿。数量代表项目过程材料多，不代表有 361 篇完整成稿。
 
 ## 完整文章标准
 
@@ -40,12 +40,14 @@
 
 - [使用 TensorRtSharp4.0 在 C# 中运行 ResNet18 图像分类](classification-real-asset-walkthrough.md)。
 - [使用项目自有数字图片完成 MNIST TensorRT 与 ONNX Runtime 双重验证](onnxtoengine-mnist-owner-generated-tutorial.md)。
-- [使用 TensorRtSharp4.0 在 C# 中运行 YOLOv8n 目标检测](yolovision-yolov8n-det-local-package-consumer-tutorial.md)。
-- [使用 TensorRtSharp4.0 在 C# 中运行 LRASPP 语义分割](yolovision-lraspp-semantic-local-package-consumer-tutorial.md)。
-- [使用 TensorRtSharp4.0 在 C# 中运行 YOLOv8n 图像分类](yolovision-yolov8n-cls-local-package-consumer-tutorial.md)。
-- [使用 TensorRtSharp4.0 在 C# 中运行 YOLOv8n 姿态估计](yolovision-yolov8n-pose-local-package-consumer-tutorial.md)。
-- [使用 TensorRtSharp4.0 在 C# 中运行 YOLOv8n OBB 旋转目标检测](yolovision-yolov8n-obb-local-package-consumer-tutorial.md)。
-- [使用 TensorRtSharp4.0 在 C# 中运行 YOLOv8n 实例分割](yolovision-yolov8-seg-local-package-consumer-tutorial.md)。
+- [使用 TensorRtSharp4.0 在 C# 中运行 YOLOv8n 目标检测](yolovision-yolov8n-detection-tutorial.md)。
+- [使用 TensorRtSharp4.0 在 C# 中运行 LRASPP 语义分割](yolovision-lraspp-semantic-segmentation-tutorial.md)。
+- [使用 TensorRtSharp4.0 在 C# 中运行 YOLOv8n 图像分类](yolovision-yolov8n-classification-tutorial.md)。
+- [使用 TensorRtSharp4.0 在 C# 中运行 YOLOv8n 姿态估计](yolovision-yolov8n-pose-tutorial.md)。
+- [使用 TensorRtSharp4.0 在 C# 中运行 YOLOv8n OBB 旋转目标检测](yolovision-yolov8n-obb-tutorial.md)。
+- [使用 TensorRtSharp4.0 在 C# 中运行 YOLOv8n 实例分割](yolovision-yolov8n-instance-segmentation-tutorial.md)。
+
+上述 6 篇 YoloVision 文章使用不含 `local-package-consumer` 的稳定 canonical 路径。旧文件名继续保留完整历史正文，供已有链接和证据合同兼容，但不再作为严格目录或公开导航入口。
 - [使用 TensorRtSharp4.0 在 C# 中运行 YOLOv10n End-to-End 目标检测](yolovision-yolov10n-real-asset-tutorial.md)。
 - [使用 TensorRtSharp4.0 在 C# 中运行官方 YOLOX-S 目标检测](yolovision-yolox-official-runtime-tutorial.md)。
 

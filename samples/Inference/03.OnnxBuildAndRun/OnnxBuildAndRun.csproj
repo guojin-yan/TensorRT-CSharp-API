@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>OnnxBuildAndRun</AssemblyName>
+    <RootNamespace>OnnxBuildAndRunSample</RootNamespace>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <JYPPXIncludeTensorRtOnnxSampleSupport>true</JYPPXIncludeTensorRtOnnxSampleSupport>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+</Project>

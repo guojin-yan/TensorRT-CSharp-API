@@ -48,13 +48,21 @@ public sealed class TrtexecEnginePackagingPolicyTests
         Assert.True(load.GetProperty("inferenceRan").GetBoolean());
         Assert.Equal(load.GetProperty("automaticBudgetBytes").GetInt64(), load.GetProperty("readbackBudgetBytes").GetInt64());
 
-        Assert.Equal("dependency-probe-only", root.GetProperty("tensorRt11").GetProperty("proofClassification").GetString());
+        JsonElement trt11 = root.GetProperty("tensorRt11");
+        Assert.Equal("external-onnx-refit-reload-reference-validated-runtime", trt11.GetProperty("state").GetString());
+        Assert.True(trt11.GetProperty("refitConfigReadbackMatch").GetBoolean());
+        Assert.True(trt11.GetProperty("stripPlanReadbackMatch").GetBoolean());
+        Assert.True(trt11.GetProperty("parserRefitReturned").GetBoolean());
+        Assert.True(trt11.GetProperty("engineRefitReturned").GetBoolean());
+        Assert.True(trt11.GetProperty("persistedReloadSucceeded").GetBoolean());
+        Assert.True(trt11.GetProperty("outputValidated").GetBoolean());
+        Assert.True(trt11.GetProperty("historicalDependencyProbeRetained").GetBoolean());
         JsonElement boundary = root.GetProperty("proofBoundary");
         Assert.True(boundary.GetProperty("isBuilderAndEnginePolicyEvidence").GetBoolean());
         Assert.True(boundary.GetProperty("isWeightedModelEnqueueEvidence").GetBoolean());
         Assert.False(boundary.GetProperty("isModelAccuracyProof").GetBoolean());
         Assert.False(boundary.GetProperty("isCrossVersionLeanRuntimeProof").GetBoolean());
-        Assert.False(boundary.GetProperty("isStrippedPlanRefitLifecycleProof").GetBoolean());
+        Assert.True(boundary.GetProperty("isStrippedPlanRefitLifecycleProof").GetBoolean());
         Assert.False(boundary.GetProperty("isPackageConsumerRuntimeProof").GetBoolean());
         Assert.False(boundary.GetProperty("canPublishPublicly").GetBoolean());
         Assert.False(boundary.GetProperty("publicReleaseSideEffectsExecuted").GetBoolean());
@@ -69,7 +77,7 @@ public sealed class TrtexecEnginePackagingPolicyTests
             "interface-coverage",
             "trtexec-engine-packaging-runtime-evidence-validation.json")));
         Assert.Equal("passed", validation.RootElement.GetProperty("validationState").GetString());
-        Assert.Equal(20, validation.RootElement.GetProperty("checkCount").GetInt32());
+        Assert.Equal(21, validation.RootElement.GetProperty("checkCount").GetInt32());
         Assert.Equal(0, validation.RootElement.GetProperty("failureCount").GetInt32());
 
         string exporter = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "eng", "Export-TrtexecEnginePackagingRuntimeEvidence.ps1"));
@@ -84,7 +92,7 @@ public sealed class TrtexecEnginePackagingPolicyTests
         Assert.Contains("trt10-context-order", validator, StringComparison.Ordinal);
         Assert.Contains("--weightStreamingBudget 50%", article, StringComparison.Ordinal);
         Assert.Contains("35,829,504", article, StringComparison.Ordinal);
-        Assert.Contains("20 checks / 0 failures", article, StringComparison.Ordinal);
+        Assert.Contains("21 checks / 0 failures", article, StringComparison.Ordinal);
         Assert.Contains("engine-packaging-refit-weight-streaming", parity, StringComparison.Ordinal);
         Assert.Contains("implemented-build-runtime-readback-with-version-guards", parity, StringComparison.Ordinal);
         Assert.Contains("engine-packaging-refit-weight-streaming", checklist, StringComparison.Ordinal);

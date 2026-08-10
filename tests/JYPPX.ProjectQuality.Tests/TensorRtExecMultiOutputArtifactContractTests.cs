@@ -87,7 +87,7 @@ public sealed class TensorRtExecMultiOutputArtifactContractTests
         Assert.Contains("OutputValidated=false", readme, StringComparison.Ordinal);
         Assert.Contains("<raw-path>.manifest.json", readme, StringComparison.Ordinal);
         Assert.Contains("implemented-bounded-multi-output-capture", featureMatrix, StringComparison.Ordinal);
-        Assert.Contains("implemented-pointer-free-multi-input-binding-multi-output-artifacts-and-reference-validation", parityMatrix, StringComparison.Ordinal);
+        Assert.Contains("implemented-structured-pointer-free-binding-report-and-reference-validation", parityMatrix, StringComparison.Ordinal);
         Assert.Contains("implemented-bounded-multi-output-log", fieldMap, StringComparison.Ordinal);
         Assert.Contains("implemented-bounded-multi-output-raw-manifest", fieldMap, StringComparison.Ordinal);
         Assert.Contains("implemented-bounded-multi-output-json", fieldMap, StringComparison.Ordinal);

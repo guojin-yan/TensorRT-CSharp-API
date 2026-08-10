@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using JYPPX.TensorRtSharp.Tools;
 
 namespace TensorRtExecApp.Core;
 
@@ -43,7 +44,9 @@ public sealed class TensorRtExecReport
         bool refitPersistenceAttempted = false,
         bool refitPersistenceSucceeded = false,
         string refitPersistenceState = "",
-        string persistedRefittedEnginePath = "")
+        string persistedRefittedEnginePath = "",
+        OnnxEngineBindingMetadata? bindingMetadata = null,
+        OnnxEngineLayerInfoArtifact? layerInfoArtifact = null)
     {
         Success = success;
         State = state ?? string.Empty;
@@ -73,6 +76,8 @@ public sealed class TensorRtExecReport
         RefitPersistenceSucceeded = refitPersistenceSucceeded;
         RefitPersistenceState = refitPersistenceState ?? string.Empty;
         PersistedRefittedEnginePath = persistedRefittedEnginePath ?? string.Empty;
+        BindingMetadata = bindingMetadata ?? OnnxEngineBindingMetadata.Empty;
+        LayerInfoArtifact = layerInfoArtifact ?? OnnxEngineLayerInfoArtifact.Empty;
     }
 
     public bool Success { get; }
@@ -130,4 +135,8 @@ public sealed class TensorRtExecReport
     public string RefitPersistenceState { get; }
 
     public string PersistedRefittedEnginePath { get; }
+
+    public OnnxEngineBindingMetadata BindingMetadata { get; }
+
+    public OnnxEngineLayerInfoArtifact LayerInfoArtifact { get; }
 }

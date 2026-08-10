@@ -36,6 +36,8 @@ public static partial class OnnxEngineBuildDiagnostics
             result.RuntimeOptions,
             result.PreflightMetadata,
             result.LoadedEngineDiagnostics,
+            result.LayerInfoArtifact,
+            result.BindingMetadata,
             result.TimingCacheArtifact,
             result.CapabilityProbe,
             result.WorkspaceBytes,

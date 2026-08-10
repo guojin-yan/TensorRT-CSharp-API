@@ -48,7 +48,7 @@ The shared parser covers common build, profile, memory-pool, plugin, timing, eng
 
 ## WinForms
 
-The Windows desktop front end edits the same normalized command consumed by the CLI. A publishable GUI article must show the actual application window, selected inputs, generated command, final status, and generated report. A screenshot proves the visible workflow only; it does not replace a successful TensorRT runtime log or validated model output.
+The Windows desktop front end edits the same normalized command consumed by the CLI. CLI and WinForms also use the same `TensorRtExecReportFormatter`, so binding summaries, refit state, final status, and error classification do not drift between front ends. A publishable GUI article must show the actual application window, selected inputs, generated command, final status, and generated report. A screenshot proves the visible workflow only; it does not replace a successful TensorRT runtime log or validated model output.
 
 See [TensorRtExec getting started](../../docs/articles/zh-cn/tensorrtexec-tool-getting-started.md) and the [GUI user guide](../../docs/articles/zh-cn/tensorrtexec-gui-user-guide.md) for the current workflow.
 
@@ -56,7 +56,9 @@ See [TensorRtExec getting started](../../docs/articles/zh-cn/tensorrtexec-tool-g
 
 Keep ONNX, Engine, timing cache, tensors, and raw reports in the workspace-level `models` or a caller-selected artifact directory outside Git. Articles must record the model source and license, acquisition and ONNX conversion steps, input/output contract, exact command, hashes, host/runtime versions, a real terminal screenshot, and the GUI screenshot when the desktop front end is used.
 
-Reports distinguish `precheck`, `build-only`, readonly Engine diagnostics, bounded synthetic runtime, real-model runtime, and package-consumer runtime. Build reports, GUI screenshots, local file feeds, ProjectReference runs, and direct `.nupkg` runs cannot be promoted to public-package or post-publish proof by themselves.
+Reports distinguish `precheck`, `build-only`, readonly Engine diagnostics, bounded synthetic runtime, real-model runtime, and package-consumer runtime. The top-level `BindingMetadata` object copies engine-order input/output mode, data type, engine/profile shapes, location, format, vectorization, byte-size fallback, and diagnostics from `TensorRtEngineBindingReport` during build, load, or runtime setup. It is a pointer-free deployment snapshot with explicit `CanPromoteRuntimeProof=false` and `CanPromoteReleaseProof=false` boundaries. Build reports, GUI screenshots, local file feeds, ProjectReference runs, and direct `.nupkg` runs cannot be promoted to public-package or post-publish proof by themselves.
+
+On TensorRT 10 and 11, `--refitFromOnnx` and `--saveRefittedEngine` now cover stripped-plan deserialization, parser load, engine commit, serialization `ExcludeWeights` clear/readback, original-owner disposal, full-weight plan reload, context creation, and enqueue. The TensorRT 11 evidence under `artifacts/real-case/tensorrtexec-trt11-refit-lifecycle-20260810-091859/` also includes a loadEngine-only second process with identical output SHA and zero reference mismatch; both reports pass all 69 strict checks. This is local source-tree runtime evidence with an unreviewed MNIST reference, not model-accuracy, package-consumer, public-feed, post-publish, or release proof.
 
 ## Relationship To Other Applications
 

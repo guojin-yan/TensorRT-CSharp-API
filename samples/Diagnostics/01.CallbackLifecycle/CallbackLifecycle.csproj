@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>CallbackLifecycle</AssemblyName>
+    <RootNamespace>CallbackLifecycleSample</RootNamespace>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <JYPPXIncludeTensorRtSampleSupport>true</JYPPXIncludeTensorRtSampleSupport>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+</Project>

@@ -42,7 +42,9 @@ public sealed class OnnxEngineBuildResult
         OnnxEngineRefitSnapshot? refitSnapshot = null,
         OnnxEngineRefitPersistenceSnapshot? refitPersistenceSnapshot = null,
         bool outputValidated = false,
-        bool identityOutputMatch = false)
+        bool identityOutputMatch = false,
+        OnnxEngineBindingMetadata? bindingMetadata = null,
+        OnnxEngineLayerInfoArtifact? layerInfoArtifact = null)
         : this(
             success,
             skipped,
@@ -75,7 +77,9 @@ public sealed class OnnxEngineBuildResult
             refitSnapshot,
             refitPersistenceSnapshot,
             outputValidated,
-            identityOutputMatch)
+            identityOutputMatch,
+            bindingMetadata,
+            layerInfoArtifact)
     {
     }
 
@@ -111,7 +115,9 @@ public sealed class OnnxEngineBuildResult
         OnnxEngineRefitSnapshot? refitSnapshot = null,
         OnnxEngineRefitPersistenceSnapshot? refitPersistenceSnapshot = null,
         bool outputValidated = false,
-        bool identityOutputMatch = false)
+        bool identityOutputMatch = false,
+        OnnxEngineBindingMetadata? bindingMetadata = null,
+        OnnxEngineLayerInfoArtifact? layerInfoArtifact = null)
     {
         Success = success;
         Skipped = skipped;
@@ -142,6 +148,8 @@ public sealed class OnnxEngineBuildResult
         ParserPreflightSnapshot = parserPreflightSnapshot ?? OnnxEngineParserPreflightSnapshot.Empty;
         RefitSnapshot = refitSnapshot ?? OnnxEngineRefitSnapshot.Empty;
         RefitPersistenceSnapshot = refitPersistenceSnapshot ?? OnnxEngineRefitPersistenceSnapshot.Empty;
+        BindingMetadata = bindingMetadata ?? LoadedEngineDiagnostics.BindingMetadata;
+        LayerInfoArtifact = layerInfoArtifact ?? LoadedEngineDiagnostics.LayerInfoArtifact;
         Diagnostics = diagnostics ?? Array.Empty<string>();
         LogLines = logLines ?? Array.Empty<string>();
         EvidenceSidecar = evidenceSidecar ?? OnnxEngineBuildEvidenceSidecarReader.Empty;
@@ -222,6 +230,13 @@ public sealed class OnnxEngineBuildResult
     /// 获取可选持久化 plan 独立重新加载生命周期的复制证据。
     /// </summary>
     public OnnxEngineRefitPersistenceSnapshot RefitPersistenceSnapshot { get; }
+
+    /// <summary>
+    /// Gets pointer-free engine binding metadata copied during build, load, or runtime setup.
+    /// </summary>
+    public OnnxEngineBindingMetadata BindingMetadata { get; }
+
+    public OnnxEngineLayerInfoArtifact LayerInfoArtifact { get; }
 
     public bool IsRuntimeExecutionProof => InferenceRan && OutputMatch;
 

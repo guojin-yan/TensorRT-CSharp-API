@@ -25,11 +25,27 @@
   },
   "applicationAssets": {
     "programSha256": "1f7e33f044f6111efa207899cf589f515e5a24951795b49a36c09a2c7269c8c6",
-    "mainFormSha256": "6ae3a40c76d89c0f01074f32fff184a249da4bf5f83a0166a0bc8c48127dda75",
+    "mainFormSha256": "19f056ec9fd44aed217666aed6f2d81765a9b7421bb508665ccf6bb4f1019ed8",
+    "mainFormAtCaptureSha256": "6ae3a40c76d89c0f01074f32fff184a249da4bf5f83a0166a0bc8c48127dda75",
+    "mainFormSourceBoundary": "The current source hash includes the 2026-08-09 shared report/error formatter parity update. Screenshots, application assembly, and runtime values remain the original 2026-08-04 build-only evidence and were not recaptured.",
     "projectSha256": "2b478b60f7abdb00c0fc2065f82c69e348044c6b0e307db01cc9090f7b9f9f4b",
     "applicationAssemblySha256": "a529bc6889c94efdbf963903105bd2bebef82a89bc057412065d79754c3a64b7",
     "toolsAssemblySha256": "62b35481335cfd11310b6cc46796e7e3e21ed439f831bb976007dc67b5a33024",
     "nativeBridgeSha256": "0576f191617dcdad46fd40e238f61cf22b9fb04826b70c1c47993b7944bd26a0"
+  },
+  "currentSourceBuild": {
+    "executedUtcDate": "2026-08-09",
+    "configuration": "Release",
+    "buildSucceeded": true,
+    "screenshotsRecaptured": false,
+    "runtimeValuesRecaptured": false,
+    "programSha256": "1f7e33f044f6111efa207899cf589f515e5a24951795b49a36c09a2c7269c8c6",
+    "mainFormSha256": "19f056ec9fd44aed217666aed6f2d81765a9b7421bb508665ccf6bb4f1019ed8",
+    "projectSha256": "c81c8c89db63dda4c790d2c494a44a49426a5c766a5b0bd136bbdd0d036d70ca",
+    "applicationAssemblySha256": "ffa4e7fe6e2770172360ff843e42ccdb5d607c47cd863607588b667bd5e55de4",
+    "applicationToolsAssemblySha256": "71d5122fe6d4bfa78aa441571fceb3d365376cd0002e529ce2438f2a3f37ff1e",
+    "nativeBridgeSha256": "8669fa8799767d874994cd35424ef3edf079315aa1e6633e7e86b7676f2effc5",
+    "evidenceBoundary": "This is current-source Release build evidence only, including the detailed inspector-format implementation. The 2026-08-04 screenshots, application assembly, and displayed runtime values remain the original capture and were not replaced or promoted."
   },
   "runtimeValidation": {
     "success": true,

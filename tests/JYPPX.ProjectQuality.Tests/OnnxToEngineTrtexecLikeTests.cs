@@ -1177,9 +1177,16 @@ public sealed class OnnxToEngineTrtexecLikeTests
         string diagnostics = ReadBuildDiagnostics("OptionStatus");
 
         Assert.Contains("TryCollectLayerInformationFromSerializedEngine", service, StringComparison.Ordinal);
-        Assert.Contains("inspector.GetLayerInformation(index, TensorRtLayerInformationFormat.Oneline)", service, StringComparison.Ordinal);
+        Assert.Contains("ResolveLayerInformationFormat(options)", service, StringComparison.Ordinal);
+        Assert.Contains("TensorRtLayerInformationFormat.Json", service, StringComparison.Ordinal);
+        Assert.Contains("TensorRtLayerInformationFormat.Oneline", service, StringComparison.Ordinal);
+        Assert.Contains("inspector.GetLayerInformation(index, layerInformationFormat)", service, StringComparison.Ordinal);
+        Assert.Contains("Format={layerInformationFormat}", service, StringComparison.Ordinal);
+        Assert.Contains("RequestedProfilingVerbosity={options.ProfilingVerbosity}", service, StringComparison.Ordinal);
         Assert.Contains("LayerInfo Collected=True", service, StringComparison.Ordinal);
         Assert.Contains("LayerInfo ExportRequested=True Written=True", service, StringComparison.Ordinal);
+        Assert.Contains("CreateStructuredLayerInformationContent", service, StringComparison.Ordinal);
+        Assert.Contains("json-document", service, StringComparison.Ordinal);
         Assert.Contains("new UTF8Encoding(encoderShouldEmitUTF8Identifier: false)", service, StringComparison.Ordinal);
         Assert.Contains("copied-engine-inspector-diagnostics-only", service, StringComparison.Ordinal);
         Assert.Contains("public bool DumpLayerInfo", options, StringComparison.Ordinal);
@@ -1422,6 +1429,11 @@ public sealed class OnnxToEngineTrtexecLikeTests
             Assert.False(result.InferenceRan);
             Assert.False(result.IsRuntimeExecutionProof);
             Assert.False(result.IsPackageConsumerRuntimeProof);
+            Assert.False(result.CapabilityProbe.Attempted);
+            Assert.Equal("not-attempted", result.CapabilityProbe.ProbeState);
+            Assert.Equal(options.TensorRtLine, result.CapabilityProbe.TensorRtLine);
+            Assert.Contains("dry-run skips TensorRT and CUDA capability probing", result.CapabilityProbe.EvidenceBoundary, StringComparison.Ordinal);
+            Assert.DoesNotContain(result.LogLines, line => line.StartsWith("CapabilityProbe ", StringComparison.Ordinal));
             Assert.Equal(missingOnnx, result.ModelSource);
             Assert.Equal(64, result.NormalizedCommandSha256.Length);
             Assert.True(result.TimingCacheArtifact.InputRequested);
@@ -1434,6 +1446,10 @@ public sealed class OnnxToEngineTrtexecLikeTests
             Assert.True(root.GetProperty("DryRun").GetBoolean());
             Assert.Equal("precheck", root.GetProperty("ProofClassification").GetString());
             Assert.Equal(result.NormalizedCommandSha256, root.GetProperty("NormalizedCommandSha256").GetString());
+            JsonElement capabilityProbe = root.GetProperty("CapabilityProbe");
+            Assert.False(capabilityProbe.GetProperty("Attempted").GetBoolean());
+            Assert.Equal("not-attempted", capabilityProbe.GetProperty("ProbeState").GetString());
+            Assert.Contains("dry-run skips TensorRT and CUDA capability probing", capabilityProbe.GetProperty("EvidenceBoundary").GetString(), StringComparison.Ordinal);
             Assert.Contains("runtime probing, ONNX parsing, engine build", string.Join("\n", result.LogLines), StringComparison.Ordinal);
             JsonElement status = root.GetProperty("OptionImplementationStatus");
             foreach (string optionName in new[] { "--maxNbTactics", "--tilingOptimizationLevel", "--l2LimitForTiling", "--quantizationFlags" })

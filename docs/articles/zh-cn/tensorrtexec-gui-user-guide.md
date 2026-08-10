@@ -80,6 +80,7 @@ Get-FileHash -LiteralPath $ModelPath -Algorithm SHA256
 - `applications/TensorRtExec/WinForms/MainForm.cs`：页面控件、命令预览和运行日志。
 - `applications/TensorRtExec/Core/TensorRtExecOptions.cs`：GUI/CLI 共用参数模型。
 - `applications/TensorRtExec/Core/TensorRtExecService.cs`：调用 ONNX Engine 构建服务。
+- `applications/TensorRtExec/Core/TensorRtExecReportFormatter.cs`：GUI/CLI 共用 binding/refit/final status 摘要与错误分类。
 - `src/JYPPX.TensorRtSharp.Tools/Build`：Parser、Builder、Engine 与报告实现。
 - `applications/TensorRtExec/tensor-rt-exec-gui-cli-field-map.json`：GUI 到 CLI 字段合同。
 - `samples/assets/tensorrtexec-gui-article-runtime-evidence.json`：本文运行的机器可读摘要。
@@ -93,11 +94,12 @@ flowchart LR
   C --> D["ONNX Parser"]
   D --> E["TensorRT Builder"]
   E --> F["Serialized Engine"]
-  C --> G["JSON Report"]
+  C --> G["JSON Report + BindingMetadata"]
   B --> H["Normalized CLI Command"]
+  C --> I["Shared CLI/GUI Formatter"]
 ```
 
-GUI 只负责收集输入和展示结果。Parser、Builder 与报告逻辑位于可复用工具层，CLI 不需要复制另一套实现。
+GUI 只负责收集输入和展示结果。Parser、Builder 与报告逻辑位于可复用工具层，CLI 不需要复制另一套实现；两端也不再各自拼接成功摘要或错误文本。
 
 ## 环境准备
 

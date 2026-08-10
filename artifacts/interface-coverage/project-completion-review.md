@@ -19,15 +19,17 @@ CUDA、cuDNN、TensorRT 和 NVRTC 由用户自行安装，不进入项目包或 
 
 当前 Git 跟踪 `214` 个 manifest 文件，共 `4046` 条 API 记录。其中 `common=11`、`cuda=675`、`tensorrt=3360`。
 
-最近一次具备完整 TensorRT 8/10/11 与 CUDA toolkit 输入的 vendor-header 覆盖扫描基线为 `4013` 条，生成于 2026-08-03。此后新增的 `33` 条 manifest API 已进入源码和绑定生成验证，但尚未回填到该次逐版本 header-scan 行。因此下表是完整 SDK 矩阵扫描基线，不冒充当前 4046 条的重新扫描结果；正式候选冻结前要在完整 SDK 主机上重建覆盖摘要。
+2026-08-09 已使用本机完整的 TensorRT 8.6、10.11、10.13、11.0 和 CUDA 11.6、11.8、12.1、12.3、12.9、13.2 headers 重建覆盖基线。manifest 记录数与逐 SDK header 行是两个维度，不能把 `4046` 与某次逐版本扫描行数直接相减。当前发布矩阵明确为 TensorRT `8.6`、`10.11`、`11.0`；TensorRT `10.13` 扫描保留为 `future-version` 前瞻数据，不作为核心库缺陷。
 
 完整 SDK 扫描基线为：
 
 | TensorRT 版本线 | 扫描 / 匹配 / 源码存在 | 已实现 | 仅 deferred |
 | --- | ---: | ---: | ---: |
 | 8.6 | `880 / 880 / 880` | `760` | `120` |
-| 10.11 | `879 / 879 / 879` | `762` | `117` |
-| 11.0 | `901 / 901 / 901` | `815` | `86` |
+| 10.11 | `879 / 879 / 879` | `764` | `115` |
+| 11.0 | `901 / 901 / 901` | `817` | `84` |
+
+TensorRT 10.13 共扫描 `894` 条接口，其中 `879` 条与当前 TensorRT 10 manifest/source 匹配；剩余 `15` 条全部标记为 `future-version`。其中 12 条低 ownership 风险接口已在 TensorRT 11 路径完成 native、manifest、interop、高层 wrapper、XML/版本保护和质量测试闭环；另外 3 条 `IBuilder::buildSerializedNetworkToStream`、`IStreamWriter::getInterfaceInfo`、`IStreamWriter::write` 继续保持 callback/buffer/lifetime design gate，不以裸指针或临时 `IntPtr` 提升覆盖状态。
 
 `deferred-only` 表示公开接口仍明确阻止不安全或未验证的路径，不等于遗漏。历史 deferred 记录不会为了提高覆盖率而删除；已安全实现的别名会归类为 `implemented-with-deferred-history`。
 
@@ -46,7 +48,7 @@ CUDA、cuDNN、TensorRT 和 NVRTC 由用户自行安装，不进入项目包或 
 - TensorRT builder、network、runtime、engine、execution context、ONNX parser、plugin、refit、profiling 和 diagnostics；
 - CUDA device、stream、event、graph、memory、IPC、kernel、texture/surface 与运行时诊断；
 - owner-safe callback、allocator、debug listener 和执行上下文资源生命周期；
-- `TensorRtExec`、`OnnxToEngine`、MNIST、Classification、YoloVision 和 smoke runners；
+- `TensorRtExec`、`OnnxToEngine`、MNIST、OnnxBuildAndRun、Classification、YoloVision 和 smoke runners；
 - TensorRT 8/10/11 与 CUDA 11/12/13 的 bridge 构建矩阵及严格 native entry allowlist。
 
 “已经有接口”与“已经形成真实运行证明”必须分开理解。各 API 的状态以 coverage、runtime evidence 和 package-consumer evidence 三类文件共同判断。

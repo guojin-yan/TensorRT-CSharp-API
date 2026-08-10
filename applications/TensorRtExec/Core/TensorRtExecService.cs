@@ -49,7 +49,9 @@ public sealed class TensorRtExecService
             result.RefitPersistenceSnapshot.Attempted,
             result.RefitPersistenceSnapshot.Succeeded,
             result.RefitPersistenceSnapshot.State,
-            result.RefitPersistenceSnapshot.PersistedPlanPath);
+            result.RefitPersistenceSnapshot.PersistedPlanPath,
+            result.BindingMetadata,
+            result.LayerInfoArtifact);
     }
 
 }

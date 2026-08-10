@@ -1,0 +1,255 @@
+{
+  "schemaVersion": 1,
+  "recordKind": "tensorrtexec-external-onnx-precision-policy-runtime-evidence",
+  "recordId": "tensorrtexec-yolov8n-cls-trt10.11-precision-policy-20260810",
+  "executedUtcDate": "2026-08-10",
+  "sourceBaseCommit": "3d30ed8b5ea35b5b8dba7bb7d3b6718019e831e2",
+  "sourceTreeDirtyAtExecution": true,
+  "state": "external-onnx-reference-validated-runtime",
+  "proofClassification": "synthetic-input-runtime",
+  "runtimeEnvironment": {
+    "os": "Microsoft Windows 10.0.26200",
+    "processArchitecture": "X64",
+    "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+    "driverVersion": "576.02",
+    "cudaToolkitVersion": "12.9",
+    "tensorRtVersion": "10.11.0.33",
+    "dotnetSdkVersion": "10.0.301"
+  },
+  "sourceAssets": {
+    "model": {
+      "path": "<workspace>/downloads/yolov8n-cls-ultralytics-v8.3.0/source/yolov8n-cls.onnx",
+      "length": 10911331,
+      "sha256": "630c022a99885d59f633ab5a614738f8a49be7f361e340fd3ff89b8c19b0768f",
+      "license": "AGPL-3.0-only",
+      "publicRedistributionApproved": false
+    },
+    "input": {
+      "path": "<workspace>/downloads/yolov8n-cls-ultralytics-v8.3.0/reports/independent-reference/input-ultralytics-1x3x224x224.fp32.bin",
+      "tensorName": "images",
+      "shape": [1, 3, 224, 224],
+      "elementCount": 150528,
+      "length": 602112,
+      "sha256": "05e47521b07652eee70942902ab5bf070edc9da7067466a5433c7cdd29fb1a62"
+    },
+    "reference": {
+      "path": "<workspace>/downloads/yolov8n-cls-ultralytics-v8.3.0/reports/independent-reference/output0.reference.json",
+      "tensorName": "output0",
+      "shape": [1, 1000],
+      "elementCount": 1000,
+      "length": 28522,
+      "sha256": "ded68dd048acdee3a38e95dc46490517e85ece8346f1ebe627bdd88cdb307697",
+      "sourceClassification": "official-yolov8n-cls-onnxruntime-cpu"
+    }
+  },
+  "execution": {
+    "processExitCode": 0,
+    "success": true,
+    "parsed": true,
+    "engineSaved": true,
+    "engineFileRoundTrip": true,
+    "inferenceRan": true,
+    "outputMatch": true,
+    "outputValidated": true,
+    "profileIndex": 0,
+    "workspaceBytes": 268435456,
+    "normalizedCommandSha256": "4e6e308ec180d26a2f6c395e24da9ba8ec9d0efccc982d1359932b295aaca86a",
+    "commandShape": "dotnet run --project applications/TensorRtExec -c Release --no-build -- --tensor-rt-line 10 --onnx <model> --saveEngine <plan> --batch 1 --loadInputs images:<input> --referenceOutputs output0:<reference> --inputIOFormats fp32:chw --outputIOFormats fp32:chw --precisionConstraints obey --layerPrecisions /model.0/conv/Conv:fp32 --layerOutputTypes /model.0/conv/Conv:fp32 --profilingVerbosity detailed --exportLayerInfo <layer-info> --exportOutput <output> --exportReport <report>"
+  },
+  "precisionPolicy": {
+    "inputIOFormats": {
+      "requested": "fp32:chw",
+      "applied": true,
+      "readbackMatch": true,
+      "tensorCount": 1
+    },
+    "outputIOFormats": {
+      "requested": "fp32:chw",
+      "applied": true,
+      "readbackMatch": true,
+      "tensorCount": 1
+    },
+    "precisionConstraints": {
+      "requested": "obey",
+      "applied": true,
+      "readbackPrefer": false,
+      "readbackObey": true,
+      "readbackMatch": true
+    },
+    "layerPrecision": {
+      "requested": "/model.0/conv/Conv:fp32",
+      "matchedLayerCount": 1,
+      "applied": true,
+      "readbackMatch": true
+    },
+    "layerOutputType": {
+      "requested": "/model.0/conv/Conv:fp32",
+      "matchedLayerCount": 1,
+      "applied": true,
+      "readbackMatch": true
+    },
+    "engineLayerImplementationMetadataObserved": true,
+    "engineLayerInputOutputDatatypeObserved": true,
+    "engineSelectedTacticObserved": true,
+    "standaloneImplementationPrecisionPropertyObserved": false,
+    "engineImplementationPrecisionObserved": false,
+    "engineInspectorReadback": {
+      "requestedProfilingVerbosity": "detailed",
+      "informationFormat": "Json",
+      "artifactKind": "tensor-rt-engine-layer-information",
+      "contentKind": "json-document",
+      "source": "LoadEngine",
+      "layerCount": 87,
+      "targetLayer": {
+        "index": 0,
+        "name": "/model.0/conv/Conv",
+        "layerType": "CaskConvolution",
+        "inputName": "images",
+        "inputDimensions": [1, 3, 224, 224],
+        "inputFormatDatatype": "Float",
+        "outputName": "/model.0/conv/Conv_output_0",
+        "outputDimensions": [1, 16, 112, 112],
+        "outputFormatDatatype": "Float",
+        "weightsType": "Float",
+        "biasType": "Float",
+        "tacticName": "sm80_xmma_fprop_implicit_gemm_f32f32_f32f32_f32_nchwkcrs_nchw_tilesize128x16x8_stage3_warpsize4x1x1_g1_ffma_aligna4_alignc4",
+        "tacticValue": "0x9d9fdb5fd9945f64",
+        "streamId": 0,
+        "metadata": "[ONNX Layer: /model.0/conv/Conv]"
+      }
+    },
+    "engineInspectorBoundary": "TensorRT detailed inspector output proves the built target layer's actual engine I/O datatype and format, weight/bias type, and selected tactic. It exposes no standalone internal compute or accumulator precision property, so engineImplementationPrecisionObserved remains false."
+  },
+  "bindingMetadata": {
+    "state": "runtime-binding-readback",
+    "profileIndex": 0,
+    "contextReadinessAttached": true,
+    "readyForEnqueue": true,
+    "pointerFreeCopiedSnapshot": true,
+    "tensorCount": 2,
+    "inputCount": 1,
+    "outputCount": 1,
+    "tensors": [
+      {
+        "index": 0,
+        "name": "images",
+        "ioMode": "Input",
+        "dataType": "Float",
+        "engineShape": [1, 3, 224, 224],
+        "profileMinShape": [1, 3, 224, 224],
+        "profileOptShape": [1, 3, 224, 224],
+        "profileMaxShape": [1, 3, 224, 224],
+        "location": "Device",
+        "format": "Linear",
+        "vectorizedDimension": -1
+      },
+      {
+        "index": 1,
+        "name": "output0",
+        "ioMode": "Output",
+        "dataType": "Float",
+        "engineShape": [1, 1000],
+        "profileMinShape": [1, 1000],
+        "profileOptShape": [1, 1000],
+        "profileMaxShape": [1, 1000],
+        "location": "Device",
+        "format": "Linear",
+        "vectorizedDimension": -1
+      }
+    ]
+  },
+  "referenceValidation": {
+    "requested": true,
+    "completed": true,
+    "passed": true,
+    "absoluteTolerance": 0.001,
+    "relativeTolerance": 0.001,
+    "nanPolicy": "reject",
+    "infinityPolicy": "exact",
+    "comparedElementCount": 1000,
+    "mismatchCount": 0,
+    "firstMismatchIndex": -1,
+    "maximumAbsoluteError": 5.364418e-7,
+    "maximumRelativeError": 1.1431351e-5,
+    "actualTensorSha256": "51fd6b750ef2e19a8130f23cf09f3d4cd5029e774bdaeec3d7652c900380ae4e"
+  },
+  "artifacts": {
+    "root": "artifacts/real-case/tensorrtexec-yolov8n-cls-layer-artifact-final-20260810",
+    "engine": {
+      "fileName": "yolov8n-cls-layer-artifact.plan",
+      "length": 12987356,
+      "sha256": "b03596e85aa2d63e6c0fc1c4b64c3184d640d8f42a0548d28a1f85a714426ea9",
+      "trackedByGit": false,
+      "crossHostDeterministic": false
+    },
+    "report": {
+      "fileName": "report.json",
+      "length": 56521,
+      "sha256": "151f7e98fd45c6c6073e1d0f7ccb96775462168fc0ad2d21bb452cd30b128b80"
+    },
+    "output": {
+      "fileName": "output.json",
+      "length": 6414,
+      "sha256": "b058d3216c397d9c0b36cae061f3097910a28f4505619877c0bccf693233f8f8"
+    },
+    "layerInfo": {
+      "fileName": "layer-info.json",
+      "artifactKind": "tensor-rt-engine-layer-information",
+      "contentKind": "json-document",
+      "source": "LoadEngine",
+      "informationFormat": "Json",
+      "requestedProfilingVerbosity": "detailed",
+      "layerCount": 87,
+      "length": 136894,
+      "sha256": "05995dad0aedbee6cf6d9e50d2e2b970798fdebc230db08944f7c4cfbbef4319"
+    },
+    "stdout": {
+      "fileName": "stdout.log",
+      "length": 10891,
+      "sha256": "f3b33653613270469e23edc7d8891f172f8e776208c0e8eae89261fa2de597fc"
+    },
+    "stderr": {
+      "fileName": "stderr.log",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "strictValidation": {
+      "fileName": "report-validation.json",
+      "state": "tensor-rt-exec-report-ready",
+      "failedBlockers": 0,
+      "length": 12188,
+      "sha256": "e26bbb5b720fd22a51d4aec24b39273283de6d49b3c5c58fba3ac40d4676447e"
+    }
+  },
+  "applicationAssets": {
+    "projectSha256": "c81c8c89db63dda4c790d2c494a44a49426a5c766a5b0bd136bbdd0d036d70ca",
+    "programSha256": "1f7e33f044f6111efa207899cf589f515e5a24951795b49a36c09a2c7269c8c6",
+    "mainFormSha256": "19f056ec9fd44aed217666aed6f2d81765a9b7421bb508665ccf6bb4f1019ed8",
+    "builderConfigurationSha256": "ae86dbc71709b5eb5f883230015a5b4d5e034ff59ccdeb709d67eed5faeca00c",
+    "diagnosticsSha256": "e28cb8a0b85063e7a68b15f08502b3581a97d373683c173b41572018275247a5",
+    "applicationAssemblySha256": "f4fd8c63af6a92ac853c7a669959f55618299bb547fa421d515c7837de0ed1ae",
+    "applicationToolsAssemblySha256": "44258d5458b40a2787e16f4ef5bdbc0636d39299b2642122ebb9e029d6d5330c",
+    "nativeBridgeSha256": "8669fa8799767d874994cd35424ef3edf079315aa1e6633e7e86b7676f2effc5"
+  },
+  "proofBoundary": {
+    "tensorRtExecRuntimeExecution": true,
+    "externalRealOnnxAndInput": true,
+    "requestedAppliedReadbackPrecisionPolicyEvidence": true,
+    "engineLayerImplementationMetadataObserved": true,
+    "engineLayerInputOutputDatatypeObserved": true,
+    "engineSelectedTacticObserved": true,
+    "standaloneImplementationPrecisionPropertyObserved": false,
+    "engineImplementationPrecisionObserved": false,
+    "sourceTreeRealModelRuntimeProof": false,
+    "companionModelSpecificEvidence": "samples/assets/yolovision-yolov8n-cls-real-model-runtime-evidence.json",
+    "packageConsumerRuntimeProof": false,
+    "publicPackageProof": false,
+    "postPublishProof": false,
+    "ownerReleaseAcceptance": false,
+    "releaseProof": false,
+    "modelRedistributionApproved": false,
+    "performsPublish": false,
+    "uploadsAssets": false,
+    "statement": "This record proves the current source tree built and executed one external static YOLOv8n-cls ONNX model with profile index zero, requested/applied/readback TensorRT 10 precision policies, copied pointer-free binding metadata, a self-describing valid JSON inspector artifact for 87 actual engine layers with a verified file hash, target-layer Float I/O and selected-tactic metadata, and a passing structured reference comparison. Layer count and tactic selection are specific to this engine build. The inspector does not expose a standalone internal compute or accumulator precision property. TensorRtExec deliberately classifies the run as synthetic-input-runtime; model-specific real-model-runtime remains owned by the linked YoloVision evidence, and package/public/post-publish proof remains separate."
+  }
+}

@@ -21,7 +21,8 @@ public sealed partial class OnnxEngineBuildService
     {
         if (options.ShapeProfile.IsEmpty && options.UsesExternalOnnx)
         {
-            return -1;
+            // Static engines still expose their implicit profile as index zero for binding readback and execution.
+            return 0;
         }
 
         using TensorRtOptimizationProfile profile = builder.CreateOptimizationProfile();

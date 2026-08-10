@@ -3,7 +3,8 @@ param(
   [string]$RepositoryRoot,
   [string]$TensorRtPackageRoot,
   [string]$CudaToolkitRoot = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA",
-  [string]$OutputDirectory
+  [string]$OutputDirectory,
+  [string[]]$SupportedTensorRtVersions = @("8.6", "10.11", "11.0")
 )
 
 $ErrorActionPreference = "Stop"
@@ -176,6 +177,21 @@ function Get-TensorRtCategory {
     'ErrorRecorder|Profiler|Logger' { return "diagnostics" }
     default { return "other" }
   }
+}
+
+function Get-TensorRtReleaseMatrixStatus {
+  param([string]$Version)
+
+  if ($Version -notmatch '^(\d+)\.(\d+)') {
+    return "future-version"
+  }
+
+  $majorMinor = "$($matches[1]).$($matches[2])"
+  if ($SupportedTensorRtVersions -contains $majorMinor) {
+    return "supported"
+  }
+
+  return "future-version"
 }
 
 function Get-TensorRtClassAliases {
@@ -1479,6 +1495,7 @@ $tensorRtRows = New-Object System.Collections.Generic.List[object]
 $tensorRtPackages = @(Get-TensorRtPackageInfo $TensorRtPackageRoot)
 foreach ($package in $tensorRtPackages) {
   $interfaces = @(Get-TensorRtInterfaces $package)
+  $releaseMatrixStatus = Get-TensorRtReleaseMatrixStatus $package.Version
   foreach ($item in $interfaces) {
     $matches = @(Find-MatchedManifestApis $manifestApis "tensorrt" $item.VersionLine $item.Class $item.Method)
     $entryPoints = @($matches | ForEach-Object { $_.EntryPoint })
@@ -1513,6 +1530,7 @@ foreach ($package in $tensorRtPackages) {
       MatchedManifestIds = ($ids -join ';')
       MatchedEntryPoints = ($entryPoints -join ';')
       Notes = if ($matches.Count -eq 0) { "not found by manifest/token heuristic" } else { "" }
+      ReleaseMatrixStatus = $releaseMatrixStatus
     }) | Out-Null
   }
 }
@@ -1588,7 +1606,8 @@ $sortedTensorRtRows |
     ManagedHighLevelHeuristic,
     MatchedManifestIds,
     MatchedEntryPoints,
-    Notes |
+    Notes,
+    ReleaseMatrixStatus |
   Export-Csv -LiteralPath $tensorRtComparisonCsv -NoTypeInformation -Encoding utf8
 
 $sortedCudaRows |
@@ -1621,6 +1640,7 @@ $summary = [System.Text.StringBuilder]::new()
 [void]$summary.AppendLine("- CUDA toolkit roots: configured host inputs; machine-specific paths omitted")
 [void]$summary.AppendLine("- Manifest API count: $($manifestApis.Count)")
 [void]$summary.AppendLine("- Manifest file count: $manifestFileCount")
+[void]$summary.AppendLine("- Supported TensorRT release matrix: $($SupportedTensorRtVersions -join ', ')")
 [void]$summary.AppendLine("- Snapshot boundary: per-version rows describe only the vendor headers available to this run; an empty or partial host SDK matrix is not a complete release scan")
 [void]$summary.AppendLine()
 [void]$summary.AppendLine("## TensorRT Packages")
@@ -1631,12 +1651,21 @@ foreach ($group in $tensorRtRows | Group-Object Package) {
   $source = @($group.Group | Where-Object { $_.NativeSourceStatus -eq "present" }).Count
   $implemented = @($group.Group | Where-Object { $_.ImplementationStatus -in @("implemented", "implemented-with-deferred-history") }).Count
   $deferredOnly = @($group.Group | Where-Object { $_.ImplementationStatus -eq "deferred-only" }).Count
-  [void]$summary.AppendLine("- ``$($group.Name)``: official interfaces scanned=$total, manifest matched=$covered, native source present=$source, implemented=$implemented, deferred-only=$deferredOnly")
+  $releaseMatrixStatus = @($group.Group | Select-Object -First 1).ReleaseMatrixStatus
+  [void]$summary.AppendLine("- ``$($group.Name)``: release-matrix=$releaseMatrixStatus, official interfaces scanned=$total, manifest matched=$covered, native source present=$source, implemented=$implemented, deferred-only=$deferredOnly")
 }
 [void]$summary.AppendLine()
-[void]$summary.AppendLine("## TensorRT Missing By Package / Category")
+[void]$summary.AppendLine("## Supported TensorRT Missing By Package / Category")
 [void]$summary.AppendLine()
-foreach ($group in $tensorRtRows | Where-Object { $_.NativeManifestStatus -ne "present" } | Group-Object Package,Category | Sort-Object Count -Descending | Select-Object -First 40) {
+foreach ($group in $tensorRtRows | Where-Object { $_.ReleaseMatrixStatus -eq "supported" -and $_.NativeManifestStatus -ne "present" } | Group-Object Package,Category | Sort-Object Count -Descending | Select-Object -First 40) {
+  [void]$summary.AppendLine("- $($group.Name): $($group.Count)")
+}
+[void]$summary.AppendLine()
+[void]$summary.AppendLine("## Future TensorRT Version Differences")
+[void]$summary.AppendLine()
+[void]$summary.AppendLine("These rows are retained as forward-looking SDK scan data and are not core-library defects for the supported release matrix.")
+[void]$summary.AppendLine()
+foreach ($group in $tensorRtRows | Where-Object { $_.ReleaseMatrixStatus -eq "future-version" -and $_.NativeManifestStatus -ne "present" } | Group-Object Package,Category | Sort-Object Count -Descending | Select-Object -First 40) {
   [void]$summary.AppendLine("- $($group.Name): $($group.Count)")
 }
 [void]$summary.AppendLine()
@@ -1660,6 +1689,7 @@ foreach ($group in $cudaRows | Where-Object { $_.NativeManifestStatus -ne "prese
 [void]$summary.AppendLine("## Next Use")
 [void]$summary.AppendLine()
 [void]$summary.AppendLine('- Use `tensorrt-interface-coverage.csv` and `cuda-runtime-interface-coverage.csv` as the persistent interface checklist.')
+[void]$summary.AppendLine('- `ReleaseMatrixStatus=future-version` preserves header-scan differences without reporting them as defects in the supported TensorRT 8.6/10.11/11.0 matrix.')
 [void]$summary.AppendLine('- `ImplementationStatus` separates `implemented`, `implemented-with-deferred-history`, `deferred-only`, `manifest-only`, and `missing`; do not treat deferred history as the active implementation when a real non-deferred export is present.')
 [void]$summary.AppendLine('- Compatibility CSVs are also written to `tensorrt-interface-comparison.csv` and `cuda-runtime-interface-comparison.csv` for older review notes.')
 [void]$summary.AppendLine('- After each API batch, rerun `eng/Export-InterfaceCoverageMatrix.ps1`; rows should move from `missing`, `manifest-only`, or `deferred-only` toward `implemented` or `implemented-with-deferred-history`.')

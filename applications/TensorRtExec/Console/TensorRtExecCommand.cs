@@ -24,45 +24,23 @@ public static class TensorRtExecCommand
         {
             TensorRtExecOptions options = TensorRtExecOptions.Parse(args);
             TensorRtExecReport report = new TensorRtExecService().Execute(options);
-            foreach (string line in report.LogLines)
+            foreach (string line in TensorRtExecReportFormatter.Format(report))
             {
                 System.Console.WriteLine(line);
             }
 
-            if (!string.IsNullOrWhiteSpace(report.ReportPath))
-            {
-                System.Console.WriteLine("TensorRtExec ReportPath=" + report.ReportPath);
-            }
-
-            if (!string.IsNullOrWhiteSpace(report.ProofClassification))
-            {
-                System.Console.WriteLine("TensorRtExec ProofClassification=" + report.ProofClassification + " BuildEvidenceOnly=" + report.BuildEvidenceOnly + " DryRun=" + report.DryRun);
-            }
-
-            if (!string.IsNullOrWhiteSpace(report.NormalizedCommandSha256))
-            {
-                System.Console.WriteLine("TensorRtExec NormalizedCommandSha256=" + report.NormalizedCommandSha256);
-            }
-
-            if (!string.IsNullOrWhiteSpace(report.LoadEngineDiagnosticsState))
-            {
-                System.Console.WriteLine("TensorRtExec LoadEngineDiagnosticsState=" + report.LoadEngineDiagnosticsState + " Attempted=" + report.LoadEngineDiagnosticsAttempted + " Succeeded=" + report.LoadEngineDiagnosticsSucceeded);
-                System.Console.WriteLine("TensorRtExec LoadEngineDiagnosticsBoundary=" + report.LoadEngineDiagnosticsBoundary);
-            }
-
-            System.Console.WriteLine("TensorRtExec WorkspaceBytes=" + report.WorkspaceBytes);
-            System.Console.WriteLine("TensorRtExec BuilderConfigDeploymentSnapshot=" + report.BuilderConfigDeploymentSnapshotState + " Diagnostics=" + report.BuilderConfigDeploymentDiagnosticCount);
-            System.Console.WriteLine("TensorRtExec ParserPreflightSnapshot=" + report.ParserPreflightSnapshotState + " Diagnostics=" + report.ParserPreflightDiagnosticCount);
-            System.Console.WriteLine("TensorRtExec RefitSnapshot=" + report.RefitState + " Attempted=" + report.RefitAttempted + " Succeeded=" + report.RefitSucceeded);
-            System.Console.WriteLine("TensorRtExec RefitPersistence=" + report.RefitPersistenceState + " Attempted=" + report.RefitPersistenceAttempted + " Succeeded=" + report.RefitPersistenceSucceeded + " Plan=" + report.PersistedRefittedEnginePath);
-            System.Console.WriteLine("TensorRtExec State=" + report.State + " Success=" + report.Success);
             return report.Success ? 0 : 2;
         }
-        catch (Exception exception) when (exception is ArgumentException || exception is System.IO.FileNotFoundException)
+        catch (Exception exception) when (TensorRtExecReportFormatter.IsInvalidArguments(exception))
         {
-            System.Console.WriteLine("TensorRtExec=InvalidArguments Reason=" + exception.Message);
+            System.Console.WriteLine(TensorRtExecReportFormatter.FormatFailure(exception));
             PrintUsage();
             return 2;
+        }
+        catch (Exception exception)
+        {
+            System.Console.WriteLine(TensorRtExecReportFormatter.FormatFailure(exception));
+            return 1;
         }
     }
 

@@ -28,6 +28,8 @@
     "RuntimeOptions",
     "PreflightMetadata",
     "LoadedEngineDiagnostics",
+    "LayerInfoArtifact",
+    "BindingMetadata",
     "TimingCacheArtifact",
     "CapabilityProbe",
     "WorkspaceBytes",
@@ -155,6 +157,144 @@
         "EvidenceBoundary"
       ]
     },
+    "LayerInfoArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "Requested",
+        "Collected",
+        "Source",
+        "State",
+        "InformationFormat",
+        "ContentKind",
+        "RequestedProfilingVerbosity",
+        "LayerCount",
+        "DumpRequested",
+        "ExportRequested",
+        "ExportWritten",
+        "ExportPath",
+        "LengthBytes",
+        "Sha256",
+        "Diagnostics",
+        "EvidenceBoundary",
+        "PointerFreeCopiedSnapshot",
+        "CanPromoteRuntimeProof",
+        "CanPromoteReleaseProof"
+      ],
+      "properties": {
+        "Requested": { "type": "boolean" },
+        "Collected": { "type": "boolean" },
+        "Source": { "type": "string" },
+        "State": { "type": "string", "minLength": 1 },
+        "InformationFormat": { "type": "string" },
+        "ContentKind": { "type": "string" },
+        "RequestedProfilingVerbosity": { "type": "string" },
+        "LayerCount": { "type": "integer", "minimum": 0 },
+        "DumpRequested": { "type": "boolean" },
+        "ExportRequested": { "type": "boolean" },
+        "ExportWritten": { "type": "boolean" },
+        "ExportPath": { "type": "string" },
+        "LengthBytes": { "type": "integer", "minimum": 0 },
+        "Sha256": { "type": "string", "pattern": "^$|^[a-f0-9]{64}$" },
+        "Diagnostics": { "type": "array", "items": { "type": "string" } },
+        "EvidenceBoundary": { "type": "string", "minLength": 1 },
+        "PointerFreeCopiedSnapshot": { "type": "boolean", "const": true },
+        "CanPromoteRuntimeProof": { "type": "boolean", "const": false },
+        "CanPromoteReleaseProof": { "type": "boolean", "const": false }
+      }
+    },
+    "BindingMetadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "Attempted",
+        "Succeeded",
+        "State",
+        "EngineName",
+        "ProfileIndex",
+        "ContextReadinessAttached",
+        "IsReadyForEnqueue",
+        "TensorCount",
+        "InputCount",
+        "OutputCount",
+        "Tensors",
+        "Diagnostics",
+        "EvidenceKind",
+        "EvidenceBoundary",
+        "PointerFreeCopiedSnapshot",
+        "CanPromoteRuntimeProof",
+        "CanPromoteReleaseProof"
+      ],
+      "properties": {
+        "Attempted": { "type": "boolean" },
+        "Succeeded": { "type": "boolean" },
+        "State": { "type": "string" },
+        "EngineName": { "type": "string" },
+        "ProfileIndex": { "type": "integer" },
+        "ContextReadinessAttached": { "type": "boolean" },
+        "IsReadyForEnqueue": { "type": "boolean" },
+        "TensorCount": { "type": "integer", "minimum": 0 },
+        "InputCount": { "type": "integer", "minimum": 0 },
+        "OutputCount": { "type": "integer", "minimum": 0 },
+        "Tensors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "Index",
+              "Name",
+              "IOMode",
+              "DataType",
+              "EngineShape",
+              "Location",
+              "IsShapeInferenceIO",
+              "BytesPerComponent",
+              "ComponentsPerElement",
+              "EffectiveBytesPerComponent",
+              "EffectiveComponentsPerElement",
+              "UsesDataTypeSizeFallback",
+              "Format",
+              "FormatDescription",
+              "VectorizedDimension",
+              "ProfileIndex",
+              "ProfileMinShape",
+              "ProfileOptShape",
+              "ProfileMaxShape",
+              "Diagnostics"
+            ],
+            "properties": {
+              "Index": { "type": "integer", "minimum": 0 },
+              "Name": { "type": "string" },
+              "IOMode": { "type": "string", "enum": [ "Input", "Output", "Unknown" ] },
+              "DataType": { "type": "string" },
+              "EngineShape": { "type": "array", "items": { "type": "integer" } },
+              "Location": { "type": "string" },
+              "IsShapeInferenceIO": { "type": "boolean" },
+              "BytesPerComponent": { "type": "integer" },
+              "ComponentsPerElement": { "type": "integer" },
+              "EffectiveBytesPerComponent": { "type": "integer", "minimum": 0 },
+              "EffectiveComponentsPerElement": { "type": "integer", "minimum": 1 },
+              "UsesDataTypeSizeFallback": { "type": "boolean" },
+              "Format": { "type": "string" },
+              "FormatDescription": { "type": "string" },
+              "VectorizedDimension": { "type": "integer" },
+              "ProfileIndex": { "type": "integer", "minimum": 0 },
+              "ProfileMinShape": { "type": [ "array", "null" ], "items": { "type": "integer" } },
+              "ProfileOptShape": { "type": [ "array", "null" ], "items": { "type": "integer" } },
+              "ProfileMaxShape": { "type": [ "array", "null" ], "items": { "type": "integer" } },
+              "Diagnostics": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        },
+        "Diagnostics": { "type": "array", "items": { "type": "string" } },
+        "EvidenceKind": { "type": "string", "const": "copied-pointer-free-TensorRtEngineBindingReport" },
+        "EvidenceBoundary": { "type": "string", "minLength": 1 },
+        "PointerFreeCopiedSnapshot": { "type": "boolean", "const": true },
+        "CanPromoteRuntimeProof": { "type": "boolean", "const": false },
+        "CanPromoteReleaseProof": { "type": "boolean", "const": false }
+      }
+    },
     "TimingCacheArtifact": {
       "type": "object",
       "additionalProperties": false,
@@ -266,7 +406,29 @@
         "MissingWeightsAfter": { "type": "array", "items": { "type": "string" } }, "AllWeightsAfter": { "type": "array", "items": { "type": "string" } },
         "ParserErrorCount": { "type": "integer", "minimum": 0 }, "CopiedDiagnosticCount": { "type": "integer", "minimum": 0 }, "DiagnosticSummary": { "type": "string" },
         "ContextCreationAllowed": { "type": "boolean" }, "EvidenceBoundary": { "type": "string" }
-      }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "Attempted": { "const": true } }, "required": ["Attempted"] },
+          "then": {
+            "properties": {
+              "Succeeded": { "const": true },
+              "State": { "const": "onnx-refit-complete" },
+              "SourcePath": { "minLength": 1 },
+              "SourceLengthBytes": { "minimum": 1 },
+              "SourceSha256": { "pattern": "^[0-9a-f]{64}$" },
+              "EngineRefittableBefore": { "const": true },
+              "EngineRefittableAfter": { "const": true },
+              "ParserRefitReturned": { "const": true },
+              "EngineRefitReturned": { "const": true },
+              "MissingWeightsAfter": { "maxItems": 0 },
+              "ParserErrorCount": { "const": 0 },
+              "ContextCreationAllowed": { "const": true },
+              "EvidenceBoundary": { "minLength": 1 }
+            }
+          }
+        }
+      ]
     },
     "RefitPersistenceSnapshot": {
       "type": "object",
@@ -283,7 +445,34 @@
         "ReloadIOTensorCount": { "type": "integer", "minimum": 0 }, "ReloadLayerCount": { "type": "integer", "minimum": 0 }, "ReloadOptimizationProfileCount": { "type": "integer", "minimum": 0 },
         "ReloadContextCreationAllowed": { "type": "boolean" }, "ReloadEngineSelectedForRuntime": { "type": "boolean" }, "InferenceRanFromReloadedEngine": { "type": "boolean" },
         "EvidenceBoundary": { "type": "string" }
-      }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "Attempted": { "const": true } }, "required": ["Attempted"] },
+          "then": {
+            "properties": {
+              "Succeeded": { "const": true },
+              "State": { "const": "refitted-plan-persisted-and-reloaded" },
+              "StrippedPlanPath": { "minLength": 1 },
+              "StrippedPlanLengthBytes": { "minimum": 1 },
+              "StrippedPlanSha256": { "pattern": "^[0-9a-f]{64}$" },
+              "PersistedPlanPath": { "minLength": 1 },
+              "PersistedPlanLengthBytes": { "minimum": 1 },
+              "PersistedPlanSha256": { "pattern": "^[0-9a-f]{64}$" },
+              "RefittableWeightsIncludedInSerialization": { "const": true },
+              "ArtifactDiffersFromStrippedPlan": { "const": true },
+              "OriginalRefittedEngineDisposedBeforeReload": { "const": true },
+              "ReloadAttempted": { "const": true },
+              "ReloadSucceeded": { "const": true },
+              "ReloadIOTensorCount": { "minimum": 1 },
+              "ReloadLayerCount": { "minimum": 1 },
+              "ReloadOptimizationProfileCount": { "minimum": 1 },
+              "ReloadContextCreationAllowed": { "const": true },
+              "EvidenceBoundary": { "minLength": 1 }
+            }
+          }
+        }
+      ]
     },
     "OptionImplementationStatus": {
       "type": "object",

@@ -165,7 +165,8 @@ public sealed partial class OnnxEngineBuildService
                 loadedEngineDiagnostics: loadedEngineDiagnostics,
                 timingCacheArtifact: CreateTimingCacheBoundaryArtifact(options, "not-applied-to-load-engine"),
                 outputValidated: runtimeExecution?.OutputValidated ?? false,
-                identityOutputMatch: runtimeExecution?.IdentityOutputMatch ?? false);
+                identityOutputMatch: runtimeExecution?.IdentityOutputMatch ?? false,
+                bindingMetadata: runtimeExecution?.BindingMetadata ?? loadedEngineDiagnostics.BindingMetadata);
             OnnxEngineBuildDiagnostics.WriteReport(loadResult, options.ExportReportPath);
             OnnxEngineRuntimeArtifactWriter.WriteArtifacts(loadResult, runtimeExecution?.ArtifactData);
             return loadResult;
@@ -314,7 +315,7 @@ public sealed partial class OnnxEngineBuildService
                 using TensorRtHostMemory hostMemory = builder.BuildSerializedNetwork(network, config);
                 hostMemory.SaveToFile(enginePath);
                 timingCache.Artifact = ExportTimingCache(timingCache, options, log);
-                TryCollectLayerInformationFromSerializedEngine(runtime, enginePath, options, log, "Build");
+                OnnxEngineLayerInfoArtifact buildLayerInfoArtifact = TryCollectLayerInformationFromSerializedEngine(runtime, enginePath, options, log, "Build");
 
                 OnnxEngineRefitSnapshot refitSnapshot = OnnxEngineRefitSnapshot.Empty;
                 OnnxEngineRefitPersistenceSnapshot refitPersistenceSnapshot = OnnxEngineRefitPersistenceSnapshot.Empty;
@@ -349,6 +350,23 @@ public sealed partial class OnnxEngineBuildService
                     }
                 }
 
+                OnnxEngineBindingMetadata buildBindingMetadata;
+                if (refittedEngine != null)
+                {
+                    buildBindingMetadata = OnnxEngineBindingMetadata.FromBindingReport(
+                        refittedEngine.GetBindingReport(profileIndex),
+                        "build-engine-readback");
+                }
+                else
+                {
+                    using TensorRtEngine metadataEngine = runtime.DeserializeFromFile(enginePath);
+                    buildBindingMetadata = OnnxEngineBindingMetadata.FromBindingReport(
+                        metadataEngine.GetBindingReport(profileIndex),
+                        "build-engine-readback");
+                }
+
+                log.Add($"BindingMetadata State={buildBindingMetadata.State} Tensors={buildBindingMetadata.TensorCount} Inputs={buildBindingMetadata.InputCount} Outputs={buildBindingMetadata.OutputCount} ContextReadinessAttached={buildBindingMetadata.ContextReadinessAttached} EvidenceKind={buildBindingMetadata.EvidenceKind}");
+
                 bool externalRuntimeRequested = options.UsesExternalOnnx && CanAttemptGenericExternalRuntime(options);
                 if (options.BuildOnly || options.SkipInference || (options.UsesExternalOnnx && !externalRuntimeRequested))
                 {
@@ -382,7 +400,9 @@ public sealed partial class OnnxEngineBuildService
                         builderConfigDeploymentSnapshot: builderConfigDeploymentSnapshot,
                         parserPreflightSnapshot: parserPreflightSnapshot,
                         refitSnapshot: refitSnapshot,
-                        refitPersistenceSnapshot: refitPersistenceSnapshot);
+                        refitPersistenceSnapshot: refitPersistenceSnapshot,
+                        bindingMetadata: buildBindingMetadata,
+                        layerInfoArtifact: buildLayerInfoArtifact);
                     OnnxEngineBuildDiagnostics.WriteReport(buildOnly, options.ExportReportPath);
                     OnnxEngineRuntimeArtifactWriter.WriteArtifacts(buildOnly);
                     return buildOnly;
@@ -408,6 +428,14 @@ public sealed partial class OnnxEngineBuildService
                     log.Add(runtimeExecution == null
                         ? "OnnxToEngine ExternalOnnx=RuntimeSkipped Note=Generic bounded runtime could not be executed."
                         : $"OnnxToEngine ExternalOnnx=BoundedRuntime InferenceRan=True OutputMatch={runtimeExecution.OutputMatch} OutputValidated={runtimeExecution.OutputValidated}");
+                    OnnxLoadedEngineDiagnostics loadedEngineDiagnostics = ProbeLoadedEngineDiagnostics(
+                        options,
+                        OnnxEnginePreflightMetadata.FromExistingEngine(
+                            refitPersistenceSnapshot.Succeeded ? refitPersistenceSnapshot.PersistedPlanPath : enginePath),
+                        log);
+                    OnnxEngineLayerInfoArtifact runtimeLayerInfoArtifact = loadedEngineDiagnostics.LayerInfoArtifact.Collected
+                        ? loadedEngineDiagnostics.LayerInfoArtifact
+                        : buildLayerInfoArtifact;
                     OnnxEngineBuildResult externalRuntime = CreateResult(
                         success: !options.RuntimeOptions.RequestsReferenceValidation || (runtimeExecution?.OutputValidated ?? false),
                         skipped: false,
@@ -430,18 +458,16 @@ public sealed partial class OnnxEngineBuildService
                         log,
                         evidenceSidecar,
                         benchmarkSummary: runtimeExecution?.BenchmarkSummary,
-                        loadedEngineDiagnostics: ProbeLoadedEngineDiagnostics(
-                            options,
-                            OnnxEnginePreflightMetadata.FromExistingEngine(
-                                refitPersistenceSnapshot.Succeeded ? refitPersistenceSnapshot.PersistedPlanPath : enginePath),
-                            log),
+                        loadedEngineDiagnostics: loadedEngineDiagnostics,
                         timingCacheArtifact: timingCache.Artifact,
                         builderConfigDeploymentSnapshot: builderConfigDeploymentSnapshot,
                         parserPreflightSnapshot: parserPreflightSnapshot,
                         refitSnapshot: refitSnapshot,
                         refitPersistenceSnapshot: refitPersistenceSnapshot,
                         outputValidated: runtimeExecution?.OutputValidated ?? false,
-                        identityOutputMatch: runtimeExecution?.IdentityOutputMatch ?? false);
+                        identityOutputMatch: runtimeExecution?.IdentityOutputMatch ?? false,
+                        bindingMetadata: runtimeExecution?.BindingMetadata ?? buildBindingMetadata,
+                        layerInfoArtifact: runtimeLayerInfoArtifact);
                     OnnxEngineBuildDiagnostics.WriteReport(externalRuntime, options.ExportReportPath);
                     OnnxEngineRuntimeArtifactWriter.WriteArtifacts(externalRuntime, runtimeExecution?.ArtifactData);
                     return externalRuntime;
@@ -491,7 +517,9 @@ public sealed partial class OnnxEngineBuildService
                     builderConfigDeploymentSnapshot: builderConfigDeploymentSnapshot,
                     parserPreflightSnapshot: parserPreflightSnapshot,
                     outputValidated: identityRuntimeExecution.OutputValidated,
-                    identityOutputMatch: identityRuntimeExecution.IdentityOutputMatch);
+                    identityOutputMatch: identityRuntimeExecution.IdentityOutputMatch,
+                    bindingMetadata: identityRuntimeExecution.BindingMetadata,
+                    layerInfoArtifact: buildLayerInfoArtifact);
                 OnnxEngineBuildDiagnostics.WriteReport(roundTrip, options.ExportReportPath);
                 OnnxEngineRuntimeArtifactWriter.WriteArtifacts(roundTrip, identityRuntimeExecution.ArtifactData);
                 return roundTrip;

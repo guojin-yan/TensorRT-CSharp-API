@@ -32,6 +32,18 @@
     href: articles/zh-cn/classification-real-asset-walkthrough.md
   - name: YoloVision 全任务
     href: articles/zh-cn/yolovision-all-task-overview.md
+  - name: YOLOv8n 目标检测
+    href: articles/zh-cn/yolovision-yolov8n-detection-tutorial.md
+  - name: LRASPP 语义分割
+    href: articles/zh-cn/yolovision-lraspp-semantic-segmentation-tutorial.md
+  - name: YOLOv8n 图像分类
+    href: articles/zh-cn/yolovision-yolov8n-classification-tutorial.md
+  - name: YOLOv8n 姿态估计
+    href: articles/zh-cn/yolovision-yolov8n-pose-tutorial.md
+  - name: YOLOv8n OBB
+    href: articles/zh-cn/yolovision-yolov8n-obb-tutorial.md
+  - name: YOLOv8n 实例分割
+    href: articles/zh-cn/yolovision-yolov8n-instance-segmentation-tutorial.md
   - name: 模型获取与 ONNX 转换
     href: articles/zh-cn/demo-model-acquisition-and-onnx-conversion.md
   - name: TensorRtExec GUI

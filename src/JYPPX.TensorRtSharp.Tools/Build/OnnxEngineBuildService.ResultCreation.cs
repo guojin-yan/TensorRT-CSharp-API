@@ -43,7 +43,9 @@ public sealed partial class OnnxEngineBuildService
         OnnxEngineRefitSnapshot? refitSnapshot = null,
         OnnxEngineRefitPersistenceSnapshot? refitPersistenceSnapshot = null,
         bool outputValidated = false,
-        bool identityOutputMatch = false)
+        bool identityOutputMatch = false,
+        OnnxEngineBindingMetadata? bindingMetadata = null,
+        OnnxEngineLayerInfoArtifact? layerInfoArtifact = null)
     {
         OnnxEngineCapabilityProbe capabilityProbe = ProbeCapabilities(options);
         logLines = AppendCapabilityProbeLog(logLines, capabilityProbe);
@@ -80,7 +82,9 @@ public sealed partial class OnnxEngineBuildService
             refitSnapshot: refitSnapshot,
             refitPersistenceSnapshot: refitPersistenceSnapshot,
             outputValidated: outputValidated,
-            identityOutputMatch: identityOutputMatch);
+            identityOutputMatch: identityOutputMatch,
+            bindingMetadata: bindingMetadata,
+            layerInfoArtifact: layerInfoArtifact ?? loadedEngineDiagnostics?.LayerInfoArtifact ?? CreateLayerInformationBoundaryArtifact(options, "Result", state));
     }
 
     private static string RuntimeState(
