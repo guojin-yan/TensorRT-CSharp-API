@@ -10,6 +10,7 @@
 - `OnnxToEngine` 与 `TensorRtExec` 已移除到核心 `src/JYPPX.CudaSharp`、`src/JYPPX.TensorRtSharp` 的项目引用。
 - 新增不可打包的 `applications/_shared/JYPPX.TensorRtSharp.ApplicationTools`，链接 Tools 实现并使用公共 TensorRT 包编译。
 - 两个工具应用的离线 `--help` 入口已在公共包依赖图下运行通过。
+- TRT11 `--versionCompatible --stripWeights --refit` 已完成 builder/runtime host-code readback、ONNX parser refit、full-weight plan 持久化、两进程 reload/enqueue 和零 mismatch reference validation；两份 report 各为 69/69，专用 evidence validator 为 45/45。该结果仍分类为 `synthetic-input-runtime`，不是 external lean runtime、模型准确率、包消费或发布证明。
 
 ## OpenCV
 

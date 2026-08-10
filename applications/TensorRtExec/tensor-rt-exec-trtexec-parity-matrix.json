@@ -123,8 +123,8 @@
       "entryPoints": ["TrtexecLikeWeightStreamingBudget", "OnnxEngineBuildService.ApplyEnginePackagingOptions", "OnnxEngineBuildService.ApplyEngineRuntimePolicies", "TensorRtBuilderConfig.SetFlag/GetFlag", "TensorRtEngine.SetWeightStreamingBudgetV2", "TensorRtExecOptions", "WinForms Packaging fields"],
       "proofBoundary": "Builder/engine set-readback and a local weighted-model enqueue prove policy routing only. The separate --refitFromOnnx/--saveRefittedEngine extensions do not change official trtexec parity or prove package consumption or release.",
       "isRuntimeProof": false,
-      "gap": "TRT8 keeps strip/weight-streaming and version-compatible+refit conflict parse-only. TRT11 strip/refit now has parser load, engine commit, persistence, reload, enqueue, and reference comparison evidence; TRT11 version-compatible+refit, weight streaming, and external lean runtime remain unverified.",
-      "nextStep": "Retain the version guards and compact runtime evidence; collect TRT11 version-compatible, weight-streaming, and external lean-runtime evidence separately from the managed refit extensions."
+      "gap": "TRT8 keeps strip/weight-streaming and version-compatible+refit conflict parse-only. TRT11 version-compatible+refit now has builder-flag and runtime host-code readback, parser load, engine commit, persistence, reload, a loadEngine-only second process, enqueue, identical output SHA, and zero-mismatch reference comparison evidence. TRT11 weight streaming and external lean runtime remain unverified.",
+      "nextStep": "Retain the version guards and compact runtime evidence; collect TRT11 weight-streaming and external lean-runtime evidence separately from the managed refit extensions."
     },
     {
       "id": "onnx-stripped-plan-refit-extension",

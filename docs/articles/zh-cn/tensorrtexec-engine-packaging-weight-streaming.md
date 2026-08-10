@@ -117,6 +117,29 @@ EngineFileRoundTrip=True
 OutputMatch=True
 ```
 
+### 6.1 TRT11 version-compatible + stripped-plan refit
+
+TRT11 使用同一 MNIST ONNX、固定输入和结构化 reference，在显式 native bridge、vendor runtime 与 CUDA 12.9 路径下执行：
+
+```powershell
+TensorRtExec.exe `
+  --tensor-rt-line 11 `
+  --onnx <mnist.onnx> `
+  --saveEngine <version-compatible-stripped.plan> `
+  --versionCompatible `
+  --stripWeights `
+  --refit `
+  --refitFromOnnx <mnist.onnx> `
+  --saveRefittedEngine <version-compatible-refitted.plan> `
+  --loadInputs Input3:<input.bin> `
+  --referenceOutputs Plus214_Output_0:<reference.json> `
+  --iterations 1 --warmUp 0 --duration 0
+```
+
+本次 vendor 接受 `VersionCompatible + StripPlan + Refit`，builder flag、build runtime host-code policy 和 load-engine runtime host-code policy 均 set/readback match。parser refitter 与 engine refitter 返回 `true`，missing weights 前后均为 `0`，full-weight plan 在原 engine owner 释放后重新加载并创建 context。随后独立 `loadEngine` 子进程再次加载同一 plan；两进程 reference mismatch 都为 `0`，raw output SHA256 都是 `a632b881db2328e9103bbdbfb9205c988577a146125faa8ae20e51977b6877c8`。
+
+两份 TensorRtExec report 各通过 `69/69` strict checks，专用 lifecycle validator 通过 `45/45` checks。compact evidence 位于 `artifacts/interface-coverage/trt11-version-compatible-refit-runtime-evidence.json`。该结果分类为 `synthetic-input-runtime`，只证明本机 TRT11 builder/refit/persist/reload/enqueue/reference 边界，不是跨版本 external lean runtime、模型准确率、包消费或发布 proof。
+
 ## 7. 用官方 YOLOX-S 验证非零权重预算
 
 先按仓库的固定来源和 SHA256 获取资产：
@@ -194,14 +217,14 @@ dotnet .\applications\OnnxToEngine\bin\Debug\net8.0\OnnxToEngine.dll `
 
 | 行为 | TRT8 | TRT10 | TRT11 |
 | --- | --- | --- | --- |
-| version compatible | applied/readback | applied/readback | 本次未请求，仍需单独验证 |
+| version compatible | applied/readback | applied/readback | applied/readback + runtime host-code policy |
 | exclude lean runtime | applied/readback | applied/readback | 本次未请求，仍需单独验证 |
 | refit 单独使用 | applied/readback | applied/readback + engine readback | applied/readback + parser load + engine commit |
-| version compatible + refit | vendor readback conflict，refit parse-only | applied/readback | 本次未请求，不能由 refit-only 结果代替 |
+| version compatible + refit | vendor readback conflict，refit parse-only | applied/readback | applied/readback + parser refit + persist/reload + two-process enqueue |
 | strip weights | parse-only | `StripPlan + RefitIdentical/Refit` | `StripPlan + Refit` applied/readback |
 | weight streaming | parse-only | builder + engine budget readback | 本次未请求，仍需单独验证 |
 
-TRT11 当前主机已经完成 stripped-plan build、parser-refitter load、engine commit、`ExcludeWeights` clear/readback、原 owner dispose、full-weight plan reload、独立进程 reload、enqueue 和 10 值零 mismatch reference comparison。2026-07-22 的 structured exception `3228369022` 记录继续作为 historical dependency probe 保留；它不能覆盖 2026-08-10 的新结果，也不能被删除。上述结果仍不代表 TRT11 version-compatible、lean runtime 或 weight streaming 已验证。
+TRT11 当前主机已经完成 version-compatible stripped-plan build、runtime host-code policy readback、parser-refitter load、engine commit、`ExcludeWeights` clear/readback、原 owner dispose、full-weight plan reload、独立进程 reload、enqueue 和 10 值零 mismatch reference comparison。2026-07-22 的 structured exception `3228369022` 记录继续作为 historical dependency probe 保留；它不能覆盖 2026-08-10 的新结果，也不能被删除。上述结果仍不代表 TRT11 external lean runtime、跨版本加载或 weight streaming 已验证。
 
 ## 10. 证据生成与严格验证
 
@@ -214,6 +237,10 @@ pwsh -NoProfile -ExecutionPolicy Bypass `
 pwsh -NoProfile -ExecutionPolicy Bypass `
   -File .\eng\Test-TrtexecEnginePackagingRuntimeEvidence.ps1 `
   -Strict
+
+pwsh -NoProfile -ExecutionPolicy Bypass `
+  -File .\eng\Test-Trt11VersionCompatibleRefitRuntimeEvidence.ps1 `
+  -Strict
 ```
 
 输出：
@@ -223,9 +250,12 @@ artifacts/interface-coverage/trtexec-engine-packaging-runtime-evidence.json
 artifacts/interface-coverage/trtexec-engine-packaging-runtime-evidence.md
 artifacts/interface-coverage/trtexec-engine-packaging-runtime-evidence-validation.json
 artifacts/interface-coverage/trtexec-engine-packaging-runtime-evidence-validation.md
+artifacts/interface-coverage/trt11-version-compatible-refit-runtime-evidence.json
+artifacts/interface-coverage/trt11-version-compatible-refit-runtime-validation.json
+artifacts/interface-coverage/trt11-version-compatible-refit-runtime-validation.md
 ```
 
-本次 strict 结果为 `21 checks / 0 failures`。
+engine-packaging 汇总 strict 结果为 `21 checks / 0 failures`；TRT11 version-compatible refit 专用 strict 结果为 `45 checks / 0 failures`。
 
 ## 11. 常见错误
 
@@ -245,12 +275,13 @@ artifacts/interface-coverage/trtexec-engine-packaging-runtime-evidence-validatio
 - builder flag 使用稳定 logical enum 到 TRT8/10/11 raw index 的映射。
 - TRT10 version-compatible/refit plan 可 round-trip 并输出匹配。
 - TRT10 对真实 YOLOX-S 权重得到非零 budget/scratch readback并完成 enqueue。
-- TRT8 不支持的路径，以及 TRT11 本次没有请求的 version-compatible、lean runtime 和 weight streaming 路径，没有被伪装成 applied。
+- TRT11 version-compatible + stripped-plan refit 完成 host-code readback、持久化、两进程 reload/enqueue 和相同输出 hash。
+- TRT8 不支持的路径，以及 TRT11 本次没有请求的 external lean runtime 和 weight streaming 路径，没有被伪装成 applied。
 
 本批没有证明：
 
 - plan 在更新 TensorRT 版本或外部 lean runtime 中成功运行。
-- stripped plan 已通过完整 refit lifecycle 恢复权重。
+- version-compatible plan 已在其他 TensorRT 版本或 external lean runtime 中加载。
 - YOLOX 通用 output capture 已完成 decode、NMS 和精度验证。
 - 公开 NuGet/GitHub 包已被仓库外 consumer 使用。
 - 已执行包发布、GitHub Release 上传或 issue close。

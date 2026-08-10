@@ -1,0 +1,161 @@
+{
+  "schemaVersion": "trt11-version-compatible-refit-runtime-evidence.v1",
+  "generatedAt": "2026-08-10",
+  "evidenceKind": "local-source-tree-trt11-version-compatible-refit-runtime",
+  "state": "external-onnx-refit-reload-reference-validated-runtime",
+  "proofClassification": "synthetic-input-runtime",
+  "sourceTreeDirtyAtExecution": false,
+  "gitHead": "66f11029e5de34b2be05bb541fb52af2f002e369",
+  "runDirectory": "artifacts/real-case/tensorrtexec-trt11-version-compatible-refit-runtime-20260810-111142",
+  "tensorRtVersion": "11.0.0",
+  "cudaToolkitVersion": "12.9",
+  "outputSha256": "a632b881db2328e9103bbdbfb9205c988577a146125faa8ae20e51977b6877c8",
+  "processes": {
+    "sameProcess": {
+      "processIsolation": "dedicated-TensorRtExec-process",
+      "command": {
+        "path": "artifacts/real-case/tensorrtexec-trt11-version-compatible-refit-runtime-20260810-111142/command.txt",
+        "lengthBytes": 2185,
+        "sha256": "ad8036f57f72ebe06e45c741faebeb4b3235f76c65e0b31f9e2db523e77aa4fd"
+      },
+      "stdout": {
+        "path": "artifacts/real-case/tensorrtexec-trt11-version-compatible-refit-runtime-20260810-111142/stdout.log",
+        "lengthBytes": 11895,
+        "sha256": "2274ed475e603b866892f31daca4efa1ad8f19f9b1c2ba31ddc17818355117c8"
+      },
+      "stderr": {
+        "path": "artifacts/real-case/tensorrtexec-trt11-version-compatible-refit-runtime-20260810-111142/stderr.log",
+        "lengthBytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "exitCode": {
+        "path": "artifacts/real-case/tensorrtexec-trt11-version-compatible-refit-runtime-20260810-111142/exit-code.txt",
+        "lengthBytes": 3,
+        "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+        "value": 0
+      },
+      "report": {
+        "path": "artifacts/real-case/tensorrtexec-trt11-version-compatible-refit-runtime-20260810-111142/report.json",
+        "lengthBytes": 48246,
+        "sha256": "0079a89488019ba67a9f5ce265cf4b6ed486f7a1f0f204f563fc1335e7674b60"
+      },
+      "strictValidation": {
+        "path": "artifacts/real-case/tensorrtexec-trt11-version-compatible-refit-runtime-20260810-111142/strict-validation.json",
+        "lengthBytes": 14079,
+        "sha256": "4fb57213fc33edd2d0a2ed8267cf5bed624496c976b6388dfd32eb321d304e2e",
+        "checkCount": 69,
+        "passedCount": 69,
+        "failureCount": 0
+      },
+      "output": {
+        "path": "artifacts/real-case/tensorrtexec-trt11-version-compatible-refit-runtime-20260810-111142/output.json",
+        "lengthBytes": 5185,
+        "sha256": "fea059533ad53958834234e2ba7cf10bcf656b4f44cc8852aa6ce138c6e01274"
+      }
+    },
+    "secondProcess": {
+      "processIsolation": "loadEngine-only-dedicated-TensorRtExec-process",
+      "command": {
+        "path": "artifacts/real-case/tensorrtexec-trt11-version-compatible-refit-runtime-20260810-111142/second-process-reload/command.txt",
+        "lengthBytes": 1776,
+        "sha256": "9e3b69f1f4b3e11c7054b161c08e82f3727cb054c96122adcd5bc9949ac0e9c4"
+      },
+      "stdout": {
+        "path": "artifacts/real-case/tensorrtexec-trt11-version-compatible-refit-runtime-20260810-111142/second-process-reload/stdout.log",
+        "lengthBytes": 7358,
+        "sha256": "7fac7131f35344b9adf579b67b43474bc5210a65f329dd351ff9ee91de153dcd"
+      },
+      "stderr": {
+        "path": "artifacts/real-case/tensorrtexec-trt11-version-compatible-refit-runtime-20260810-111142/second-process-reload/stderr.log",
+        "lengthBytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "exitCode": {
+        "path": "artifacts/real-case/tensorrtexec-trt11-version-compatible-refit-runtime-20260810-111142/second-process-reload/exit-code.txt",
+        "lengthBytes": 3,
+        "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+        "value": 0
+      },
+      "report": {
+        "path": "artifacts/real-case/tensorrtexec-trt11-version-compatible-refit-runtime-20260810-111142/second-process-reload/report.json",
+        "lengthBytes": 35812,
+        "sha256": "445165e9d0df7071995c203f7c122e1fb275c0b7b2bd216681b5e10d6639f876"
+      },
+      "strictValidation": {
+        "path": "artifacts/real-case/tensorrtexec-trt11-version-compatible-refit-runtime-20260810-111142/second-process-reload/strict-validation.json",
+        "lengthBytes": 14125,
+        "sha256": "9e41d965d073e5be6f1d9fcc73e4407a51a9cf86c8e4cbb2d609697926f0f9cb",
+        "checkCount": 69,
+        "passedCount": 69,
+        "failureCount": 0
+      },
+      "output": {
+        "path": "artifacts/real-case/tensorrtexec-trt11-version-compatible-refit-runtime-20260810-111142/second-process-reload/output.json",
+        "lengthBytes": 5780,
+        "sha256": "66972236a3f2b513f12c9608a03559da1fb2113503f6138ad173aed7c77a347a"
+      }
+    }
+  },
+  "buildArtifacts": {
+    "strippedPlan": {
+      "path": "artifacts/real-case/tensorrtexec-trt11-version-compatible-refit-runtime-20260810-111142/mnist-trt11-version-compatible-stripped.plan",
+      "lengthBytes": 41682452,
+      "sha256": "63534e5f0120be93c90c373fa2479850f8ef1c2baba93faa36eb8a472668ea51"
+    },
+    "refittedPlan": {
+      "path": "artifacts/real-case/tensorrtexec-trt11-version-compatible-refit-runtime-20260810-111142/mnist-trt11-version-compatible-refitted-full-weight.plan",
+      "lengthBytes": 106612,
+      "sha256": "961db2fba8cf396bf9bb9cb1f9f6fdda37ae61c739a960c8f1773785db058af6"
+    }
+  },
+  "environment": {
+    "path": "artifacts/real-case/tensorrtexec-trt11-version-compatible-refit-runtime-20260810-111142/environment-dependencies.json",
+    "lengthBytes": 3472,
+    "sha256": "19778f45e84e04ff14e297fd42ff0d3caa09f09415b55c7baeeab78753b75532"
+  },
+  "assets": {
+    "model": {
+      "path": "../models/OnnxToEngine/MNIST/nvidia-tensorrt-10.11/mnist.onnx",
+      "lengthBytes": 26454,
+      "sha256": "2f06e72de813a8635c9bc0397ac447a601bdbfa7df4bebc278723b958831c9bf"
+    },
+    "input": {
+      "path": "artifacts/real-case/onnx-to-engine-mnist-trt10-runtime/digit-7/mnist-trt10-7-input-f32.bin",
+      "lengthBytes": 3136,
+      "sha256": "81f2cd7784dca5c8f02a9887ae89a6a3582880a27d2eba95a53f845c63187564"
+    },
+    "reference": {
+      "path": "artifacts/real-case/onnx-to-engine-mnist-trt10-runtime/digit-7/mnist-trt10-7.reference.json",
+      "lengthBytes": 329,
+      "sha256": "07969a96f76f9dc69a777770ca581df64ad9cb2d1ea320f97bdfbb7cc697beef"
+    },
+    "nativeBridge": {
+      "path": "build-out/win-x64-trt11-cuda12-release/bin/Release/jyppxtrtbridge.dll",
+      "lengthBytes": 921600,
+      "sha256": "a94d1e5fe4454c9402979ae050f7a64d74c7f51bd6bb2d74936531f608a9ef6f"
+    },
+    "vendorRuntime": {
+      "path": "../downloads/trt11-cuda12.9-v4.0.6156/assembled-runtime/bin/nvinfer_11.dll",
+      "lengthBytes": 414402672,
+      "sha256": "7359c70c65f4a9f138d4bef6d5945a2c4a69c37a7db8dd44ca001af1d701acf7"
+    },
+    "cudaRuntime": {
+      "path": "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v12.9/bin/cudart64_12.dll",
+      "lengthBytes": 580608,
+      "sha256": "cf68ac7d47c621988db3343b8a211188e6f94cccf30dec3b15dd52d69fdcf512"
+    }
+  },
+  "proofBoundary": {
+    "isTrt11VersionCompatibleRefitRuntimeEvidence": true,
+    "isBuilderAndEnginePolicyEvidence": true,
+    "isReferenceValidatedSyntheticRuntime": true,
+    "isCrossVersionLeanRuntimeProof": false,
+    "isModelAccuracyProof": false,
+    "isPackageConsumerRuntimeProof": false,
+    "isPublicFeedProof": false,
+    "isPostPublishProof": false,
+    "isReleaseProof": false,
+    "canPublishPublicly": false,
+    "publicReleaseSideEffectsExecuted": false
+  }
+}

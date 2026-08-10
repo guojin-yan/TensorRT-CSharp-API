@@ -122,7 +122,7 @@
       "cliSupported": true,
       "winFormsSupported": true,
       "nextImplementationPaths": ["src/JYPPX.TensorRtSharp.Tools/Trtexec/TrtexecLikeWeightStreamingBudget.cs", "src/JYPPX.TensorRtSharp.Tools/Build/OnnxEngineBuildService.cs", "applications/TensorRtExec", "tests/fixtures/package-consumers/RefittedPlan.PackageConsumer", "eng/Test-TrtexecRefittedPlanPackageConsumer.ps1"],
-      "nextStep": "Keep TRT8 guards and retain TRT10/11 parser-load, engine-commit, persisted reload, context/enqueue, and output-comparison evidence. TRT11 now also has a loadEngine-only second-process reload, identical output SHA, 69/69 strict report checks, and zero reference mismatch. TRT11 version-compatible+refit, weight streaming, external lean-runtime, public-feed, and post-publish proof remain separate Owner work."
+      "nextStep": "Keep TRT8 guards and retain TRT10/11 parser-load, engine-commit, persisted reload, context/enqueue, and output-comparison evidence. TRT11 version-compatible+refit now has builder/runtime host-code readback, a loadEngine-only second process, identical output SHA, two 69/69 report checks, 45/45 lifecycle checks, and zero reference mismatch. TRT11 weight streaming, external lean-runtime, public-feed, and post-publish proof remain separate Owner work."
     },
     {
       "id": "io-layer-precision-policies",
