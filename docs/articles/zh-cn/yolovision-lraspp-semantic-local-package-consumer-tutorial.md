@@ -278,7 +278,7 @@ dotnet run --project ./applications/YoloVision -c Release --no-build -- @runArgs
 | background | `58,253` 像素，`56.9%` |
 | dog | `35,453` 像素，`34.6%` |
 | person | `8,694` 像素，`8.5%` |
-| 进程结果 | `OutputValidated=True`、`YoloVision Passed=True`、exit `0` |
+| 进程结果 | `OutputValidated=True`、`YoloVision Passed=True`、exit `0`（真实模型运行证据，不是包消费或发布 proof） |
 
 狗的主体轮廓被完整覆盖，左侧人物腿部被分到 `person`。尾部和毛发边缘呈现阶梯状，来自 320x320 输出映射回 1280x1091 原图后的离散边界；这也是低分辨率语义分割部署时需要评估的精度代价。
 
