@@ -1,7 +1,8 @@
 [CmdletBinding()]
 param(
   [string]$RepositoryRoot,
-  [switch]$WarnOnly
+  [switch]$WarnOnly,
+  [string]$OutputRoot
 )
 
 $ErrorActionPreference = "Stop"
@@ -362,7 +363,15 @@ foreach ($file in ($files | Sort-Object -Unique)) {
   }
 }
 
-$outputRoot = Join-Path $RepositoryRoot "artifacts\final-release"
+$outputRoot = if ([string]::IsNullOrWhiteSpace($OutputRoot)) {
+  Join-Path $RepositoryRoot "artifacts\final-release"
+}
+elseif ([System.IO.Path]::IsPathRooted($OutputRoot)) {
+  $OutputRoot
+}
+else {
+  Join-Path $RepositoryRoot $OutputRoot
+}
 New-Item -ItemType Directory -Path $outputRoot -Force | Out-Null
 $jsonPath = Join-Path $outputRoot "stale-release-claims-audit.json"
 $markdownPath = Join-Path $outputRoot "stale-release-claims-audit.md"

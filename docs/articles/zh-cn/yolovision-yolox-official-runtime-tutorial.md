@@ -205,6 +205,6 @@ dotnet build ./TensorRtSharp.sln -c Release
 1. ONNX 输入输出名称、shape、objectness 与 80 类列语义和 decoder 合同一致。
 2. 预处理确实是 BGR、NCHW、raw `0..255`、fill 114 和左上 letterbox。
 3. bus 框覆盖车辆主体，七个 person 框与原图中行人位置对应，坐标没有整体偏移。
-4. `YoloVision Passed=True` 且退出码为 0；JSON、SVG、tensor 与日志哈希可以相互追溯。
+4. `YoloVision Passed=True` 且退出码为 0（源码树 real-model-runtime 证据，不是包消费或 Release proof）；JSON、SVG、tensor 与日志哈希可以相互追溯。
 
 本篇证明的是源码树 `real-model-runtime`：官方真实模型、真实图片、TensorRT enqueue、输出读取、YOLOX grid/stride 解码和结果绘制均已完成。它不证明本地或公开 package consumer、公开 NuGet/GitHub 包、post-publish、Owner 接受、Release 或模型公开再分发授权。CUDA、cuDNN、TensorRT、native bridge 和模型文件继续由使用者按版本安装或获取。

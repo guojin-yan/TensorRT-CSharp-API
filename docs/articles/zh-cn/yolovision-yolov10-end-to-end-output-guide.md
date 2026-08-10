@@ -304,7 +304,7 @@ stdout 的脱敏终端窗口渲染。输入图片来自 Wikimedia Commons 的 `L
 | person | 5 | 0.804005 |
 
 终端中同时可以看到 `images:[1,3,640,640] -> output0:[1,300,6]`、中心 letterbox、9.451 ms 执行耗时、
-`Nms=False` 以及 `YoloVision Passed=True`。检测框已经从 640×640 模型坐标反变换到 1280×961 原图坐标，
+`Nms=False` 以及 `YoloVision Passed=True`（真实模型运行日志中的预期正例，不是包消费或发布 proof）。检测框已经从 640×640 模型坐标反变换到 1280×961 原图坐标，
 公交车框覆盖车身，行人框集中在站台右侧，没有出现整图缩放偏移。
 
 ## 10. 检查结果与证据

@@ -203,7 +203,7 @@ RuntimeEnvironment TRT=10.11.0 CUDA=12.9
 Input=images:[1,3,640,640] Output=output:[1,8400,85]
 Execution ElapsedMs=7.329
 Detections=8 Top=bus Score=0.956653 Classes=bus:1,person:7
-YoloVision Passed=True
+YoloVision Passed=True（本地包消费者运行记录，不是公开包 post-publish proof）
 ```
 
 ![YOLOX-S 本地包消费者终端结果](../../images/yolovision-yolox-s-local-package-consumer-terminal.png)

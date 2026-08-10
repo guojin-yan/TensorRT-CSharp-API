@@ -226,7 +226,7 @@ Input=images:[1,3,640,640] Output=output0:[1,300,6]
 Layout=EndToEndNms Nms=False NmsMode=None
 Execution ElapsedMs=5.596
 Postprocess Detections=6
-YoloVision Passed=True
+YoloVision Passed=True（真实模型运行证据中的预期正例）
 ```
 
 输出 JSON SHA256 为 `369878a520f0256000c57892f12bc72f97d8a3c2e4e6a94ed3c1fa774a35173e`，脱敏文本和机器证据分别位于：
@@ -249,4 +249,4 @@ samples/assets/yolovision-yolov10n-local-package-consumer-runtime-evidence.json
 3. restore graph 中核心 API 来自 NuGet，YoloVision 自身保持 `IsPackable=false`。
 4. `ApplyNms=false`，不对 end-to-end 结果执行第二次 NMS。
 5. bus 框覆盖车辆主体，5 个 person 框位于站台右侧，坐标无整体偏移。
-6. 进程退出码为 0，最终标记为 `YoloVision Passed=True`。
+6. 进程退出码为 0，最终标记为 `YoloVision Passed=True`（真实模型运行证据中的预期正例，不是公开包或 Release proof）。
