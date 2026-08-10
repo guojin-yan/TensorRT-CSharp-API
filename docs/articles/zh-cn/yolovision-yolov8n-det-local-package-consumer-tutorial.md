@@ -221,7 +221,7 @@ dotnet run --project ./applications/YoloVision -c Release --no-build -- `
 
 ## 已验证结果
 
-下面是本次 TensorRT 10.11 实际执行的 Windows Terminal 窗口。截图显示模型合同、预处理、执行耗时、8 个检测结果、`YoloVision Passed=True` 和退出码 0。
+下面是本次 TensorRT 10.11 实际执行的 Windows Terminal 窗口。截图显示模型合同、预处理、执行耗时、8 个检测结果、`YoloVision Passed=True` 和退出码 0；这是源码树 real-model-runtime 证据，不是包消费或发布 proof。
 
 ![YoloVision YOLOv8n Detection 真实程序运行窗口](../../images/yolovision-yolov8n-det-runtime-terminal.png)
 
