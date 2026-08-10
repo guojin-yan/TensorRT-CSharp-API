@@ -311,16 +311,6 @@ jobs:
             throw "Package or Release publication requires owner_publish_approved=true."
           }
 
-      - name: Validate nuget.org publication prerequisites
-        if: ${{ inputs.publish_to_nuget && inputs.owner_publish_approved && github.repository_owner == 'guojin-yan' }}
-        shell: pwsh
-        env:
-          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
-        run: |
-          pwsh -NoProfile -File ./eng/Test-PublishPrerequisites.ps1 `
-            -Target nuget.org `
-            -ApiKey $env:NUGET_API_KEY
-
       - name: Resolve package version
         id: version
         shell: pwsh
@@ -718,7 +708,7 @@ jobs:
             -PackagePath (Join-Path './artifacts/runtime-split-nupkg' '${{ matrix.key }}')
 
       - name: Upload Linux split runtime artifacts
-        if: ${{ inputs.attach_to_github_release && inputs.release_tag == '' && inputs.runtime_delivery_mode == 'split' }}
+        if: ${{ inputs.runtime_delivery_mode == 'split' }}
         uses: actions/upload-artifact@v7
         with:
           compression-level: 0
@@ -728,60 +718,77 @@ jobs:
             artifacts/package-consumer/package-consumer-validation-summary.*
             artifacts/linux-dry-run/${{ matrix.key }}/**
 
-      - name: Upload Linux bridge package to GitHub Release
-        if: ${{ inputs.attach_to_github_release && inputs.release_tag != '' && inputs.owner_publish_approved && inputs.runtime_delivery_mode == 'split' && github.repository_owner == 'guojin-yan' }}
+  publish-runtime:
+    if: ${{ inputs.runtime_delivery_mode == 'split' && inputs.owner_publish_approved && github.repository_owner == 'guojin-yan' && (inputs.publish_to_nuget || inputs.publish_to_github_packages || (inputs.attach_to_github_release && inputs.release_tag != '')) }}
+    needs: pack-runtime
+    runs-on: ubuntu-latest
+    environment:
+      name: production-release
+    permissions:
+      contents: write
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Download Linux bridge artifacts
+        uses: actions/download-artifact@v8
+        with:
+          pattern: runtime-linux-split-*
+          path: artifacts
+          merge-multiple: true
+
+      - name: Revalidate Linux publication payload
+        shell: pwsh
+        run: |
+          pwsh -NoProfile -File ./eng/Test-ExternalVendorRuntimePackagePolicy.ps1 `
+            -PackagePath ./artifacts/runtime-split-nupkg
+          pwsh -NoProfile -File ./eng/Test-PublicationLicenseReadiness.ps1 `
+            -ArtifactPath ./artifacts/runtime-split-nupkg
+          $packages = @(Get-ChildItem -LiteralPath ./artifacts/runtime-split-nupkg -Filter *.nupkg -Recurse)
+          if ($packages.Count -eq 0) {
+            throw "No Linux Bridge packages were downloaded for publication."
+          }
+
+      - name: Upload Linux bridge packages to GitHub Release
+        if: ${{ inputs.attach_to_github_release && inputs.release_tag != '' }}
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
-          $splitPackageRoot = Join-Path './artifacts/runtime-split-nupkg' '${{ matrix.key }}'
-          pwsh -NoProfile -File ./eng/Test-PublicationLicenseReadiness.ps1 -ArtifactPath $splitPackageRoot
-          $packages = @(Get-ChildItem -LiteralPath $splitPackageRoot -Filter *.nupkg -Recurse | Sort-Object FullName)
-          if ($packages.Count -eq 0) {
-            throw "No Linux split runtime packages were found for runtime key '${{ matrix.key }}' under '$splitPackageRoot'."
-          }
-
-          $releaseTag = "${{ inputs.release_tag }}"
+          $releaseTag = '${{ inputs.release_tag }}'
           gh release view $releaseTag --repo "$env:GH_REPO" *> $null
           if ($LASTEXITCODE -ne 0) {
             gh release create $releaseTag --title $releaseTag --notes "Automated Linux runtime release for $releaseTag" --repo "$env:GH_REPO"
             if ($LASTEXITCODE -ne 0) {
-              gh release view $releaseTag --repo "$env:GH_REPO" *> $null
+              throw "Failed to create GitHub Release '$releaseTag'."
+            }
+          }
+          Get-ChildItem -LiteralPath ./artifacts/runtime-split-nupkg -Filter *.nupkg -Recurse |
+            Sort-Object FullName |
+            ForEach-Object {
+              if ($_.Length -ge 2147483648) {
+                throw "Release asset '$($_.Name)' exceeds the GitHub Release asset limit."
+              }
+              gh release upload $releaseTag $_.FullName --clobber --repo "$env:GH_REPO"
               if ($LASTEXITCODE -ne 0) {
-                throw "Failed to create or observe GitHub Release '$releaseTag'."
+                throw "Failed to upload Linux Bridge package '$($_.Name)'."
               }
             }
-          }
-          foreach ($package in $packages) {
-            $maxReleaseBytes = 2147483648
-            if ($package.Length -ge $maxReleaseBytes) {
-              $actualMb = [Math]::Round($package.Length / 1MB, 2)
-              throw "Release asset '$($package.Name)' is ${actualMb} MB and exceeds the GitHub Release asset limit. Split the component package further before publishing."
-            }
 
-            Write-Host "Uploading release asset: $($package.FullName)"
-            gh release upload $releaseTag $package.FullName --clobber --repo "$env:GH_REPO"
-            if ($LASTEXITCODE -ne 0) {
-              throw "gh release upload failed for '$($package.FullName)' with exit code $LASTEXITCODE."
-            }
-          }
-
-      - name: Publish Linux bridge package to GitHub Packages
-        if: ${{ inputs.publish_to_github_packages && inputs.owner_publish_approved && inputs.runtime_delivery_mode == 'split' && github.repository_owner == 'guojin-yan' }}
+      - name: Publish Linux bridge packages to GitHub Packages
+        if: ${{ inputs.publish_to_github_packages }}
         shell: pwsh
         env:
           GITHUB_PACKAGES_TOKEN: ${{ github.token }}
         run: |
-          $maxBytes = 2147000000
           $packages = Get-ChildItem -LiteralPath ./artifacts/runtime-split-nupkg -Filter *.nupkg -Recurse
           foreach ($package in $packages) {
-            if ($package.Length -ge $maxBytes) {
-              $actualMb = [Math]::Round($package.Length / 1MB, 2)
-              throw "Runtime split package '$($package.Name)' is ${actualMb} MB and exceeds the GitHub NuGet registry limit (< 2.147 GB). Split this component further before publishing."
+            if ($package.Length -ge 2147000000) {
+              throw "Runtime Bridge package '$($package.Name)' exceeds the GitHub NuGet registry limit."
             }
           }
-
           pwsh -NoProfile -File ./eng/Push-NuGetPackages.ps1 `
             -PackageRoot ./artifacts/runtime-split-nupkg `
             -Source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" `
@@ -793,13 +800,14 @@ jobs:
             -SortMode size-ascending
 
       - name: Publish Linux bridge packages to nuget.org
-        if: ${{ inputs.publish_to_nuget && inputs.owner_publish_approved && inputs.runtime_delivery_mode == 'split' && github.repository_owner == 'guojin-yan' }}
+        if: ${{ inputs.publish_to_nuget }}
         shell: pwsh
         env:
           NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
         run: |
-          pwsh -NoProfile -File ./eng/Test-PublicationLicenseReadiness.ps1 `
-            -ArtifactPath ./artifacts/runtime-split-nupkg
+          pwsh -NoProfile -File ./eng/Test-PublishPrerequisites.ps1 `
+            -Target nuget.org `
+            -ApiKey $env:NUGET_API_KEY
           pwsh -NoProfile -File ./eng/Push-NuGetPackages.ps1 `
             -PackageRoot ./artifacts/runtime-split-nupkg `
             -Source "https://api.nuget.org/v3/index.json" `

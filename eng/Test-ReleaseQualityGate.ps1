@@ -190,13 +190,19 @@ $objectArrayFindings = Get-TextFindings -Roots @(
 ) -Pattern "System\.Object\[\]"
 Add-Check -Id "public-markdown-array-rendering" -Passed ($objectArrayFindings.Count -eq 0) -Required $true -Detail ("Findings: " + ($objectArrayFindings -join ", "))
 
+$artifactRoot = Join-Path $RepositoryRoot "artifacts"
+$publicArtifactRoots = @(
+  Get-ChildItem -LiteralPath $artifactRoot -Directory -ErrorAction SilentlyContinue |
+    Where-Object { $_.Name -ne "test-results" } |
+    Select-Object -ExpandProperty FullName
+)
 $legacySampleFindings = Get-TextFindings -Roots @(
   (Join-Path $RepositoryRoot "README.md"),
   (Join-Path $RepositoryRoot "README.zh-CN.md"),
   (Join-Path $RepositoryRoot "docs"),
   (Join-Path $RepositoryRoot "samples"),
   (Join-Path $RepositoryRoot "applications"),
-  (Join-Path $RepositoryRoot "artifacts")
+  $publicArtifactRoots
 ) -Pattern "samples[/\\]YoloDet|YoloDet\.csproj"
 Add-Check -Id "legacy-yolodet-public-paths" -Passed ($legacySampleFindings.Count -eq 0) -Required $true -Detail ("Findings: " + ($legacySampleFindings -join ", "))
 

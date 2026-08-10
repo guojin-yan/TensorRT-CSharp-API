@@ -90,6 +90,8 @@ jobs:
     if: ${{ inputs.attach_to_github_release && inputs.release_tag != '' && inputs.owner_publish_approved && github.repository_owner == 'guojin-yan' }}
     needs: pack
     runs-on: ubuntu-latest
+    environment:
+      name: production-release
     permissions:
       contents: write
     steps:

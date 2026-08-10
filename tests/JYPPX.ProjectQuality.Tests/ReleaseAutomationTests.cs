@@ -45,7 +45,8 @@ public sealed class ReleaseAutomationTests
         Assert.Contains("fromJson(matrix.runsOnJson)", runtimeLinux, StringComparison.Ordinal);
         Assert.Contains("publish_runtime_to_nuget", releaseBundle, StringComparison.Ordinal);
         Assert.Contains("publish_to_nuget=$PUBLISH_RUNTIME_TO_NUGET", releaseBundle, StringComparison.Ordinal);
-        Assert.Contains("inputs.publish_to_github_packages }}' -ne 'true' -and '${{ inputs.publish_to_nuget }}' -ne 'true'", runtimeWindows, StringComparison.Ordinal);
+        Assert.Contains("runtime_delivery_mode == 'split'", runtimeWindows, StringComparison.Ordinal);
+        Assert.Contains("runtime_delivery_mode == 'split'", runtimeLinux, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -86,9 +87,42 @@ public sealed class ReleaseAutomationTests
         {
             Assert.Matches("owner_publish_approved:[\\s\\S]*?default: false", workflow);
             Assert.Contains("Package or Release publication requires owner_publish_approved=true", workflow, StringComparison.Ordinal);
-            Assert.Contains("inputs.publish_to_nuget && inputs.owner_publish_approved", workflow, StringComparison.Ordinal);
-            Assert.Contains("inputs.publish_to_github_packages && inputs.owner_publish_approved", workflow, StringComparison.Ordinal);
+            Assert.Contains("inputs.publish_to_nuget", workflow, StringComparison.Ordinal);
+            Assert.Contains("inputs.publish_to_github_packages", workflow, StringComparison.Ordinal);
+            Assert.Contains("publish-runtime:", workflow, StringComparison.Ordinal);
             Assert.Matches("attach_to_github_release:[\\s\\S]*?default: false", workflow);
+        }
+    }
+
+    [Fact]
+    public void PublicationJobsRequireProductionReleaseEnvironment()
+    {
+        string packageManaged = File.ReadAllText(Path.Combine(RepositoryPaths.Root, ".github", "workflows", "package-managed.yml"));
+        string packageSource = File.ReadAllText(Path.Combine(RepositoryPaths.Root, ".github", "workflows", "package-source.yml"));
+        string releaseBundle = File.ReadAllText(Path.Combine(RepositoryPaths.Root, ".github", "workflows", "release-bundle.yml"));
+        string[] runtimeWorkflows =
+        [
+            File.ReadAllText(Path.Combine(RepositoryPaths.Root, ".github", "workflows", "runtime-windows.yml")),
+            File.ReadAllText(Path.Combine(RepositoryPaths.Root, ".github", "workflows", "runtime-linux.yml")),
+        ];
+
+        Assert.True(System.Text.RegularExpressions.Regex.Matches(packageManaged, "name: production-release").Count == 3);
+        Assert.True(System.Text.RegularExpressions.Regex.Matches(packageSource, "name: production-release").Count == 1);
+        Assert.True(System.Text.RegularExpressions.Regex.Matches(releaseBundle, "name: production-release").Count == 1);
+        Assert.DoesNotContain(
+            "name: production-release",
+            packageManaged[..packageManaged.IndexOf("  attach-github-release:", StringComparison.Ordinal)],
+            StringComparison.Ordinal);
+
+        foreach (string workflow in runtimeWorkflows)
+        {
+            int publishJobIndex = workflow.IndexOf("  publish-runtime:", StringComparison.Ordinal);
+            Assert.True(publishJobIndex > 0);
+            Assert.DoesNotContain("name: production-release", workflow[..publishJobIndex], StringComparison.Ordinal);
+            Assert.Contains("needs: pack-runtime", workflow[publishJobIndex..], StringComparison.Ordinal);
+            Assert.Contains("name: production-release", workflow[publishJobIndex..], StringComparison.Ordinal);
+            Assert.Contains("inputs.publish_to_nuget || inputs.publish_to_github_packages", workflow[publishJobIndex..], StringComparison.Ordinal);
+            Assert.DoesNotContain("secrets.NUGET_API_KEY", workflow[..publishJobIndex], StringComparison.Ordinal);
         }
     }
 

@@ -137,6 +137,8 @@ permissions:
 jobs:
   orchestrate:
     runs-on: ubuntu-latest
+    environment:
+      name: production-release
     env:
       GH_TOKEN: ${{ github.token }}
       GH_REPO: ${{ github.repository }}

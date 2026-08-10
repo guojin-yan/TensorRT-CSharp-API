@@ -413,16 +413,6 @@ jobs:
             throw "Package or Release publication requires owner_publish_approved=true."
           }
 
-      - name: Validate nuget.org publication prerequisites
-        if: ${{ inputs.publish_to_nuget && inputs.owner_publish_approved && github.repository_owner == 'guojin-yan' }}
-        shell: pwsh
-        env:
-          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
-        run: |
-          pwsh -NoProfile -File .\eng\Test-PublishPrerequisites.ps1 `
-            -Target nuget.org `
-            -ApiKey $env:NUGET_API_KEY
-
       - name: Verify local .NET
         shell: pwsh
         run: dotnet --info
@@ -621,42 +611,6 @@ jobs:
             pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-ExternalVendorRuntimePackagePolicy.ps1 `
               -PackagePath (Join-Path '.\artifacts\runtime-split-nupkg' $key)
 
-            if ('${{ inputs.attach_to_github_release }}' -eq 'true' -and
-                '${{ inputs.owner_publish_approved }}' -eq 'true' -and
-                '${{ github.repository_owner }}' -eq 'guojin-yan' -and
-                -not [string]::IsNullOrWhiteSpace('${{ inputs.release_tag }}')) {
-              $splitPackageRoot = Join-Path '.\artifacts\runtime-split-nupkg' $key
-              pwsh -NoProfile -File .\eng\Test-PublicationLicenseReadiness.ps1 -ArtifactPath $splitPackageRoot
-              $packages = @(Get-ChildItem -LiteralPath $splitPackageRoot -Filter *.nupkg -Recurse | Sort-Object FullName)
-              if ($packages.Count -eq 0) {
-                throw "No Windows split runtime packages were found for runtime key '$key' under '$splitPackageRoot'."
-              }
-
-              $releaseTag = '${{ inputs.release_tag }}'
-              gh release view $releaseTag --repo "$env:GH_REPO" *> $null
-              if ($LASTEXITCODE -ne 0) {
-                gh release create $releaseTag --title $releaseTag --notes "Automated runtime release for $releaseTag" --repo "$env:GH_REPO"
-                if ($LASTEXITCODE -ne 0) {
-                  gh release view $releaseTag --repo "$env:GH_REPO" *> $null
-                  if ($LASTEXITCODE -ne 0) {
-                    throw "Failed to create or observe GitHub Release '$releaseTag'."
-                  }
-                }
-              }
-
-              foreach ($package in $packages) {
-                Write-Host "Uploading release asset for ${key}: $($package.FullName)"
-                gh release upload "${{ inputs.release_tag }}" $package.FullName --clobber --repo "$env:GH_REPO"
-                if ($LASTEXITCODE -ne 0) {
-                  throw "gh release upload failed for '$($package.FullName)' with exit code $LASTEXITCODE."
-                }
-              }
-
-              if ('${{ inputs.publish_to_github_packages }}' -ne 'true' -and '${{ inputs.publish_to_nuget }}' -ne 'true') {
-                Remove-Item -LiteralPath $splitPackageRoot -Recurse -Force -ErrorAction SilentlyContinue
-                Write-Host "Pruned uploaded split runtime package directory: $splitPackageRoot"
-              }
-            }
           }
 
       - name: Prune Windows runtime intermediates
@@ -699,7 +653,7 @@ jobs:
             Format-Table -AutoSize
 
       - name: Upload Windows split runtime artifacts
-        if: ${{ inputs.attach_to_github_release && inputs.release_tag == '' && inputs.runtime_delivery_mode == 'split' }}
+        if: ${{ inputs.runtime_delivery_mode == 'split' }}
         uses: actions/upload-artifact@v7
         with:
           compression-level: 0
@@ -711,34 +665,63 @@ jobs:
             artifacts/local-runtime-validation/*.json
             artifacts/local-runtime-validation/*.md
 
+  publish-runtime:
+    if: ${{ inputs.runtime_delivery_mode == 'split' && inputs.owner_publish_approved && github.repository_owner == 'guojin-yan' && (inputs.publish_to_nuget || inputs.publish_to_github_packages || (inputs.attach_to_github_release && inputs.release_tag != '')) }}
+    needs: pack-runtime
+    runs-on: windows-latest
+    environment:
+      name: production-release
+    permissions:
+      contents: write
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Download Windows bridge artifacts
+        uses: actions/download-artifact@v8
+        with:
+          name: runtime-windows-split
+          path: artifacts
+
+      - name: Revalidate Windows publication payload
+        shell: pwsh
+        run: |
+          pwsh -NoProfile -File .\eng\Test-ExternalVendorRuntimePackagePolicy.ps1 `
+            -PackagePath .\artifacts\runtime-split-nupkg
+          pwsh -NoProfile -File .\eng\Test-PublicationLicenseReadiness.ps1 `
+            -ArtifactPath .\artifacts\runtime-split-nupkg
+          $packages = @(Get-ChildItem -LiteralPath .\artifacts\runtime-split-nupkg -Filter *.nupkg -Recurse)
+          if ($packages.Count -eq 0) {
+            throw "No Windows Bridge packages were downloaded for publication."
+          }
+
       - name: Upload Windows bridge packages to GitHub Release
-        if: ${{ inputs.attach_to_github_release && inputs.release_tag != '' && inputs.owner_publish_approved && inputs.runtime_delivery_mode == 'split' && github.repository_owner == 'guojin-yan' }}
+        if: ${{ inputs.attach_to_github_release && inputs.release_tag != '' }}
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
-          Write-Host "Windows split runtime packages are uploaded immediately after each runtime key is packaged."
-          Write-Host "Skipping the final bulk upload to avoid duplicate large release asset transfers."
-          return
-
-          pwsh -NoProfile -File .\eng\Test-PublicationLicenseReadiness.ps1 -ArtifactPath .\artifacts\runtime-split-nupkg
-          $packages = @(Get-ChildItem -LiteralPath .\artifacts\runtime-split-nupkg -Filter *.nupkg -Recurse | Sort-Object FullName)
-          if ($packages.Count -eq 0) {
-            Write-Host "No remaining Windows split runtime packages were found; direct split release assets may have already been uploaded after each runtime key."
-            return
-          }
-
-          foreach ($package in $packages) {
-            Write-Host "Uploading release asset: $($package.FullName)"
-            gh release upload "${{ inputs.release_tag }}" $package.FullName --clobber --repo "$env:GH_REPO"
+          $releaseTag = '${{ inputs.release_tag }}'
+          gh release view $releaseTag --repo "$env:GH_REPO" *> $null
+          if ($LASTEXITCODE -ne 0) {
+            gh release create $releaseTag --title $releaseTag --notes "Automated runtime release for $releaseTag" --repo "$env:GH_REPO"
             if ($LASTEXITCODE -ne 0) {
-              throw "gh release upload failed for '$($package.FullName)' with exit code $LASTEXITCODE."
+              throw "Failed to create GitHub Release '$releaseTag'."
             }
           }
+          Get-ChildItem -LiteralPath .\artifacts\runtime-split-nupkg -Filter *.nupkg -Recurse |
+            Sort-Object FullName |
+            ForEach-Object {
+              gh release upload $releaseTag $_.FullName --clobber --repo "$env:GH_REPO"
+              if ($LASTEXITCODE -ne 0) {
+                throw "Failed to upload Windows Bridge package '$($_.Name)'."
+              }
+            }
 
       - name: Publish Windows bridge packages to GitHub Packages
-        if: ${{ inputs.publish_to_github_packages && inputs.owner_publish_approved && inputs.runtime_delivery_mode == 'split' && github.repository_owner == 'guojin-yan' }}
+        if: ${{ inputs.publish_to_github_packages }}
         shell: pwsh
         env:
           GITHUB_PACKAGES_TOKEN: ${{ github.token }}
@@ -754,13 +737,14 @@ jobs:
             -SortMode size-ascending
 
       - name: Publish Windows bridge packages to nuget.org
-        if: ${{ inputs.publish_to_nuget && inputs.owner_publish_approved && inputs.runtime_delivery_mode == 'split' && github.repository_owner == 'guojin-yan' }}
+        if: ${{ inputs.publish_to_nuget }}
         shell: pwsh
         env:
           NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
         run: |
-          pwsh -NoProfile -File .\eng\Test-PublicationLicenseReadiness.ps1 `
-            -ArtifactPath .\artifacts\runtime-split-nupkg
+          pwsh -NoProfile -File .\eng\Test-PublishPrerequisites.ps1 `
+            -Target nuget.org `
+            -ApiKey $env:NUGET_API_KEY
           pwsh -NoProfile -File .\eng\Push-NuGetPackages.ps1 `
             -PackageRoot .\artifacts\runtime-split-nupkg `
             -Source "https://api.nuget.org/v3/index.json" `
