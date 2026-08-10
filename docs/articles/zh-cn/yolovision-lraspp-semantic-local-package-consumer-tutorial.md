@@ -250,7 +250,7 @@ dotnet run --project ./applications/YoloVision -c Release --no-build -- @runArgs
   --reference-rel-tolerance 0.0001
 ```
 
-返回码为 0，并出现 `OutputValidated=True` 和 `YoloVision Passed=True`，才算本次运行完成。
+返回码为 0，并出现 `OutputValidated=True` 和 `YoloVision Passed=True`，才算本次真实模型运行完成；这不是包消费或发布 proof。
 
 ## 已验证结果
 
