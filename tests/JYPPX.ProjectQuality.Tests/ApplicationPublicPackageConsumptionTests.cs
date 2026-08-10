@@ -46,7 +46,7 @@ public sealed class ApplicationPublicPackageConsumptionTests
     }
 
     [Fact]
-    public void SharedPackageRulesFollowMaintainedLinesWithoutVersionedTutorialCommands()
+    public void SharedPackageRulesUseMaintainedTensorRtLineAndPinnedOpenCvRelease()
     {
         string tensorRtProps = File.ReadAllText(Path.Combine(
             RepositoryPaths.Root,
@@ -61,7 +61,7 @@ public sealed class ApplicationPublicPackageConsumptionTests
         string combinedReadmes = sampleReadme + applicationReadme;
 
         Assert.Contains("4.0.0-*", tensorRtProps, StringComparison.Ordinal);
-        Assert.Contains("5.*-*", openCvProps, StringComparison.Ordinal);
+        Assert.Contains(">5.0.0<", openCvProps, StringComparison.Ordinal);
         Assert.Contains(
             "dotnet add package JYPPX.TensorRT.CSharp.API --version \"4.0.0-*\"",
             combinedReadmes,

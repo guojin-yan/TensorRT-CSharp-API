@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup>
-    <JYPPXOpenCvSamplePackageVersion Condition="'$(JYPPXOpenCvSamplePackageVersion)' == ''">5.*-*</JYPPXOpenCvSamplePackageVersion>
+    <JYPPXOpenCvSamplePackageVersion Condition="'$(JYPPXOpenCvSamplePackageVersion)' == ''">5.0.0</JYPPXOpenCvSamplePackageVersion>
   </PropertyGroup>
 
   <ItemGroup>

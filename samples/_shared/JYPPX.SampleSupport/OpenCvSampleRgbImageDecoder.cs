@@ -1,9 +1,9 @@
 using System;
 using System.IO;
-using JYPPX.OpenCvSharp;
-using JYPPX.OpenCvSharp.Core;
-using JYPPX.OpenCvSharp.ImgCodecs;
-using ImgCodecsCv2 = JYPPX.OpenCvSharp.ImgCodecs.Cv2;
+using OpenCvSharp;
+using OpenCvSharp.Core;
+using OpenCvSharp.ImgCodecs;
+using ImgCodecsCv2 = OpenCvSharp.ImgCodecs.Cv2;
 
 namespace JYPPX.SampleSupport;
 
