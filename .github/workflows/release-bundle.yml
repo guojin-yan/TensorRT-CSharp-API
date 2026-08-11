@@ -822,21 +822,32 @@ jobs:
             exit 1
           fi
 
+          if tag_commit="$(gh api "repos/$GH_REPO/commits/$tag" --jq '.sha' 2>/dev/null)"; then
+            :
+          else
+            tag_commit=""
+            gh api --method POST "repos/$GH_REPO/git/refs" \
+              -f "ref=refs/tags/$tag" \
+              -f "sha=$GH_HEAD_SHA" \
+              >/dev/null
+          fi
+
+          if [ -z "$tag_commit" ]; then
+            tag_commit="$(gh api "repos/$GH_REPO/commits/$tag" --jq '.sha')"
+          fi
+          if [ "$tag_commit" != "$GH_HEAD_SHA" ]; then
+            echo "Release tag '$tag' resolves to '$tag_commit', expected '$GH_HEAD_SHA'." >&2
+            exit 1
+          fi
+
           if ! gh release view "$tag" --repo "$GH_REPO" >/dev/null 2>&1; then
             if ! gh release create "$tag" \
-              --target "$GH_HEAD_SHA" \
               --title "$title" \
               --notes-file "$notes_path" \
               --draft \
               --repo "$GH_REPO"; then
               gh release view "$tag" --repo "$GH_REPO" >/dev/null 2>&1
             fi
-          fi
-
-          tag_commit="$(gh api "repos/$GH_REPO/commits/$tag" --jq '.sha')"
-          if [ "$tag_commit" != "$GH_HEAD_SHA" ]; then
-            echo "Release tag '$tag' resolves to '$tag_commit', expected '$GH_HEAD_SHA'." >&2
-            exit 1
           fi
 
           gh release upload "$tag" "${files[@]}" --clobber --repo "$GH_REPO"

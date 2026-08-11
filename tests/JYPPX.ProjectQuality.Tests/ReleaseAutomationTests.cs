@@ -163,7 +163,10 @@ public sealed class ReleaseAutomationTests
         Assert.Contains(".sha256 == $sha", workflow, StringComparison.Ordinal);
         Assert.Contains("title=\"TensorRT-CSharp-API $RELEASE_VERSION\"", workflow, StringComparison.Ordinal);
         Assert.Contains("notes_path=\"$GITHUB_WORKSPACE/docs/releases/$RELEASE_VERSION.md\"", workflow, StringComparison.Ordinal);
-        Assert.Contains("--target \"$GH_HEAD_SHA\"", workflow, StringComparison.Ordinal);
+        Assert.Contains("repos/$GH_REPO/git/refs", workflow, StringComparison.Ordinal);
+        Assert.Contains("ref=refs/tags/$tag", workflow, StringComparison.Ordinal);
+        Assert.Contains("sha=$GH_HEAD_SHA", workflow, StringComparison.Ordinal);
+        Assert.Contains("if tag_commit=\"$(gh api", workflow, StringComparison.Ordinal);
         Assert.Contains("--draft", workflow, StringComparison.Ordinal);
         Assert.Contains("draft:false", workflow, StringComparison.Ordinal);
         Assert.Contains("prerelease:false", workflow, StringComparison.Ordinal);
