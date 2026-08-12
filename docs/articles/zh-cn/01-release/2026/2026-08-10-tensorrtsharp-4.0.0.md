@@ -880,15 +880,19 @@ TensorRT 日志用于定位 Parser、Builder 和 Runtime 问题；Profiler 可�
 
 ### 9.1 先判断问题位于哪一层
 
+按执行链从上到下检查，在第一个失败的阶段停下来处理，不要同时改动多个层次。
+
 ```mermaid
 flowchart TD
-    A["项目无法还原或编译"] --> B["检查 NuGet 版本、TFM 与 PackageReference"]
-    C["找不到 jyppxtrtbridge"] --> D["检查 Bridge 包、RID 与输出目录"]
-    E["Bridge 加载但依赖缺失"] --> F["检查 TensorRT/CUDA/cuDNN 与 PATH/LD_LIBRARY_PATH"]
-    G["CUDA 初始化失败"] --> H["检查驱动、GPU 与 CUDA 兼容性"]
-    I["Parser/Build 失败"] --> J["检查 ONNX、算子、Plugin、Workspace 与 Parser 错误"]
-    K["Enqueue 失败"] --> L["检查 Profile、Shape、Tensor Address、Buffer 与 Readiness"]
-    M["运行成功但结果错误"] --> N["检查预处理、布局、DataType、输出解码与参考值"]
+    A["1. NuGet 还原或编译<br/>版本、TFM、PackageReference"]
+    B["2. Bridge 文件发现<br/>Bridge 包、RID、输出目录"]
+    C["3. Native 依赖加载<br/>TensorRT、CUDA、cuDNN、库路径"]
+    D["4. CUDA 初始化<br/>驱动、GPU、CUDA 兼容性"]
+    E["5. Parser 与 Build<br/>ONNX、算子、Plugin、Workspace"]
+    F["6. Enqueue<br/>Profile、Shape、地址、Buffer"]
+    G["7. 结果正确性<br/>预处理、布局、类型、输出解码"]
+
+    A --> B --> C --> D --> E --> F --> G
 ```
 
 ### 9.2 常见症状与处理
