@@ -1,22 +1,34 @@
-# TensorRtSharp4.0 Documentation
+# TensorRT CSharp API v4.0 Documentation
 
-本目录分为用户教程、API/架构说明、模型演示和内部工程记录。文件多不等于都能作为公开技术文章：只有 publishing/publication-catalog.json 显式收录且通过完整性门禁的文章，才进入对外候选目录。
+本页只展示面向使用者的版本文章、安装指南、系列案例、完整应用、API 使用和源码编译文章。仓库中的内部工程记录继续保留用于维护，但不进入公开导航。
 
-The first 4-series preview is published. Samples and applications consume the public package; build-only or precheck output still cannot be promoted to real-model or package-consumer runtime proof.
+The stable `4.0.0` release is public. Samples and applications consume the exact public package; a help command, build, or precheck still does not represent real GPU/model execution.
+
+## 中文公开文章
+
+- [版本发布](articles/zh-cn/01-release/README.md)：[TensorRT CSharp API v4.0 正式发布](articles/zh-cn/01-release/2026/2026-08-10-tensorrtsharp-4.0.0.md)
+- [系列案例](articles/zh-cn/02-samples/README.md)：[8 个案例总览与学习路线](articles/zh-cn/02-samples/smp-001-sample-series-overview.md)
+- [完整应用](articles/zh-cn/03-applications/README.md)：YoloVision、OnnxToEngine 与 TensorRtExec
+- [API 使用](articles/zh-cn/04-api/README.md)：[对象模型](articles/zh-cn/04-api/tensorrt/msc-007-tensorrt-object-model.md)、[构建对象](articles/zh-cn/04-api/tensorrt/api-001-builder-network-config-profile.md)、[运行对象](articles/zh-cn/04-api/tensorrt/api-002-runtime-engine-context-bindings.md)、[CUDA 资源](articles/zh-cn/04-api/cuda/api-003-cuda-device-memory-stream-event-graph.md)、[ONNX Parser](articles/zh-cn/04-api/onnx/api-004-onnx-parser-parser-refitter-diagnostics.md)、[回调与诊断](articles/zh-cn/04-api/diagnostics/api-005-callbacks-logger-profiler-progress-debug-listener.md)、[序列化与 Inspector](articles/zh-cn/04-api/engine/api-006-serialization-engine-inspector-error-boundary.md)
+- [安装与运行环境](articles/zh-cn/05-installation/README.md)：[Windows 安装](articles/zh-cn/05-installation/windows/msc-003-windows-installation.md)、[Linux 安装](articles/zh-cn/05-installation/linux/ins-001-linux-installation-runtime-validation.md)、[WSL](articles/zh-cn/05-installation/wsl/ins-002-wsl-gpu-passthrough-runtime-validation.md)、[容器](articles/zh-cn/05-installation/container/ins-003-container-deployment-runtime-boundary.md)、[GPU CI](articles/zh-cn/05-installation/ci/ins-004-gpu-ci-runner-validation.md)、[Bridge 矩阵](articles/zh-cn/05-installation/runtime/msc-005-windows-linux-bridge-matrix.md)、[Native 排障](articles/zh-cn/05-installation/troubleshooting/msc-008-cuda-error35-native-load.md)
+- [源码编译](articles/zh-cn/06-source-build/README.md)：[C++ Bridge 编译](articles/zh-cn/06-source-build/bridge/msc-006-build-cpp-bridge-from-source.md)、[托管编译与本地包验证](articles/zh-cn/06-source-build/managed/bld-001-managed-source-build-test-and-package-validation.md)、[绑定生成](articles/zh-cn/06-source-build/bindings/bld-002-binding-generation-diff-audit.md)、[CMake 与 Native 调试](articles/zh-cn/06-source-build/native/bld-003-cmake-presets-native-debugging.md)、[Runtime Bridge 打包](articles/zh-cn/06-source-build/runtime/bld-004-runtime-bridge-packaging.md)
+- [项目背景与其他主题](articles/zh-cn/07-misc/README.md)：[项目总览](articles/zh-cn/07-misc/overview/msc-001-what-is-tensorrtsharp4.md)、[模型资产](articles/zh-cn/07-misc/models/msc-009-model-acquisition-and-onnx-governance.md)
 
 ## Start Here
 
 - [English getting started](articles/en/getting-started.md)
 - [安装与目录](articles/en/installation-layout.md)
-- [中文项目概览](articles/zh-cn/project-overview.md)
+- [4.0.0 正式发布](articles/zh-cn/01-release/2026/2026-08-10-tensorrtsharp-4.0.0.md)
+- [Windows 安装、验证与常见问题](articles/zh-cn/05-installation/windows/msc-003-windows-installation.md)
+- [中文项目概览](articles/zh-cn/07-misc/overview/msc-001-what-is-tensorrtsharp4.md)
 - [源码组织](articles/zh-cn/source-organization.md)
-- [模型获取与 ONNX 转换](articles/zh-cn/demo-model-acquisition-and-onnx-conversion.md)
+- [模型获取与 ONNX 转换](articles/zh-cn/07-misc/models/msc-009-model-acquisition-and-onnx-governance.md)
 - [推理绑定教程](articles/zh-cn/inference-bindings-tutorial.md)
 
 ## Example Series
 
 - [English series learning path](articles/en/sample-series-overview.md)
-- [中文系列案例学习路线](articles/zh-cn/sample-series-overview.md)
+- [中文系列案例学习路线](articles/zh-cn/02-samples/smp-001-sample-series-overview.md)
 - [CUDA RTC](articles/zh-cn/cuda-runtime-compilation-technical-article.md)
 - [Inference bindings](articles/zh-cn/inference-bindings-tutorial.md)
 - [Dynamic shapes](articles/zh-cn/dynamic-shape-optimization-profile-tutorial.md)
@@ -42,24 +54,19 @@ The first 4-series preview is published. Samples and applications consume the pu
 - [CUDA stream/event](articles/zh-cn/cuda-stream-event-multistream-tutorial.md)
 - [Dynamic shape profiles](articles/zh-cn/dynamic-shape-optimization-profile-tutorial.md)
 - [ONNX to engine quickstart](articles/zh-cn/onnx-to-engine-quickstart.md)
-- [Windows Source Build CMake Guide](articles/zh-cn/source-build-cmake-windows-guide.md)
+- [从源码编译 C++ Bridge](articles/zh-cn/06-source-build/bridge/msc-006-build-cpp-bridge-from-source.md)
 - [Runtime package strategy](articles/en/runtime-packages.md)
 - [Package consumer validation](articles/zh-cn/package-consumer-validation.md)
 
-## Release And Writing Rules
+## Release And Article Index
 
-- [Chinese article catalog and complete-article standard](articles/zh-cn/README.md)
-- [Model acquisition and conversion contract](articles/zh-cn/demo-model-acquisition-and-onnx-conversion.md)
-- [Release candidate gate](articles/zh-cn/release-candidate-gate.md)
-- [Publishing roadmap](articles/zh-cn/publishing/article-roadmap-30plus.md)
-- API readiness audit: `artifacts/interface-coverage/release-api-readiness-audit.json`
+- [Chinese public article entrypoint and writing rules](articles/zh-cn/README.md)
+- [4.0.0 release notes](releases/4.0.0.md)
+- [Known issues](releases/known-issues.md)
+- [Model acquisition and conversion contract](articles/zh-cn/07-misc/models/msc-009-model-acquisition-and-onnx-governance.md)
 - YOLOVision matrix: `applications/YoloVision/yolo-model-matrix.json`
 - TensorRtExec matrix: `applications/TensorRtExec/tensor-rt-exec-feature-matrix.json`
 - ONNX parity matrix: `applications/OnnxToEngine/trtexec-parity-matrix.json`
-
-## Internal Records
-
-`docs/articles/zh-cn/publishing` stores planning, audit, and Owner input records. These are non-proof engineering records; they are not publication approval, runtime proof, post-publish proof, or release close approval.
 
 <!-- Compatibility index: historical article paths stay searchable for source contracts but are not rendered as public navigation. -->
 <!-- articles/en/api-coverage-and-deferred-boundaries.md -->

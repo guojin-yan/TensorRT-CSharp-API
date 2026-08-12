@@ -2,6 +2,129 @@
   href: index.md
 - name: Release notes
   href: releases/README.md
+- name: 中文公开文章
+  items:
+  - name: 版本发布
+    href: articles/zh-cn/01-release/README.md
+    items:
+    - name: TensorRT CSharp API v4.0 正式发布
+      href: articles/zh-cn/01-release/2026/2026-08-10-tensorrtsharp-4.0.0.md
+  - name: 系列案例
+    href: articles/zh-cn/02-samples/README.md
+    items:
+    - name: 8 个案例总览与学习路线
+      href: articles/zh-cn/02-samples/smp-001-sample-series-overview.md
+    - name: 推理输入、显存绑定与输出读回
+      href: articles/zh-cn/02-samples/smp-002-inference-bindings.md
+    - name: Dynamic Shape 与动态 Batch
+      href: articles/zh-cn/02-samples/smp-003-dynamic-shapes.md
+    - name: 从 ONNX 到 TensorRT Engine
+      href: articles/zh-cn/02-samples/smp-004-onnx-build-and-run.md
+    - name: Refitted Plan 权重更新与重载
+      href: articles/zh-cn/02-samples/smp-005-refitted-plan.md
+    - name: CUDA Runtime Compilation
+      href: articles/zh-cn/02-samples/smp-006-cuda-runtime-compilation.md
+    - name: CUDA 多流与 Event 同步
+      href: articles/zh-cn/02-samples/smp-007-cuda-multistream.md
+    - name: TensorRT Callback 生命周期
+      href: articles/zh-cn/02-samples/smp-008-callback-lifecycle.md
+    - name: ResNet18 图像分类
+      href: articles/zh-cn/02-samples/smp-009-resnet18-classification.md
+  - name: 完整应用
+    href: articles/zh-cn/03-applications/README.md
+    items:
+    - name: YoloVision 全任务总览
+      href: articles/zh-cn/03-applications/yolovision/app-yv-001-yolovision-overview.md
+    - name: YOLOv8n 目标检测
+      href: articles/zh-cn/03-applications/yolovision/app-yv-002-yolov8n-detection.md
+    - name: YOLOv8n 图像分类
+      href: articles/zh-cn/03-applications/yolovision/app-yv-003-yolov8n-classification.md
+    - name: YOLOv8n 实例分割
+      href: articles/zh-cn/03-applications/yolovision/app-yv-004-yolov8n-instance-segmentation.md
+    - name: YOLOv8n 姿态估计
+      href: articles/zh-cn/03-applications/yolovision/app-yv-005-yolov8n-pose.md
+    - name: YOLOv8n OBB 旋转目标检测
+      href: articles/zh-cn/03-applications/yolovision/app-yv-006-yolov8n-obb.md
+    - name: LRASPP 语义分割
+      href: articles/zh-cn/03-applications/yolovision/app-yv-007-lraspp-semantic-segmentation.md
+    - name: YOLOv10n End-to-End 检测
+      href: articles/zh-cn/03-applications/yolovision/app-yv-008-yolov10n-end-to-end.md
+    - name: YOLOX-S 目标检测
+      href: articles/zh-cn/03-applications/yolovision/app-yv-009-yolox-s-detection.md
+    - name: OnnxToEngine 入门
+      href: articles/zh-cn/03-applications/onnxtoengine/app-onnx-001-onnx-to-engine-getting-started.md
+    - name: OnnxToEngine MNIST 双重验证
+      href: articles/zh-cn/03-applications/onnxtoengine/app-onnx-002-mnist-runtime-validation.md
+    - name: OnnxToEngine 高级构建选项
+      href: articles/zh-cn/03-applications/onnxtoengine/app-onnx-003-advanced-build-options.md
+    - name: TensorRtExec CLI 与 WinForms 入门
+      href: articles/zh-cn/03-applications/tensorrtexec/app-exec-001-tensorrtexec-getting-started.md
+    - name: TensorRtExec GUI 构建指南
+      href: articles/zh-cn/03-applications/tensorrtexec/app-exec-002-gui-onnx-build.md
+    - name: TensorRtExec CLI 参数指南
+      href: articles/zh-cn/03-applications/tensorrtexec/app-exec-003-cli-parameter-guide.md
+    - name: TensorRtExec 性能与输出校验
+      href: articles/zh-cn/03-applications/tensorrtexec/app-exec-004-performance-and-output-validation.md
+    - name: TensorRtExec Refit 与 Engine 持久化
+      href: articles/zh-cn/03-applications/tensorrtexec/app-exec-005-refit-and-engine-persistence.md
+  - name: API 使用
+    href: articles/zh-cn/04-api/README.md
+    items:
+    - name: TensorRT 对象模型
+      href: articles/zh-cn/04-api/tensorrt/msc-007-tensorrt-object-model.md
+    - name: Builder、Network、Config 与 Profile
+      href: articles/zh-cn/04-api/tensorrt/api-001-builder-network-config-profile.md
+    - name: Runtime、Engine、Context 与绑定
+      href: articles/zh-cn/04-api/tensorrt/api-002-runtime-engine-context-bindings.md
+    - name: CUDA Device、Memory、Stream、Event 与 Graph
+      href: articles/zh-cn/04-api/cuda/api-003-cuda-device-memory-stream-event-graph.md
+    - name: ONNX Parser、ParserRefitter 与诊断
+      href: articles/zh-cn/04-api/onnx/api-004-onnx-parser-parser-refitter-diagnostics.md
+    - name: Logger、Profiler、ProgressMonitor 与 DebugListener
+      href: articles/zh-cn/04-api/diagnostics/api-005-callbacks-logger-profiler-progress-debug-listener.md
+    - name: 序列化、Engine Inspector 与错误边界
+      href: articles/zh-cn/04-api/engine/api-006-serialization-engine-inspector-error-boundary.md
+  - name: 安装与运行环境
+    href: articles/zh-cn/05-installation/README.md
+    items:
+    - name: Windows 安装、验证与常见问题
+      href: articles/zh-cn/05-installation/windows/msc-003-windows-installation.md
+    - name: 托管包与 Bridge 包如何选择
+      href: articles/zh-cn/05-installation/packages/msc-004-managed-and-bridge-package-selection.md
+    - name: Windows/Linux Bridge 运行库矩阵
+      href: articles/zh-cn/05-installation/runtime/msc-005-windows-linux-bridge-matrix.md
+    - name: CUDA error 35 与 Native 加载排查
+      href: articles/zh-cn/05-installation/troubleshooting/msc-008-cuda-error35-native-load.md
+    - name: Linux 安装与运行环境验证
+      href: articles/zh-cn/05-installation/linux/ins-001-linux-installation-runtime-validation.md
+    - name: WSL GPU 透传与运行库验证
+      href: articles/zh-cn/05-installation/wsl/ins-002-wsl-gpu-passthrough-runtime-validation.md
+    - name: 容器部署与 NVIDIA Runtime 边界
+      href: articles/zh-cn/05-installation/container/ins-003-container-deployment-runtime-boundary.md
+    - name: GPU CI Runner 与发布证据
+      href: articles/zh-cn/05-installation/ci/ins-004-gpu-ci-runner-validation.md
+  - name: 源码编译
+    href: articles/zh-cn/06-source-build/README.md
+    items:
+    - name: 从源码编译 C++ Bridge
+      href: articles/zh-cn/06-source-build/bridge/msc-006-build-cpp-bridge-from-source.md
+    - name: 托管层编译、测试与本地包验证
+      href: articles/zh-cn/06-source-build/managed/bld-001-managed-source-build-test-and-package-validation.md
+    - name: 绑定生成与差异审计
+      href: articles/zh-cn/06-source-build/bindings/bld-002-binding-generation-diff-audit.md
+    - name: CMake Preset 与 Native 调试
+      href: articles/zh-cn/06-source-build/native/bld-003-cmake-presets-native-debugging.md
+    - name: Runtime Bridge 打包与消费者验证
+      href: articles/zh-cn/06-source-build/runtime/bld-004-runtime-bridge-packaging.md
+  - name: 项目背景与其他主题
+    href: articles/zh-cn/07-misc/README.md
+    items:
+    - name: 项目是什么
+      href: articles/zh-cn/07-misc/overview/msc-001-what-is-tensorrtsharp4.md
+    - name: 为什么不是简单 P/Invoke
+      href: articles/zh-cn/07-misc/architecture/msc-002-beyond-pinvoke.md
+    - name: 模型获取与 ONNX 转换
+      href: articles/zh-cn/07-misc/models/msc-009-model-acquisition-and-onnx-governance.md
 - name: English user guides
   items:
   - name: Getting started
@@ -17,7 +140,7 @@
   - name: 中文文章目录
     href: articles/zh-cn/README.md
   - name: 系列案例学习路线
-    href: articles/zh-cn/sample-series-overview.md
+    href: articles/zh-cn/02-samples/smp-001-sample-series-overview.md
   - name: 快速开始
     href: articles/zh-cn/getting-started.md
   - name: CUDA RTC
@@ -48,14 +171,8 @@
     href: articles/zh-cn/demo-model-acquisition-and-onnx-conversion.md
   - name: TensorRtExec GUI
     href: articles/zh-cn/tensorrtexec-gui-user-guide.md
-  - name: Windows Source Build CMake Guide
+  - name: Windows 源码构建 CMake 指南
     href: articles/zh-cn/source-build-cmake-windows-guide.md
-- name: Publishing and internal records
-  items:
-  - name: Article completeness rules
-    href: articles/zh-cn/README.md
-  - name: Known issues
-    href: releases/known-issues.md
 # Navigation entries are not runtime proof, post-publish proof, or release approval.
 # Compatibility index for source contracts; these paths are intentionally not rendered as public navigation.
 # articles/en/api-coverage-and-deferred-boundaries.md
