@@ -10,7 +10,7 @@
 </style>
 <!-- public-article-layout:end -->
 
-> 文章编号：INS-003；适用版本：4.0.0；当前状态：review。
+> 文章编号：INS-003；适用版本：4.0.0；当前状态：ready。
 
 ## 1. 前言
 <!-- public-article-project-preface:start -->
@@ -169,7 +169,11 @@ Pull Request 的容器 smoke 还要考虑不可信代码：GPU runner 应隔离�
 
 ## 8. 小结
 
-2026-08-13 在 Docker Desktop `4.60.1`、Docker `29.2` 上执行 CUDA `12.9.1` Ubuntu 22.04 基础镜像 GPU 探针，容器内 `nvidia-smi` 识别到 NVIDIA GeForce RTX 3060 Laptop GPU，驱动为 `576.02`。该结果只证明 Docker GPU 设备透传；基础镜像没有安装本文目标 TensorRT、项目 managed/Bridge 包，也没有执行 Engine、enqueue 或输出语义校验，因此文章继续保持 `review`。
+2026-08-14 在 Docker Desktop `4.60.1`、Docker client/server `29.2.0` 上，以固定 digest `sha256:c3108f6ea3d012d79d376293ef9e16879a5a98f661153d148fb516630ca0bc69` 运行 NVIDIA TensorRT 官方镜像 `nvcr.io/nvidia/tensorrt:25.06-py3`。容器为 Ubuntu 24.04.2 x64，使用 TensorRT `10.11.0.33`、CUDA `12.9`、cuDNN `9.22.0.52-1`、.NET SDK `8.0.424`，可见 NVIDIA GeForce RTX 3060 Laptop GPU 和驱动 `576.02`。
+
+本次不再停留于 GPU 探针：官方 `trtexec` MNIST smoke 返回 `PASSED`，吞吐量为 `4219.11 qps`，GPU compute mean 为 `0.0810061 ms`；仓库 Linux Bridge 构建及 `ldd` 检查通过，managed/Bridge 本地包的外部两 PackageReference 消费者完成 Engine 序列化、反序列化、enqueue、stream 同步与 identity 输出比对。因此该固定镜像、运行库、包和 GPU 组合的容器部署主路径达到 `ready`。
+
+结论仍受明确边界约束：本次不是裸机 Linux、WSL Ubuntu、GPU CI runner、公网 NuGet 或 post-publish proof。回调增强版消费者在 `populate_callback_state_snapshot` 内触发 `SIGSEGV`（退出码 `139`），没有形成 callback-state snapshot 或 DebugListener runtime proof；主路径成功不能替代这项失败。机器可读证据与原始日志哈希见 `docs/articles/zh-cn/05-installation/installation-runtime-evidence-20260814.json`。
 
 容器部署的最小闭环是宿主机驱动、Container Toolkit、`--gpus all`、Linux 用户态 NVIDIA 运行库、项目 Bridge 和真实输出校验。每一层都要保存自己的证据，不能用镜像构建结果或 `nvidia-smi` 单项结果替代 TensorRT 推理证明。
 

@@ -10,7 +10,7 @@
 </style>
 <!-- public-article-layout:end -->
 
-> 文章编号：INS-001；适用版本：4.0.0；当前状态：review。
+> 文章编号：INS-001；适用版本：4.0.0；当前状态：ready。
 
 ## 1. 前言
 <!-- public-article-project-preface:start -->
@@ -140,9 +140,9 @@ native dependency scan: no unresolved required library
 real inference: output checksum or semantic result recorded
 ```
 
-本文已完成包清单、命令和证据边界的静态复核，状态保持 `review`。正式发布前应在至少一个 Ubuntu 22.04 或 24.04 目标环境完成真实 GPU 烟雾测试，并把 Runtime 包版本与输出一并固化。
+2026-08-14 已在固定 digest 的 NVIDIA TensorRT 官方镜像 `nvcr.io/nvidia/tensorrt:25.06-py3` 中完成 Ubuntu 24.04.2 x64 验证。目标组合为 TensorRT `10.11.0.33`、CUDA `12.9`、cuDNN `9.22.0.52-1`、.NET SDK `8.0.424`，GPU 为 NVIDIA GeForce RTX 3060 Laptop GPU，驱动 `576.02`。仓库输入校验通过，`linux-x64-trt10-cuda12-release` 成功生成 `libjyppxtrtbridge.so`，`ldd` 必需依赖无未解析项；managed 与 Linux Bridge `4.0.0` 本地包均成功构建，外部目录中的两 PackageReference 消费者完成 Engine 序列化、反序列化、GPU enqueue、stream 同步和 identity 输出比对，进程退出码为 `0`。官方 `trtexec` MNIST smoke 也以 TensorRT `v101100` 通过，导出的 Engine 为 `402380` 字节。
 
-2026-08-13 环境审计补充了两类可用但不足以晋级的记录：GitHub Actions 历史运行 `31412970912` 和 `31412959494` 在 Ubuntu hosted container 中完成 restore、生成器、CMake、Native build、dry-run 与 pack；本机 Docker GPU 探针也能识别 NVIDIA GeForce RTX 3060 Laptop GPU。前者没有 `nvidia-smi`、GPU enqueue 或输出校验，后者没有 TensorRT、Bridge 与项目消费者，因此都不能替代本文要求的 Linux 真实运行证据。完整边界见 `docs/articles/zh-cn/06-source-build/source-build-evidence-20260813.json`。
+因此，本文覆盖的 Ubuntu 安装、动态链接和真实 GPU 推理主路径已达到 `ready`。证据属于 Docker Desktop 上的容器化 Ubuntu，不代表裸机 Linux、WSL Ubuntu 或 GPU CI runner；包来自本地构建目录，也不是公网 NuGet 或 post-publish 证明。回调增强版消费者在 Engine 已构建、Binding readiness 已输出后，于 `populate_callback_state_snapshot` 触发 `SIGSEGV`（退出码 `139`），所以 callback-state snapshot 和 DebugListener runtime proof 明确不成立；该缺陷不会被精简消费者的成功结果掩盖。环境、哈希、原始日志引用和完整边界见 `docs/articles/zh-cn/05-installation/installation-runtime-evidence-20260814.json`。
 
 ## 8. 小结
 

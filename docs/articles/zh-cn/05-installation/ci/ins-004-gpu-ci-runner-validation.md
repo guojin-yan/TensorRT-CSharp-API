@@ -155,7 +155,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-LinuxRunnerProofPack.ps
 
 ## 8. 小结
 
-2026-08-13 查询仓库 runner API，结果为 `total_count=0`，当前没有可执行本文 GPU CI smoke 的 self-hosted runner。历史 GitHub Actions 运行 `31412970912` 与 `31412959494` 证明 Ubuntu hosted container 的 restore、绑定生成、Native build、dry-run 与 pack 曾成功，但日志没有 `nvidia-smi`、GPU enqueue 或输出校验，不能作为 GPU runner proof。
+2026-08-14 通过 GitHub API 再次查询仓库 runner，结果仍为 `total_count=0`，当前没有可执行本文 GPU CI smoke 的 self-hosted runner。历史 GitHub Actions 运行 `31412970912` 与 `31412959494` 证明 Ubuntu hosted container 的 restore、绑定生成、Native build、dry-run 与 pack 曾成功，但日志没有 `nvidia-smi`、GPU enqueue 或输出校验，不能作为 GPU runner proof。同日完成的本地 Docker GPU 推理不在 GitHub Actions session 中，也不能借用为 runner proof。审计记录见 `docs/articles/zh-cn/05-installation/installation-runtime-evidence-20260814.json`。
 
 GPU CI 的可信链路是标签匹配、环境快照、清单校验、Native 构建、真实 smoke、包消费者验证和 proof pack。任何一层缺失，都应保留为 review 或 blocked，而不是通过修改 runner 标签或切换环境来掩盖缺口。本文继续保持 `review`，下一步需要上线具备明确标签的 Linux GPU runner 并固化完整 proof pack。
 

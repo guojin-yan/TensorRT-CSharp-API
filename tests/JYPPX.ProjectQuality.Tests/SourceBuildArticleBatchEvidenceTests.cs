@@ -5,8 +5,9 @@ namespace JYPPX.ProjectQuality.Tests;
 
 public sealed class SourceBuildArticleBatchEvidenceTests
 {
-    private static readonly string[] ReadyArticleIds = ["BLD-001", "BLD-002", "BLD-003", "BLD-004"];
-    private static readonly string[] ReviewArticleIds = ["INS-001", "INS-002", "INS-003", "INS-004"];
+    private static readonly string[] ReadyArticleIds =
+        ["BLD-001", "BLD-002", "BLD-003", "BLD-004", "INS-001", "INS-003"];
+    private static readonly string[] ReviewArticleIds = ["INS-002", "INS-004"];
 
     [Fact]
     public void EvidencePinsBuildGenerationPackagingAndNegativeBoundaries()
@@ -69,8 +70,8 @@ public sealed class SourceBuildArticleBatchEvidenceTests
             .EnumerateArray()
             .ToDictionary(article => article.GetProperty("id").GetString()!, article => article);
 
-        Assert.Equal(46, articles.Values.Count(article => article.GetProperty("status").GetString() == "ready"));
-        Assert.Equal(4, articles.Values.Count(article => article.GetProperty("status").GetString() == "review"));
+        Assert.Equal(48, articles.Values.Count(article => article.GetProperty("status").GetString() == "ready"));
+        Assert.Equal(2, articles.Values.Count(article => article.GetProperty("status").GetString() == "review"));
 
         foreach (string id in ReadyArticleIds)
         {

@@ -1,0 +1,210 @@
+{
+  "schemaVersion": 1,
+  "recordKind": "installation-article-batch-evidence",
+  "generatedAt": "2026-08-14T01:02:38+08:00",
+  "baseCommit": "0025f79366c3f0915b3acaa8d17e1f65054e8678",
+  "branch": "TensorRtSharp4.0",
+  "sourceState": {
+    "classification": "base-commit-plus-local-tracked-source-changes",
+    "trackedModifiedFileCountBeforeArticleEdits": 120,
+    "buildRelevantModifiedFileCount": 89,
+    "cleanBaseCommitBuildProof": false,
+    "validationWorktreeIsolated": true
+  },
+  "containerEnvironment": {
+    "image": "nvcr.io/nvidia/tensorrt:25.06-py3",
+    "imageDigest": "sha256:c3108f6ea3d012d79d376293ef9e16879a5a98f661153d148fb516630ca0bc69",
+    "os": "Ubuntu 24.04.2 LTS",
+    "architecture": "x86_64",
+    "kernel": "6.6.87.2-microsoft-standard-WSL2",
+    "dockerDesktopVersion": "4.60.1",
+    "dockerClientVersion": "29.2.0",
+    "dockerServerVersion": "29.2.0",
+    "dotnetSdks": [
+      "8.0.424",
+      "10.0.300"
+    ],
+    "powershellVersion": "7.6.4",
+    "cmakeVersion": "3.31.8",
+    "ninjaVersion": "1.11.1",
+    "gpu": {
+      "name": "NVIDIA GeForce RTX 3060 Laptop GPU",
+      "driverVersion": "576.02",
+      "computeCapability": "8.6",
+      "deviceCount": 1
+    }
+  },
+  "runtimeCombination": {
+    "runtimeKey": "linux-x64-ubuntu24.04-trt10.11-cuda12.9-cudnn9.22",
+    "cmakePreset": "linux-x64-trt10-cuda12-release",
+    "tensorRtVersion": "10.11.0.33",
+    "cudaToolkitVersion": "12.9",
+    "cudaRuntimeVersion": "12.9.86",
+    "cudnnVersion": "9.22.0.52-1",
+    "inputValidationPassed": true,
+    "exactVersionMatch": true
+  },
+  "officialTensorRtSmoke": {
+    "tool": "trtexec",
+    "tensorRtBanner": "TensorRT v101100",
+    "model": "/opt/tensorrt/data/mnist/mnist.onnx",
+    "exitCode": 0,
+    "passed": true,
+    "engineSizeBytes": 402380,
+    "throughputQueriesPerSecond": 4219.11,
+    "gpuComputeMeanMilliseconds": 0.0810061,
+    "outputExported": true
+  },
+  "repositoryValidation": {
+    "nativeBridge": {
+      "buildPassed": true,
+      "fileName": "libjyppxtrtbridge.so",
+      "sizeBytes": 1954432,
+      "sha256": "897301f3fc024464e3c03b7f0967418ea99c514460dc8db13a2d12765c9b7d9e",
+      "unresolvedLddDependencyCount": 0
+    },
+    "managedPackage": {
+      "id": "JYPPX.TensorRT.CSharp.API",
+      "version": "4.0.0",
+      "sizeBytes": 15579516,
+      "sha256": "81309a144e2c2c3fb93b5f54926fbd6759d82c9ed95f1abe46e7c8778c215b45"
+    },
+    "bridgePackage": {
+      "id": "JYPPX.TensorRT.CSharp.API.Runtime.linux-x64.ubuntu24.04.trt10.11.cuda12.9.cudnn9.22.Bridge",
+      "version": "4.0.0",
+      "sizeBytes": 641928,
+      "sha256": "90514ec49da5ce79783431d4d4184e8e740987aeeed63e6c5ad75b7f1c6a0c90"
+    },
+    "baselinePackageConsumer": {
+      "restorePassed": true,
+      "buildPassed": true,
+      "warningCount": 0,
+      "errorCount": 0,
+      "environmentProbeSucceeded": true,
+      "nativeDependencyReady": true,
+      "runtimeExecutionProof": false
+    },
+    "minimalPackageRuntimeConsumer": {
+      "consumerOutsideRepository": true,
+      "packageReferenceCount": 2,
+      "usesPackageReferenceOnly": true,
+      "usesProjectReference": false,
+      "usesDirectAssemblyReference": false,
+      "restorePassed": true,
+      "buildPassed": true,
+      "warningCount": 0,
+      "errorCount": 0,
+      "engineSerializedBytes": 2604,
+      "readyForEnqueue": true,
+      "enqueueCompleted": true,
+      "streamSynchronized": true,
+      "identityOutputMatch": true,
+      "exitCode": 0,
+      "passed": true,
+      "projectSha256": "239acdd41d54d2ffd99b882190743adb77a9f3967431d2c96a459ac2a4c04bb8",
+      "programSha256": "a86df63f858d3099ff348590936efdf6919fac2d6b87c6ff16e2a7c6c480444a",
+      "runtimeLogSha256": "4649d7ecc08b31ac0069f0d69529e2599602a250fee8d585aa818ec859ddbb1b"
+    },
+    "callbackRichPackageRuntimeConsumer": {
+      "consumerOutsideRepository": true,
+      "packageReferenceCount": 2,
+      "usesPackageReferenceOnly": true,
+      "engineSerializedBytes": 32124,
+      "bindingReadinessObserved": true,
+      "enqueueCompleted": false,
+      "identityOutputMatch": false,
+      "exitCode": 139,
+      "signal": "SIGSEGV",
+      "failurePhase": "execution-context-callback-state-snapshot",
+      "nativeFailureSymbol": "populate_callback_state_snapshot",
+      "runtimeExecutionProof": false,
+      "reportedProofBoundaryTextAccepted": false,
+      "reportSha256": "4d26daba53f220d5b53b2034b6324bb2e4f21d9fc7836e66bd791e25f4086165",
+      "gdbBacktraceSha256": "21fc726e4a35ed3cd9ae8b107df0fc49440c93cb895c38061330f228c0c70538"
+    }
+  },
+  "environmentAudit": {
+    "linux": {
+      "status": "ready",
+      "containerizedUbuntuProof": true,
+      "bareMetalLinuxProof": false
+    },
+    "wsl": {
+      "status": "review",
+      "registeredUbuntuDistributionCount": 0,
+      "dockerDesktopDistributionPresent": true,
+      "wslProjectConsumerProof": false
+    },
+    "container": {
+      "status": "ready",
+      "gpuPassThroughProof": true,
+      "exactVendorRuntimeProof": true,
+      "packageConsumerGpuRuntimeProof": true
+    },
+    "gpuCi": {
+      "status": "review",
+      "repositoryRunnerTotalCount": 0,
+      "gpuRunnerProof": false,
+      "proofPackAvailable": false
+    }
+  },
+  "articleDecisions": {
+    "INS-001": "ready",
+    "INS-002": "review",
+    "INS-003": "ready",
+    "INS-004": "review"
+  },
+  "rawEvidence": {
+    "localRoot": "artifacts/article-validation/installation-20260814",
+    "trackedByGit": false,
+    "environmentLogSha256": "ea13eebff00f4013dae08b4db19417146cdcf6b1152704f477706683c94f0ec8",
+    "lddLogSha256": "a84eb50657c98cf70aef0d5db63bcb7ecd28ae8026c7616ce451f6ea4cd96198",
+    "trtexecLogSha256": "3efb71f35758c3c3e799f9cf7dfad43234baf647689f499c7fdec40293d3e5a7",
+    "trtexecEngineSha256": "c26d558a781974e238979d67573c1ea4bbd6c68b964bcb218e51a5fb2d9c0762",
+    "trtexecOutputSha256": "0a5a25b243b189c9a8f78676cb8585888c17c603e27eb6db5da10a8855c922b0",
+    "baselineConsumerReportSha256": "457f35511d2e5040d92bae268535b778950be5eadf9dbf1f4bf33293f5654526"
+  },
+  "proofBoundary": {
+    "linuxContainerGpuRuntimeProof": true,
+    "bareMetalLinuxRuntimeProof": false,
+    "wslGpuRuntimeProof": false,
+    "gpuCiRuntimeProof": false,
+    "callbackStateSnapshotProof": false,
+    "publicPackageProof": false,
+    "postPublishProof": false,
+    "performsPublish": false,
+    "releaseClosureProof": false
+  },
+  "qualityValidation": {
+    "status": "passed-with-user-untracked-file-isolation",
+    "publicArticleIndexPassed": true,
+    "focusedEvidenceTests": {
+      "total": 6,
+      "passed": 6,
+      "failed": 0
+    },
+    "mainWorkingTreeFullSuite": {
+      "total": 2233,
+      "passed": 2232,
+      "failed": 1,
+      "trxSha256": "326ff48c9e8bbc7b77292c1a188aaf8b37b9930f188a051eb8023e7b5597395c",
+      "failure": "EngineeringAndArticleCatalogTests counted 421 Markdown files because two user-owned untracked copy files were present; the controlled README baseline is 419."
+    },
+    "isolatedFailedTestRerun": {
+      "validationSourceStateEquivalent": true,
+      "controlledMarkdownFileCount": 419,
+      "userOwnedUntrackedCopyFilesExcluded": 2,
+      "total": 1,
+      "passed": 1,
+      "failed": 0,
+      "trxSha256": "12f8cdd59ed4a5e726cc089264fb063270c693dd60415491be9993efe376abbf"
+    },
+    "docfx": {
+      "warningsAsErrors": true,
+      "warningCount": 0,
+      "errorCount": 0,
+      "buildPassed": true
+    },
+    "effectiveControlledSourceResult": "passed"
+  }
+}

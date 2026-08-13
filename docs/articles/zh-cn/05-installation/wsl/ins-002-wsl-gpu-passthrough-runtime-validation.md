@@ -177,7 +177,7 @@ WSL 适合作为开发与复现环境，也可以帮助定位 Linux 用户态问
 
 ## 8. 小结
 
-2026-08-13 本机 `wsl -l -v` 只显示 Docker Desktop 管理的 `docker-desktop`，没有可用于本文复核的 Ubuntu 发行版。因此没有执行 WSL 内的 TensorRT 安装、Bridge 加载、GPU enqueue 与输出校验，文章继续保持 `review`。Docker Desktop 的 GPU 可见性不能替代 WSL Ubuntu 项目消费者证据。
+2026-08-14 再次执行 `wsl -l -v`，本机仍只显示 Docker Desktop 管理的 `docker-desktop`，没有可用于本文复核的独立 Ubuntu 发行版。因此没有执行 WSL Ubuntu 内的 TensorRT 安装、Bridge 加载、GPU enqueue 与输出校验，文章继续保持 `review`。同日完成的 Ubuntu 24.04 Docker GPU 与项目包消费者证明属于容器边界，不能替代 WSL Ubuntu 证明。环境审计见 `docs/articles/zh-cn/05-installation/installation-runtime-evidence-20260814.json`。
 
 可靠的 WSL 结论必须同时包含 WSL2 发行版、GPU 透传、Linux 用户态依赖、Bridge 加载和真实推理证据。Windows 主机可见、NuGet 还原成功或 dry-run 通过，都不能单独证明 TensorRT CSharp API 已经完成 WSL GPU 推理。
 

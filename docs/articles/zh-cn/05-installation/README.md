@@ -19,12 +19,12 @@ Runtime Bridge 包列表：https://www.nuget.org/packages?q=+JYPPX.TensorRT.CSha
 | `MSC-004` | 托管包与 Bridge 包选择 | `ready` |
 | `MSC-005` | Windows/Linux Runtime Bridge 矩阵 | `ready` |
 | `MSC-008` | CUDA error 35、DLL 加载与版本不匹配 | `ready` |
-| [`INS-001`](linux/ins-001-linux-installation-runtime-validation.md) | Linux 安装与运行环境验证 | `review` |
+| [`INS-001`](linux/ins-001-linux-installation-runtime-validation.md) | Linux 安装与运行环境验证 | `ready` |
 | [`INS-002`](wsl/ins-002-wsl-gpu-passthrough-runtime-validation.md) | WSL 安装、GPU 透传与运行库边界 | `review` |
-| [`INS-003`](container/ins-003-container-deployment-runtime-boundary.md) | 容器部署、NVIDIA Container Toolkit 与 Smoke | `review` |
+| [`INS-003`](container/ins-003-container-deployment-runtime-boundary.md) | 容器部署、NVIDIA Container Toolkit 与 Smoke | `ready` |
 | [`INS-004`](ci/ins-004-gpu-ci-runner-validation.md) | GPU CI runner、标签与发布证据 | `review` |
 
-2026-08-13 已完成环境可用性审计：Docker GPU 设备可见，但没有 TensorRT/Bridge/Engine smoke；本机没有可用的 WSL Ubuntu 发行版；仓库 self-hosted runner 数量为 0；历史 Ubuntu hosted-container workflow 只有 build/dry-run/pack 证据。四篇安装文章因此继续保持 `review`，不以相邻环境或 build-only 结果替代目标平台 GPU runtime proof。
+2026-08-14 已在 Ubuntu 24.04.2 TensorRT 官方容器中完成固定版本厂商依赖、Linux Bridge 构建、`ldd`、本地 managed/Bridge 包以及外部 PackageReference 消费者的真实 GPU enqueue 和输出比对，`INS-001`、`INS-003` 因而晋级 `ready`。本机仍没有独立 WSL Ubuntu 发行版，仓库 self-hosted runner 数量仍为 0，因此 `INS-002`、`INS-004` 保持 `review`。回调增强 smoke 的 `SIGSEGV` 与所有证明边界保留在 [`installation-runtime-evidence-20260814.json`](installation-runtime-evidence-20260814.json)，不以相邻环境或精简主路径成功掩盖缺口。
 
 ## 2. 后续安装选题
 
