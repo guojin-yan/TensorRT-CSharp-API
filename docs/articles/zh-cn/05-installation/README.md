@@ -24,6 +24,8 @@ Runtime Bridge 包列表：https://www.nuget.org/packages?q=+JYPPX.TensorRT.CSha
 | [`INS-003`](container/ins-003-container-deployment-runtime-boundary.md) | 容器部署、NVIDIA Container Toolkit 与 Smoke | `review` |
 | [`INS-004`](ci/ins-004-gpu-ci-runner-validation.md) | GPU CI runner、标签与发布证据 | `review` |
 
+2026-08-13 已完成环境可用性审计：Docker GPU 设备可见，但没有 TensorRT/Bridge/Engine smoke；本机没有可用的 WSL Ubuntu 发行版；仓库 self-hosted runner 数量为 0；历史 Ubuntu hosted-container workflow 只有 build/dry-run/pack 证据。四篇安装文章因此继续保持 `review`，不以相邻环境或 build-only 结果替代目标平台 GPU runtime proof。
+
 ## 2. 后续安装选题
 
 | 主题 | 计划覆盖内容 |

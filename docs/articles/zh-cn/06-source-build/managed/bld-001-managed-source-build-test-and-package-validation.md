@@ -10,7 +10,7 @@
 </style>
 <!-- public-article-layout:end -->
 
-> 文章编号：BLD-001；适用版本：4.0.0；当前状态：review。
+> 文章编号：BLD-001；适用版本：4.0.0；当前状态：ready。
 
 ## 1. 前言
 <!-- public-article-project-preface:start -->
@@ -92,10 +92,10 @@ dotnet test `
 New-Item -ItemType Directory -Force .\artifacts\managed | Out-Null
 
 dotnet pack `
-  .\src\JYPPX.TensorRtSharp\JYPPX.TensorRtSharp.csproj `
+  .\pack\JYPPX.TensorRT.CSharp.API\JYPPX.TensorRT.CSharp.API.csproj `
   -c Release `
-  --no-build `
-  -o .\artifacts\managed
+  -o .\artifacts\managed `
+  -p:JYPPXPackageVersion=4.0.0
 ```
 
 如需同时验证 CUDA 托管层，应对 `JYPPX.CudaSharp` 执行同样流程，并确认 TensorRT 包引用的版本与本地输出一致。不要让验证项目意外从 nuget.org 解析到同名旧版本。
@@ -146,7 +146,11 @@ https://github.com/guojin-yan/TensorRT-CSharp-API/tree/TensorRtSharp4.0/src
 
 一次完整的托管层验证应满足：Restore、Build、Test、Pack 和干净消费者 Build 均以退出码 `0` 结束；包内容检查通过；消费者解析到本地版本；文档中的包 ID、版本和目标框架与产物一致。
 
-这些结果仍不能替代真实 TensorRT/CUDA 运行验证。托管包可以成功编译和加载，但目标机器上的原生库、GPU、Engine 或插件仍可能不兼容。本文状态保持 `review`，发布前应补充一次全新目录消费者和目标 Runtime 包的完整记录。
+2026-08-13 的复核以提交 `3c2cbb7fb4bd66c3f99e7168e1bd5f5b0a325598` 为基线，并明确包含当时工作树中的源码修改。该源码状态完成 locked restore 和 Release solution build，结果为 `0 warnings / 0 errors`；随后生成 `JYPPX.TensorRT.CSharp.API.4.0.0.nupkg`，包大小为 `15597221` 字节，SHA256 为 `b0840e4cb120b47ee18976d8bff540088f45b19b63e2bfed092f626c26f22f53`。独立 `net8.0` 消费者只使用该本地源还原 `JYPPX.TensorRT.CSharp.API/4.0.0`，restore 与 Release build 均成功。
+
+同一轮也在干净基线提交上执行了对照：生成器检查通过，但 solution build 因工作树中的配套源码尚未进入该提交而失败。因此上述成功结果严格归属于证据记录中的源码状态，不能归为干净提交构建证明。完整命令、产物哈希和边界见 `docs/articles/zh-cn/06-source-build/source-build-evidence-20260813.json`。
+
+这些结果仍不能替代真实 TensorRT/CUDA 推理、公开 NuGet 消费或 post-publish 验证。托管包可以成功编译和加载，但目标机器上的原生库、GPU、Engine 或插件仍可能不兼容。本文晋级 `ready` 只表示文章命令、包入口和本地消费者链路已经复核。
 
 ## 9. 小结
 

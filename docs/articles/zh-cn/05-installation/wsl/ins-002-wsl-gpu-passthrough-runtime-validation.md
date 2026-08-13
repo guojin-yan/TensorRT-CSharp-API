@@ -10,6 +10,7 @@
 </style>
 <!-- public-article-layout:end -->
 
+> 文章编号：INS-002；适用版本：4.0.0；当前状态：review。
 
 ## 1. 前言
 <!-- public-article-project-preface:start -->
@@ -175,6 +176,8 @@ real GPU inference: output checksum or semantic result recorded
 WSL 适合作为开发与复现环境，也可以帮助定位 Linux 用户态问题；没有 GitHub Actions Linux runner 的真实执行日志、包哈希和 proof pack 时，本文结果仍只能标记为本地验证。
 
 ## 8. 小结
+
+2026-08-13 本机 `wsl -l -v` 只显示 Docker Desktop 管理的 `docker-desktop`，没有可用于本文复核的 Ubuntu 发行版。因此没有执行 WSL 内的 TensorRT 安装、Bridge 加载、GPU enqueue 与输出校验，文章继续保持 `review`。Docker Desktop 的 GPU 可见性不能替代 WSL Ubuntu 项目消费者证据。
 
 可靠的 WSL 结论必须同时包含 WSL2 发行版、GPU 透传、Linux 用户态依赖、Bridge 加载和真实推理证据。Windows 主机可见、NuGet 还原成功或 dry-run 通过，都不能单独证明 TensorRT CSharp API 已经完成 WSL GPU 推理。
 

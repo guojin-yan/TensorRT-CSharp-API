@@ -142,6 +142,8 @@ real inference: output checksum or semantic result recorded
 
 本文已完成包清单、命令和证据边界的静态复核，状态保持 `review`。正式发布前应在至少一个 Ubuntu 22.04 或 24.04 目标环境完成真实 GPU 烟雾测试，并把 Runtime 包版本与输出一并固化。
 
+2026-08-13 环境审计补充了两类可用但不足以晋级的记录：GitHub Actions 历史运行 `31412970912` 和 `31412959494` 在 Ubuntu hosted container 中完成 restore、生成器、CMake、Native build、dry-run 与 pack；本机 Docker GPU 探针也能识别 NVIDIA GeForce RTX 3060 Laptop GPU。前者没有 `nvidia-smi`、GPU enqueue 或输出校验，后者没有 TensorRT、Bridge 与项目消费者，因此都不能替代本文要求的 Linux 真实运行证据。完整边界见 `docs/articles/zh-cn/06-source-build/source-build-evidence-20260813.json`。
+
 ## 8. 小结
 
 Linux 安装不是“NuGet 还原成功”这一项检查。可靠的结论必须沿着 SDK、包还原、托管构建、本机库加载、Engine 反序列化和真实推理逐层推进，并明确记录每一层能够证明和不能证明的内容。

@@ -66,7 +66,8 @@
             "articles/zh-cn/article-index.json",
             "articles/zh-cn/04-api/api-runtime-evidence-20260813.json",
             "articles/zh-cn/03-applications/onnxtoengine/onnxtoengine-runtime-evidence-20260813.json",
-            "articles/zh-cn/03-applications/tensorrtexec/tensorrtexec-runtime-evidence-20260813.json"
+            "articles/zh-cn/03-applications/tensorrtexec/tensorrtexec-runtime-evidence-20260813.json",
+            "articles/zh-cn/06-source-build/source-build-evidence-20260813.json"
           ]
         }
     ],

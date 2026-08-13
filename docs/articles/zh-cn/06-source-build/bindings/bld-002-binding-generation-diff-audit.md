@@ -10,6 +10,7 @@
 </style>
 <!-- public-article-layout:end -->
 
+> 文章编号：BLD-002；适用版本：4.0.0；当前状态：ready。
 
 ## 1. 前言
 <!-- public-article-project-preface:start -->
@@ -140,7 +141,9 @@ Native ABI comparison 报告
 
 ## 8. 小结
 
-绑定生成的可复现性来自 manifest、generator、模板、生成文件和差异报告的完整闭环。只有重复生成哈希稳定、ABI 对比有结论、托管和 Native 测试通过，绑定变化才具备进入评审或发布候选的基础。
+2026-08-13 在独立工作树中两次执行仓库验证入口，共读取 `214` 份 manifest、核对 `4046` 条 API 记录；两次生成结果一致，native methods comparison、wrapper lift candidates 和 generated API coverage 报告均成功导出。报告 SHA256 和源码状态记录在 `docs/articles/zh-cn/06-source-build/source-build-evidence-20260813.json`。
+
+绑定生成的可复现性来自 manifest、generator、模板、生成文件和差异报告的完整闭环。只有重复生成哈希稳定、ABI 对比有结论、托管和 Native 测试通过，绑定变化才具备进入评审或发布候选的基础。本文晋级 `ready` 表示生成与差异审计流程已复核，不表示每个生成 entry point 都完成了真实 GPU 调用。
 
 <!-- public-article-declaration:start -->
 ## 9. 文章声明

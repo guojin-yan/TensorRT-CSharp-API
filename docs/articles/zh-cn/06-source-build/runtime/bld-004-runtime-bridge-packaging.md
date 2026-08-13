@@ -10,6 +10,7 @@
 </style>
 <!-- public-article-layout:end -->
 
+> 文章编号：BLD-004；适用版本：4.0.0；当前状态：ready。
 
 ## 1. 前言
 <!-- public-article-project-preface:start -->
@@ -75,7 +76,7 @@ Bridge 包在 `runtimes/<rid>/native` 下应只有项目自有库：Windows 为 
 
 ```powershell
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Invoke-LocalSplitRuntimePackage.ps1 `
-  -SourceRuntimeKey win-x64-trt11.0-cuda12.9-cudnn9.22 `
+  -SourceRuntimeKey win-x64-trt10.11-cuda12.9-cudnn9.22 `
   -Version 4.0.0 `
   -SplitPackageRole bridge
 ```
@@ -91,7 +92,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Invoke-LocalSplitRuntimePack
 ```powershell
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Validate-SplitRuntimePackages.ps1
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-ExternalVendorRuntimePackagePolicy.ps1 `
-  -PackagePath .\artifacts\runtime-split-nupkg\win-x64-trt11.0-cuda12.9-cudnn9.22
+  -PackagePath .\artifacts\runtime-split-nupkg\win-x64-trt10.11-cuda12.9-cudnn9.22
 ```
 
 审计项目至少包括：包 ID 与 RID 一致、Bridge 文件数量正确、没有 `nvinfer`/`cudart`/`cudnn` 等厂商资产、依赖版本没有被意外写成项目包内文件、nupkg 内容可由消费者复现。
@@ -130,6 +131,10 @@ publication feed and visibility result
 ```
 
 本地 nupkg 通过不等于公开 feed 可见，公开 feed 可见也不等于 post-publish 机器能运行。发布前还要通过许可证、包大小、allowlist、签名策略和消费者验证。
+
+2026-08-13 对 `win-x64-trt10.11-cuda12.9-cudnn9.22` 执行 Bridge split 打包，生成包大小为 `478825` 字节，SHA256 为 `d4ca1aa3062918a693bb676a9d79715bc9e7b291e4c4c63eeddd2ed1a53dbf7d`。独立消费者从本地 managed 与 Bridge 包 restore、Release build 均成功；Bridge 初始化成功，环境探针识别 TensorRT `10.11.0` 与 CUDA `12.9`，`NativeDependencyStatus=ready`。
+
+该消费者只验证 PackageReference、包布局、Bridge 加载与依赖探针，没有执行 Engine 构建、enqueue 或输出语义校验，因此 `RuntimeExecutionProof=false`。它也不是公开 feed 或 post-publish 证明。本文晋级 `ready` 的范围仅限 split 打包与本地消费者验证流程，完整字段见 `docs/articles/zh-cn/06-source-build/source-build-evidence-20260813.json`。
 
 ## 7. 常见错误
 

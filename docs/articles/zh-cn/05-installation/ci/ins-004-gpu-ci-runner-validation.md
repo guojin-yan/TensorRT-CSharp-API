@@ -10,6 +10,7 @@
 </style>
 <!-- public-article-layout:end -->
 
+> 文章编号：INS-004；适用版本：4.0.0；当前状态：review。
 
 ## 1. 前言
 <!-- public-article-project-preface:start -->
@@ -154,7 +155,9 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-LinuxRunnerProofPack.ps
 
 ## 8. 小结
 
-GPU CI 的可信链路是标签匹配、环境快照、清单校验、Native 构建、真实 smoke、包消费者验证和 proof pack。任何一层缺失，都应保留为 review 或 blocked，而不是通过修改 runner 标签或切换环境来掩盖缺口。
+2026-08-13 查询仓库 runner API，结果为 `total_count=0`，当前没有可执行本文 GPU CI smoke 的 self-hosted runner。历史 GitHub Actions 运行 `31412970912` 与 `31412959494` 证明 Ubuntu hosted container 的 restore、绑定生成、Native build、dry-run 与 pack 曾成功，但日志没有 `nvidia-smi`、GPU enqueue 或输出校验，不能作为 GPU runner proof。
+
+GPU CI 的可信链路是标签匹配、环境快照、清单校验、Native 构建、真实 smoke、包消费者验证和 proof pack。任何一层缺失，都应保留为 review 或 blocked，而不是通过修改 runner 标签或切换环境来掩盖缺口。本文继续保持 `review`，下一步需要上线具备明确标签的 Linux GPU runner 并固化完整 proof pack。
 
 <!-- public-article-declaration:start -->
 ## 9. 文章声明

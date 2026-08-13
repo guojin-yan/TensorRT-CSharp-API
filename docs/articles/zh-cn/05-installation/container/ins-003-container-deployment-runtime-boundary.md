@@ -10,6 +10,7 @@
 </style>
 <!-- public-article-layout:end -->
 
+> 文章编号：INS-003；适用版本：4.0.0；当前状态：review。
 
 ## 1. 前言
 <!-- public-article-project-preface:start -->
@@ -167,6 +168,8 @@ Pull Request 的容器 smoke 还要考虑不可信代码：GPU runner 应隔离�
 | digest、日志、哈希齐全 | 可复核该次执行 | 已完成公开发布授权 |
 
 ## 8. 小结
+
+2026-08-13 在 Docker Desktop `4.60.1`、Docker `29.2` 上执行 CUDA `12.9.1` Ubuntu 22.04 基础镜像 GPU 探针，容器内 `nvidia-smi` 识别到 NVIDIA GeForce RTX 3060 Laptop GPU，驱动为 `576.02`。该结果只证明 Docker GPU 设备透传；基础镜像没有安装本文目标 TensorRT、项目 managed/Bridge 包，也没有执行 Engine、enqueue 或输出语义校验，因此文章继续保持 `review`。
 
 容器部署的最小闭环是宿主机驱动、Container Toolkit、`--gpus all`、Linux 用户态 NVIDIA 运行库、项目 Bridge 和真实输出校验。每一层都要保存自己的证据，不能用镜像构建结果或 `nvidia-smi` 单项结果替代 TensorRT 推理证明。
 

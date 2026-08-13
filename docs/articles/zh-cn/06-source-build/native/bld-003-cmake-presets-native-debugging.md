@@ -10,6 +10,7 @@
 </style>
 <!-- public-article-layout:end -->
 
+> 文章编号：BLD-003；适用版本：4.0.0；当前状态：ready。
 
 ## 1. 前言
 <!-- public-article-project-preface:start -->
@@ -72,18 +73,30 @@ cmake --list-presets
 
 ## 3. 选择和配置 Preset
 
-开发时先用不启用厂商绑定的 preset 验证编译器和基本 Bridge：
+开发时可以先用不启用厂商绑定的 preset 检查配置器和编译器入口：
 
 ```powershell
 cmake --preset win-x64-dev
 cmake --build --preset win-x64-dev-debug --parallel
 ```
 
+这一 preset 不是 TensorRT lane 的替代品。本次源码状态下 `win-x64-dev` configure 成功，但 build 在关闭厂商绑定的 v8 兼容实现处失败，因此不能把它列为本轮通过项；问题应按生成 guard 或 no-binding 实现单独修复。
+
 目标 TensorRT/CUDA lane 则使用清单中存在的 preset，例如：
 
 ```powershell
 cmake --preset win-x64-trt11-cuda13-release
 cmake --build --preset win-x64-trt11-cuda13-release --parallel
+```
+
+若本机安装的是 TensorRT 10 与 CUDA 12，可选择对应 lane，并通过环境变量或 `-D` 参数传入 SDK 根目录：
+
+```powershell
+cmake --preset win-x64-trt10-cuda12-release `
+  -DJYPPX_TENSORRT_ROOT="$env:JYPPX_TENSORRT_ROOT" `
+  -DJYPPX_CUDA_ROOT="$env:JYPPX_CUDA_ROOT" `
+  -DJYPPX_CUDNN_ROOT="$env:JYPPX_CUDNN_ROOT"
+cmake --build --preset win-x64-trt10-cuda12-release --parallel
 ```
 
 Linux 使用同名 Linux preset：
@@ -160,7 +173,9 @@ Native 构建可以作为源码编译证据，但不能自动升级为 NuGet 发
 
 ## 8. 小结
 
-Preset、独立 binary directory、依赖发现日志和 ABI 工具输出共同构成可复现的 Native 构建记录。调试时优先修复根目录、缓存和实际加载路径，保持源码、生成绑定、Bridge 和消费者的版本一致。
+2026-08-13 的 Windows 实测使用 `win-x64-trt10-cuda12-release`，CMake 发现 TensorRT `10.11`、CUDA Toolkit `12.9.41`，并启用 TensorRT、CUDA、ONNX parser 与 ONNX config。Release 构建成功，`jyppxtrtbridge.dll` 为 `1197056` 字节，SHA256 为 `2e417858af6b3be929f2564da5a1f7f19e25512cd7e3fe1a75701a3d8800d4ca`。这证明该 Windows lane 的 Native Bridge 可构建，不证明其它 TensorRT/CUDA lane、Linux 构建、GPU 推理或公开包消费。
+
+Preset、独立 binary directory、依赖发现日志和 ABI 工具输出共同构成可复现的 Native 构建记录。调试时优先修复根目录、缓存和实际加载路径，保持源码、生成绑定、Bridge 和消费者的版本一致。完整正负结果见 `docs/articles/zh-cn/06-source-build/source-build-evidence-20260813.json`。
 
 <!-- public-article-declaration:start -->
 ## 9. 文章声明

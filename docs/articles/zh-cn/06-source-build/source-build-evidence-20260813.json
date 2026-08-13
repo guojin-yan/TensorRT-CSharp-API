@@ -1,0 +1,177 @@
+{
+  "schemaVersion": 1,
+  "recordKind": "source-build-article-batch-evidence",
+  "generatedAt": "2026-08-13T21:50:23+08:00",
+  "baseCommit": "3c2cbb7fb4bd66c3f99e7168e1bd5f5b0a325598",
+  "branch": "TensorRtSharp4.0",
+  "sourceState": {
+    "classification": "base-commit-plus-local-tracked-source-changes",
+    "trackedModifiedFileCountBeforeArticleEdits": 120,
+    "buildRelevantModifiedFileCount": 71,
+    "sourceStateFingerprintAlgorithm": "SHA256 over UTF-8 rows sorted by git diff order; each row is repo-relative-path, TAB, git-hash-object, LF.",
+    "sourceStateFingerprintSha256": "01a1e624883986ac54b4a52e0d6070c81b0e661bef7cae307305dc668f080a0a",
+    "cleanBaseCommitBuildProof": false
+  },
+  "cleanBaselineComparison": {
+    "bindingGeneratorValidationPassed": true,
+    "solutionBuildPassed": false,
+    "solutionBuildErrorCount": 131,
+    "solutionBuildBoundary": "The clean base commit does not include the local companion source changes used by the successful build.",
+    "winX64DevConfigurePassed": true,
+    "winX64DevBuildPassed": false,
+    "winX64DevBuildBoundary": "The no-vendor-binding v8 compatibility implementation fails to compile and is not counted as a passing lane."
+  },
+  "managedBuild": {
+    "lockedRestorePassed": true,
+    "releaseSolutionBuildPassed": true,
+    "warningCount": 0,
+    "errorCount": 0,
+    "managedPackage": {
+      "id": "JYPPX.TensorRT.CSharp.API",
+      "version": "4.0.0",
+      "sizeBytes": 15597221,
+      "sha256": "b0840e4cb120b47ee18976d8bff540088f45b19b63e2bfed092f626c26f22f53",
+      "contentValidationPassed": true,
+      "validatedTargetFrameworkCount": 15
+    },
+    "cleanConsumer": {
+      "targetFramework": "net8.0",
+      "restorePassed": true,
+      "buildPassed": true,
+      "resolvedPackage": "JYPPX.TensorRT.CSharp.API/4.0.0",
+      "projectAssetsSha256": "9b52a38c2a6a1928a3d22b3afc1c5dc9c7bda3a4359fef30e6997d3afa6618f7",
+      "assemblySha256": "f7e57988478a88aef54f7de9402ab617f8b132f657a58fda0403f4d5f1e2e0ea",
+      "publicPackageProof": false
+    }
+  },
+  "bindingGeneration": {
+    "validationPassed": true,
+    "deterministicDoubleGenerationPassed": true,
+    "manifestCount": 214,
+    "apiRecordCount": 4046,
+    "reports": [
+      {
+        "name": "native-methods-comparison.md",
+        "sizeBytes": 579336,
+        "sha256": "48c1774de03dfe99cd1e4a236d2998887fc7a7624e520a4a69cf85cbbaeba476"
+      },
+      {
+        "name": "wrapper-lift-candidates.md",
+        "sizeBytes": 3233,
+        "sha256": "235131eebdf1ba2a95629e9bdcdbcf5e59a46e01a665a134fbe24f24971157c1"
+      },
+      {
+        "name": "generated-api-coverage.json",
+        "sizeBytes": 3677,
+        "sha256": "31cca3ccec4313fd28ca07dc93c7bd34e5b4263a510eed0719343ee4ad0b4065"
+      }
+    ],
+    "allEntryPointsRuntimeInvoked": false
+  },
+  "nativeBuild": {
+    "runtimeKey": "win-x64-trt10.11-cuda12.9-cudnn9.22",
+    "preset": "win-x64-trt10-cuda12-release",
+    "runtimeInputValidationPassed": true,
+    "configurePassed": true,
+    "buildPassed": true,
+    "tensorRtVersion": "10.11",
+    "cudaToolkitVersion": "12.9.41",
+    "tensorRtBindingsEnabled": true,
+    "cudaBindingsEnabled": true,
+    "onnxParserEnabled": true,
+    "onnxConfigEnabled": true,
+    "bridge": {
+      "fileName": "jyppxtrtbridge.dll",
+      "sizeBytes": 1197056,
+      "sha256": "2e417858af6b3be929f2564da5a1f7f19e25512cd7e3fe1a75701a3d8800d4ca"
+    },
+    "otherPresetProof": false,
+    "linuxBuildProof": false,
+    "gpuInferenceProof": false
+  },
+  "splitBridgePackage": {
+    "sourceRuntimeKey": "win-x64-trt10.11-cuda12.9-cudnn9.22",
+    "packageId": "JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge",
+    "version": "4.0.0",
+    "sizeBytes": 478825,
+    "sha256": "d4ca1aa3062918a693bb676a9d79715bc9e7b291e4c4c63eeddd2ed1a53dbf7d",
+    "restorePassed": true,
+    "buildPassed": true,
+    "packageConsumerValidationSucceeded": true,
+    "bridgeInitialized": true,
+    "environmentProbeSucceeded": true,
+    "nativeDependencyStatus": "ready",
+    "runtimeTensorRtVersion": "10.11.0",
+    "runtimeCudaVersion": "12.9",
+    "runtimeExecutionProof": false,
+    "publicPackageProof": false,
+    "postPublishProof": false
+  },
+  "installationEnvironmentAudit": {
+    "linux": {
+      "status": "review",
+      "historicalWorkflowRunIds": [31412970912, 31412959494],
+      "historicalBuildDryRunPackPassed": true,
+      "gpuRuntimeProof": false
+    },
+    "wsl": {
+      "status": "review",
+      "ubuntuDistributionAvailable": false,
+      "onlyDockerDesktopDistributionObserved": true,
+      "gpuRuntimeProof": false
+    },
+    "container": {
+      "status": "review",
+      "dockerVersion": "29.2",
+      "dockerDesktopVersion": "4.60.1",
+      "cudaBaseImage": "nvidia/cuda:12.9.1-base-ubuntu22.04",
+      "gpuName": "NVIDIA GeForce RTX 3060 Laptop GPU",
+      "driverVersion": "576.02",
+      "gpuVisible": true,
+      "tensorRtBridgeConsumerProof": false
+    },
+    "gpuCi": {
+      "status": "review",
+      "selfHostedRunnerCount": 0,
+      "gpuRuntimeProof": false
+    }
+  },
+  "qualityValidation": {
+    "isolatedSnapshotComparison": {
+      "total": 2227,
+      "passed": 2212,
+      "failed": 15,
+      "trxSha256": "9b80b949485a447f9b684c55232605c154bf7d05fd7f5e4549871a964b23032a",
+      "boundary": "The temporary snapshot did not contain every ignored ancillary evidence directory and is not reported as a passing full-project quality run."
+    },
+    "currentWorkingTreeFinal": {
+      "total": 2230,
+      "passed": 2230,
+      "failed": 0,
+      "skipped": 0,
+      "duration": "00:13:56",
+      "trxSizeBytes": 3626332,
+      "trxSha256": "b63984b71b33a87a9429ade4424d601c483e5ca0537ab056ecffcbde33a36152"
+    }
+  },
+  "articleDecisions": {
+    "BLD-001": "ready",
+    "BLD-002": "ready",
+    "BLD-003": "ready",
+    "BLD-004": "ready",
+    "INS-001": "review",
+    "INS-002": "review",
+    "INS-003": "review",
+    "INS-004": "review"
+  },
+  "proofBoundary": {
+    "performsPublish": false,
+    "publicPackageProof": false,
+    "postPublishProof": false,
+    "releaseClosureProof": false,
+    "linuxGpuRuntimeProof": false,
+    "wslGpuRuntimeProof": false,
+    "containerTensorRtRuntimeProof": false,
+    "gpuCiRuntimeProof": false
+  }
+}

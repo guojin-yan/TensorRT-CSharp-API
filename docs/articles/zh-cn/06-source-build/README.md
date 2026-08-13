@@ -17,10 +17,12 @@ CMake Presets：https://github.com/guojin-yan/TensorRT-CSharp-API/blob/TensorRtS
 | ID | 主题 | 状态 |
 | --- | --- | --- |
 | `MSC-006` | Windows/Linux C++ Bridge 编译与最小 Smoke | `ready` |
-| [`BLD-001`](managed/bld-001-managed-source-build-test-and-package-validation.md) | 托管层源码编译、测试分层与本地包验证 | `review` |
-| [`BLD-002`](bindings/bld-002-binding-generation-diff-audit.md) | 绑定生成、Manifest 与差异审计 | `review` |
-| [`BLD-003`](native/bld-003-cmake-presets-native-debugging.md) | CMake Preset、Native Bridge 与调试 | `review` |
-| [`BLD-004`](runtime/bld-004-runtime-bridge-packaging.md) | Runtime Bridge split 打包与消费者验证 | `review` |
+| [`BLD-001`](managed/bld-001-managed-source-build-test-and-package-validation.md) | 托管层源码编译、测试分层与本地包验证 | `ready` |
+| [`BLD-002`](bindings/bld-002-binding-generation-diff-audit.md) | 绑定生成、Manifest 与差异审计 | `ready` |
+| [`BLD-003`](native/bld-003-cmake-presets-native-debugging.md) | CMake Preset、Native Bridge 与调试 | `ready` |
+| [`BLD-004`](runtime/bld-004-runtime-bridge-packaging.md) | Runtime Bridge split 打包与消费者验证 | `ready` |
+
+2026-08-13 已完成本模块 4 篇 `BLD` 文章的源码状态、生成器、Windows TensorRT 10/CUDA 12 Native lane、managed/split pack 与本地消费者复核。结果与失败对照记录在 `source-build-evidence-20260813.json`；`ready` 不扩展为其它平台、公开包、post-publish 或真实推理证明。
 
 ## 2. 后续源码编译选题
 
