@@ -10,7 +10,7 @@
 </style>
 <!-- public-article-layout:end -->
 
-> 文章编号：`APP-EXEC-001`；适用版本：TensorRT CSharp API v4.0 `4.0.0`；当前状态：`review`。
+> 文章编号：`APP-EXEC-001`；适用版本：TensorRT CSharp API v4.0 `4.0.0`；当前状态：`ready`。
 
 ## 1. 前言
 <!-- public-article-project-preface:start -->
@@ -123,7 +123,7 @@ dotnet build .\applications\TensorRtExec\TensorRtExec.csproj `
   /p:UseSharedCompilation=false
 ```
 
-> 当前源码复核说明：2026-08-12 已使用稳定核心包 `4.0.0` 完成 TensorRtExec Release 构建和 `--help` 验证，结果为 0 警告、0 错误、退出码 0。下文 GUI 实测记录仍引用 2026-08-04 已登记的 build-only 证据；本轮尚未重新操作完整 GUI 流程，因此本文继续保持 `review`。
+> 当前源码复核说明：2026-08-13 已重新构建当前 TensorRtExec Release 程序，并在 TensorRT 10.11 / CUDA 12.9 环境完成 `--help`、WinForms Preview/Run、MNIST GUI build-only、CLI 构建/推理、Reference 比较和独立 `--loadEngine` 复跑。机器可读摘要位于 `docs/articles/zh-cn/03-applications/tensorrtexec/tensorrtexec-runtime-evidence-20260813.json`。
 
 ## 4. 第一次使用 CLI
 
@@ -293,13 +293,13 @@ TensorRtExec 只完成通用构建。应转到具体业务 runner，补齐真实
 
 ### 9.6 当前源码出现 `TensorRtApiLine` 缺失
 
-这是共享应用工具项目引用问题，不是 GUI 参数或 ONNX 文件问题。完成项目引用修复并重新执行构建与界面验证前，本文保持 `review`。
+这是共享应用工具项目引用问题，不是 GUI 参数或 ONNX 文件问题。当前 2026-08-13 Release 构建及 CLI/GUI 复跑已通过；若读者环境再次出现该错误，应先核对 `JYPPX.TensorRtSharp.ApplicationTools` 的版本与项目引用，再重新构建。
 
 ## 10. 证据边界
 
-本文展示了 TensorRtExec 的 CLI/GUI 工作流和一条真实 GUI build-only 记录。它证明固定环境中 Parser、Builder、配置 readback、Engine 保存和报告输出成立，但没有证明该 MNIST 模型完成推理。
+本文展示了 TensorRtExec 的 CLI/GUI 工作流。2026-08-13 当前源码复跑中，GUI build-only 得到 `external-onnx-build-only`、Parser error 0、2 个 binding 和 367748 字节 Engine；CLI 使用固定 MNIST float32 输入与 repository reference 完成构建、推理和独立 Engine 重载，两次输出 SHA256 均为 `c2ae024fb1a0f958fdad982b8586916089fa726e02ddcf36dfc4476964f0a84e`，Reference mismatch 为 0。
 
-当前提交已经通过应用构建和帮助入口复核，但历史 GUI 截图和构建证据不能替代当前工作树的交互式复测。本文也不是独立临时项目中的 post-publish proof 或应用二进制发布声明，没有执行 NuGet push、Tag、GitHub Release 或外部文章发布。
+这组结果证明当前源码树中 Parser、Builder、Engine 保存、bounded runtime、输出校验和 GUI/CLI 共享服务成立。GUI 本身仍是 build-only 证据，通用 MNIST tensor 运行保守归类为 `synthetic-input-runtime`；本文也不是独立 public-package consumer、post-publish proof 或应用二进制发布声明，没有执行 NuGet push、Tag、GitHub Release 或外部文章发布。
 
 ## 11. 总结
 

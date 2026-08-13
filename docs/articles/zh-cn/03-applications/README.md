@@ -18,15 +18,15 @@
 | `APP-ONNX-001` | `OnnxToEngine` | ONNX 解析、Engine 构建、MNIST 推理与报告 | [OnnxToEngine 入门](onnxtoengine/app-onnx-001-onnx-to-engine-getting-started.md) | `ready` |
 | `APP-ONNX-002` | `OnnxToEngine` | MNIST 项目自有输入、TensorRT 与 ORT 双重验证 | [MNIST 完整流程](onnxtoengine/app-onnx-002-mnist-runtime-validation.md) | `ready` |
 | `APP-ONNX-003` | `OnnxToEngine` | Dynamic Shape、精度、Workspace、Timing Cache 与报告 | [高级构建选项](onnxtoengine/app-onnx-003-advanced-build-options.md) | `ready` |
-| `APP-EXEC-001` | `TensorRtExec` | trtexec 风格 CLI 与 WinForms 工作流 | [TensorRtExec 入门](tensorrtexec/app-exec-001-tensorrtexec-getting-started.md) | `review` |
-| `APP-EXEC-002` | `TensorRtExec` | 使用 WinForms 配置 ONNX 并生成 Engine 与报告 | [GUI 构建指南](tensorrtexec/app-exec-002-gui-onnx-build.md) | `review` |
-| `APP-EXEC-003` | `TensorRtExec` | trtexec 参数迁移、分层状态和严格输出校验 | [CLI 参数指南](tensorrtexec/app-exec-003-cli-parameter-guide.md) | `review` |
-| `APP-EXEC-004` | `TensorRtExec` | 多流 Benchmark、CUDA Graph、精度策略与 Reference | [性能与输出校验](tensorrtexec/app-exec-004-performance-and-output-validation.md) | `review` |
-| `APP-EXEC-005` | `TensorRtExec` | Stripped Plan、ONNX Refit、完整权重持久化与独立 Reload | [Refit 与 Engine 持久化](tensorrtexec/app-exec-005-refit-and-engine-persistence.md) | `review` |
+| `APP-EXEC-001` | `TensorRtExec` | trtexec 风格 CLI 与 WinForms 工作流 | [TensorRtExec 入门](tensorrtexec/app-exec-001-tensorrtexec-getting-started.md) | `ready` |
+| `APP-EXEC-002` | `TensorRtExec` | 使用 WinForms 配置 ONNX 并生成 Engine 与报告 | [GUI 构建指南](tensorrtexec/app-exec-002-gui-onnx-build.md) | `ready` |
+| `APP-EXEC-003` | `TensorRtExec` | trtexec 参数迁移、分层状态和严格输出校验 | [CLI 参数指南](tensorrtexec/app-exec-003-cli-parameter-guide.md) | `ready` |
+| `APP-EXEC-004` | `TensorRtExec` | 多流 Benchmark、CUDA Graph、精度策略与 Reference | [性能与输出校验](tensorrtexec/app-exec-004-performance-and-output-validation.md) | `ready` |
+| `APP-EXEC-005` | `TensorRtExec` | Stripped Plan、ONNX Refit、完整权重持久化与独立 Reload | [Refit 与 Engine 持久化](tensorrtexec/app-exec-005-refit-and-engine-persistence.md) | `ready` |
 
 旧文章没有删除或批量移动，原路径继续兼容既有链接和证据合同。新文章使用 `APP-YV-###`、`APP-ONNX-###` 和 `APP-EXEC-###` 标识应用系列，并在 [`article-index.json`](../article-index.json) 登记 canonical 路径。
 
-`APP-ONNX-001` 至 `APP-ONNX-003` 已于 2026-08-13 在 TensorRT 10.11、CUDA 12.9、RTX 3060 Laptop 环境完成真实 MNIST 正例/负例、独立 ONNX Runtime CPU 对照、FP16/Workspace/Builder readback、Timing Cache 两轮生命周期和动态 Profile GPU smoke，批次证据见 [`onnxtoengine/onnxtoengine-runtime-evidence-20260813.json`](onnxtoengine/onnxtoengine-runtime-evidence-20260813.json)。剩余 `APP-EXEC-001` 至 `APP-EXEC-005` 仍为 `review`：当前仅完成稳定包构建与 `--help` 验证，GUI、性能和 Refit 的完整运行证据尚未按正文逐项复跑。
+`APP-ONNX-001` 至 `APP-ONNX-003` 已于 2026-08-13 完成 MNIST、ORT、动态 Profile 和高级构建批次验证；`APP-EXEC-001` 至 `APP-EXEC-005` 也已在同一 TensorRT 10.11、CUDA 12.9、RTX 3060 Laptop 环境完成 CLI bounded runtime、GUI build-only、benchmark、独立 loadEngine 与 Refit 持久化复跑，批次证据见 [`tensorrtexec-runtime-evidence-20260813.json`](tensorrtexec/tensorrtexec-runtime-evidence-20260813.json)。当前总计为 `42 ready / 8 review`；这些状态不等于 public package、post-publish 或 release-close 证明。
 
 ## 2. 新增规则
 

@@ -10,7 +10,7 @@
 </style>
 <!-- public-article-layout:end -->
 
-> 文章编号：`APP-EXEC-002`；适用版本：TensorRT CSharp API v4.0 `4.0.0`；当前状态：`review`。
+> 文章编号：`APP-EXEC-002`；适用版本：TensorRT CSharp API v4.0 `4.0.0`；当前状态：`ready`。
 
 ## 1. 前言
 <!-- public-article-project-preface:start -->
@@ -293,7 +293,9 @@ Build Only 与 Skip Inference 本来就不会产生业务预测。需要提供�
 
 ## 11. 当前源码复核状态
 
-2026-08-12 已使用稳定核心包 `4.0.0` 完成 TensorRtExec Release 构建和 `--help` 验证，结果为 0 警告、0 错误、退出码 0。本文引用的 GUI 构建记录仍是带日期的历史证据；本轮尚未重新操作 WinForms 并生成新报告，因此保持 `review`，不将历史截图表述为当前工作树的重新验证结果。
+2026-08-13 已从当前 Release `TensorRtExec.exe --ui` 启动真实 WinForms 窗口，通过 Windows UI Automation 读取 ONNX、Save Engine、TensorRT、Workspace、Preview、Run 和日志控件，填入 MNIST build-only 参数并依次执行 Preview 与 Run。实际构建耗时约 22.9 秒，报告得到 `TensorRT=10.11.0`、`CUDA=12.9`、`Parsed=True`、`EngineSaved=True`、Parser error 0、binding count 2，Engine 为 367748 字节；`InferenceRan=False` 是本步骤勾选 Build Only/Skip Inference 的预期结果。
+
+同一轮还保留了未设置 bridge 环境时的 `dependency-probe-only` 失败报告，随后以明确的 TensorRT/bridge 路径重新启动进程并成功构建。它证明 GUI 会如实暴露 native dependency 边界，而不是把依赖探测失败写成 Engine 成功。当前复跑摘要和哈希位于 `docs/articles/zh-cn/03-applications/tensorrtexec/tensorrtexec-runtime-evidence-20260813.json`；正文既有 2026-08-04 截图仍保留其原始哈希与日期，不冒充本次新截图。
 
 ## 12. 总结
 

@@ -10,7 +10,7 @@
 </style>
 <!-- public-article-layout:end -->
 
-> 文章编号：`APP-EXEC-004`；适用版本：TensorRT CSharp API v4.0 `4.0.0`；当前状态：`review`。
+> 文章编号：`APP-EXEC-004`；适用版本：TensorRT CSharp API v4.0 `4.0.0`；当前状态：`ready`。
 
 ## 1. 前言
 <!-- public-article-project-preface:start -->
@@ -381,7 +381,9 @@ TensorRT 11.0 的同资产记录同样比较 1000 values，0 mismatch，最大�
 
 ## 13. 当前源码复核状态
 
-2026-08-12 已使用稳定核心包 `4.0.0` 完成 TensorRtExec Release 构建和 `--help` 验证，结果为 0 警告、0 错误、退出码 0。稳定包尚未公开 `CudaStream.EnqueueDelay`，所以该消费模式下 `--sleepTime` 会记录为请求但未应用，实际应用值为 0；其他性能与输出组合也尚未在本轮逐项复跑。因此本文保持 `review`，上述数据仍是带日期的历史运行记录。
+2026-08-13 当前源码复跑使用固定 MNIST float32 输入、独立 reference、`warmUp=50`、`duration=1`、`streams=1`、`avgRuns=2` 和 percentile 统计。调度器实际完成 110 次 warmup 与 2028 次测量推理，测量区间约 1000.17 ms，报告平均/最小/最大 GPU timing 为 `0.3444564 / 0.03584 / 5.39136 ms`；输出比较 10 个元素、mismatch 0，独立 `--loadEngine` 进程输出 SHA256 与构建进程一致。
+
+本轮数据证明当前单流 bounded scheduler、输出读回、Reference 和统计导出，不声称这个短时 MNIST 测量是稳定性能基准或代表多流加速。正文中的多流、CUDA Graph、sleepTime、精度策略和 YOLOv8n-cls 数值继续按各自历史证据日期解释，未在本轮请求的控制不会被描述为重新执行。当前批次摘要位于 `docs/articles/zh-cn/03-applications/tensorrtexec/tensorrtexec-runtime-evidence-20260813.json`。
 
 ## 14. 总结
 

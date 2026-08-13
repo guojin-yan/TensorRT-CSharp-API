@@ -1,0 +1,269 @@
+{
+  "schemaVersion": "tensorrtexec-runtime-evidence.v1",
+  "recordKind": "tensorrtexec-article-batch-runtime-evidence",
+  "recordedAt": "2026-08-13T11:57:04+08:00",
+  "sourceBaseline": "909a3c9df4a1b7142e1384973b4156ef83cb90a5",
+  "sourceWorktreeDirty": true,
+  "packageVersion": "4.0.0",
+  "proofClassification": "source-tree-tensorrtexec-runtime-and-build-evidence",
+  "environment": {
+    "os": "Windows 11 x64 10.0.26200",
+    "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+    "driverVersion": "576.02",
+    "computeCapability": "8.6",
+    "tensorRtApiLine": 10,
+    "tensorRtVersion": "10.11.0.33",
+    "cudaToolkitVersion": "12.9",
+    "dotnetSdkVersion": "10.0.301"
+  },
+  "sourceBoundary": {
+    "statement": "The run used the source baseline plus pre-existing uncommitted compatibility changes. This article batch does not include or claim ownership of those source changes.",
+    "modelRedistributionApproved": false,
+    "publicPackageConsumerRuntime": false,
+    "postPublishProof": false,
+    "releaseCloseProof": false
+  },
+  "model": {
+    "kind": "NVIDIA TensorRT 10.11 sample-data MNIST ONNX",
+    "path": "models/OnnxToEngine/MNIST/nvidia-tensorrt-10.11/mnist.onnx",
+    "lengthBytes": 26454,
+    "sha256": "2f06e72de813a8635c9bc0397ac447a601bdbfa7df4bebc278723b958831c9bf",
+    "inputName": "Input3",
+    "inputShape": [1, 1, 28, 28],
+    "outputName": "Plus214_Output_0",
+    "outputShape": [1, 10],
+    "inputAsset": "artifacts/real-case/onnx-to-engine-mnist-trt10-runtime/digit-7/mnist-trt10-7-input-f32.bin",
+    "inputSha256": "81f2cd7784dca5c8f02a9887ae89a6a3582880a27d2eba95a53f845c63187564",
+    "referenceAsset": "artifacts/real-case/onnx-to-engine-mnist-trt10-runtime/digit-7/mnist-trt10-7.reference.json",
+    "referenceSha256": "07969a96f76f9dc69a777770ca581df64ad9cb2d1ea320f97bdfbb7cc697beef"
+  },
+  "runs": {
+    "cliBuildAndRuntime": {
+      "articleIds": ["APP-EXEC-001", "APP-EXEC-003", "APP-EXEC-004"],
+      "state": "external-onnx-reference-validated-runtime",
+      "success": true,
+      "parsed": true,
+      "engineSaved": true,
+      "engineFileRoundTrip": true,
+      "inferenceRan": true,
+      "outputValidated": true,
+      "referenceComparedElements": 10,
+      "referenceMismatchCount": 0,
+      "referenceMaximumAbsoluteError": 0.000002861023,
+      "referenceMaximumRelativeError": 0.0000015683895,
+      "engineLengthBytes": 439460,
+      "engineSha256": "4e262ef9830c479b0b23579eeed90d8affcb91080689aed06efd58492eae9b62",
+      "outputSha256": "c2ae024fb1a0f958fdad982b8586916089fa726e02ddcf36dfc4476964f0a84e",
+      "normalizedCommandSha256": "e5fffa684f1084a7bbf21e53db70806accd286fc83621dc8cf73684cb5324d9f",
+      "benchmark": {
+        "iterationsExecuted": 2028,
+        "measurementRounds": 2028,
+        "warmUpIterations": 110,
+        "measurementElapsedMilliseconds": 1000.1698,
+        "averageElapsedMilliseconds": 0.3444564,
+        "minimumElapsedMilliseconds": 0.03584,
+        "maximumElapsedMilliseconds": 5.39136,
+        "streams": 1,
+        "durationSeconds": 1
+      },
+      "independentLoadEngine": {
+        "state": "load-engine-reference-validated-runtime",
+        "inferenceRan": true,
+        "outputValidated": true,
+        "referenceMismatchCount": 0,
+        "outputSha256": "c2ae024fb1a0f958fdad982b8586916089fa726e02ddcf36dfc4476964f0a84e"
+      }
+    },
+    "guiBuildOnly": {
+      "articleIds": ["APP-EXEC-001", "APP-EXEC-002"],
+      "state": "external-onnx-build-only",
+      "success": true,
+      "parsed": true,
+      "engineSaved": true,
+      "inferenceRan": false,
+      "parserErrorCount": 0,
+      "bindingCount": 2,
+      "workspaceBytes": 67108864,
+      "builderOptimizationLevel": 3,
+      "engineLengthBytes": 367748,
+      "engineSha256": "ad033909921077c94ca8ed2571a8f516d4ea56003c3460371174192e2e9fbaf3",
+      "normalizedCommandSha256": "cb029c142e4c8be074951f372f19e9946f173f811fdf8aa218af2b65b493170a",
+      "uiAutomation": {
+        "windowTitle": "TensorRtExec",
+        "previewInvoked": true,
+        "runInvoked": true,
+        "successLogObserved": true,
+        "screenshotsCapturedAndInspected": true
+      }
+    },
+    "refitAndPersistence": {
+      "articleIds": ["APP-EXEC-005"],
+      "state": "external-onnx-refit-reload-reference-validated-runtime",
+      "success": true,
+      "inferenceRan": true,
+      "outputValidated": true,
+      "refitState": "onnx-refit-complete",
+      "parserRefitReturned": true,
+      "engineRefitReturned": true,
+      "parserErrorCount": 0,
+      "missingWeightsBefore": 0,
+      "allWeightsBefore": 6,
+      "missingWeightsAfter": 0,
+      "allWeightsAfter": 6,
+      "strippedPlan": {
+        "lengthBytes": 524652,
+        "sha256": "98e98497781fce115cdc031074beeeab6a6207fe8668f1ad7189fc7c54bcf824"
+      },
+      "persistedPlan": {
+        "lengthBytes": 442972,
+        "sha256": "b5d1926d6de39b03d03399b5e888cfbb2e3043c0a6f18dd8d637b8de003e9a06"
+      },
+      "serializationFlagsBefore": 3,
+      "serializationFlagsAfter": 2,
+      "refittableWeightsIncludedInSerialization": true,
+      "artifactDiffersFromStrippedPlan": true,
+      "originalRefittedEngineDisposedBeforeReload": true,
+      "reloadSucceeded": true,
+      "reloadMetadata": {"ioTensorCount": 2, "layerCount": 5, "optimizationProfileCount": 1},
+      "reloadEngineSelectedForRuntime": true,
+      "inferenceRanFromReloadedEngine": true,
+      "sameProcessOutputSha256": "6f5771d6c5b056406c190a59e725cf9bb13c1f148c1ef06f99ed8acfb11b9041",
+      "sameProcessReferenceMismatchCount": 0,
+      "secondProcessState": "load-engine-reference-validated-runtime",
+      "secondProcessOutputSha256": "6f5771d6c5b056406c190a59e725cf9bb13c1f148c1ef06f99ed8acfb11b9041",
+      "secondProcessReferenceMismatchCount": 0,
+      "secondProcessCommandIsLoadOnly": true
+    }
+  },
+  "localRunArtifacts": {
+    "retention": "workspace-local-ignored-artifacts",
+    "boundary": "These files remain in the ignored local artifact directory for audit and are identified here by repository-relative path, byte length, and SHA256. They are not publication assets or release proof.",
+    "gui": [
+      {
+        "path": "artifacts/article-exec-batch/gui/gui-report.json",
+        "lengthBytes": 24851,
+        "sha256": "f586ec485ebec2e30647636b32a89cea64b4687f832597f84400d5e84fad20f7"
+      },
+      {
+        "path": "artifacts/article-exec-batch/gui/gui-report.dependency-probe-failed.json",
+        "lengthBytes": 19451,
+        "sha256": "953350e3d73b3347d73f1cedf16643f0429842c14a2bdb07d557916bfb3fd84a"
+      },
+      {
+        "path": "artifacts/article-exec-batch/gui/gui-top-success.png",
+        "lengthBytes": 149413,
+        "sha256": "30e3f48f47bb72440c12544dc730acacdd4de2eea68c2a4279feaaa2699cc89a"
+      },
+      {
+        "path": "artifacts/article-exec-batch/gui/gui-preview-success.png",
+        "lengthBytes": 179995,
+        "sha256": "52ce9588efcb4865e73752ef773acea6e1b0fb7a5f23aa404aa8eae4d3767ee3"
+      },
+      {
+        "path": "artifacts/article-exec-batch/gui/gui-result-success.png",
+        "lengthBytes": 338414,
+        "sha256": "efacc878a1c6e4a42aac120845f2b8dcc3d529c94047a156d75e4abaaabbf6d6"
+      }
+    ],
+    "cliRuntime": [
+      {
+        "path": "artifacts/article-exec-batch/runtime/report.json",
+        "lengthBytes": 121772,
+        "sha256": "f902dd09daeafdddf0b99b25982be156858fc0b577ff1acd849547e248193c40"
+      },
+      {
+        "path": "artifacts/article-exec-batch/runtime/output.json",
+        "lengthBytes": 5089,
+        "sha256": "9ce601ea87da3cd7e84c371887abf657800bc8641e6890e31bb46bff2e1c475f"
+      },
+      {
+        "path": "artifacts/article-exec-batch/runtime/load-report.json",
+        "lengthBytes": 33389,
+        "sha256": "5df63d3bdee7db0076060885c2fa911ef93082c47ea4ca431be6824153b4a7f8"
+      },
+      {
+        "path": "artifacts/article-exec-batch/runtime/load-output.json",
+        "lengthBytes": 5491,
+        "sha256": "ed28ca784de7ef8def1a2837e77ae945b0981f5a12e409207e671133791e9eac"
+      }
+    ],
+    "refit": [
+      {
+        "path": "artifacts/article-exec-batch/refit/refit-report.json",
+        "lengthBytes": 46976,
+        "sha256": "0e3297e23845227e6e26dbc80ca683e2ced916611d0ce83b48515c4e8189495b"
+      },
+      {
+        "path": "artifacts/article-exec-batch/refit/refit-output.json",
+        "lengthBytes": 5085,
+        "sha256": "c9ef63c1c8fb91e17be25ced143808fa637c35f4f8a1b6ea3f40852f8d6e411e"
+      },
+      {
+        "path": "artifacts/article-exec-batch/refit/reload-report.json",
+        "lengthBytes": 33402,
+        "sha256": "a808f0b109ad1df4bae2ca8221d550ce8fe8cfef01a5ff2bcfaaa6850ee816b5"
+      },
+      {
+        "path": "artifacts/article-exec-batch/refit/reload-output.json",
+        "lengthBytes": 5488,
+        "sha256": "5dbb743127e7df161f0c7f5a8ca5edb654f26ba1d4ef5870715e58845f0903d4"
+      },
+      {
+        "path": "artifacts/article-exec-batch/refit/mnist-stripped.plan",
+        "lengthBytes": 524652,
+        "sha256": "98e98497781fce115cdc031074beeeab6a6207fe8668f1ad7189fc7c54bcf824"
+      },
+      {
+        "path": "artifacts/article-exec-batch/refit/mnist-refitted.plan",
+        "lengthBytes": 442972,
+        "sha256": "b5d1926d6de39b03d03399b5e888cfbb2e3043c0a6f18dd8d637b8de003e9a06"
+      }
+    ],
+    "qualityValidation": [
+      {
+        "path": "artifacts/article-exec-batch/test-results/app-exec-full.trx",
+        "lengthBytes": 3621799,
+        "sha256": "8de480ca86e88b8f2b2b2bf2cbd2c7437246368450889f39fb2880cf1d247141"
+      }
+    ]
+  },
+  "qualityValidation": {
+    "publicArticleIndex": {
+      "passed": true,
+      "articleCount": 50,
+      "moduleCount": 7
+    },
+    "targetedProjectQuality": {
+      "passed": true,
+      "total": 101,
+      "failed": 0,
+      "skipped": 0
+    },
+    "docfx": {
+      "passed": true,
+      "resourceCount": 57,
+      "warningCount": 0,
+      "errorCount": 0
+    },
+    "fullProjectQuality": {
+      "outcome": "Completed",
+      "total": 2227,
+      "executed": 2227,
+      "passed": 2227,
+      "failed": 0,
+      "skipped": 0,
+      "error": 0,
+      "timeout": 0,
+      "aborted": 0,
+      "duration": "00:13:14"
+    }
+  },
+  "sourceAssets": {
+    "programSha256": "1f7e33f044f6111efa207899cf589f515e5a24951795b49a36c09a2c7269c8c6",
+    "mainFormSha256": "19f056ec9fd44aed217666aed6f2d81765a9b7421bb508665ccf6bb4f1019ed8",
+    "serviceSha256": "7b51b831056132baf13155c224a9a1136db3dac6d18dab3460fcfd6567ab9a6f",
+    "applicationAssemblySha256": "5f923c2d2680b0fcf56197612332e174f140338a0d72113e27fffa24ce569d27",
+    "nativeBridgeSha256": "8669fa8799767d874994cd35424ef3edf079315aa1e6633e7e86b7676f2effc5"
+  },
+  "promotionBoundary": "This batch promotes the five TensorRtExec articles to ready for repository publication review because the current source workflow, GUI build-only path, bounded CLI runtime, output reference validation, benchmark scheduling, and TRT10 Refit persistence/reload were exercised and recorded. It does not prove public NuGet consumption, post-publish deployment, arbitrary-model accuracy, model redistribution permission, performance improvement, or release-close authorization."
+}

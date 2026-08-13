@@ -10,7 +10,7 @@
 </style>
 <!-- public-article-layout:end -->
 
-> 文章编号：`APP-EXEC-005`；适用版本：TensorRT CSharp API v4.0 `4.0.0`；当前状态：`review`。
+> 文章编号：`APP-EXEC-005`；适用版本：TensorRT CSharp API v4.0 `4.0.0`；当前状态：`ready`。
 
 ## 1. 前言
 <!-- public-article-project-preface:start -->
@@ -296,7 +296,9 @@ Plan 不是跨任意环境的通用格式。核对 TensorRT line、版本兼容�
 
 TensorRtExec 的完整 Refit 流程不是“加载 ONNX 后调用一次 refit”，而是：权重来源确认、missing/error 检查、commit、清除序列化排权重标志、独立文件持久化、原 owner 释放、新 owner 重新加载、Context 创建和输出一致性校验。把这些步骤放在一个报告中，才能判断 refitted plan 是否真的可交付。
 
-本文状态保持 `review`：2026-08-12 已使用稳定核心包 `4.0.0` 完成 TensorRtExec Release 构建和 `--help` 验证，但 Refit、完整权重 Engine 持久化与独立 Reload 尚未在当前工作树重新执行。正文不把旧的 local-feed consumer 当成正式 NuGet.org 或 post-publish 证明，也不声称 TensorRT 8 支持 parser refit。
+2026-08-13 已在当前源码树重新执行 TensorRT 10.11 MNIST 完整闭环：`StripPlan`/`Refit` 均应用并回读，Parser Refitter 和 Engine commit 返回 true，parser error 为 0，Refit 前后 missing weights 均为 0、all weights 均为 6；序列化 flags 从 `3` 变为 `2`，证明 `ExcludeWeights` 已清除。stripped plan 为 524652 字节、SHA256 `98e98497781fce115cdc031074beeeab6a6207fe8668f1ad7189fc7c54bcf824`，完整权重 plan 为 442972 字节、SHA256 `b5d1926d6de39b03d03399b5e888cfbb2e3043c0a6f18dd8d637b8de003e9a06`。
+
+同进程记录确认原 Engine 在 reload 前释放，新 Engine 元数据为 I/O `2`、layers `5`、profiles `1`，并由重载 Engine 完成 inference/reference。第二个完全不带 `--onnx` 和 `--refitFromOnnx` 的进程仅用 `--loadEngine` 再次通过；两次输出 SHA256 都是 `6f5771d6c5b056406c190a59e725cf9bb13c1f148c1ef06f99ed8acfb11b9041`，Reference mismatch 均为 0。机器可读摘要位于 `docs/articles/zh-cn/03-applications/tensorrtexec/tensorrtexec-runtime-evidence-20260813.json`。正文仍不把旧 local-feed consumer 当成正式 NuGet.org 或 post-publish 证明，也不声称 TensorRT 8 支持 parser refit。
 
 <!-- public-article-declaration:start -->
 ## 13. 文章声明

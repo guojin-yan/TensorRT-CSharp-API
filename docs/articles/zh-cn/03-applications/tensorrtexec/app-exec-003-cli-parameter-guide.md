@@ -10,7 +10,7 @@
 </style>
 <!-- public-article-layout:end -->
 
-> 文章编号：`APP-EXEC-003`；适用版本：TensorRT CSharp API v4.0 `4.0.0`；当前状态：`review`。
+> 文章编号：`APP-EXEC-003`；适用版本：TensorRT CSharp API v4.0 `4.0.0`；当前状态：`ready`。
 
 ## 1. 前言
 <!-- public-article-project-preface:start -->
@@ -320,7 +320,9 @@ abs(actual - expected) <= relativeTolerance * max(abs(actual), abs(expected))
 
 ## 13. 当前源码复核状态
 
-2026-08-12 已使用稳定核心包 `4.0.0` 完成 TensorRtExec Release 构建和 `--help` 验证，结果为 0 警告、0 错误、退出码 0。本文涉及的参数组合尚未在本轮逐项执行，历史运行数据不冒充当前工作树重新执行结果，因此状态保持 `review`。
+2026-08-13 已使用当前 Release 程序复跑 `--help`、dry-run 参数归一化、MNIST `--onnx/--saveEngine`、`--loadInputs`、`--referenceOutputs`、输出/时间/Profile 导出和独立 `--loadEngine`。真实运行状态为 `external-onnx-reference-validated-runtime`：Parser/Engine round-trip 成功，2 个 binding 可读回，Reference 比较 10 个元素、mismatch 0、最大绝对误差 `2.861023e-6`；独立加载进程得到相同输出 SHA256。GUI Preview 也通过同一 `TensorRtExecOptions.ToArgumentLine()` 生成规范化命令。
+
+这次复跑只把报告中明确列为 applied 的选项写成已执行；parse-only、diagnostic-only 和未请求的高级选项仍保留原边界。机器可读摘要位于 `docs/articles/zh-cn/03-applications/tensorrtexec/tensorrtexec-runtime-evidence-20260813.json`。
 
 ## 14. 总结
 
