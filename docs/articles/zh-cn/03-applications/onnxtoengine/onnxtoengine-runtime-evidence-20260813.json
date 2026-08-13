@@ -1,0 +1,197 @@
+{
+  "schemaVersion": "1.0",
+  "recordedAt": "2026-08-13T09:50:00+08:00",
+  "sourceBaseline": "ee351914",
+  "sourceWorktreeDirty": true,
+  "packageVersion": "4.0.0",
+  "proofClassification": "source-tree-real-model-and-build-runtime",
+  "environment": {
+    "os": "Windows 11 x64 10.0.26200",
+    "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+    "computeCapability": "8.6",
+    "tensorRtApiLine": 10,
+    "tensorRtVersion": "10.11.0.33",
+    "cudaToolkitVersion": "12.9",
+    "onnxRuntimeVersion": "1.23.2",
+    "dotnetSdkVersion": "10.0.301",
+    "bridgeVersion": "4.0.0"
+  },
+  "sourceBoundary": {
+    "statement": "The runs used baseline ee351914 plus pre-existing uncommitted stable-package compatibility changes. This article batch does not include or claim ownership of those source changes.",
+    "modelRedistributionApproved": false,
+    "publicPackageConsumerRuntime": false,
+    "postPublishProof": false
+  },
+  "model": {
+    "kind": "NVIDIA TensorRT 10.11 MNIST sample-data ONNX",
+    "lengthBytes": 26454,
+    "sha256": "2f06e72de813a8635c9bc0397ac447a601bdbfa7df4bebc278723b958831c9bf",
+    "inputName": "Input3",
+    "inputShape": [1, 1, 28, 28],
+    "outputName": "Plus214_Output_0",
+    "outputShape": [1, 10]
+  },
+  "runs": [
+    {
+      "id": "APP-ONNX-001-APP-ONNX-002-mnist-positive",
+      "command": "dotnet applications/OnnxToEngine/bin/Release/net8.0/OnnxToEngine.dll --mnist --tensor-rt-line 10 --onnx <mnist.onnx> --mnistInput <digit-7.pgm> --expectedDigit 7 --minimumConfidence 0.5 --saveEngine <mnist-positive.plan> --exportReport <mnist-positive-report.json> --exportOutput <mnist-positive-output.json> --exportPreprocessedInput <mnist-input-f32.bin> --visualization <mnist-positive.svg>",
+      "exitCode": 0,
+      "state": "mnist-real-model-runtime",
+      "proofClassification": "real-model-runtime",
+      "assertions": [
+        "TensorRT=10.11.0",
+        "CUDA=12.9",
+        "Parsed=True",
+        "EngineSaved=True",
+        "EngineFileRoundTrip=True",
+        "InferenceRan=True",
+        "ExpectedDigit=7",
+        "PredictedDigit=7",
+        "Confidence=0.99945575",
+        "OutputMatch=True"
+      ],
+      "input": {
+        "kind": "owner-generated CC0 P5 PGM",
+        "sha256": "e2f39f47bae623e76b4a16dc4f2de66f11e3cae9b5e0eb2fa4f17858d7a3aa87",
+        "preprocessedElementCount": 784,
+        "preprocessedSha256": "7f6cfd9ba7fadb5e2751bd150ea92275f90c413681fec0c74921f4b476f81f76"
+      },
+      "engine": {
+        "lengthBytes": 367748,
+        "sha256": "ad033909921077c94ca8ed2571a8f516d4ea56003c3460371174192e2e9fbaf3"
+      },
+      "artifacts": {
+        "logSha256": "94e7688be628d18146e8e5f60ca20c1d64cda8d53e729ad7401f9d4903138513",
+        "reportSha256": "3588e4d10de9d46e92ed629d8362c317b8be4135c929134855fb0e2b8f3afbf5",
+        "visualizationSha256": "0c5e7fdf1ee9982b40aa348c5ff40b1590bc8255493b5fae4a55c4d75f5ae2dc"
+      }
+    },
+    {
+      "id": "APP-ONNX-002-mnist-controlled-negative",
+      "command": "dotnet applications/OnnxToEngine/bin/Release/net8.0/OnnxToEngine.dll --mnist --tensor-rt-line 10 --onnx <mnist.onnx> --mnistInput <digit-7.pgm> --expectedDigit 6 --minimumConfidence 0.5 --saveEngine <mnist-negative.plan> --exportReport <mnist-negative-report.json> --exportOutput <mnist-negative-output.json>",
+      "exitCode": 2,
+      "state": "mnist-output-mismatch",
+      "proofClassification": "runtime-output-mismatch",
+      "assertions": [
+        "InferenceRan=True",
+        "ExpectedDigit=6",
+        "PredictedDigit=7",
+        "Confidence=0.99945575",
+        "OutputMatch=False"
+      ],
+      "artifacts": {
+        "logSha256": "992268e2414aba46c20a6dadf96d35c8b1a58cce5d459e51201e36d1089488a1",
+        "reportSha256": "eb9ab9734fad22b436634ef25448b0814bd68bcc5bdbe4baf06929b90e007e58"
+      }
+    },
+    {
+      "id": "APP-ONNX-002-onnxruntime-cpu-reference",
+      "command": "pwsh -File eng/Test-TensorRtExecMnistOnnxRuntimeReference.ps1 -ModelPath <mnist.onnx> -InputPath <mnist-input-f32.bin> -TensorRtReferencePath <mnist-positive-trt.reference.json> -OutputRoot <isolated-e-drive-workspace> -ReportDirectory <onnxruntime-report-directory> -Strict",
+      "exitCode": 0,
+      "state": "independent-onnxruntime-cpu-reference-runtime-passed",
+      "assertions": [
+        "ProviderValidated=True",
+        "ProfileProviders=CPUExecutionProvider",
+        "DeterministicOutput=True",
+        "PredictedIndex=7",
+        "ComparedElementCount=10",
+        "MismatchCount=0",
+        "MaximumAbsoluteError=0.000006198883",
+        "MaximumRelativeError=0.0000013311652",
+        "TensorRtReferenceComparisonPassed=True"
+      ],
+      "tolerances": {
+        "absolute": 0.0001,
+        "relative": 0.0001
+      },
+      "artifacts": {
+        "runReportSha256": "9a4ee101853dc58d4c10d2c68c4da88d75b8bdae5a97ba5c2555cf4a8297c56c",
+        "referenceSha256": "250c604b6d7832dcfd57de922fc3814c82ed6b93e2c68dfeed50bc59baf5f074",
+        "rawOutputSha256": "7e45e92423b305bc7219cdb04ce7b1d1bfa964903ac03d9a20048238ce1967d4",
+        "profileSha256": "57de1cfec1ee8f695dafad36369e3e3811a67aac6fca93581db505ffe2367318"
+      }
+    },
+    {
+      "id": "APP-ONNX-003-advanced-build-first",
+      "command": "dotnet applications/OnnxToEngine/bin/Release/net8.0/OnnxToEngine.dll --tensor-rt-line 10 --onnx <mnist.onnx> --saveEngine <advanced-first.plan> --workspace 64 --profilingVerbosity layer_names_only --exportReport <advanced-first-report.json> --batch 2 --iterations 10 --warmUp 200 --duration 3 --streams 1 --builderOptimizationLevel 4 --maxAuxStreams 1 --exportTimingCache <advanced-first.cache> --fp16 --buildOnly",
+      "exitCode": 0,
+      "state": "external-onnx-build-only",
+      "proofClassification": "build-only",
+      "normalizedCommandSha256": "3542bf1d1107cb2f1d404a7b8a8c566b077057952608a8c31457848277bfe019",
+      "assertions": [
+        "Fp16 Requested=True Applied=True Readback=True ReadbackMatch=True",
+        "Tf32 Requested=True Applied=True Readback=True ReadbackMatch=True",
+        "WorkspaceBytes=67108864",
+        "BuilderOptimizationLevel=4",
+        "MaxAuxStreams=1",
+        "Parsed=True",
+        "EngineSaved=True",
+        "InferenceRan=False"
+      ],
+      "engine": {
+        "lengthBytes": 235276,
+        "sha256": "aba2693106e2f5af751f0182731650e2bf80a9fb8bb711ba12696506624afe7d"
+      },
+      "timingCacheOutput": {
+        "written": true,
+        "lengthBytes": 74533,
+        "sha256": "55364b91e701ce129ffbdb14a21b8891a26e89eb41711160b34a0d6d99fe6988"
+      },
+      "artifacts": {
+        "logSha256": "a173b85616775d84c3b1309295dee04caab54ca5cc1e82bafdacb90f997e9992",
+        "reportSha256": "d12b0202c5755956d1b17b7f4d1504fe3403dce9442ae1a4f143638c7fa0e06b"
+      }
+    },
+    {
+      "id": "APP-ONNX-003-advanced-build-cache-reuse",
+      "command": "dotnet applications/OnnxToEngine/bin/Release/net8.0/OnnxToEngine.dll --tensor-rt-line 10 --onnx <mnist.onnx> --saveEngine <advanced-second.plan> --workspace 64 --timingCacheFile <advanced-first.cache> --profilingVerbosity layer_names_only --exportReport <advanced-second-report.json> --batch 2 --iterations 10 --warmUp 200 --duration 3 --streams 1 --builderOptimizationLevel 4 --maxAuxStreams 1 --exportTimingCache <advanced-second.cache> --fp16 --buildOnly",
+      "exitCode": 0,
+      "state": "external-onnx-build-only",
+      "proofClassification": "build-only",
+      "normalizedCommandSha256": "59858c258b0bb0a1ba21476b14e50fc6089f3426723217a121d1142e7cbcbefc",
+      "assertions": [
+        "TimingCache InputRequested=True",
+        "TimingCache InputApplied=True",
+        "TimingCache InputLengthBytes=74533",
+        "TimingCache input SHA256 matches first export",
+        "TimingCache OutputWritten=True",
+        "Parsed=True",
+        "EngineSaved=True",
+        "InferenceRan=False"
+      ],
+      "engine": {
+        "lengthBytes": 245412,
+        "sha256": "d0113014664da7f326edf07304cbf586186cc60578902ddf1ffac74dcd1ce3ee"
+      },
+      "timingCacheOutput": {
+        "written": true,
+        "lengthBytes": 88469,
+        "sha256": "6ee034233f1ed4cd847e0e659dd2423cce8c971b82c117912066ab81d3b87ba1"
+      },
+      "artifacts": {
+        "logSha256": "54612104873ce3d088f215b2f66bf300e0855b48dc43d116088cccb842e48257",
+        "reportSha256": "2b9b3a9bff187797c1cfbe64b44a3d0ef0e09c0d732a293881c735a32a6d55cc"
+      }
+    },
+    {
+      "id": "APP-ONNX-003-dynamic-profile-runtime",
+      "command": "dotnet smoke/OnnxToEngineSmokeRunner/bin/Debug/net8.0/OnnxToEngineSmokeRunner.dll --tensor-rt-line 10 --batch 3",
+      "exitCode": 0,
+      "state": "dynamic-onnx-profile-runtime-passed",
+      "assertions": [
+        "Parsed=True",
+        "ParserErrors=0",
+        "ConfiguredMin=[1,4]",
+        "ConfiguredOpt=[2,4]",
+        "ConfiguredMax=[4,4]",
+        "ProfileValid=True",
+        "RuntimeBatch=3",
+        "Enqueue=True",
+        "OutputMatch=True"
+      ],
+      "logSha256": "35c5189819ab29dd79fe515a6f8b259227f63be25299a4af30981bf9690ef724",
+      "boundary": "This run proves the shared OnnxToEngine parser/build/profile/runtime path with a generated dynamic ONNX model. It is not an external business-model result from the OnnxToEngine CLI."
+    }
+  ],
+  "promotionBoundary": "The records prove the three OnnxToEngine articles on one matching Windows TensorRT 10/CUDA 12 host: real MNIST runtime with fail-closed validation, independent ONNX Runtime CPU comparison, advanced builder readback, timing-cache lifecycle, and shared dynamic-profile GPU execution. They do not prove TensorRT 8/11 parity, arbitrary-model semantics, performance gains, model redistribution permission, clean package-consumer runtime, post-publish verification, or release authorization."
+}

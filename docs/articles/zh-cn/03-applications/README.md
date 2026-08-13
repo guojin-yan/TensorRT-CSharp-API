@@ -15,9 +15,9 @@
 | `APP-YV-007` | `YoloVision` | LRASPP VOC 21 类语义分割 | [LRASPP 语义分割](yolovision/app-yv-007-lraspp-semantic-segmentation.md) | `ready` |
 | `APP-YV-008` | `YoloVision` | YOLOv10n End-to-End 六列输出检测 | [YOLOv10n 检测](yolovision/app-yv-008-yolov10n-end-to-end.md) | `ready` |
 | `APP-YV-009` | `YoloVision` | YOLOX-S grid/stride 目标检测 | [YOLOX-S 检测](yolovision/app-yv-009-yolox-s-detection.md) | `ready` |
-| `APP-ONNX-001` | `OnnxToEngine` | ONNX 解析、Engine 构建、MNIST 推理与报告 | [OnnxToEngine 入门](onnxtoengine/app-onnx-001-onnx-to-engine-getting-started.md) | `review` |
-| `APP-ONNX-002` | `OnnxToEngine` | MNIST 项目自有输入、TensorRT 与 ORT 双重验证 | [MNIST 完整流程](onnxtoengine/app-onnx-002-mnist-runtime-validation.md) | `review` |
-| `APP-ONNX-003` | `OnnxToEngine` | Dynamic Shape、精度、Workspace、Timing Cache 与报告 | [高级构建选项](onnxtoengine/app-onnx-003-advanced-build-options.md) | `review` |
+| `APP-ONNX-001` | `OnnxToEngine` | ONNX 解析、Engine 构建、MNIST 推理与报告 | [OnnxToEngine 入门](onnxtoengine/app-onnx-001-onnx-to-engine-getting-started.md) | `ready` |
+| `APP-ONNX-002` | `OnnxToEngine` | MNIST 项目自有输入、TensorRT 与 ORT 双重验证 | [MNIST 完整流程](onnxtoengine/app-onnx-002-mnist-runtime-validation.md) | `ready` |
+| `APP-ONNX-003` | `OnnxToEngine` | Dynamic Shape、精度、Workspace、Timing Cache 与报告 | [高级构建选项](onnxtoengine/app-onnx-003-advanced-build-options.md) | `ready` |
 | `APP-EXEC-001` | `TensorRtExec` | trtexec 风格 CLI 与 WinForms 工作流 | [TensorRtExec 入门](tensorrtexec/app-exec-001-tensorrtexec-getting-started.md) | `review` |
 | `APP-EXEC-002` | `TensorRtExec` | 使用 WinForms 配置 ONNX 并生成 Engine 与报告 | [GUI 构建指南](tensorrtexec/app-exec-002-gui-onnx-build.md) | `review` |
 | `APP-EXEC-003` | `TensorRtExec` | trtexec 参数迁移、分层状态和严格输出校验 | [CLI 参数指南](tensorrtexec/app-exec-003-cli-parameter-guide.md) | `review` |
@@ -26,7 +26,7 @@
 
 旧文章没有删除或批量移动，原路径继续兼容既有链接和证据合同。新文章使用 `APP-YV-###`、`APP-ONNX-###` 和 `APP-EXEC-###` 标识应用系列，并在 [`article-index.json`](../article-index.json) 登记 canonical 路径。
 
-`review` 表示正文结构已经完成，且当前源码已于 2026-08-12 使用稳定核心包 `4.0.0` 完成构建与 `--help` 验证，但本轮尚未逐篇重跑 GUI、真实 MNIST、性能和 Refit 的完整运行证据。历史证据继续保留日期与边界，在相应流程使用当前工作树重新执行前不提升为 `ready`。
+`APP-ONNX-001` 至 `APP-ONNX-003` 已于 2026-08-13 在 TensorRT 10.11、CUDA 12.9、RTX 3060 Laptop 环境完成真实 MNIST 正例/负例、独立 ONNX Runtime CPU 对照、FP16/Workspace/Builder readback、Timing Cache 两轮生命周期和动态 Profile GPU smoke，批次证据见 [`onnxtoengine/onnxtoengine-runtime-evidence-20260813.json`](onnxtoengine/onnxtoengine-runtime-evidence-20260813.json)。剩余 `APP-EXEC-001` 至 `APP-EXEC-005` 仍为 `review`：当前仅完成稳定包构建与 `--help` 验证，GUI、性能和 Refit 的完整运行证据尚未按正文逐项复跑。
 
 ## 2. 新增规则
 

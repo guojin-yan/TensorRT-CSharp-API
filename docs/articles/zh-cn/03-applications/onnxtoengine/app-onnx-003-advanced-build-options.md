@@ -10,7 +10,7 @@
 </style>
 <!-- public-article-layout:end -->
 
-> 文章编号：`APP-ONNX-003`；适用版本：TensorRT CSharp API v4.0 `4.0.0`；当前状态：`review`。
+> 文章编号：`APP-ONNX-003`；适用版本：TensorRT CSharp API v4.0 `4.0.0`；当前状态：`ready`。
 
 ## 1. 前言
 <!-- public-article-project-preface:start -->
@@ -234,19 +234,26 @@ dotnet run --project .\applications\OnnxToEngine -- `
 
 ## 8. 已登记的构建结果
 
-仓库保留了一次 TensorRT 10.11 / CUDA 12.9 的 MNIST build-only 记录，可用于理解报告字段：
+2026-08-13 在 TensorRT 10.11 / CUDA 12.9 / RTX 3060 Laptop 环境对 MNIST ONNX 执行两轮 `OnnxToEngine --buildOnly`，第二轮导入第一轮 Timing Cache。机器可读记录位于 `docs/articles/zh-cn/03-applications/onnxtoengine/onnxtoengine-runtime-evidence-20260813.json`。
 
 | 检查项 | 结果 |
 | --- | --- |
 | ONNX | 26,454 bytes，SHA256 `2f06e72de813a8635c9bc0397ac447a601bdbfa7df4bebc278723b958831c9bf` |
 | Workspace | 64 MiB，即 `67,108,864` bytes |
+| FP16 / TF32 | 请求、应用、readback 与 match 均为 `true` |
+| Builder Optimization Level | readback 为 4 |
+| Max Aux Streams | readback 为 1 |
 | 状态 | `external-onnx-build-only`，`Success=true` |
-| Engine | 287,068 bytes，SHA256 `1fe17e748dc7eeaed265766ae83de6b2023b067e213dfdfd47db5a98f4a17828` |
-| Report | 11,402 bytes，SHA256 `ffb79126bcf7b84ce96875fee6afd717d7fb1b9b04e3cb566980ba31fb48c7bf` |
-| 归一化参数 SHA256 | `72a3b79606c4518d55c84578ab4337c96192bd0c0d378e00d3a1522563203398` |
+| 第一轮 Engine | 235,276 bytes，SHA256 `aba2693106e2f5af751f0182731650e2bf80a9fb8bb711ba12696506624afe7d` |
+| 第一轮 Cache | 74,533 bytes，SHA256 `55364b91e701ce129ffbdb14a21b8891a26e89eb41711160b34a0d6d99fe6988` |
+| 第二轮 Cache 导入 | `InputRequested=true`、`InputApplied=true`，输入哈希与第一轮一致 |
+| 第二轮 Cache 导出 | 88,469 bytes，SHA256 `6ee034233f1ed4cd847e0e659dd2423cce8c971b82c117912066ab81d3b87ba1` |
+| 归一化参数 SHA256 | 第一轮 `3542bf1d...e019`；第二轮 `59858c25...befc` |
 | 结果范围 | Parser、Builder、Engine 保存；不含业务输出语义验证 |
 
-该记录用于展示高级构建参数和报告结构。MNIST 的真实输入、预测结果和独立 ORT 对比在 `APP-ONNX-002` 中单独说明。
+Dynamic Shape 另由仓库现有 `OnnxToEngineSmokeRunner` 生成单输入动态 ONNX，并真实构建 `Min=[1,4] / Opt=[2,4] / Max=[4,4]` Profile。batch 3 位于范围内，Parser 错误为 0，GPU enqueue 成功且 `OutputMatch=true`，退出码 0。
+
+这条 Dynamic Shape 结果证明共享 Parser、Builder、Profile 和 Runtime 路径，不冒充 OnnxToEngine CLI 对外部业务模型的运行结果。两轮高级构建均为 `build-only`、`InferenceRan=false`；MNIST 的真实输入、预测结果和独立 ORT 对比在 `APP-ONNX-002` 中单独说明。
 
 ## 9. 推荐排查顺序
 
@@ -259,7 +266,7 @@ dotnet run --project .\applications\OnnxToEngine -- `
 
 ## 10. 当前源码复核状态
 
-2026-08-12 已使用稳定核心包 `4.0.0` 完成 `OnnxToEngine` Release 构建与 `--help` 验证，结果为 0 警告、0 错误、退出码 0。Dynamic Shape、FP16、Workspace、Timing Cache 等组合尚未在本轮按本文逐项复跑，因此继续保持 `review`，不把历史结果写成当前工作树已完整验证。
+2026-08-13 已使用稳定核心包 `4.0.0` 重新构建 `OnnxToEngine` 与动态 smoke，均为 0 警告、0 错误。FP16、TF32、64 MiB Workspace、Builder Optimization Level 4、Max Aux Streams 1、Timing Cache 写出与复用都由 `OnnxToEngine` 报告 readback 证明；动态 Profile 则由共享 smoke 的真实 GPU 输出证明。证据基于 `ee351914` 与用户已有未提交兼容改动，不是干净 package-consumer 或性能收益证明。
 
 ## 11. 总结
 

@@ -64,7 +64,8 @@
           "files": [
             "images/**",
             "articles/zh-cn/article-index.json",
-            "articles/zh-cn/04-api/api-runtime-evidence-20260813.json"
+            "articles/zh-cn/04-api/api-runtime-evidence-20260813.json",
+            "articles/zh-cn/03-applications/onnxtoengine/onnxtoengine-runtime-evidence-20260813.json"
           ]
         }
     ],

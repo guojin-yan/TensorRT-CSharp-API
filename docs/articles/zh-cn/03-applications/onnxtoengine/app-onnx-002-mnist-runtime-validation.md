@@ -10,7 +10,7 @@
 </style>
 <!-- public-article-layout:end -->
 
-> 文章编号：`APP-ONNX-002`；适用版本：TensorRT CSharp API v4.0 `4.0.0`；当前状态：`review`。
+> 文章编号：`APP-ONNX-002`；适用版本：TensorRT CSharp API v4.0 `4.0.0`；当前状态：`ready`。
 
 ## 1. 前言
 <!-- public-article-project-preface:start -->
@@ -102,9 +102,9 @@ flowchart TD
 
 ## 3. 当前源码复核状态
 
-2026-08-12 已使用稳定核心包 `4.0.0` 完成 `OnnxToEngine` Release 构建和 `--help` 验证，结果为 0 警告、0 错误、退出码 0。稳定包与当前源码的共享 namespace 漂移已通过受控编译条件兼容。
+2026-08-13 已使用稳定核心包 `4.0.0` 重新构建 `OnnxToEngine`，结果为 0 警告、0 错误；稳定包与当前源码的共享 namespace 漂移通过受控编译条件兼容。随后使用同一模型、项目自有输入和预处理 tensor 依次执行 TensorRT 正例、错误期望数字负例与 ONNX Runtime 1.23.2 CPU 对照，三条路径均达到预设判定。
 
-下文实测来自机器可读记录 `onnxtoengine-mnist-owner-generated-win-x64-trt10.11-20260805`，执行时间为 2026-08-04。它是可追溯历史 runtime evidence，但不冒充当前工作树已经重新执行完整 MNIST GPU 流程；完成该复测后再决定是否改为 `ready`。
+本轮机器可读汇总位于 `docs/articles/zh-cn/03-applications/onnxtoengine/onnxtoengine-runtime-evidence-20260813.json`。它明确记录基线 `ee351914`、非干净工作树、执行命令、退出码、输出、哈希和不能外推的证明边界。
 
 ## 4. 模型来源与许可
 
@@ -251,14 +251,19 @@ pwsh -NoProfile -ExecutionPolicy Bypass `
 
 <img src="../../../../images/onnxtoengine-mnist-owner-generated-terminal.png" alt="OnnxToEngine MNIST 真实运行与独立参考对照" width="640" style="display:block;max-width:100%;height:auto;margin:16px auto;" />
 
+<img src="../../../../images/onnxtoengine-mnist-runtime-20260813.svg" alt="2026-08-13 当前工作树生成的 MNIST TensorRT 分类结果" width="640" style="display:block;max-width:100%;height:auto;margin:16px auto;" />
+
+前两张图片是 2026-08-04 历史归档；第三张 SVG 是 2026-08-13 正例命令直接生成的当前结果图。状态晋级同时要求本轮日志、JSON 和退出码通过，不以历史截图替代复跑。
+
 | 检查项 | 结果 |
 | --- | --- |
 | 环境 | Windows 11 / RTX 3060 Laptop / TensorRT 10.11 / CUDA 12.9 |
 | TensorRT 预测 | 7 |
 | 置信度 | `0.99945575` |
 | 最低置信度 | 0.5 |
-| Enqueue | `0.971776 ms` |
+| Enqueue | `1.34144 ms` |
 | ONNX Runtime | 1.23.2 CPUExecutionProvider |
+| ORT 两次输出 | float32 bytes 完全一致 |
 | 比较元素 / mismatch | 10 / 0 |
 | 最大绝对误差 | `6.198883e-6` |
 | 最大相对误差 | `1.3311652e-6` |
@@ -297,13 +302,13 @@ ProcessExitCode=2
 
 ### 11.4 `TensorRtApiLine` namespace 不匹配
 
-稳定包和当前源码的共享 namespace 不同。当前已用条件编译对齐 `TensorRtApiLine`，若再次出现该错误，应先检查公开包版本与 `JYPPX_PUBLIC_STABLE_4_0_0`，不要归因于 MNIST 模型。完整 GPU 流程尚未在本轮复跑，因此本文仍保持 `review`。
+稳定包和当前源码的共享 namespace 不同。当前已用条件编译对齐 `TensorRtApiLine`，若再次出现该错误，应先检查公开包版本与 `JYPPX_PUBLIC_STABLE_4_0_0`，不要归因于 MNIST 模型。本轮已经在该兼容条件下完成构建、GPU 正例/负例和 ORT 对照。
 
 ## 12. 证据边界
 
-历史记录证明固定 MNIST ONNX、项目自有输入、真实 TensorRT GPU 推理、ONNX Runtime CPU 对照和错误期望数字负例成立。它不证明完整 MNIST 精度，也不授权重新分发 ONNX。
+本轮记录证明固定 MNIST ONNX、项目自有输入、真实 TensorRT GPU 推理、ONNX Runtime CPU 对照和错误期望数字负例成立。ORT profiling 只出现 `CPUExecutionProvider`，同一输入两次输出逐字节一致；与本轮 TensorRT 10 个 logits 在绝对/相对容差 `1e-4` 内 mismatch 为 0。它不证明完整 MNIST 精度，也不授权重新分发 ONNX。
 
-当前提交已通过构建与帮助验证，但这些结果不能替代 MNIST GPU 推理、ORT 对照和负例的当前源码复测。本文不是独立临时项目中的 post-publish、Owner acceptance、Tag、Release 或发布批准。
+证据基于 `ee351914` 与用户已有的未提交稳定包兼容改动，不是干净临时项目中的 public-package consumer、post-publish、Owner acceptance、Tag、Release 或发布批准。ORT 结果是独立执行框架参考，但模型与参考仍未取得 Owner 再分发批准。
 
 ## 13. 总结
 

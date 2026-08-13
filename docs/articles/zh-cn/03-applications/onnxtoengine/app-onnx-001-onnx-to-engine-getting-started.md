@@ -10,7 +10,7 @@
 </style>
 <!-- public-article-layout:end -->
 
-> 文章编号：`APP-ONNX-001`；适用版本：TensorRT CSharp API v4.0 `4.0.0`；当前状态：`review`。
+> 文章编号：`APP-ONNX-001`；适用版本：TensorRT CSharp API v4.0 `4.0.0`；当前状态：`ready`。
 
 ## 1. 前言
 <!-- public-article-project-preface:start -->
@@ -144,7 +144,7 @@ dotnet build .\applications\OnnxToEngine\OnnxToEngine.csproj `
   /p:UseSharedCompilation=false
 ```
 
-> 当前源码复核说明：2026-08-12 已使用稳定核心包 `4.0.0` 完成 `OnnxToEngine` Release 构建和 `--help` 入口验证，结果为 0 警告、0 错误、退出码 0。下文实测结果仍来自已登记的 2026-08-04 TensorRT 10.11 运行证据；本轮尚未重新执行完整 MNIST GPU 流程，因此本文继续保持 `review`。
+> 当前源码复核说明：2026-08-13 已重新构建 `OnnxToEngine`，结果为 0 警告、0 错误；随后在 TensorRT 10.11、CUDA 12.9、RTX 3060 Laptop 环境中重新执行完整 MNIST GPU 正例和受控负例。正例退出码为 0，负例退出码为 2；本轮机器可读证据位于 `docs/articles/zh-cn/03-applications/onnxtoengine/onnxtoengine-runtime-evidence-20260813.json`。
 
 ## 5. 通用 ONNX 构建
 
@@ -264,7 +264,7 @@ dotnet run --project .\applications\OnnxToEngine -- `
   --exportReport (Join-Path $MnistOutput 'report.json') `
   --exportOutput (Join-Path $MnistOutput 'output.json') `
   --exportPreprocessedInput (Join-Path $MnistOutput 'input-f32.bin') `
-  --exportVisualization (Join-Path $MnistOutput 'result.png')
+  --visualization (Join-Path $MnistOutput 'result.svg')
 ```
 
 ## 8. 已登记的真实结果
@@ -273,17 +273,21 @@ dotnet run --project .\applications\OnnxToEngine -- `
 
 <img src="../../../../images/onnxtoengine-mnist-owner-generated-result.png" alt="OnnxToEngine MNIST 项目自有输入与分类结果" width="640" style="display:block;max-width:100%;height:auto;margin:16px auto;" />
 
-2026-08-04 的机器可读记录 `onnxtoengine-mnist-owner-generated-win-x64-trt10.11-20260805` 包含以下结果：
+下表使用 2026-08-13 当前工作树复跑结果；2026-08-04 的历史截图继续保留用于界面参照，但状态晋级依据是本轮 JSON、日志和结果图。
+
+<img src="../../../../images/onnxtoengine-mnist-runtime-20260813.svg" alt="2026-08-13 OnnxToEngine MNIST 项目自有输入与 TensorRT 分类结果" width="640" style="display:block;max-width:100%;height:auto;margin:16px auto;" />
 
 | 检查项 | 结果 |
 | --- | --- |
 | TensorRT / CUDA | 10.11.0.33 / 12.9 |
 | 预测数字 | 7 |
 | 置信度 | `0.99945575` |
+| Engine 往返 | `EngineFileRoundTrip=true`，367,748 bytes |
+| 正例退出码 | 0 |
 | 10 个 logits 与 ORT mismatch | 0 |
 | 最大绝对误差 | `0.000006198883` |
 | 最大相对误差 | `0.0000013311652` |
-| 负例 | expected digit 改为 6，exit code 2 |
+| 负例 | expected digit 改为 6，`OutputMatch=false`，exit code 2 |
 | Proof | `real-model-runtime` |
 
 负例保持模型和输入不变，仅把期望数字从 7 改为 6；程序仍预测 7，并以非零退出码结束。这证明输出校验会 fail closed。
@@ -312,9 +316,9 @@ Engine 构建不理解业务预处理。检查输入 layout、dtype、归一化�
 
 ## 10. 证据边界
 
-已登记结果证明固定 MNIST 模型和项目自有输入在记录的 TensorRT 10.11 环境中完成构建、序列化、重新加载、真实 GPU 推理和 ONNX Runtime 对比。它不证明任意外部 ONNX 都有正确业务输出。
+本轮结果证明固定 MNIST 模型和项目自有输入在记录的 TensorRT 10.11 环境中完成构建、序列化、重新加载、真实 GPU 推理、fail-closed 输出校验和独立 ONNX Runtime CPU 对比。它不证明任意外部 ONNX 都有正确业务输出，也不授权重新分发该 ONNX 模型。
 
-当前提交已经完成应用构建和帮助入口复核，但没有在本轮重新执行本文的完整 MNIST GPU 命令，因此历史记录仍只作为带日期的可追溯证据。本文也不是独立临时项目中的 post-publish proof，没有执行 package push、Tag、Release 或外部发布。
+证据基于 `ee351914` 与用户已有的未提交稳定包兼容改动，文章批次没有提交或取得这些源码改动的所有权。本文也不是干净临时项目中的 public-package consumer、post-publish proof、Tag、Release 或发布批准。
 
 ## 11. 总结
 
