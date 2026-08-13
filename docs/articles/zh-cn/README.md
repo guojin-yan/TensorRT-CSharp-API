@@ -14,6 +14,8 @@
 
 新模块使用 [`article-index.json`](article-index.json) 记录稳定 ID、canonical 源、版本、状态和外部发布冻结字段。`ready` 只表示正文经过技术校验；只有真实发布后填写 URL、时间、提交和 SHA256，才可以改为 `published` 与 `immutable=true`。
 
+截至 2026-08-13，索引共登记 50 篇 canonical 文章，其中 34 篇为 `ready`、16 篇为 `review`。`04-api` 模块的 7 篇文章已经全部完成仓库正文复核，API-001 至 API-006 的实机批次证据见 [`04-api/api-runtime-evidence-20260813.json`](04-api/api-runtime-evidence-20260813.json)。
+
 根目录历史文档没有被批量迁移或删除。它们继续包含：
 
 - 用户教程和模型案例；

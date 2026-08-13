@@ -10,7 +10,7 @@
 </style>
 <!-- public-article-layout:end -->
 
-> 文章编号：API-003；适用版本：4.0.0；当前状态：review。
+> 文章编号：API-003；适用版本：4.0.0；当前状态：ready。
 
 ## 1. 前言
 <!-- public-article-project-preface:start -->
@@ -133,13 +133,41 @@ https://github.com/guojin-yan/TensorRT-CSharp-API/tree/TensorRtSharp4.0/samples/
 ## 8. 验证命令与判定
 
 ```powershell
-dotnet run --project .\samples\Performance\01.MultiStream
-dotnet run --project .\samples\Cuda\01.RuntimeCompilation
+$env:JYPPX_NATIVE_BRIDGE_PATH = '<trt10-cuda12-bridge>\jyppxtrtbridge.dll'
+dotnet .\samples\Performance\01.MultiStream\bin\Debug\net8.0\MultiStream.dll
+dotnet .\samples\Cuda\01.RuntimeCompilation\bin\Debug\net8.0\CudaRuntimeCompilation.dll
+dotnet run --project .\smoke\CudaGraphSmokeRunner\CudaGraphSmokeRunner.csproj --no-restore
 ```
 
 验证记录至少应包含 GPU 型号、CUDA 与驱动版本、并发 Stream 数量、每条 Stream 的资源归属、同步方式、退出码和结果校验。性能结论还应包含预热次数、统计口径和单流基线。
 
-本文已完成源码入口、资源关系和样例命令的静态复核，状态保持 `review`。Event 计时和 Graph 捕获的性能收益必须在目标 GPU 上重新测量，不能由接口存在直接推导。
+### 8.1 2026-08-13 三条实机路径
+
+本次在 RTX 3060 Laptop、驱动 576.02、CUDA 12.9.41 上完成三类运行，三条进程退出码均为 `0`：
+
+```text
+MultiStream:
+IndependentStreams=True A=True B=True Bytes=4096
+CrossStreamWait=True ProducerStream=NonBlocking ConsumerStream=NonBlocking
+MultiStream Passed=True
+
+RuntimeCompilation:
+capability.version=12.9
+launch.succeeded=True gpuReadback=True correctness=True maxAbsoluteError=0
+driver.launch.succeeded=True gpuReadback=True correctness=True maxAbsoluteError=0
+failure.success=False result=Compilation logLength=1299
+
+CudaGraphSmokeRunner:
+CudaGraphCaptureRoundTrip=True Bytes=64 Capture=None->Active->None
+MemsetOutput=True
+CudaGraphMemoryAllocation Bytes=64 Pattern=0x6B
+```
+
+Graph 路径真实覆盖 Capture、Instantiate、Launch、64 字节回读与 Graph Memory Allocation；同时保留版本失败边界：CUDA 12.9 不提供要求 CUDA 13.0 的 Graph ID API，旧 PTDS dependency-update 变体也被报告为版本不支持。本文只据此确认功能正确性，不宣称 Graph 比普通 Stream 更快，因为本批没有运行同环境预热、重复统计和单流对照。详细哈希见 `api-runtime-evidence-20260813.json`：<https://github.com/guojin-yan/TensorRT-CSharp-API/blob/TensorRtSharp4.0/docs/articles/zh-cn/04-api/api-runtime-evidence-20260813.json>。
+
+<img src="../../../../images/cuda-multistream-runtime-terminal.png" alt="两条 CUDA Stream 与跨流 Event 等待的真实终端记录" width="640" style="display:block;max-width:100%;height:auto;margin:16px auto;" />
+
+<img src="../../../../images/cuda-rtc-runtime-terminal.png" alt="NVRTC 编译、Runtime 和 Driver Kernel 启动与 GPU 读回的真实终端记录" width="640" style="display:block;max-width:100%;height:auto;margin:16px auto;" />
 
 ## 9. 小结
 

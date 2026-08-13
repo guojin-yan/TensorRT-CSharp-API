@@ -10,7 +10,7 @@
 </style>
 <!-- public-article-layout:end -->
 
-> 文章编号：API-002；适用版本：4.0.0；当前状态：review。
+> 文章编号：API-002；适用版本：4.0.0；当前状态：ready。
 
 ## 1. 前言
 <!-- public-article-project-preface:start -->
@@ -153,13 +153,33 @@ https://github.com/guojin-yan/TensorRT-CSharp-API/tree/TensorRtSharp4.0/src/JYPP
 ## 8. 验证命令与判定
 
 ```powershell
-dotnet run --project .\samples\Inference\01.Bindings
-dotnet run --project .\samples\Inference\02.DynamicShapes
+$tensorRtRoot = '<TensorRT-10.11-root>'
+$env:PATH = (Join-Path $tensorRtRoot 'lib') + ';' + $env:PATH
+$env:JYPPX_NATIVE_BRIDGE_PATH = '<trt10-cuda12-bridge>\jyppxtrtbridge.dll'
+dotnet .\samples\Inference\01.Bindings\bin\Debug\net8.0\InferenceBindings.dll `
+  --tensor-rt-line 10 --batch 2
 ```
 
 可接受结果应同时满足：进程退出码为 `0`、readiness 为可执行状态、`EnqueueAsync` 成功、Stream 完成同步、输出张量形状和字节数符合模型契约。仅成功反序列化 Engine 不能证明推理链路正确。
 
-本文已完成接口、样例和生命周期规则的静态复核，状态保持 `review`。发布前应在受支持的 TensorRT 运行时上补充一次真实 Engine 和输入数据的执行记录。
+### 8.1 2026-08-13 实机输出
+
+环境与 Loader 审计和 API-001 相同，实际加载 TensorRT 10.11/CUDA 12 Bridge。稳定托管包版本为 4.0.0；运行源码基线为 `d514fe91`，工作树存在未提交的稳定包消费兼容调整，因此这条证据分类为源码树/稳定包合成运行，不提升为干净独立消费者证明。
+
+```text
+InferenceBindings TensorRtLine=10 TRT=10.11.0 CUDA=12.9 Batch=2
+BindingReport Ready=True Inputs=1 Outputs=1
+Readiness Ready=True Bound=True ActiveProfile=0
+Execution profile=0 bound=2 synchronized=False ready=True ElapsedMs=2.559 OutputMatch=True
+input Input Float shape=[2, 4] bytes=32 bound=True
+output Output Float shape=[2, 4] bytes=32 bound=True
+InferenceBindings Passed=True
+ProcessExitCode=0
+```
+
+`synchronized=False` 表示 `EnqueueAsync` 本身没有请求同步，不代表读回发生在 GPU 完成之前；样例在读取输出时完成必要同步。该结果证明两个张量完成地址绑定、GPU enqueue 和 FP32 输出一致性，不证明外部业务模型精度或并发性能。机器可读记录见 `api-runtime-evidence-20260813.json`：<https://github.com/guojin-yan/TensorRT-CSharp-API/blob/TensorRtSharp4.0/docs/articles/zh-cn/04-api/api-runtime-evidence-20260813.json>。
+
+<img src="../../../../images/inference-bindings-runtime-terminal.png" alt="InferenceBindings 示例在 TensorRT 10 与 CUDA 12 环境中的真实终端记录" width="640" style="display:block;max-width:100%;height:auto;margin:16px auto;" />
 
 ## 9. 小结
 

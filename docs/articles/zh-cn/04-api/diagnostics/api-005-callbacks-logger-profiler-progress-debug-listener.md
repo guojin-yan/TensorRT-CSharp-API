@@ -10,7 +10,7 @@
 </style>
 <!-- public-article-layout:end -->
 
-> 文章编号：API-005；适用版本：4.0.0；当前状态：review。
+> 文章编号：API-005；适用版本：4.0.0；当前状态：ready。
 
 ## 1. 前言
 <!-- public-article-project-preface:start -->
@@ -193,12 +193,33 @@ https://github.com/guojin-yan/TensorRT-CSharp-API/blob/TensorRtSharp4.0/docs/art
 ## 9. 验证命令与判定
 
 ```powershell
-dotnet run --project .\samples\Diagnostics\01.CallbackLifecycle -- --tensor-rt-line 10
+$tensorRtRoot = '<TensorRT-10.11-root>'
+$env:PATH = (Join-Path $tensorRtRoot 'lib') + ';' + $env:PATH
+$env:JYPPX_NATIVE_BRIDGE_PATH = '<trt10-cuda12-bridge>\jyppxtrtbridge.dll'
+dotnet .\samples\Diagnostics\01.CallbackLifecycle\bin\Debug\net8.0\CallbackLifecycle.dll `
+  --tensor-rt-line 10 `
+  --output-json .\artifacts\article-api-batch\callback-lifecycle-audited.json
 ```
 
 可接受结果要求 Logger、ProgressMonitor、Profiler 和 DebugListener 均产生至少一次回调，失败次数为 `0`，ProgressMonitor 在构建后解除，Profiler 与 DebugListener 在 Context 完成后解除，DebugListener 不暴露借用指针，并且推理输出仍匹配。
 
-本文已完成接口和样例复核，状态保持 `review`。TensorRT 8 不具备组合样例要求的全部 Progress/Debug 能力；正式发布前应分别保存 TensorRT 10 和 11 的生命周期输出。
+### 9.1 2026-08-13 生命周期实测
+
+子进程模块枚举确认 Bridge、`nvinfer_10.dll` 和 `nvinfer_builder_resource_10.dll` 分别来自指定 Bridge 与 TensorRT 10.11/CUDA 12 目录。进程退出码为 `0`，结构化摘要如下：
+
+```text
+TensorRT=10.11.0 CUDA=12.9
+Logger invocationCount=299 failureCount=0
+ProgressMonitor invocationCount=22615 failureCount=0 distinctPhaseCount=13
+Profiler invocationCount=14 failureCount=0 distinctLayerCount=14
+DebugListener invocationCount=1 failureCount=0 inFlightCallbackCount=0
+DebugListener tensorName=callback_output shape=[1, 1, 2, 2]
+BorrowedPointerExposed=False DetachCount=1
+OutputMatch=True
+CallbackLifecycle Passed=True
+```
+
+这条记录覆盖“构建期间挂载 Progress，构建后解除；执行期间挂载 Profiler/DebugListener，同步后解除；最后释放 owner”的完整顺序。Logger/Profiler 的次数和耗时只属于本次合成网络，不是性能基准。TensorRT 8 缺少组合样例所需的完整 Progress/Debug 能力，TensorRT 11 也未在本批复跑，不能从这条 TensorRT 10 记录外推。机器可读清单见 `api-runtime-evidence-20260813.json`：<https://github.com/guojin-yan/TensorRT-CSharp-API/blob/TensorRtSharp4.0/docs/articles/zh-cn/04-api/api-runtime-evidence-20260813.json>。
 
 ## 10. 小结
 

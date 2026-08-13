@@ -10,7 +10,7 @@
 </style>
 <!-- public-article-layout:end -->
 
-> 文章编号：API-004；适用版本：4.0.0；当前状态：review。
+> 文章编号：API-004；适用版本：4.0.0；当前状态：ready。
 
 ## 1. 前言
 <!-- public-article-project-preface:start -->
@@ -166,13 +166,37 @@ https://github.com/guojin-yan/TensorRT-CSharp-API/tree/TensorRtSharp4.0/samples/
 ## 9. 验证命令与判定
 
 ```powershell
-dotnet run --project .\samples\Inference\03.OnnxBuildAndRun -- --synthetic --tensor-rt-line 10
-dotnet run --project .\samples\Inference\04.RefittedPlan -- --synthetic --tensor-rt-line 10
+$tensorRtRoot = '<TensorRT-10.11-root>'
+$env:PATH = (Join-Path $tensorRtRoot 'lib') + ';' + $env:PATH
+$env:JYPPX_NATIVE_BRIDGE_PATH = '<trt10-cuda12-bridge>\jyppxtrtbridge.dll'
+dotnet .\samples\Inference\04.RefittedPlan\bin\Debug\net8.0\RefittedPlan.dll `
+  --synthetic --tensor-rt-line 10 `
+  --plan .\artifacts\article-api-batch\refitted-scale-audited.engine `
+  --output-json .\artifacts\article-api-batch\refitted-plan-audited.json
 ```
 
 Parser 链路应同时看到解析成功、Engine 构建完成、反序列化成功、Enqueue 完成和输出匹配。Refit 链路还应看到 Engine 可 refit、缺失权重清零、提交成功、输出发生预期变化，并且保存后重新加载的输出仍匹配。
 
-本文已完成源码、样例和复制型诊断边界复核，状态保持 `review`。发布前应在目标 TensorRT line 上保留一次成功路径和一次故意解析失败的完整诊断记录。
+### 9.1 2026-08-13 成功与受控失败
+
+成功路径在实际加载 TensorRT 10.11 的进程中生成两份确定性 `1x4 Mul` ONNX：baseline 权重为 1，refit 权重为 2。输出如下：
+
+```text
+TensorRT=10.11.0 CUDA=12.9
+EngineRefittable=True AllRefittableWeightCount=1
+ParserRefitAccepted=True MissingWeightCountAfterModelLoad=0
+RefitCommitted=True
+Before=[1, 2, -3, 4]
+After=[2, 4, -6, 8]
+AfterReload=[2, 4, -6, 8]
+BeforeMatch=True AfterMatch=True ReloadedMatch=True OutputChanged=True
+RefittedPlan Passed=True
+ProcessExitCode=0
+```
+
+失败路径故意把 TensorRT Engine 字节作为 ONNX 输入。Parser 返回错误码 3、错误计数 1 和 `Failed to parse the ONNX model`，样例将其归类为 `invalid-arguments` 并以退出码 `2` 结束。它证明诊断和非零失败判定有效；不是把异常结束包装成成功。
+
+合成 ONNX 的 SHA256、Engine 哈希、成功/失败日志哈希与命令见 `api-runtime-evidence-20260813.json`：<https://github.com/guojin-yan/TensorRT-CSharp-API/blob/TensorRtSharp4.0/docs/articles/zh-cn/04-api/api-runtime-evidence-20260813.json>。这仍不是复杂外部模型的算子覆盖或精度证明。
 
 ## 10. 小结
 

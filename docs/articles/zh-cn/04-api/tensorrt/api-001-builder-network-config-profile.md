@@ -10,7 +10,7 @@
 </style>
 <!-- public-article-layout:end -->
 
-> 文章编号：API-001；适用版本：4.0.0；当前状态：review。
+> 文章编号：API-001；适用版本：4.0.0；当前状态：ready。
 
 ## 1. 前言
 <!-- public-article-project-preface:start -->
@@ -142,7 +142,34 @@ https://github.com/guojin-yan/TensorRT-CSharp-API/tree/TensorRtSharp4.0/applicat
 
 完成构建验证时，至少应保留以下证据：构建命令退出码为 `0`、Logger 中不存在致命错误、序列化产物大小大于 `0`、动态输入 Profile 可被读回，并且生成的 Engine 能在匹配的 Runtime 环境中反序列化。
 
-本文的代码与接口关系已按仓库源码和现有样例复核。由于 Engine 构建结果受 GPU、TensorRT、CUDA 和模型共同影响，文章状态保持 `review`；发布前还需在目标环境补充一次真实模型构建记录。
+### 7.1 2026-08-13 实机复核
+
+本次复核固定到 Windows 11 x64、RTX 3060 Laptop（Compute Capability 8.6）、驱动 576.02、TensorRT 10.11.0.33、CUDA 12.9.41、.NET SDK 10.0.301 / Runtime 8.0.28。进程模块审计确认实际加载的是 `TensorRT-10.11.0.33-cu12/lib/nvinfer_10.dll`，没有误用系统 `PATH` 中另一套 TensorRT 10.13。Bridge SHA256 为 `8669fa8799767d874994cd35424ef3edf079315aa1e6633e7e86b7676f2effc5`。
+
+```powershell
+$tensorRtRoot = '<TensorRT-10.11-root>'
+$env:PATH = (Join-Path $tensorRtRoot 'lib') + ';' + $env:PATH
+$env:JYPPX_NATIVE_BRIDGE_PATH = '<trt10-cuda12-bridge>\jyppxtrtbridge.dll'
+dotnet .\samples\Inference\02.DynamicShapes\bin\Debug\net8.0\DynamicShape.dll `
+  --tensor-rt-line 10 --batch 3
+```
+
+真实输出摘要：
+
+```text
+DynamicShape TensorRtLine=10 TRT=10.11.0 CUDA=12.9 Batch=3
+Network Input=input:[-1, 3, 4] Output=output:[-1, 3, 4]
+Profile Index=0 Min=[1, 3, 4] Opt=[2, 3, 4] Max=[4, 3, 4] Valid=True
+RuntimeShape=[3, 3, 4] Values=36 HostMemory=3332 EngineTensors=2
+Readiness Ready=True Bound=True ActiveProfile=0
+Execution ... OutputMatch=True
+DynamicShape Passed=True
+ProcessExitCode=0
+```
+
+这条记录证明合成动态 Identity Network 的 Network、Profile、BuilderConfig、序列化、反序列化和 GPU 输出读回闭环。它不是外部真实模型构建、独立消费者或 TensorRT 8/11 兼容证明；本机虽安装 cuDNN 9.22 候选库，本网络没有调用 cuDNN，不能写成 cuDNN 已参与执行。机器可读命令、哈希和边界见 `api-runtime-evidence-20260813.json`：<https://github.com/guojin-yan/TensorRT-CSharp-API/blob/TensorRtSharp4.0/docs/articles/zh-cn/04-api/api-runtime-evidence-20260813.json>。
+
+<img src="../../../../images/dynamic-shape-runtime-terminal.png" alt="Dynamic Shape 示例在 TensorRT 10 与 CUDA 12 环境中的真实终端记录" width="640" style="display:block;max-width:100%;height:auto;margin:16px auto;" />
 
 ## 8. 小结
 

@@ -67,7 +67,7 @@
       href: articles/zh-cn/03-applications/tensorrtexec/app-exec-004-performance-and-output-validation.md
     - name: TensorRtExec Refit 与 Engine 持久化
       href: articles/zh-cn/03-applications/tensorrtexec/app-exec-005-refit-and-engine-persistence.md
-  - name: API 使用
+  - name: API 使用（7/7 ready）
     href: articles/zh-cn/04-api/README.md
     items:
     - name: TensorRT 对象模型

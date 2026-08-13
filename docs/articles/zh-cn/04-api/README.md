@@ -32,14 +32,14 @@ Runtime Bridge 包列表：https://www.nuget.org/packages?q=+JYPPX.TensorRT.CSha
 | ID | 主题 | 状态 |
 | --- | --- | --- |
 | `MSC-007` | TensorRT 对象模型与 API 调用顺序 | `ready` |
-| [`API-001`](tensorrt/api-001-builder-network-config-profile.md) | Builder、Network、BuilderConfig 与 OptimizationProfile | `review` |
-| [`API-002`](tensorrt/api-002-runtime-engine-context-bindings.md) | Runtime、Engine、ExecutionContext 与推理绑定 | `review` |
-| [`API-003`](cuda/api-003-cuda-device-memory-stream-event-graph.md) | CUDA Device、Memory、Stream、Event 与 Graph | `review` |
-| [`API-004`](onnx/api-004-onnx-parser-parser-refitter-diagnostics.md) | ONNX Parser、ParserRefitter 与诊断信息 | `review` |
-| [`API-005`](diagnostics/api-005-callbacks-logger-profiler-progress-debug-listener.md) | Logger、Profiler、ProgressMonitor、DebugListener | `review` |
-| [`API-006`](engine/api-006-serialization-engine-inspector-error-boundary.md) | 序列化、Engine Inspector 与错误边界 | `review` |
+| [`API-001`](tensorrt/api-001-builder-network-config-profile.md) | Builder、Network、BuilderConfig 与 OptimizationProfile | `ready` |
+| [`API-002`](tensorrt/api-002-runtime-engine-context-bindings.md) | Runtime、Engine、ExecutionContext 与推理绑定 | `ready` |
+| [`API-003`](cuda/api-003-cuda-device-memory-stream-event-graph.md) | CUDA Device、Memory、Stream、Event 与 Graph | `ready` |
+| [`API-004`](onnx/api-004-onnx-parser-parser-refitter-diagnostics.md) | ONNX Parser、ParserRefitter 与诊断信息 | `ready` |
+| [`API-005`](diagnostics/api-005-callbacks-logger-profiler-progress-debug-listener.md) | Logger、Profiler、ProgressMonitor、DebugListener | `ready` |
+| [`API-006`](engine/api-006-serialization-engine-inspector-error-boundary.md) | 序列化、Engine Inspector 与错误边界 | `ready` |
 
-`review` 表示正文、源码入口和验证方法已经进入复核，但仍需目标 TensorRT/CUDA 环境的实机记录；`planned` 只代表选题已经登记。文章末尾不放未发布文章的跳转链接；正式入口只在本模块首页和文章索引中维护。
+截至 2026-08-13，本模块 7 篇 canonical 文章均为 `ready`。`API-001` 至 `API-006` 已在同一台 Windows TensorRT 10.11/CUDA 12.9 主机完成 API line、进程级 DLL 路径、GPU/CUDA 正路径和受控失败复核；批次命令、退出码、日志哈希和证明边界记录在 [`api-runtime-evidence-20260813.json`](api-runtime-evidence-20260813.json)。这些记录不外推为 TensorRT 8/11、真实模型精度、独立包消费者或性能基准证明。
 
 ## 4. 接口文章限制
 

@@ -10,7 +10,7 @@
 </style>
 <!-- public-article-layout:end -->
 
-> 文章编号：API-006；适用版本：4.0.0；当前状态：review。
+> 文章编号：API-006；适用版本：4.0.0；当前状态：ready。
 
 ## 1. 前言
 <!-- public-article-project-preface:start -->
@@ -190,13 +190,45 @@ https://github.com/guojin-yan/TensorRT-CSharp-API/tree/TensorRtSharp4.0/applicat
 ## 10. 验证命令与判定
 
 ```powershell
-dotnet run --project .\samples\Inference\04.RefittedPlan -- --synthetic --tensor-rt-line 10
-dotnet run --project .\applications\TensorRtExec -- --help
+$tensorRtRoot = '<TensorRT-10.11-root>'
+$env:PATH = (Join-Path $tensorRtRoot 'lib') + ';' + $env:PATH
+$env:JYPPX_NATIVE_BRIDGE_PATH = '<trt10-cuda12-bridge>\jyppxtrtbridge.dll'
+dotnet .\samples\Inference\04.RefittedPlan\bin\Debug\net8.0\RefittedPlan.dll `
+  --synthetic --tensor-rt-line 10 `
+  --plan .\artifacts\article-api-batch\refitted-scale-audited.engine
+dotnet .\applications\OnnxToEngine\bin\Debug\net8.0\OnnxToEngine.dll `
+  --tensor-rt-line 10 `
+  --loadEngine .\artifacts\article-api-batch\refitted-scale-audited.engine `
+  --profilingVerbosity layer_names_only `
+  --dumpLayerInfo --exportLayerInfo .\artifacts\article-api-batch\layer-info-audited.json `
+  --exportReport .\artifacts\article-api-batch\engine-inspector-audited.json `
+  --skipInference
 ```
 
-第一条命令用于验证 Engine 序列化、文件重载和输出一致性。第二条只验证工具入口与参数可见，不能证明 Inspector 或推理已经执行。Inspector 专题发布前还应保存实际 Engine 的 Oneline/JSON 输出、文件 SHA256、重载结果和输出校验。
+第一条命令验证 Engine 序列化、独立文件重载和输出一致性；第二条真实反序列化同一 Engine 并复制 Inspector 信息，但通过 `--skipInference` 明确禁止把只读诊断冒充推理。
 
-本文已完成源码和能力边界复核，状态保持 `review`。SerializationConfig 和部分 Inspector/ErrorRecorder 控制存在 TensorRT line 差异，发布记录必须注明实际运行版本。
+### 10.1 2026-08-13 分层结果
+
+```text
+RefittedPlan:
+EngineLengthBytes=19436
+EngineSha256=6fad8892a654c8fe295bbece68850e4af743af666c22e38013ac5874fe8f2ac3
+AfterReload=[2, 4, -6, 8] ReloadedMatch=True
+RefittedPlan Passed=True
+ProcessExitCode=0
+
+Engine Inspector:
+LoadEngineReadonlyDiagnostics TRT=10.11.0 CUDA=12.9 Runtime=True
+Succeeded=True IOTensors=2 Layers=2 Profiles=1 InspectorBytes=53
+LayerInfo Bytes=43 Sha256=144e780a5b6afdd6a579e5c53761d5d05f3ae7f5b1c709ff9e74a5e7bf2fc569
+InferenceRan=False OutputValidated=False
+OnnxToEngine State=load-engine-readonly-diagnostics Success=True
+ProcessExitCode=0
+```
+
+失败边界也实际执行：对不存在的 Engine 路径，当前工具抛出未捕获的 `FileNotFoundException`，Windows 进程码为 `-532462766`。这说明路径预检能够拒绝缺失文件，但当前呈现不是优雅的结构化失败；文章不掩盖这一点。
+
+Inspector 只证明复制型 Engine/Layer 元数据可读；API-006 的运行正确性来自同一 Engine 在 RefittedPlan 中的独立重载和输出校验，二者不能合并成同一种 proof。完整命令、报告哈希和证明边界见 `api-runtime-evidence-20260813.json`：<https://github.com/guojin-yan/TensorRT-CSharp-API/blob/TensorRtSharp4.0/docs/articles/zh-cn/04-api/api-runtime-evidence-20260813.json>。
 
 ## 11. 小结
 

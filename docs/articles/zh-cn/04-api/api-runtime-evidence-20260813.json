@@ -1,0 +1,110 @@
+{
+  "schemaVersion": "1.0",
+  "recordedAt": "2026-08-13T01:06:36+08:00",
+  "sourceBaseline": "d514fe91",
+  "sourceWorktreeDirty": true,
+  "packageVersion": "4.0.0",
+  "proofClassification": "source-tree-and-stable-package-synthetic-runtime",
+  "environment": {
+    "os": "Windows 11 x64 10.0.26200",
+    "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+    "computeCapability": "8.6",
+    "driverVersion": "576.02",
+    "tensorRtApiLine": 10,
+    "tensorRtVersion": "10.11.0.33",
+    "cudaToolkitVersion": "12.9.41",
+    "dotnetSdkVersion": "10.0.301",
+    "dotnetRuntimeVersion": "8.0.28",
+    "cudnnInstalledCandidate": "9.22.0.52",
+    "cudnnLoadedByBatch": false,
+    "cudnnBoundary": "The synthetic Identity/Mul and CUDA memory paths did not call cuDNN. An installed candidate is not runtime-use proof."
+  },
+  "loaderAudit": {
+    "exitCode": 0,
+    "bridgePath": "artifacts/local-current-packages/bridge-assets-20260809-staticprofile2/runtimes/win-x64/native/jyppxtrtbridge.dll",
+    "bridgeSha256": "8669fa8799767d874994cd35424ef3edf079315aa1e6633e7e86b7676f2effc5",
+    "tensorRtCorePath": "D:/Program Files/TensorRT-10.11.0.33-cu12/lib/nvinfer_10.dll",
+    "tensorRtCoreSha256": "872eb3acdda69d85444c5ac59af0308546a1a41b1857fba547b7cef6cd4f3226",
+    "builderResourcePath": "D:/Program Files/TensorRT-10.11.0.33-cu12/lib/nvinfer_builder_resource_10.dll",
+    "incorrectGlobalPathCandidateExcluded": "D:/Program Files/TensorRT-10.13.0.35-cu11/lib/nvinfer_10.dll"
+  },
+  "runs": [
+    {
+      "id": "API-001-API-002-bindings",
+      "command": "dotnet samples/Inference/01.Bindings/bin/Debug/net8.0/InferenceBindings.dll --tensor-rt-line 10 --batch 2",
+      "exitCode": 0,
+      "logSha256": "40f0bdc292d018600c0e3c9587663e711a21029ddab0d23bbde0fefada3da171",
+      "assertions": ["Ready=True", "Bound=True", "OutputMatch=True", "InferenceBindings Passed=True"]
+    },
+    {
+      "id": "API-001-API-002-dynamic-profile",
+      "command": "dotnet samples/Inference/02.DynamicShapes/bin/Debug/net8.0/DynamicShape.dll --tensor-rt-line 10 --batch 3",
+      "exitCode": 0,
+      "logSha256": "f0491605edbfaefdf5ea879ecca0075d8047ae8d5ec6e6fae83944dd04d28929",
+      "assertions": ["Profile Min=[1, 3, 4] Opt=[2, 3, 4] Max=[4, 3, 4] Valid=True", "RuntimeShape=[3, 3, 4]", "OutputMatch=True", "DynamicShape Passed=True"]
+    },
+    {
+      "id": "API-003-cuda-rtc",
+      "command": "dotnet samples/Cuda/01.RuntimeCompilation/bin/Debug/net8.0/CudaRuntimeCompilation.dll",
+      "exitCode": 0,
+      "logSha256": "8d67743fd6f8f2425f6df252ae2a5d4022c2e7f7836c33389d2a02e45f77c452",
+      "assertions": ["NVRTC=12.9", "Runtime kernel correctness=True", "Driver kernel correctness=True", "maxAbsoluteError=0", "controlled compile failure logLength=1299"]
+    },
+    {
+      "id": "API-003-multistream",
+      "command": "dotnet samples/Performance/01.MultiStream/bin/Debug/net8.0/MultiStream.dll",
+      "exitCode": 0,
+      "logSha256": "6159df41863864535bd415d888c801599259a70fbbfc95e2226f20480a94f105",
+      "assertions": ["IndependentStreams=True", "CrossStreamWait=True", "MultiStream Passed=True"]
+    },
+    {
+      "id": "API-003-cuda-graph",
+      "command": "dotnet run --project smoke/CudaGraphSmokeRunner/CudaGraphSmokeRunner.csproj --no-restore",
+      "exitCode": 0,
+      "logSha256": "d66c7d4d901dd9ab8b665057655a3cbcdd83270dfe82b9400f80da955409ecd4",
+      "assertions": ["CudaGraphCaptureRoundTrip=True", "Bytes=64", "MemsetOutput=True", "GraphMemoryAllocation Pattern=0x6B"],
+      "boundary": "Functional capture, instantiate, launch and readback proof only. No graph-versus-stream performance comparison was run."
+    },
+    {
+      "id": "API-004-parser-refitter",
+      "command": "dotnet samples/Inference/04.RefittedPlan/bin/Debug/net8.0/RefittedPlan.dll --synthetic --tensor-rt-line 10 --plan artifacts/article-api-batch/refitted-scale-audited.engine --output-json artifacts/article-api-batch/refitted-plan-audited.json",
+      "exitCode": 0,
+      "logSha256": "1485a449edda01d9f4aec4ff558666c9a3870359356ebe291830043b27443b10",
+      "assertions": ["ParserRefitAccepted=True", "RefitCommitted=True", "Before=[1,2,-3,4]", "After=[2,4,-6,8]", "AfterReload=[2,4,-6,8]", "RefittedPlan Passed=True"]
+    },
+    {
+      "id": "API-004-parser-negative",
+      "command": "dotnet samples/Inference/04.RefittedPlan/bin/Debug/net8.0/RefittedPlan.dll --baseline-model artifacts/article-api-batch/refitted-scale.engine --refit-model artifacts/article-api-batch/refitted-scale.engine --tensor-rt-line 10",
+      "exitCode": 2,
+      "logSha256": "13aff267966021c0031ed1c524bfa9c110646f462bfada8403b66a538b9baaeb",
+      "assertions": ["status=invalid-arguments", "ONNX parser errors=1", "error code=3", "Failed to parse the ONNX model"]
+    },
+    {
+      "id": "API-005-callback-lifecycle",
+      "command": "dotnet samples/Diagnostics/01.CallbackLifecycle/bin/Debug/net8.0/CallbackLifecycle.dll --tensor-rt-line 10 --output-json artifacts/article-api-batch/callback-lifecycle-audited.json",
+      "exitCode": 0,
+      "assertions": ["Logger invocationCount=299 failureCount=0", "Progress invocationCount=22615 failureCount=0", "Profiler invocationCount=14 failureCount=0", "DebugListener invocationCount=1 failureCount=0", "BorrowedPointerExposed=false", "OutputMatch=true", "CallbackLifecycle Passed=True"]
+    },
+    {
+      "id": "API-006-engine-inspector",
+      "command": "dotnet applications/OnnxToEngine/bin/Debug/net8.0/OnnxToEngine.dll --tensor-rt-line 10 --loadEngine artifacts/article-api-batch/refitted-scale-audited.engine --workspace 64 --profilingVerbosity layer_names_only --exportLayerInfo artifacts/article-api-batch/layer-info-audited.json --exportReport artifacts/article-api-batch/engine-inspector-audited.json --dumpLayerInfo --skipInference",
+      "exitCode": 0,
+      "logSha256": "884250edc4dcf7e3bd2b37c61f4883a72fdc2e2c640ab7c9bc9fd5d6d6f7bdeb",
+      "engineLengthBytes": 19436,
+      "engineSha256": "6fad8892a654c8fe295bbece68850e4af743af666c22e38013ac5874fe8f2ac3",
+      "layerInfoLengthBytes": 43,
+      "layerInfoSha256": "144e780a5b6afdd6a579e5c53761d5d05f3ae7f5b1c709ff9e74a5e7bf2fc569",
+      "assertions": ["readonly-deserialize-succeeded", "IOTensors=2", "Layers=2", "Profiles=1", "InferenceRan=False", "OutputValidated=False"],
+      "boundary": "Inspector proof is readonly metadata only. Runtime correctness is supplied separately by the API-004 refitted-engine reload and output match."
+    },
+    {
+      "id": "API-006-missing-engine-negative",
+      "command": "dotnet applications/OnnxToEngine/bin/Debug/net8.0/OnnxToEngine.dll --tensor-rt-line 10 --loadEngine artifacts/article-api-batch/does-not-exist.engine --skipInference",
+      "exitCode": -532462766,
+      "logSha256": "287154c854476b968d1b192f99cc1e1150516b127d38b79e9d586b4b6dc9363e",
+      "assertions": ["FileNotFoundException", "Serialized TensorRT engine file was not found"],
+      "boundary": "The current sample rejects the missing path with an unhandled exception; this is a controlled non-zero failure, not graceful error formatting."
+    }
+  ],
+  "promotionBoundary": "These records prove the documented API behavior on one matching Windows TensorRT 10/CUDA 12 host. They do not prove TensorRT 8/11 parity, real-model accuracy, clean independent package-consumer runtime, benchmark performance or release readiness."
+}
