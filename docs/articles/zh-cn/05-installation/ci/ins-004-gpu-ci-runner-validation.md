@@ -118,6 +118,23 @@ cmake --build --preset linux-x64-trt11-cuda13-release --parallel
 
 真实 GPU 验证必须在目标 runner 上执行，并保存进程退出码、TensorRT/CUDA/cuDNN 版本、Bridge 包、Engine、输入、输出和日志。只在 Windows、WSL 或本地容器中通过的结果不能升级为 Linux runner proof。
 
+仓库提供专用工作流 `.github/workflows/runtime-linux-gpu-smoke.yml`。它不会回退到 hosted runner，作业固定路由到 `self-hosted`、`linux`、`x64`、`ubuntu-24.04`、`gpu` 五个标签，并依次校验 Ubuntu 版本、`nvidia-smi`、NVIDIA roots、Native Bridge、managed/Bridge 包、仓库外最小 consumer、真实 enqueue、同步和 identity 输出：
+
+```powershell
+gh workflow run runtime-linux-gpu-smoke.yml `
+  --ref TensorRtSharp4.0 `
+  -f runtime_key=linux-x64-ubuntu24.04-trt10.11-cuda12.9-cudnn9.22 `
+  -f version=4.0.0
+```
+
+触发前应先以不带 `-WarnOnly` 的 runner 可用性检查作为门禁。没有匹配的在线 runner 时不要触发后长期等待，也不要删减标签以便让其他机器接单：
+
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-GitHubRunnerAvailability.ps1 `
+  -Repository guojin-yan/TensorRT-CSharp-API `
+  -RequiredLabelSet "self-hosted,linux,x64,ubuntu-24.04,gpu"
+```
+
 ## 5. Runner 状态与 proof pack
 
 可以用项目脚本生成当前执行状态：
@@ -135,6 +152,8 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-LinuxRunnerProofPack.ps
 ```
 
 校验。校验通过也只表示 proof candidate 满足字段和哈希格式；脚本不会发布包、关闭 Release issue 或把 WSL/dry-run 记录变成真实 Linux proof。
+
+专用工作流成功后会上传 `runtime-linux-gpu-smoke-<runtime-key>` artifact，其中包括 runner 环境日志、Linux dry-run、managed/Bridge nupkg、包消费者报告、最小 GPU consumer 的 JSON/Markdown/原始日志和 `sha256-inventory.json`。INS-004 的晋级复核必须确认工作流路径确为 `runtime-linux-gpu-smoke.yml`、作业实际落在五标签 runner 上，并且最小 consumer 报告的 `runtimeExecutionProof=true`、`canPromoteGpuCiRuntimeProof=true`；仅有 artifact 名称或成功的 build step 不够。
 
 ## 6. CI 缓存与失败复现
 
@@ -155,7 +174,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Test-LinuxRunnerProofPack.ps
 
 ## 8. 小结
 
-2026-08-14 通过 GitHub API 再次查询仓库 runner，结果仍为 `total_count=0`，当前没有可执行本文 GPU CI smoke 的 self-hosted runner。使用 `Test-GitHubRunnerAvailability.ps1 -Repository guojin-yan/TensorRT-CSharp-API -RequiredLabelSet 'self-hosted,linux,x64,ubuntu-24.04,gpu' -WarnOnly` 的结构化结果为 `querySucceeded=true`、`runnerCount=0`、`matchingRunnerCount=0`、`onlineMatchingRunnerCount=0`；报告位于 `artifacts/runner-availability/github-runner-availability.json`。历史 GitHub Actions 运行 `31412970912` 与 `31412959494` 证明 Ubuntu hosted container 的 restore、绑定生成、Native build、dry-run 与 pack 曾成功，但日志没有 `nvidia-smi`、GPU enqueue 或输出校验，不能作为 GPU runner proof。同日完成的本地 Docker GPU 推理不在 GitHub Actions session 中，也不能借用为 runner proof。审计记录和报告哈希见 `docs/articles/zh-cn/05-installation/installation-runtime-evidence-20260814.json`。
+2026-08-14 通过 GitHub API 再次查询仓库 runner，结果仍为 `total_count=0`，当前没有可执行本文 GPU CI smoke 的 self-hosted runner。使用 `Test-GitHubRunnerAvailability.ps1 -Repository guojin-yan/TensorRT-CSharp-API -RequiredLabelSet 'self-hosted,linux,x64,ubuntu-24.04,gpu' -WarnOnly` 的结构化结果为 `querySucceeded=true`、`runnerCount=0`、`matchingRunnerCount=0`、`onlineMatchingRunnerCount=0`；报告位于 `artifacts/runner-availability/github-runner-availability.json`。仓库现已补齐固定五标签的 `runtime-linux-gpu-smoke.yml` 和可复用的最小 PackageReference-only GPU consumer，但工作流尚未在目标 runner 上执行，不能据此晋级。历史 GitHub Actions 运行 `31412970912` 与 `31412959494` 只证明 Ubuntu hosted container 的 restore、绑定生成、Native build、dry-run 与 pack 曾成功；同日完成的本地 Docker GPU 推理也不在 GitHub Actions session 中。审计记录和报告哈希见 `docs/articles/zh-cn/05-installation/installation-runtime-evidence-20260814.json`。
 
 GPU CI 的可信链路是标签匹配、环境快照、清单校验、Native 构建、真实 smoke、包消费者验证和 proof pack。任何一层缺失，都应保留为 review 或 blocked，而不是通过修改 runner 标签或切换环境来掩盖缺口。本文继续保持 `review`，下一步需要上线具备明确标签的 Linux GPU runner 并固化完整 proof pack。
 

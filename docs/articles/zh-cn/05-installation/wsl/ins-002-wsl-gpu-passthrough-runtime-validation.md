@@ -152,6 +152,40 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Invoke-LinuxRuntimeDryRun.ps
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Validate-LinuxDryRunArtifacts.ps1 -RuntimePackageKey <linux-runtime-key>
 ```
 
+### 5.1 WSL 专用环境审计
+
+从 Windows PowerShell 运行 WSL 专用导出器。它从 WSL 注册信息中选择独立 Ubuntu 发行版，拒绝把 `docker-desktop` 当成 Ubuntu 证明，并在发行版内检查架构、`/dev/dxg`、`nvidia-smi`、.NET、PowerShell 和动态库：
+
+```powershell
+$runtimeKey = "linux-x64-ubuntu24.04-trt10.11-cuda12.9-cudnn9.22"
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\eng\Export-WslRuntimeEvidence.ps1 `
+  -RuntimePackageKey $runtimeKey `
+  -Distribution "Ubuntu-24.04"
+```
+
+报告输出到 `artifacts/wsl-runtime/<runtime-key>/wsl-runtime-evidence.json`。`status=wsl-environment-ready-runtime-proof-required` 只表示环境预检通过；导出器本身不执行 TensorRT，不会把环境预检晋级为推理证明。
+
+### 5.2 最小 PackageReference-only GPU consumer
+
+在 Ubuntu WSL 的 Linux 文件系统内进入仓库，先构建本地 managed 与 Bridge 包，再运行固定的最小 identity consumer：
+
+```powershell
+$runtimeKey = "linux-x64-ubuntu24.04-trt10.11-cuda12.9-cudnn9.22"
+pwsh -NoProfile -ExecutionPolicy Bypass -File ./eng/Invoke-LocalSplitRuntimePackage.ps1 `
+  -SourceRuntimeKey $runtimeKey `
+  -Version 4.0.0 `
+  -SplitPackageRole bridge `
+  -Configuration Release
+pwsh -NoProfile -ExecutionPolicy Bypass -File ./eng/Test-MinimalLinuxBridgePackageRuntimeConsumer.ps1 `
+  -SourceRuntimeKey $runtimeKey `
+  -ManagedPackageDirectory ./artifacts/managed `
+  -BridgePackageDirectory "./artifacts/runtime-split-nupkg/$runtimeKey"
+```
+
+该脚本在仓库外创建临时 consumer，只生成两个 `PackageReference`，不使用 `ProjectReference` 或直接程序集引用。只有报告同时包含 `ReadyForEnqueue=True`、`EnqueueCompleted=True`、`StreamSynchronized=True`、`IdentityOutputMatch=True` 和退出码 `0`，才是基础安装链路的真实 GPU 运行候选。报告默认位于 `artifacts/minimal-linux-bridge-runtime/<runtime-key>/minimal-linux-bridge-package-runtime-consumer.json`。
+
+最后从 Windows 侧再次运行导出器，并用 `-RuntimeConsumerEvidencePath` 指向这份报告。只有环境检查和 consumer 合同同时通过时，WSL 报告才会成为 `wsl-gpu-runtime-proof-candidate`；容器或 GitHub Actions 的相邻报告不会被接受。
+
 ## 6. WSL 特有的失败边界
 
 `nvidia-smi` 在 Windows 成功、WSL 失败时，先检查 WSL 内核、发行版版本、Windows 驱动和 `/usr/lib/wsl/lib`，不要先修改项目代码。动态库加载失败时，记录缺失库的完整名称、`ldd` 输出和实际 `LD_LIBRARY_PATH`。Engine 反序列化失败时，重新核对 Engine 构建环境与 WSL 中的 TensorRT/GPU 组合。
@@ -177,7 +211,7 @@ WSL 适合作为开发与复现环境，也可以帮助定位 Linux 用户态问
 
 ## 8. 小结
 
-2026-08-14 再次执行 `wsl -l -v`，本机仍只显示 Docker Desktop 管理的 `docker-desktop`，没有可用于本文复核的独立 Ubuntu 发行版。因此没有执行 WSL Ubuntu 内的 TensorRT 安装、Bridge 加载、GPU enqueue 与输出校验，文章继续保持 `review`。同日运行 `Export-LinuxRunnerExecutionStatus.ps1` 的结构化结果为 `status=blocked`、`isLinux=false`、`githubActions=false`，报告位于 `artifacts/linux-dry-run/linux-x64-ubuntu24.04-trt10.11-cuda12.9-cudnn9.22/linux-runner-execution-status.json`；这份报告证明当前环境缺口，不冒充 WSL proof。同日完成的 Ubuntu 24.04 Docker GPU 与项目包消费者证明属于容器边界，不能替代 WSL Ubuntu 证明。环境审计和报告哈希见 `docs/articles/zh-cn/05-installation/installation-runtime-evidence-20260814.json`。
+2026-08-14 再次执行专用 `Export-WslRuntimeEvidence.ps1`，报告显示 `status=blocked`、`registeredUbuntuDistributionCount=0`、`dockerDesktopDistributionPresent=true`、`environmentReady=false`，唯一阻塞项是没有注册独立 Ubuntu WSL 发行版。报告位于 `artifacts/wsl-runtime/linux-x64-ubuntu24.04-trt10.11-cuda12.9-cudnn9.22/wsl-runtime-evidence.json`，SHA256 为 `b08b815e8433358e9f979e937909f9b574a237eac1feb978a699030769c9bb35`。因此没有执行 WSL Ubuntu 内的 TensorRT 安装、Bridge 加载、GPU enqueue 与输出校验，文章继续保持 `review`。同日完成的 Ubuntu 24.04 Docker GPU 与项目包消费者证明属于容器边界，不能替代 WSL Ubuntu 证明。环境审计和报告哈希见 `docs/articles/zh-cn/05-installation/installation-runtime-evidence-20260814.json`。
 
 可靠的 WSL 结论必须同时包含 WSL2 发行版、GPU 透传、Linux 用户态依赖、Bridge 加载和真实推理证据。Windows 主机可见、NuGet 还原成功或 dry-run 通过，都不能单独证明 TensorRT CSharp API 已经完成 WSL GPU 推理。
 

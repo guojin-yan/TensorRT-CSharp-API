@@ -99,6 +99,14 @@ public sealed class InstallationArticleBatchEvidenceTests
         Assert.Equal(2, wsl.GetProperty("executionStatusReport").GetProperty("blockerCount").GetInt32());
         Assert.Matches("^[a-f0-9]{64}$", wsl.GetProperty("executionStatusReport").GetProperty("sha256").GetString()!);
 
+        JsonElement wslReport = wsl.GetProperty("wslRuntimeReport");
+        Assert.Equal("blocked", wslReport.GetProperty("status").GetString());
+        Assert.False(wslReport.GetProperty("environmentReady").GetBoolean());
+        Assert.False(wslReport.GetProperty("runtimeConsumerProofAccepted").GetBoolean());
+        Assert.Equal(1, wslReport.GetProperty("blockerCount").GetInt32());
+        Assert.Matches("^[a-f0-9]{64}$", wslReport.GetProperty("sha256").GetString()!);
+        Assert.Matches("^[a-f0-9]{64}$", wslReport.GetProperty("markdownSha256").GetString()!);
+
         JsonElement gpuCi = audit.GetProperty("gpuCi");
         Assert.Equal(0, gpuCi.GetProperty("repositoryRunnerTotalCount").GetInt32());
         JsonElement runnerReport = gpuCi.GetProperty("runnerAvailabilityReport");
@@ -108,6 +116,12 @@ public sealed class InstallationArticleBatchEvidenceTests
         Assert.Equal(0, runnerReport.GetProperty("onlineMatchingRunnerCount").GetInt32());
         Assert.Equal(5, runnerReport.GetProperty("requiredLabelSet").GetArrayLength());
         Assert.Matches("^[a-f0-9]{64}$", runnerReport.GetProperty("sha256").GetString()!);
+
+        JsonElement dedicatedWorkflow = gpuCi.GetProperty("dedicatedWorkflow");
+        Assert.Equal(".github/workflows/runtime-linux-gpu-smoke.yml", dedicatedWorkflow.GetProperty("path").GetString());
+        Assert.Equal(5, dedicatedWorkflow.GetProperty("requiredRunsOn").GetArrayLength());
+        Assert.True(dedicatedWorkflow.GetProperty("workflowAvailable").GetBoolean());
+        Assert.False(dedicatedWorkflow.GetProperty("workflowExecuted").GetBoolean());
 
         JsonElement quality = root.GetProperty("qualityValidation");
         Assert.Equal("passed-with-user-untracked-file-isolation", quality.GetProperty("status").GetString());
@@ -151,6 +165,102 @@ public sealed class InstallationArticleBatchEvidenceTests
             "articles/zh-cn/05-installation/installation-runtime-evidence-20260814.json",
             docfx,
             StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ReviewArticlesExposeTargetSpecificRuntimeEvidenceEntrypoints()
+    {
+        string minimalConsumerScript = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "eng",
+            "Test-MinimalLinuxBridgePackageRuntimeConsumer.ps1"));
+        string minimalConsumerProgram = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "eng",
+            "templates",
+            "MinimalLinuxBridgePackageRuntimeConsumer",
+            "Program.cs"));
+        string wslExporter = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "eng",
+            "Export-WslRuntimeEvidence.ps1"));
+        string gpuWorkflow = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            ".github",
+            "workflows",
+            "runtime-linux-gpu-smoke.yml"));
+
+        Assert.Contains("minimal-linux-bridge-package-runtime-consumer", minimalConsumerScript, StringComparison.Ordinal);
+        Assert.Contains("packageReferenceCount = 2", minimalConsumerScript, StringComparison.Ordinal);
+        Assert.Contains("-RequiredVersion $bridgePackage.version", minimalConsumerScript, StringComparison.Ordinal);
+        Assert.Contains("usesPackageReferenceOnly = $true", minimalConsumerScript, StringComparison.Ordinal);
+        Assert.Contains("usesProjectReference = $false", minimalConsumerScript, StringComparison.Ordinal);
+        Assert.Contains("runtimeExecutionProof = $runtimeExecutionProof", minimalConsumerScript, StringComparison.Ordinal);
+        Assert.Contains("hostIsContainer", minimalConsumerScript, StringComparison.Ordinal);
+        Assert.Contains("wslKernelDetected", minimalConsumerScript, StringComparison.Ordinal);
+        Assert.Contains("GITHUB_WORKFLOW", minimalConsumerScript, StringComparison.Ordinal);
+        Assert.Contains("runtime-linux-gpu-smoke", minimalConsumerScript, StringComparison.Ordinal);
+        Assert.Contains("canPromoteWslRuntimeProof", minimalConsumerScript, StringComparison.Ordinal);
+        Assert.Contains("canPromoteGpuCiRuntimeProof", minimalConsumerScript, StringComparison.Ordinal);
+        Assert.Contains("ReadyForEnqueue=", minimalConsumerProgram, StringComparison.Ordinal);
+        Assert.Contains("EnqueueCompleted=True", minimalConsumerProgram, StringComparison.Ordinal);
+        Assert.Contains("StreamSynchronized=", minimalConsumerProgram, StringComparison.Ordinal);
+        Assert.Contains("IdentityOutputMatch=", minimalConsumerProgram, StringComparison.Ordinal);
+
+        Assert.Contains("recordKind = \"wsl-runtime-evidence\"", wslExporter, StringComparison.Ordinal);
+        Assert.Contains("No independent Ubuntu WSL distribution is registered.", wslExporter, StringComparison.Ordinal);
+        Assert.Contains("Docker Desktop's internal WSL distribution cannot be used", wslExporter, StringComparison.Ordinal);
+        Assert.Contains("runtimeConsumerProofAccepted", wslExporter, StringComparison.Ordinal);
+        Assert.Contains("wsl-gpu-runtime-proof-candidate", wslExporter, StringComparison.Ordinal);
+
+        Assert.Contains("runs-on: [self-hosted, linux, x64, ubuntu-24.04, gpu]", gpuWorkflow, StringComparison.Ordinal);
+        Assert.Contains("Validate GPU runner contract", gpuWorkflow, StringComparison.Ordinal);
+        Assert.Contains("Test-MinimalLinuxBridgePackageRuntimeConsumer.ps1", gpuWorkflow, StringComparison.Ordinal);
+        Assert.Contains("sha256-inventory.json", gpuWorkflow, StringComparison.Ordinal);
+        Assert.Contains("if: ${{ always() }}", gpuWorkflow, StringComparison.Ordinal);
+
+        using JsonDocument evidence = JsonDocument.Parse(File.ReadAllText(EvidencePath()));
+        JsonElement entrypoints = evidence.RootElement.GetProperty("completionEntrypoints");
+        Assert.True(entrypoints.GetProperty("minimalLinuxBridgeConsumer").GetProperty("packageReferenceOnly").GetBoolean());
+        Assert.Equal(5, entrypoints.GetProperty("minimalLinuxBridgeConsumer").GetProperty("requiredRuntimeMarkers").GetArrayLength());
+        Assert.False(entrypoints.GetProperty("minimalLinuxBridgeConsumer").GetProperty("executedInWsl").GetBoolean());
+        Assert.False(entrypoints.GetProperty("minimalLinuxBridgeConsumer").GetProperty("executedInGpuCi").GetBoolean());
+        JsonElement containerRegression = entrypoints.GetProperty("containerRegression");
+        Assert.True(containerRegression.GetProperty("runtimeExecutionProof").GetBoolean());
+        Assert.Equal("local-package-linux-container-gpu-runtime-proof", containerRegression.GetProperty("proofClassification").GetString());
+        Assert.True(containerRegression.GetProperty("containerDetected").GetBoolean());
+        Assert.True(containerRegression.GetProperty("wslKernelDetected").GetBoolean());
+        Assert.False(containerRegression.GetProperty("wslHostAccepted").GetBoolean());
+        Assert.False(containerRegression.GetProperty("canPromoteWslRuntimeProof").GetBoolean());
+        Assert.False(containerRegression.GetProperty("canPromoteGpuCiRuntimeProof").GetBoolean());
+        Assert.True(containerRegression.GetProperty("readyForEnqueue").GetBoolean());
+        Assert.True(containerRegression.GetProperty("enqueueCompleted").GetBoolean());
+        Assert.True(containerRegression.GetProperty("streamSynchronized").GetBoolean());
+        Assert.True(containerRegression.GetProperty("identityOutputMatch").GetBoolean());
+        Assert.Matches("^[a-f0-9]{64}$", containerRegression.GetProperty("sha256").GetString()!);
+        Assert.True(entrypoints.GetProperty("wslAudit").GetProperty("rejectsDockerDesktopAsUbuntuProof").GetBoolean());
+        Assert.True(entrypoints.GetProperty("gpuCi").GetProperty("routesToRequiredSelfHostedGpuLabels").GetBoolean());
+
+        string wslArticle = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "docs",
+            "articles",
+            "zh-cn",
+            "05-installation",
+            "wsl",
+            "ins-002-wsl-gpu-passthrough-runtime-validation.md"));
+        string gpuCiArticle = File.ReadAllText(Path.Combine(
+            RepositoryPaths.Root,
+            "docs",
+            "articles",
+            "zh-cn",
+            "05-installation",
+            "ci",
+            "ins-004-gpu-ci-runner-validation.md"));
+        Assert.Contains("Export-WslRuntimeEvidence.ps1", wslArticle, StringComparison.Ordinal);
+        Assert.Contains("Test-MinimalLinuxBridgePackageRuntimeConsumer.ps1", wslArticle, StringComparison.Ordinal);
+        Assert.Contains("runtime-linux-gpu-smoke.yml", gpuCiArticle, StringComparison.Ordinal);
+        Assert.Contains("self-hosted,linux,x64,ubuntu-24.04,gpu", gpuCiArticle, StringComparison.Ordinal);
     }
 
     private static string EvidencePath() => Path.Combine(

@@ -1,0 +1,209 @@
+name: runtime-linux-gpu-smoke
+
+on:
+  workflow_dispatch:
+    inputs:
+      runtime_key:
+        description: Ubuntu 24.04 Linux runtime key to validate
+        required: true
+        default: linux-x64-ubuntu24.04-trt10.11-cuda12.9-cudnn9.22
+        type: string
+      version:
+        description: Local managed and Bridge package version
+        required: true
+        default: 4.0.0
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: runtime-linux-gpu-smoke-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  gpu-smoke:
+    name: Ubuntu 24.04 self-hosted GPU smoke
+    runs-on: [self-hosted, linux, x64, ubuntu-24.04, gpu]
+    timeout-minutes: 90
+    env:
+      DOTNET_SYSTEM_GLOBALIZATION_INVARIANT: "1"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
+      - name: Capture runner environment
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/gpu-ci-smoke
+          {
+            echo "GITHUB_RUN_ID=${GITHUB_RUN_ID}"
+            echo "GITHUB_RUN_ATTEMPT=${GITHUB_RUN_ATTEMPT}"
+            echo "RUNNER_NAME=${RUNNER_NAME}"
+            echo "RUNNER_OS=${RUNNER_OS}"
+            echo "RUNNER_ARCH=${RUNNER_ARCH}"
+            uname -a
+            cat /etc/os-release
+            nvidia-smi
+            dotnet --info
+            pwsh --version
+            cmake --version
+            ninja --version
+          } 2>&1 | tee artifacts/gpu-ci-smoke/environment.log
+
+      - name: Validate runtime manifest
+        shell: pwsh
+        run: pwsh -NoProfile -File ./eng/Validate-RuntimeManifest.ps1
+
+      - name: Validate GPU runner contract
+        shell: pwsh
+        run: |
+          $package = (Get-Content -Raw ./pack/runtime/runtime-packages.manifest.json | ConvertFrom-Json).packages |
+            Where-Object key -eq '${{ inputs.runtime_key }}' |
+            Select-Object -First 1
+          if (-not $package) { throw "Unknown runtime key '${{ inputs.runtime_key }}'." }
+          if ($package.platform -ne 'linux' -or $package.architecture -ne 'x64' -or $package.linuxDistroVersion -ne '24.04') {
+            throw "The dedicated GPU workflow accepts Ubuntu 24.04 Linux x64 runtime keys only."
+          }
+          $osRelease = @{}
+          foreach ($line in Get-Content -LiteralPath /etc/os-release) {
+            if ($line -match '^(?<name>[A-Z_]+)=(?<value>.*)$') {
+              $osRelease[$Matches.name] = $Matches.value.Trim('"')
+            }
+          }
+          if ($osRelease['ID'] -ne 'ubuntu' -or $osRelease['VERSION_ID'] -ne '24.04') {
+            throw "Runner OS must be Ubuntu 24.04. Actual: $($osRelease['ID']) $($osRelease['VERSION_ID'])."
+          }
+          if ($env:GITHUB_ACTIONS -ne 'true' -or $env:RUNNER_OS -ne 'Linux' -or $env:RUNNER_ARCH -ne 'X64') {
+            throw "This job must execute in a GitHub Actions Linux X64 runner session."
+          }
+          nvidia-smi --list-gpus
+          if ($LASTEXITCODE -ne 0) { throw "nvidia-smi did not detect an available GPU." }
+
+      - name: Resolve NVIDIA roots
+        id: roots
+        shell: pwsh
+        run: |
+          $resolved = pwsh -NoProfile -File ./eng/Resolve-RuntimeRoots.ps1 `
+            -RuntimePackageKey "${{ inputs.runtime_key }}" | ConvertFrom-Json
+          if ([string]::IsNullOrWhiteSpace($resolved.tensorRtRoot)) {
+            throw "TensorRT root is not configured for $($resolved.runtimeKey)."
+          }
+          if ([string]::IsNullOrWhiteSpace($resolved.cudaRoot)) {
+            throw "CUDA root is not configured for $($resolved.runtimeKey)."
+          }
+          "tensor_rt_root=$($resolved.tensorRtRoot)" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+          "cuda_root=$($resolved.cudaRoot)" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+          "cudnn_root=$($resolved.cudnnRoot)" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+
+      - name: Validate Linux runtime inputs
+        shell: pwsh
+        run: |
+          pwsh -NoProfile -File ./eng/Validate-LinuxRuntimeInputs.ps1 `
+            -RuntimePackageKey "${{ inputs.runtime_key }}" `
+            -TensorRtRoot "${{ steps.roots.outputs.tensor_rt_root }}" `
+            -CudaRoot "${{ steps.roots.outputs.cuda_root }}" `
+            -CudnnRoot "${{ steps.roots.outputs.cudnn_root }}"
+
+      - name: Restore solution
+        run: dotnet restore TensorRtSharp.sln
+
+      - name: Configure native Bridge
+        shell: bash
+        run: |
+          set -euo pipefail
+          preset="$(pwsh -NoProfile -Command "(Get-Content -Raw pack/runtime/runtime-packages.manifest.json | ConvertFrom-Json).packages | Where-Object key -eq '${{ inputs.runtime_key }}' | Select-Object -ExpandProperty buildPreset")"
+          if [[ -z "$preset" ]]; then
+            echo "Unable to resolve build preset for ${{ inputs.runtime_key }}." >&2
+            exit 1
+          fi
+          echo "BUILD_PRESET=$preset" >> "$GITHUB_ENV"
+          cmake --preset "$preset" \
+            -DJYPPX_TENSORRT_ROOT="${{ steps.roots.outputs.tensor_rt_root }}" \
+            -DCUDAToolkit_ROOT="${{ steps.roots.outputs.cuda_root }}" \
+            -DJYPPX_CUDA_ROOT="${{ steps.roots.outputs.cuda_root }}" \
+            -DJYPPX_CUDNN_ROOT="${{ steps.roots.outputs.cudnn_root }}"
+
+      - name: Build native Bridge
+        run: cmake --build --preset "$BUILD_PRESET" --parallel
+
+      - name: Generate Linux dry-run evidence
+        shell: pwsh
+        run: |
+          pwsh -NoProfile -File ./eng/Invoke-LinuxRuntimeDryRun.ps1 `
+            -RuntimePackageKey "${{ inputs.runtime_key }}" `
+            -TensorRtRoot "${{ steps.roots.outputs.tensor_rt_root }}" `
+            -CudaRoot "${{ steps.roots.outputs.cuda_root }}"
+          pwsh -NoProfile -File ./eng/Validate-LinuxDryRunArtifacts.ps1 `
+            -RuntimePackageKey "${{ inputs.runtime_key }}"
+          pwsh -NoProfile -File ./eng/Export-LinuxRunnerExecutionStatus.ps1 `
+            -RuntimePackageKey "${{ inputs.runtime_key }}"
+
+      - name: Pack and validate local managed and Bridge packages
+        shell: pwsh
+        run: |
+          pwsh -NoProfile -File ./eng/Invoke-LocalSplitRuntimePackage.ps1 `
+            -SourceRuntimeKey "${{ inputs.runtime_key }}" `
+            -Version "${{ inputs.version }}" `
+            -SplitPackageRole bridge `
+            -Configuration Release `
+            -SkipBaseRuntimeBuild
+
+      - name: Run minimal PackageReference-only GPU consumer
+        shell: pwsh
+        run: |
+          pwsh -NoProfile -File ./eng/Test-MinimalLinuxBridgePackageRuntimeConsumer.ps1 `
+            -SourceRuntimeKey "${{ inputs.runtime_key }}" `
+            -ManagedPackageDirectory ./artifacts/managed `
+            -BridgePackageDirectory "./artifacts/runtime-split-nupkg/${{ inputs.runtime_key }}"
+
+      - name: Export artifact SHA256 inventory
+        if: ${{ always() }}
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path ./artifacts/gpu-ci-smoke -Force | Out-Null
+          $roots = @(
+            './artifacts/gpu-ci-smoke',
+            './artifacts/linux-dry-run/${{ inputs.runtime_key }}',
+            './artifacts/managed',
+            './artifacts/runtime-split-nupkg/${{ inputs.runtime_key }}',
+            './artifacts/package-consumer',
+            './artifacts/minimal-linux-bridge-runtime/${{ inputs.runtime_key }}'
+          )
+          $rows = foreach ($root in $roots) {
+            if (-not (Test-Path -LiteralPath $root -PathType Container)) { continue }
+            Get-ChildItem -LiteralPath $root -File -Recurse |
+              Where-Object { $_.Name -ne 'sha256-inventory.json' } |
+              ForEach-Object {
+                [pscustomobject]@{
+                  path = [System.IO.Path]::GetRelativePath((Get-Location).Path, $_.FullName).Replace('\', '/')
+                  lengthBytes = $_.Length
+                  sha256 = (Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+                }
+              }
+          }
+          $rows | Sort-Object path | ConvertTo-Json -Depth 4 |
+            Set-Content -LiteralPath ./artifacts/gpu-ci-smoke/sha256-inventory.json -Encoding utf8
+
+      - name: Upload GPU smoke evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: runtime-linux-gpu-smoke-${{ inputs.runtime_key }}
+          if-no-files-found: error
+          retention-days: 30
+          path: |
+            artifacts/gpu-ci-smoke/**
+            artifacts/linux-dry-run/${{ inputs.runtime_key }}/**
+            artifacts/managed/*.nupkg
+            artifacts/runtime-split-nupkg/${{ inputs.runtime_key }}/*.nupkg
+            artifacts/package-consumer/**
+            artifacts/minimal-linux-bridge-runtime/${{ inputs.runtime_key }}/**
