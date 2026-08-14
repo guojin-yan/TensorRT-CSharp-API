@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "recordKind": "installation-article-batch-evidence",
-  "generatedAt": "2026-08-14T01:02:38+08:00",
+  "generatedAt": "2026-08-14T13:37:45+08:00",
   "baseCommit": "0025f79366c3f0915b3acaa8d17e1f65054e8678",
   "branch": "TensorRtSharp4.0",
   "sourceState": {
@@ -133,7 +133,15 @@
       "status": "review",
       "registeredUbuntuDistributionCount": 0,
       "dockerDesktopDistributionPresent": true,
-      "wslProjectConsumerProof": false
+      "wslProjectConsumerProof": false,
+      "executionStatusReport": {
+        "path": "artifacts/linux-dry-run/linux-x64-ubuntu24.04-trt10.11-cuda12.9-cudnn9.22/linux-runner-execution-status.json",
+        "sha256": "b611f6c5f4bbb16e61dd78aedf8b44279d125bc3f9f69280aa2e2d7b02ed4938",
+        "status": "blocked",
+        "isLinux": false,
+        "githubActions": false,
+        "blockerCount": 2
+      }
     },
     "container": {
       "status": "ready",
@@ -145,7 +153,23 @@
       "status": "review",
       "repositoryRunnerTotalCount": 0,
       "gpuRunnerProof": false,
-      "proofPackAvailable": false
+      "proofPackAvailable": false,
+      "runnerAvailabilityReport": {
+        "path": "artifacts/runner-availability/github-runner-availability.json",
+        "sha256": "2f1aabc0900b8fa69aae74129bd79bf12aa4db2bf2e4488a370223cb172950b3",
+        "querySucceeded": true,
+        "runnerCount": 0,
+        "failedCount": 1,
+        "requiredLabelSet": [
+          "self-hosted",
+          "linux",
+          "x64",
+          "ubuntu-24.04",
+          "gpu"
+        ],
+        "matchingRunnerCount": 0,
+        "onlineMatchingRunnerCount": 0
+      }
     }
   },
   "articleDecisions": {
@@ -162,7 +186,9 @@
     "trtexecLogSha256": "3efb71f35758c3c3e799f9cf7dfad43234baf647689f499c7fdec40293d3e5a7",
     "trtexecEngineSha256": "c26d558a781974e238979d67573c1ea4bbd6c68b964bcb218e51a5fb2d9c0762",
     "trtexecOutputSha256": "0a5a25b243b189c9a8f78676cb8585888c17c603e27eb6db5da10a8855c922b0",
-    "baselineConsumerReportSha256": "457f35511d2e5040d92bae268535b778950be5eadf9dbf1f4bf33293f5654526"
+    "baselineConsumerReportSha256": "457f35511d2e5040d92bae268535b778950be5eadf9dbf1f4bf33293f5654526",
+    "wslExecutionStatusReportSha256": "b611f6c5f4bbb16e61dd78aedf8b44279d125bc3f9f69280aa2e2d7b02ed4938",
+    "runnerAvailabilityReportSha256": "2f1aabc0900b8fa69aae74129bd79bf12aa4db2bf2e4488a370223cb172950b3"
   },
   "proofBoundary": {
     "linuxContainerGpuRuntimeProof": true,

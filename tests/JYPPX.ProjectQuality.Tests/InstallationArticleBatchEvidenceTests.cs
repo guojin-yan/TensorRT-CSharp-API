@@ -91,8 +91,23 @@ public sealed class InstallationArticleBatchEvidenceTests
         Assert.False(boundary.GetProperty("releaseClosureProof").GetBoolean());
 
         JsonElement audit = root.GetProperty("environmentAudit");
-        Assert.Equal(0, audit.GetProperty("wsl").GetProperty("registeredUbuntuDistributionCount").GetInt32());
-        Assert.Equal(0, audit.GetProperty("gpuCi").GetProperty("repositoryRunnerTotalCount").GetInt32());
+        JsonElement wsl = audit.GetProperty("wsl");
+        Assert.Equal(0, wsl.GetProperty("registeredUbuntuDistributionCount").GetInt32());
+        Assert.False(wsl.GetProperty("executionStatusReport").GetProperty("isLinux").GetBoolean());
+        Assert.False(wsl.GetProperty("executionStatusReport").GetProperty("githubActions").GetBoolean());
+        Assert.Equal("blocked", wsl.GetProperty("executionStatusReport").GetProperty("status").GetString());
+        Assert.Equal(2, wsl.GetProperty("executionStatusReport").GetProperty("blockerCount").GetInt32());
+        Assert.Matches("^[a-f0-9]{64}$", wsl.GetProperty("executionStatusReport").GetProperty("sha256").GetString()!);
+
+        JsonElement gpuCi = audit.GetProperty("gpuCi");
+        Assert.Equal(0, gpuCi.GetProperty("repositoryRunnerTotalCount").GetInt32());
+        JsonElement runnerReport = gpuCi.GetProperty("runnerAvailabilityReport");
+        Assert.True(runnerReport.GetProperty("querySucceeded").GetBoolean());
+        Assert.Equal(0, runnerReport.GetProperty("runnerCount").GetInt32());
+        Assert.Equal(0, runnerReport.GetProperty("matchingRunnerCount").GetInt32());
+        Assert.Equal(0, runnerReport.GetProperty("onlineMatchingRunnerCount").GetInt32());
+        Assert.Equal(5, runnerReport.GetProperty("requiredLabelSet").GetArrayLength());
+        Assert.Matches("^[a-f0-9]{64}$", runnerReport.GetProperty("sha256").GetString()!);
 
         JsonElement quality = root.GetProperty("qualityValidation");
         Assert.Equal("passed-with-user-untracked-file-isolation", quality.GetProperty("status").GetString());
