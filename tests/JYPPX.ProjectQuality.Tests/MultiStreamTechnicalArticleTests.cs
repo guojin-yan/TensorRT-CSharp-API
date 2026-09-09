@@ -21,6 +21,7 @@ public sealed class MultiStreamTechnicalArticleTests
         JsonElement assets = root.GetProperty("assets");
         JsonElement validation = root.GetProperty("runtimeValidation");
         JsonElement boundary = root.GetProperty("proofBoundary");
+        JsonElement maintenance = root.GetProperty("currentMaintenanceValidation");
 
         Assert.Equal("cuda-multistream-technical-article-runtime-evidence", root.GetProperty("recordKind").GetString());
         Assert.False(root.GetProperty("workload").GetProperty("modelOrOnnxRequired").GetBoolean());
@@ -37,7 +38,9 @@ public sealed class MultiStreamTechnicalArticleTests
         string screenshotPath = Path.Combine(
             RepositoryPaths.Root,
             assets.GetProperty("runtimeScreenshotPath").GetString()!.Replace('/', Path.DirectorySeparatorChar));
-        Assert.Equal(assets.GetProperty("sampleSourceSha256").GetString(), ComputeSha256(sourcePath));
+        Assert.Equal(maintenance.GetProperty("currentSourceSha256").GetString(), ComputeSha256(sourcePath));
+        Assert.False(maintenance.GetProperty("gpuRuntimeScenarioRerun").GetBoolean());
+        Assert.True(maintenance.GetProperty("historicalRuntimeEvidenceRetained").GetBoolean());
         Assert.Equal(assets.GetProperty("runtimeScreenshotSha256").GetString(), ComputeSha256(screenshotPath));
 
         string sampleReadme = File.ReadAllText(Path.Combine(

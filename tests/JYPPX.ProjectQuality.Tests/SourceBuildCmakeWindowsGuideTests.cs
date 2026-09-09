@@ -40,10 +40,10 @@ public sealed class SourceBuildCmakeWindowsGuideTests
         string index = ReadSource("docs", "index.md");
         string toc = ReadSource("docs", "toc.yml");
 
-        Assert.Contains("source-build-cmake-windows-guide.md", index);
-        Assert.Contains("Windows Source Build CMake Guide", index);
-        Assert.Contains("source-build-cmake-windows-guide.md", toc);
-        Assert.Contains("Windows Source Build CMake Guide", toc);
+        Assert.Contains("articles/zh-cn/06-source-build/bridge/msc-006-build-cpp-bridge-from-source.md", index);
+        Assert.Contains("从源码编译 C++ Bridge", index);
+        Assert.Contains("articles/zh-cn/06-source-build/bridge/msc-006-build-cpp-bridge-from-source.md", toc);
+        Assert.Contains("从源码编译 C++ Bridge", toc);
     }
 
     [Fact]

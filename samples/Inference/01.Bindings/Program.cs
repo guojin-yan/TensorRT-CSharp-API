@@ -11,6 +11,12 @@ internal static class Program
 {
     public static int Main(string[] args)
     {
+        if (SampleCommandLine.HasSwitch(args, "--help") || SampleCommandLine.HasSwitch(args, "-h"))
+        {
+            PrintUsage();
+            return 0;
+        }
+
         try
         {
             return Run(args);
@@ -102,6 +108,7 @@ internal static class Program
             throw new InvalidOperationException($"Inference binding output mismatch. Input=[{string.Join(", ", inputValues)}] Output=[{string.Join(", ", outputValues)}]");
         }
 
+#if !JYPPX_PUBLIC_STABLE_4_0_0
         byte[] rawOutput = bindings.ReadOutputBytes("output");
         byte[] expectedRawOutput = new byte[checked(outputValues.Length * sizeof(float))];
         Buffer.BlockCopy(outputValues, 0, expectedRawOutput, 0, expectedRawOutput.Length);
@@ -109,6 +116,7 @@ internal static class Program
         {
             throw new InvalidOperationException("Raw output readback does not match the typed FP32 output bytes.");
         }
+#endif
 
         ulong profileMemory = line == TensorRtApiLine.TensorRt10 ? engine.GetDeviceMemorySizeForProfileV2(profileIndex) : engine.DeviceMemorySizeInBytes;
         Console.WriteLine($"BindingReport Ready={bindings.Report.IsReadyForEnqueue} Inputs={bindings.Report.GetInputs().Count} Outputs={bindings.Report.GetOutputs().Count}");

@@ -97,9 +97,10 @@ public sealed class TensorRtExecCurrentRuntimeEvidenceTests
             "JYPPX.TensorRtSharp.Tools",
             "Build",
             "OnnxEngineBuildService.BuilderConfiguration.cs");
+        JsonElement maintenance = root.GetProperty("currentMaintenanceValidation");
         Assert.Equal(
             ComputeSha256(builderConfiguration),
-            root.GetProperty("applicationAssets").GetProperty("builderConfigurationSha256").GetString());
+            maintenance.GetProperty("currentBuilderConfigurationSha256").GetString());
 
         string diagnostics = Path.Combine(
             RepositoryPaths.Root,
@@ -109,7 +110,9 @@ public sealed class TensorRtExecCurrentRuntimeEvidenceTests
             "OnnxEngineBuildService.Diagnostics.cs");
         Assert.Equal(
             ComputeSha256(diagnostics),
-            root.GetProperty("applicationAssets").GetProperty("diagnosticsSha256").GetString());
+            maintenance.GetProperty("currentDiagnosticsSha256").GetString());
+        Assert.False(maintenance.GetProperty("gpuRuntimeScenarioRerun").GetBoolean());
+        Assert.True(maintenance.GetProperty("historicalRuntimeEvidenceRetained").GetBoolean());
 
         JsonElement layerInfo = root.GetProperty("artifacts").GetProperty("layerInfo");
         Assert.Equal("Json", layerInfo.GetProperty("informationFormat").GetString());

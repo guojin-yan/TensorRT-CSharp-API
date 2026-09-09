@@ -39,13 +39,13 @@ public sealed class PublicPackageArticleMigrationTests
     };
 
     [Fact]
-    public void MigratedArticlesUseThePublicPreviewLineBeforeHistoricalLocalFeedEvidence()
+    public void MigratedArticlesUseTheStablePublicReleaseBeforeHistoricalLocalFeedEvidence()
     {
         foreach (string articleName in MigratedArticleNames)
         {
             string article = ReadSource("docs", "articles", "zh-cn", articleName);
             int publicInstall = article.IndexOf(
-                "dotnet add package JYPPX.TensorRT.CSharp.API --version \"4.0.0-*\"",
+                "dotnet add package JYPPX.TensorRT.CSharp.API --version \"4.0.0\"",
                 StringComparison.Ordinal);
             int historicalEvidence = article.IndexOf(
                 "### 发布前 local-feed 证据复核",
@@ -59,7 +59,7 @@ public sealed class PublicPackageArticleMigrationTests
                 historicalEvidence > publicInstall,
                 "Historical evidence must follow public installation: " + articleName);
             Assert.Contains(
-                "dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --version \"4.0.0-*\"",
+                "dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --version \"4.0.0\"",
                 article,
                 StringComparison.Ordinal);
             Assert.Contains("API 不兼容的历史", article, StringComparison.Ordinal);
@@ -89,20 +89,18 @@ public sealed class PublicPackageArticleMigrationTests
     }
 
     [Fact]
-    public void CurrentInstallationGuidesUseTheMaintainedPreviewLine()
+    public void CurrentInstallationGuidesUseTheStableRelease()
     {
         foreach (string relativePath in CurrentInstallationGuidePaths)
         {
             string guide = ReadSource(relativePath.Split('/'));
 
-            Assert.Contains(
-                "dotnet add package JYPPX.TensorRT.CSharp.API --version \"4.0.0-*\"",
-                guide,
-                StringComparison.Ordinal);
-            Assert.Contains(
-                "dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --version \"4.0.0-*\"",
-                guide,
-                StringComparison.Ordinal);
+            Assert.Matches(
+                "dotnet add package JYPPX\\.TensorRT\\.CSharp\\.API --version \\\"?4\\.0\\.0\\\"?",
+                guide);
+            Assert.Matches(
+                "dotnet add package JYPPX\\.TensorRT\\.CSharp\\.API\\.Runtime\\.win-x64\\.trt10\\.11\\.cuda12\\.9\\.cudnn9\\.22\\.Bridge --version \\\"?4\\.0\\.0\\\"?",
+                guide);
             Assert.DoesNotContain(
                 "dotnet add package JYPPX.TensorRT.CSharp.API --prerelease",
                 guide,

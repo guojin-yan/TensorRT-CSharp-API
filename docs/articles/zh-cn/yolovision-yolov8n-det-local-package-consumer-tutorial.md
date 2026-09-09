@@ -150,16 +150,16 @@ Get-FileHash $jpgPath, $ppmPath -Algorithm SHA256
 [OpenCV-CSharp-API](https://github.com/guojin-yan/OpenCV-CSharp-API)。应用本身不再生成或引用
 `JYPPX.TensorRT.CSharp.API.YoloVision` 包。
 
-新建仓库外项目时，可以让 NuGet 获取当前公开预览版，而不在文章中写死版本：
+新建仓库外项目时，使用已核验的精确正式版本：
 
 ```powershell
-dotnet add package JYPPX.TensorRT.CSharp.API --version "4.0.0-*"
+dotnet add package JYPPX.TensorRT.CSharp.API --version "4.0.0"
 dotnet add package JYPPX.OpenCV.CSharp.API --prerelease
 dotnet add package JYPPX.OpenCV.runtime.win-x64 --prerelease
-dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --version "4.0.0-*"
+dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --version "4.0.0"
 ```
 
-`4.0.0-*` 只跟随当前 4.0.0 预览线，避免误选 API 不兼容的历史 `4.0.6170`。最后一个包必须按目标机器环境替换。它只包含项目自有 bridge，不包含 CUDA、cuDNN 或 TensorRT。
+精确 `4.0.0` 固定正式版本，避免误选 API 不兼容的历史 `4.0.6170`。最后一个包必须按目标机器环境替换。它只包含项目自有 bridge，不包含 CUDA、cuDNN 或 TensorRT。
 
 ## 编写程序入口
 

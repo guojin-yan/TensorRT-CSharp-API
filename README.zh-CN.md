@@ -1,10 +1,10 @@
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/images/readme/hero-dark.svg">
   <source media="(prefers-color-scheme: light)" srcset="docs/images/readme/hero-light.svg">
-  <img alt="TensorRT CSharpAPI v4.0 - 面向 C# 与 .NET 的 TensorRT 和 CUDA 接口" src="docs/images/readme/hero-light.svg" width="100%">
+  <img alt="TensorRT CSharp API v4.0 - 面向 C# 与 .NET 的 TensorRT 和 CUDA 接口" src="docs/images/readme/hero-light.svg" width="100%">
 </picture>
 
-<h1 align="center">TensorRT CSharpAPI v4.0</h1>
+<h1 align="center">TensorRT CSharp API v4.0</h1>
 
 <p align="center">
   面向 C# 与 .NET 的 TensorRT、CUDA 托管接口、项目自有桥接包、可运行视觉示例和 TensorRtExec 桌面工具。
@@ -19,19 +19,19 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/guojin-yan/TensorRT-CSharp-API/actions/workflows/ci-validation.yml"><img src="https://github.com/guojin-yan/TensorRT-CSharp-API/actions/workflows/ci-validation.yml/badge.svg?branch=TensorRT CSharpAPI v4.0" alt="托管代码检查" /></a>
-  <a href="https://github.com/guojin-yan/TensorRT-CSharp-API/actions/workflows/release-quality-gate.yml"><img src="https://github.com/guojin-yan/TensorRT-CSharp-API/actions/workflows/release-quality-gate.yml/badge.svg?branch=TensorRT CSharpAPI v4.0" alt="发布质量门禁" /></a>
+  <a href="https://github.com/guojin-yan/TensorRT-CSharp-API/actions/workflows/ci-validation.yml"><img src="https://github.com/guojin-yan/TensorRT-CSharp-API/actions/workflows/ci-validation.yml/badge.svg?branch=TensorRtSharp4.0" alt="托管代码检查" /></a>
+  <a href="https://github.com/guojin-yan/TensorRT-CSharp-API/actions/workflows/release-quality-gate.yml"><img src="https://github.com/guojin-yan/TensorRT-CSharp-API/actions/workflows/release-quality-gate.yml/badge.svg?branch=TensorRtSharp4.0" alt="发布质量门禁" /></a>
 </p>
 
 <p align="center"><a href="README.md">English</a> | <strong>简体中文</strong></p>
 
-# TensorRT CSharpAPI v4.0
+# TensorRT CSharp API v4.0
 
 [![构建](https://github.com/guojin-yan/TensorRT-CSharp-API/actions/workflows/ci-validation.yml/badge.svg)](https://github.com/guojin-yan/TensorRT-CSharp-API/actions/workflows/ci-validation.yml)
 [![文档](https://img.shields.io/badge/docs-DocFX-2f80ed)](https://guojin-yan.github.io/TensorRT-CSharp-API/)
 [![许可证](https://img.shields.io/github/license/guojin-yan/TensorRT-CSharp-API.svg)](LICENSE)
 
-TensorRT CSharpAPI v4.0 是面向 .NET 的 TensorRT / CUDA 桥接项目，包含推理执行、CUDA 运行时编译、显存、流与事件、回调、分配器以及 TensorRtExec 桌面工具。`4.0.0` 正式稳定版已经发布，当前开发重点转向使用公开包的系列案例、完整应用和配套技术文章。
+TensorRT CSharp API v4.0 是面向 .NET 的 TensorRT / CUDA 桥接项目，包含推理执行、CUDA 运行时编译、显存、流与事件、回调、分配器以及 TensorRtExec 桌面工具。`4.0.0` 正式稳定版已经发布，当前开发重点转向使用公开包的系列案例、完整应用和配套技术文章。
 
 ## 📖 项目简介
 

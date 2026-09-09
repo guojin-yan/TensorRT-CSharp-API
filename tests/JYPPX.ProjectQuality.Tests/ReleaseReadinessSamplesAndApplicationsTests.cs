@@ -109,16 +109,15 @@ public sealed class ReleaseReadinessSamplesAndApplicationsTests
         {
             "applications/YoloVision/yolo-model-matrix.json",
             "applications/OnnxToEngine/trtexec-parity-matrix.json",
-            "applications/TensorRtExec/tensor-rt-exec-feature-matrix.json",
-            "artifacts/interface-coverage/release-api-readiness-audit.json",
-            "article-roadmap-30plus"
+            "applications/TensorRtExec/tensor-rt-exec-feature-matrix.json"
         })
         {
             Assert.Contains(marker, rootReadme, StringComparison.Ordinal);
             Assert.Contains(marker, rootReadmeZh, StringComparison.Ordinal);
         }
 
-        Assert.Contains("release-api-readiness-audit.json", docsIndex, StringComparison.Ordinal);
+        string projectOverview = ReadText("docs", "articles", "zh-cn", "project-overview.md");
+        Assert.Contains("artifacts/interface-coverage/release-api-readiness-audit.json", projectOverview, StringComparison.Ordinal);
         Assert.Contains("article-roadmap-30plus.md", docsIndex, StringComparison.Ordinal);
         Assert.Contains("article-roadmap-30plus.md", docsToc, StringComparison.Ordinal);
     }

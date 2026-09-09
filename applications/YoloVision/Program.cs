@@ -9,6 +9,7 @@ using JYPPX.TensorRtSharp;
 
 namespace YoloVisionSample;
 
+#if !JYPPX_PROJECT_QUALITY_SOURCE_HOST
 internal static class Program
 {
     public static int Main(string[] args)
@@ -16,6 +17,7 @@ internal static class Program
         return YoloVisionCommand.Run(args);
     }
 }
+#endif
 
 /// <summary>
 /// Runs the reusable, pointer-free YoloVision command-line pipeline.

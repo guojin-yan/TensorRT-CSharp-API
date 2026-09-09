@@ -162,7 +162,7 @@ public sealed class ReleaseReadinessSmokeClosureTests
 
         (string FileName, string RoadmapMarker)[] entryArticles =
         {
-            ("project-overview.md", "TensorRtSharp4.0 项目总览"),
+            ("project-overview.md", "TensorRT CSharp API v4.0 项目总览"),
             ("onnx-to-engine-quickstart.md", "OnnxToEngine 快速入门"),
             ("tensorrtexec-cli-parameter-map.md", "TensorRtExec CLI"),
             ("yolovision-sample-overview.md", "YoloVision 总览"),

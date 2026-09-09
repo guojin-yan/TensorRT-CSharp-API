@@ -65,8 +65,8 @@ https://github.com/guojin-yan/TensorRT-CSharp-API/tree/TensorRtSharp4.0
 
 ```powershell
 dotnet --info
-dotnet restore .\TensorRtSharp4.0.sln
-dotnet build .\TensorRtSharp4.0.sln -c Release --no-restore
+dotnet restore .\TensorRtSharp.sln
+dotnet build .\TensorRtSharp.sln -c Release --no-restore
 ```
 
 构建前应记录当前提交、工作树状态、.NET SDK 版本、目标框架和运行系统。若工作树包含本地修改，报告中应说明构建的是哪个源码状态，避免把未提交修改的结果归到公开提交。
@@ -133,7 +133,7 @@ dotnet build $consumer\Smoke.csproj -c Release
 
 ```text
 解决方案：
-https://github.com/guojin-yan/TensorRT-CSharp-API/blob/TensorRtSharp4.0/TensorRtSharp4.0.sln
+https://github.com/guojin-yan/TensorRT-CSharp-API/blob/TensorRtSharp4.0/TensorRtSharp.sln
 
 项目质量测试：
 https://github.com/guojin-yan/TensorRT-CSharp-API/tree/TensorRtSharp4.0/tests/JYPPX.ProjectQuality.Tests

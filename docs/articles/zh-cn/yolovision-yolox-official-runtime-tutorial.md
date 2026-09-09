@@ -71,13 +71,13 @@ output:[1,8400,85]
 `JYPPX.TensorRT.CSharp.API` 4 系列包，以及作者维护的
 [OpenCV-CSharp-API](https://github.com/guojin-yan/OpenCV-CSharp-API)。应用本身不发布 YoloVision 案例 NuGet 包。
 
-新建仓库外项目时，可以让 NuGet 获取当前公开预览版，而不在文章中写死具体版本：
+新建仓库外项目时，使用已核验的精确正式版本：
 
 ```powershell
-dotnet add package JYPPX.TensorRT.CSharp.API --version "4.0.0-*"
+dotnet add package JYPPX.TensorRT.CSharp.API --version "4.0.0"
 dotnet add package JYPPX.OpenCV.CSharp.API --prerelease
 dotnet add package JYPPX.OpenCV.runtime.win-x64 --prerelease
-dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --version "4.0.0-*"
+dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --version "4.0.0"
 ```
 
 最后一个包 ID 必须按目标机器环境替换。它只包含项目自有 bridge；CUDA、cuDNN、TensorRT 和 NVRTC

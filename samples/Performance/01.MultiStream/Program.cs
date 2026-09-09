@@ -8,8 +8,18 @@ internal static class Program
 {
     private const int ByteCount = 4096;
 
-    private static int Main()
+    private static int Main(string[] args)
     {
+        if (args.Any(static argument => string.Equals(argument, "--help", StringComparison.OrdinalIgnoreCase) || string.Equals(argument, "-h", StringComparison.OrdinalIgnoreCase)))
+        {
+            Console.WriteLine("MultiStream sample");
+            Console.WriteLine("Usage:");
+            Console.WriteLine("  dotnet run --project samples/Performance/01.MultiStream");
+            Console.WriteLine("Options:");
+            Console.WriteLine("  --help, -h                 Show this offline help.");
+            return 0;
+        }
+
         CudaEnvironmentSnapshot snapshot;
         try
         {

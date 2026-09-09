@@ -68,10 +68,21 @@ public sealed partial class TensorRtInferenceBindings
         {
             if (existing.Memory.SizeInBytes < minimumBytes)
             {
-                throw new InvalidOperationException("Existing CUDA buffer is smaller than the requested host payload.");
-            }
+                if (!existing.OwnsMemory)
+                {
+                    throw new InvalidOperationException(
+                        $"Existing CUDA buffer for tensor '{tensor.Name}' is smaller than the requested host payload " +
+                        $"(existing={existing.Memory.SizeInBytes} bytes, required={minimumBytes} bytes) and is caller-owned.");
+                }
 
-            return existing;
+                // Host payload sizes can change between dynamic-shape runs. Recreate
+                // buffers owned by this binding instead of rejecting the new shape.
+                RemoveOwnedBuffer(tensor.Name);
+            }
+            else
+            {
+                return existing;
+            }
         }
 
         TensorRtDims shape = runtimeShape ?? ResolveRuntimeShape(tensor);

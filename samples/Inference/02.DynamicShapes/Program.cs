@@ -11,6 +11,12 @@ internal static class Program
 {
     public static int Main(string[] args)
     {
+        if (SampleCommandLine.HasSwitch(args, "--help") || SampleCommandLine.HasSwitch(args, "-h"))
+        {
+            PrintUsage();
+            return 0;
+        }
+
         try
         {
             return Run(args);

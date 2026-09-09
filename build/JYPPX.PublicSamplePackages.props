@@ -1,12 +1,12 @@
 <Project>
   <PropertyGroup>
     <!--
-      Keep the public-package dependency in one place. The 4.0.0-* floating rule
-      follows the current 4-series preview line while excluding historical 4.x
-      packages that use a different API surface. Update this one property when
-      the maintained 4-series release line advances.
+      Keep the public-package dependency in one place. Samples consume the exact
+      4.0.0 stable release so local and CI restores resolve the same API surface.
+      Update this one property when the maintained stable release advances.
     -->
-    <JYPPXTensorRtSamplePackageVersion Condition="'$(JYPPXTensorRtSamplePackageVersion)' == ''">4.0.0-*</JYPPXTensorRtSamplePackageVersion>
+    <JYPPXTensorRtSamplePackageVersion Condition="'$(JYPPXTensorRtSamplePackageVersion)' == ''">4.0.0</JYPPXTensorRtSamplePackageVersion>
+    <DefineConstants>$(DefineConstants);JYPPX_PUBLIC_STABLE_4_0_0</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>

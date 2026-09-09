@@ -59,8 +59,8 @@ public sealed class ReleaseAutomationTests
         string index = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "releases", "README.md"));
         string details = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "docs", "releases", "4.0.0.md"));
 
-        Assert.Contains("## Latest Update: 4.0.0", english, StringComparison.Ordinal);
-        Assert.Contains("## 本次更新：4.0.0", chinese, StringComparison.Ordinal);
+        Assert.Contains("Latest Update: 4.0.0", english, StringComparison.Ordinal);
+        Assert.Contains("本次更新：4.0.0", chinese, StringComparison.Ordinal);
         Assert.Contains("docs/releases/4.0.0.md", english, StringComparison.Ordinal);
         Assert.Contains("docs/releases/4.0.0.md", chinese, StringComparison.Ordinal);
         Assert.Contains("[4.0.0](4.0.0.md)", index, StringComparison.Ordinal);
@@ -225,9 +225,9 @@ public sealed class ReleaseAutomationTests
         Assert.DoesNotContain("windows_split_package_roles=bridge,collection", chinese, StringComparison.Ordinal);
         Assert.DoesNotContain("windows_cuda_cudnn_package_version", chinese, StringComparison.Ordinal);
         Assert.DoesNotContain("windows_tensorrt_package_version", chinese, StringComparison.Ordinal);
-        Assert.Contains("dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --version \"4.0.0-*\"", samples, StringComparison.Ordinal);
-        Assert.Contains("img.shields.io/nuget/vpre/JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge.svg?label=version", english, StringComparison.Ordinal);
-        Assert.Contains("img.shields.io/nuget/vpre/JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge.svg?label=version", chinese, StringComparison.Ordinal);
+        Assert.Contains("dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --version 4.0.0", samples, StringComparison.Ordinal);
+        Assert.Contains("img.shields.io/nuget/v/JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge.svg?label=version", english, StringComparison.Ordinal);
+        Assert.Contains("img.shields.io/nuget/v/JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge.svg?label=version", chinese, StringComparison.Ordinal);
         Assert.Contains("NuGet.org", english, StringComparison.Ordinal);
         Assert.Contains("NuGet.org", chinese, StringComparison.Ordinal);
     }

@@ -5,8 +5,18 @@ namespace CudaRuntimeCompilationSample;
 
 internal static class Program
 {
-    public static int Main()
+    public static int Main(string[] args)
     {
+        if (args.Any(static argument => string.Equals(argument, "--help", StringComparison.OrdinalIgnoreCase) || string.Equals(argument, "-h", StringComparison.OrdinalIgnoreCase)))
+        {
+            Console.WriteLine("CUDA Runtime Compilation sample");
+            Console.WriteLine("Usage:");
+            Console.WriteLine("  dotnet run --project samples/Cuda/01.RuntimeCompilation");
+            Console.WriteLine("Options:");
+            Console.WriteLine("  --help, -h                 Show this offline help.");
+            return 0;
+        }
+
         const string sourceText = """
 #include "scale.cuh"
 

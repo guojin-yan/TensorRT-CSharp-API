@@ -154,9 +154,12 @@ public sealed class OnnxToEngineMnistRuntimeEvidenceTests
         Assert.Equal(
             root.GetProperty("sourceChangesIncluded").GetProperty("visualizationWriterSha256").GetString(),
             ComputeSha256(Path.Combine(RepositoryPaths.Root, "src", "JYPPX.TensorRtSharp.Tools", "Runtime", "MnistVisualizationWriter.cs")));
+        JsonElement maintenance = root.GetProperty("currentMaintenanceValidation");
         Assert.Equal(
-            root.GetProperty("sourceChangesIncluded").GetProperty("sampleProgramSha256").GetString(),
+            maintenance.GetProperty("currentSampleProgramSha256").GetString(),
             ComputeSha256(Path.Combine(RepositoryPaths.Root, "applications", "OnnxToEngine", "Program.cs")));
+        Assert.False(maintenance.GetProperty("gpuRuntimeScenarioRerun").GetBoolean());
+        Assert.True(maintenance.GetProperty("historicalRuntimeEvidenceRetained").GetBoolean());
         Assert.Equal(
             visuals.GetProperty("annotatedResultSha256").GetString(),
             ComputeSha256(Path.Combine(RepositoryPaths.Root, visuals.GetProperty("annotatedResult").GetString()!.Replace('/', Path.DirectorySeparatorChar))));

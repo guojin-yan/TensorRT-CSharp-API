@@ -4,6 +4,9 @@
     <IsPackable>false</IsPackable>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <JYPPXIncludeTensorRtOnnxSampleSupport>true</JYPPXIncludeTensorRtOnnxSampleSupport>
+    <JYPPXIncludeOpenCvSampleSupport>true</JYPPXIncludeOpenCvSampleSupport>
+    <DefineConstants>$(DefineConstants);JYPPX_PROJECT_QUALITY_SOURCE_HOST</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,6 +21,20 @@
     <ProjectReference Include="..\\..\\src\\JYPPX.TensorRtSharp.Tools\\JYPPX.TensorRtSharp.Tools.csproj" />
     <ProjectReference Include="..\\..\\applications\\OnnxToEngine\\OnnxToEngine.csproj" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\\..\\samples\\ComputerVision\\01.Classification\\Classification.csproj" />
-    <ProjectReference Include="..\\..\\applications\\YoloVision\\YoloVision.csproj" />
+    <ProjectReference Include="..\\..\\applications\\YoloVision\\YoloVision.csproj"
+                      ReferenceOutputAssembly="false" />
   </ItemGroup>
+
+  <!--
+    The public YoloVision application compiles against the stable package, whose
+    legacy namespaces cannot share one test process with the current source API.
+    Compile its managed sources here so offline tests exercise the source graph;
+    the non-output project reference above still verifies the package consumer.
+  -->
+  <ItemGroup>
+    <Compile Include="..\\..\\applications\\YoloVision\\*.cs"
+             Link="YoloVision\\%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <Import Project="..\\..\\build\\JYPPX.SampleSupport.props" />
 </Project>

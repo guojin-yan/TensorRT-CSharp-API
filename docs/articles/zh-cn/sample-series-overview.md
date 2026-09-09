@@ -13,11 +13,11 @@ CUDA、cuDNN、TensorRT 和 NVRTC 由用户安装；运行时还需要选择与�
 
 ## 依赖安装
 
-新建仓库外项目时，可以让 NuGet 解析当前公开预览版，而不在文章中写死具体版本：
+新建仓库外项目时，使用已核验的精确正式版本：
 
 ```powershell
-dotnet add package JYPPX.TensorRT.CSharp.API --version "4.0.0-*"
-dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --version "4.0.0-*"
+dotnet add package JYPPX.TensorRT.CSharp.API --version "4.0.0"
+dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --version "4.0.0"
 ```
 
 第二个包只是一种环境示例。实际包 ID 必须匹配目标机器的操作系统、CUDA、cuDNN 和 TensorRT 版本。

@@ -22,7 +22,11 @@ public sealed partial class OnnxEngineBuildService
         OnnxEngineBuildOptions options)
     {
         bool useCudaGraphApplied = TryEnableCudaGraphs(workers, options.UseCudaGraph, out string cudaGraphFallbackReason);
+#if JYPPX_PUBLIC_STABLE_4_0_0
+        int sleepTimeMillisecondsApplied = 0;
+#else
         int sleepTimeMillisecondsApplied = options.RuntimeOptions.SleepTimeMilliseconds.GetValueOrDefault();
+#endif
         using BenchmarkStartDelayGate? startDelayGate = BenchmarkStartDelayGate.Create(
             workers,
             sleepTimeMillisecondsApplied);
@@ -532,7 +536,7 @@ public sealed partial class OnnxEngineBuildService
             {
                 delayStream = new CudaStream(CudaStreamCreationFlags.NonBlocking);
                 readyEvent = new CudaEvent(CudaEventCreationFlags.DisableTiming);
-                delayStream.EnqueueDelay(milliseconds);
+                EnqueueStartDelay(delayStream, milliseconds);
                 readyEvent.Record(delayStream);
                 foreach (OnnxEngineBenchmarkWorker worker in workers)
                 {
@@ -565,6 +569,17 @@ public sealed partial class OnnxEngineBuildService
             return milliseconds > 0
                 ? new BenchmarkStartDelayGate(workers, milliseconds)
                 : null;
+        }
+
+        private static void EnqueueStartDelay(CudaStream stream, int milliseconds)
+        {
+#if JYPPX_PUBLIC_STABLE_4_0_0
+            throw new NotSupportedException(
+                "The stable 4.0.0 package does not expose the stream-ordered delay API.");
+#else
+            CudaStream delayStream = stream;
+            delayStream.EnqueueDelay(milliseconds);
+#endif
         }
 
         public void Dispose()

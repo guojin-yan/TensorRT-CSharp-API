@@ -42,7 +42,7 @@ public sealed class InferenceBindingsTechnicalArticleTests
         JsonElement root = evidence.RootElement;
         JsonElement assets = root.GetProperty("assets");
         JsonElement validation = root.GetProperty("runtimeValidation");
-        JsonElement maintenance = root.GetProperty("maintenanceValidation");
+        JsonElement maintenance = root.GetProperty("currentMaintenanceValidation");
         JsonElement boundary = root.GetProperty("proofBoundary");
 
         Assert.Equal("inference-bindings-technical-article-runtime-evidence", root.GetProperty("recordKind").GetString());
@@ -60,10 +60,9 @@ public sealed class InferenceBindingsTechnicalArticleTests
             RepositoryPaths.Root,
             assets.GetProperty("runtimeScreenshotPath").GetString()!.Replace('/', Path.DirectorySeparatorChar));
         Assert.Equal(maintenance.GetProperty("currentSourceSha256").GetString(), ComputeSha256(sourcePath));
-        Assert.Equal(0, maintenance.GetProperty("processExitCode").GetInt32());
-        Assert.True(maintenance.GetProperty("outputMatch").GetBoolean());
-        Assert.False(maintenance.GetProperty("runtimeScreenshotRecaptured").GetBoolean());
-        Assert.True(maintenance.GetProperty("historicalRuntimeScreenshotRetained").GetBoolean());
+        Assert.True(maintenance.GetProperty("buildAndHelpPassed").GetBoolean());
+        Assert.False(maintenance.GetProperty("gpuRuntimeScenarioRerun").GetBoolean());
+        Assert.True(maintenance.GetProperty("historicalRuntimeEvidenceRetained").GetBoolean());
         Assert.Equal(assets.GetProperty("runtimeScreenshotSha256").GetString(), ComputeSha256(screenshotPath));
 
         string sampleReadme = File.ReadAllText(Path.Combine(

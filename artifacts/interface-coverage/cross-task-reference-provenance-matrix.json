@@ -1,6 +1,6 @@
 {
   "schemaVersion": "cross-task-reference-provenance-matrix.v1",
-  "generatedDate": "2026-08-08",
+  "generatedDate": "2026-09-09",
   "state": "owner-action-required",
   "contract": {
     "path": "samples/assets/cross-task-reference-provenance-contract.json",

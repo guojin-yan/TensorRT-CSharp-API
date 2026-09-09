@@ -42,6 +42,14 @@
     "processExitCode": 0,
     "passed": true
   },
+  "currentMaintenanceValidation": {
+    "validatedUtcDate": "2026-08-12",
+    "validationScope": "stable-package-build-help-and-source-drift-classification",
+    "currentSourceSha256": "9e710c202f124cc1c3b4910d9d75072a60d036f068c721e6e1d575137996dc41",
+    "buildAndHelpPassed": true,
+    "gpuRuntimeScenarioRerun": false,
+    "historicalRuntimeEvidenceRetained": true
+  },
   "proofBoundary": {
     "sourceTreeRuntime": true,
     "realCudaRuntimeExecution": true,

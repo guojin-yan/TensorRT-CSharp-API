@@ -80,10 +80,10 @@ ead3558569edd88aa73a4eb46acbe6c38dee113933234547f04a0f6e48169903
 在仓库外创建自己的项目时，可以不写死具体版本：
 
 ```powershell
-dotnet add package JYPPX.TensorRT.CSharp.API --version "4.0.0-*"
+dotnet add package JYPPX.TensorRT.CSharp.API --version "4.0.0"
 dotnet add package JYPPX.OpenCV.CSharp.API --prerelease
 dotnet add package JYPPX.OpenCV.runtime.win-x64 --prerelease
-dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --version "4.0.0-*"
+dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --version "4.0.0"
 ```
 
 最后一个包 ID 必须按本机环境选择。它只包含项目自有 bridge；CUDA、cuDNN 和 TensorRT 继续从用户安装目录加载。
@@ -195,7 +195,7 @@ python ./eng/Invoke-ClassificationResNet18Reference.py `
 生成独立参考后，使用同一条案例命令增加 `--reference-output` 重新运行，比较任务概率与原始 logits。
 再复制参考 JSON，把索引 0 的参考值增加 `0.125` 后执行受控负例；进程必须返回非零，证明错误参考会失败关闭。
 
-## 已验证结果
+## 已验证结果与语义边界
 
 本文实跑环境为 Windows 11、NVIDIA GeForce RTX 3060 Laptop GPU、CUDA 12.9、TensorRT 10.11。24-bit BMP 和同图 PPM 得到的 C# 输入 tensor 完全一致，SHA256 为 `43de394443f6fc3ccfd08cd9df61ee645ee5c51d1954c52267c221a438252f9e`。
 
@@ -208,11 +208,15 @@ python ./eng/Invoke-ClassificationResNet18Reference.py `
 
 最终 Top-5 为：Tibetan terrier `0.309864`、Dandie Dinmont `0.242565`、Lhasa `0.124855`、Shih-Tzu `0.119756`、miniature poodle `0.044701`。本次 TensorRT enqueue 记录为 `3.063 ms`，程序结束于 `OutputValidated=True` 和 `Classification Passed=True`。受控负例返回 `exit 1`、`mismatch 1`、`firstMismatch 0`，说明参考值错误时会失败关闭。
 
-![ResNet18 在 CC0 狗图片上的真实 TensorRT Top-5 结果](../../images/classification-resnet18-annotated-cc0.webp)
+这里必须区分“推理实现一致”和“图片类别判断正确”。[Wikimedia 原图说明](https://commons.wikimedia.org/wiki/File:Dog_at_N%C3%B8rre_Vorup%C3%B8r_Strand.jpg)把这只狗描述为“可能为 Shih Tzu / Maltese 混种”，并没有把它标注为 Tibetan terrier。ResNet18 的 Top-1 只有约 31%，第 2 至第 4 也集中在外形相近的长毛犬种，其中 `Shih-Tzu` 位于第 4。这是一条真实但语义上不确定、且 Top-1 与来源说明不一致的模型输出。
+
+标签映射没有发生偏移。`imagenet1k.names` 由 torchvision `ResNet18_Weights.DEFAULT.meta["categories"]` 直接生成，共 1000 行；索引 155、194、200、204、266 已分别复核为 `Shih-Tzu`、`Dandie Dinmont`、`Tibetan terrier`、`Lhasa`、`miniature poodle`。TensorRT 与 ONNX Runtime 对全部 1000 个概率和 logits 的比较通过，只能证明两条执行路径输出一致，不能把模型预测提升为图片的真实犬种。
+
+![ResNet18 在 CC0 狗图片上的真实 TensorRT Top-5 预测；Top-1 与原图来源描述并不一致](../../images/classification-resnet18-annotated-cc0.webp)
 
 ![Classification 真实运行输出](../../images/classification-resnet18-local-package-consumer-terminal.png)
 
-终端截图来自真实运行的 stdout，只移除了机器路径并压缩成长短适合窗口展示的字段；shape、耗时、Top-5、比较数量、负例和通过状态均未修改。结果图使用同一个 CC0 输入和同一套 Classification 可视化写入器生成。
+终端截图来自真实运行的 stdout，只移除了机器路径并压缩成长短适合窗口展示的字段；shape、耗时、Top-5、比较数量、负例和通过状态均未修改。结果图使用同一个 CC0 输入和同一套 Classification 可视化写入器生成。它用于展示真实模型输出及其局限，不作为犬种识别正确样例。
 
 ## 复查与边界
 

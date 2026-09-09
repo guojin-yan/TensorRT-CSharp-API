@@ -52,11 +52,11 @@ TensorRT 10/11 的 `IDebugListener::processDebugTensor` 可以在 enqueue 时接
 
 ~~~powershell
 dotnet new console --framework net8.0
-dotnet add package JYPPX.TensorRT.CSharp.API --version "4.0.0-*"
-dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --version "4.0.0-*"
+dotnet add package JYPPX.TensorRT.CSharp.API --version "4.0.0"
+dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --version "4.0.0"
 ~~~
 
-`4.0.0-*` 只跟随当前 4.0.0 预览线，避免 NuGet 选择 API 不兼容的历史 `4.0.6170`。最后一个包 ID 必须按目标机器的 RID、TensorRT、CUDA 和 cuDNN 版本替换；Bridge 包不包含 NVIDIA vendor runtime。
+精确 `4.0.0` 固定正式版本，避免 NuGet 选择 API 不兼容的历史 `4.0.6170`。最后一个包 ID 必须按目标机器的 RID、TensorRT、CUDA 和 cuDNN 版本替换；Bridge 包不包含 NVIDIA vendor runtime。
 
 ### 发布前 local-feed 证据复核
 

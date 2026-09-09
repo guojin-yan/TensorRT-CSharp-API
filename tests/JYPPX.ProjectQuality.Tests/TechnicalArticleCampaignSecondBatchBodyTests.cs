@@ -42,7 +42,7 @@ public sealed class TechnicalArticleCampaignSecondBatchBodyTests
         JsonElement root = evidence.RootElement;
         JsonElement assets = root.GetProperty("assets");
         JsonElement validation = root.GetProperty("runtimeValidation");
-        JsonElement maintenance = root.GetProperty("maintenanceValidation");
+        JsonElement maintenance = root.GetProperty("currentMaintenanceValidation");
 
         Assert.Equal("dynamic-shape-technical-article-runtime-evidence", root.GetProperty("recordKind").GetString());
         Assert.False(root.GetProperty("network").GetProperty("modelOrOnnxRequired").GetBoolean());
@@ -57,7 +57,8 @@ public sealed class TechnicalArticleCampaignSecondBatchBodyTests
             assets.GetProperty("runtimeScreenshotPath").GetString()!.Replace('/', Path.DirectorySeparatorChar));
         Assert.Equal(maintenance.GetProperty("currentSourceSha256").GetString(), ComputeSha256(sourcePath));
         Assert.Equal(assets.GetProperty("runtimeScreenshotSha256").GetString(), ComputeSha256(screenshotPath));
-        Assert.True(maintenance.GetProperty("historicalRuntimeScreenshotRetained").GetBoolean());
+        Assert.False(maintenance.GetProperty("gpuRuntimeScenarioRerun").GetBoolean());
+        Assert.True(maintenance.GetProperty("historicalRuntimeEvidenceRetained").GetBoolean());
     }
 
     private static string ComputeSha256(string path)

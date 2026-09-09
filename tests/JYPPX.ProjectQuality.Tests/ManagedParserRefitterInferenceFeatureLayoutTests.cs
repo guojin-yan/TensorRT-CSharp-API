@@ -10,7 +10,7 @@ public sealed class ManagedParserRefitterInferenceFeatureLayoutTests
     private const string ParserRefitterOriginalNormalizedSha256 =
         "f18a67b5f9660b0dde1f71288dffd177a18662fc4d7e16455c9341e27e73c35d";
     private const string InferenceBindingsOriginalNormalizedSha256 =
-        "80ddd3fe4c3b391e9cd005e240feb2df71d9d1ae3b861eec119a6ecb54a5eca0";
+        "96c4de33359c562e7c13d79a5fb0fde4e5c65d2aa0c8fb4eaf5f432aaf1ab288";
 
     public static TheoryData<string, string[]> ParserRefitterFeatureMethods => new()
     {

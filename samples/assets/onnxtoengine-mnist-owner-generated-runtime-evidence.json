@@ -10,6 +10,14 @@
     "visualizationWriterSha256": "232e59180fce74f13760917497826c45ef3c89c05a674e5f7e126d3e93994427",
     "sampleProgramSha256": "0b639bbffe22eb1750435d4733e8a68f0125edfe5e97ea662cf493ea7beac4aa"
   },
+  "currentMaintenanceValidation": {
+    "validatedUtcDate": "2026-08-12",
+    "validationScope": "stable-package-build-help-and-source-drift-classification",
+    "currentSampleProgramSha256": "0b639bbffe22eb1750435d4733e8a68f0125edfe5e97ea662cf493ea7beac4aa",
+    "buildAndHelpPassed": true,
+    "gpuRuntimeScenarioRerun": false,
+    "historicalRuntimeEvidenceRetained": true
+  },
   "runtimeEnvironment": {
     "os": "Windows 11",
     "rid": "win-x64",

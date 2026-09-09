@@ -231,6 +231,15 @@
     "applicationToolsAssemblySha256": "44258d5458b40a2787e16f4ef5bdbc0636d39299b2642122ebb9e029d6d5330c",
     "nativeBridgeSha256": "8669fa8799767d874994cd35424ef3edf079315aa1e6633e7e86b7676f2effc5"
   },
+  "currentMaintenanceValidation": {
+    "validatedUtcDate": "2026-08-12",
+    "validationScope": "source-layout-and-build-help-validation",
+    "currentBuilderConfigurationSha256": "ae86dbc71709b5eb5f883230015a5b4d5e034ff59ccdeb709d67eed5faeca00c",
+    "currentDiagnosticsSha256": "e28cb8a0b85063e7a68b15f08502b3581a97d373683c173b41572018275247a5",
+    "buildAndHelpPassed": true,
+    "gpuRuntimeScenarioRerun": false,
+    "historicalRuntimeEvidenceRetained": true
+  },
   "proofBoundary": {
     "tensorRtExecRuntimeExecution": true,
     "externalRealOnnxAndInput": true,

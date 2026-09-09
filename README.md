@@ -1,10 +1,10 @@
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/images/readme/hero-dark.svg">
   <source media="(prefers-color-scheme: light)" srcset="docs/images/readme/hero-light.svg">
-  <img alt="TensorRT CSharpAPI v4.0 - TensorRT and CUDA bindings for C# and .NET" src="docs/images/readme/hero-light.svg" width="100%">
+  <img alt="TensorRT CSharp API v4.0 - TensorRT and CUDA bindings for C# and .NET" src="docs/images/readme/hero-light.svg" width="100%">
 </picture>
 
-<h1 align="center">TensorRT CSharpAPI v4.0</h1>
+<h1 align="center">TensorRT CSharp API v4.0</h1>
 
 <p align="center">
   TensorRT and CUDA bindings for C# and .NET, with managed APIs, project-owned bridge packages, runnable vision samples, and a TensorRtExec desktop workflow.
@@ -19,19 +19,19 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/guojin-yan/TensorRT-CSharp-API/actions/workflows/ci-validation.yml"><img src="https://github.com/guojin-yan/TensorRT-CSharp-API/actions/workflows/ci-validation.yml/badge.svg?branch=TensorRT CSharpAPI v4.0" alt="Managed CI" /></a>
-  <a href="https://github.com/guojin-yan/TensorRT-CSharp-API/actions/workflows/release-quality-gate.yml"><img src="https://github.com/guojin-yan/TensorRT-CSharp-API/actions/workflows/release-quality-gate.yml/badge.svg?branch=TensorRT CSharpAPI v4.0" alt="Release quality gate" /></a>
+  <a href="https://github.com/guojin-yan/TensorRT-CSharp-API/actions/workflows/ci-validation.yml"><img src="https://github.com/guojin-yan/TensorRT-CSharp-API/actions/workflows/ci-validation.yml/badge.svg?branch=TensorRtSharp4.0" alt="Managed CI" /></a>
+  <a href="https://github.com/guojin-yan/TensorRT-CSharp-API/actions/workflows/release-quality-gate.yml"><img src="https://github.com/guojin-yan/TensorRT-CSharp-API/actions/workflows/release-quality-gate.yml/badge.svg?branch=TensorRtSharp4.0" alt="Release quality gate" /></a>
 </p>
 
 <p align="center"><strong>English</strong> | <a href="README.zh-CN.md">简体中文</a></p>
 
-# TensorRT CSharpAPI v4.0
+# TensorRT CSharp API v4.0
 
 [![Build](https://github.com/guojin-yan/TensorRT-CSharp-API/actions/workflows/ci-validation.yml/badge.svg)](https://github.com/guojin-yan/TensorRT-CSharp-API/actions/workflows/ci-validation.yml)
 [![Documentation](https://img.shields.io/badge/docs-DocFX-2f80ed)](https://guojin-yan.github.io/TensorRT-CSharp-API/)
 [![License](https://img.shields.io/github/license/guojin-yan/TensorRT-CSharp-API.svg)](LICENSE)
 
-TensorRT CSharpAPI v4.0 provides a .NET API for TensorRT inference, CUDA runtime compilation, memory, streams, callbacks, and the TensorRtExec desktop workflow. The stable `4.0.0` release is public; development now focuses on package-consuming examples, applications, and complete technical articles.
+TensorRT CSharp API v4.0 provides a .NET API for TensorRT inference, CUDA runtime compilation, memory, streams, callbacks, and the TensorRtExec desktop workflow. The stable `4.0.0` release is public; development now focuses on package-consuming examples, applications, and complete technical articles.
 
 ## 📖 Introduction
 

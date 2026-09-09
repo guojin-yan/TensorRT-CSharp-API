@@ -65,6 +65,14 @@
     "runtimeScreenshotRecaptured": false,
     "historicalRuntimeScreenshotRetained": true
   },
+  "currentMaintenanceValidation": {
+    "validatedUtcDate": "2026-08-12",
+    "validationScope": "stable-package-build-help-and-source-drift-classification",
+    "currentSourceSha256": "b2f37fea1b173bd049337998bec385ad9acbc14ec6b68bffd54e4f0815c06ced",
+    "buildAndHelpPassed": true,
+    "gpuRuntimeScenarioRerun": false,
+    "historicalRuntimeEvidenceRetained": true
+  },
   "proofBoundary": {
     "sourceTreeRuntime": true,
     "realTensorRtEngineExecution": true,

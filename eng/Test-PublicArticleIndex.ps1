@@ -154,6 +154,7 @@ foreach ($article in $index.articles) {
   $headings = @(Get-MarkdownHeadings -Content $content)
   Assert-Condition ($content -notmatch '(?i)\b(TODO|TBD)\b') "Unresolved placeholder in '$($article.sourcePath)'."
   Assert-Condition ($content -notmatch '(?i)[A-Z]:\\Users\\') "Machine-specific path in '$($article.sourcePath)'."
+  Assert-Condition ($content -notmatch '(?<![A-Za-z0-9])TensorRtSharp4\.0\.sln(?![A-Za-z0-9])') "Canonical article '$($article.id)' uses the retired solution name 'TensorRtSharp4.0.sln'."
   $h1Headings = @($headings | Where-Object Level -eq 1)
   Assert-Condition ($h1Headings.Count -eq 1) "Canonical article '$($article.id)' must have exactly one H1."
   Assert-Condition ($h1Headings[0].Text -eq [string]$article.title) "H1 does not match article-index title for '$($article.id)'."
@@ -219,6 +220,11 @@ foreach ($article in $index.articles) {
 
   Assert-Condition ($content.Contains('https://github.com/guojin-yan/TensorRT-CSharp-API')) "Canonical article '$($article.id)' is missing the project source link."
   Assert-Condition ($content.Contains('https://www.nuget.org/packages/JYPPX.TensorRT.CSharp.API/4.0.0')) "Canonical article '$($article.id)' is missing the stable core package link."
+
+  foreach ($match in [regex]::Matches($content, 'https://github\.com/guojin-yan/TensorRT-CSharp-API/(?:blob|tree)/TensorRtSharp4\.0/(?<path>[^<>\s)`"'']+)')) {
+    $repositoryPath = [Uri]::UnescapeDataString($match.Groups['path'].Value)
+    Assert-Condition (Test-Path -LiteralPath (Resolve-RepositoryPath $repositoryPath)) "Broken repository link '$repositoryPath' in '$($article.sourcePath)'."
+  }
 
   if ($article.module -eq '02-samples') {
     Assert-Condition ($content.Contains('github.com/guojin-yan/TensorRT-CSharp-API') -and $content.Contains('/samples')) "Sample article '$($article.id)' is missing its GitHub sample source link."
@@ -291,6 +297,13 @@ foreach ($module in $modules) {
   Assert-Condition ($toc.Contains("href: $modulePath")) "TOC is missing '$modulePath'."
   Assert-Condition ($docsIndex.Contains("($modulePath)")) "docs/index.md is missing '$modulePath'."
   Assert-Condition ($articleReadme.Contains("($module/README.md)")) "Chinese article README is missing '$module'."
+
+  $moduleRoot = Resolve-RepositoryPath "docs/articles/zh-cn/$module"
+  foreach ($markdownFile in Get-ChildItem -LiteralPath $moduleRoot -Recurse -File -Filter '*.md') {
+    $relativePath = [IO.Path]::GetRelativePath($RepositoryRoot, $markdownFile.FullName).Replace('\', '/')
+    $moduleReadme = "docs/articles/zh-cn/$module/README.md"
+    Assert-Condition ($relativePath -eq $moduleReadme -or $seenPaths.Contains($relativePath)) "Public module contains unindexed Markdown '$relativePath'."
+  }
 }
 
 $writingSpecPath = Resolve-RepositoryPath 'docs/articles/zh-cn/publishing/public-article-writing-spec.md'

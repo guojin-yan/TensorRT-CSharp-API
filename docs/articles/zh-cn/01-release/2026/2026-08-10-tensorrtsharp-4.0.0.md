@@ -180,7 +180,7 @@ flowchart TD
 
 ---
 
-## 2. TensorRT CSharp API v4.0 4.0.0 介绍
+## 2. TensorRT CSharp API v4.0 介绍
 
 ### 2.1 项目简介
 

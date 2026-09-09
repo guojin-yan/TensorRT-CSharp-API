@@ -46,7 +46,7 @@ public sealed class ApplicationPublicPackageConsumptionTests
     }
 
     [Fact]
-    public void SharedPackageRulesUseMaintainedTensorRtLineAndPinnedOpenCvRelease()
+    public void SharedPackageRulesUseStableTensorRtReleaseAndPinnedOpenCvRelease()
     {
         string tensorRtProps = File.ReadAllText(Path.Combine(
             RepositoryPaths.Root,
@@ -60,10 +60,10 @@ public sealed class ApplicationPublicPackageConsumptionTests
         string applicationReadme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "applications", "README.md"));
         string combinedReadmes = sampleReadme + applicationReadme;
 
-        Assert.Contains("4.0.0-*", tensorRtProps, StringComparison.Ordinal);
+        Assert.Contains(">4.0.0<", tensorRtProps, StringComparison.Ordinal);
         Assert.Contains(">5.0.0<", openCvProps, StringComparison.Ordinal);
         Assert.Contains(
-            "dotnet add package JYPPX.TensorRT.CSharp.API --version \"4.0.0-*\"",
+            "dotnet add package JYPPX.TensorRT.CSharp.API --version 4.0.0",
             combinedReadmes,
             StringComparison.Ordinal);
         Assert.DoesNotContain(
@@ -71,7 +71,7 @@ public sealed class ApplicationPublicPackageConsumptionTests
             combinedReadmes,
             StringComparison.Ordinal);
         Assert.DoesNotContain("dotnet add package JYPPX.TensorRT.CSharp.API --version \"4.0.0-preview.1\"", combinedReadmes, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("dotnet add package JYPPX.TensorRT.CSharp.API --version \"4.0.0\"", combinedReadmes, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("4.0.0-*", combinedReadmes, StringComparison.Ordinal);
         Assert.DoesNotContain("4.0.0-preview.1", combinedReadmes, StringComparison.Ordinal);
     }
 }

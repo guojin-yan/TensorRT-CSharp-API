@@ -2,7 +2,7 @@
 
 `article-roadmap-30plus.json` 是面向微信公众号、博客和项目文档的机器可读文章规划。它不是 proof，不批准公开发布，也不关闭 release issue。
 
-## Summary
+## 1. Summary
 
 | Field | Value |
 | --- | --- |
@@ -12,17 +12,23 @@
 | canPublishPublicly | `False` |
 | canCloseReleaseIssue | `False` |
 
-## Boundary
+## 2. Boundary
 
 The 30+ article roadmap is publication planning only: not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push. failedBlockerCount=0 is not ready.
 
 Rows marked `near-ready-owner-proof-input` are article-body and owner proof input guidance only. They still require Owner-provided real assets, public package metadata, stdout/stderr logs, SHA256 values, host metadata, and strict validators before any proof promotion.
 
-## 文章矩阵
+## 3. 模块与写作约束
+
+公开文章按 `01-release`、`02-samples`、`03-applications`、`04-api`、`05-installation`、`06-source-build`、`07-misc` 七个模块维护。API 模块按类和功能扩展；安装模块按 Windows、Linux、WSL、容器和安装排错扩展；源码编译模块按绑定生成、CMake preset、Native 调试、托管构建和本地打包扩展。
+
+所有选题在进入 canonical 清单前必须遵守 `public-article-writing-spec.md`：标题品牌使用 `TensorRT CSharp API v4.0`，正文标题从 H2 编号，外部 URL 保留明文，程序标出仓库并提供输出，图片不超过 640px，流程图优先纵向，前言包含完整项目介绍，结尾使用统一文章声明且不链接尚未发布的下一篇。
+
+## 4. 文章矩阵
 
 | Id | Title | Audience | Status | Target |
 | --- | --- | --- | --- | --- |
-| `1` | TensorRtSharp4.0 项目总览：把 TensorRT/CUDA 带到 .NET | C# 工程师、AI 推理平台开发者 | `planned` | docs/articles/zh-cn/publishing/tensorrtsharp4-0-项目总览-把-tensorrt-cuda-带到-net.md |
+| `1` | TensorRT CSharp API v4.0 项目总览：把 TensorRT/CUDA 带到 .NET | C# 工程师、AI 推理平台开发者 | `planned` | docs/articles/zh-cn/publishing/tensorrtsharp4-0-项目总览-把-tensorrt-cuda-带到-net.md |
 | `2` | 为什么 TensorRT C# Binding 不能只是简单 P/Invoke | 系统开发者、库维护者 | `planned` | docs/articles/zh-cn/publishing/为什么-tensorrt-c-binding-不能只是简单-p-invoke.md |
 | `3` | 从 missing 清零到 deferred 边界提升：真实完成度怎么看 | 项目评审者、贡献者 | `ready` | docs/articles/zh-cn/publishing/从-missing-清零到-deferred-边界提升-真实完成度怎么看.md |
 | `4` | TensorRT 8/10/11 跨版本封装策略 | TensorRT 用户、库维护者 | `planned` | docs/articles/zh-cn/publishing/tensorrt-8-10-11-跨版本封装策略.md |
@@ -52,7 +58,7 @@ Rows marked `near-ready-owner-proof-input` are article-body and owner proof inpu
 | `28` | Callback 与 Allocator 为什么要谨慎提升 | 高级用户、贡献者 | `planned` | docs/articles/zh-cn/publishing/callback-与-allocator-为什么要谨慎提升.md |
 | `29` | Release Evidence Bundle 怎么读 | 发布负责人 | `planned` | docs/articles/zh-cn/publishing/release-evidence-bundle-怎么读.md |
 | `30` | 真实公开发布前最后一步：Owner 输入与 StrictClose | 发布 Owner | `planned` | docs/articles/zh-cn/publishing/真实公开发布前最后一步-owner-输入与-strictclose.md |
-| `31` | TensorRtSharp4.0 常见问题排查合集 | 所有用户 | `planned` | docs/articles/zh-cn/publishing/tensorrtsharp4-0-常见问题排查合集.md |
+| `31` | TensorRT CSharp API v4.0 常见问题排查合集 | 所有用户 | `planned` | docs/articles/zh-cn/publishing/tensorrtsharp4-0-常见问题排查合集.md |
 | `32` | 从样例到博客：如何准备一篇可复现的模型部署文章 | 项目维护者、技术作者 | `planned` | docs/articles/zh-cn/publishing/从样例到博客-如何准备一篇可复现的模型部署文章.md |
 | `33` | 发布前 Proof 边界：样例、工具报告与真实运行证据的分层 | 发布负责人、项目评审者、贡献者 | `ready` | docs/articles/zh-cn/publishing/发布前-proof-边界-样例-工具报告与真实运行证据的分层.md |
 | `34` | TensorRtExec 报告为什么不能替代真实模型运行 Proof | 工具用户、发布 Owner | `ready` | docs/articles/zh-cn/publishing/tensorrtexec-报告为什么不能替代真实模型运行-proof.md |
@@ -67,7 +73,7 @@ Rows marked `near-ready-owner-proof-input` are article-body and owner proof inpu
 | `43` | YoloVision YOLOX 本地 PackageReference 消费者实战 | YOLO 部署用户、NuGet 包维护者、发布负责人 | `ready` | docs/articles/zh-cn/yolovision-yolox-local-package-consumer-tutorial.md |
 | `44` | YoloVision YOLOv10 End-to-End 输出接入：从官方模型到 TensorRT 结果 | YOLOv10 部署用户、TensorRT 工程师、技术文章作者 | `ready` | docs/articles/zh-cn/yolovision-yolov10-end-to-end-output-guide.md |
 
-## Must Avoid Claims
+## 5. Must Avoid Claims
 
 - 不把 local feed、ProjectReference、direct nupkg、dry-run、dashboard、runbook、candidate、draft 或 build-only 写成 proof。
 - 不把 failedBlockerCount=0 写成 ready。

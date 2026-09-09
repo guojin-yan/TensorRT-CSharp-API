@@ -62,7 +62,11 @@ public static class TrtexecLikeOptionCapabilities
             new TrtexecLikeOptionCapability("--buildOnly/--skipInference/--dryRun", "execution", "implemented-boundary", "execution-mode", "Build-only, skip-inference, and dry-run modes cannot promote runtime proof."),
             new TrtexecLikeOptionCapability("--iterations/--warmUp/--duration/--streams/--infStreams", "runtime", "bounded-runtime-control", "bounded-scheduler-control", "Scheduler controls are bounded runtime infrastructure, not model correctness proof."),
             new TrtexecLikeOptionCapability("--noDataTransfers/--useSpinWait/--threads/--avgRuns/--percentile/--idleTime", "runtime", "bounded-runtime-control", "bounded-scheduler-control", "Runtime controls remain bounded enqueue/readback infrastructure evidence."),
+#if JYPPX_PUBLIC_STABLE_4_0_0
+            new TrtexecLikeOptionCapability("--sleepTime", "runtime", "unsupported-stable-package", "requested-but-not-applied", "The stable 4.0.0 package does not expose the stream-ordered delay API; reports record an applied value of zero."),
+#else
             new TrtexecLikeOptionCapability("--sleepTime", "runtime", "implemented-bounded-runtime", "runtime-applied-when-benchmark-executes", "A bridge-owned cudaLaunchHostFunc delay is event-fanned out to every inference stream before warmup; it is not a caller-thread sleep or a managed callback."),
+#endif
             new TrtexecLikeOptionCapability("--loadInputs", "runtime-artifacts", "implemented-bounded-float-input", "applied-bounded-input-capture", "Named float input files feed bounded runtime but do not validate expected output."),
             new TrtexecLikeOptionCapability("--dumpOutput/--dumpRawBindingsToFile/--exportOutput", "runtime-artifacts", "implemented-bounded-multi-output-capture", "applied-bounded-output-capture", "All float outputs are captured with bounded metadata and deterministic raw manifests; capture is not validation."),
             new TrtexecLikeOptionCapability("--referenceOutputs/--referenceAbsTolerance/--referenceRelTolerance/--referenceNaNPolicy/--referenceInfinityPolicy", "runtime-validation", "implemented-structured-reference-validation", "applied-all-output-reference-comparison", "Every float output must match a traceable structured reference; synthetic references remain synthetic runtime evidence."),

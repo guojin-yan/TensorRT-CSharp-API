@@ -72,7 +72,7 @@ CLI 适合脚本、批处理和 CI，WinForms 适合交互式选择模型、Shap
 | Runtime Bridge | 按 TensorRT/CUDA/cuDNN 组合选择 | NuGet 包列表：<https://www.nuget.org/profiles/JYPPX> |
 | TensorRtExec | CLI 与 WinForms 源码应用 | 应用目录：<https://github.com/guojin-yan/TensorRT-CSharp-API/tree/TensorRtSharp4.0/applications/TensorRtExec> |
 | CLI 入口 | 参数解析与运行模式选择 | `Program.cs`：<https://github.com/guojin-yan/TensorRT-CSharp-API/blob/TensorRtSharp4.0/applications/TensorRtExec/Program.cs> |
-| GUI 窗口 | WinForms 字段与交互 | `MainForm.cs`：<https://github.com/guojin-yan/TensorRT-CSharp-API/blob/TensorRtSharp4.0/applications/TensorRtExec/MainForm.cs> |
+| GUI 窗口 | WinForms 字段与交互 | `MainForm.cs`：<https://github.com/guojin-yan/TensorRT-CSharp-API/blob/TensorRtSharp4.0/applications/TensorRtExec/WinForms/MainForm.cs> |
 | 应用说明 | 参数、能力和边界 | `README.md`：<https://github.com/guojin-yan/TensorRT-CSharp-API/blob/TensorRtSharp4.0/applications/TensorRtExec/README.md> |
 
 TensorRtExec 是 source-only 应用，不作为独立 NuGet 或预编译桌面程序随 `4.0.0` Release 发布。它消费稳定核心包和共享工具代码。

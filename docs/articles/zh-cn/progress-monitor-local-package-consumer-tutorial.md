@@ -63,11 +63,11 @@ TensorRT 10/11 的 `IProgressMonitor` 会在 engine 构建期间报告三种事�
 
 ~~~powershell
 dotnet new console --framework net8.0
-dotnet add package JYPPX.TensorRT.CSharp.API --version "4.0.0-*"
-dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --version "4.0.0-*"
+dotnet add package JYPPX.TensorRT.CSharp.API --version "4.0.0"
+dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --version "4.0.0"
 ~~~
 
-`4.0.0-*` 只跟随当前 4.0.0 预览线，避免 NuGet 选择 API 不兼容的历史 `4.0.6170`。Bridge 包 ID 必须按目标机器环境替换，并且只包含项目自有 bridge。
+精确 `4.0.0` 固定正式版本，避免 NuGet 选择 API 不兼容的历史 `4.0.6170`。Bridge 包 ID 必须按目标机器环境替换，并且只包含项目自有 bridge。
 
 ### 发布前 local-feed 证据复核
 

@@ -10,6 +10,27 @@
   "isPostPublishProof": false,
   "isReleaseCloseProof": false,
   "boundary": "The 30+ article roadmap is publication planning only: not runtime proof, not post-publish proof, not publish approval, not release close approval, and not package push. failedBlockerCount=0 is not ready.",
+  "writingSpecification": "docs/articles/zh-cn/publishing/public-article-writing-spec.md",
+  "publicArticleModules": [
+    "01-release",
+    "02-samples",
+    "03-applications",
+    "04-api",
+    "05-installation",
+    "06-source-build",
+    "07-misc"
+  ],
+  "contentRules": {
+    "titleBrand": "TensorRT CSharp API v4.0",
+    "numberHeadingsFromH2": true,
+    "showExternalUrlText": true,
+    "requireProgramRepositoryAndOutput": true,
+    "maximumArticleImageWidthPixels": 640,
+    "preferVerticalFlowcharts": true,
+    "forbidUnpublishedNextArticleLink": true,
+    "requireExpandedProjectPreface": true,
+    "requireFinalArticleDeclaration": true
+  },
   "requiredFields": [
     "id",
     "title",
@@ -23,7 +44,7 @@
   "articles": [
     {
       "id": 1,
-      "title": "TensorRtSharp4.0 项目总览：把 TensorRT/CUDA 带到 .NET",
+      "title": "TensorRT CSharp API v4.0 项目总览：把 TensorRT/CUDA 带到 .NET",
       "audience": "C# 工程师、AI 推理平台开发者",
       "type": "宣发",
       "outline": [
@@ -964,7 +985,7 @@
     },
     {
       "id": 31,
-      "title": "TensorRtSharp4.0 常见问题排查合集",
+      "title": "TensorRT CSharp API v4.0 常见问题排查合集",
       "audience": "所有用户",
       "type": "FAQ",
       "outline": [

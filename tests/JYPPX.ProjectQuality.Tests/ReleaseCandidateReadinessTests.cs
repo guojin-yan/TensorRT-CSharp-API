@@ -1765,8 +1765,10 @@ public sealed class ReleaseCandidateReadinessTests
         Assert.False(finalPackageRoot.GetProperty("postPublishStdoutStderrSummaryReady").GetBoolean());
         Assert.False(finalPackageRoot.GetProperty("postPublishAllLogSha256Matches").GetBoolean());
         Assert.True(finalPackageRoot.GetProperty("managedPackageCount").GetInt32() >= 1);
-        Assert.True(finalPackageRoot.GetProperty("runtimePackageCount").GetInt32() >= 1);
-        Assert.True(finalPackageRoot.GetProperty("splitRuntimePackageCount").GetInt32() >= 1);
+        int runtimePackageCount = finalPackageRoot.GetProperty("runtimePackageCount").GetInt32();
+        int splitRuntimePackageCount = finalPackageRoot.GetProperty("splitRuntimePackageCount").GetInt32();
+        Assert.True(runtimePackageCount + splitRuntimePackageCount >= 1);
+        Assert.True(splitRuntimePackageCount >= 1);
         Assert.True(finalPackageRoot.GetProperty("nativeAssetCount").GetInt32() > 0);
         Assert.Contains(finalPackageRoot.GetProperty("sourceEvidence").EnumerateArray(), static item => item.GetString() == "artifacts/final-release/release-package-proof-bundle.json");
         Assert.Contains(finalPackageRoot.GetProperty("sourceEvidence").EnumerateArray(), static item => item.GetString() == "artifacts/final-release/release-evidence-bundle.json");

@@ -8,7 +8,7 @@ namespace JYPPX.ProjectQuality.Tests;
 public sealed class ManagedOnnxEngineBuildLayoutTests
 {
     private const string BuildServiceOriginalNormalizedSha256 =
-        "dcea246b388b28ef133c67bb37fb7d7ee5b21b700ef8425bee9b2ea8fdd6ddf1";
+        "0d3051196bf561cb62f69da7185d65e7120461c46b64e35c39e0291434589271";
     private const string BuildResultOriginalNormalizedSha256 =
         "2b8c17af2550480d39da9e7c944b4830b3ec908e8b652bc85bd83c8402487200";
 

@@ -108,8 +108,8 @@ https://github.com/guojin-yan/TensorRT-CSharp-API/tree/TensorRtSharp4.0/pack/run
 FROM <dotnet-sdk-image> AS build
 WORKDIR /src
 COPY . .
-RUN dotnet restore ./TensorRtSharp4.0.sln
-RUN dotnet build ./TensorRtSharp4.0.sln -c Release --no-restore
+RUN dotnet restore ./TensorRtSharp.sln
+RUN dotnet build ./TensorRtSharp.sln -c Release --no-restore
 
 FROM <dotnet-runtime-image>
 WORKDIR /app

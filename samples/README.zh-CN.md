@@ -28,11 +28,11 @@
 新建外部项目时，安装托管 API 和一个与目标系统、TensorRT、CUDA、cuDNN 版本匹配的 Bridge 包：
 
 ```powershell
-dotnet add package JYPPX.TensorRT.CSharp.API --version "4.0.0-*"
-dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --version "4.0.0-*"
+dotnet add package JYPPX.TensorRT.CSharp.API --version 4.0.0
+dotnet add package JYPPX.TensorRT.CSharp.API.Runtime.win-x64.trt10.11.cuda12.9.cudnn9.22.Bridge --version 4.0.0
 ```
 
-CUDA、cuDNN、TensorRT 和 NVRTC 由用户自行安装，Bridge 包不携带 NVIDIA 运行库。
+正式项目使用精确 `4.0.0`，以保证本地和 CI 还原到同一 API 表面。CUDA、cuDNN、TensorRT 和 NVRTC 由用户自行安装，Bridge 包不携带 NVIDIA 运行库。
 
 ## 模型与图片
 
