@@ -15,8 +15,8 @@ else {
   $RequestedVersion.Trim()
 }
 
-if ($version -notmatch '^4\.0\.\d+([\-+][0-9A-Za-z][0-9A-Za-z\.-]*)?$') {
-  throw "Package version must start with 4.0.x. Current value: '$version'."
+if ($version -notmatch '^4\.0\.\d+(\.\d+)?([\-+][0-9A-Za-z][0-9A-Za-z\.-]*)?$') {
+  throw "Package version must start with 4.0.x or 4.0.x.y. Current value: '$version'."
 }
 
 Write-Output $version

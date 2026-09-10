@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: Package version (must start with 4.0.x)
+        description: Package version (must start with 4.0.x or 4.0.x.y)
         required: false
         default: 4.0.0
         type: string
@@ -46,7 +46,7 @@ on:
   workflow_call:
     inputs:
       version:
-        description: Package version (must start with 4.0.x)
+        description: Package version (must start with 4.0.x or 4.0.x.y)
         required: false
         default: 4.0.0
         type: string

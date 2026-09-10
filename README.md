@@ -56,8 +56,9 @@ CUDA, cuDNN, TensorRT, and NVRTC are user-installed prerequisites. NVIDIA runtim
 - Finalizes the stable `JYPPX.TensorRtSharp` and `JYPPX.CudaSharp` namespace roots and the 4.0 managed API surface.
 - Publishes one managed package plus 6 Windows and 12 Linux project-owned Bridge packages; consumers install the matching NVIDIA runtime themselves.
 - Keeps CUDA, cuDNN, TensorRT, NVRTC, sample applications, and model binaries outside all NuGet packages.
+- The compatible managed-package maintenance revision `4.0.0.1` is available for current C# core changes; the Bridge package matrix remains on `4.0.0`.
 
-Read the [detailed 4.0.0 notes](docs/releases/4.0.0.md) or browse the [complete version index](docs/releases/README.md).
+Read the [detailed 4.0.0 notes](docs/releases/4.0.0.md), the [4.0.0.1 managed-package notes](docs/releases/4.0.0.1.md), or browse the [complete version index](docs/releases/README.md).
 
 ## 🚀 Get Started In 30 Seconds
 
@@ -99,7 +100,7 @@ CUDA RTC roadmap: [English](docs/articles/en/cuda-runtime-compilation-roadmap.md
 
 ## 🌐 Public Packages And Release Assets
 
-The stable `4.0.0` release is available through GitHub Releases, NuGet.org, and GitHub Packages. Package README content is the English root README, package branding uses <code>nuget/logo.jpg</code>, and the core managed package uses the Apache-2.0 SPDX license expression.
+The stable `4.0.0` release is available through GitHub Releases, NuGet.org, and GitHub Packages. The compatible managed-package maintenance revision is `4.0.0.1`; the Bridge matrix remains at `4.0.0`. Package README content is the English root README, package branding uses <code>nuget/logo.jpg</code>, and the core managed package uses the Apache-2.0 SPDX license expression.
 
 | Package | Version | NuGet.org | GitHub Packages | Purpose |
 | --- | --- | --- | --- | --- |

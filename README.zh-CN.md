@@ -54,8 +54,9 @@ CUDA、cuDNN、TensorRT 和 NVRTC 由使用者自行安装。仓库不重新分�
 - 固定 `JYPPX.TensorRtSharp` 与 `JYPPX.CudaSharp` 顶层命名空间及 4.0 托管 API。
 - 发布 1 个托管包、6 个 Windows Bridge 包和 12 个 Linux Bridge 包，匹配的 NVIDIA 运行时仍由用户自行安装。
 - CUDA、cuDNN、TensorRT、NVRTC、样例应用和模型二进制均不进入 NuGet 包。
+- 针对当前 C# 核心代码提供兼容的托管包维护版本 `4.0.0.1`；Bridge 包矩阵仍保持 `4.0.0`。
 
-查看 [4.0.0 详细说明](docs/releases/4.0.0.md)，或浏览 [全部版本列表](docs/releases/README.md)。
+查看 [4.0.0 详细说明](docs/releases/4.0.0.md)、[4.0.0.1 托管包说明](docs/releases/4.0.0.1.md)，或浏览 [全部版本列表](docs/releases/README.md)。
 
 ## 🚀 30 秒开始
 
@@ -97,7 +98,7 @@ CUDA RTC 路线图：[English](docs/articles/en/cuda-runtime-compilation-roadmap
 
 ## 🌐 公开包与 Release 资产
 
-`4.0.0` 正式版已经在 GitHub Release、NuGet.org 和 GitHub Packages 公开。NuGet 包 README 使用根目录英文 README，包图标固定为 <code>nuget/logo.jpg</code>，核心托管包使用 Apache-2.0 SPDX 许可证表达式。
+`4.0.0` 正式版已经在 GitHub Release、NuGet.org 和 GitHub Packages 公开；兼容的托管包维护版本为 `4.0.0.1`，Bridge 矩阵仍为 `4.0.0`。NuGet 包 README 使用根目录英文 README，包图标固定为 <code>nuget/logo.jpg</code>，核心托管包使用 Apache-2.0 SPDX 许可证表达式。
 
 | 包 | 版本 | NuGet.org | GitHub Packages | 用途 |
 | --- | --- | --- | --- | --- |
