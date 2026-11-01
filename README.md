@@ -205,6 +205,8 @@ Workflows are manual-only to conserve Actions quota. The <code>grape-yan</code> 
 
 NuGet publication requires the core package permission plus package-scoped push permission for each project-owned `.Bridge` ID. `JYPPX.TensorRT.CSharp.API.YoloVision` and `JYPPX.TensorRT.CSharp.API.Classification` are sample-only IDs and must never be uploaded. A nuget.org `403` is an authorization failure, not a retryable build failure.
 
+NuGet.org publishing uses **Trusted Publishing** through GitHub OIDC and `NuGet/login@v1`. Set the Actions repository variable `NUGET_USER` to your NuGet account username and register the publishing workflow with the `production-release` environment on NuGet.org. See the [setup guide and policy values](docs/nuget-trusted-publishing.md). Long-lived `NUGET_API_KEY` secrets are no longer used; GitHub Packages continues to use `GITHUB_TOKEN`.
+
 ## 🗂️ Repository Layout
 
 - <code>src</code>: managed interfaces grouped by CUDA, TensorRT, runtime, memory, and shared modules.

@@ -71,7 +71,7 @@ public sealed class ReleaseAutomationTests
     }
 
     [Fact]
-    public void RuntimePublicationRequiresExplicitOwnerApprovalAndNuGetSecretPreflight()
+    public void RuntimePublicationRequiresExplicitOwnerApprovalAndTrustedPublishingPreflight()
     {
         string releaseBundle = File.ReadAllText(Path.Combine(RepositoryPaths.Root, ".github", "workflows", "release-bundle.yml"));
         string runtimeWindows = File.ReadAllText(Path.Combine(RepositoryPaths.Root, ".github", "workflows", "runtime-windows.yml"));
@@ -79,7 +79,8 @@ public sealed class ReleaseAutomationTests
 
         Assert.Contains("'${{ inputs.publish_runtime_to_nuget }}' -eq 'true'", releaseBundle, StringComparison.Ordinal);
         Assert.Contains("[ \"$PUBLISH_RUNTIME_TO_NUGET\" = \"true\" ]", releaseBundle, StringComparison.Ordinal);
-        Assert.Contains("Publishing managed or Bridge packages to nuget.org requires the repository secret NUGET_API_KEY", releaseBundle, StringComparison.Ordinal);
+        Assert.Contains("Test-NuGetTrustedPublishingConfiguration.ps1", releaseBundle, StringComparison.Ordinal);
+        Assert.Contains("-NuGetUser \"$NUGET_USER\" -RequireUser", releaseBundle, StringComparison.Ordinal);
         Assert.Equal(
             6,
             System.Text.RegularExpressions.Regex.Matches(
@@ -277,7 +278,7 @@ public sealed class ReleaseAutomationTests
     }
 
     [Fact]
-    public void NuGetOrgPublicationDocsRequirePackageScopedApiKey()
+    public void NuGetOrgPublicationDocsRequireTrustedPublishingAndPackageScopes()
     {
         string englishReadme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "README.md"));
         string chineseReadme = File.ReadAllText(Path.Combine(RepositoryPaths.Root, "README.zh-CN.md"));
@@ -294,7 +295,113 @@ public sealed class ReleaseAutomationTests
         Assert.Contains("nuget.org `403`", chineseReadme, StringComparison.Ordinal);
         Assert.Contains("push permission for the managed package ID", englishGate, StringComparison.Ordinal);
         Assert.Contains("nuget.org `403`", chineseGate, StringComparison.Ordinal);
-        Assert.Contains("NUGET_API_KEY` must be an active plain-text nuget.org key", summaryScript, StringComparison.Ordinal);
+        foreach (string documentation in new[] { englishReadme, chineseReadme, englishGate, chineseGate, summaryScript })
+        {
+            Assert.Contains("Trusted Publishing", documentation, StringComparison.Ordinal);
+            Assert.Contains("NUGET_USER", documentation, StringComparison.Ordinal);
+        }
+    }
+
+    [Theory]
+    [InlineData("package-managed.yml", "publish-nuget")]
+    [InlineData("release-bundle.yml", "orchestrate")]
+    [InlineData("runtime-windows.yml", "publish-runtime")]
+    [InlineData("runtime-linux.yml", "publish-runtime")]
+    public void NuGetPublicationUsesJobScopedOidcAndOnlyTheTemporaryLoginCredential(string file, string job)
+    {
+        string workflow = File.ReadAllText(Path.Combine(RepositoryPaths.Root, ".github", "workflows", file));
+        int jobIndex = workflow.IndexOf($"  {job}:", StringComparison.Ordinal);
+        Assert.True(jobIndex >= 0);
+        Assert.DoesNotContain("id-token: write", workflow[..jobIndex], StringComparison.Ordinal);
+        string publishingJob = workflow[jobIndex..];
+        int stepsIndex = publishingJob.IndexOf("    steps:", StringComparison.Ordinal);
+        Assert.Contains("id-token: write", publishingJob[..stepsIndex], StringComparison.Ordinal);
+        Assert.Contains("name: production-release", publishingJob[..stepsIndex], StringComparison.Ordinal);
+        Assert.Contains("uses: NuGet/login@v1", publishingJob, StringComparison.Ordinal);
+        Assert.Contains("user: ${{ vars.NUGET_USER }}", publishingJob, StringComparison.Ordinal);
+        Assert.Contains("NUGET_API_KEY: ${{ steps.nuget-login.outputs.NUGET_API_KEY }}", publishingJob, StringComparison.Ordinal);
+        Assert.Contains("-RequireApiKey", publishingJob, StringComparison.Ordinal);
+        Assert.DoesNotContain("secrets.NUGET_API_KEY", workflow, StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData("runtime-windows.yml", "inputs.publish_to_nuget")]
+    [InlineData("runtime-linux.yml", "inputs.publish_to_nuget")]
+    [InlineData("release-bundle.yml", "inputs.publish_managed_to_nuget && inputs.publish_runtime_to_nuget")]
+    public void MixedPublicationJobsOnlyLogInWhenNuGetPublicationIsEnabled(string file, string condition)
+    {
+        string workflow = File.ReadAllText(Path.Combine(RepositoryPaths.Root, ".github", "workflows", file));
+        int loginIndex = workflow.IndexOf("      - name: Log in to NuGet.org with Trusted Publishing", StringComparison.Ordinal);
+        int nextStepIndex = workflow.IndexOf("      - name:", loginIndex + 1, StringComparison.Ordinal);
+        Assert.Contains("if: ${{ " + condition + " }}", workflow[loginIndex..nextStepIndex], StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData("GuojinYan", true)]
+    [InlineData("", false)]
+    [InlineData("GuojinYan@example.com", false)]
+    [InlineData(" GuojinYan ", false)]
+    public void NuGetConfigurationCheckReportsOnlyUsernameConfigurationWithoutVerifyingPolicy(string user, bool configured)
+    {
+        // Explicit input must work without GitHub authentication or an OIDC token.
+        ProcessStartInfo startInfo = new(PowerShellHost.ResolveExecutable())
+        {
+            WorkingDirectory = RepositoryPaths.Root,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+        };
+        startInfo.ArgumentList.Add("-NoProfile");
+        if (OperatingSystem.IsWindows())
+        {
+            startInfo.ArgumentList.Add("-ExecutionPolicy");
+            startInfo.ArgumentList.Add("Bypass");
+        }
+        startInfo.ArgumentList.Add("-Command");
+        startInfo.ArgumentList.Add("& './eng/Test-NuGetTrustedPublishingConfiguration.ps1' -NuGetUser '" + user.Replace("'", "''", StringComparison.Ordinal) + "' -Repository unused/unused | ConvertTo-Json -Compress");
+        using Process process = Process.Start(startInfo)!;
+        using JsonDocument document = JsonDocument.Parse(process.StandardOutput.ReadToEnd());
+        process.WaitForExit();
+        Assert.Equal(0, process.ExitCode);
+        Assert.Equal(configured, document.RootElement.GetProperty("userConfigured").GetBoolean());
+        Assert.False(document.RootElement.GetProperty("policyVerified").GetBoolean());
+        Assert.Equal("input", document.RootElement.GetProperty("source").GetString());
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("GuojinYan@example.com")]
+    public void NuGetPublicationConfigurationRejectsMissingOrInvalidUsername(string user)
+    {
+        (int exitCode, string output) = RunPowerShellAllowFailure(
+            Path.Combine(RepositoryPaths.Root, "eng", "Test-NuGetTrustedPublishingConfiguration.ps1"),
+            "-NuGetUser", user,
+            "-RequireUser");
+        Assert.NotEqual(0, exitCode);
+        Assert.Contains("NUGET_USER is missing or invalid", output, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void MissingNuGetOidcCredentialFailsBeforeLocalConfigurationFallbackOrPush()
+    {
+        string tempRoot = Path.Combine(Path.GetTempPath(), "nuget-trusted-publishing-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(tempRoot);
+        try
+        {
+            File.WriteAllText(Path.Combine(tempRoot, "unused.nupkg"), "Never uploaded: credential validation must fail first.");
+            (int exitCode, string output) = RunPowerShellAllowFailure(
+                Path.Combine(RepositoryPaths.Root, "eng", "Push-NuGetPackages.ps1"),
+                "-PackageRoot", tempRoot,
+                "-Source", "https://api.nuget.org/v3/index.json",
+                "-ApiKeyEnvironmentVariable", "UNSET_NUGET_TEST_" + Guid.NewGuid().ToString("N"),
+                "-RequireApiKey");
+            Assert.NotEqual(0, exitCode);
+            Assert.Contains("fallback is disabled", output, StringComparison.Ordinal);
+            Assert.DoesNotContain("Downloading nuget.exe", output, StringComparison.Ordinal);
+        }
+        finally
+        {
+            Directory.Delete(tempRoot, recursive: true);
+        }
     }
 
     [Fact]

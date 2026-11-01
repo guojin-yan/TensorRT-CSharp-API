@@ -190,6 +190,8 @@ dotnet test tests/JYPPX.ProjectQuality.Tests/JYPPX.ProjectQuality.Tests.csproj -
 
 NuGet 发布需要核心包权限，以及每个项目自有 `.Bridge` ID 的按包 push 权限。`JYPPX.TensorRT.CSharp.API.YoloVision` 和 `JYPPX.TensorRT.CSharp.API.Classification` 是仅供 samples 使用的 ID，严禁上传。nuget.org `403` 表示授权失败，不应重复上传。
 
+NuGet.org 发布已改为 **Trusted Publishing**，通过 GitHub OIDC 和 `NuGet/login@v1` 获取短期发布凭据。请设置仓库 Actions variable `NUGET_USER`，并在 NuGet.org 为发布工作流及 `production-release` 环境创建信任策略，具体填写内容见[配置指南](docs/nuget-trusted-publishing.md)。工作流不再使用长期 `NUGET_API_KEY` secret；GitHub Packages 继续使用 `GITHUB_TOKEN`。
+
 ## 🗂️ 目录结构
 
 - src：按模块归类的托管接口。

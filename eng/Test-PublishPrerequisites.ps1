@@ -71,7 +71,7 @@ switch ($Target) {
     }
 
     if (-not (Test-IsAsciiText -Value $normalizedApiKey)) {
-      throw "The nuget.org API key contains non-ASCII characters. Store the plain-text NuGet API key in NUGET_API_KEY instead of an encrypted credential blob or other machine-generated token."
+      throw "The nuget.org API key contains non-ASCII characters. In GitHub Actions, use the exact temporary NUGET_API_KEY output from NuGet/login."
     }
 
     if (Test-ContainsWhitespace -Value $normalizedApiKey) {

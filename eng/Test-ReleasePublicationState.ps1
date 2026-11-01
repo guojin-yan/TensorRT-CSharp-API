@@ -10,8 +10,8 @@ param(
   [string]$ReleaseTag,
   [string[]]$RuntimeReleaseTag = @(),
   [AllowEmptyString()]
-  [string]$NuGetApiKeyAvailable,
-  [switch]$RequireNuGetApiKey,
+  [string]$NuGetUser,
+  [switch]$RequireNuGetTrustedPublishingConfiguration,
   [switch]$RequireManagedGitHubPackages,
   [switch]$RequireManagedNuGetOrg,
   [switch]$RequireManagedReleaseAsset,
@@ -227,27 +227,15 @@ function Get-NuGetOrgVersions {
 $checks = New-Object System.Collections.Generic.List[object]
 $runtimeReleaseTags = @(Expand-TokenList -Values $RuntimeReleaseTag)
 
-if (-not [string]::IsNullOrWhiteSpace($NuGetApiKeyAvailable)) {
-  $hasNuGetApiKey = $NuGetApiKeyAvailable -in @("1", "true", "True", "TRUE", "yes", "Yes", "YES")
-  $requirement = if ($RequireNuGetApiKey.IsPresent) { "required" } else { "optional" }
-  Add-Check -Name "repository secret NUGET_API_KEY availability" -Passed ($hasNuGetApiKey -or -not $RequireNuGetApiKey.IsPresent) -Detail "required=$requirement found=$hasNuGetApiKey source=input"
+$nugetConfigurationArguments = @{ Repository = $Repository }
+if ($PSBoundParameters.ContainsKey("NuGetUser")) {
+  $nugetConfigurationArguments.NuGetUser = $NuGetUser
 }
-else {
-  $secretResult = Invoke-GhJson -Arguments @("secret", "list", "--repo", $Repository) -AllowFailure
-  if ($secretResult.success) {
-    $secretNames = @(
-      $secretResult.output -split "`n" |
-        Where-Object { -not [string]::IsNullOrWhiteSpace($_) } |
-        ForEach-Object { ($_ -split "\s+")[0] }
-    )
-    $hasNuGetApiKey = $secretNames -contains "NUGET_API_KEY"
-    $requirement = if ($RequireNuGetApiKey.IsPresent) { "required" } else { "optional" }
-    Add-Check -Name "repository secret NUGET_API_KEY availability" -Passed ($hasNuGetApiKey -or -not $RequireNuGetApiKey.IsPresent) -Detail "required=$requirement found=$hasNuGetApiKey source=gh-secret-list"
-  }
-  else {
-    Add-Check -Name "repository secret list is readable" -Passed $false -Detail $secretResult.stderr
-  }
-}
+$nugetConfiguration = & (Join-Path $PSScriptRoot "Test-NuGetTrustedPublishingConfiguration.ps1") @nugetConfigurationArguments
+$requirement = if ($RequireNuGetTrustedPublishingConfiguration.IsPresent) { "required" } else { "optional" }
+Add-Check -Name "NuGet Trusted Publishing configuration (NUGET_USER)" `
+  -Passed ($nugetConfiguration.userConfigured -or -not $RequireNuGetTrustedPublishingConfiguration.IsPresent) `
+  -Detail "required=$requirement source=$($nugetConfiguration.source); $($nugetConfiguration.detail)"
 
 $managedPackageIds = @(Expand-TokenList -Values @($ManagedPackageId, $ManagedExtensionPackageId))
 if (-not [string]::IsNullOrWhiteSpace($ManagedVersion)) {

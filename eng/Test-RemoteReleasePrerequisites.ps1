@@ -2,10 +2,10 @@
 param(
   [string]$Repository = "guojin-yan/TensorRT-CSharp-API",
   [AllowEmptyString()]
-  [string]$NuGetApiKeyAvailable,
+  [string]$NuGetUser,
   [AllowEmptyString()]
   [string]$RunnerAuditTokenAvailable,
-  [string[]]$RequiredSecret = @("NUGET_API_KEY"),
+  [string[]]$RequiredSecret = @(),
   [string[]]$RequiredRunnerLabelSet = @(
     "self-hosted,windows,x64"
   ),
@@ -137,11 +137,12 @@ $requiredSecrets = @(Expand-TokenList -Values $RequiredSecret)
 $requiredRunnerLabelSets = @(Expand-TokenList -Values $RequiredRunnerLabelSet)
 
 $knownSecretAvailability = @{}
-$nugetApiKeyIsAvailable = ConvertTo-BoolOrNull -Value $NuGetApiKeyAvailable
-$runnerAuditTokenIsAvailable = ConvertTo-BoolOrNull -Value $RunnerAuditTokenAvailable
-if ($null -ne $nugetApiKeyIsAvailable) {
-  $knownSecretAvailability["NUGET_API_KEY"] = [bool]$nugetApiKeyIsAvailable
+$nugetConfigurationArguments = @{ Repository = $Repository }
+if ($PSBoundParameters.ContainsKey("NuGetUser")) {
+  $nugetConfigurationArguments.NuGetUser = $NuGetUser
 }
+$nugetConfiguration = & (Join-Path $PSScriptRoot "Test-NuGetTrustedPublishingConfiguration.ps1") @nugetConfigurationArguments
+$runnerAuditTokenIsAvailable = ConvertTo-BoolOrNull -Value $RunnerAuditTokenAvailable
 if ($null -ne $runnerAuditTokenIsAvailable) {
   $knownSecretAvailability["RUNNER_AUDIT_TOKEN"] = [bool]$runnerAuditTokenIsAvailable
 }
@@ -255,6 +256,9 @@ $runnerChecks = @(
 )
 
 $failures = New-Object System.Collections.Generic.List[string]
+if (-not $nugetConfiguration.userConfigured) {
+  $failures.Add($nugetConfiguration.detail) | Out-Null
+}
 foreach ($check in $secretChecks) {
   if (-not $check.present) {
     $failures.Add("Missing repository secret: $($check.name)") | Out-Null
@@ -279,6 +283,7 @@ $markdownPath = Join-Path $outputRoot "remote-release-prerequisites.md"
 [pscustomobject]@{
   repository = $Repository
   failedCount = $failures.Count
+  nugetTrustedPublishing = $nugetConfiguration
   secrets = @($secretChecks)
   runnerQuerySucceeded = [bool]$runnerResult.success
   runnerQuerySource = $runnerQuerySource
@@ -301,6 +306,10 @@ $codeQuote = [string][char]96
 $lines.Add("# Remote Release Prerequisites")
 $lines.Add("")
 $lines.Add("Repository: " + $codeQuote + $Repository + $codeQuote)
+$lines.Add("")
+$lines.Add("## NuGet Trusted Publishing")
+$lines.Add("")
+$lines.Add($nugetConfiguration.detail)
 $lines.Add("")
 $lines.Add("## Secrets")
 $lines.Add("")

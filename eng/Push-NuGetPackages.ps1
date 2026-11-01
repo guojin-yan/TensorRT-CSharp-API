@@ -6,6 +6,7 @@ param(
   [string]$Source,
   [string]$ApiKey,
   [string]$ApiKeyEnvironmentVariable,
+  [switch]$RequireApiKey,
   [string]$SourceName,
   [string]$SourceUserName,
   [string]$SourcePasswordEnvironmentVariable,
@@ -276,7 +277,7 @@ function Get-LocalNuGetApiKeyEntries {
   $entries = [System.Collections.Generic.List[object]]::new()
   foreach ($value in @($matchingValues)) {
     if (-not (Test-IsAsciiText -Value $value)) {
-      throw "A local NuGet API key entry for '$Source' contains non-ASCII characters. Recreate the local key with NuGet tooling or provide NUGET_API_KEY as a plain-text secret."
+      throw "A local NuGet API key entry for '$Source' contains non-ASCII characters. Use the NuGet/login temporary credential in GitHub Actions or recreate the local key with NuGet tooling."
     }
 
     $originalKeys = @(@(
@@ -412,6 +413,9 @@ $ApiKey = if ([string]::IsNullOrWhiteSpace($ApiKey)) { Get-SecretFromEnvironment
 $ApiKey = Get-NormalizedSecretValue -Value $ApiKey -Description "The package API key"
 $sourcePassword = Get-NormalizedSecretValue -Value (Get-SecretFromEnvironment -Name $SourcePasswordEnvironmentVariable) -Description "The package source password"
 $hasApiKey = -not [string]::IsNullOrWhiteSpace($ApiKey)
+if ($RequireApiKey.IsPresent -and -not $hasApiKey) {
+  throw "An explicit API key is required. NuGet Trusted Publishing must supply the NuGet/login output; local NuGet.Config fallback is disabled."
+}
 $hasSourceCredentials = -not [string]::IsNullOrWhiteSpace($SourceName) -and
   -not [string]::IsNullOrWhiteSpace($SourceUserName) -and
   -not [string]::IsNullOrWhiteSpace($sourcePassword)
@@ -528,7 +532,7 @@ try {
       }
 
       if (Test-IsNonRetryableNuGetAuthorizationFailure -Source $Source -Output $output) {
-        throw "nuget.org rejected the package with a non-retryable authentication/authorization failure. Check that NUGET_API_KEY is active and has push permission for this package ID or its owning account/organization."
+        throw "nuget.org rejected the package with a non-retryable authentication/authorization failure. Check the Trusted Publishing policy, NUGET_USER, package ownership/scopes, and the one-hour credential lifetime."
       }
 
       if ($attempt -ge $MaxAttempts) {

@@ -135,7 +135,11 @@ $packageManagedDryRunReady = Test-ContainsAll -Text $packageWorkflow -Needles @(
 
 $packageManagedPublishGuarded = Test-ContainsAll -Text $packageWorkflow -Needles @(
   'if: ${{ inputs.publish_to_nuget && inputs.owner_publish_approved && github.repository_owner == ''guojin-yan'' }}',
-  "NUGET_API_KEY",
+  "NuGet/login@v1",
+  "id-token: write",
+  "vars.NUGET_USER",
+  "steps.nuget-login.outputs.NUGET_API_KEY",
+  "-RequireApiKey",
   "Test-PublishPrerequisites.ps1",
   "Push-NuGetPackages.ps1",
   'if: ${{ inputs.publish_to_github_packages && inputs.owner_publish_approved && github.repository_owner == ''guojin-yan'' }}',

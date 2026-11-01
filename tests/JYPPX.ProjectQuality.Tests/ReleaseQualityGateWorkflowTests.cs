@@ -99,6 +99,9 @@ public sealed class ReleaseQualityGateWorkflowTests
         Assert.Contains("release_tag: \"\"", workflow, StringComparison.Ordinal);
         Assert.Contains("artifact_name: package-managed-dry-run", workflow, StringComparison.Ordinal);
 
+        int dryRunJobIndex = workflow.IndexOf("  package-managed-dry-run:", StringComparison.Ordinal);
+        int nextJobIndex = workflow.IndexOf("  release-artifact-audit:", dryRunJobIndex, StringComparison.Ordinal);
+        Assert.Contains("id-token: write", workflow[dryRunJobIndex..nextJobIndex], StringComparison.Ordinal);
         Assert.Contains("publish_to_nuget:", packageManagedWorkflow, StringComparison.Ordinal);
         Assert.Contains("publish_to_github_packages:", packageManagedWorkflow, StringComparison.Ordinal);
         Assert.True(CountOccurrences(packageManagedWorkflow, "default: false") >= 4);

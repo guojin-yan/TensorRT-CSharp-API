@@ -23,8 +23,8 @@ on:
         required: false
         default: "v4.0.0-preview.1"
         type: string
-      require_nuget_api_key:
-        description: Fail when NUGET_API_KEY is missing
+      require_nuget_trusted_publishing_configuration:
+        description: Require NUGET_USER configuration (does not verify the NuGet trust policy)
         required: false
         default: true
         type: boolean
@@ -100,7 +100,7 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
       GH_REPO: ${{ github.repository }}
-      HAS_NUGET_API_KEY: ${{ secrets.NUGET_API_KEY != '' }}
+      NUGET_USER: ${{ vars.NUGET_USER }}
       RUNNER_AUDIT_TOKEN: ${{ secrets.RUNNER_AUDIT_TOKEN }}
     steps:
       - name: Checkout
@@ -115,8 +115,8 @@ jobs:
             "./eng/Test-ReleasePublicationState.ps1",
             "-Repository",
             "$env:GH_REPO",
-            "-NuGetApiKeyAvailable",
-            "$env:HAS_NUGET_API_KEY",
+            "-NuGetUser",
+            "$env:NUGET_USER"
           )
 
           if (-not [string]::IsNullOrWhiteSpace("${{ inputs.managed_version }}")) {
@@ -131,8 +131,8 @@ jobs:
             $arguments += @("-RuntimeReleaseTag", "${{ inputs.runtime_release_tags }}")
           }
 
-          if ("${{ inputs.require_nuget_api_key }}" -eq "true") {
-            $arguments += "-RequireNuGetApiKey"
+          if ("${{ inputs.require_nuget_trusted_publishing_configuration }}" -eq "true") {
+            $arguments += "-RequireNuGetTrustedPublishingConfiguration"
           }
 
           if ("${{ inputs.require_managed_github_packages }}" -eq "true") {
@@ -230,8 +230,8 @@ jobs:
             "./eng/Test-ReleaseReadiness.ps1",
             "-Repository",
             "$env:GH_REPO",
-            "-NuGetApiKeyAvailable",
-            "$env:HAS_NUGET_API_KEY",
+            "-NuGetUser",
+            "$env:NUGET_USER",
             "-RunnerAuditTokenAvailable",
             "${{ secrets.RUNNER_AUDIT_TOKEN != '' }}"
           )
@@ -262,8 +262,8 @@ jobs:
             "./eng/Test-RemoteReleasePrerequisites.ps1",
             "-Repository",
             "$env:GH_REPO",
-            "-NuGetApiKeyAvailable",
-            "$env:HAS_NUGET_API_KEY",
+            "-NuGetUser",
+            "$env:NUGET_USER",
             "-RunnerAuditTokenAvailable",
             "${{ secrets.RUNNER_AUDIT_TOKEN != '' }}"
           )

@@ -148,6 +148,7 @@ jobs:
     permissions:
       contents: write
       packages: write
+      id-token: write
     with:
       version: ${{ inputs.candidate_version }}
       configuration: Release

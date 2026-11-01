@@ -255,9 +255,6 @@ on:
         required: false
         default: false
         type: boolean
-    secrets:
-      NUGET_API_KEY:
-        required: false
 permissions:
   contents: write
   packages: write
@@ -727,6 +724,7 @@ jobs:
     permissions:
       contents: write
       packages: write
+      id-token: write
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -805,11 +803,25 @@ jobs:
             -Recurse `
             -SortMode size-ascending
 
+      - name: Validate NuGet Trusted Publishing configuration
+        if: ${{ inputs.publish_to_nuget }}
+        shell: pwsh
+        env:
+          NUGET_USER: ${{ vars.NUGET_USER }}
+        run: pwsh -NoProfile -File ./eng/Test-NuGetTrustedPublishingConfiguration.ps1 -NuGetUser $env:NUGET_USER -RequireUser
+
+      - name: Log in to NuGet.org with Trusted Publishing
+        if: ${{ inputs.publish_to_nuget }}
+        id: nuget-login
+        uses: NuGet/login@v1
+        with:
+          user: ${{ vars.NUGET_USER }}
+
       - name: Publish Linux bridge packages to nuget.org
         if: ${{ inputs.publish_to_nuget }}
         shell: pwsh
         env:
-          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+          NUGET_API_KEY: ${{ steps.nuget-login.outputs.NUGET_API_KEY }}
         run: |
           pwsh -NoProfile -File ./eng/Test-PublishPrerequisites.ps1 `
             -Target nuget.org `
@@ -818,6 +830,7 @@ jobs:
             -PackageRoot ./artifacts/runtime-split-nupkg `
             -Source "https://api.nuget.org/v3/index.json" `
             -ApiKeyEnvironmentVariable NUGET_API_KEY `
+            -RequireApiKey `
             -TimeoutSeconds 3600 `
             -MaxAttempts 2 `
             -RetryDelaySeconds 30 `

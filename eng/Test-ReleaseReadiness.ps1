@@ -2,7 +2,7 @@
 param(
   [string]$Repository = "guojin-yan/TensorRT-CSharp-API",
   [AllowEmptyString()]
-  [string]$NuGetApiKeyAvailable,
+  [string]$NuGetUser,
   [AllowEmptyString()]
   [string]$RunnerAuditTokenAvailable,
   [switch]$WarnOnly,
@@ -204,26 +204,22 @@ function Test-RunnerLabelSet {
   }
 }
 
-$hasNuGetApiKey = ConvertTo-BoolOrNull -Value $NuGetApiKeyAvailable
+$nugetConfigurationArguments = @{ Repository = $Repository }
+if ($PSBoundParameters.ContainsKey("NuGetUser")) {
+  $nugetConfigurationArguments.NuGetUser = $NuGetUser
+}
+$nugetConfiguration = & (Join-Path $PSScriptRoot "Test-NuGetTrustedPublishingConfiguration.ps1") @nugetConfigurationArguments
 $runnerAuditTokenIsAvailable = ConvertTo-BoolOrNull -Value $RunnerAuditTokenAvailable
 
-if ($null -eq $hasNuGetApiKey -or $null -eq $runnerAuditTokenIsAvailable) {
+if ($null -eq $runnerAuditTokenIsAvailable) {
   $secretResult = Invoke-GhJsonLines -Arguments @("secret", "list", "--repo", $Repository, "--json", "name", "--jq", ".[] | @json") -AllowFailure
   if ($secretResult.success) {
     $secretNames = @($secretResult.items | ForEach-Object { [string]$_.name })
-    if ($null -eq $hasNuGetApiKey) {
-      $hasNuGetApiKey = $secretNames -contains "NUGET_API_KEY"
-    }
-
     if ($null -eq $runnerAuditTokenIsAvailable) {
       $runnerAuditTokenIsAvailable = $secretNames -contains "RUNNER_AUDIT_TOKEN"
     }
   }
   else {
-    if ($null -eq $hasNuGetApiKey) {
-      $hasNuGetApiKey = $false
-    }
-
     if ($null -eq $runnerAuditTokenIsAvailable) {
       $runnerAuditTokenIsAvailable = $false
     }
@@ -292,10 +288,10 @@ $futureTargetReadiness = @(
 
 $readiness = New-Object System.Collections.Generic.List[object]
 $readiness.Add([pscustomobject]@{
-    area = "managed-nuget-org"
+    area = "nuget-trusted-publishing-configuration"
     gate = "required"
-    ready = [bool]$hasNuGetApiKey
-    detail = if ($hasNuGetApiKey) { "NUGET_API_KEY is available." } else { "NUGET_API_KEY is missing; managed package cannot be published to nuget.org from GitHub Actions." }
+    ready = [bool]$nugetConfiguration.userConfigured
+    detail = $nugetConfiguration.detail
   }) | Out-Null
 $readiness.Add([pscustomobject]@{
     area = "runner-audit"
@@ -345,7 +341,7 @@ $markdownPath = Join-Path $outputRoot "release-readiness.md"
   advisoryNotReadyCount = $advisoryNotReady.Count
   readiness = @($readiness.ToArray())
   runnerAuditTokenAvailable = [bool]$runnerAuditTokenIsAvailable
-  nugetApiKeyAvailable = [bool]$hasNuGetApiKey
+  nugetTrustedPublishing = $nugetConfiguration
   runnerQueryAttempted = [bool]$runnerQueryAttempted
   runnerQuerySucceeded = [bool]$runnerQuerySucceeded
   runnerQuerySource = $runnerQuerySource

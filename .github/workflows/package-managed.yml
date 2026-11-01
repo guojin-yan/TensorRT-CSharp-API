@@ -85,10 +85,6 @@ on:
         required: false
         default: false
         type: boolean
-    secrets:
-      NUGET_API_KEY:
-        required: false
-
 permissions:
   contents: read
 
@@ -292,6 +288,7 @@ jobs:
       name: production-release
     permissions:
       contents: read
+      id-token: write
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -307,14 +304,11 @@ jobs:
         with:
           dotnet-version: 10.0.x
 
-      - name: Validate nuget.org publish prerequisites
+      - name: Validate NuGet Trusted Publishing configuration
         shell: pwsh
         env:
-          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
-        run: |
-          pwsh -NoProfile -File .\eng\Test-PublishPrerequisites.ps1 `
-            -Target nuget.org `
-            -ApiKey $env:NUGET_API_KEY
+          NUGET_USER: ${{ vars.NUGET_USER }}
+        run: pwsh -NoProfile -File .\eng\Test-NuGetTrustedPublishingConfiguration.ps1 -NuGetUser $env:NUGET_USER -RequireUser
 
       - name: Download managed package artifact
         uses: actions/download-artifact@v8
@@ -331,17 +325,25 @@ jobs:
             -ExpectedPackageVersion '${{ needs.pack.outputs.package_version }}' `
             -RequireExactPackageSet
 
+      - name: Log in to NuGet.org with Trusted Publishing
+        id: nuget-login
+        uses: NuGet/login@v1
+        with:
+          user: ${{ vars.NUGET_USER }}
+
       - name: Publish managed package to nuget.org
         shell: pwsh
         env:
-          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+          NUGET_API_KEY: ${{ steps.nuget-login.outputs.NUGET_API_KEY }}
         run: |
-          Write-Host "Using NUGET_API_KEY secret for nuget.org publication."
-
+          pwsh -NoProfile -File .\eng\Test-PublishPrerequisites.ps1 `
+            -Target nuget.org `
+            -ApiKey $env:NUGET_API_KEY
           pwsh -NoProfile -File .\eng\Push-NuGetPackages.ps1 `
             -PackageRoot .\artifacts\managed `
             -Source https://api.nuget.org/v3/index.json `
             -ApiKeyEnvironmentVariable NUGET_API_KEY `
+            -RequireApiKey `
             -TimeoutSeconds 1800 `
             -MaxAttempts 2 `
             -RetryDelaySeconds 15

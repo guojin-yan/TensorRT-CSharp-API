@@ -86,7 +86,11 @@ $workflowContracts = @(
       New-Requirement -Needle "release_tag" -Description "GitHub Release tag input"
       New-Requirement -Needle "attach_to_github_release" -Description "GitHub Release asset upload toggle"
       New-Requirement -Needle "gh release upload" -Description "managed package release asset upload"
-      New-Requirement -Needle "-ApiKeyEnvironmentVariable NUGET_API_KEY" -Description "nuget.org publish uses repository secret"
+      New-Requirement -Needle "-ApiKeyEnvironmentVariable NUGET_API_KEY" -Description "nuget.org publish uses temporary credential"
+      New-Requirement -Needle "NuGet/login@v1" -Description "NuGet Trusted Publishing login"
+      New-Requirement -Needle "id-token: write" -Description "publishing job can request GitHub OIDC token"
+      New-Requirement -Needle "steps.nuget-login.outputs.NUGET_API_KEY" -Description "publishing uses login output"
+      New-Requirement -Needle "-RequireApiKey" -Description "missing OIDC credential cannot fall back to local configuration"
     )
   }
   [pscustomobject]@{
@@ -157,7 +161,7 @@ $workflowContracts = @(
       New-Requirement -Needle "gh workflow run" -Description "child workflow dispatch"
       New-Requirement -Needle "package-managed" -Description "managed package child workflow"
       New-Requirement -Needle "owner_publish_approved" -Description "explicit Owner publication approval"
-      New-Requirement -Needle "Publishing managed or Bridge packages to nuget.org requires the repository secret NUGET_API_KEY" -Description "managed and Bridge nuget.org secret preflight"
+      New-Requirement -Needle "Test-NuGetTrustedPublishingConfiguration.ps1" -Description "managed and Bridge NuGet Trusted Publishing configuration preflight"
       New-Requirement -Needle "runtime-windows" -Description "Windows runtime child workflow"
       New-Requirement -Needle "runtime-linux" -Description "Linux runtime child workflow"
       New-Requirement -Needle "gh release upload" -Description "release asset upload"
@@ -210,7 +214,7 @@ $workflowContracts = @(
       New-Requirement -Needle "windows_tensorrt_package_version_map" -Description "split collection TensorRT version map override"
       New-Requirement -Needle "windows_tensorrt_package_release_tag_map" -Description "split collection TensorRT release tag map override"
       New-Requirement -Needle 'attach_to_github_release=false' -Description "centralized Release mutation boundary"
-      New-Requirement -Needle "Publishing managed or Bridge packages to nuget.org requires the repository secret NUGET_API_KEY" -Description "nuget.org secret guard before child workflow dispatch"
+      New-Requirement -Needle "-NuGetUser" -Description "NuGet username guard before child workflow dispatch"
     )
   }
   [pscustomobject]@{
@@ -303,8 +307,8 @@ $workflowContracts = @(
   [pscustomobject]@{
     path = "eng\Test-RemoteReleasePrerequisites.ps1"
     requirements = @(
-      New-Requirement -Needle "NUGET_API_KEY" -Description "nuget.org secret prerequisite"
-      New-Requirement -Needle "NuGetApiKeyAvailable" -Description "workflow-provided nuget.org secret availability"
+      New-Requirement -Needle "Test-NuGetTrustedPublishingConfiguration.ps1" -Description "NuGet Trusted Publishing configuration prerequisite"
+      New-Requirement -Needle "NuGetUser" -Description "workflow-provided NuGet username"
       New-Requirement -Needle "RunnerAuditTokenAvailable" -Description "workflow-provided runner audit token availability"
       New-Requirement -Needle "runnerQuerySource" -Description "runner query source report"
       New-Requirement -Needle "self-hosted,windows,x64" -Description "Windows runner prerequisite"
@@ -325,12 +329,12 @@ $workflowContracts = @(
     requirements = @(
       New-Requirement -Needle "workflow_dispatch" -Description "manual trigger"
       New-Requirement -Needle "Test-ReleasePublicationState.ps1" -Description "release publication state audit script"
-      New-Requirement -Needle "HAS_NUGET_API_KEY" -Description "secret availability is passed without listing secrets"
+      New-Requirement -Needle "vars.NUGET_USER" -Description "NuGet username is provided by Actions variable"
       New-Requirement -Needle 'default: "4.0.0-preview.1"' -Description "current managed package version is audited by default"
       New-Requirement -Needle 'default: "v4.0.0-preview.1"' -Description "current release tag and strict inventory are audited by default"
       New-Requirement -Needle "runtime_release_tags" -Description "runtime assets attached to the current release can be audited explicitly"
       New-Requirement -Needle "require_managed_nuget_org" -Description "nuget.org managed package gate"
-      New-Requirement -Needle "require_nuget_api_key" -Description "nuget.org API key gate"
+      New-Requirement -Needle "require_nuget_trusted_publishing_configuration" -Description "NuGet Trusted Publishing configuration gate"
       New-Requirement -Needle "use only for infrastructure preparation audits" -Description "warn-only mode is documented as a preparation-only audit"
       New-Requirement -Needle "default: false" -Description "publication audit is a hard gate by default"
       New-Requirement -Needle "runner_required_label_sets" -Description "runner label audit input"
@@ -379,9 +383,9 @@ $workflowContracts = @(
   [pscustomobject]@{
     path = "eng\Test-ReleasePublicationState.ps1"
     requirements = @(
-      New-Requirement -Needle "NUGET_API_KEY" -Description "nuget.org secret audit"
-      New-Requirement -Needle "repository secret NUGET_API_KEY availability" -Description "secret availability report distinguishes optional and required gates"
-      New-Requirement -Needle "NuGetApiKeyAvailable" -Description "workflow-provided secret availability"
+      New-Requirement -Needle "Test-NuGetTrustedPublishingConfiguration.ps1" -Description "NuGet Trusted Publishing configuration audit"
+      New-Requirement -Needle "NuGet Trusted Publishing configuration (NUGET_USER)" -Description "configuration report distinguishes optional and required gates"
+      New-Requirement -Needle "NuGetUser" -Description "workflow-provided NuGet username"
       New-Requirement -Needle "Test-GitHubPackagesCoverage.ps1" -Description "runtime GitHub Packages coverage delegation"
       New-Requirement -Needle "api.nuget.org/v3-flatcontainer" -Description "nuget.org managed package visibility audit"
       New-Requirement -Needle "CheckFailedWorkflowRuns" -Description "failed workflow run audit"
@@ -415,7 +419,7 @@ $workflowContracts = @(
   [pscustomobject]@{
     path = "eng\Test-ReleaseReadiness.ps1"
     requirements = @(
-      New-Requirement -Needle "NUGET_API_KEY" -Description "nuget.org secret readiness"
+      New-Requirement -Needle "nuget-trusted-publishing-configuration" -Description "NuGet Trusted Publishing configuration readiness"
       New-Requirement -Needle "RUNNER_AUDIT_TOKEN" -Description "runner audit token readiness"
       New-Requirement -Needle "runnerQuerySource" -Description "runner query source reporting"
       New-Requirement -Needle "gh-auth" -Description "local gh-auth runner query fallback"

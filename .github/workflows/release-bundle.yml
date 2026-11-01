@@ -137,6 +137,11 @@ permissions:
 jobs:
   orchestrate:
     runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: write
+      packages: write
+      id-token: write
     environment:
       name: production-release
     env:
@@ -173,7 +178,7 @@ jobs:
       ATTACH_RUNTIME_TO_GITHUB_RELEASE: ${{ inputs.attach_runtime_to_github_release }}
       RELEASE_CONFIG_JSON: ${{ inputs.release_config_json }}
       RELEASE_TAG: v${{ inputs.version }}
-      HAS_NUGET_API_KEY: ${{ secrets.NUGET_API_KEY != '' }}
+      NUGET_USER: ${{ vars.NUGET_USER }}
       RUNNER_AUDIT_TOKEN: ${{ secrets.RUNNER_AUDIT_TOKEN }}
     steps:
       - name: Checkout
@@ -254,9 +259,9 @@ jobs:
         run: |
           set -euo pipefail
 
-          if { [ "$PUBLISH_MANAGED_TO_NUGET" = "true" ] || [ "$PUBLISH_RUNTIME_TO_NUGET" = "true" ]; } && [ "$HAS_NUGET_API_KEY" != "true" ]; then
-            echo "Publishing managed or Bridge packages to nuget.org requires the repository secret NUGET_API_KEY. Add a valid nuget.org API key secret before centralized publication." >&2
-            exit 1
+          if [ "$PUBLISH_MANAGED_TO_NUGET" = "true" ] || [ "$PUBLISH_RUNTIME_TO_NUGET" = "true" ]; then
+            # Publishing managed or Bridge packages to nuget.org requires Trusted Publishing and NUGET_USER.
+            pwsh -NoProfile -File ./eng/Test-NuGetTrustedPublishingConfiguration.ps1 -NuGetUser "$NUGET_USER" -RequireUser
           fi
 
           runner_label_sets=()
@@ -783,11 +788,18 @@ jobs:
             -MaxAttempts 3 `
             -RetryDelaySeconds 15
 
+      - name: Log in to NuGet.org with Trusted Publishing
+        if: ${{ inputs.publish_managed_to_nuget && inputs.publish_runtime_to_nuget }}
+        id: nuget-login
+        uses: NuGet/login@v1
+        with:
+          user: ${{ vars.NUGET_USER }}
+
       - name: Publish exact package set to nuget.org
         if: ${{ inputs.publish_managed_to_nuget && inputs.publish_runtime_to_nuget }}
         shell: pwsh
         env:
-          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+          NUGET_API_KEY: ${{ steps.nuget-login.outputs.NUGET_API_KEY }}
         run: |
           $stagingRoot = Join-Path $env:RUNNER_TEMP 'release-bundle-staging'
           pwsh -NoProfile -File .\eng\Test-PublishPrerequisites.ps1 `
@@ -797,6 +809,7 @@ jobs:
             -PackageRoot $stagingRoot `
             -Source https://api.nuget.org/v3/index.json `
             -ApiKeyEnvironmentVariable NUGET_API_KEY `
+            -RequireApiKey `
             -TimeoutSeconds 1800 `
             -MaxAttempts 2 `
             -RetryDelaySeconds 15
